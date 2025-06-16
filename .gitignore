@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Supabase
+# Keep migrations and config, ignore temp files
+supabase/.temp/
+supabase/.branches/
+supabase/logs/
+.env.local
+.env.production
+
+# IMPORTANT: Keep these files tracked
+# supabase/config.toml
+# supabase/migrations/
+# supabase/functions/
