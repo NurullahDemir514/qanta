@@ -1,92 +1,92 @@
-# Qanta Database Development Rules
-**🚨 CRITICAL: Read before making any database changes**
+# Qanta Veritabanı Geliştirme Kuralları
+**🚨 KRİTİK: Herhangi bir veritabanı değişikliği yapmadan önce okuyun**
 
-## ❌ NEVER DO THESE
-1. **Delete migration files** - They're applied to production
-2. **Modify existing migrations** - Will cause schema mismatch
-3. **Run `supabase db reset` on production** - Will destroy all data
-4. **Push untested migrations** - Test locally first
-5. **Ignore migration errors** - Fix immediately
+## ❌ ASLA BUNLARI YAPMAYIN
+1. **Migration dosyalarını silmeyin** - Prodüksiyona uygulandılar
+2. **Mevcut migration'ları değiştirmeyin** - Şema uyumsuzluğuna neden olur
+3. **Prodüksiyonda `supabase db reset` çalıştırmayın** - Tüm veriyi yok eder
+4. **Test edilmemiş migration'ları push'lamayın** - Önce yerel ortamda test edin
+5. **Migration hatalarını görmezden gelmeyin** - Hemen düzeltin
 
-## ✅ SAFE PRACTICES
+## ✅ GÜVENLİ PRATİKLER
 
-### For New Features
+### Yeni Özellikler İçin
 ```bash
-# 1. Create new migration
-supabase migration new feature_name
+# 1. Yeni migration oluşturun
+supabase migration new ozellik_adi
 
-# 2. Write SQL changes in the new file
-# 3. Test locally (if Docker available)
+# 2. Yeni dosyaya SQL değişikliklerini yazın
+# 3. Yerel ortamda test edin (Docker varsa)
 supabase db reset
 supabase db push
 
-# 4. Push to production only after testing
+# 4. Test ettikten sonra prodüksiyona push'layın
 supabase db push
 ```
 
-### For Bug Fixes
+### Hata Düzeltmeleri İçin
 ```bash
-# 1. Create new migration (don't modify existing)
-supabase migration new fix_bug_name
+# 1. Yeni migration oluşturun (mevcut olanı değiştirmeyin)
+supabase migration new hata_duzeltmesi_adi
 
-# 2. Write corrective SQL
-# 3. Test thoroughly
-# 4. Push to production
+# 2. Düzeltici SQL yazın
+# 3. Kapsamlı test yapın
+# 4. Prodüksiyona push'layın
 ```
 
-### For Schema Changes
+### Şema Değişiklikleri İçin
 ```bash
-# 1. Always create new migration
-supabase migration new alter_table_name
+# 1. Her zaman yeni migration oluşturun
+supabase migration new tablo_degisikligi_adi
 
-# 2. Use safe SQL practices:
-#    - Add columns with DEFAULT values
-#    - Use IF EXISTS for drops
-#    - Add constraints carefully
+# 2. Güvenli SQL pratiklerini kullanın:
+#    - Sütunları DEFAULT değerlerle ekleyin
+#    - Silme işlemleri için IF EXISTS kullanın
+#    - Kısıtlamaları dikkatli ekleyin
 ```
 
-## 🔒 PRODUCTION SAFETY
+## 🔒 PRODÜKSİYON GÜVENLİĞİ
 
-### Before Any Database Change
-- [ ] Create backup documentation
-- [ ] Test migration locally
-- [ ] Review SQL for destructive operations
-- [ ] Ensure rollback plan exists
-- [ ] Commit code changes first
+### Herhangi Bir Veritabanı Değişikliğinden Önce
+- [ ] Yedek dokümantasyonu oluşturun
+- [ ] Migration'ı yerel ortamda test edin
+- [ ] SQL'i yıkıcı işlemler için gözden geçirin
+- [ ] Geri alma planının olduğundan emin olun
+- [ ] Önce kod değişikliklerini commit edin
 
-### Emergency Rollback
-If something goes wrong:
-1. **DON'T PANIC**
-2. Check `supabase/MIGRATION_BACKUP.md`
-3. Restore missing migrations from backup
-4. Contact team if data corruption suspected
+### Acil Durum Geri Alma
+Bir şeyler ters giderse:
+1. **PANİK YAPMAYIN**
+2. `supabase/MIGRATION_BACKUP.md` dosyasını kontrol edin
+3. Eksik migration'ları yedekten geri yükleyin
+4. Veri bozulması şüphesi varsa ekiple iletişime geçin
 
-## 📝 MIGRATION NAMING CONVENTION
+## 📝 MIGRATION İSİMLENDİRME KURALI
 ```
-YYYYMMDDHHMMSS_descriptive_name.sql
+YYYYMMDDHHMMSS_aciklayici_isim.sql
 
-Examples:
-20250616163000_add_user_preferences.sql
-20250616163100_fix_transaction_constraint.sql
-20250616163200_update_installment_logic.sql
+Örnekler:
+20250616163000_kullanici_tercihleri_ekle.sql
+20250616163100_islem_kisitlamasi_duzelt.sql
+20250616163200_taksit_mantigi_guncelle.sql
 ```
 
-## 🧪 LOCAL DEVELOPMENT
+## 🧪 YEREL GELİŞTİRME
 ```bash
-# Safe local reset (only affects local Docker)
+# Güvenli yerel sıfırlama (sadece yerel Docker'ı etkiler)
 supabase stop
 supabase start
 supabase db reset
 
-# This will:
-# - Destroy local database
-# - Recreate from migrations
-# - Safe for development
+# Bu işlem:
+# - Yerel veritabanını yok eder
+# - Migration'lardan yeniden oluşturur
+# - Geliştirme için güvenlidir
 ```
 
-## 📞 EMERGENCY CONTACTS
-- Database issues: Check GitHub issues
-- Migration problems: Restore from backup
-- Data corruption: **STOP ALL OPERATIONS**
+## 📞 ACİL DURUM İLETİŞİM
+- Veritabanı sorunları: GitHub issues'ı kontrol edin
+- Migration problemleri: Yedekten geri yükleyin
+- Veri bozulması: **TÜM İŞLEMLERİ DURDURUN**
 
-## Last Updated: 2025-06-16 
+## Son Güncelleme: 2025-06-16 
