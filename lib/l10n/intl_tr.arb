@@ -1,0 +1,1674 @@
+{
+  "@@locale": "tr",
+  "appTitle": "Qanta",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "welcome": "Hoş Geldiniz",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+  "getStarted": "Başlayın",
+  "@getStarted": {
+    "description": "Get started button text"
+  },
+  "home": "Ana Sayfa",
+  "@home": {
+    "description": "Home screen title"
+  },
+  "settings": "Ayarlar",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  "darkMode": "Karanlık Mod",
+  "@darkMode": {
+    "description": "Dark mode setting"
+  },
+  "lightMode": "Açık Mod",
+  "@lightMode": {
+    "description": "Light mode setting"
+  },
+  "theme": "Tema",
+  "@theme": {
+    "description": "Theme setting"
+  },
+  "language": "Dil",
+  "@language": {
+    "description": "Language setting"
+  },
+  "english": "İngilizce",
+  "@english": {
+    "description": "English language option"
+  },
+  "turkish": "Türkçe",
+  "@turkish": {
+    "description": "Turkish language option"
+  },
+  "login": "Giriş Yap",
+  "@login": {
+    "description": "Login button text"
+  },
+  "logout": "Çıkış Yap",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "email": "E-posta",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Şifre",
+  "@password": {
+    "description": "Password field label"
+  },
+  "fullName": "Adınız",
+  "@fullName": {
+    "description": "Full name field label"
+  },
+  "signUp": "Kayıt Ol",
+  "@signUp": {
+    "description": "Sign up button text"
+  },
+  "forgotPassword": "Şifremi Unuttum",
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "budget": "Bütçe",
+  "@budget": {
+    "description": "Budget feature"
+  },
+  "expenses": "Giderler",
+  "@expenses": {
+    "description": "Expenses tracking"
+  },
+  "income": "Gelir",
+  "@income": {
+    "description": "Income tracking"
+  },
+  "investments": "Yatırımlar",
+  "@investments": {
+    "description": "Investment portfolio"
+  },
+  "analytics": "Analiz",
+  "@analytics": {
+    "description": "Financial analytics"
+  },
+  "balance": "Bakiye",
+  "@balance": {
+    "description": "Account balance"
+  },
+  "onboardingDescription": "Qanta ile paranızı daha iyi yönetin. Harcamalarınızı takip edin, bütçe yapın ve akıllı önerilerle birikimlerinizi artırın.",
+  "@onboardingDescription": {
+    "description": "Onboarding screen description text"
+  },
+  "welcomeSubtitle": "Paranızı bugün daha iyi yönetmeye başlayın!",
+  "@welcomeSubtitle": {
+    "description": "Welcome subtitle on home screen"
+  },
+  "budgetSubtitle": "Harcamalarınızı takip edin",
+  "@budgetSubtitle": {
+    "description": "Budget card subtitle"
+  },
+  "investmentsSubtitle": "Birikimlerinizi artırın",
+  "@investmentsSubtitle": {
+    "description": "Investments card subtitle"
+  },
+  "analyticsSubtitle": "Verilerinizi analiz edin",
+  "@analyticsSubtitle": {
+    "description": "Analytics card subtitle"
+  },
+  "settingsSubtitle": "Uygulamayı kendinize göre ayarlayın",
+  "@settingsSubtitle": {
+    "description": "Settings card subtitle"
+  },
+  "appSlogan": "Paranızı akıllıca yönetin",
+  "@appSlogan": {
+    "description": "App slogan on splash screen"
+  },
+  "greetingHello": "Merhaba, {name}!",
+  "@greetingHello": {
+    "description": "Greeting message with user name",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "User's name"
+      }
+    }
+  },
+  "homeMainTitle": "Finansal hedeflerinize ulaşmaya hazır mısınız?",
+  "@homeMainTitle": {
+    "description": "Main title on home screen"
+  },
+  "homeSubtitle": "Paranızı akıllıca yönetin ve geleceğinizi planlayın",
+  "@homeSubtitle": {
+    "description": "Subtitle on home screen"
+  },
+  "defaultUserName": "Qanta Kullanıcısı",
+  "@defaultUserName": {
+    "description": "Default user name when no name is provided"
+  },
+  "nameRequired": "İsim gerekli",
+  "@nameRequired": {
+    "description": "Name required validation message"
+  },
+  "emailRequired": "E-posta gerekli",
+  "@emailRequired": {
+    "description": "Email required validation message"
+  },
+  "invalidEmail": "Geçersiz e-posta",
+  "@invalidEmail": {
+    "description": "Invalid email validation message"
+  },
+  "emailInvalid": "Geçerli bir e-posta girin",
+  "@emailInvalid": {
+    "description": "Invalid email validation error"
+  },
+  "passwordRequired": "Şifre gerekli",
+  "@passwordRequired": {
+    "description": "Password required validation message"
+  },
+  "passwordTooShort": "Şifre çok kısa",
+  "@passwordTooShort": {
+    "description": "Password too short validation message"
+  },
+  "confirmPasswordRequired": "Şifre onayı gerekli",
+  "@confirmPasswordRequired": {
+    "description": "Confirm password field validation error"
+  },
+  "passwordsDoNotMatch": "Şifreler eşleşmiyor",
+  "@passwordsDoNotMatch": {
+    "description": "Passwords do not match validation message"
+  },
+  "confirmPassword": "Şifreyi Onayla",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "loginSubtitle": "Hesabınıza giriş yapın",
+  "@loginSubtitle": {
+    "description": "Login page subtitle"
+  },
+  "createAccount": "Hesap Oluştur",
+  "@createAccount": {
+    "description": "Create account button text"
+  },
+  "registerSubtitle": "Qanta'ya katılın ve paranızı yönetmeye başlayın",
+  "@registerSubtitle": {
+    "description": "Register page subtitle"
+  },
+  "pageNotFound": "Sayfa bulunamadı",
+  "@pageNotFound": {
+    "description": "404 error page title"
+  },
+  "pageNotFoundDescription": "Aradığınız sayfa mevcut değil.",
+  "@pageNotFoundDescription": {
+    "description": "404 error page description"
+  },
+  "goHome": "Ana Sayfaya Git",
+  "@goHome": {
+    "description": "Go to home page button"
+  },
+  "alreadyHaveAccount": "Zaten hesabınız var mı?",
+  "@alreadyHaveAccount": {
+    "description": "Already have account text"
+  },
+  "dontHaveAccount": "Hesabınız yok mu?",
+  "@dontHaveAccount": {
+    "description": "Don't have account text"
+  },
+  "loginError": "Giriş hatası",
+  "@loginError": {
+    "description": "Login error message"
+  },
+  "signUpError": "Kayıt hatası",
+  "@signUpError": {
+    "description": "Sign up error message"
+  },
+  "registerError": "Kayıt hatası",
+  "@registerError": {
+    "description": "Register error prefix"
+  },
+  "networkError": "Ağ hatası",
+  "@networkError": {
+    "description": "Network error message"
+  },
+  "emailNotConfirmed": "E-posta adresinizi doğrulamanız gerekiyor. Lütfen e-postanızı kontrol edin.",
+  "@emailNotConfirmed": {
+    "description": "Email not confirmed error"
+  },
+  "invalidCredentials": "E-posta veya şifre hatalı. Lütfen tekrar deneyin.",
+  "@invalidCredentials": {
+    "description": "Invalid credentials error"
+  },
+  "tooManyRequests": "Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.",
+  "@tooManyRequests": {
+    "description": "Too many requests error"
+  },
+  "invalidEmailAddress": "Geçersiz e-posta adresi. Lütfen doğru bir e-posta girin.",
+  "@invalidEmailAddress": {
+    "description": "Invalid email address error"
+  },
+  "passwordTooShortError": "Şifre çok kısa. En az 6 karakter olmalı.",
+  "@passwordTooShortError": {
+    "description": "Password too short error message"
+  },
+  "userAlreadyRegistered": "Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.",
+  "@userAlreadyRegistered": {
+    "description": "User already registered error"
+  },
+  "signupDisabled": "Kayıt işlemi şu anda devre dışı. Lütfen daha sonra deneyin.",
+  "@signupDisabled": {
+    "description": "Signup disabled error"
+  },
+  "registrationSuccessful": "Kayıt başarılı! Hoş geldin {name}!",
+  "@registrationSuccessful": {
+    "description": "Registration successful message",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "User's name"
+      }
+    }
+  },
+  "totalBalance": "Toplam Bakiye",
+  "@totalBalance": {
+    "description": "Total balance label"
+  },
+  "totalPortfolio": "Toplam Portföy",
+  "@totalPortfolio": {
+    "description": "Total portfolio label"
+  },
+  "allAccounts": "Tüm hesaplarınız",
+  "@allAccounts": {
+    "description": "All accounts subtitle"
+  },
+  "availableBalance": "Kullanılabilir Bakiye",
+  "@availableBalance": {
+    "description": "Available balance label"
+  },
+  "thisMonthIncome": "Bu Ay Gelir",
+  "@thisMonthIncome": {
+    "description": "This month income label"
+  },
+  "thisMonthExpense": "Bu Ay Gider",
+  "@thisMonthExpense": {
+    "description": "This month expense label"
+  },
+  "myCards": "Kartlarım",
+  "@myCards": {
+    "description": "My cards section title"
+  },
+  "manageYourCards": "Kartlarınızı yönetin",
+  "@manageYourCards": {
+    "description": "Manage your cards subtitle"
+  },
+  "seeAll": "Tümünü Gör",
+  "@seeAll": {
+    "description": "See all button text"
+  },
+  "recentTransactions": "Son İşlemler",
+  "@recentTransactions": {
+    "description": "Recent transactions section title"
+  },
+  "thisMonthSummary": "Bu Ay Özeti",
+  "@thisMonthSummary": {
+    "description": "This month summary section title"
+  },
+  "savings": "BİRİKİM",
+  "@savings": {
+    "description": "Savings card type"
+  },
+  "budgetUsed": "Kullanıldı",
+  "@budgetUsed": {
+    "description": "Budget used label"
+  },
+  "thisMonthGrowth": "bu ay",
+  "@thisMonthGrowth": {
+    "description": "This month growth indicator"
+  },
+  "cardHolder": "KART SAHİBİ",
+  "@cardHolder": {
+    "description": "Card holder label on credit card"
+  },
+  "expiryDate": "GEÇERLİLİK",
+  "@expiryDate": {
+    "description": "Expiry date label on credit card"
+  },
+  "qantaDebit": "Qanta Debit",
+  "@qantaDebit": {
+    "description": "Qanta debit card name"
+  },
+  "checkingAccount": "Vadesiz Hesap",
+  "@checkingAccount": {
+    "description": "Checking account type"
+  },
+  "qantaCredit": "Qanta Credit",
+  "@qantaCredit": {
+    "description": "Qanta credit card name"
+  },
+  "qantaSavings": "Qanta Savings",
+  "@qantaSavings": {
+    "description": "Qanta savings card name"
+  },
+  "goodMorning": "Günaydın! ☀️",
+  "@goodMorning": {
+    "description": "Good morning greeting"
+  },
+  "goodAfternoon": "İyi günler! 🌤️",
+  "@goodAfternoon": {
+    "description": "Good afternoon greeting"
+  },
+  "goodEvening": "İyi akşamlar! 🌆",
+  "@goodEvening": {
+    "description": "Good evening greeting"
+  },
+  "goodNight": "İyi geceler! 🌙",
+  "@goodNight": {
+    "description": "Good night greeting"
+  },
+  "currency": "Para Birimi",
+  "@currency": {
+    "description": "Currency setting"
+  },
+  "currencyTRY": "Türk Lirası (₺)",
+  "@currencyTRY": {
+    "description": "Turkish Lira currency option"
+  },
+  "currencyUSD": "Amerikan Doları ($)",
+  "@currencyUSD": {
+    "description": "US Dollar currency option"
+  },
+  "currencyEUR": "Euro (€)",
+  "@currencyEUR": {
+    "description": "Euro currency option"
+  },
+  "currencyGBP": "İngiliz Sterlini (£)",
+  "@currencyGBP": {
+    "description": "British Pound currency option"
+  },
+  "selectCurrency": "Para Birimi Seçin",
+  "@selectCurrency": {
+    "description": "Select currency title"
+  },
+  "selectCurrencyDescription": "Hangi para birimini kullanmak istiyorsunuz?",
+  "@selectCurrencyDescription": {
+    "description": "Select currency description"
+  },
+  "debit": "BANKA",
+  "@debit": {
+    "description": "Debit card type"
+  },
+  "credit": "KREDİ",
+  "@credit": {
+    "description": "Credit card type"
+  },
+  "profile": "Profil",
+  "@profile": {
+    "description": "Profile page title"
+  },
+  "personalInfo": "Kişisel Bilgiler",
+  "@personalInfo": {
+    "description": "Personal information section"
+  },
+  "preferences": "Tercihler",
+  "@preferences": {
+    "description": "Preferences section"
+  },
+  "security": "Güvenlik",
+  "@security": {
+    "description": "Security section"
+  },
+  "support": "Destek",
+  "@support": {
+    "description": "Support section"
+  },
+  "about": "Hakkında",
+  "@about": {
+    "description": "About section"
+  },
+  "editProfile": "Profili Düzenle",
+  "@editProfile": {
+    "description": "Edit profile button"
+  },
+  "notifications": "Bildirimler",
+  "@notifications": {
+    "description": "Notifications setting"
+  },
+  "privacy": "Gizlilik",
+  "@privacy": {
+    "description": "Privacy setting"
+  },
+  "termsOfService": "Kullanım Şartları",
+  "@termsOfService": {
+    "description": "Terms of service"
+  },
+  "privacyPolicy": "Gizlilik Politikası",
+  "@privacyPolicy": {
+    "description": "Privacy policy"
+  },
+  "version": "Sürüm",
+  "@version": {
+    "description": "App version"
+  },
+  "contactSupport": "Destek İletişim",
+  "@contactSupport": {
+    "description": "Contact support"
+  },
+  "changePassword": "Şifre Değiştir",
+  "@changePassword": {
+    "description": "Change password"
+  },
+  "biometricAuth": "Biyometrik Kimlik Doğrulama",
+  "@biometricAuth": {
+    "description": "Biometric authentication"
+  },
+  "transactions": "İşlemler",
+  "@transactions": {
+    "description": "Transactions menu item"
+  },
+  "analytics": "İstatistikler",
+  "@analytics": {
+    "description": "Analytics menu item"
+  },
+  "goals": "Hedefler",
+  "@goals": {
+    "description": "Goals menu item"
+  },
+  "upcomingPayments": "Yaklaşan Ödemeler",
+  "@upcomingPayments": {
+    "description": "Upcoming payments section title"
+  },
+  "comingSoon": "Yakında geliyor...",
+  "@comingSoon": {
+    "description": "Coming soon placeholder text"
+  },
+  "cardInfo": "Kart Bilgileri",
+  "@cardInfo": {
+    "description": "Card information section title"
+  },
+  "cardType": "Kart Türü",
+  "@cardType": {
+    "description": "Card type label"
+  },
+  "cardNumber": "Kart Numarası",
+  "@cardNumber": {
+    "description": "Card number label"
+  },
+  "expiryDateShort": "Son Kullanma",
+  "@expiryDateShort": {
+    "description": "Short expiry date label"
+  },
+  "status": "Durum",
+  "@status": {
+    "description": "Status label"
+  },
+  "active": "Aktif",
+  "@active": {
+    "description": "Active status"
+  },
+  "balanceInfo": "Bakiye Bilgileri",
+  "@balanceInfo": {
+    "description": "Balance information section title"
+  },
+  "creditLimit": "Kredi Limiti",
+  "@creditLimit": {
+    "description": "Credit limit label"
+  },
+  "usedLimit": "Kullanılan Limit",
+  "@usedLimit": {
+    "description": "Used limit label"
+  },
+  "quickActions": "Hızlı İşlemler",
+  "@quickActions": {
+    "description": "Quick actions section title"
+  },
+  "sendMoney": "Para Gönder",
+  "@sendMoney": {
+    "description": "Send money action"
+  },
+  "loadMoney": "Para Yükle",
+  "@loadMoney": {
+    "description": "Load money action"
+  },
+  "freezeCard": "Kartı Dondur",
+  "@freezeCard": {
+    "description": "Freeze card action"
+  },
+  "cardSettings": "Kart Ayarları",
+  "@cardSettings": {
+    "description": "Card settings action"
+  },
+  "addNewCard": "Yeni Kart Ekle",
+  "@addNewCard": {
+    "description": "Add new card button"
+  },
+  "addNewCardFeature": "Yeni kart ekleme özelliği yakında geliyor!",
+  "@addNewCardFeature": {
+    "description": "Add new card feature coming soon message"
+  },
+  "cardManagement": "Kart Yönetimi",
+  "@cardManagement": {
+    "description": "Card management section title"
+  },
+  "securitySettings": "Güvenlik Ayarları",
+  "@securitySettings": {
+    "description": "Security settings option"
+  },
+  "securitySettingsDesc": "PIN, limit ve güvenlik ayarları",
+  "@securitySettingsDesc": {
+    "description": "Security settings description"
+  },
+  "notificationSettings": "Bildirim Ayarları",
+  "@notificationSettings": {
+    "description": "Notification settings option"
+  },
+  "notificationSettingsDesc": "İşlem bildirimleri ve uyarılar",
+  "@notificationSettingsDesc": {
+    "description": "Notification settings description"
+  },
+  "transactionHistory": "İşlem Geçmişi",
+  "@transactionHistory": {
+    "description": "Transaction history option"
+  },
+  "transactionHistoryDesc": "Tüm kartların işlem geçmişi",
+  "@transactionHistoryDesc": {
+    "description": "Transaction history description"
+  },
+  "qantaWallet": "Qanta Cüzdan",
+  "@qantaWallet": {
+    "description": "Qanta wallet payment method"
+  },
+  "qantaDebitCard": "Qanta Debit",
+  "@qantaDebitCard": {
+    "description": "Qanta debit card payment method"
+  },
+  "bankTransfer": "Banka Transferi",
+  "@bankTransfer": {
+    "description": "Bank transfer payment method"
+  },
+  "iban": "IBAN",
+  "@iban": {
+    "description": "IBAN label"
+  },
+  "recommended": "ÖNERİLEN",
+  "@recommended": {
+    "description": "Recommended label"
+  },
+  "urgent": "ACİL",
+  "@urgent": {
+    "description": "Urgent label"
+  },
+  "amount": "Tutar",
+  "@amount": {
+    "description": "Amount label"
+  },
+  "dueDate": "Son Ödeme",
+  "@dueDate": {
+    "description": "Due date label"
+  },
+  "setReminder": "Hatırlatma Kur",
+  "@setReminder": {
+    "description": "Set reminder action"
+  },
+  "paymentHistory": "Ödeme Geçmişi",
+  "@paymentHistory": {
+    "description": "Payment history action"
+  },
+  "reminderSetup": "Hatırlatma kurulumu açılıyor...",
+  "@reminderSetup": {
+    "description": "Reminder setup opening message"
+  },
+  "paymentHistoryOpening": "Ödeme geçmişi açılıyor...",
+  "@paymentHistoryOpening": {
+    "description": "Payment history opening message"
+  },
+  "sendMoneyOpening": "Para Gönder açılıyor...",
+  "@sendMoneyOpening": {
+    "description": "Send money opening message"
+  },
+  "loadMoneyOpening": "Para Yükle açılıyor...",
+  "@loadMoneyOpening": {
+    "description": "Load money opening message"
+  },
+  "freezeCardOpening": "Kart Dondurma açılıyor...",
+  "@freezeCardOpening": {
+    "description": "Freeze card opening message"
+  },
+  "cardSettingsOpening": "Kart Ayarları açılıyor...",
+  "@cardSettingsOpening": {
+    "description": "Card settings opening message"
+  },
+  "securitySettingsOpening": "Güvenlik Ayarları açılıyor...",
+  "@securitySettingsOpening": {
+    "description": "Security settings opening message"
+  },
+  "notificationSettingsOpening": "Bildirim Ayarları açılıyor...",
+  "@notificationSettingsOpening": {
+    "description": "Notification settings opening message"
+  },
+  "transactionHistoryOpening": "İşlem geçmişi açılıyor...",
+  "@transactionHistoryOpening": {
+    "description": "Transaction history opening message"
+  },
+  "paymentProcessing": "{method} ile ödeme işlemi başlatılıyor...",
+  "@paymentProcessing": {
+    "description": "Payment processing message",
+    "placeholders": {
+      "method": {
+        "type": "String",
+        "description": "Payment method"
+      }
+    }
+  },
+  "allAccountsTotal": "Tüm hesaplarınızın toplamı",
+  "@allAccountsTotal": {
+    "description": "All accounts total subtitle"
+  },
+  "accountBreakdown": "Hesap Dağılımı",
+  "@accountBreakdown": {
+    "description": "Account breakdown section title"
+  },
+  "creditCard": "Kredi Kartı",
+  "@creditCard": {
+    "description": "Credit card account type"
+  },
+  "savingsAccount": "Vadeli Hesap",
+  "@savingsAccount": {
+    "description": "Savings account type"
+  },
+  "monthlySummary": "Bu Ay Özeti",
+  "@monthlySummary": {
+    "description": "Monthly summary section title"
+  },
+  "cashBalance": "Nakit Bakiye",
+  "@cashBalance": {
+    "description": "Cash balance label"
+  },
+  "addCashBalance": "Nakit Bakiye Ekle",
+  "@addCashBalance": {
+    "description": "Add cash balance button"
+  },
+  "enterCashAmount": "Nakit Miktarını Girin",
+  "@enterCashAmount": {
+    "description": "Enter cash amount dialog title"
+  },
+  "cashAmount": "Nakit Miktarı",
+  "@cashAmount": {
+    "description": "Cash amount field label"
+  },
+  "addCash": "Nakit Ekle",
+  "@addCash": {
+    "description": "Add cash button"
+  },
+  "cancel": "İptal",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "cashAdded": "Nakit bakiye eklendi: {amount}",
+  "@cashAdded": {
+    "description": "Cash added success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Cash amount"
+      }
+    }
+  },
+  "invalidAmount": "Geçersiz miktar",
+  "@invalidAmount": {
+    "description": "Invalid amount error"
+  },
+  "enterValidAmount": "Geçerli bir miktar girin",
+  "@enterValidAmount": {
+    "description": "Enter valid amount validation message"
+  },
+  "cash": "NAKİT",
+  "@cash": {
+    "description": "Cash label on cash card"
+  },
+  "digitalWallet": "Dijital Cüzdan",
+  "@digitalWallet": {
+    "description": "Digital wallet label"
+  },
+  "all": "Tümü",
+  "@all": {
+    "description": "All tab label"
+  },
+  "cashManagement": "Nakit Yönetimi",
+  "@cashManagement": {
+    "description": "Cash management section title"
+  },
+  "addCashHistory": "Nakit Ekleme Geçmişi",
+  "@addCashHistory": {
+    "description": "Add cash history option"
+  },
+  "addCashHistoryDesc": "Nakit ekleme işlemlerinizi görüntüleyin",
+  "@addCashHistoryDesc": {
+    "description": "Add cash history description"
+  },
+  "cashLimits": "Nakit Limitleri",
+  "@cashLimits": {
+    "description": "Cash limits option"
+  },
+  "cashLimitsDesc": "Günlük ve aylık nakit limitlerini ayarlayın",
+  "@cashLimitsDesc": {
+    "description": "Cash limits description"
+  },
+  "debitCardManagement": "Banka Kartı Yönetimi",
+  "@debitCardManagement": {
+    "description": "Debit card management section title"
+  },
+  "cardLimits": "Kart Limitleri",
+  "@cardLimits": {
+    "description": "Card limits option"
+  },
+  "cardLimitsDesc": "Günlük harcama ve çekim limitlerini ayarlayın",
+  "@cardLimitsDesc": {
+    "description": "Card limits description"
+  },
+  "atmLocations": "ATM Konumları",
+  "@atmLocations": {
+    "description": "ATM locations option"
+  },
+  "atmLocationsDesc": "Yakınımdaki ATM'leri bul",
+  "@atmLocationsDesc": {
+    "description": "ATM locations description"
+  },
+  "creditCardManagement": "Kredi Kartı Yönetimi",
+  "@creditCardManagement": {
+    "description": "Credit card management section title"
+  },
+  "creditLimit": "Kredi Limiti",
+  "@creditLimit": {
+    "description": "Credit limit option"
+  },
+  "creditLimitDesc": "Kredi limitinizi görüntüleyin ve artırım talep edin",
+  "@creditLimitDesc": {
+    "description": "Credit limit description"
+  },
+  "installmentOptions": "Taksit Seçenekleri",
+  "@installmentOptions": {
+    "description": "Installment options"
+  },
+  "installmentOptionsDesc": "Alışverişlerinizi taksitlendirin",
+  "@installmentOptionsDesc": {
+    "description": "Installment options description"
+  },
+  "savingsManagement": "Tasarruf Yönetimi",
+  "@savingsManagement": {
+    "description": "Savings management section title"
+  },
+  "savingsGoals": "Tasarruf Hedefleri",
+  "@savingsGoals": {
+    "description": "Savings goals option"
+  },
+  "savingsGoalsDesc": "Tasarruf hedeflerinizi belirleyin ve takip edin",
+  "@savingsGoalsDesc": {
+    "description": "Savings goals description"
+  },
+  "autoSave": "Otomatik Tasarruf",
+  "@autoSave": {
+    "description": "Auto save option"
+  },
+  "autoSaveDesc": "Otomatik tasarruf kuralları oluşturun",
+  "@autoSaveDesc": {
+    "description": "Auto save description"
+  },
+  "opening": "açılıyor...",
+  "@opening": {
+    "description": "Opening message"
+  },
+  "addTransaction": "İşlem Ekle",
+  "@addTransaction": {
+    "description": "Add transaction button text"
+  },
+  "close": "Kapat",
+  "@close": {
+    "description": "Close button text"
+  },
+  "selectTransactionType": "İşlem Türü Seçin",
+  "@selectTransactionType": {
+    "description": "Select transaction type title"
+  },
+  "selectTransactionTypeDesc": "Hangi türde işlem yapmak istiyorsunuz?",
+  "@selectTransactionTypeDesc": {
+    "description": "Select transaction type description"
+  },
+  "expenseSaved": "Gider kaydedildi: {amount}",
+  "@expenseSaved": {
+    "description": "Expense saved success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Expense amount"
+      }
+    }
+  },
+  "errorOccurred": "Hata oluştu. Lütfen tekrar deneyin.",
+  "@errorOccurred": {
+    "description": "Generic error message"
+  },
+  "enterAmount": "Tutar Girin",
+  "@enterAmount": {
+    "description": "Enter amount step title"
+  },
+  "selectCategory": "Kategori Seçin",
+  "@selectCategory": {
+    "description": "Select category step title"
+  },
+  "paymentMethod": "Ödeme Yöntemi",
+  "@paymentMethod": {
+    "description": "Payment method step title"
+  },
+  "details": "Detaylar",
+  "@details": {
+    "description": "Details step title"
+  },
+  "amountRequired": "Tutar gerekli",
+  "@amountRequired": {
+    "description": "Amount required validation message"
+  },
+  "enterValidAmountMessage": "Geçerli bir tutar girin",
+  "@enterValidAmountMessage": {
+    "description": "Enter valid amount validation message"
+  },
+  "selectCategoryMessage": "Kategori seçin",
+  "@selectCategoryMessage": {
+    "description": "Select category validation message"
+  },
+  "selectPaymentMethodMessage": "Ödeme yöntemi seçin",
+  "@selectPaymentMethodMessage": {
+    "description": "Select payment method validation message"
+  },
+  "saveExpense": "Gideri Kaydet",
+  "@saveExpense": {
+    "description": "Save expense button text"
+  },
+  "continueButton": "Devam Et",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+  "lastCheckAndDetails": "Son kontrol ve detaylar",
+  "@lastCheckAndDetails": {
+    "description": "Last check and details description"
+  },
+  "summary": "Özet",
+  "@summary": {
+    "description": "Summary title"
+  },
+  "category": "Kategori",
+  "@category": {
+    "description": "Category label"
+  },
+  "payment": "Ödeme",
+  "@payment": {
+    "description": "Payment label"
+  },
+  "date": "Tarih",
+  "@date": {
+    "description": "Date label"
+  },
+  "description": "Açıklama",
+  "@description": {
+    "description": "Description field label"
+  },
+  "card": "Kart",
+  "@card": {
+    "description": "Card payment method"
+  },
+  "installmentOptions": "Taksit Seçenekleri",
+  "@installmentOptions": {
+    "description": "Installment options title"
+  },
+  "cashPayment": "Peşin",
+  "@cashPayment": {
+    "description": "Cash payment (no installments)"
+  },
+  "installments": "{count} Taksit",
+  "@installments": {
+    "description": "Installments count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of installments"
+      }
+    }
+  },
+  "foodAndDrink": "Yemek & İçecek",
+  "@foodAndDrink": {
+    "description": "Food and drink category"
+  },
+  "transport": "Ulaşım",
+  "@transport": {
+    "description": "Transport category"
+  },
+  "shopping": "Alışveriş",
+  "@shopping": {
+    "description": "Shopping category"
+  },
+  "entertainment": "Eğlence",
+  "@entertainment": {
+    "description": "Entertainment category"
+  },
+  "bills": "Faturalar",
+  "@bills": {
+    "description": "Bills category"
+  },
+  "health": "Sağlık",
+  "@health": {
+    "description": "Health category"
+  },
+  "education": "Eğitim",
+  "@education": {
+    "description": "Education category"
+  },
+  "other": "Diğer",
+  "@other": {
+    "description": "Other category"
+  },
+  "incomeType": "Gelir",
+  "@incomeType": {
+    "description": "Income transaction type"
+  },
+  "expenseType": "Gider",
+  "@expenseType": {
+    "description": "Expense transaction type"
+  },
+  "transferType": "Transfer",
+  "@transferType": {
+    "description": "Transfer transaction type"
+  },
+  "investmentType": "Yatırım",
+  "@investmentType": {
+    "description": "Investment transaction type"
+  },
+  "incomeDescription": "Maaş, bonus, satış geliri",
+  "@incomeDescription": {
+    "description": "Income transaction description"
+  },
+  "expenseDescription": "Alışveriş, fatura, harcama",
+  "@expenseDescription": {
+    "description": "Expense transaction description"
+  },
+  "transferDescription": "Hesaplar arası transfer",
+  "@transferDescription": {
+    "description": "Transfer transaction description"
+  },
+  "investmentDescription": "Hisse, kripto, altın",
+  "@investmentDescription": {
+    "description": "Investment transaction description"
+  },
+  "recurringType": "Sabit Ödemeler",
+  "@recurringType": {
+    "description": "Recurring transaction type"
+  },
+  "recurringDescription": "Netflix, fatura, abonelik",
+  "@recurringDescription": {
+    "description": "Recurring transaction description"
+  },
+  "incomeFormOpening": "Gelir ekleme formu açılacak",
+  "@incomeFormOpening": {
+    "description": "Income form opening message"
+  },
+  "transferFormOpening": "Transfer formu açılacak",
+  "@transferFormOpening": {
+    "description": "Transfer form opening message"
+  },
+  "investmentFormOpening": "Yatırım formu açılacak",
+  "@investmentFormOpening": {
+    "description": "Investment form opening message"
+  },
+  "howMuchSpent": "Ne kadar harcadınız?",
+  "@howMuchSpent": {
+    "description": "How much did you spend question"
+  },
+  "whichCategorySpent": "Hangi kategoride harcama yaptınız?",
+  "@whichCategorySpent": {
+    "description": "Which category did you spend in question"
+  },
+  "howDidYouPay": "Nasıl ödeme yaptınız?",
+  "@howDidYouPay": {
+    "description": "How did you pay question"
+  },
+  "saveIncome": "Geliri Kaydet",
+  "@saveIncome": {
+    "description": "Save income button text"
+  },
+  "food": "Yemek",
+  "@food": {
+    "description": "Food expense category"
+  },
+  "foodDescription": "Restoran, market, kahve",
+  "@foodDescription": {
+    "description": "Food expense category description"
+  },
+  "transport": "Ulaşım",
+  "@transport": {
+    "description": "Transport expense category"
+  },
+  "transportDescription": "Taksi, otobüs, yakıt",
+  "@transportDescription": {
+    "description": "Transport expense category description"
+  },
+  "shopping": "Alışveriş",
+  "@shopping": {
+    "description": "Shopping expense category"
+  },
+  "shoppingDescription": "Giyim, elektronik, ev",
+  "@shoppingDescription": {
+    "description": "Shopping expense category description"
+  },
+  "bills": "Faturalar",
+  "@bills": {
+    "description": "Bills expense category"
+  },
+  "billsDescription": "Elektrik, su, internet",
+  "@billsDescription": {
+    "description": "Bills expense category description"
+  },
+  "entertainment": "Eğlence",
+  "@entertainment": {
+    "description": "Entertainment expense category"
+  },
+  "entertainmentDescription": "Sinema, konser, oyun",
+  "@entertainmentDescription": {
+    "description": "Entertainment expense category description"
+  },
+  "health": "Sağlık",
+  "@health": {
+    "description": "Health expense category"
+  },
+  "healthDescription": "Doktor, eczane, spor",
+  "@healthDescription": {
+    "description": "Health expense category description"
+  },
+  "education": "Eğitim",
+  "@education": {
+    "description": "Education expense category"
+  },
+  "educationDescription": "Kurs, kitap, okul",
+  "@educationDescription": {
+    "description": "Education expense category description"
+  },
+  "travel": "Seyahat",
+  "@travel": {
+    "description": "Travel expense category"
+  },
+  "travelDescription": "Tatil, uçak, otel",
+  "@travelDescription": {
+    "description": "Travel expense category description"
+  },
+  "saveExpense": "Gideri Kaydet",
+  "@saveExpense": {
+    "description": "Save expense button text"
+  },
+  "howMuchEarned": "Ne kadar gelir elde ettiniz?",
+  "@howMuchEarned": {
+    "description": "How much did you earn question"
+  },
+  "whichCategoryEarned": "Hangi kategoride gelir elde ettiniz?",
+  "@whichCategoryEarned": {
+    "description": "Which category did you earn in question"
+  },
+  "howDidYouReceive": "Nasıl aldınız?",
+  "@howDidYouReceive": {
+    "description": "How did you receive payment question"
+  },
+  "incomeSaved": "Gelir kaydedildi: {amount}",
+  "@incomeSaved": {
+    "description": "Income saved success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Income amount"
+      }
+    }
+  },
+  "salary": "Maaş",
+  "@salary": {
+    "description": "Salary income category"
+  },
+  "salaryDescription": "Aylık maaş, ücret",
+  "@salaryDescription": {
+    "description": "Salary income category description"
+  },
+  "bonus": "Bonus",
+  "@bonus": {
+    "description": "Bonus income category"
+  },
+  "bonusDescription": "Prim, ikramiye, bonus",
+  "@bonusDescription": {
+    "description": "Bonus income category description"
+  },
+  "freelance": "Freelance",
+  "@freelance": {
+    "description": "Freelance income category"
+  },
+  "freelanceDescription": "Serbest çalışma, proje",
+  "@freelanceDescription": {
+    "description": "Freelance income category description"
+  },
+  "business": "İş",
+  "@business": {
+    "description": "Business income category"
+  },
+  "businessDescription": "İş geliri, ticaret",
+  "@businessDescription": {
+    "description": "Business income category description"
+  },
+  "rental": "Kira",
+  "@rental": {
+    "description": "Rental income category"
+  },
+  "rentalDescription": "Ev kirası, araç kirası",
+  "@rentalDescription": {
+    "description": "Rental income category description"
+  },
+  "gift": "Hediye",
+  "@gift": {
+    "description": "Gift income category"
+  },
+  "giftDescription": "Hediye, bağış, harçlık",
+  "@giftDescription": {
+    "description": "Gift income category description"
+  },
+  "otherIncome": "Diğer Gelir",
+  "@otherIncome": {
+    "description": "Other income category"
+  },
+  "saveTransfer": "Transfer Kaydet",
+  "@saveTransfer": {
+    "description": "Save transfer button text"
+  },
+  "howMuchInvest": "Ne Kadar Yatırım Yapacaksınız?",
+  "@howMuchInvest": {
+    "description": "How much to invest question"
+  },
+  "whichInvestmentType": "Hangi Yatırım Türü?",
+  "@whichInvestmentType": {
+    "description": "Which investment type question"
+  },
+  "stocks": "Hisse Senedi",
+  "@stocks": {
+    "description": "Stocks investment category"
+  },
+  "stocksDescription": "Borsa, hisse, pay",
+  "@stocksDescription": {
+    "description": "Stocks investment category description"
+  },
+  "crypto": "Kripto Para",
+  "@crypto": {
+    "description": "Crypto investment category"
+  },
+  "cryptoDescription": "Bitcoin, Ethereum, altcoin",
+  "@cryptoDescription": {
+    "description": "Crypto investment category description"
+  },
+  "gold": "Altın",
+  "@gold": {
+    "description": "Gold investment category"
+  },
+  "goldDescription": "Gram altın, çeyrek altın",
+  "@goldDescription": {
+    "description": "Gold investment category description"
+  },
+  "bonds": "Tahvil",
+  "@bonds": {
+    "description": "Bonds investment category"
+  },
+  "bondsDescription": "Devlet tahvili, özel tahvil",
+  "@bondsDescription": {
+    "description": "Bonds investment category description"
+  },
+  "funds": "Fon",
+  "@funds": {
+    "description": "Funds investment category"
+  },
+  "fundsDescription": "Yatırım fonu, emeklilik fonu",
+  "@fundsDescription": {
+    "description": "Funds investment category description"
+  },
+  "forex": "Döviz",
+  "@forex": {
+    "description": "Forex investment category"
+  },
+  "forexDescription": "USD, EUR, GBP",
+  "@forexDescription": {
+    "description": "Forex investment category description"
+  },
+  "realEstate": "Gayrimenkul",
+  "@realEstate": {
+    "description": "Real estate investment category"
+  },
+  "realEstateDescription": "Ev, arsa, dükkan",
+  "@realEstateDescription": {
+    "description": "Real estate investment category description"
+  },
+  "saveInvestment": "Yatırımı Kaydet",
+  "@saveInvestment": {
+    "description": "Save investment button"
+  },
+  "investmentSaved": "Yatırım kaydedildi: {amount}",
+  "@investmentSaved": {
+    "description": "Investment saved success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Investment amount"
+      }
+    }
+  },
+  "selectInvestmentTypeMessage": "Yatırım türü seçin",
+  "@selectInvestmentTypeMessage": {
+    "description": "Select investment type validation message"
+  },
+  "quantityRequired": "Miktar gerekli",
+  "@quantityRequired": {
+    "description": "Quantity required validation message"
+  },
+  "enterValidQuantity": "Geçerli bir miktar girin",
+  "@enterValidQuantity": {
+    "description": "Enter valid quantity validation message"
+  },
+  "rateRequired": "Kur gerekli",
+  "@rateRequired": {
+    "description": "Rate required validation message"
+  },
+  "enterValidRate": "Geçerli bir kur girin",
+  "@enterValidRate": {
+    "description": "Enter valid rate validation message"
+  },
+  "investmentType": "Yatırım Türü",
+  "@investmentType": {
+    "description": "Investment type label"
+  },
+  "quantity": "Miktar",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "rate": "Kur",
+  "@rate": {
+    "description": "Rate label"
+  },
+  "totalAmount": "Toplam Tutar",
+  "@totalAmount": {
+    "description": "Total amount label"
+  },
+  "onboardingFeaturesTitle": "Qanta ile Neler Yapabilirsiniz?",
+  "@onboardingFeaturesTitle": {
+    "description": "Onboarding features page title"
+  },
+  "expenseTrackingTitle": "Harcama Takibi",
+  "@expenseTrackingTitle": {
+    "description": "Expense tracking feature title"
+  },
+  "expenseTrackingDesc": "Günlük harcamalarınızı kolayca takip edin",
+  "@expenseTrackingDesc": {
+    "description": "Expense tracking feature description"
+  },
+  "smartSavingsTitle": "Akıllı Birikim",
+  "@smartSavingsTitle": {
+    "description": "Smart savings feature title"
+  },
+  "smartSavingsDesc": "Hedeflerinize ulaşmak için birikim yapın",
+  "@smartSavingsDesc": {
+    "description": "Smart savings feature description"
+  },
+  "financialAnalysisTitle": "Finansal Analiz",
+  "@financialAnalysisTitle": {
+    "description": "Financial analysis feature title"
+  },
+  "financialAnalysisDesc": "Harcama alışkanlıklarınızı analiz edin",
+  "@financialAnalysisDesc": {
+    "description": "Financial analysis feature description"
+  },
+  "languageSelectionTitle": "Dil Seçimi",
+  "@languageSelectionTitle": {
+    "description": "Language selection page title"
+  },
+  "languageSelectionDesc": "Uygulamayı hangi dilde kullanmak istiyorsunuz?",
+  "@languageSelectionDesc": {
+    "description": "Language selection page description"
+  },
+  "themeSelectionTitle": "Tema Seçimi",
+  "@themeSelectionTitle": {
+    "description": "Theme selection page title"
+  },
+  "themeSelectionDesc": "Hangi temayı tercih ediyorsunuz?",
+  "@themeSelectionDesc": {
+    "description": "Theme selection page description"
+  },
+  "lightThemeTitle": "Açık Tema",
+  "@lightThemeTitle": {
+    "description": "Light theme option title"
+  },
+  "lightThemeDesc": "Klasik beyaz tema",
+  "@lightThemeDesc": {
+    "description": "Light theme option description"
+  },
+  "darkThemeTitle": "Koyu Tema",
+  "@darkThemeTitle": {
+    "description": "Dark theme option title"
+  },
+  "darkThemeDesc": "Gözlerinizi yormuyor",
+  "@darkThemeDesc": {
+    "description": "Dark theme option description"
+  },
+  "exitOnboarding": "Çıkış",
+  "@exitOnboarding": {
+    "description": "Exit onboarding dialog title"
+  },
+  "exitOnboardingMessage": "Onboarding'i tamamlamadan çıkmak istediğinizden emin misiniz?",
+  "@exitOnboardingMessage": {
+    "description": "Exit onboarding dialog message"
+  },
+  "exitCancel": "İptal",
+  "@exitCancel": {
+    "description": "Cancel exit dialog button"
+  },
+  "back": "Geri",
+  "@back": {
+    "description": "Back button text"
+  },
+  "updateCashBalance": "Nakit Bakiyeyi Güncelle",
+  "@updateCashBalance": {
+    "description": "Update cash balance button text"
+  },
+  "updateCashBalanceDesc": "Cebinizdeki mevcut nakit miktarını girin",
+  "@updateCashBalanceDesc": {
+    "description": "Update cash balance description"
+  },
+  "updateCashBalanceTitle": "Nakit Bakiyeyi Güncelle",
+  "@updateCashBalanceTitle": {
+    "description": "Update cash balance dialog title"
+  },
+  "updateCashBalanceMessage": "Cebinizdeki mevcut nakit miktarını girin:",
+  "@updateCashBalanceMessage": {
+    "description": "Update cash balance dialog message"
+  },
+  "newBalance": "Yeni Bakiye",
+  "@newBalance": {
+    "description": "New balance input label"
+  },
+  "update": "Güncelle",
+  "@update": {
+    "description": "Update button text"
+  },
+  "cashBalanceUpdated": "Nakit bakiye {amount} olarak güncellendi",
+  "@cashBalanceUpdated": {
+    "description": "Cash balance updated success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "New balance amount"
+      }
+    }
+  },
+  "enterValidAmount": "Geçerli bir miktar girin",
+  "@enterValidAmount": {
+    "description": "Enter valid amount validation message"
+  },
+  "cashAccountLoadError": "Nakit hesabı yüklenirken hata oluştu",
+  "@cashAccountLoadError": {
+    "description": "Cash account load error message"
+  },
+  "unknownError": "Bilinmeyen hata",
+  "@unknownError": {
+    "description": "Unknown error message"
+  },
+  "retry": "Tekrar Dene",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "noCashTransactions": "Henüz nakit işlem yok",
+  "@noCashTransactions": {
+    "description": "No cash transactions message"
+  },
+  "noCashTransactionsDesc": "İlk nakit işleminizi yaptığınızda burada görünecek",
+  "@noCashTransactionsDesc": {
+    "description": "No cash transactions description"
+  },
+  "balanceUpdated": "Nakit Eklendi",
+  "@balanceUpdated": {
+    "description": "Title for cash balance increase transaction"
+  },
+  "walletBalanceUpdated": "Nakit güncellendi",
+  "@walletBalanceUpdated": {
+    "description": "Subtitle for manual cash addition"
+  },
+  "groceryShopping": "Market Alışverişi",
+  "@groceryShopping": {
+    "description": "Grocery shopping transaction title"
+  },
+  "cashPaymentMade": "Nakit ödeme",
+  "@cashPaymentMade": {
+    "description": "Cash payment transaction subtitle"
+  },
+  "taxiFare": "Taksi Ücreti",
+  "@taxiFare": {
+    "description": "Taxi fare transaction title"
+  },
+  "transactionDetails": "İşlem Detayları",
+  "cardDetails": "Kart Bilgileri",
+  "time": "Saat",
+  "transactionType": "İşlem Türü",
+  "merchant": "İşyeri",
+  "installmentInfo": "Taksit Bilgisi",
+  "availableLimit": "Kullanılabilir Limit",
+  "selectFrequency": "Sıklık Seçin",
+  "@selectFrequency": {
+    "description": "Select frequency title"
+  },
+  "saveRecurring": "Sabit Ödemeyi Kaydet",
+  "@saveRecurring": {
+    "description": "Save recurring payment button text"
+  },
+  "weekly": "Haftalık",
+  "@weekly": {
+    "description": "Weekly frequency"
+  },
+  "monthly": "Aylık",
+  "@monthly": {
+    "description": "Monthly frequency"
+  },
+  "quarterly": "3 Aylık",
+  "@quarterly": {
+    "description": "Quarterly frequency"
+  },
+  "yearly": "Yıllık",
+  "@yearly": {
+    "description": "Yearly frequency"
+  },
+  "weeklyDescription": "Her hafta tekrarlanır",
+  "@weeklyDescription": {
+    "description": "Weekly frequency description"
+  },
+  "monthlyDescription": "Her ay tekrarlanır",
+  "@monthlyDescription": {
+    "description": "Monthly frequency description"
+  },
+  "quarterlyDescription": "Her 3 ayda bir tekrarlanır",
+  "@quarterlyDescription": {
+    "description": "Quarterly frequency description"
+  },
+  "yearlyDescription": "Her yıl tekrarlanır",
+  "@yearlyDescription": {
+    "description": "Yearly frequency description"
+  },
+  "subscription": "Abonelik",
+  "@subscription": {
+    "description": "Subscription category"
+  },
+  "utilities": "Faturalar",
+  "@utilities": {
+    "description": "Utilities category"
+  },
+  "insurance": "Sigorta",
+  "@insurance": {
+    "description": "Insurance category"
+  },
+  "rent": "Kira",
+  "@rent": {
+    "description": "Rent category"
+  },
+  "loan": "Kredi/Taksit",
+  "@loan": {
+    "description": "Loan category"
+  },
+  "subscriptionDescription": "Netflix, Spotify, YouTube",
+  "@subscriptionDescription": {
+    "description": "Subscription category description"
+  },
+  "utilitiesDescription": "Elektrik, su, doğalgaz",
+  "@utilitiesDescription": {
+    "description": "Utilities category description"
+  },
+  "insuranceDescription": "Sağlık, kasko, dask",
+  "@insuranceDescription": {
+    "description": "Insurance category description"
+  },
+  "rentDescription": "Ev kirası, ofis kirası",
+  "@rentDescription": {
+    "description": "Rent category description"
+  },
+  "loanDescription": "Kredi kartı, taksit",
+  "@loanDescription": {
+    "description": "Loan category description"
+  },
+  "otherDescription": "Diğer sabit ödemeler",
+  "@otherDescription": {
+    "description": "Other recurring category description"
+  },
+  "next": "İleri",
+  "@next": {
+    "description": "Next button text"
+  },
+  "save": "Kaydet",
+  "@save": {
+    "description": "Save button text"
+  },
+  "howMuchTransfer": "Ne kadar transfer yapacaksınız?",
+  "@howMuchTransfer": {
+    "description": "How much transfer question"
+  },
+  "fromWhichAccount": "Hangi hesaptan?",
+  "@fromWhichAccount": {
+    "description": "From which account question"
+  },
+  "toWhichAccount": "Hangi hesaba?",
+  "@toWhichAccount": {
+    "description": "To which account question"
+  },
+  "saveTransfer": "Transferi Kaydet",
+  "@saveTransfer": {
+    "description": "Save transfer button text"
+  },
+  "investmentIncome": "Yatırım Geliri",
+  "@investmentIncome": {
+    "description": "Investment income category"
+  },
+  "investmentIncomeDescription": "Hisse, fon, kira geliri",
+  "@investmentIncomeDescription": {
+    "description": "Investment income category description"
+  },
+  "silver": "Gümüş",
+  "@silver": {
+    "description": "Silver investment type"
+  },
+  "usd": "Dolar",
+  "@usd": {
+    "description": "USD investment type"
+  },
+  "eur": "Euro",
+  "@eur": {
+    "description": "EUR investment type"
+  },
+  "goldUnit": "gram",
+  "@goldUnit": {
+    "description": "Gold unit"
+  },
+  "silverUnit": "gram",
+  "@silverUnit": {
+    "description": "Silver unit"
+  },
+  "usdUnit": "adet",
+  "@usdUnit": {
+    "description": "USD unit"
+  },
+  "eurUnit": "adet",
+  "@eurUnit": {
+    "description": "EUR unit"
+  },
+  "silverDescription": "Gümüş yatırımı",
+  "@silverDescription": {
+    "description": "Silver investment description"
+  },
+  "usdDescription": "Amerikan Doları",
+  "@usdDescription": {
+    "description": "USD investment description"
+  },
+  "eurDescription": "Euro para birimi",
+  "@eurDescription": {
+    "description": "EUR investment description"
+  },
+  "selectInvestmentType": "Yatırım Türü Seçin",
+  "@selectInvestmentType": {
+    "description": "Select investment type title"
+  },
+  "investment": "Yatırım",
+  "@investment": {
+    "description": "Investment category"
+  },
+  "otherIncome": "Diğer Gelir",
+  "@otherIncome": {
+    "description": "Other income category"
+  },
+  "recurringPayment": "Sabit Ödeme",
+  "@recurringPayment": {
+    "description": "Recurring payment title"
+  },
+  "saveRecurringPayment": "Sabit Ödemeyi Kaydet",
+  "@saveRecurringPayment": {
+    "description": "Save recurring payment button"
+  },
+  "noTransactionsYet": "Henüz işlem yok",
+  "@noTransactionsYet": {
+    "description": "Empty state title when no transactions exist"
+  },
+  "noTransactionsDescription": "İlk işleminizi eklemek için + butonuna dokunun",
+  "@noTransactionsDescription": {
+    "description": "Empty state description when no transactions exist"
+  },
+  "noSearchResults": "Arama sonucu bulunamadı",
+  "@noSearchResults": {
+    "description": "Empty state title when search returns no results"
+  },
+  "noSearchResultsDescription": "\"{query}\" için sonuç bulunamadı",
+  "@noSearchResultsDescription": {
+    "description": "Empty state description when search returns no results",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "Search query"
+      }
+    }
+  },
+  "transactionsLoadError": "İşlemler yüklenemedi",
+  "@transactionsLoadError": {
+    "description": "Error state title when transactions fail to load"
+  },
+  "connectionError": "Bağlantı sorunu yaşanıyor",
+  "@connectionError": {
+    "description": "Error state description for connection issues"
+  },
+  "tryAgain": "Tekrar Dene",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+  "noAccountsAvailable": "Kullanılabilir hesap yok",
+  "@noAccountsAvailable": {
+    "description": "No accounts available message"
+  },
+  "debitCard": "Banka Kartı",
+  "@debitCard": {
+    "description": "Debit card account type"
+  }
+} 

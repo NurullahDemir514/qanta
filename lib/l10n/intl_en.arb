@@ -1,0 +1,1650 @@
+{
+  "@@locale": "en",
+  "appTitle": "Qanta",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "welcome": "Welcome",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+  "getStarted": "Get Started",
+  "@getStarted": {
+    "description": "Get started button text"
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Home screen title"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Dark mode setting"
+  },
+  "lightMode": "Light Mode",
+  "@lightMode": {
+    "description": "Light mode setting"
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme setting"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language setting"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language option"
+  },
+  "turkish": "Turkish",
+  "@turkish": {
+    "description": "Turkish language option"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "fullName": "Your Name",
+  "@fullName": {
+    "description": "Full name field label"
+  },
+  "signUp": "Sign Up",
+  "@signUp": {
+    "description": "Sign up button text"
+  },
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "budget": "Budget",
+  "@budget": {
+    "description": "Budget feature"
+  },
+  "expenses": "Expenses",
+  "@expenses": {
+    "description": "Expenses tracking"
+  },
+  "income": "Income",
+  "@income": {
+    "description": "Income tracking"
+  },
+  "investments": "Investments",
+  "@investments": {
+    "description": "Investment portfolio"
+  },
+  "analytics": "Analytics",
+  "@analytics": {
+    "description": "Financial analytics"
+  },
+  "balance": "Balance",
+  "@balance": {
+    "description": "Account balance"
+  },
+  "onboardingDescription": "Take control of your finances with Qanta. Track expenses, manage budgets, and grow your wealth with smart insights.",
+  "@onboardingDescription": {
+    "description": "Onboarding screen description text"
+  },
+  "welcomeSubtitle": "Take control of your finances today!",
+  "@welcomeSubtitle": {
+    "description": "Welcome subtitle on home screen"
+  },
+  "budgetSubtitle": "Track your spending",
+  "@budgetSubtitle": {
+    "description": "Budget card subtitle"
+  },
+  "investmentsSubtitle": "Grow your wealth",
+  "@investmentsSubtitle": {
+    "description": "Investments card subtitle"
+  },
+  "analyticsSubtitle": "Financial insights",
+  "@analyticsSubtitle": {
+    "description": "Analytics card subtitle"
+  },
+  "settingsSubtitle": "Customize your app",
+  "@settingsSubtitle": {
+    "description": "Settings card subtitle"
+  },
+  "appSlogan": "Manage your money smartly",
+  "@appSlogan": {
+    "description": "App slogan on splash screen"
+  },
+  "greetingHello": "Hello, {name}!",
+  "@greetingHello": {
+    "description": "Personalized greeting with user name",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "User's name"
+      }
+    }
+  },
+  "homeMainTitle": "Ready to reach your financial goals?",
+  "@homeMainTitle": {
+    "description": "Main title on home screen"
+  },
+  "homeSubtitle": "Manage your money smartly and plan your future",
+  "@homeSubtitle": {
+    "description": "Subtitle on home screen"
+  },
+  "defaultUserName": "User",
+  "@defaultUserName": {
+    "description": "Default name when user name is not available"
+  },
+  "nameRequired": "Your name is required",
+  "@nameRequired": {
+    "description": "Name field validation error"
+  },
+  "emailRequired": "Email is required",
+  "@emailRequired": {
+    "description": "Email field validation error"
+  },
+  "emailInvalid": "Please enter a valid email",
+  "@emailInvalid": {
+    "description": "Invalid email validation error"
+  },
+  "passwordRequired": "Password is required",
+  "@passwordRequired": {
+    "description": "Password field validation error"
+  },
+  "passwordTooShort": "Password must be at least 6 characters",
+  "@passwordTooShort": {
+    "description": "Password too short validation error"
+  },
+  "confirmPasswordRequired": "Password confirmation is required",
+  "@confirmPasswordRequired": {
+    "description": "Confirm password field validation error"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Passwords do not match validation error"
+  },
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "loginSubtitle": "Sign in to your account",
+  "@loginSubtitle": {
+    "description": "Login page subtitle"
+  },
+  "createAccount": "Create Account",
+  "@createAccount": {
+    "description": "Create account title"
+  },
+  "registerSubtitle": "Join Qanta and start managing your money",
+  "@registerSubtitle": {
+    "description": "Register page subtitle"
+  },
+  "pageNotFound": "Page not found",
+  "@pageNotFound": {
+    "description": "404 error page title"
+  },
+  "pageNotFoundDescription": "The page you are looking for does not exist.",
+  "@pageNotFoundDescription": {
+    "description": "404 error page description"
+  },
+  "goHome": "Go Home",
+  "@goHome": {
+    "description": "Go to home page button"
+  },
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Already have account text"
+  },
+  "dontHaveAccount": "Don't have an account?",
+  "@dontHaveAccount": {
+    "description": "Don't have account text"
+  },
+  "loginError": "Login error",
+  "@loginError": {
+    "description": "Login error prefix"
+  },
+  "registerError": "Registration error",
+  "@registerError": {
+    "description": "Register error prefix"
+  },
+  "emailNotConfirmed": "You need to verify your email address. Please check your email.",
+  "@emailNotConfirmed": {
+    "description": "Email not confirmed error"
+  },
+  "invalidCredentials": "Invalid email or password. Please try again.",
+  "@invalidCredentials": {
+    "description": "Invalid credentials error"
+  },
+  "tooManyRequests": "Too many attempts. Please try again later.",
+  "@tooManyRequests": {
+    "description": "Too many requests error"
+  },
+  "invalidEmailAddress": "Invalid email address. Please enter a valid email.",
+  "@invalidEmailAddress": {
+    "description": "Invalid email address error"
+  },
+  "passwordTooShortError": "Password is too short. Must be at least 6 characters.",
+  "@passwordTooShortError": {
+    "description": "Password too short error message"
+  },
+  "userAlreadyRegistered": "This email is already registered. Try signing in.",
+  "@userAlreadyRegistered": {
+    "description": "User already registered error"
+  },
+  "signupDisabled": "Registration is currently disabled. Please try again later.",
+  "@signupDisabled": {
+    "description": "Signup disabled error"
+  },
+  "registrationSuccessful": "Registration successful! Welcome {name}!",
+  "@registrationSuccessful": {
+    "description": "Registration successful message",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "User's name"
+      }
+    }
+  },
+  "totalBalance": "Total Balance",
+  "@totalBalance": {
+    "description": "Total balance label"
+  },
+  "totalPortfolio": "Total Portfolio",
+  "@totalPortfolio": {
+    "description": "Total portfolio label"
+  },
+  "allAccounts": "All your accounts",
+  "@allAccounts": {
+    "description": "All accounts subtitle"
+  },
+  "availableBalance": "Available Balance",
+  "@availableBalance": {
+    "description": "Available balance label"
+  },
+  "thisMonthIncome": "This Month Income",
+  "@thisMonthIncome": {
+    "description": "This month income label"
+  },
+  "thisMonthExpense": "This Month Expense",
+  "@thisMonthExpense": {
+    "description": "This month expense label"
+  },
+  "myCards": "My Cards",
+  "@myCards": {
+    "description": "My cards section title"
+  },
+  "manageYourCards": "Manage your cards",
+  "@manageYourCards": {
+    "description": "Manage your cards subtitle"
+  },
+  "seeAll": "See All",
+  "@seeAll": {
+    "description": "See all button text"
+  },
+  "recentTransactions": "Recent Transactions",
+  "@recentTransactions": {
+    "description": "Recent transactions section title"
+  },
+  "thisMonthSummary": "This Month Summary",
+  "@thisMonthSummary": {
+    "description": "This month summary section title"
+  },
+  "savings": "SAVINGS",
+  "@savings": {
+    "description": "Savings card type"
+  },
+  "budgetUsed": "Used",
+  "@budgetUsed": {
+    "description": "Budget used label"
+  },
+  "thisMonthGrowth": "this month",
+  "@thisMonthGrowth": {
+    "description": "This month growth indicator"
+  },
+  "cardHolder": "CARD HOLDER",
+  "@cardHolder": {
+    "description": "Card holder label on credit card"
+  },
+  "expiryDate": "VALID THRU",
+  "@expiryDate": {
+    "description": "Expiry date label on credit card"
+  },
+  "qantaDebit": "Qanta Debit",
+  "@qantaDebit": {
+    "description": "Qanta debit card name"
+  },
+  "checkingAccount": "Checking Account",
+  "@checkingAccount": {
+    "description": "Checking account type"
+  },
+  "qantaCredit": "Qanta Credit",
+  "@qantaCredit": {
+    "description": "Qanta credit card name"
+  },
+  "qantaSavings": "Qanta Savings",
+  "@qantaSavings": {
+    "description": "Qanta savings card name"
+  },
+  "goodMorning": "Good Morning! ☀️",
+  "@goodMorning": {
+    "description": "Good morning greeting"
+  },
+  "goodAfternoon": "Good Afternoon! 🌤️",
+  "@goodAfternoon": {
+    "description": "Good afternoon greeting"
+  },
+  "goodEvening": "Good Evening! 🌆",
+  "@goodEvening": {
+    "description": "Good evening greeting"
+  },
+  "goodNight": "Good Night! 🌙",
+  "@goodNight": {
+    "description": "Good night greeting"
+  },
+  "currency": "Currency",
+  "@currency": {
+    "description": "Currency setting"
+  },
+  "currencyTRY": "Turkish Lira (₺)",
+  "@currencyTRY": {
+    "description": "Turkish Lira currency option"
+  },
+  "currencyUSD": "US Dollar ($)",
+  "@currencyUSD": {
+    "description": "US Dollar currency option"
+  },
+  "currencyEUR": "Euro (€)",
+  "@currencyEUR": {
+    "description": "Euro currency option"
+  },
+  "currencyGBP": "British Pound (£)",
+  "@currencyGBP": {
+    "description": "British Pound currency option"
+  },
+  "selectCurrency": "Select Currency",
+  "@selectCurrency": {
+    "description": "Select currency title"
+  },
+  "selectCurrencyDescription": "Which currency would you like to use?",
+  "@selectCurrencyDescription": {
+    "description": "Select currency description"
+  },
+  "debit": "DEBIT",
+  "@debit": {
+    "description": "Debit card type"
+  },
+  "credit": "CREDIT",
+  "@credit": {
+    "description": "Credit card type"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile page title"
+  },
+  "personalInfo": "Personal Information",
+  "@personalInfo": {
+    "description": "Personal information section"
+  },
+  "preferences": "Preferences",
+  "@preferences": {
+    "description": "Preferences section"
+  },
+  "security": "Security",
+  "@security": {
+    "description": "Security section"
+  },
+  "support": "Support",
+  "@support": {
+    "description": "Support section"
+  },
+  "about": "About",
+  "@about": {
+    "description": "About section"
+  },
+  "editProfile": "Edit Profile",
+  "@editProfile": {
+    "description": "Edit profile button"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications setting"
+  },
+  "privacy": "Privacy",
+  "@privacy": {
+    "description": "Privacy setting"
+  },
+  "termsOfService": "Terms of Service",
+  "@termsOfService": {
+    "description": "Terms of service"
+  },
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Privacy policy"
+  },
+  "version": "Version",
+  "@version": {
+    "description": "App version"
+  },
+  "contactSupport": "Contact Support",
+  "@contactSupport": {
+    "description": "Contact support"
+  },
+  "changePassword": "Change Password",
+  "@changePassword": {
+    "description": "Change password"
+  },
+  "biometricAuth": "Biometric Authentication",
+  "@biometricAuth": {
+    "description": "Biometric authentication"
+  },
+  "transactions": "Transactions",
+  "@transactions": {
+    "description": "Transactions menu item"
+  },
+  "goals": "Goals",
+  "@goals": {
+    "description": "Goals menu item"
+  },
+  "upcomingPayments": "Upcoming Payments",
+  "@upcomingPayments": {
+    "description": "Upcoming payments section title"
+  },
+  "comingSoon": "Coming soon...",
+  "@comingSoon": {
+    "description": "Coming soon placeholder text"
+  },
+  "cardInfo": "Card Information",
+  "@cardInfo": {
+    "description": "Card information section title"
+  },
+  "cardType": "Card Type",
+  "@cardType": {
+    "description": "Card type label"
+  },
+  "cardNumber": "Card Number",
+  "@cardNumber": {
+    "description": "Card number label"
+  },
+  "expiryDateShort": "Expiry Date",
+  "@expiryDateShort": {
+    "description": "Short expiry date label"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "Status label"
+  },
+  "active": "Active",
+  "@active": {
+    "description": "Active status"
+  },
+  "balanceInfo": "Balance Information",
+  "@balanceInfo": {
+    "description": "Balance information section title"
+  },
+  "creditLimit": "Credit Limit",
+  "@creditLimit": {
+    "description": "Credit limit label"
+  },
+  "usedLimit": "Used Limit",
+  "@usedLimit": {
+    "description": "Used limit label"
+  },
+  "quickActions": "Quick Actions",
+  "@quickActions": {
+    "description": "Quick actions section title"
+  },
+  "sendMoney": "Send Money",
+  "@sendMoney": {
+    "description": "Send money action"
+  },
+  "loadMoney": "Load Money",
+  "@loadMoney": {
+    "description": "Load money action"
+  },
+  "freezeCard": "Freeze Card",
+  "@freezeCard": {
+    "description": "Freeze card action"
+  },
+  "cardSettings": "Card Settings",
+  "@cardSettings": {
+    "description": "Card settings action"
+  },
+  "addNewCard": "Add New Card",
+  "@addNewCard": {
+    "description": "Add new card button"
+  },
+  "addNewCardFeature": "Add new card feature coming soon!",
+  "@addNewCardFeature": {
+    "description": "Add new card feature coming soon message"
+  },
+  "cardManagement": "Card Management",
+  "@cardManagement": {
+    "description": "Card management section title"
+  },
+  "securitySettings": "Security Settings",
+  "@securitySettings": {
+    "description": "Security settings option"
+  },
+  "securitySettingsDesc": "PIN, limits and security settings",
+  "@securitySettingsDesc": {
+    "description": "Security settings description"
+  },
+  "notificationSettings": "Notification Settings",
+  "@notificationSettings": {
+    "description": "Notification settings option"
+  },
+  "notificationSettingsDesc": "Transaction notifications and alerts",
+  "@notificationSettingsDesc": {
+    "description": "Notification settings description"
+  },
+  "transactionHistory": "Transaction History",
+  "@transactionHistory": {
+    "description": "Transaction history option"
+  },
+  "transactionHistoryDesc": "All cards transaction history",
+  "@transactionHistoryDesc": {
+    "description": "Transaction history description"
+  },
+  "qantaWallet": "Qanta Wallet",
+  "@qantaWallet": {
+    "description": "Qanta wallet payment method"
+  },
+  "qantaDebitCard": "Qanta Debit",
+  "@qantaDebitCard": {
+    "description": "Qanta debit card payment method"
+  },
+  "bankTransfer": "Bank Transfer",
+  "@bankTransfer": {
+    "description": "Bank transfer payment method"
+  },
+  "iban": "IBAN",
+  "@iban": {
+    "description": "IBAN label"
+  },
+  "recommended": "RECOMMENDED",
+  "@recommended": {
+    "description": "Recommended label"
+  },
+  "urgent": "URGENT",
+  "@urgent": {
+    "description": "Urgent label"
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "Amount label"
+  },
+  "dueDate": "Due Date",
+  "@dueDate": {
+    "description": "Due date label"
+  },
+  "setReminder": "Set Reminder",
+  "@setReminder": {
+    "description": "Set reminder action"
+  },
+  "paymentHistory": "Payment History",
+  "@paymentHistory": {
+    "description": "Payment history action"
+  },
+  "reminderSetup": "Reminder setup opening...",
+  "@reminderSetup": {
+    "description": "Reminder setup opening message"
+  },
+  "paymentHistoryOpening": "Payment history opening...",
+  "@paymentHistoryOpening": {
+    "description": "Payment history opening message"
+  },
+  "sendMoneyOpening": "Send Money opening...",
+  "@sendMoneyOpening": {
+    "description": "Send money opening message"
+  },
+  "loadMoneyOpening": "Load Money opening...",
+  "@loadMoneyOpening": {
+    "description": "Load money opening message"
+  },
+  "freezeCardOpening": "Freeze Card opening...",
+  "@freezeCardOpening": {
+    "description": "Freeze card opening message"
+  },
+  "cardSettingsOpening": "Card Settings opening...",
+  "@cardSettingsOpening": {
+    "description": "Card settings opening message"
+  },
+  "securitySettingsOpening": "Security Settings opening...",
+  "@securitySettingsOpening": {
+    "description": "Security settings opening message"
+  },
+  "notificationSettingsOpening": "Notification Settings opening...",
+  "@notificationSettingsOpening": {
+    "description": "Notification settings opening message"
+  },
+  "transactionHistoryOpening": "Opening transaction history...",
+  "@transactionHistoryOpening": {
+    "description": "Transaction history opening message"
+  },
+  "paymentProcessing": "Processing payment with {method}...",
+  "@paymentProcessing": {
+    "description": "Payment processing message",
+    "placeholders": {
+      "method": {
+        "type": "String",
+        "description": "Payment method"
+      }
+    }
+  },
+  "allAccountsTotal": "Total of all your accounts",
+  "@allAccountsTotal": {
+    "description": "All accounts total subtitle"
+  },
+  "accountBreakdown": "Account Breakdown",
+  "@accountBreakdown": {
+    "description": "Account breakdown section title"
+  },
+  "creditCard": "Credit Card",
+  "@creditCard": {
+    "description": "Credit card account type"
+  },
+  "savingsAccount": "Savings Account",
+  "@savingsAccount": {
+    "description": "Savings account type"
+  },
+  "monthlySummary": "Monthly Summary",
+  "@monthlySummary": {
+    "description": "Monthly summary section title"
+  },
+  "cashBalance": "Cash Balance",
+  "@cashBalance": {
+    "description": "Cash balance label"
+  },
+  "addCashBalance": "Add Cash Balance",
+  "@addCashBalance": {
+    "description": "Add cash balance button"
+  },
+  "enterCashAmount": "Enter Cash Amount",
+  "@enterCashAmount": {
+    "description": "Enter cash amount dialog title"
+  },
+  "cashAmount": "Cash Amount",
+  "@cashAmount": {
+    "description": "Cash amount field label"
+  },
+  "addCash": "Add Cash",
+  "@addCash": {
+    "description": "Add cash button"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "cashAdded": "Cash balance added: {amount}",
+  "@cashAdded": {
+    "description": "Cash added success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Cash amount"
+      }
+    }
+  },
+  "invalidAmount": "Invalid amount",
+  "@invalidAmount": {
+    "description": "Invalid amount error"
+  },
+  "enterValidAmount": "Please enter a valid amount",
+  "@enterValidAmount": {
+    "description": "Enter valid amount validation message"
+  },
+  "cash": "CASH",
+  "@cash": {
+    "description": "Cash label on cash card"
+  },
+  "digitalWallet": "Digital Wallet",
+  "@digitalWallet": {
+    "description": "Digital wallet label"
+  },
+  "all": "All",
+  "@all": {
+    "description": "All tab label"
+  },
+  "cashManagement": "Cash Management",
+  "@cashManagement": {
+    "description": "Cash management section title"
+  },
+  "addCashHistory": "Add Cash History",
+  "@addCashHistory": {
+    "description": "Add cash history option"
+  },
+  "addCashHistoryDesc": "View your cash addition transactions",
+  "@addCashHistoryDesc": {
+    "description": "Add cash history description"
+  },
+  "cashLimits": "Cash Limits",
+  "@cashLimits": {
+    "description": "Cash limits option"
+  },
+  "cashLimitsDesc": "Set daily and monthly cash limits",
+  "@cashLimitsDesc": {
+    "description": "Cash limits description"
+  },
+  "debitCardManagement": "Debit Card Management",
+  "@debitCardManagement": {
+    "description": "Debit card management section title"
+  },
+  "cardLimits": "Card Limits",
+  "@cardLimits": {
+    "description": "Card limits option"
+  },
+  "cardLimitsDesc": "Set daily spending and withdrawal limits",
+  "@cardLimitsDesc": {
+    "description": "Card limits description"
+  },
+  "atmLocations": "ATM Locations",
+  "@atmLocations": {
+    "description": "ATM locations option"
+  },
+  "atmLocationsDesc": "Find nearby ATMs",
+  "@atmLocationsDesc": {
+    "description": "ATM locations description"
+  },
+  "creditCardManagement": "Credit Card Management",
+  "@creditCardManagement": {
+    "description": "Credit card management section title"
+  },
+  "creditLimitDesc": "View your credit limit and request increase",
+  "@creditLimitDesc": {
+    "description": "Credit limit description"
+  },
+  "installmentOptions": "Installment Options",
+  "@installmentOptions": {
+    "description": "Installment options"
+  },
+  "installmentOptionsDesc": "Convert your purchases to installments",
+  "@installmentOptionsDesc": {
+    "description": "Installment options description"
+  },
+  "savingsManagement": "Savings Management",
+  "@savingsManagement": {
+    "description": "Savings management section title"
+  },
+  "savingsGoals": "Savings Goals",
+  "@savingsGoals": {
+    "description": "Savings goals option"
+  },
+  "savingsGoalsDesc": "Set and track your savings goals",
+  "@savingsGoalsDesc": {
+    "description": "Savings goals description"
+  },
+  "autoSave": "Auto Save",
+  "@autoSave": {
+    "description": "Auto save option"
+  },
+  "autoSaveDesc": "Create automatic saving rules",
+  "@autoSaveDesc": {
+    "description": "Auto save description"
+  },
+  "opening": "opening...",
+  "@opening": {
+    "description": "Opening message"
+  },
+  "addTransaction": "Add Transaction",
+  "@addTransaction": {
+    "description": "Add transaction button text"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
+  },
+  "selectTransactionType": "Select Transaction Type",
+  "@selectTransactionType": {
+    "description": "Select transaction type title"
+  },
+  "selectTransactionTypeDesc": "What type of transaction would you like to make?",
+  "@selectTransactionTypeDesc": {
+    "description": "Select transaction type description"
+  },
+  "expenseSaved": "Expense saved: {amount}",
+  "@expenseSaved": {
+    "description": "Expense saved success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Expense amount"
+      }
+    }
+  },
+  "errorOccurred": "An error occurred. Please try again.",
+  "@errorOccurred": {
+    "description": "Generic error message"
+  },
+  "enterAmount": "Enter Amount",
+  "@enterAmount": {
+    "description": "Enter amount step title"
+  },
+  "selectCategory": "Select Category",
+  "@selectCategory": {
+    "description": "Select category step title"
+  },
+  "paymentMethod": "Payment Method",
+  "@paymentMethod": {
+    "description": "Payment method step title"
+  },
+  "details": "Details",
+  "@details": {
+    "description": "Details step title"
+  },
+  "amountRequired": "Amount is required",
+  "@amountRequired": {
+    "description": "Amount required validation message"
+  },
+  "enterValidAmountMessage": "Please enter a valid amount",
+  "@enterValidAmountMessage": {
+    "description": "Enter valid amount validation message"
+  },
+  "selectCategoryMessage": "Please select a category",
+  "@selectCategoryMessage": {
+    "description": "Select category validation message"
+  },
+  "selectPaymentMethodMessage": "Please select a payment method",
+  "@selectPaymentMethodMessage": {
+    "description": "Select payment method validation message"
+  },
+  "saveExpense": "Save Expense",
+  "@saveExpense": {
+    "description": "Save expense button text"
+  },
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+  "lastCheckAndDetails": "Final review and details",
+  "@lastCheckAndDetails": {
+    "description": "Last check and details description"
+  },
+  "summary": "Summary",
+  "@summary": {
+    "description": "Summary title"
+  },
+  "category": "Category",
+  "@category": {
+    "description": "Category label"
+  },
+  "payment": "Payment",
+  "@payment": {
+    "description": "Payment label"
+  },
+  "date": "Date",
+  "@date": {
+    "description": "Date label"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Description field label"
+  },
+  "card": "Card",
+  "@card": {
+    "description": "Card payment method"
+  },
+  "installmentOptions": "Installment Options",
+  "@installmentOptions": {
+    "description": "Installment options title"
+  },
+  "cashPayment": "Full Payment",
+  "@cashPayment": {
+    "description": "Cash payment (no installments)"
+  },
+  "installments": "{count} Installments",
+  "@installments": {
+    "description": "Installments count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of installments"
+      }
+    }
+  },
+  "foodAndDrink": "Food & Drink",
+  "@foodAndDrink": {
+    "description": "Food and drink category"
+  },
+  "transport": "Transport",
+  "@transport": {
+    "description": "Transport category"
+  },
+  "shopping": "Shopping",
+  "@shopping": {
+    "description": "Shopping category"
+  },
+  "entertainment": "Entertainment",
+  "@entertainment": {
+    "description": "Entertainment category"
+  },
+  "bills": "Bills",
+  "@bills": {
+    "description": "Bills category"
+  },
+  "health": "Health",
+  "@health": {
+    "description": "Health category"
+  },
+  "education": "Education",
+  "@education": {
+    "description": "Education category"
+  },
+  "other": "Other",
+  "@other": {
+    "description": "Other category"
+  },
+  "incomeType": "Income",
+  "@incomeType": {
+    "description": "Income transaction type"
+  },
+  "expenseType": "Expense",
+  "@expenseType": {
+    "description": "Expense transaction type"
+  },
+  "transferType": "Transfer",
+  "@transferType": {
+    "description": "Transfer transaction type"
+  },
+  "investmentType": "Investment",
+  "@investmentType": {
+    "description": "Investment transaction type"
+  },
+  "incomeDescription": "Salary, bonus, sales income",
+  "@incomeDescription": {
+    "description": "Income transaction description"
+  },
+  "expenseDescription": "Shopping, bills, expenses",
+  "@expenseDescription": {
+    "description": "Expense transaction description"
+  },
+  "transferDescription": "Transfer between accounts",
+  "@transferDescription": {
+    "description": "Transfer transaction description"
+  },
+  "investmentDescription": "Stocks, crypto, gold",
+  "@investmentDescription": {
+    "description": "Investment transaction description"
+  },
+  "recurringType": "Recurring Payments",
+  "@recurringType": {
+    "description": "Recurring transaction type"
+  },
+  "recurringDescription": "Netflix, bills, subscriptions",
+  "@recurringDescription": {
+    "description": "Recurring transaction description"
+  },
+  "selectFrequency": "Select Frequency",
+  "@selectFrequency": {
+    "description": "Select frequency title"
+  },
+  "saveRecurring": "Save Recurring Payment",
+  "@saveRecurring": {
+    "description": "Save recurring payment button text"
+  },
+  "weekly": "Weekly",
+  "@weekly": {
+    "description": "Weekly frequency"
+  },
+  "monthly": "Monthly",
+  "@monthly": {
+    "description": "Monthly frequency"
+  },
+  "quarterly": "Quarterly",
+  "@quarterly": {
+    "description": "Quarterly frequency"
+  },
+  "yearly": "Yearly",
+  "@yearly": {
+    "description": "Yearly frequency"
+  },
+  "weeklyDescription": "Repeats every week",
+  "@weeklyDescription": {
+    "description": "Weekly frequency description"
+  },
+  "monthlyDescription": "Repeats every month",
+  "@monthlyDescription": {
+    "description": "Monthly frequency description"
+  },
+  "quarterlyDescription": "Repeats every 3 months",
+  "@quarterlyDescription": {
+    "description": "Quarterly frequency description"
+  },
+  "yearlyDescription": "Repeats every year",
+  "@yearlyDescription": {
+    "description": "Yearly frequency description"
+  },
+  "subscription": "Subscription",
+  "@subscription": {
+    "description": "Subscription category"
+  },
+  "utilities": "Utilities",
+  "@utilities": {
+    "description": "Utilities category"
+  },
+  "insurance": "Insurance",
+  "@insurance": {
+    "description": "Insurance category"
+  },
+  "rent": "Rent",
+  "@rent": {
+    "description": "Rent category"
+  },
+  "loan": "Loan/Installment",
+  "@loan": {
+    "description": "Loan category"
+  },
+  "subscriptionDescription": "Netflix, Spotify, YouTube",
+  "@subscriptionDescription": {
+    "description": "Subscription category description"
+  },
+  "utilitiesDescription": "Electricity, water, gas",
+  "@utilitiesDescription": {
+    "description": "Utilities category description"
+  },
+  "insuranceDescription": "Health, auto, home insurance",
+  "@insuranceDescription": {
+    "description": "Insurance category description"
+  },
+  "rentDescription": "House rent, office rent",
+  "@rentDescription": {
+    "description": "Rent category description"
+  },
+  "loanDescription": "Credit card, installments",
+  "@loanDescription": {
+    "description": "Loan category description"
+  },
+  "otherDescription": "Other recurring payments",
+  "@otherDescription": {
+    "description": "Other recurring category description"
+  },
+  "next": "Next",
+  "@next": {
+    "description": "Next button text"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  "incomeFormOpening": "Income form will open",
+  "@incomeFormOpening": {
+    "description": "Income form opening message"
+  },
+  "transferFormOpening": "Transfer form will open",
+  "@transferFormOpening": {
+    "description": "Transfer form opening message"
+  },
+  "investmentFormOpening": "Investment form will open",
+  "@investmentFormOpening": {
+    "description": "Investment form opening message"
+  },
+  "howMuchSpent": "How much did you spend?",
+  "@howMuchSpent": {
+    "description": "How much did you spend question"
+  },
+  "whichCategorySpent": "Which category did you spend in?",
+  "@whichCategorySpent": {
+    "description": "Which category did you spend in question"
+  },
+  "howDidYouPay": "How did you pay?",
+  "@howDidYouPay": {
+    "description": "How did you pay question"
+  },
+  "saveIncome": "Save Income",
+  "@saveIncome": {
+    "description": "Save income button text"
+  },
+  "food": "Food",
+  "@food": {
+    "description": "Food expense category"
+  },
+  "foodDescription": "Restaurant, grocery, coffee",
+  "@foodDescription": {
+    "description": "Food expense category description"
+  },
+  "transport": "Transport",
+  "@transport": {
+    "description": "Transport expense category"
+  },
+  "transportDescription": "Taxi, bus, fuel",
+  "@transportDescription": {
+    "description": "Transport expense category description"
+  },
+  "shopping": "Shopping",
+  "@shopping": {
+    "description": "Shopping expense category"
+  },
+  "shoppingDescription": "Clothing, electronics, home",
+  "@shoppingDescription": {
+    "description": "Shopping expense category description"
+  },
+  "bills": "Bills",
+  "@bills": {
+    "description": "Bills expense category"
+  },
+  "billsDescription": "Electricity, water, internet",
+  "@billsDescription": {
+    "description": "Bills expense category description"
+  },
+  "entertainment": "Entertainment",
+  "@entertainment": {
+    "description": "Entertainment expense category"
+  },
+  "entertainmentDescription": "Cinema, concert, games",
+  "@entertainmentDescription": {
+    "description": "Entertainment expense category description"
+  },
+  "health": "Health",
+  "@health": {
+    "description": "Health expense category"
+  },
+  "healthDescription": "Doctor, pharmacy, sports",
+  "@healthDescription": {
+    "description": "Health expense category description"
+  },
+  "education": "Education",
+  "@education": {
+    "description": "Education expense category"
+  },
+  "educationDescription": "Course, books, school",
+  "@educationDescription": {
+    "description": "Education expense category description"
+  },
+  "travel": "Travel",
+  "@travel": {
+    "description": "Travel expense category"
+  },
+  "travelDescription": "Vacation, flight, hotel",
+  "@travelDescription": {
+    "description": "Travel expense category description"
+  },
+  "saveExpense": "Save Expense",
+  "@saveExpense": {
+    "description": "Save expense button text"
+  },
+  "howMuchEarned": "How much did you earn?",
+  "@howMuchEarned": {
+    "description": "How much did you earn question"
+  },
+  "whichCategoryEarned": "Which category did you earn in?",
+  "@whichCategoryEarned": {
+    "description": "Which category did you earn in question"
+  },
+  "howDidYouReceive": "How did you receive it?",
+  "@howDidYouReceive": {
+    "description": "How did you receive payment question"
+  },
+  "incomeSaved": "Income saved: {amount}",
+  "@incomeSaved": {
+    "description": "Income saved success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Income amount"
+      }
+    }
+  },
+  "salary": "Salary",
+  "@salary": {
+    "description": "Salary income category"
+  },
+  "salaryDescription": "Monthly salary, wage",
+  "@salaryDescription": {
+    "description": "Salary income category description"
+  },
+  "bonus": "Bonus",
+  "@bonus": {
+    "description": "Bonus income category"
+  },
+  "bonusDescription": "Bonus, incentive, reward",
+  "@bonusDescription": {
+    "description": "Bonus income category description"
+  },
+  "freelance": "Freelance",
+  "@freelance": {
+    "description": "Freelance income category"
+  },
+  "freelanceDescription": "Freelance work, project",
+  "@freelanceDescription": {
+    "description": "Freelance income category description"
+  },
+  "business": "Business",
+  "@business": {
+    "description": "Business income category"
+  },
+  "businessDescription": "Business income, trade",
+  "@businessDescription": {
+    "description": "Business income category description"
+  },
+  "rental": "Rental",
+  "@rental": {
+    "description": "Rental income category"
+  },
+  "rentalDescription": "House rent, car rental",
+  "@rentalDescription": {
+    "description": "Rental income category description"
+  },
+  "gift": "Gift",
+  "@gift": {
+    "description": "Gift income category"
+  },
+  "giftDescription": "Gift, donation, allowance",
+  "@giftDescription": {
+    "description": "Gift income category description"
+  },
+  "saveTransfer": "Save Transfer",
+  "@saveTransfer": {
+    "description": "Save transfer button text"
+  },
+  "howMuchInvest": "How Much Will You Invest?",
+  "@howMuchInvest": {
+    "description": "How much to invest question"
+  },
+  "whichInvestmentType": "Which Investment Type?",
+  "@whichInvestmentType": {
+    "description": "Which investment type question"
+  },
+  "stocks": "Stocks",
+  "@stocks": {
+    "description": "Stocks investment category"
+  },
+  "stocksDescription": "Stock market, shares",
+  "@stocksDescription": {
+    "description": "Stocks investment category description"
+  },
+  "crypto": "Cryptocurrency",
+  "@crypto": {
+    "description": "Crypto investment category"
+  },
+  "cryptoDescription": "Bitcoin, Ethereum, altcoin",
+  "@cryptoDescription": {
+    "description": "Crypto investment category description"
+  },
+  "gold": "Gold",
+  "@gold": {
+    "description": "Gold investment category"
+  },
+  "goldDescription": "Gold bars, gold coins",
+  "@goldDescription": {
+    "description": "Gold investment category description"
+  },
+  "bonds": "Bonds",
+  "@bonds": {
+    "description": "Bonds investment category"
+  },
+  "bondsDescription": "Government bonds, corporate bonds",
+  "@bondsDescription": {
+    "description": "Bonds investment category description"
+  },
+  "funds": "Funds",
+  "@funds": {
+    "description": "Funds investment category"
+  },
+  "fundsDescription": "Mutual funds, pension funds",
+  "@fundsDescription": {
+    "description": "Funds investment category description"
+  },
+  "forex": "Forex",
+  "@forex": {
+    "description": "Forex investment category"
+  },
+  "forexDescription": "USD, EUR, GBP",
+  "@forexDescription": {
+    "description": "Forex investment category description"
+  },
+  "realEstate": "Real Estate",
+  "@realEstate": {
+    "description": "Real estate investment category"
+  },
+  "realEstateDescription": "House, land, shop",
+  "@realEstateDescription": {
+    "description": "Real estate investment category description"
+  },
+  "saveInvestment": "Save Investment",
+  "@saveInvestment": {
+    "description": "Save investment button"
+  },
+  "investmentSaved": "Investment saved: {amount}",
+  "@investmentSaved": {
+    "description": "Investment saved success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Investment amount"
+      }
+    }
+  },
+  "selectInvestmentTypeMessage": "Please select investment type",
+  "@selectInvestmentTypeMessage": {
+    "description": "Select investment type validation message"
+  },
+  "quantityRequired": "Quantity is required",
+  "@quantityRequired": {
+    "description": "Quantity required validation message"
+  },
+  "enterValidQuantity": "Please enter a valid quantity",
+  "@enterValidQuantity": {
+    "description": "Enter valid quantity validation message"
+  },
+  "rateRequired": "Rate is required",
+  "@rateRequired": {
+    "description": "Rate required validation message"
+  },
+  "enterValidRate": "Please enter a valid rate",
+  "@enterValidRate": {
+    "description": "Enter valid rate validation message"
+  },
+  "investmentType": "Investment Type",
+  "@investmentType": {
+    "description": "Investment type label"
+  },
+  "quantity": "Quantity",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "rate": "Rate",
+  "@rate": {
+    "description": "Rate label"
+  },
+  "totalAmount": "Total Amount",
+  "@totalAmount": {
+    "description": "Total amount label"
+  },
+  "onboardingFeaturesTitle": "What Can You Do with Qanta?",
+  "@onboardingFeaturesTitle": {
+    "description": "Onboarding features page title"
+  },
+  "expenseTrackingTitle": "Expense Tracking",
+  "@expenseTrackingTitle": {
+    "description": "Expense tracking feature title"
+  },
+  "expenseTrackingDesc": "Easily track your daily expenses",
+  "@expenseTrackingDesc": {
+    "description": "Expense tracking feature description"
+  },
+  "smartSavingsTitle": "Smart Savings",
+  "@smartSavingsTitle": {
+    "description": "Smart savings feature title"
+  },
+  "smartSavingsDesc": "Save money to reach your goals",
+  "@smartSavingsDesc": {
+    "description": "Smart savings feature description"
+  },
+  "financialAnalysisTitle": "Financial Analysis",
+  "@financialAnalysisTitle": {
+    "description": "Financial analysis feature title"
+  },
+  "financialAnalysisDesc": "Analyze your spending habits",
+  "@financialAnalysisDesc": {
+    "description": "Financial analysis feature description"
+  },
+  "languageSelectionTitle": "Language Selection",
+  "@languageSelectionTitle": {
+    "description": "Language selection page title"
+  },
+  "languageSelectionDesc": "Which language would you like to use the app in?",
+  "@languageSelectionDesc": {
+    "description": "Language selection page description"
+  },
+  "themeSelectionTitle": "Theme Selection",
+  "@themeSelectionTitle": {
+    "description": "Theme selection page title"
+  },
+  "themeSelectionDesc": "Which theme do you prefer?",
+  "@themeSelectionDesc": {
+    "description": "Theme selection page description"
+  },
+  "lightThemeTitle": "Light Theme",
+  "@lightThemeTitle": {
+    "description": "Light theme option title"
+  },
+  "lightThemeDesc": "Classic white theme",
+  "@lightThemeDesc": {
+    "description": "Light theme option description"
+  },
+  "darkThemeTitle": "Dark Theme",
+  "@darkThemeTitle": {
+    "description": "Dark theme option title"
+  },
+  "darkThemeDesc": "Easy on your eyes",
+  "@darkThemeDesc": {
+    "description": "Dark theme option description"
+  },
+  "exitOnboarding": "Exit",
+  "@exitOnboarding": {
+    "description": "Exit onboarding dialog title"
+  },
+  "exitOnboardingMessage": "Are you sure you want to exit without completing the onboarding?",
+  "@exitOnboardingMessage": {
+    "description": "Exit onboarding dialog message"
+  },
+  "exitCancel": "Cancel",
+  "@exitCancel": {
+    "description": "Cancel exit dialog button"
+  },
+  "back": "Back",
+  "@back": {
+    "description": "Back button text"
+  },
+  "updateCashBalance": "Update Cash Balance",
+  "@updateCashBalance": {
+    "description": "Update cash balance button text"
+  },
+  "updateCashBalanceDesc": "Enter your current cash amount",
+  "@updateCashBalanceDesc": {
+    "description": "Update cash balance description"
+  },
+  "updateCashBalanceTitle": "Update Cash Balance",
+  "@updateCashBalanceTitle": {
+    "description": "Update cash balance dialog title"
+  },
+  "updateCashBalanceMessage": "Enter your current cash amount:",
+  "@updateCashBalanceMessage": {
+    "description": "Update cash balance dialog message"
+  },
+  "newBalance": "New Balance",
+  "@newBalance": {
+    "description": "New balance input label"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Update button text"
+  },
+  "cashBalanceUpdated": "Cash balance updated to {amount}",
+  "@cashBalanceUpdated": {
+    "description": "Cash balance updated success message",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "New balance amount"
+      }
+    }
+  },
+  "enterValidAmount": "Please enter a valid amount",
+  "@enterValidAmount": {
+    "description": "Enter valid amount validation message"
+  },
+  "cashAccountLoadError": "Error loading cash account",
+  "@cashAccountLoadError": {
+    "description": "Cash account load error message"
+  },
+  "unknownError": "Unknown error",
+  "@unknownError": {
+    "description": "Unknown error message"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "noCashTransactions": "No cash transactions yet",
+  "@noCashTransactions": {
+    "description": "No cash transactions message"
+  },
+  "noCashTransactionsDesc": "Your first cash transaction will appear here",
+  "@noCashTransactionsDesc": {
+    "description": "No cash transactions description"
+  },
+  "balanceUpdated": "Cash Added",
+  "@balanceUpdated": {
+    "description": "Title for cash balance increase transaction"
+  },
+  "walletBalanceUpdated": "Manual cash addition",
+  "@walletBalanceUpdated": {
+    "description": "Subtitle for manual cash addition"
+  },
+  "groceryShopping": "Grocery Shopping",
+  "@groceryShopping": {
+    "description": "Grocery shopping transaction title"
+  },
+  "cashPaymentMade": "Cash payment",
+  "@cashPaymentMade": {
+    "description": "Cash payment transaction subtitle"
+  },
+  "taxiFare": "Taxi Fare",
+  "@taxiFare": {
+    "description": "Taxi fare transaction title"
+  },
+  "transactionDetails": "Transaction Details",
+  "cardDetails": "Card Details",
+  "time": "Time",
+  "transactionType": "Transaction Type",
+  "merchant": "Merchant",
+  "installmentInfo": "Installment Info",
+  "availableLimit": "Available Limit",
+  "howMuchTransfer": "How much will you transfer?",
+  "@howMuchTransfer": {
+    "description": "How much transfer question"
+  },
+  "fromWhichAccount": "From which account?",
+  "@fromWhichAccount": {
+    "description": "From which account question"
+  },
+  "toWhichAccount": "To which account?",
+  "@toWhichAccount": {
+    "description": "To which account question"
+  },
+  "investmentIncome": "Investment Income",
+  "@investmentIncome": {
+    "description": "Investment income category"
+  },
+  "investmentIncomeDescription": "Stocks, funds, rental income",
+  "@investmentIncomeDescription": {
+    "description": "Investment income category description"
+  },
+  "silver": "Silver",
+  "@silver": {
+    "description": "Silver investment type"
+  },
+  "usd": "USD",
+  "@usd": {
+    "description": "USD investment type"
+  },
+  "eur": "EUR",
+  "@eur": {
+    "description": "EUR investment type"
+  },
+  "goldUnit": "gram",
+  "@goldUnit": {
+    "description": "Gold unit"
+  },
+  "silverUnit": "gram",
+  "@silverUnit": {
+    "description": "Silver unit"
+  },
+  "usdUnit": "unit",
+  "@usdUnit": {
+    "description": "USD unit"
+  },
+  "eurUnit": "unit",
+  "@eurUnit": {
+    "description": "EUR unit"
+  },
+  "silverDescription": "Silver investment",
+  "@silverDescription": {
+    "description": "Silver investment description"
+  },
+  "usdDescription": "US Dollar",
+  "@usdDescription": {
+    "description": "USD investment description"
+  },
+  "eurDescription": "Euro currency",
+  "@eurDescription": {
+    "description": "EUR investment description"
+  },
+  "selectInvestmentType": "Select Investment Type",
+  "@selectInvestmentType": {
+    "description": "Select investment type title"
+  },
+  "investment": "Investment",
+  "@investment": {
+    "description": "Investment category"
+  },
+  "otherIncome": "Other Income",
+  "@otherIncome": {
+    "description": "Other income category"
+  },
+  "recurringPayment": "Recurring Payment",
+  "@recurringPayment": {
+    "description": "Recurring payment title"
+  },
+  "saveRecurringPayment": "Save Recurring Payment",
+  "@saveRecurringPayment": {
+    "description": "Save recurring payment button"
+  },
+  "noTransactionsYet": "No transactions yet",
+  "@noTransactionsYet": {
+    "description": "Empty state title when no transactions exist"
+  },
+  "noTransactionsDescription": "Tap the + button to add your first transaction",
+  "@noTransactionsDescription": {
+    "description": "Empty state description when no transactions exist"
+  },
+  "noSearchResults": "No search results found",
+  "@noSearchResults": {
+    "description": "Empty state title when search returns no results"
+  },
+  "noSearchResultsDescription": "No results found for \"{query}\"",
+  "@noSearchResultsDescription": {
+    "description": "Empty state description when search returns no results",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "description": "Search query"
+      }
+    }
+  },
+  "transactionsLoadError": "Failed to load transactions",
+  "@transactionsLoadError": {
+    "description": "Error state title when transactions fail to load"
+  },
+  "connectionError": "Connection problem occurred",
+  "@connectionError": {
+    "description": "Error state description for connection issues"
+  },
+  "tryAgain": "Try Again",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+  "noAccountsAvailable": "No accounts available",
+  "@noAccountsAvailable": {
+    "description": "No accounts available message"
+  },
+  "saveTransfer": "Save Transfer",
+  "@saveTransfer": {
+    "description": "Save transfer button text"
+  },
+  "debitCard": "Debit Card",
+  "@debitCard": {
+    "description": "Debit card account type"
+  }
+} 

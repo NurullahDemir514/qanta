@@ -1,0 +1,192 @@
+# Qanta Personal Finance App - Cursor Rules
+
+## Project Overview
+Qanta is a modern personal finance mobile application built with Flutter, focusing on budget management, expense tracking, investment portfolio, and financial analytics with AI-powered insights.
+
+## Tech Stack
+- **Framework**: Flutter 3.8.1+
+- **Language**: Dart
+- **State Management**: Provider
+- **Database**: Supabase
+- **Navigation**: GoRouter
+- **UI**: Material 3 Design System
+- **Fonts**: Google Fonts (Sora)
+- **Localization**: flutter_localizations (Turkish/English)
+- **Theme**: Light/Dark mode with SharedPreferences
+
+## Project Structure
+```
+lib/
+├── core/
+│   ├── theme/           # Theme configuration
+│   ├── services/        # External services (Supabase, etc.)
+│   └── constants/       # App constants
+├── modules/
+│   ├── auth/           # Authentication & onboarding
+│   ├── home/           # Dashboard & overview
+│   ├── transactions/   # Transaction management
+│   ├── cards/          # Card management
+│   ├── insights/       # AI insights & analytics
+│   └── settings/       # Settings & profile
+├── shared/
+│   ├── widgets/        # Reusable widgets
+│   ├── models/         # Data models
+│   └── utils/          # Utility functions
+├── l10n/              # Localization files
+└── routes/            # Navigation configuration
+```
+
+## Coding Standards
+
+### Dart/Flutter Best Practices
+- Use `const` constructors whenever possible
+- Prefer `final` over `var` for immutable variables
+- Use meaningful variable and function names
+- Follow Dart naming conventions (camelCase for variables, PascalCase for classes)
+- Always use `super.key` for widget constructors
+- Use `late` keyword appropriately for non-nullable variables
+
+### Widget Guidelines
+- Create reusable widgets in `shared/widgets/`
+- Use `StatelessWidget` when possible, `StatefulWidget` only when state is needed
+- Implement proper `dispose()` methods for controllers and streams
+- Use `Builder` widgets to access context when needed
+- Prefer composition over inheritance
+
+### State Management
+- Use Provider for global state (theme, user data)
+- Use local state (setState) for simple UI state
+- Create separate providers for different concerns
+- Use `Consumer` and `Selector` widgets appropriately
+- Implement proper error handling in providers
+
+### Navigation
+- Use GoRouter for all navigation
+- Define routes in `routes/app_router.dart`
+- Use named routes instead of direct navigation
+- Implement proper route guards for authentication
+
+### Styling & Theming
+- Use Material 3 design system
+- Follow the established color scheme (#00FFB3 mint green primary)
+- Use Google Fonts Sora throughout the app
+- Implement responsive design with MediaQuery
+- Use Theme.of(context) for colors and text styles
+- Support both light and dark themes
+
+### Localization
+- Add all user-facing strings to ARB files
+- Use descriptive keys for localization
+- Support Turkish and English languages
+- Use AppLocalizations.of(context) for translations
+
+### File Naming
+- Use snake_case for file names
+- Use descriptive names that reflect functionality
+- Group related files in appropriate modules
+- Use suffixes: `_page.dart`, `_widget.dart`, `_provider.dart`, `_model.dart`
+
+### Code Organization
+- Keep files under 300 lines when possible
+- Separate business logic from UI
+- Use barrel exports (index.dart) for modules
+- Group imports: Flutter, packages, relative imports
+- Use meaningful comments for complex logic
+
+### Error Handling
+- Implement try-catch blocks for async operations
+- Show user-friendly error messages
+- Log errors appropriately (debugPrint in development)
+- Handle network connectivity issues
+- Validate user inputs
+
+### Performance
+- Use `const` widgets to reduce rebuilds
+- Implement lazy loading for lists
+- Optimize images and assets
+- Use `ListView.builder` for large lists
+- Avoid unnecessary rebuilds with proper state management
+
+### Security
+- Never commit API keys or sensitive data
+- Use environment variables for configuration
+- Implement proper input validation
+- Follow Supabase security best practices
+- Use secure storage for sensitive data
+
+### Testing
+- Write unit tests for business logic
+- Write widget tests for UI components
+- Use meaningful test descriptions
+- Mock external dependencies
+- Aim for good test coverage
+
+## Finance App Specific Guidelines
+
+### Data Models
+- Create models for: User, Transaction, Card, Budget, Category
+- Use proper data validation
+- Implement serialization methods (toJson/fromJson)
+- Use enums for transaction types, categories
+
+### Financial Calculations
+- Use `Decimal` or `BigDecimal` for precise calculations
+- Handle currency formatting properly
+- Implement proper rounding for financial values
+- Support multiple currencies
+
+### UI/UX for Finance
+- Use clear visual hierarchy for financial data
+- Implement proper loading states
+- Show confirmation dialogs for important actions
+- Use appropriate icons for financial concepts
+- Implement pull-to-refresh for data updates
+
+### Security for Finance
+- Implement biometric authentication
+- Use secure storage for sensitive financial data
+- Implement session timeouts
+- Add transaction confirmation steps
+- Log financial operations for audit
+
+## AI Integration Guidelines
+- Use clear prompts for AI financial insights
+- Implement proper error handling for AI responses
+- Show loading states during AI processing
+- Cache AI responses when appropriate
+- Provide fallback content when AI is unavailable
+
+## Git Workflow
+- Use conventional commits (feat:, fix:, docs:, etc.)
+- Create feature branches for new functionality
+- Write descriptive commit messages
+- Keep commits atomic and focused
+- Use pull requests for code review
+
+## Dependencies Management
+- Keep dependencies up to date
+- Use specific version numbers in pubspec.yaml
+- Document why each dependency is needed
+- Prefer official packages over third-party when possible
+- Regular security audits of dependencies
+
+## Documentation
+- Document complex business logic
+- Keep README.md updated
+- Document API integrations
+- Maintain changelog for releases
+- Document deployment procedures
+
+## Code Review Checklist
+- [ ] Follows Dart/Flutter best practices
+- [ ] Proper error handling implemented
+- [ ] Localization strings added
+- [ ] Theme support implemented
+- [ ] Performance considerations addressed
+- [ ] Security guidelines followed
+- [ ] Tests written (if applicable)
+- [ ] Documentation updated
+- [ ] No hardcoded values
+- [ ] Proper null safety
+
+Remember: Focus on creating a secure, user-friendly, and performant personal finance application that helps users manage their money effectively. 
