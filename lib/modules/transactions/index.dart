@@ -18,9 +18,8 @@ export 'screens/transfer_form_screen.dart';
 export 'services/transaction_bottom_sheet_service.dart';
 
 // Models
-export 'models/transaction.dart';
 export 'models/payment_method.dart';
 export 'models/card.dart';
-export 'models/expense_category.dart';
+// export 'models/expense_category.dart'; // Deleted, remove export
 export 'models/recurring_frequency.dart';
 export 'models/transfer_model.dart'; 

@@ -7,6 +7,7 @@ import '../../core/providers/credit_card_provider.dart';
 import '../../core/events/card_events.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/app_page_scaffold.dart';
+import '../../shared/design_system/transaction_design_system.dart';
 import 'tabs/cash_tab.dart';
 import 'tabs/debit_cards_tab.dart';
 import 'tabs/credit_cards_tab.dart';
@@ -64,7 +65,7 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
     
     cardEvents.listen<CreditCardBalanceUpdated>((event) {
       if (mounted) {
-        final changeText = event.changeAmount > 0 ? '+${event.changeAmount.toStringAsFixed(2)}' : '${event.changeAmount.toStringAsFixed(2)}';
+        final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
         _showEventSnackBar('Kredi kartı bakiyesi güncellendi ($changeText ₺)', isSuccess: true);
       }
     });
@@ -90,7 +91,7 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
     
     cardEvents.listen<DebitCardBalanceUpdated>((event) {
       if (mounted) {
-        final changeText = event.changeAmount > 0 ? '+${event.changeAmount.toStringAsFixed(2)}' : '${event.changeAmount.toStringAsFixed(2)}';
+        final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
         _showEventSnackBar('Banka kartı bakiyesi güncellendi ($changeText ₺)', isSuccess: true);
       }
     });
@@ -98,7 +99,7 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
     // Cash account events
     cardEvents.listen<CashAccountUpdated>((event) {
       if (mounted) {
-        final changeText = event.changeAmount > 0 ? '+${event.changeAmount.toStringAsFixed(2)}' : '${event.changeAmount.toStringAsFixed(2)}';
+        final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
         _showEventSnackBar('Nakit bakiyesi güncellendi ($changeText ₺)', isSuccess: true);
       }
     });

@@ -9,6 +9,7 @@ import 'core/providers/debit_card_provider.dart';
 import 'core/providers/credit_card_provider.dart';
 import 'core/providers/unified_card_provider.dart';
 import 'core/providers/unified_provider_v2.dart';
+import 'core/providers/profile_provider.dart';
 import 'core/theme/light_theme.dart';
 import 'core/theme/dark_theme.dart';
 import 'core/supabase_client.dart';
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => ProfileProvider()),
         
         // Legacy providers (for backward compatibility)
         ChangeNotifierProvider(create: (context) => CashAccountProvider.instance),

@@ -9,6 +9,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/services/profile_image_service.dart';
 import '../../core/providers/unified_provider_v2.dart';
+import '../../core/providers/profile_provider.dart';
 import '../../shared/models/account_model.dart';
 import '../../shared/models/transaction_model_v2.dart';
 import '../../l10n/app_localizations.dart';
@@ -50,22 +51,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text(
-          'Profil Fotoğrafı',
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF8E8E93),
-          ),
-        ),
-        message: Text(
-          'Profil fotoğrafınızı nasıl eklemek istiyorsunuz?',
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF8E8E93),
-          ),
-        ),
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
             onPressed: () {
@@ -140,12 +125,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
 
         final imageFile = File(image.path);
-        await ProfileImageService.instance.uploadProfileImage(imageFile);
+        final newImageUrl = await ProfileImageService.instance.uploadProfileImage(imageFile);
 
         if (mounted) {
           setState(() {
             _isUploadingImage = false;
           });
+
+          // ProfileProvider'ı güncelle
+          final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+          await profileProvider.updateProfileImage(newImageUrl);
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -186,6 +175,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _isUploadingImage = false;
         });
 
+        // ProfileProvider'ı güncelle
+        final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+        await profileProvider.updateProfileImage(null);
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profil fotoğrafı silindi! ✅'),
@@ -214,20 +207,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final user = SupabaseService.instance.currentUser;
-    final userName = user?.userMetadata?['full_name'] as String? ?? l10n.defaultUserName;
-    final userEmail = user?.email ?? '';
+    
+    return Consumer<ProfileProvider>(
+      builder: (context, profileProvider, child) {
+        final userName = profileProvider.userName ?? l10n.defaultUserName;
+        final userEmail = profileProvider.userEmail ?? '';
+        final profileImageUrl = profileProvider.profileImageUrl;
 
-    return AppPageScaffold(
-      title: l10n.profile,
-        onRefresh: () async {
-          // TODO: Refresh profile data
-          await Future.delayed(const Duration(seconds: 1));
-        },
-      body: SliverList(
-        delegate: SliverChildListDelegate([
+        return AppPageScaffold(
+          title: l10n.profile,
+          onRefresh: () async {
+            await profileProvider.refresh();
+          },
+          body: SliverList(
+            delegate: SliverChildListDelegate([
               // Profile Header
-              _buildProfileHeader(context, l10n, userName, userEmail),
+              _buildProfileHeader(context, l10n, userName, userEmail, profileImageUrl),
               const SizedBox(height: 32),
               
               // Personal Information Section
@@ -384,14 +379,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Logout Button
               _buildLogoutButton(context, l10n),
               const SizedBox(height: 20),
-        ]),
-      ),
+            ]),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, AppLocalizations l10n, String userName, String userEmail) {
+  Widget _buildProfileHeader(BuildContext context, AppLocalizations l10n, String userName, String userEmail, String? profileImageUrl) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final profileImageUrl = ProfileImageService.instance.getProfileImageUrl();
     
     return Container(
       padding: const EdgeInsets.all(20),
@@ -526,6 +522,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
+            // ProfileProvider'ı temizle
+            final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+            profileProvider.clearProfile();
+            
             await SupabaseService.instance.signOut();
             if (context.mounted) {
               context.go('/onboarding');
@@ -587,7 +587,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.inter(fontSize: 16),
               ),
               trailing: themeProvider.currency == currency
-                ? const Icon(Icons.check, color: Color(0xFF10B981))
+                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
                 : null,
               onTap: () {
                 themeProvider.setCurrency(currency);
@@ -627,7 +627,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.inter(fontSize: 16),
               ),
               trailing: !themeProvider.isDarkMode
-                ? const Icon(Icons.check, color: Color(0xFF10B981))
+                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
                 : null,
               onTap: () {
                 if (themeProvider.isDarkMode) {
@@ -643,7 +643,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.inter(fontSize: 16),
               ),
               trailing: themeProvider.isDarkMode
-                ? const Icon(Icons.check, color: Color(0xFF10B981))
+                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
                 : null,
               onTap: () {
                 if (!themeProvider.isDarkMode) {
@@ -688,7 +688,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.inter(fontSize: 16),
               ),
               trailing: themeProvider.isTurkish
-                ? const Icon(Icons.check, color: Color(0xFF10B981))
+                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
                 : null,
               onTap: () {
                 if (!themeProvider.isTurkish) {
@@ -707,7 +707,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.inter(fontSize: 16),
               ),
               trailing: !themeProvider.isTurkish
-                ? const Icon(Icons.check, color: Color(0xFF10B981))
+                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
                 : null,
               onTap: () {
                 if (themeProvider.isTurkish) {

@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/widgets/installment_expandable_card.dart';
+import '../../../shared/services/category_icon_service.dart';
 
 class RecentTransactionsSection extends StatefulWidget {
   const RecentTransactionsSection({super.key});
@@ -165,6 +166,29 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
         ? providerV2.getCategoryById(transaction.categoryId!)
         : null;
 
+    // Get category icon using CategoryIconService
+    IconData? categoryIcon;
+    if (category?.icon != null) {
+      categoryIcon = CategoryIconService.getIcon(category!.icon);
+    } else if (transaction.categoryName != null) {
+      // Fallback to category name for icon lookup
+      categoryIcon = CategoryIconService.getIcon(transaction.categoryName!);
+    }
+
+    // Get category color using CategoryIconService
+    Color? categoryColor;
+    if (category?.color != null) {
+      categoryColor = CategoryIconService.getColor(category!.color);
+    } else if (category?.icon != null) {
+      // Use predefined colors based on category type and icon
+      final isIncomeCategory = transactionType == TransactionType.income;
+      categoryColor = CategoryIconService.getCategoryColor(
+        iconName: category!.icon,
+        colorHex: category.color,
+        isIncomeCategory: isIncomeCategory,
+      );
+    }
+
     // FALLBACK: Check if description contains installment pattern like (1/4)
     final hasInstallmentPattern = RegExp(r'\(\d+/\d+\)').hasMatch(transaction.description);
     final isActualInstallment = transaction.isInstallment || hasInstallmentPattern;
@@ -180,6 +204,16 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
 
     // Card name
     String cardName = transaction.sourceAccountName ?? 'Hesap';
+    
+    // For transfer transactions, show source → target
+    if (transactionType == TransactionType.transfer) {
+      final sourceAccount = transaction.sourceAccountName ?? 'Hesap';
+      final targetAccount = transaction.targetAccountName ?? 'Hesap';
+      cardName = TransactionDesignSystem.formatTransferSubtitle(sourceAccount, targetAccount);
+    } else {
+      // Shorten regular card names
+      cardName = TransactionDesignSystem.shortenAccountName(cardName);
+    }
 
     // Check if this should be displayed as an installment
     if (isActualInstallment) {
@@ -224,15 +258,15 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       );
     }
 
-    // Regular transaction
+    // Regular transaction - use new centralized color system
     return TransactionDesignSystem.buildTransactionItem(
       title: title,
       subtitle: cardName,
       amount: amount,
       time: time,
       type: transactionType,
-      categoryIcon: category?.icon,
-      categoryColor: category?.color,
+      categoryIconData: categoryIcon,      // Use direct IconData
+      categoryColorData: categoryColor,    // Use direct Color
       isDark: isDark,
       isFirst: isFirst,
       isLast: isLast,

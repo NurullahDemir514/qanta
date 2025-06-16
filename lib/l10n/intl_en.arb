@@ -658,6 +658,10 @@
   "@savingsAccount": {
     "description": "Savings account type"
   },
+  "cashAccount": "Cash Account",
+  "@cashAccount": {
+    "description": "Cash account type"
+  },
   "monthlySummary": "Monthly Summary",
   "@monthlySummary": {
     "description": "Monthly summary section title"

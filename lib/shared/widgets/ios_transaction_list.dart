@@ -179,7 +179,7 @@ class IOSTransactionList extends StatelessWidget {
 
   String _formatCardTransactionAmount(pcm.CardTransactionModel transaction) {
     final amount = transaction.amount.abs();
-    final formattedAmount = amount.toStringAsFixed(2);
+    final formattedAmount = TransactionDesignSystem.formatNumber(amount);
     
     if (transaction.isIncome) {
       return '+$formattedAmount₺';
@@ -325,27 +325,21 @@ class _IOSTransactionListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine transaction type based on amount
-    TransactionType transactionType;
-    if (transaction.amount.startsWith('+')) {
-      transactionType = TransactionType.income;
-    } else if (transaction.amount.startsWith('-')) {
-      transactionType = TransactionType.expense;
-    } else {
-      transactionType = TransactionType.transfer;
-    }
-
-    return TransactionDesignSystem.buildTransactionItem(
+    // Use the new TransactionDesignSystem method that supports specific icons
+    return TransactionDesignSystem.buildTransactionItemWithIcon(
       title: transaction.title,
       subtitle: transaction.subtitle,
       amount: transaction.amount,
       time: transaction.time,
-      type: transactionType,
       isDark: isDark,
-      isFirst: isFirst,
-      isLast: isLast,
+      specificIcon: transaction.icon,
+      specificIconColor: transaction.iconColor,
+      specificBackgroundColor: transaction.iconBackgroundColor,
+      specificAmountColor: transaction.amountColor,
       onTap: transaction.onTap,
       onLongPress: transaction.onLongPress,
+      isFirst: isFirst,
+      isLast: isLast,
     );
   }
 }
@@ -414,7 +408,7 @@ class IOSTransactionItem {
       subtitle: subtitle,
       amount: '+$amount',
       time: time,
-      icon: icon ?? Icons.arrow_downward_outlined,
+      icon: icon ?? Icons.trending_up_rounded,
       iconColor: incomeColor,
       iconBackgroundColor: incomeColor.withValues(alpha: 0.1),
       amountColor: incomeColor,
@@ -440,7 +434,7 @@ class IOSTransactionItem {
       subtitle: subtitle,
       amount: '-$amount',
       time: time,
-      icon: icon ?? Icons.arrow_upward_outlined,
+      icon: icon ?? Icons.trending_down_rounded,
       iconColor: expenseColor,
       iconBackgroundColor: expenseColor.withValues(alpha: 0.1),
       amountColor: expenseColor,

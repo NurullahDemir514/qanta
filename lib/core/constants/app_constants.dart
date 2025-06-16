@@ -4,10 +4,10 @@ class AppConstants {
   // App Info
   static const String appName = 'Qanta';
   static const String appVersion = '1.0.0';
-  static const String appDescription = 'Your Personal Finance Companion';
+  static const String appDescription = 'Personal Finance Management App';
 
-  // Colors (Updated to match new theme)
-  static const Color primaryColor = Color(0xFF10B981);
+  // Colors
+  static const Color primaryColor = Color(0xFF6D6D70);
   static const Color secondaryColor = Color(0xFF34D399);
   static const Color primaryLightColor = Color(0xFFF7F8FA);
   static const Color successColor = Color(0xFF4CAF50);
@@ -74,11 +74,11 @@ class AppConstants {
 
   // Card Dimensions
   static const double cardWidth = 320.0;
-  static const double cardHeight = 180.0;
+  static const double cardHeight = 200.0;
   static const double cardAspectRatio = cardWidth / cardHeight; // 16:9 ratio
   static const double miniCardWidth = 200.0;
   static const double miniCardHeight = 125.0;
-  static const double cardBorderRadius = 12.0;
+  static const double cardBorderRadius = 16.0;
   static const double cardPadding = 18.0;
   
   // Card Section
@@ -100,7 +100,7 @@ class AppConstants {
         Color(0xFF2d2d2d),
         Color(0xFF1a1a1a),
       ],
-      'accentColor': Color(0xFF10B981),
+      'accentColor': Color(0xFF6D6D70),
     },
     'credit': {
       'gradientColors': [
@@ -114,10 +114,10 @@ class AppConstants {
       'gradientColors': [
         Color(0xFF064E3B),
         Color(0xFF059669),
-        Color(0xFF10B981),
+        Color(0xFF6D6D70),
         Color(0xFF34D399),
       ],
-      'accentColor': Color(0xFF10B981),
+      'accentColor': Color(0xFF6D6D70),
     },
   };
 
@@ -408,14 +408,14 @@ class AppConstants {
   static const Map<String, IconData> categoryIcons = {
     'salary': Icons.work,
     'freelance': Icons.laptop,
-    'investment': Icons.trending_up,
+    'investment': Icons.trending_up_rounded,
     'business': Icons.business,
     'gift': Icons.card_giftcard,
     'food': Icons.restaurant,
     'transport': Icons.directions_car,
     'shopping': Icons.shopping_bag,
     'entertainment': Icons.movie,
-    'bills': Icons.receipt,
+    'bills': Icons.receipt_long_rounded,
     'healthcare': Icons.local_hospital,
     'education': Icons.school,
     'travel': Icons.flight,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../services/category_icon_service.dart';
 
 /// **QANTA Transaction Design System**
@@ -51,12 +52,72 @@ class TransactionDesignSystem {
   static const Duration tapAnimationDuration = Duration(milliseconds: 150);
   static const Duration longPressAnimationDuration = Duration(milliseconds: 200);
   
+  // ==================== NUMBER FORMATTING ====================
+  
+  /// Turkish number formatter with thousand separators
+  static final NumberFormat _turkishNumberFormat = NumberFormat('#,##0.00', 'tr_TR');
+  
+  /// Format number with Turkish thousand separators (dots)
+  static String formatNumber(double number) {
+    return _turkishNumberFormat.format(number).replaceAll(',', '.');
+  }
+  
+  /// Shorten long account names for better display
+  static String shortenAccountName(String accountName, {int maxLength = 15}) {
+    if (accountName.length <= maxLength) {
+      return accountName;
+    }
+    
+    // Common bank name replacements for shorter display
+    final bankReplacements = {
+      'Türkiye İş Bankası': 'İş Bankası',
+      'Türkiye Garanti Bankası': 'Garanti',
+      'Akbank T.A.Ş.': 'Akbank',
+      'Yapı ve Kredi Bankası': 'Yapı Kredi',
+      'Türkiye Halk Bankası': 'Halkbank',
+      'Türkiye Vakıflar Bankası': 'VakıfBank',
+      'Ziraat Bankası': 'Ziraat',
+      'QNB Finansbank': 'Finansbank',
+      'İNG Bank': 'ING',
+      'HSBC Bank': 'HSBC',
+      'Denizbank': 'Denizbank',
+      'Türk Ekonomi Bankası': 'TEB',
+      'Şekerbank': 'Şekerbank',
+    };
+    
+    // Try bank name replacements first
+    for (final entry in bankReplacements.entries) {
+      if (accountName.contains(entry.key)) {
+        final shortened = accountName.replaceAll(entry.key, entry.value);
+        if (shortened.length <= maxLength) {
+          return shortened;
+        }
+      }
+    }
+    
+    // If still too long, truncate with ellipsis
+    return '${accountName.substring(0, maxLength - 1)}…';
+  }
+  
+  /// Format transfer subtitle with shortened account names
+  static String formatTransferSubtitle(String sourceAccount, String targetAccount, {int maxLength = 12}) {
+    final shortSource = shortenAccountName(sourceAccount, maxLength: maxLength);
+    final shortTarget = shortenAccountName(targetAccount, maxLength: maxLength);
+    return '$shortSource → $shortTarget';
+  }
+  
   // ==================== COLOR SYSTEM ====================
   
-  /// Transaction Type Colors
-  static const Color incomeColor = Color(0xFF34C759);
-  static const Color expenseColor = Color(0xFFFF3B30);
-  static const Color transferColor = Color(0xFF007AFF);
+  /// **CENTRALIZED COLOR SYSTEM**
+  /// 
+  /// All colors now managed through CategoryIconService for consistency.
+  /// This eliminates duplicate color definitions and ensures uniform
+  /// color usage across the entire application.
+  
+  /// Transaction Type Colors - delegated to CategoryIconService
+  static Color get incomeColor => CategoryIconService.getColorFromMap('income_default');
+  static Color get expenseColor => CategoryIconService.getColorFromMap('expense_default');
+  static Color get transferColor => CategoryIconService.getColorFromMap('transfer_default');
   
   /// Theme Colors
   static Color getContainerColor(bool isDark) {
@@ -80,7 +141,7 @@ class TransactionDesignSystem {
       case TransactionType.income:
         return incomeColor;
       case TransactionType.expense:
-        return isDark ? Colors.white : Colors.black;
+        return const Color(0xFFFF3B30); // Red color for expenses
       case TransactionType.transfer:
         return transferColor;
     }
@@ -100,31 +161,43 @@ class TransactionDesignSystem {
     }
   }
   
-  /// Get category icon from icon name
+  /// Get category icon from icon name - delegated to CategoryIconService
   static IconData getCategoryIcon(String iconName) {
     return CategoryIconService.getIcon(iconName);
   }
   
-  /// Get category color from hex string
+  /// Get category color from hex string - delegated to CategoryIconService
   static Color getCategoryColor(String colorHex) {
     return CategoryIconService.getColor(colorHex);
   }
   
-  /// Get transaction icon and color
+  /// Get transaction icon and color using centralized system
   static TransactionIconData getTransactionIconData({
     required TransactionType type,
     String? categoryIcon,
     String? categoryColor,
+    IconData? categoryIconData,
+    Color? categoryColorData,
   }) {
     IconData icon;
     Color iconColor;
     
-    if (categoryIcon != null) {
-      // Use category icon and color
+    // Prioritize direct IconData/Color parameters (new system)
+    if (categoryIconData != null) {
+      icon = categoryIconData;
+      iconColor = categoryColorData ?? _getDefaultColorForType(type);
+    } else if (categoryIcon != null) {
+      // Use category icon and centralized color system (legacy support)
       icon = getCategoryIcon(categoryIcon);
-      iconColor = categoryColor != null 
-          ? getCategoryColor(categoryColor)
-          : _getDefaultColorForType(type);
+      
+      if (categoryColor != null) {
+        // Use provided color (hex or predefined)
+        iconColor = getCategoryColor(categoryColor);
+      } else {
+        // Use centralized color based on category type
+        final categoryType = type == TransactionType.income ? 'income' : 'expense';
+        iconColor = CategoryIconService.getColorFromMap(categoryIcon, categoryType: categoryType);
+      }
     } else {
       // Use transaction type icon and color
       icon = getTransactionTypeIcon(type);
@@ -153,7 +226,7 @@ class TransactionDesignSystem {
   
   /// Format transaction amount
   static String formatAmount(double amount, TransactionType type) {
-    final formattedAmount = amount.abs().toStringAsFixed(2);
+    final formattedAmount = formatNumber(amount.abs());
     
     switch (type) {
       case TransactionType.income:
@@ -201,25 +274,37 @@ class TransactionDesignSystem {
     String? time,
     String? categoryIcon,
     String? categoryColor,
+    IconData? categoryIconData,
+    Color? categoryColorData,
     VoidCallback? onTap,
     VoidCallback? onLongPress,
     bool isFirst = false,
     bool isLast = false,
   }) {
-    final iconData = getTransactionIconData(
-      type: type,
-      categoryIcon: categoryIcon,
-      categoryColor: categoryColor,
-    );
+    IconData icon;
+    Color iconColor;
+    
+    if (categoryIconData != null) {
+      icon = categoryIconData;
+      iconColor = categoryColorData ?? _getDefaultColorForType(type);
+    } else if (categoryIcon != null) {
+      icon = getCategoryIcon(categoryIcon);
+      iconColor = categoryColor != null 
+          ? getCategoryColor(categoryColor)
+          : _getDefaultColorForType(type);
+    } else {
+      icon = getTransactionTypeIcon(type);
+      iconColor = _getDefaultColorForType(type);
+    }
     
     return TransactionItem(
       title: title,
       subtitle: subtitle,
       amount: amount,
       time: time,
-      icon: iconData.icon,
-      iconColor: iconData.iconColor,
-      backgroundColor: iconData.backgroundColor,
+      icon: icon,
+      iconColor: iconColor,
+      backgroundColor: iconColor.withValues(alpha: 0.1),
       amountColor: getAmountColor(type, isDark),
       isDark: isDark,
       onTap: onTap,
@@ -260,6 +345,39 @@ class TransactionDesignSystem {
     return TransactionLoadingSkeleton(
       isDark: isDark,
       itemCount: itemCount,
+    );
+  }
+  
+  /// Build transaction item with specific icon override
+  static Widget buildTransactionItemWithIcon({
+    required String title,
+    required String subtitle,
+    required String amount,
+    required bool isDark,
+    String? time,
+    IconData? specificIcon,
+    Color? specificIconColor,
+    Color? specificBackgroundColor,
+    Color? specificAmountColor,
+    VoidCallback? onTap,
+    VoidCallback? onLongPress,
+    bool isFirst = false,
+    bool isLast = false,
+  }) {
+    return TransactionItem(
+      title: title,
+      subtitle: subtitle,
+      amount: amount,
+      time: time,
+      icon: specificIcon ?? Icons.receipt_outlined,
+      iconColor: specificIconColor ?? const Color(0xFF6B7280),
+      backgroundColor: specificBackgroundColor ?? const Color(0xFF6B7280).withValues(alpha: 0.1),
+      amountColor: specificAmountColor ?? getTitleColor(isDark),
+      isDark: isDark,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      isFirst: isFirst,
+      isLast: isLast,
     );
   }
 }

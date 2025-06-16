@@ -1,15 +1,15 @@
--- Fix installment transaction linking
+-- Fix installment transaction time handling
 -- 
--- The current create_installment_transaction function creates the first transaction
--- but doesn't set the installment_id, so transactions don't show up as installments
--- in the transaction_summary view.
+-- ISSUE: Time information is lost when creating installment transactions
+-- because the create_installment_transaction function only accepts DATE
+-- instead of TIMESTAMP WITH TIME ZONE, and doesn't set transaction_date
+-- when creating the first installment transaction.
 -- 
--- ALSO FIX: Time information is lost when creating installment transactions
--- because we only pass DATE instead of TIMESTAMP WITH TIME ZONE
+-- SOLUTION: Update functions to accept and preserve full timestamp information
 
 BEGIN;
 
--- Drop and recreate the create_installment_transaction function with proper linking AND time support
+-- Update create_installment_transaction function to handle timestamps properly
 CREATE OR REPLACE FUNCTION create_installment_transaction(
     p_source_account_id UUID,
     p_total_amount DECIMAL(15,2),
@@ -61,7 +61,7 @@ BEGIN
     v_current_date := p_start_date::DATE;
     FOR i IN 1..p_count LOOP
         INSERT INTO installment_details (
-            installment_transaction_id, installment_number,
+            installment_transaction_id, installment_number, 
             due_date, amount
         ) VALUES (
             v_installment_id, i, v_current_date, v_monthly_amount
@@ -76,7 +76,7 @@ BEGIN
         user_id, type, amount, description, source_account_id, 
         category_id, installment_id, notes, transaction_date  -- Added transaction_date
     ) VALUES (
-        v_user_id, 'expense', v_monthly_amount,
+        v_user_id, 'expense', v_monthly_amount, 
         p_description || ' (1/' || p_count || ')',
         p_source_account_id, p_category_id, v_installment_id,
         'First installment payment', p_start_date  -- Use the provided timestamp
@@ -87,7 +87,7 @@ BEGIN
     SET is_paid = true, 
         paid_date = p_start_date,  -- Use the provided timestamp for paid_date too
         transaction_id = v_first_transaction_id
-    WHERE installment_transaction_id = v_installment_id
+    WHERE installment_transaction_id = v_installment_id 
     AND installment_number = 1;
     
     -- Update account balance
@@ -97,7 +97,7 @@ BEGIN
 END;
 $$;
 
--- Also fix the pay_installment function to set installment_id AND preserve time
+-- Update pay_installment function to preserve time information
 CREATE OR REPLACE FUNCTION pay_installment(
     p_installment_detail_id UUID,
     p_payment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -136,7 +136,7 @@ BEGIN
     
     -- Create payment transaction WITH installment_id link AND preserve time
     INSERT INTO transactions (
-        user_id, type, amount, description, source_account_id,
+        user_id, type, amount, description, source_account_id, 
         category_id, installment_id, notes, transaction_date  -- Added transaction_date
     ) VALUES (
         v_user_id, 'expense', v_detail.amount,
@@ -149,8 +149,8 @@ BEGIN
     PERFORM update_account_balance(v_detail.source_account_id, v_detail.amount, 'subtract');
     
     -- Mark installment as paid with the provided timestamp
-    UPDATE installment_details
-    SET is_paid = true,
+    UPDATE installment_details 
+    SET is_paid = true, 
         paid_date = p_payment_date,  -- Use the provided timestamp
         transaction_id = v_transaction_id,
         updated_at = NOW()
@@ -160,4 +160,4 @@ BEGIN
 END;
 $$;
 
-COMMIT;
+COMMIT; 

@@ -6,6 +6,8 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
+import '../../../shared/widgets/installment_expandable_card.dart';
+import '../../../shared/services/category_icon_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CardTransactionSection extends StatefulWidget {
@@ -152,8 +154,23 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
         ? providerV2.getCategoryById(transaction.categoryId!)
         : null;
 
+    // FALLBACK: Check if description contains installment pattern like (1/4)
+    final hasInstallmentPattern = RegExp(r'\(\d+/\d+\)').hasMatch(transaction.description);
+    final isActualInstallment = transaction.isInstallment || hasInstallmentPattern;
+
     // Build title - sadece description göster (kategori adı gereksiz)
     String title = transaction.categoryName ?? transaction.description;
+    
+    // Card name - for transfers, show source → target
+    String cardName = widget.cardName;
+    if (transactionType == TransactionType.transfer) {
+      final sourceAccount = transaction.sourceAccountName ?? 'Hesap';
+      final targetAccount = transaction.targetAccountName ?? 'Hesap';
+      cardName = TransactionDesignSystem.formatTransferSubtitle(sourceAccount, targetAccount);
+    } else {
+      // Shorten regular card names
+      cardName = TransactionDesignSystem.shortenAccountName(cardName);
+    }
 
     // Format amount
     final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
@@ -161,9 +178,52 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     // Format time
     final time = TransactionDesignSystem.formatTime(transaction.transactionDate);
 
+    // Check if this should be displayed as an installment
+    if (isActualInstallment) {
+      // Extract installment info from pattern if available
+      Map<String, int?>? installmentInfo;
+      if (hasInstallmentPattern) {
+        final match = RegExp(r'\((\d+)/(\d+)\)').firstMatch(transaction.description);
+        if (match != null) {
+          installmentInfo = {
+            'currentInstallment': int.tryParse(match.group(1)!),
+            'totalInstallments': int.tryParse(match.group(2)!),
+          };
+        }
+      }
+
+      // Get installment count for title
+      final totalInstallments = installmentInfo?['totalInstallments'];
+      final installmentSuffix = totalInstallments != null ? ' ($totalInstallments Taksit)' : ' (Taksitli)';
+
+      // Remove installment pattern from title for cleaner display
+      final cleanTitle = title.replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '');
+
+      return InstallmentExpandableCard(
+        installmentId: transaction.installmentId, // This might be null for fallback cases
+        title: '$cleanTitle$installmentSuffix',
+        subtitle: cardName,
+        amount: amount,
+        time: time,
+        type: transactionType,
+        categoryIcon: category?.icon,
+        categoryColor: category?.color,
+        isDark: isDark,
+        isFirst: isFirst,
+        isLast: isLast,
+        currentInstallment: installmentInfo?['currentInstallment'],
+        totalInstallments: installmentInfo?['totalInstallments'],
+        onLongPress: () {
+          print('🔍 Long press detected on installment transaction: ${transaction.description}');
+          HapticFeedback.mediumImpact();
+          _showInstallmentDeleteActionSheet(context, transaction, installmentInfo);
+        },
+      );
+    }
+
     return TransactionDesignSystem.buildTransactionItem(
       title: title,
-      subtitle: widget.cardName,
+      subtitle: cardName,
       amount: amount,
       time: time,
       type: transactionType,
@@ -252,6 +312,94 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       
     } catch (e) {
       // Hata mesajı göster
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('İşlem silinirken hata oluştu: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Show installment delete action sheet
+  void _showInstallmentDeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction, Map<String, int?>? installmentInfo) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(
+          'Taksitli İşlemi Sil',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
+          ),
+        ),
+        message: Text(
+          '${transaction.description} taksitli işlemini tamamen silmek istediğinizden emin misiniz? Bu işlem tüm taksitleri silecektir.',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
+          ),
+        ),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteInstallmentTransaction(context, transaction);
+            },
+            child: Text(
+              'Sil',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(
+            'İptal',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Delete installment transaction
+  Future<void> _deleteInstallmentTransaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) async {
+    try {
+      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+      debugPrint('🗑️ CardTransactionSection: Deleting installment transaction: ${transaction.id}');
+
+      // Use enhanced installment deletion that refunds total amount
+      await providerV2.deleteInstallmentTransaction(transaction.id);
+
+      debugPrint('✅ CardTransactionSection: Installment transaction deleted successfully');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Taksitli işlem başarıyla silindi'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ CardTransactionSection: Error deleting installment transaction: $e');
+      
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

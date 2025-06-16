@@ -674,6 +674,10 @@
   "@savingsAccount": {
     "description": "Savings account type"
   },
+  "cashAccount": "Nakit Hesap",
+  "@cashAccount": {
+    "description": "Cash account type"
+  },
   "monthlySummary": "Bu Ay Özeti",
   "@monthlySummary": {
     "description": "Monthly summary section title"

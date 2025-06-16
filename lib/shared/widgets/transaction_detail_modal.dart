@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
 import '../models/payment_card_model.dart';
 import '../utils/currency_utils.dart';
+import '../design_system/transaction_design_system.dart';
 
 class TransactionDetailModal extends StatelessWidget {
   final CardTransactionModel transaction;
@@ -372,21 +373,8 @@ class TransactionDetailModal extends StatelessWidget {
   }
 
   String _formatCurrency(double amount) {
-    // Binlik ayırıcı ile formatlama
-    final parts = amount.toStringAsFixed(2).split('.');
-    final integerPart = parts[0];
-    final decimalPart = parts[1];
-    
-    // Binlik ayırıcı ekleme
-    String formattedInteger = '';
-    for (int i = 0; i < integerPart.length; i++) {
-      if (i > 0 && (integerPart.length - i) % 3 == 0) {
-        formattedInteger += '.';
-      }
-      formattedInteger += integerPart[i];
-    }
-    
-    return '$formattedInteger,$decimalPart₺';
+    // TransactionDesignSystem'den binlik ayırıcı ile formatlama
+    return TransactionDesignSystem.formatNumber(amount) + '₺';
   }
 
   // Para birimi için güvenli formatlama

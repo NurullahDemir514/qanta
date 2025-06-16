@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/services/installment_service_v2.dart';
 import '../../shared/models/installment_models_v2.dart';
 import '../design_system/transaction_design_system.dart';
+import '../services/category_icon_service.dart';
 
 class InstallmentExpandableCard extends StatefulWidget {
   final String? installmentId;
@@ -156,10 +157,30 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
 
   @override
   Widget build(BuildContext context) {
+    // Get category icon using CategoryIconService
+    IconData? categoryIconData;
+    if (widget.categoryIcon != null) {
+      categoryIconData = CategoryIconService.getIcon(widget.categoryIcon!);
+    }
+
+    // Get category color using CategoryIconService
+    Color? categoryColorData;
+    if (widget.categoryColor != null) {
+      categoryColorData = CategoryIconService.getColor(widget.categoryColor!);
+    } else if (widget.categoryIcon != null) {
+      // Use predefined colors based on category type and icon
+      final isIncomeCategory = widget.type == TransactionType.income;
+      categoryColorData = CategoryIconService.getCategoryColor(
+        iconName: widget.categoryIcon!,
+        colorHex: widget.categoryColor,
+        isIncomeCategory: isIncomeCategory,
+      );
+    }
+
     final iconData = TransactionDesignSystem.getTransactionIconData(
       type: widget.type,
-      categoryIcon: widget.categoryIcon,
-      categoryColor: widget.categoryColor,
+      categoryIconData: categoryIconData,
+      categoryColorData: categoryColorData,
     );
 
     return Padding(
@@ -235,16 +256,6 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                         color: TransactionDesignSystem.getAmountColor(widget.type, widget.isDark),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    AnimatedRotation(
-                      turns: _isExpanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 300),
-                      child: Icon(
-                        Icons.keyboard_arrow_down,
-                        color: TransactionDesignSystem.getSubtitleColor(widget.isDark),
-                        size: 20,
-                      ),
-                    ),
                   ],
                 ),
               ],
@@ -282,13 +293,17 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
       );
     }
 
+    // Sort installments by installment number (ascending order: 1, 2, 3, 4...)
+    final sortedDetails = List<InstallmentDetailModel>.from(_installmentDetails!)
+      ..sort((a, b) => a.installmentNumber.compareTo(b.installmentNumber));
+
     return Padding(
       padding: const EdgeInsets.only(top: 12, left: 52), // Align with content
       child: Column(
-        children: _installmentDetails!.asMap().entries.map((entry) {
+        children: sortedDetails.asMap().entries.map((entry) {
           final index = entry.key;
           final detail = entry.value;
-          final isLast = index == _installmentDetails!.length - 1;
+          final isLast = index == sortedDetails.length - 1;
           
           return _buildInstallmentDetailRow(detail, isLast);
         }).toList(),
@@ -303,47 +318,25 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
     
     Color statusColor;
     IconData statusIcon;
-    String statusText;
     
     if (isPaid) {
       statusColor = const Color(0xFF34C759); // Green
       statusIcon = Icons.check_circle;
-      statusText = 'Ödendi';
     } else if (isOverdue) {
       statusColor = const Color(0xFFFF3B30); // Red
       statusIcon = Icons.error;
-      statusText = 'Gecikmiş';
     } else if (isDueSoon) {
       statusColor = const Color(0xFFFF9500); // Orange
       statusIcon = Icons.warning;
-      statusText = 'Yaklaşıyor';
     } else {
       statusColor = TransactionDesignSystem.getSubtitleColor(widget.isDark);
       statusIcon = Icons.schedule;
-      statusText = 'Bekliyor';
     }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          // Tree line indicator
-          Container(
-            width: 2,
-            height: 24,
-            color: isLast 
-                ? Colors.transparent 
-                : TransactionDesignSystem.getBorderColor(widget.isDark),
-          ),
-          
-          Container(
-            width: 8,
-            height: 2,
-            color: TransactionDesignSystem.getBorderColor(widget.isDark),
-          ),
-          
-          const SizedBox(width: 8),
-          
           // Status icon
           Icon(
             statusIcon,
@@ -351,12 +344,12 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
             color: statusColor,
           ),
           
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           
-          // Installment info
+          // Installment info - removed status text
           Expanded(
             child: Text(
-              '${detail.installmentNumber}. Taksit (${_formatDate(detail.dueDate)}) • $statusText',
+              '${detail.installmentNumber}. Taksit - ${_formatDate(detail.dueDate)}',
               style: GoogleFonts.inter(
                 fontSize: 13,
                 color: TransactionDesignSystem.getSubtitleColor(widget.isDark),
@@ -420,6 +413,11 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
   }
 
   String _formatDate(DateTime date) {
+    const monthNames = [
+      'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+      'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
+    ];
+    
     final now = DateTime.now();
     final difference = date.difference(now).inDays;
     
@@ -427,10 +425,8 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
       return 'Bugün';
     } else if (difference == 1) {
       return 'Yarın';
-    } else if (difference < 7) {
-      return '${difference} gün';
     } else {
-      return '${date.day}/${date.month}';
+      return '${date.day} ${monthNames[date.month - 1]}';
     }
   }
 } 

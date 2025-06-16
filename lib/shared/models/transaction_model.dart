@@ -50,11 +50,11 @@ extension TransactionTypeExtension on TransactionType {
   IconData get icon {
     switch (this) {
       case TransactionType.income:
-        return Icons.add_circle_outline;
+        return Icons.trending_up_rounded;
       case TransactionType.expense:
-        return Icons.remove_circle_outline;
+        return Icons.trending_down_rounded;
       case TransactionType.transfer:
-        return Icons.compare_arrows_rounded;
+        return Icons.swap_horiz_rounded;
     }
   }
 
@@ -85,71 +85,6 @@ enum CardType {
   credit,
   debit,
   cash,
-}
-
-enum TransactionCategory {
-  // Income categories
-  salary,
-  freelance,
-  business,
-  gift,
-  other,
-  
-  // Expense categories
-  food,
-  transport,
-  shopping,
-  entertainment,
-  bills,
-  healthcare,
-  education,
-  travel,
-  housing,
-  insurance;
-
-  String get displayName {
-    switch (this) {
-      case TransactionCategory.salary:
-        return 'Salary';
-      case TransactionCategory.freelance:
-        return 'Freelance';
-      case TransactionCategory.business:
-        return 'Business';
-      case TransactionCategory.gift:
-        return 'Gift';
-      case TransactionCategory.food:
-        return 'Food & Dining';
-      case TransactionCategory.transport:
-        return 'Transportation';
-      case TransactionCategory.shopping:
-        return 'Shopping';
-      case TransactionCategory.entertainment:
-        return 'Entertainment';
-      case TransactionCategory.bills:
-        return 'Bills & Utilities';
-      case TransactionCategory.healthcare:
-        return 'Healthcare';
-      case TransactionCategory.education:
-        return 'Education';
-      case TransactionCategory.travel:
-        return 'Travel';
-      case TransactionCategory.housing:
-        return 'Housing';
-      case TransactionCategory.insurance:
-        return 'Insurance';
-      case TransactionCategory.other:
-        return 'Other';
-    }
-  }
-
-  bool get isIncomeCategory {
-    return [
-      TransactionCategory.salary,
-      TransactionCategory.freelance,
-      TransactionCategory.business,
-      TransactionCategory.gift,
-    ].contains(this);
-  }
 }
 
 class TransactionModel {

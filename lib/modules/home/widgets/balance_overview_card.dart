@@ -34,7 +34,7 @@ class BalanceOverviewCard extends StatelessWidget {
         }
 
         return GestureDetector(
-          onTap: () => BalanceDetailBottomSheet.show(context, themeProvider, l10n, isDark),
+          onTap: () => BalanceDetailBottomSheet.show(context),
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(

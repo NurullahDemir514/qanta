@@ -299,13 +299,13 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                 children: [
                   // Credit Card Option
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildCardOption(
-                      context: context,
-                      card: paymentCard,
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildCardOption(
+                  context: context,
+                  card: paymentCard,
                       isSelected: isSelected || isSelectedForInstallments,
-                      onTap: () {
-                        HapticFeedback.selectionClick();
+                  onTap: () {
+                    HapticFeedback.selectionClick();
                         setState(() {
                           _selectedCreditCard = paymentCard;
                           _selectedInstallments = null;
@@ -469,22 +469,22 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                             ? color
                             : (isDark ? Colors.white : Colors.black),
                           letterSpacing: -0.2,
-                        ),
-                      ),
-                      if (balance != null) ...[
-                        const Spacer(),
-                        Text(
-                          _formatCurrency(balance),
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark 
-                              ? const Color(0xFF8E8E93)
-                              : const Color(0xFF6D6D70),
-                            letterSpacing: -0.1,
+                            ),
                           ),
-                        ),
-                      ],
+                          if (balance != null) ...[
+                            const Spacer(),
+                            Text(
+                              _formatCurrency(balance),
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: isDark 
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ],
                     ],
                   ),
                 ),
@@ -560,19 +560,19 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                         ),
                       ),
                       if (balance != null) ...[
-                        const Spacer(),
-                        Text(
-                          _formatCurrency(balance),
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark 
-                              ? const Color(0xFF8E8E93)
-                              : const Color(0xFF6D6D70),
-                            letterSpacing: -0.1,
-                          ),
-                        ),
-                      ],
+                          const Spacer(),
+                            Text(
+                              _formatCurrency(balance),
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: isDark 
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ],
                     ],
                   ),
                 ),
@@ -583,7 +583,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
       ),
     );
   }
-
+  
   CashAccount _convertAccountToCashAccount(AccountModel account) {
     return CashAccount(
       id: account.id,

@@ -1,13 +1,26 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../shared/models/income_category_model.dart';
+import '../../shared/models/category_model.dart';
+import '../../shared/models/unified_category_model.dart';
 import '../../shared/models/income_stats_model.dart';
 import 'supabase_service.dart';
+import 'category_service_v2.dart';
 
 class IncomeService {
   static final _supabase = SupabaseService.instance.client;
 
-  // Gelir kategorilerini getir
-  static Future<List<IncomeCategoryModel>> getIncomeCategories({
+  // Gelir kategorilerini getir (V2 sistem kullanarak)
+  static Future<List<CategoryModel>> getIncomeCategories({
+    String language = 'tr',
+  }) async {
+    try {
+      return await CategoryServiceV2.getIncomeCategories();
+    } catch (e) {
+      throw Exception('Gelir kategorileri yüklenirken hata oluştu: $e');
+    }
+  }
+
+  // Unified kategori sistemi ile gelir kategorileri
+  static Future<List<UnifiedCategoryModel>> getUnifiedIncomeCategories({
     String language = 'tr',
   }) async {
     try {
@@ -16,7 +29,10 @@ class IncomeService {
       });
 
       return (response as List)
-          .map((json) => IncomeCategoryModel.fromJson(json))
+          .map((json) => UnifiedCategoryModel.fromJson({
+                ...json,
+                'category_type': 'income',
+              }))
           .toList();
     } catch (e) {
       throw Exception('Gelir kategorileri yüklenirken hata oluştu: $e');

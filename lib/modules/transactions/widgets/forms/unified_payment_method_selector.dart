@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import '../../../../core/providers/unified_card_provider.dart';
 import '../../../../shared/models/transaction_model.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/providers/unified_provider_v2.dart';
+import '../../../../shared/models/payment_card_model.dart';
+import '../../../../shared/design_system/transaction_design_system.dart';
 
 class UnifiedPaymentMethodSelector extends StatefulWidget {
   final Map<String, dynamic>? selectedCard;
@@ -330,7 +333,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
                           if (balance != null) ...[
                             const Spacer(),
                             Text(
-                              '₺${balance.toStringAsFixed(2)}',
+                              TransactionDesignSystem.formatNumber(balance),
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,

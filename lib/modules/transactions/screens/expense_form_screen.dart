@@ -7,7 +7,6 @@ import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/models/category_model.dart';
 import '../../../core/services/category_service_v2.dart';
 import '../../../shared/widgets/insufficient_funds_dialog.dart';
-import '../models/expense_category.dart';
 import '../models/payment_method.dart';
 import '../widgets/forms/base_transaction_form.dart';
 import '../widgets/forms/calculator_input_field.dart';

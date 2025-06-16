@@ -234,22 +234,22 @@ class _IncomePaymentMethodSelectorState extends State<IncomePaymentMethodSelecto
                             ? color
                             : (isDark ? Colors.white : Colors.black),
                           letterSpacing: -0.2,
-                        ),
-                      ),
-                      if (balance != null) ...[
-                        const Spacer(),
-                        Text(
-                          _formatCurrency(balance),
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark 
-                              ? const Color(0xFF8E8E93)
-                              : const Color(0xFF6D6D70),
-                            letterSpacing: -0.1,
+                            ),
                           ),
-                        ),
-                      ],
+                          if (balance != null) ...[
+                            const Spacer(),
+                            Text(
+                              _formatCurrency(balance),
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: isDark 
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ],
                     ],
                   ),
                 ),
@@ -322,23 +322,23 @@ class _IncomePaymentMethodSelectorState extends State<IncomePaymentMethodSelecto
                             ? card.color
                             : (isDark ? Colors.white : Colors.black),
                           letterSpacing: -0.2,
-                        ),
-                      ),
-                      const Spacer(),
-                      // Bakiye gösterimi - UnifiedCardProvider'dan gelen balance bilgisi
-                      if (balance != null) ...[
-                        Text(
-                          _formatCurrency(balance),
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark 
-                              ? const Color(0xFF8E8E93)
-                              : const Color(0xFF6D6D70),
-                            letterSpacing: -0.1,
+                            ),
                           ),
-                        ),
-                      ],
+                          const Spacer(),
+                          // Bakiye gösterimi - UnifiedCardProvider'dan gelen balance bilgisi
+                          if (balance != null) ...[
+                            Text(
+                              _formatCurrency(balance),
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: isDark 
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ],
                     ],
                   ),
                 ),

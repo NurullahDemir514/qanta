@@ -1058,6 +1058,12 @@ abstract class AppLocalizations {
   /// **'Savings Account'**
   String get savingsAccount;
 
+  /// Cash account type
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Account'**
+  String get cashAccount;
+
   /// Monthly summary section title
   ///
   /// In en, this message translates to:

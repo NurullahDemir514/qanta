@@ -140,8 +140,8 @@ class TransactionServiceV2 {
       return result as bool? ?? false;
     } catch (e) {
       debugPrint('❌ Error deleting transaction: $e');
-      return false;
-    }
+        return false;
+      }
   }
 
   /// Delete installment transaction (refunds total amount)
@@ -151,7 +151,7 @@ class TransactionServiceV2 {
       final result = await _client.rpc('delete_installment_transaction', params: {
         'p_transaction_id': transactionId,
       });
-      
+
       debugPrint('✅ Installment transaction deleted successfully: $transactionId');
       return result as bool? ?? false;
     } catch (e) {

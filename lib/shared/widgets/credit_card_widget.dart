@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../models/credit_card_model.dart';
+import '../design_system/transaction_design_system.dart';
 
 class CreditCardWidget extends StatelessWidget {
   final CreditCardModel card;
@@ -131,7 +132,7 @@ class CreditCardWidget extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '₺${(card.creditLimit - card.totalDebt).toStringAsFixed(2)}',
+                            '₺${TransactionDesignSystem.formatNumber(card.creditLimit - card.totalDebt)}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -151,7 +152,7 @@ class CreditCardWidget extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '₺${card.creditLimit.toStringAsFixed(2)}',
+                            '₺${TransactionDesignSystem.formatNumber(card.creditLimit)}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,

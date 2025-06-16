@@ -160,7 +160,7 @@ class ProfileImageService {
   /// Storage bucket'ının var olup olmadığını kontrol et ve oluştur
   Future<void> ensureBucketExists() async {
     try {
-      // Bucket'ları listele
+      // Önce bucket'ın var olup olmadığını kontrol et
       final buckets = await _client.storage.listBuckets();
       final bucketExists = buckets.any((bucket) => bucket.name == _bucketName);
       
@@ -170,17 +170,25 @@ class ProfileImageService {
           _bucketName,
           BucketOptions(
             public: true,
-            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-            fileSizeLimit: '5242880', // 5MB in bytes as string
+            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'],
+            fileSizeLimit: '5242880', // 5MB as string
           ),
         );
-        debugPrint('✅ Profile images bucket created');
+        debugPrint('✅ Profile images bucket created successfully');
       } else {
         debugPrint('✅ Profile images bucket already exists');
       }
     } catch (e) {
+      // Bucket zaten varsa veya RLS policy hatası varsa sessizce devam et
+      if (e.toString().contains('already exists') || 
+          e.toString().contains('duplicate key value')) {
+        debugPrint('✅ Profile images bucket already exists (caught duplicate)');
+        return;
+      }
+      
       debugPrint('❌ Error ensuring bucket exists: $e');
-      // Bucket zaten varsa hata vermez
+      // Bucket oluşturma hatası kritik değil, profil fotoğrafı yükleme işlemi devam edebilir
+      // RLS policy'ler artık mevcut olduğu için bu hata çözülmüş olmalı
     }
   }
 } 

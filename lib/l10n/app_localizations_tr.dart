@@ -506,6 +506,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get savingsAccount => 'Vadeli Hesap';
 
   @override
+  String get cashAccount => 'Nakit Hesap';
+
+  @override
   String get monthlySummary => 'Bu Ay Özeti';
 
   @override

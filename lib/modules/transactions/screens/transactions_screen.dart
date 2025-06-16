@@ -12,6 +12,7 @@ import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../shared/widgets/ios_transaction_list.dart';
 import '../../../shared/models/payment_card_model.dart' as pcm;
 import '../../../shared/widgets/installment_expandable_card.dart';
+import '../../../shared/services/category_icon_service.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -106,40 +107,40 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       builder: (context, providerV2, child) {
         // Show loading if provider is still loading
         if (providerV2.isLoadingTransactions && transactions.isEmpty) {
-          return SliverFillRemaining(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: TransactionDesignSystem.buildLoadingSkeleton(
-                isDark: isDark,
-                itemCount: 8,
-              ),
-            ),
-          );
-        }
+      return SliverFillRemaining(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: TransactionDesignSystem.buildLoadingSkeleton(
+            isDark: isDark,
+            itemCount: 8,
+          ),
+        ),
+      );
+    }
 
         // Empty state
         if (transactions.isEmpty) {
-          return SliverFillRemaining(
-            child: _buildEmptyState(l10n, isDark),
-          );
-        }
+      return SliverFillRemaining(
+              child: _buildEmptyState(l10n, isDark),
+      );
+    }
 
         // Transaction list
-        return SliverToBoxAdapter(
-          child: Column(
-            children: [
-              if (transactions.isNotEmpty) ...[
-                TransactionDesignSystem.buildTransactionList(
-                  transactions: _buildTransactionWidgets(transactions, isDark),
-                  isDark: isDark,
-                  emptyTitle: 'Henüz işlem yok',
-                  emptyDescription: 'İlk işleminizi eklemek için + butonuna dokunun',
-                  emptyIcon: Icons.receipt_long_outlined,
-                ),
-              ],
-            ],
-          ),
-        );
+    return SliverToBoxAdapter(
+      child: Column(
+        children: [
+          if (transactions.isNotEmpty) ...[
+            TransactionDesignSystem.buildTransactionList(
+              transactions: _buildTransactionWidgets(transactions, isDark),
+              isDark: isDark,
+              emptyTitle: 'Henüz işlem yok',
+              emptyDescription: 'İlk işleminizi eklemek için + butonuna dokunun',
+              emptyIcon: Icons.receipt_long_outlined,
+            ),
+          ],
+        ],
+      ),
+    );
       },
     );
   }
@@ -163,22 +164,61 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         break;
     }
 
+    // Get category info from provider
+    final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+    final category = transaction.categoryId != null 
+        ? providerV2.getCategoryById(transaction.categoryId!)
+        : null;
+
+    // Get category icon using CategoryIconService
+    IconData? categoryIcon;
+    if (category?.icon != null) {
+      categoryIcon = CategoryIconService.getIcon(category!.icon);
+    } else if (transaction.categoryName != null) {
+      // Fallback to category name for icon lookup
+      categoryIcon = CategoryIconService.getIcon(transaction.categoryName!);
+    }
+
+    // Get category color using CategoryIconService
+    Color? categoryColor;
+    if (category?.color != null) {
+      categoryColor = CategoryIconService.getColor(category!.color);
+    } else if (category?.icon != null) {
+      // Use predefined colors based on category type and icon
+      final isIncomeCategory = transactionType == TransactionType.income;
+      categoryColor = CategoryIconService.getCategoryColor(
+        iconName: category!.icon,
+        colorHex: category.color,
+        isIncomeCategory: isIncomeCategory,
+      );
+    }
+
     // FALLBACK: Check if description contains installment pattern like (1/4)
     final hasInstallmentPattern = RegExp(r'\(\d+/\d+\)').hasMatch(transaction.description);
     final isActualInstallment = transaction.isInstallment || hasInstallmentPattern;
 
     // Build title - sadece description göster (kategori adı gereksiz)
     String title = transaction.categoryName ?? transaction.description;
-    
+
     // Format amount
     final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
 
     // Format time
     final time = TransactionDesignSystem.formatTime(transaction.transactionDate);
 
-    // Get account name
-    String accountName = transaction.sourceAccountName ?? 'Hesap';
+    // Card name
+    String cardName = transaction.sourceAccountName ?? 'Hesap';
     
+    // For transfer transactions, show source → target
+    if (transactionType == TransactionType.transfer) {
+      final sourceAccount = transaction.sourceAccountName ?? 'Hesap';
+      final targetAccount = transaction.targetAccountName ?? 'Hesap';
+      cardName = TransactionDesignSystem.formatTransferSubtitle(sourceAccount, targetAccount);
+    } else {
+      // Shorten regular card names
+      cardName = TransactionDesignSystem.shortenAccountName(cardName);
+    }
+
     // Check if this should be displayed as an installment
     if (isActualInstallment) {
       // Extract installment info from pattern if available
@@ -203,12 +243,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       return InstallmentExpandableCard(
         installmentId: transaction.installmentId, // This might be null for fallback cases
         title: '$cleanTitle$installmentSuffix',
-        subtitle: accountName,
+        subtitle: cardName,
         amount: amount,
         time: time,
         type: transactionType,
-        categoryIcon: transaction.categoryIcon,
-        categoryColor: transaction.categoryColor,
+        categoryIcon: category?.icon,
+        categoryColor: category?.color,
         isDark: isDark,
         currentInstallment: installmentInfo?['currentInstallment'],
         totalInstallments: installmentInfo?['totalInstallments'],
@@ -218,15 +258,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       );
     }
     
-    // Regular transaction
+    // Regular transaction - use new centralized color system
     return TransactionDesignSystem.buildTransactionItem(
       title: title,
-      subtitle: accountName,
+      subtitle: cardName,
       amount: amount,
       time: time,
       type: transactionType,
-      categoryIcon: transaction.categoryIcon,
-      categoryColor: transaction.categoryColor,
+      categoryIconData: categoryIcon,      // Use direct IconData
+      categoryColorData: categoryColor,    // Use direct Color
       isDark: isDark,
       onLongPress: () {
         // TODO: Add delete functionality if needed

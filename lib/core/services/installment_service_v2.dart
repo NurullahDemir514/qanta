@@ -74,7 +74,7 @@ class InstallmentServiceV2 {
         'p_count': count,
         'p_description': description,
         'p_category_id': categoryId,
-        'p_start_date': (startDate ?? DateTime.now()).toIso8601String().split('T')[0],
+        'p_start_date': (startDate ?? DateTime.now()).toIso8601String(),
       });
 
       return response as String;

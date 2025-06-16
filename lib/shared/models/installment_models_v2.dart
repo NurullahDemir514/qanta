@@ -1,3 +1,5 @@
+import '../design_system/transaction_design_system.dart';
+
 /// Master installment transaction model
 class InstallmentTransactionModel {
   final String id;
@@ -291,5 +293,5 @@ class InstallmentWithProgressModel extends InstallmentTransactionModel {
   String get progressText => '$paidCount/$totalCount';
 
   /// Display remaining amount with currency
-  String get remainingAmountText => '₺${remainingAmount.toStringAsFixed(2)}';
+  String get remainingAmountText => '₺${TransactionDesignSystem.formatNumber(remainingAmount)}';
 } 

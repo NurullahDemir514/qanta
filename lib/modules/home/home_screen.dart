@@ -18,6 +18,7 @@ import 'widgets/balance_overview_card.dart';
 import 'widgets/cards_section.dart';
 import 'widgets/recent_transactions_section.dart';
 import 'utils/greeting_utils.dart';
+import '../../core/providers/profile_provider.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -183,64 +184,71 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final user = SupabaseService.instance.currentUser;
-    final fullName = user?.userMetadata?['full_name'] as String? ?? l10n.defaultUserName;
-    final firstName = GreetingUtils.getFirstName(fullName);
-    final profileImageUrl = ProfileImageService.instance.getProfileImageUrl();
     
-    return AppPageScaffold(
-      title: l10n.greetingHello(firstName),
-      subtitle: GreetingUtils.getGreetingByTime(l10n),
-      titleFontSize: 18,
-      subtitleFontSize: 14,
-      bottomPadding: 125,
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 4),
-          child: ProfileAvatar(
-            imageUrl: profileImageUrl,
-            userName: fullName,
-            size: 44,
-            showBorder: true,
-            onTap: () {
-              // TODO: Navigate to profile or show profile menu
-              debugPrint('Profile avatar tapped');
-            },
+    return Consumer<ProfileProvider>(
+      builder: (context, profileProvider, child) {
+        final fullName = profileProvider.userName ?? l10n.defaultUserName;
+        final firstName = GreetingUtils.getFirstName(fullName);
+        final profileImageUrl = profileProvider.profileImageUrl;
+        
+        return AppPageScaffold(
+          title: l10n.greetingHello(firstName),
+          subtitle: GreetingUtils.getGreetingByTime(l10n),
+          titleFontSize: 18,
+          subtitleFontSize: 14,
+          bottomPadding: 125,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: ProfileAvatar(
+                imageUrl: profileImageUrl,
+                userName: fullName,
+                size: 44,
+                showBorder: true,
+                onTap: () {
+                  // TODO: Navigate to profile or show profile menu
+                  debugPrint('Profile avatar tapped');
+                },
+              ),
+            ),
+          ],
+          onRefresh: () async {
+            // Refresh profile data
+            await profileProvider.refresh();
+            
+            // Try new provider first, fallback to legacy
+            try {
+              if (!mounted) return;
+              final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+              await providerV2.refresh();
+              debugPrint('✅ Data refreshed with QANTA v2 provider');
+            } catch (e) {
+              debugPrint('❌ Error refreshing with QANTA v2 provider: $e');
+              
+              // Fallback to legacy provider
+              if (!mounted) return;
+              final cardProvider = Provider.of<UnifiedCardProvider>(context, listen: false);
+              await cardProvider.loadAllData();
+              debugPrint('✅ Data refreshed with legacy provider');
+            }
+          },
+          body: SliverList(
+            delegate: SliverChildListDelegate([
+              // Balance Overview Card
+              const BalanceOverviewCard(),
+              const SizedBox(height: 24),
+              
+              // Cards Section
+              const CardsSection(),
+              const SizedBox(height: 24),
+              
+              // Recent Transactions
+              const RecentTransactionsSection(),
+              const SizedBox(height: 20),
+            ]),
           ),
-        ),
-      ],
-      onRefresh: () async {
-        // Try new provider first, fallback to legacy
-        try {
-          if (!mounted) return;
-          final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-          await providerV2.refresh();
-          debugPrint('✅ Data refreshed with QANTA v2 provider');
-        } catch (e) {
-          debugPrint('❌ Error refreshing with QANTA v2 provider: $e');
-          
-          // Fallback to legacy provider
-          if (!mounted) return;
-          final cardProvider = Provider.of<UnifiedCardProvider>(context, listen: false);
-          await cardProvider.loadAllData();
-          debugPrint('✅ Data refreshed with legacy provider');
-        }
+        );
       },
-      body: SliverList(
-        delegate: SliverChildListDelegate([
-          // Balance Overview Card
-          const BalanceOverviewCard(),
-          const SizedBox(height: 24),
-          
-          // Cards Section
-          const CardsSection(),
-          const SizedBox(height: 24),
-          
-          // Recent Transactions
-          const RecentTransactionsSection(),
-          const SizedBox(height: 20),
-        ]),
-      ),
     );
   }
 } 

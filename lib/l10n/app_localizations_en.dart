@@ -504,6 +504,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savingsAccount => 'Savings Account';
 
   @override
+  String get cashAccount => 'Cash Account';
+
+  @override
   String get monthlySummary => 'Monthly Summary';
 
   @override

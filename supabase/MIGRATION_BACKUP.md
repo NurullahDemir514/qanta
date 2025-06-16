@@ -20,6 +20,9 @@
 - `20250616161721_fix_installment_credit_limit.sql` - Kredi kartı limit düşme düzeltmesi
 - `20250616162020_fix_installment_refund_credit_card.sql` - Kredi kartı iade mantığı
 
+### Veri Yönetimi (2025-06-16)
+- `20250616170856_remove_test_data.sql` - Test verilerini temizleme
+
 ### Boş/Geri Alınan Migration'lar
 - `20250616134058_revert_installment_first_payment_date.sql` - (Boş - geri alındı)
 
@@ -45,5 +48,5 @@ Migration'lar yanlışlıkla silinirse:
 
 ## Son Güncelleme
 - Tarih: 2025-06-16
-- Uygulanan Migration'lar: Toplam 13
+- Uygulanan Migration'lar: Toplam 14
 - Prodüksiyon Durumu: ✅ Tümü başarıyla uygulandı 

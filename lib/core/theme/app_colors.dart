@@ -12,8 +12,8 @@ class AppColors {
   static const Color darkText = Color(0xFFFFFFFF);
 
   // 🎨 Common
-  static const Color primary = Color(0xFF10B981);
-  static const Color secondary = Color(0xFF34D399);
+  static const Color primary = Color(0xFF6D6D70);
+  static const Color secondary = Color(0xFF8E8E93);
   static const Color error = Color(0xFFFF4C4C);
   static const Color warning = Color(0xFFFFC300);
   static const Color info = Color(0xFF00C2FF);
