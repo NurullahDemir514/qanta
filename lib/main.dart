@@ -14,6 +14,7 @@ import 'core/theme/light_theme.dart';
 import 'core/theme/dark_theme.dart';
 import 'core/supabase_client.dart';
 import 'routes/app_router.dart';
+import 'modules/insights/providers/statistics_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,14 +41,22 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => ProfileProvider()),
         
-        // Legacy providers (for backward compatibility)
-        ChangeNotifierProvider(create: (context) => CashAccountProvider.instance),
-        ChangeNotifierProvider(create: (context) => DebitCardProvider.instance),
-        ChangeNotifierProvider(create: (context) => CreditCardProvider.instance),
-        ChangeNotifierProvider(create: (context) => UnifiedCardProvider()),
-        
-        // QANTA v2 provider
+        // QANTA v2 provider (main provider)
         ChangeNotifierProvider(create: (context) => UnifiedProviderV2.instance),
+        
+        // Statistics provider
+        ChangeNotifierProxyProvider<UnifiedProviderV2, StatisticsProvider>(
+          create: (context) => StatisticsProvider(UnifiedProviderV2.instance),
+          update: (context, unifiedProvider, statisticsProvider) =>
+              statisticsProvider ?? StatisticsProvider(unifiedProvider),
+        ),
+        
+        // Legacy providers disabled to prevent duplicate balance updates
+        // TODO: Remove these completely after full migration to V2
+        // ChangeNotifierProvider(create: (context) => CashAccountProvider.instance),
+        // ChangeNotifierProvider(create: (context) => DebitCardProvider.instance),
+        // ChangeNotifierProvider(create: (context) => CreditCardProvider.instance),
+        // ChangeNotifierProvider(create: (context) => UnifiedCardProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

@@ -59,7 +59,8 @@ class AccountModel {
     switch (type) {
       case AccountType.credit:
         // For credit cards, available = credit limit - current balance (debt)
-        return (creditLimit ?? 0.0) - balance.abs();
+        // Note: balance is positive for debt, negative for overpayment
+        return (creditLimit ?? 0.0) - balance;
       case AccountType.debit:
       case AccountType.cash:
         // For debit/cash, available = current balance
@@ -68,7 +69,7 @@ class AccountModel {
   }
 
   /// Used credit amount (for credit cards only)
-  double get usedCredit => isCreditCard ? balance.abs() : 0.0;
+  double get usedCredit => isCreditCard ? balance.clamp(0.0, double.infinity) : 0.0;
 
   /// Credit utilization percentage (for credit cards only)
   double get creditUtilization {

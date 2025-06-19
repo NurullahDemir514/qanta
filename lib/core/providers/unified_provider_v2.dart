@@ -752,7 +752,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       'cardName': account.name,
       'bankName': account.bankName ?? '',
       'bankCode': account.bankName ?? '', // Use bankName as bankCode for now
-      'totalDebt': account.balance.abs(), // Credit card balance is debt
+      'totalDebt': account.balance.clamp(0.0, double.infinity), // Credit card balance is debt (positive)
       'creditLimit': account.creditLimit ?? 0.0,
       'availableLimit': account.availableAmount,
       'statementDay': account.statementDay ?? 1,
@@ -762,7 +762,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       'isActive': account.isActive,
       'formattedCardNumber': '**** **** **** ${account.id.substring(0, 4)}', // Mock card number
       'usagePercentage': account.creditLimit != null && account.creditLimit! > 0 
-          ? (account.balance.abs() / account.creditLimit!) * 100 
+          ? (account.balance.clamp(0.0, double.infinity) / account.creditLimit!) * 100 
           : 0.0,
     }).toList();
   }
@@ -883,7 +883,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       'id': account.id,
       'cardName': account.name,
       'bankName': account.bankName ?? '',
-      'totalDebt': account.balance.abs(),
+      'totalDebt': account.balance.clamp(0.0, double.infinity),
       'creditLimit': account.creditLimit ?? 0.0,
       'availableLimit': account.availableAmount,
       'statementDay': account.statementDay ?? 1,

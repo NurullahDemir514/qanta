@@ -344,7 +344,7 @@
   "@goodAfternoon": {
     "description": "Good afternoon greeting"
   },
-  "goodEvening": "Good Evening! 🌆",
+  "goodEvening": "Good Evening!",
   "@goodEvening": {
     "description": "Good evening greeting"
   },
@@ -1650,5 +1650,94 @@
   "debitCard": "Debit Card",
   "@debitCard": {
     "description": "Debit card account type"
-  }
+  },
+  "statisticsTitle": "Statistics",
+  "@statisticsTitle": {
+    "description": "Statistics page title"
+  },
+  "monthlyOverview": "Monthly Overview",
+  "@monthlyOverview": {
+    "description": "Monthly overview section title"
+  },
+  "totalIncome": "Total Income",
+  "@totalIncome": {
+    "description": "Total income label"
+  },
+  "totalExpenses": "Total Expenses",
+  "@totalExpenses": {
+    "description": "Total expenses label"
+  },
+  "netBalance": "Net Balance",
+  "@netBalance": {
+    "description": "Net balance label"
+  },
+  "categoryBreakdown": "Category Breakdown",
+  "@categoryBreakdown": {
+    "description": "Category breakdown section title"
+  },
+  "spendingTrends": "Spending Trends",
+  "@spendingTrends": {
+    "description": "Spending trends section title"
+  },
+  "thisMonth": "This Month",
+  "@thisMonth": {
+    "description": "This month label"
+  },
+  "lastMonth": "Last Month",
+  "@lastMonth": {
+    "description": "Last month label"
+  },
+  "last3Months": "Last 3 Months",
+  "@last3Months": {
+    "description": "Last 3 months label"
+  },
+  "last6Months": "Last 6 Months",
+  "@last6Months": {
+    "description": "Last 6 months label"
+  },
+  "yearToDate": "Year to Date",
+  "@yearToDate": {
+    "description": "Year to date label"
+  },
+  "noDataAvailable": "No Data Available",
+  "@noDataAvailable": {
+    "description": "No data available message"
+  },
+  "noTransactionsFound": "No transactions found yet",
+  "@noTransactionsFound": {
+    "description": "No transactions found message"
+  },
+  "averageSpending": "Average Spending",
+  "@averageSpending": {
+    "description": "Average spending label"
+  },
+  "highestSpending": "Highest Spending",
+  "@highestSpending": {
+    "description": "Highest spending label"
+  },
+  "lowestSpending": "Lowest Spending",
+  "@lowestSpending": {
+    "description": "Lowest spending label"
+  },
+  "savingsRate": "Savings Rate",
+  "@savingsRate": {
+    "description": "Savings rate label"
+  },
+  "smartInsights": "Smart Insights",
+  "visualAnalytics": "Visual Analytics",
+  "categoryAnalysis": "Category Analysis",
+  "financialHealthScore": "Financial Health Score",
+  "spendingTrend": "Spending Trend",
+  "viewAll": "View All",
+  "noDataYet": "No data to analyze yet",
+  "addFirstTransaction": "Add First Transaction",
+  "analyzingData": "Analyzing your financial data...",
+  "pleaseWait": "This may take a few seconds",
+  "dataLoadError": "Error loading data",
+  "excellent": "Excellent",
+  "good": "Good",
+  "average": "Average",
+  "needsImprovement": "Needs Improvement",
+  "dailyAverage": "Daily Average",
+  "moreCategories": "more categories"
 } 

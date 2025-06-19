@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/services/profile_image_service.dart';
 import '../../core/providers/unified_card_provider.dart';
@@ -13,8 +14,10 @@ import '../cards/cards_screen.dart';
 import '../cards/widgets/add_card_fab.dart';
 import '../transactions/index.dart';
 import '../transactions/screens/transactions_screen.dart';
+import '../insights/statistics_screen.dart';
 import 'widgets/main_tab_bar.dart';
 import 'widgets/balance_overview_card.dart';
+import 'widgets/budget_overview_card.dart';
 import 'widgets/cards_section.dart';
 import 'widgets/recent_transactions_section.dart';
 import 'utils/greeting_utils.dart';
@@ -57,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
               const HomeScreen(),
               const TransactionsScreen(),
               const CardsScreen(),
-              _buildPlaceholderPage(l10n.analytics, Icons.bar_chart_outlined, const Color(0xFFF59E0B)),
+              const StatisticsScreen(),
               const ProfileScreen(),
             ],
           ),
@@ -74,6 +77,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildPlaceholderPage(String title, IconData icon, Color color) {
+    // This method can be removed now as we're using the actual StatisticsScreen
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     
@@ -167,17 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       debugPrint('❌ Error loading data with QANTA v2 provider: $e');
-      
-      // Fallback to legacy provider
-      try {
-        if (!mounted) return;
-        final cardProvider = Provider.of<UnifiedCardProvider>(context, listen: false);
-        debugPrint('🔄 Falling back to legacy provider...');
-        await cardProvider.loadAllData();
-        debugPrint('✅ Data loaded with legacy provider');
-      } catch (legacyError) {
-        debugPrint('❌ Error with legacy provider: $legacyError');
-      }
     }
   }
 
@@ -216,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // Refresh profile data
             await profileProvider.refresh();
             
-            // Try new provider first, fallback to legacy
+            // Refresh with V2 provider
             try {
               if (!mounted) return;
               final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
@@ -224,18 +217,16 @@ class _HomeScreenState extends State<HomeScreen> {
               debugPrint('✅ Data refreshed with QANTA v2 provider');
             } catch (e) {
               debugPrint('❌ Error refreshing with QANTA v2 provider: $e');
-              
-              // Fallback to legacy provider
-              if (!mounted) return;
-              final cardProvider = Provider.of<UnifiedCardProvider>(context, listen: false);
-              await cardProvider.loadAllData();
-              debugPrint('✅ Data refreshed with legacy provider');
             }
           },
           body: SliverList(
             delegate: SliverChildListDelegate([
               // Balance Overview Card
               const BalanceOverviewCard(),
+              const SizedBox(height: 24),
+              
+              // Budget Overview Card
+              const BudgetOverviewCard(),
               const SizedBox(height: 24),
               
               // Cards Section
@@ -247,8 +238,25 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 20),
             ]),
           ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+              
+              if (providerV2.accounts.isEmpty) {
+                // Show add card dialog if no accounts
+                _showAddCardDialog(context);
+              } else {
+                // Navigate to add transaction
+                context.push('/add-transaction');
+              }
+            },
+          ),
         );
       },
     );
+  }
+
+  void _showAddCardDialog(BuildContext context) {
+    // Implementation of _showAddCardDialog method
   }
 } 

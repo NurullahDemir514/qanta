@@ -16,6 +16,7 @@ import '../widgets/forms/transaction_summary.dart';
 import '../widgets/forms/description_field.dart';
 import '../widgets/forms/date_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/foundation.dart';
 
 class TransferFormScreen extends StatefulWidget {
   const TransferFormScreen({super.key});

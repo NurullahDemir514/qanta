@@ -34,19 +34,35 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Başlık
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                l10n.recentTransactions,
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.recentTransactions,
+                    style: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to transactions page
+                      // TODO: Implement navigation
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    
+                    ),
+                  ),
+                ],
               ),
-            ),
             
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             
             // V2 İçerik
             if (isLoadingV2 && v2Transactions.isEmpty)
@@ -166,27 +182,52 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
         ? providerV2.getCategoryById(transaction.categoryId!)
         : null;
 
-    // Get category icon using CategoryIconService
+    // Get category icon using CategoryIconService - prioritize category name
     IconData? categoryIcon;
-    if (category?.icon != null) {
-      categoryIcon = CategoryIconService.getIcon(category!.icon);
-    } else if (transaction.categoryName != null) {
-      // Fallback to category name for icon lookup
-      categoryIcon = CategoryIconService.getIcon(transaction.categoryName!);
+    
+    // First try category name (more reliable than database icon field)
+    if (transaction.categoryName != null) {
+      categoryIcon = CategoryIconService.getIcon(transaction.categoryName!.toLowerCase());
+    } 
+    
+    // Only fallback to category.icon if category name lookup failed
+    if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
+      if (category?.icon != null && category!.icon != 'category') {
+        categoryIcon = CategoryIconService.getIcon(category.icon);
+      }
     }
 
-    // Get category color using CategoryIconService
+    // Get category color using CategoryIconService - prioritize centralized colors
     Color? categoryColor;
-    if (category?.color != null) {
-      categoryColor = CategoryIconService.getColor(category!.color);
-    } else if (category?.icon != null) {
-      // Use predefined colors based on category type and icon
-      final isIncomeCategory = transactionType == TransactionType.income;
-      categoryColor = CategoryIconService.getCategoryColor(
-        iconName: category!.icon,
-        colorHex: category.color,
-        isIncomeCategory: isIncomeCategory,
+    
+    // First try to get color from centralized map using category name or icon
+    if (transaction.categoryName != null) {
+      // Try category name first (e.g., "market", "yemek", etc.)
+      categoryColor = CategoryIconService.getColorFromMap(
+        transaction.categoryName!.toLowerCase(),
+        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
       );
+    } else if (category?.icon != null) {
+      // Try icon name (e.g., "restaurant", "car", etc.)
+      categoryColor = CategoryIconService.getColorFromMap(
+        category!.icon,
+        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
+      );
+    }
+    
+    // If no centralized color found, fall back to hex color from database
+    if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
+      if (category?.color != null) {
+        categoryColor = CategoryIconService.getColor(category!.color);
+      } else if (category?.icon != null) {
+        // Use predefined colors based on category type and icon
+        final isIncomeCategory = transactionType == TransactionType.income;
+        categoryColor = CategoryIconService.getCategoryColor(
+          iconName: category!.icon,
+          colorHex: category.color,
+          isIncomeCategory: isIncomeCategory,
+        );
+      }
     }
 
     // FALLBACK: Check if description contains installment pattern like (1/4)

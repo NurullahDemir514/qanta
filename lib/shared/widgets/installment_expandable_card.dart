@@ -157,24 +157,36 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
 
   @override
   Widget build(BuildContext context) {
-    // Get category icon using CategoryIconService
+    // Get category icon using CategoryIconService - avoid 'category' field
     IconData? categoryIconData;
-    if (widget.categoryIcon != null) {
+    if (widget.categoryIcon != null && widget.categoryIcon != 'category') {
       categoryIconData = CategoryIconService.getIcon(widget.categoryIcon!);
     }
 
-    // Get category color using CategoryIconService
+    // Get category color using CategoryIconService - prioritize centralized colors
     Color? categoryColorData;
-    if (widget.categoryColor != null) {
-      categoryColorData = CategoryIconService.getColor(widget.categoryColor!);
-    } else if (widget.categoryIcon != null) {
-      // Use predefined colors based on category type and icon
-      final isIncomeCategory = widget.type == TransactionType.income;
-      categoryColorData = CategoryIconService.getCategoryColor(
-        iconName: widget.categoryIcon!,
-        colorHex: widget.categoryColor,
-        isIncomeCategory: isIncomeCategory,
+    
+    // First try to get color from centralized map using icon name
+    if (widget.categoryIcon != null) {
+      categoryColorData = CategoryIconService.getColorFromMap(
+        widget.categoryIcon!,
+        categoryType: widget.type == TransactionType.income ? 'income' : 'expense',
       );
+    }
+    
+    // If no centralized color found, fall back to hex color
+    if (categoryColorData == null || categoryColorData == CategoryIconService.getColorFromMap('default')) {
+      if (widget.categoryColor != null) {
+        categoryColorData = CategoryIconService.getColor(widget.categoryColor!);
+      } else if (widget.categoryIcon != null) {
+        // Use predefined colors based on category type and icon
+        final isIncomeCategory = widget.type == TransactionType.income;
+        categoryColorData = CategoryIconService.getCategoryColor(
+          iconName: widget.categoryIcon!,
+          colorHex: widget.categoryColor,
+          isIncomeCategory: isIncomeCategory,
+        );
+      }
     }
 
     final iconData = TransactionDesignSystem.getTransactionIconData(

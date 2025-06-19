@@ -599,7 +599,7 @@ abstract class AppLocalizations {
   /// Good evening greeting
   ///
   /// In en, this message translates to:
-  /// **'Good Evening! 🌆'**
+  /// **'Good Evening!'**
   String get goodEvening;
 
   /// Good night greeting
@@ -2449,6 +2449,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Debit Card'**
   String get debitCard;
+
+  /// Statistics page title
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statisticsTitle;
+
+  /// Monthly overview section title
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Overview'**
+  String get monthlyOverview;
+
+  /// Total income label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Income'**
+  String get totalIncome;
+
+  /// Total expenses label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Expenses'**
+  String get totalExpenses;
+
+  /// Net balance label
+  ///
+  /// In en, this message translates to:
+  /// **'Net Balance'**
+  String get netBalance;
+
+  /// Category breakdown section title
+  ///
+  /// In en, this message translates to:
+  /// **'Category Breakdown'**
+  String get categoryBreakdown;
+
+  /// Spending trends section title
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Trends'**
+  String get spendingTrends;
+
+  /// This month label
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get thisMonth;
+
+  /// Last month label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Month'**
+  String get lastMonth;
+
+  /// Last 3 months label
+  ///
+  /// In en, this message translates to:
+  /// **'Last 3 Months'**
+  String get last3Months;
+
+  /// Last 6 months label
+  ///
+  /// In en, this message translates to:
+  /// **'Last 6 Months'**
+  String get last6Months;
+
+  /// Year to date label
+  ///
+  /// In en, this message translates to:
+  /// **'Year to Date'**
+  String get yearToDate;
+
+  /// No data available message
+  ///
+  /// In en, this message translates to:
+  /// **'No Data Available'**
+  String get noDataAvailable;
+
+  /// No transactions found message
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions found yet'**
+  String get noTransactionsFound;
+
+  /// Average spending label
+  ///
+  /// In en, this message translates to:
+  /// **'Average Spending'**
+  String get averageSpending;
+
+  /// Highest spending label
+  ///
+  /// In en, this message translates to:
+  /// **'Highest Spending'**
+  String get highestSpending;
+
+  /// Lowest spending label
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest Spending'**
+  String get lowestSpending;
+
+  /// Savings rate label
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Rate'**
+  String get savingsRate;
+
+  /// No description provided for @smartInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Insights'**
+  String get smartInsights;
+
+  /// No description provided for @visualAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual Analytics'**
+  String get visualAnalytics;
+
+  /// No description provided for @categoryAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Analysis'**
+  String get categoryAnalysis;
+
+  /// No description provided for @financialHealthScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Health Score'**
+  String get financialHealthScore;
+
+  /// No description provided for @spendingTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Trend'**
+  String get spendingTrend;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get viewAll;
+
+  /// No description provided for @noDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data to analyze yet'**
+  String get noDataYet;
+
+  /// No description provided for @addFirstTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add First Transaction'**
+  String get addFirstTransaction;
+
+  /// No description provided for @analyzingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your financial data...'**
+  String get analyzingData;
+
+  /// No description provided for @pleaseWait.
+  ///
+  /// In en, this message translates to:
+  /// **'This may take a few seconds'**
+  String get pleaseWait;
+
+  /// No description provided for @dataLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading data'**
+  String get dataLoadError;
+
+  /// No description provided for @excellent.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent'**
+  String get excellent;
+
+  /// No description provided for @good.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get good;
+
+  /// No description provided for @average.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get average;
+
+  /// No description provided for @needsImprovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Improvement'**
+  String get needsImprovement;
+
+  /// No description provided for @dailyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Average'**
+  String get dailyAverage;
+
+  /// No description provided for @moreCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'more categories'**
+  String get moreCategories;
 }
 
 class _AppLocalizationsDelegate

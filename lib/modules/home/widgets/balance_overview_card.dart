@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/providers/unified_card_provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../bottom_sheets/balance_detail_bottom_sheet.dart';
@@ -16,22 +15,15 @@ class BalanceOverviewCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Consumer3<ThemeProvider, UnifiedCardProvider, UnifiedProviderV2>(
-      builder: (context, themeProvider, cardProvider, providerV2, child) {
-        // Try to use V2 provider first, fallback to legacy
-        final bool useV2 = providerV2.accounts.isNotEmpty;
+    return Consumer2<ThemeProvider, UnifiedProviderV2>(
+      builder: (context, themeProvider, providerV2, child) {
+        final totalBalance = providerV2.totalBalance;
+        final thisMonthIncome = providerV2.thisMonthIncome;
+        final thisMonthExpense = providerV2.thisMonthExpense;
+        final balanceChangePercentage = providerV2.balanceChangePercentage;
+        final isLoading = providerV2.isLoading;
         
-        final totalBalance = useV2 ? providerV2.totalBalance : cardProvider.totalBalance;
-        final thisMonthIncome = useV2 ? providerV2.thisMonthIncome : cardProvider.thisMonthIncome;
-        final thisMonthExpense = useV2 ? providerV2.thisMonthExpense : cardProvider.thisMonthExpense;
-        final balanceChangePercentage = useV2 ? providerV2.balanceChangePercentage : cardProvider.balanceChangePercentage;
-        final isLoading = useV2 ? providerV2.isLoading : cardProvider.isLoading;
-        
-        if (useV2) {
-          debugPrint('🎯 BalanceOverviewCard using QANTA v2 provider');
-        } else {
-          debugPrint('🔄 BalanceOverviewCard using legacy provider');
-        }
+        debugPrint('🎯 BalanceOverviewCard using QANTA v2 provider');
 
         return GestureDetector(
           onTap: () => BalanceDetailBottomSheet.show(context),
@@ -74,7 +66,7 @@ class BalanceOverviewCard extends StatelessWidget {
                           Text(
                             l10n.totalBalance,
                             style: GoogleFonts.inter(
-                              fontSize: 14,
+                              fontSize: 16,
                               color: isDark 
                                 ? const Color(0xFF8E8E93)
                                 : const Color(0xFF6D6D70),
@@ -95,7 +87,7 @@ class BalanceOverviewCard extends StatelessWidget {
                               color: isDark 
                                 ? const Color(0xFF8E8E93)
                                 : const Color(0xFF6D6D70),
-                              size: 14,
+                              size: 16,
                             ),
                           ),
                         ],
@@ -179,13 +171,13 @@ class BalanceOverviewCard extends StatelessWidget {
                                   color: balanceChangePercentage >= 0 
                                     ? const Color(0xFF34C759)
                                     : const Color(0xFFFF3B30),
-                                  size: 10,
+                                  size: 12,
                                 ),
                                 const SizedBox(width: 2),
                                 Text(
                                   '${balanceChangePercentage.abs().toStringAsFixed(1)}%',
                                   style: GoogleFonts.inter(
-                                    fontSize: 10,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     color: balanceChangePercentage >= 0 
                                       ? const Color(0xFF34C759)
@@ -252,7 +244,7 @@ class BalanceOverviewCard extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.inter(
-            fontSize: 11,
+            fontSize: 13,
             color: isDark 
               ? const Color(0xFF8E8E93)
               : const Color(0xFF6D6D70),
@@ -263,7 +255,7 @@ class BalanceOverviewCard extends StatelessWidget {
         Text(
           amount,
           style: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
             color: isDark ? Colors.white : Colors.black,
           ),

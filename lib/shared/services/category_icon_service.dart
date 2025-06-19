@@ -118,8 +118,13 @@ class CategoryIconService {
     'yemek': Icons.restaurant_rounded,
     'coffee': Icons.local_cafe_rounded,
     'kahve': Icons.local_cafe_rounded,
-    'groceries': Icons.local_grocery_store_rounded,
-    'market': Icons.local_grocery_store_rounded,
+    'groceries': Icons.shopping_cart_rounded,
+    'market': Icons.shopping_cart_rounded,
+    'supermarket': Icons.shopping_cart_rounded,
+    'süpermarket': Icons.shopping_cart_rounded,
+    'grocery': Icons.shopping_cart_rounded,
+    'bakkal': Icons.shopping_cart_rounded,
+    'marketler': Icons.shopping_cart_rounded,
     'fast_food': Icons.fastfood_rounded,
     'fast': Icons.fastfood_rounded,
     'alcohol': Icons.local_bar_rounded,
@@ -420,177 +425,177 @@ class CategoryIconService {
   /// - Supports multiple aliases per color
   static const Map<String, Color> _colorMap = {
     // === TRANSACTION TYPE COLORS ===
-    'income_default': Color(0xFF34C759),      // iOS system green
-    'expense_default': Color(0xFFFF3B30),     // iOS system red
-    'transfer_default': Color(0xFF007AFF),    // iOS system blue
+    'income_default': Color(0xFF10B981),      // Modern emerald green
+    'expense_default': Color(0xFFEF4444),     // Modern red
+    'transfer_default': Color(0xFF3B82F6),    // Modern blue
     
     // === FOOD & DINING COLORS ===
-    'restaurant': Color(0xFFFF6B35),          // Soft coral
-    'food': Color(0xFFFF6B35),
-    'yemek': Color(0xFFFF6B35),
-    'coffee': Color(0xFF8E6A5B),              // Muted brown
-    'kahve': Color(0xFF8E6A5B),
-    'groceries': Color(0xFF32D74B),           // iOS system green
-    'market': Color(0xFF32D74B),
-    'fast_food': Color(0xFFFF9500),           // iOS system orange
-    'fast': Color(0xFFFF9500),
-    'alcohol': Color(0xFFAF52DE),             // iOS system purple
-    'alkol': Color(0xFFAF52DE),
-    'delivery': Color(0xFF64D2FF),            // iOS system light blue
-    'teslimat': Color(0xFF64D2FF),
+    'restaurant': Color(0xFFFF6B6B),          // Coral red
+    'food': Color(0xFFFF6B6B),
+    'yemek': Color(0xFFFF6B6B),
+    'coffee': Color(0xFF8B4513),              // Saddle brown
+    'kahve': Color(0xFF8B4513),
+    'groceries': Color(0xFFF59E0B),           // Modern amber (shopping color)
+    'market': Color(0xFFF59E0B),
+    'fast_food': Color(0xFFFF8C42),           // Bright orange
+    'fast': Color(0xFFFF8C42),
+    'alcohol': Color(0xFF9333EA),             // Modern purple
+    'alkol': Color(0xFF9333EA),
+    'delivery': Color(0xFF06B6D4),            // Modern cyan
+    'teslimat': Color(0xFF06B6D4),
     
     // === TRANSPORTATION COLORS ===
-    'transport': Color(0xFF007AFF),           // iOS system blue
-    'car': Color(0xFF007AFF),
-    'directions_car': Color(0xFF007AFF),
-    'ulaşım': Color(0xFF007AFF),
-    'fuel': Color(0xFF8E8E93),                // iOS secondary label
-    'gas': Color(0xFF8E8E93),
-    'local_gas_station': Color(0xFF8E8E93),
-    'yakıt': Color(0xFF8E8E93),
-    'public_transport': Color(0xFF5AC8FA),    // iOS system light blue
-    'toplu_taşıma': Color(0xFF5AC8FA),
-    'taxi': Color(0xFFFFCC02),                // iOS system yellow
-    'parking': Color(0xFF6D6D70),             // iOS tertiary label
-    'park': Color(0xFF6D6D70),
-    'motorcycle': Color(0xFF48484A),          // iOS quaternary label
-    'motosiklet': Color(0xFF48484A),
-    'bicycle': Color(0xFF34C759),             // iOS system green
-    'bisiklet': Color(0xFF34C759),
+    'transport': Color(0xFF3B82F6),           // Modern blue
+    'car': Color(0xFF3B82F6),
+    'directions_car': Color(0xFF3B82F6),
+    'ulaşım': Color(0xFF3B82F6),
+    'fuel': Color(0xFF6B7280),                // Cool gray
+    'gas': Color(0xFF6B7280),
+    'local_gas_station': Color(0xFF6B7280),
+    'yakıt': Color(0xFF6B7280),
+    'public_transport': Color(0xFF06B6D4),    // Modern cyan
+    'toplu_taşıma': Color(0xFF06B6D4),
+    'taxi': Color(0xFFEAB308),                // Modern yellow
+    'parking': Color(0xFF6B7280),             // Cool gray
+    'park': Color(0xFF6B7280),
+    'motorcycle': Color(0xFF374151),          // Dark gray
+    'motosiklet': Color(0xFF374151),
+    'bicycle': Color(0xFF10B981),             // Modern emerald
+    'bisiklet': Color(0xFF10B981),
     
     // === SHOPPING COLORS ===
-    'shopping': Color(0xFFFF9F0A),            // iOS system orange
-    'shopping_cart': Color(0xFFFF9F0A),
-    'shopping_bag': Color(0xFFFF9F0A),
-    'alışveriş': Color(0xFFFF9F0A),
-    'clothing': Color(0xFFFF2D92),            // iOS system pink
-    'kıyafet': Color(0xFFFF2D92),
-    'electronics': Color(0xFF007AFF),         // iOS system blue
-    'elektronik': Color(0xFF007AFF),
-    'furniture': Color(0xFF8E6A5B),           // Muted brown
-    'mobilya': Color(0xFF8E6A5B),
-    'books': Color(0xFF8E8E93),               // iOS secondary label
-    'kitap': Color(0xFF8E8E93),
-    'jewelry': Color(0xFFFFD60A),             // iOS system yellow
-    'mücevher': Color(0xFFFFD60A),
+    'shopping': Color(0xFFF59E0B),            // Modern amber
+    'shopping_cart': Color(0xFFF59E0B),
+    'shopping_bag': Color(0xFFF59E0B),
+    'alışveriş': Color(0xFFF59E0B),
+    'clothing': Color(0xFFEC4899),            // Modern pink
+    'kıyafet': Color(0xFFEC4899),
+    'electronics': Color(0xFF6366F1),         // Modern indigo
+    'elektronik': Color(0xFF6366F1),
+    'furniture': Color(0xFF92400E),           // Brown
+    'mobilya': Color(0xFF92400E),
+    'books': Color(0xFF6B7280),               // Cool gray
+    'kitap': Color(0xFF6B7280),
+    'jewelry': Color(0xFFD97706),             // Modern amber
+    'mücevher': Color(0xFFD97706),
     
     // === ENTERTAINMENT COLORS ===
-    'entertainment': Color(0xFFBF5AF2),       // iOS system purple
-    'movie': Color(0xFFBF5AF2),
-    'eğlence': Color(0xFFBF5AF2),
-    'music': Color(0xFFAF52DE),               // iOS system purple
-    'müzik': Color(0xFFAF52DE),
-    'gaming': Color(0xFF30D158),              // iOS system green
-    'oyun': Color(0xFF30D158),
-    'streaming': Color(0xFFFF3B30),           // iOS system red
-    'yayın': Color(0xFFFF3B30),
-    'concerts': Color(0xFF5E5CE6),            // iOS system indigo
-    'konser': Color(0xFF5E5CE6),
-    'photography': Color(0xFF8E8E93),         // iOS secondary label
-    'fotoğraf': Color(0xFF8E8E93),
+    'entertainment': Color(0xFF8B5CF6),       // Modern violet
+    'movie': Color(0xFF8B5CF6),
+    'eğlence': Color(0xFF8B5CF6),
+    'music': Color(0xFFA855F7),               // Modern purple
+    'müzik': Color(0xFFA855F7),
+    'gaming': Color(0xFF059669),              // Modern green
+    'oyun': Color(0xFF059669),
+    'streaming': Color(0xFFDC2626),           // Modern red
+    'yayın': Color(0xFFDC2626),
+    'concerts': Color(0xFF6366F1),            // Modern indigo
+    'konser': Color(0xFF6366F1),
+    'photography': Color(0xFF6B7280),         // Cool gray
+    'fotoğraf': Color(0xFF6B7280),
     
     // === BILLS & UTILITIES COLORS ===
-    'bills': Color(0xFF007AFF),               // iOS system blue
-    'receipt': Color(0xFF007AFF),
-    'receipt_long': Color(0xFF007AFF),
-    'faturalar': Color(0xFF007AFF),
-    'electricity': Color(0xFFFFD60A),         // iOS system yellow
-    'elektrik': Color(0xFFFFD60A),
-    'water': Color(0xFF64D2FF),               // iOS system light blue
-    'su': Color(0xFF64D2FF),
-    'internet': Color(0xFF5AC8FA),            // iOS system light blue
-    'phone': Color(0xFF34C759),               // iOS system green
-    'telefon': Color(0xFF34C759),
-    'subscription': Color(0xFFFF9500),        // iOS system orange
-    'abonelik': Color(0xFFFF9500),
-    'insurance': Color(0xFF007AFF),           // iOS system blue
-    'sigorta': Color(0xFF007AFF),
+    'bills': Color(0xFF2563EB),               // Modern blue
+    'receipt': Color(0xFF2563EB),
+    'receipt_long': Color(0xFF2563EB),
+    'faturalar': Color(0xFF2563EB),
+    'electricity': Color(0xFFFDE047),         // Modern yellow
+    'elektrik': Color(0xFFFDE047),
+    'water': Color(0xFF0EA5E9),               // Modern sky blue
+    'su': Color(0xFF0EA5E9),
+    'internet': Color(0xFF06B6D4),            // Modern cyan
+    'phone': Color(0xFF10B981),               // Modern emerald
+    'telefon': Color(0xFF10B981),
+    'subscription': Color(0xFFF59E0B),        // Modern amber
+    'abonelik': Color(0xFFF59E0B),
+    'insurance': Color(0xFF3B82F6),           // Modern blue
+    'sigorta': Color(0xFF3B82F6),
     
     // === HEALTH & WELLNESS COLORS ===
-    'health': Color(0xFF30D158),              // iOS system green
-    'healthcare': Color(0xFF30D158),
-    'health_and_safety': Color(0xFF30D158),
-    'local_hospital': Color(0xFF30D158),
-    'sağlık': Color(0xFF30D158),
-    'doctor': Color(0xFF64D2FF),              // iOS system light blue
-    'doktor': Color(0xFF64D2FF),
-    'pharmacy': Color(0xFF32D74B),            // iOS system green
-    'eczane': Color(0xFF32D74B),
-    'fitness': Color(0xFF30D158),             // iOS system green
-    'gym': Color(0xFF30D158),
-    'spor': Color(0xFF30D158),
-    'spa': Color(0xFFFF2D92),                 // iOS system pink
-    'beauty': Color(0xFFFF2D92),
-    'güzellik': Color(0xFFFF2D92),
+    'health': Color(0xFF10B981),              // Modern emerald
+    'healthcare': Color(0xFF10B981),
+    'health_and_safety': Color(0xFF10B981),
+    'local_hospital': Color(0xFF10B981),
+    'sağlık': Color(0xFF10B981),
+    'doctor': Color(0xFF0EA5E9),              // Modern sky blue
+    'doktor': Color(0xFF0EA5E9),
+    'pharmacy': Color(0xFF22C55E),            // Modern green
+    'eczane': Color(0xFF22C55E),
+    'fitness': Color(0xFF059669),             // Modern green
+    'gym': Color(0xFF059669),
+    'spor': Color(0xFF059669),
+    'spa': Color(0xFFEC4899),                 // Modern pink
+    'beauty': Color(0xFFEC4899),
+    'güzellik': Color(0xFFEC4899),
     
     // === EDUCATION COLORS ===
-    'education': Color(0xFF007AFF),           // iOS system blue
-    'school': Color(0xFF007AFF),
-    'eğitim': Color(0xFF007AFF),
-    'university': Color(0xFF5E5CE6),          // iOS system indigo
-    'üniversite': Color(0xFF5E5CE6),
-    'course': Color(0xFF5AC8FA),              // iOS system light blue
-    'kurs': Color(0xFF5AC8FA),
+    'education': Color(0xFF2563EB),           // Modern blue
+    'school': Color(0xFF2563EB),
+    'eğitim': Color(0xFF2563EB),
+    'university': Color(0xFF6366F1),          // Modern indigo
+    'üniversite': Color(0xFF6366F1),
+    'course': Color(0xFF0EA5E9),              // Modern sky blue
+    'kurs': Color(0xFF0EA5E9),
     
     // === TRAVEL COLORS ===
-    'travel': Color(0xFF5E5CE6),              // iOS system indigo
-    'flight': Color(0xFF5E5CE6),
-    'seyahat': Color(0xFF5E5CE6),
-    'hotel': Color(0xFFFF9500),               // iOS system orange
-    'vacation': Color(0xFF64D2FF),            // iOS system light blue
-    'tatil': Color(0xFF64D2FF),
+    'travel': Color(0xFF7C3AED),              // Modern violet
+    'flight': Color(0xFF7C3AED),
+    'seyahat': Color(0xFF7C3AED),
+    'hotel': Color(0xFFF59E0B),               // Modern amber
+    'vacation': Color(0xFF06B6D4),            // Modern cyan
+    'tatil': Color(0xFF06B6D4),
     
     // === TECHNOLOGY COLORS ===
-    'tech': Color(0xFF007AFF),                // iOS system blue
-    'teknoloji': Color(0xFF007AFF),
-    'software': Color(0xFFBF5AF2),            // iOS system purple
-    'yazılım': Color(0xFFBF5AF2),
+    'tech': Color(0xFF3B82F6),                // Modern blue
+    'teknoloji': Color(0xFF3B82F6),
+    'software': Color(0xFF8B5CF6),            // Modern violet
+    'yazılım': Color(0xFF8B5CF6),
     
     // === PERSONAL CARE COLORS ===
-    'personal_care': Color(0xFFFF2D92),       // iOS system pink
-    'kişisel_bakım': Color(0xFFFF2D92),
-    'pets': Color(0xFF8E6A5B),                // Muted brown
-    'evcil_hayvan': Color(0xFF8E6A5B),
-    'childcare': Color(0xFFFFB3BA),           // Soft pink
-    'çocuk_bakımı': Color(0xFFFFB3BA),
+    'personal_care': Color(0xFFEC4899),       // Modern pink
+    'kişisel_bakım': Color(0xFFEC4899),
+    'pets': Color(0xFF92400E),                // Brown
+    'evcil_hayvan': Color(0xFF92400E),
+    'childcare': Color(0xFFFBBF24),           // Soft yellow
+    'çocuk_bakımı': Color(0xFFFBBF24),
     
     // === INCOME CATEGORY COLORS ===
-    'work': Color(0xFF34C759),                // iOS system green
-    'salary': Color(0xFF34C759),
-    'maaş': Color(0xFF34C759),
-    'freelance': Color(0xFF007AFF),           // iOS system blue
-    'laptop': Color(0xFF007AFF),
-    'business': Color(0xFFBF5AF2),            // iOS system purple
-    'iş': Color(0xFFBF5AF2),
-    'investment': Color(0xFFFF9500),          // iOS system orange
-    'yatırım': Color(0xFFFF9500),
-    'rental': Color(0xFF30D158),              // iOS system green
-    'kira': Color(0xFF30D158),
-    'home': Color(0xFF30D158),
-    'bonus': Color(0xFFFF3B30),               // iOS system red
-    'star': Color(0xFFFF3B30),
-    'gift': Color(0xFFFF2D92),                // iOS system pink
-    'hediye': Color(0xFFFF2D92),
-    'card_giftcard': Color(0xFFFF2D92),
-    'commission': Color(0xFF32D74B),          // iOS system green
-    'komisyon': Color(0xFF32D74B),
-    'dividend': Color(0xFF30D158),            // iOS system green
-    'temettü': Color(0xFF30D158),
-    'crypto': Color(0xFFFF9F0A),              // iOS system orange
-    'kripto': Color(0xFFFF9F0A),
-    'stocks': Color(0xFF64D2FF),              // iOS system light blue
-    'hisse': Color(0xFF64D2FF),
-    'royalty': Color(0xFFAF52DE),             // iOS system purple
-    'telif': Color(0xFFAF52DE),
-    'pension': Color(0xFF5AC8FA),             // iOS system light blue
-    'emekli': Color(0xFF5AC8FA),
-    'social_benefits': Color(0xFF5E5CE6),     // iOS system indigo
-    'sosyal_yardım': Color(0xFF5E5CE6),
+    'work': Color(0xFF10B981),                // Modern emerald
+    'salary': Color(0xFF10B981),
+    'maaş': Color(0xFF10B981),
+    'freelance': Color(0xFF3B82F6),           // Modern blue
+    'laptop': Color(0xFF3B82F6),
+    'business': Color(0xFF8B5CF6),            // Modern violet
+    'iş': Color(0xFF8B5CF6),
+    'investment': Color(0xFFF59E0B),          // Modern amber
+    'yatırım': Color(0xFFF59E0B),
+    'rental': Color(0xFF059669),              // Modern green
+    'kira': Color(0xFF059669),
+    'home': Color(0xFF059669),
+    'bonus': Color(0xFFEF4444),               // Modern red
+    'star': Color(0xFFEF4444),
+    'gift': Color(0xFFEC4899),                // Modern pink
+    'hediye': Color(0xFFEC4899),
+    'card_giftcard': Color(0xFFEC4899),
+    'commission': Color(0xFF22C55E),          // Modern green
+    'komisyon': Color(0xFF22C55E),
+    'dividend': Color(0xFF10B981),            // Modern emerald
+    'temettü': Color(0xFF10B981),
+    'crypto': Color(0xFFF59E0B),              // Modern amber
+    'kripto': Color(0xFFF59E0B),
+    'stocks': Color(0xFF0EA5E9),              // Modern sky blue
+    'hisse': Color(0xFF0EA5E9),
+    'royalty': Color(0xFFA855F7),             // Modern purple
+    'telif': Color(0xFFA855F7),
+    'pension': Color(0xFF06B6D4),             // Modern cyan
+    'emekli': Color(0xFF06B6D4),
+    'social_benefits': Color(0xFF6366F1),     // Modern indigo
+    'sosyal_yardım': Color(0xFF6366F1),
     
     // === DEFAULT COLORS ===
-    'default': Color(0xFF8E8E93),             // iOS secondary label
-    'other': Color(0xFF8E8E93),
-    'diğer': Color(0xFF8E8E93),
+    'default': Color(0xFF6B7280),             // Cool gray
+    'other': Color(0xFF6B7280),
+    'diğer': Color(0xFF6B7280),
   };
   
   /// Get color from centralized color map

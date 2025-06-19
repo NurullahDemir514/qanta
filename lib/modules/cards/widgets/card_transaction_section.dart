@@ -221,14 +221,62 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       );
     }
 
+    // Get category icon using CategoryIconService - prioritize category name
+    IconData? categoryIcon;
+    
+    // First try category name (more reliable than database icon field)
+    if (transaction.categoryName != null) {
+      categoryIcon = CategoryIconService.getIcon(transaction.categoryName!.toLowerCase());
+    } 
+    
+    // Only fallback to category.icon if category name lookup failed
+    if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
+      if (category?.icon != null && category!.icon != 'category') {
+        categoryIcon = CategoryIconService.getIcon(category.icon);
+      }
+    }
+
+    // Get category color using CategoryIconService - prioritize centralized colors
+    Color? categoryColor;
+    
+    // First try to get color from centralized map using category name or icon
+    if (transaction.categoryName != null) {
+      // Try category name first (e.g., "market", "yemek", etc.)
+      categoryColor = CategoryIconService.getColorFromMap(
+        transaction.categoryName!.toLowerCase(),
+        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
+      );
+    } else if (category?.icon != null) {
+      // Try icon name (e.g., "restaurant", "car", etc.)
+      categoryColor = CategoryIconService.getColorFromMap(
+        category!.icon,
+        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
+      );
+    }
+    
+    // If no centralized color found, fall back to hex color from database
+    if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
+      if (category?.color != null) {
+        categoryColor = CategoryIconService.getColor(category!.color);
+      } else if (category?.icon != null) {
+        // Use predefined colors based on category type and icon
+        final isIncomeCategory = transactionType == TransactionType.income;
+        categoryColor = CategoryIconService.getCategoryColor(
+          iconName: category!.icon,
+          colorHex: category.color,
+          isIncomeCategory: isIncomeCategory,
+        );
+      }
+    }
+
     return TransactionDesignSystem.buildTransactionItem(
       title: title,
       subtitle: cardName,
       amount: amount,
       time: time,
       type: transactionType,
-      categoryIcon: category?.icon,
-      categoryColor: category?.color,
+      categoryIconData: categoryIcon,      // Use direct IconData
+      categoryColorData: categoryColor,    // Use direct Color
       isDark: isDark,
       isFirst: isFirst,
       isLast: isLast,

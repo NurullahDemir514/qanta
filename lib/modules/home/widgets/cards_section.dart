@@ -4,12 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/providers/unified_card_provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../cards/widgets/cash_balance_card.dart';
 import 'credit_card_widget.dart';
 import '../../cards/widgets/debit_card_widget.dart';
+import '../../../shared/models/account_model.dart';
+import '../../../shared/utils/currency_utils.dart';
 
 class CardsSection extends StatefulWidget {
   const CardsSection({super.key});
@@ -42,18 +43,10 @@ class _CardsSectionState extends State<CardsSection> {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Consumer2<UnifiedCardProvider, UnifiedProviderV2>(
-      builder: (context, cardProvider, providerV2, child) {
-        // Try to use V2 provider first, fallback to legacy
-        final bool useV2 = providerV2.accounts.isNotEmpty;
-        
-        if (useV2) {
-          debugPrint('🎯 CardsSection using QANTA v2 provider');
-          return _buildV2CardsSection(context, providerV2, l10n, isDark);
-        } else {
-          debugPrint('🔄 CardsSection using legacy provider');
-          return _buildLegacyCardsSection(context, cardProvider, l10n, isDark);
-        }
+    return Consumer<UnifiedProviderV2>(
+      builder: (context, providerV2, child) {
+        debugPrint('🎯 CardsSection using QANTA v2 provider');
+        return _buildV2CardsSection(context, providerV2, l10n, isDark);
       },
     );
   }
@@ -69,7 +62,7 @@ class _CardsSectionState extends State<CardsSection> {
         'cardType': 'credit',
         'cardTypeLabel': card['bankName'] ?? card['cardName'],
         'cardNumber': card['formattedCardNumber'] ?? '**** **** **** ${card['id'].substring(0, 4)}',
-        'balance': card['availableLimit'] ?? 0.0,
+        'balance': card['availableLimit']?.toDouble() ?? 0.0, // Use provider's availableLimit directly
         'bankCode': card['bankCode'] ?? 'qanta',
         'expiryDate': '',
         'totalDebt': card['totalDebt'] ?? 0.0,
@@ -163,100 +156,6 @@ class _CardsSectionState extends State<CardsSection> {
     }
   }
 
-  /// Build cards section using legacy provider
-  Widget _buildLegacyCardsSection(BuildContext context, UnifiedCardProvider cardProvider, AppLocalizations l10n, bool isDark) {
-    // Gerçek kart verilerini al
-    final allCards = <Map<String, dynamic>>[];
-    
-    // Kredi kartları ekle
-    for (final card in cardProvider.creditCards) {
-      allCards.add({
-        'cardType': 'credit',
-        'cardTypeLabel': card.bankName,
-        'cardNumber': card.formattedCardNumber,
-        'balance': card.availableLimit,
-        'bankCode': card.bankCode,
-        'expiryDate': '',
-        'totalDebt': card.totalDebt,
-        'creditLimit': card.creditLimit,
-        'usagePercentage': card.usagePercentage,
-        'statementDate': card.statementDate,
-        'dueDate': card.dueDate,
-        'accountId': card.id, // Add account ID for usage tracking
-      });
-    }
-    
-    // Banka kartları ekle
-    for (final card in cardProvider.debitCards) {
-      allCards.add({
-        'cardType': 'debit',
-        'cardTypeLabel': card.cardName ?? card.bankName ?? 'Banka Kartı',
-        'cardName': card.cardName ?? card.bankName ?? 'Banka Kartı',
-        'cardNumber': card.maskedCardNumber,
-        'balance': card.balance,
-        'bankCode': card.bankCode,
-        'accountId': card.id, // Add account ID for usage tracking
-      });
-    }
-    
-    // Nakit hesabı ekle
-    if (cardProvider.cashAccount != null) {
-      allCards.add({
-        'cardType': 'cash',
-        'cardTypeLabel': 'Nakit',
-        'cardNumber': 'Cebinizdeki nakit',
-        'balance': cardProvider.cashAccount!.balance,
-        'bankCode': 'qanta',
-        'accountId': cardProvider.cashAccount!.id, // Add account ID for usage tracking
-      });
-    }
-    
-    // Sort cards by usage frequency (use legacy transactions if available)
-    final legacyTransactions = cardProvider.transactions ?? [];
-    _sortCardsByUsageFrequencyLegacy(allCards, legacyTransactions);
-    
-    return _buildCardsUI(context, allCards, l10n, isDark);
-  }
-
-  /// Sort cards by usage frequency for legacy provider
-  void _sortCardsByUsageFrequencyLegacy(List<Map<String, dynamic>> cards, List<dynamic> transactions) {
-    // Calculate usage count for each card
-    for (final card in cards) {
-      final accountId = card['accountId'] as String;
-      final usageCount = transactions.where((tx) {
-        // Legacy transaction structure - adjust based on your legacy transaction model
-        final txCreditCardId = tx.creditCardId ?? '';
-        final txDebitCardId = tx.debitCardId ?? '';
-        final txCashAccountId = tx.cashAccountId ?? '';
-        
-        return txCreditCardId == accountId || 
-               txDebitCardId == accountId || 
-               txCashAccountId == accountId;
-      }).length;
-      
-      card['usageCount'] = usageCount;
-    }
-    
-    // Sort by usage count (descending - most used first)
-    cards.sort((a, b) {
-      final usageA = a['usageCount'] as int? ?? 0;
-      final usageB = b['usageCount'] as int? ?? 0;
-      
-      // If usage counts are equal, sort by card type priority (cash > debit > credit)
-      if (usageA == usageB) {
-        return _getCardTypePriority(a['cardType'] as String)
-            .compareTo(_getCardTypePriority(b['cardType'] as String));
-      }
-      
-      return usageB.compareTo(usageA); // Descending order
-    });
-    
-    debugPrint('📊 Legacy Cards sorted by usage frequency:');
-    for (final card in cards) {
-      debugPrint('   ${card['cardTypeLabel']}: ${card['usageCount']} transactions');
-    }
-  }
-
   /// Build the actual cards UI (shared between V2 and legacy)
   Widget _buildCardsUI(BuildContext context, List<Map<String, dynamic>> allCards, AppLocalizations l10n, bool isDark) {
     // Eğer hiç kart yoksa boş durum göster
@@ -264,16 +163,14 @@ class _CardsSectionState extends State<CardsSection> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Row(
+          Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   l10n.myCards,
                   style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -292,8 +189,7 @@ class _CardsSectionState extends State<CardsSection> {
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Container(
             height: AppConstants.cardSectionHeight,
             margin: const EdgeInsets.symmetric(horizontal: AppConstants.cardMarginHorizontal),
@@ -349,16 +245,14 @@ class _CardsSectionState extends State<CardsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
+        Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 l10n.myCards,
                 style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
@@ -377,8 +271,7 @@ class _CardsSectionState extends State<CardsSection> {
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         
         // Cards PageView
         SizedBox(

@@ -88,9 +88,9 @@
   "@investments": {
     "description": "Investment portfolio"
   },
-  "analytics": "Analiz",
+  "analytics": "İstatistikler",
   "@analytics": {
-    "description": "Financial analytics"
+    "description": "Analytics menu item"
   },
   "balance": "Bakiye",
   "@balance": {
@@ -356,7 +356,7 @@
   "@goodAfternoon": {
     "description": "Good afternoon greeting"
   },
-  "goodEvening": "İyi akşamlar! 🌆",
+  "goodEvening": "İyi akşamlar!",
   "@goodEvening": {
     "description": "Good evening greeting"
   },
@@ -463,10 +463,6 @@
   "transactions": "İşlemler",
   "@transactions": {
     "description": "Transactions menu item"
-  },
-  "analytics": "İstatistikler",
-  "@analytics": {
-    "description": "Analytics menu item"
   },
   "goals": "Hedefler",
   "@goals": {
@@ -1674,5 +1670,94 @@
   "debitCard": "Banka Kartı",
   "@debitCard": {
     "description": "Debit card account type"
-  }
+  },
+  "statisticsTitle": "İstatistikler",
+  "@statisticsTitle": {
+    "description": "Statistics page title"
+  },
+  "monthlyOverview": "Aylık Genel Bakış",
+  "@monthlyOverview": {
+    "description": "Monthly overview section title"
+  },
+  "totalIncome": "Toplam Gelir",
+  "@totalIncome": {
+    "description": "Total income label"
+  },
+  "totalExpenses": "Toplam Gider",
+  "@totalExpenses": {
+    "description": "Total expenses label"
+  },
+  "netBalance": "Net Bakiye",
+  "@netBalance": {
+    "description": "Net balance label"
+  },
+  "categoryBreakdown": "Kategori Dağılımı",
+  "@categoryBreakdown": {
+    "description": "Category breakdown section title"
+  },
+  "spendingTrends": "Harcama Trendleri",
+  "@spendingTrends": {
+    "description": "Spending trends section title"
+  },
+  "thisMonth": "Bu Ay",
+  "@thisMonth": {
+    "description": "This month label"
+  },
+  "lastMonth": "Geçen Ay",
+  "@lastMonth": {
+    "description": "Last month label"
+  },
+  "last3Months": "Son 3 Ay",
+  "@last3Months": {
+    "description": "Last 3 months label"
+  },
+  "last6Months": "Son 6 Ay",
+  "@last6Months": {
+    "description": "Last 6 months label"
+  },
+  "yearToDate": "Yıl Başından İtibaren",
+  "@yearToDate": {
+    "description": "Year to date label"
+  },
+  "noDataAvailable": "Veri Mevcut Değil",
+  "@noDataAvailable": {
+    "description": "No data available message"
+  },
+  "noTransactionsFound": "Henüz işlem bulunamadı",
+  "@noTransactionsFound": {
+    "description": "No transactions found message"
+  },
+  "averageSpending": "Ortalama Harcama",
+  "@averageSpending": {
+    "description": "Average spending label"
+  },
+  "highestSpending": "En Yüksek Harcama",
+  "@highestSpending": {
+    "description": "Highest spending label"
+  },
+  "lowestSpending": "En Düşük Harcama",
+  "@lowestSpending": {
+    "description": "Lowest spending label"
+  },
+  "savingsRate": "Tasarruf Oranı",
+  "@savingsRate": {
+    "description": "Savings rate label"
+  },
+  "smartInsights": "Akıllı İçgörüler",
+  "visualAnalytics": "Görsel Analiz",
+  "categoryAnalysis": "Kategori Analizi",
+  "financialHealthScore": "Finansal Sağlık Skoru",
+  "spendingTrend": "Harcama Trendi",
+  "viewAll": "Tümünü Gör",
+  "noDataYet": "Henüz analiz edilecek veri yok",
+  "addFirstTransaction": "İlk İşlemi Ekle",
+  "analyzingData": "Finansal verileriniz analiz ediliyor...",
+  "pleaseWait": "Bu işlem birkaç saniye sürebilir",
+  "dataLoadError": "Veriler yüklenirken bir hata oluştu",
+  "excellent": "Mükemmel",
+  "good": "İyi",
+  "average": "Orta",
+  "needsImprovement": "Geliştirilmeli",
+  "dailyAverage": "Günlük Ortalama",
+  "moreCategories": "daha fazla kategori"
 } 

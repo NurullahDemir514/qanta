@@ -272,7 +272,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get goodAfternoon => 'İyi günler! 🌤️';
 
   @override
-  String get goodEvening => 'İyi akşamlar! 🌆';
+  String get goodEvening => 'İyi akşamlar!';
 
   @override
   String get goodNight => 'İyi geceler! 🌙';
@@ -1223,4 +1223,109 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get debitCard => 'Banka Kartı';
+
+  @override
+  String get statisticsTitle => 'İstatistikler';
+
+  @override
+  String get monthlyOverview => 'Aylık Genel Bakış';
+
+  @override
+  String get totalIncome => 'Toplam Gelir';
+
+  @override
+  String get totalExpenses => 'Toplam Gider';
+
+  @override
+  String get netBalance => 'Net Bakiye';
+
+  @override
+  String get categoryBreakdown => 'Kategori Dağılımı';
+
+  @override
+  String get spendingTrends => 'Harcama Trendleri';
+
+  @override
+  String get thisMonth => 'Bu Ay';
+
+  @override
+  String get lastMonth => 'Geçen Ay';
+
+  @override
+  String get last3Months => 'Son 3 Ay';
+
+  @override
+  String get last6Months => 'Son 6 Ay';
+
+  @override
+  String get yearToDate => 'Yıl Başından İtibaren';
+
+  @override
+  String get noDataAvailable => 'Veri Mevcut Değil';
+
+  @override
+  String get noTransactionsFound => 'Henüz işlem bulunamadı';
+
+  @override
+  String get averageSpending => 'Ortalama Harcama';
+
+  @override
+  String get highestSpending => 'En Yüksek Harcama';
+
+  @override
+  String get lowestSpending => 'En Düşük Harcama';
+
+  @override
+  String get savingsRate => 'Tasarruf Oranı';
+
+  @override
+  String get smartInsights => 'Akıllı İçgörüler';
+
+  @override
+  String get visualAnalytics => 'Görsel Analiz';
+
+  @override
+  String get categoryAnalysis => 'Kategori Analizi';
+
+  @override
+  String get financialHealthScore => 'Finansal Sağlık Skoru';
+
+  @override
+  String get spendingTrend => 'Harcama Trendi';
+
+  @override
+  String get viewAll => 'Tümünü Gör';
+
+  @override
+  String get noDataYet => 'Henüz analiz edilecek veri yok';
+
+  @override
+  String get addFirstTransaction => 'İlk İşlemi Ekle';
+
+  @override
+  String get analyzingData => 'Finansal verileriniz analiz ediliyor...';
+
+  @override
+  String get pleaseWait => 'Bu işlem birkaç saniye sürebilir';
+
+  @override
+  String get dataLoadError => 'Veriler yüklenirken bir hata oluştu';
+
+  @override
+  String get excellent => 'Mükemmel';
+
+  @override
+  String get good => 'İyi';
+
+  @override
+  String get average => 'Orta';
+
+  @override
+  String get needsImprovement => 'Geliştirilmeli';
+
+  @override
+  String get dailyAverage => 'Günlük Ortalama';
+
+  @override
+  String get moreCategories => 'daha fazla kategori';
 }

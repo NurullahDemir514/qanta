@@ -121,13 +121,14 @@ class TransactionServiceV2 {
         'p_notes': notes,
       });
 
+      debugPrint('✅ Transaction created successfully: $response');
       return response as String;
     } catch (e) {
-      debugPrint('Error creating transaction: $e');
+      debugPrint('❌ Error creating transaction: $e');
       rethrow;
     }
   }
-
+  
   /// Delete transaction
   static Future<bool> deleteTransaction(String transactionId) async {
     try {

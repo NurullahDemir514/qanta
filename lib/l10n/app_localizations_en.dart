@@ -270,7 +270,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goodAfternoon => 'Good Afternoon! 🌤️';
 
   @override
-  String get goodEvening => 'Good Evening! 🌆';
+  String get goodEvening => 'Good Evening!';
 
   @override
   String get goodNight => 'Good Night! 🌙';
@@ -1217,4 +1217,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debitCard => 'Debit Card';
+
+  @override
+  String get statisticsTitle => 'Statistics';
+
+  @override
+  String get monthlyOverview => 'Monthly Overview';
+
+  @override
+  String get totalIncome => 'Total Income';
+
+  @override
+  String get totalExpenses => 'Total Expenses';
+
+  @override
+  String get netBalance => 'Net Balance';
+
+  @override
+  String get categoryBreakdown => 'Category Breakdown';
+
+  @override
+  String get spendingTrends => 'Spending Trends';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get lastMonth => 'Last Month';
+
+  @override
+  String get last3Months => 'Last 3 Months';
+
+  @override
+  String get last6Months => 'Last 6 Months';
+
+  @override
+  String get yearToDate => 'Year to Date';
+
+  @override
+  String get noDataAvailable => 'No Data Available';
+
+  @override
+  String get noTransactionsFound => 'No transactions found yet';
+
+  @override
+  String get averageSpending => 'Average Spending';
+
+  @override
+  String get highestSpending => 'Highest Spending';
+
+  @override
+  String get lowestSpending => 'Lowest Spending';
+
+  @override
+  String get savingsRate => 'Savings Rate';
+
+  @override
+  String get smartInsights => 'Smart Insights';
+
+  @override
+  String get visualAnalytics => 'Visual Analytics';
+
+  @override
+  String get categoryAnalysis => 'Category Analysis';
+
+  @override
+  String get financialHealthScore => 'Financial Health Score';
+
+  @override
+  String get spendingTrend => 'Spending Trend';
+
+  @override
+  String get viewAll => 'View All';
+
+  @override
+  String get noDataYet => 'No data to analyze yet';
+
+  @override
+  String get addFirstTransaction => 'Add First Transaction';
+
+  @override
+  String get analyzingData => 'Analyzing your financial data...';
+
+  @override
+  String get pleaseWait => 'This may take a few seconds';
+
+  @override
+  String get dataLoadError => 'Error loading data';
+
+  @override
+  String get excellent => 'Excellent';
+
+  @override
+  String get good => 'Good';
+
+  @override
+  String get average => 'Average';
+
+  @override
+  String get needsImprovement => 'Needs Improvement';
+
+  @override
+  String get dailyAverage => 'Daily Average';
+
+  @override
+  String get moreCategories => 'more categories';
 }
