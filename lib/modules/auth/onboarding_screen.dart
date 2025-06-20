@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../shared/utils/currency_utils.dart';
 import 'package:flutter/services.dart';
 import '../../shared/widgets/ios_dialog.dart';
+import '../../shared/widgets/qanta_logo.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -192,31 +193,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-              color: const Color(0xFF10B981),
-                borderRadius: BorderRadius.circular(75),
-                boxShadow: [
-                  BoxShadow(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.2),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Text(
-                  'Q',
-                  style: TextStyle(
-                    fontSize: 80,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            const QantaLogo(size: 150),
             const SizedBox(height: 32),
             Text(
               l10n.welcome,

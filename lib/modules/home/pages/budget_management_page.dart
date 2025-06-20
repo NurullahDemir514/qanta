@@ -143,9 +143,9 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back_ios_rounded,
-            color: const Color(0xFF007AFF),
+            color: Color(0xFF007AFF),
             size: 20,
           ),
         ),
@@ -158,186 +158,290 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
           ),
         ),
         centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: _canSave() ? _saveBudget : null,
-            child: Text(
-              'Kaydet',
-              style: GoogleFonts.inter(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: _canSave() 
-                  ? const Color(0xFF007AFF)
-                  : const Color(0xFF8E8E93),
-              ),
-            ),
-          ),
-        ],
+        actions: [],
       ),
       body: _isLoading
-        ? Center(
+        ? const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF007AFF),
+            ),
+          )
+        : _existingBudgets.isEmpty
+            ? _buildEmptyState(isDark)
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _existingBudgets.length,
+                itemBuilder: (context, index) {
+                  final budget = _existingBudgets[index];
+                  return _buildBudgetCard(budget, isDark, index);
+                },
+              ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddBudgetBottomSheet(context),
+        backgroundColor: const Color(0xFF6D6D70),
+        foregroundColor: Colors.white,
+        elevation: 8,
+        child: const Icon(
+          Icons.add,
+          size: 28,
+        ),
+      ),
+    );
+  }
+
+  void _showAddBudgetBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildBottomSheetContent(context),
+    );
+  }
+
+  Widget _buildBottomSheetContent(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark 
+                ? const Color(0xFF1C1C1E) 
+                : Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircularProgressIndicator(
-                  color: const Color(0xFF007AFF),
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF8E8E93),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16),
+                
+                const SizedBox(height: 20),
+                
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.account_balance_wallet_outlined,
+                        color: const Color(0xFF007AFF),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Yeni Bütçe Ekle',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
                 Text(
-                  'Yükleniyor...',
+                  'Kategori Seçin',
                   style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF8E8E93),
                   ),
                 ),
-              ],
-            ),
-          )
-        : SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                if (_existingBudgets.isNotEmpty) ...[
-                  _buildSection(
-                    title: 'Mevcut Bütçeler',
-                    child: Column(
-                      children: _existingBudgets.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final budget = entry.value;
-                        return _buildExistingBudgetItem(
-                          budget, 
-                          isDark, 
-                          index == _existingBudgets.length - 1
-                        );
-                      }).toList(),
-                    ),
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                const SizedBox(height: 8),
                 
-                _buildSection(
-                  title: 'Yeni Bütçe Ekle',
-                  child: Column(
-                    children: [
-                      _buildFormField(
-                        label: 'Kategori',
-                        child: BudgetCategorySelector(
-                          selectedCategory: _selectedCategoryName,
-                          onCategorySelected: (categoryName) async {
-                            setState(() {
-                              _selectedCategoryName = categoryName;
-                            });
-                            await _findRealCategoryId(categoryName);
-                          },
-                        ),
-                        isDark: isDark,
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      _buildFormField(
-                        label: 'Aylık Limit',
-                        child: _buildAmountInput(isDark),
-                        isDark: isDark,
-                      ),
-                    ],
-                  ),
-                  isDark: isDark,
+                BudgetCategorySelector(
+                  selectedCategory: _selectedCategoryName,
+                  onCategorySelected: (categoryName) async {
+                    setModalState(() {
+                      _selectedCategoryName = categoryName;
+                    });
+                    await _findRealCategoryId(categoryName);
+                  },
                 ),
                 
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+                
+                Text(
+                  'Aylık Limit',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF8E8E93),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                
+                _buildAmountInput(isDark),
+                
+                const SizedBox(height: 24),
+                
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _selectedCategoryId = null;
+                          _selectedCategoryName = null;
+                          _limitController.clear();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(
+                            color: const Color(0xFF8E8E93),
+                            width: 1,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'İptal',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF8E8E93),
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 12),
+                    
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _canSave() ? () async {
+                          await _saveBudget();
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        } : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _canSave() 
+                            ? const Color(0xFF007AFF)
+                            : const Color(0xFF8E8E93),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Bütçe Ekle',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
               ],
             ),
           ),
+        );
+      },
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required Widget child,
-    required bool isDark,
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: isDark 
-          ? const Color(0xFF1C1C1E) 
-          : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
+  Widget _buildEmptyState(bool isDark) {
+    return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            child: Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : Colors.black,
-              ),
+          Icon(
+            Icons.account_balance_wallet_outlined,
+            size: 64,
+            color: const Color(0xFF8E8E93),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Henüz bütçe belirlenmemiş',
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : Colors.black,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: child,
+          const SizedBox(height: 8),
+          Text(
+            'Kategoriler için aylık harcama limiti\nbelirleyerek bütçenizi kontrol edin',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: const Color(0xFF8E8E93),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFormField({
-    required String label,
-    required Widget child,
-    required bool isDark,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-        ),
-        const SizedBox(height: 8),
-        child,
-      ],
-    );
-  }
 
-  Widget _buildExistingBudgetItem(BudgetModel budget, bool isDark, bool isLast) {
+
+  Widget _buildBudgetCard(BudgetModel budget, bool isDark, int index) {
+    
     final numberFormat = NumberFormat('#,##0', 'tr_TR');
     final categoryIcon = CategoryIconService.getIcon(budget.categoryName.toLowerCase());
     final categoryColor = CategoryIconService.getColorFromMap(budget.categoryName.toLowerCase());
     
     return Container(
-      margin: EdgeInsets.only(bottom: isLast ? 0 : 16),
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.only(bottom: index == _existingBudgets.length - 1 ? 0 : 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark 
-          ? const Color(0xFF2C2C2E) 
-          : const Color(0xFFF2F2F7),
-        borderRadius: BorderRadius.circular(12),
+          ? const Color(0xFF1C1C1E) 
+          : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: categoryColor.withValues(alpha: 0.1),
+              color: categoryColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               categoryIcon,
-              size: 22,
+              size: 24,
               color: categoryColor,
             ),
           ),
@@ -351,7 +455,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                 Text(
                   budget.categoryName,
                   style: GoogleFonts.inter(
-                    fontSize: 17,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: isDark ? Colors.white : Colors.black,
                   ),
@@ -360,27 +464,67 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                 Text(
                   '₺${numberFormat.format(budget.monthlyLimit)} / ay',
                   style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF8E8E93),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF34D399),
                   ),
                 ),
               ],
             ),
           ),
           
-          GestureDetector(
-            onTap: () => _deleteBudget(budget.id),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF3B30).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+          IconButton(
+            onPressed: () => _showDeleteDialog(budget),
+            icon: Icon(
+              Icons.delete_outline_rounded,
+              color: const Color(0xFFFF3B30),
+              size: 20,
+            ),
+            padding: const EdgeInsets.all(8),
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BudgetModel budget) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Bütçe Sil',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          '${budget.categoryName} kategorisi için belirlenen bütçeyi silmek istediğinizden emin misiniz?',
+          style: GoogleFonts.inter(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'İptal',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: const Color(0xFF8E8E93),
               ),
-              child: Icon(
-                Icons.delete_outline_rounded,
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteBudget(budget.id);
+            },
+            child: Text(
+              'Sil',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
                 color: const Color(0xFFFF3B30),
-                size: 20,
               ),
             ),
           ),
@@ -426,40 +570,62 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
 
   Widget _buildAmountInput(bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: isDark 
           ? const Color(0xFF2C2C2E) 
           : const Color(0xFFF2F2F7),
         borderRadius: BorderRadius.circular(12),
+        border: _limitController.text.isNotEmpty
+          ? Border.all(
+              color: const Color(0xFF007AFF).withValues(alpha: 0.3),
+              width: 1,
+            )
+          : null,
       ),
-      child: TextField(
-        controller: _limitController,
-        keyboardType: TextInputType.number,
-        style: GoogleFonts.inter(
-          fontSize: 17,
-          fontWeight: FontWeight.w400,
-          color: isDark ? Colors.white : Colors.black,
-        ),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.zero,
-          hintText: '2000',
-          hintStyle: GoogleFonts.inter(
-            fontSize: 17,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF8E8E93),
+      child: Row(
+        children: [
+          Text(
+            '₺',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF007AFF),
+            ),
           ),
-          prefixText: '₺ ',
-          prefixStyle: GoogleFonts.inter(
-            fontSize: 17,
-            fontWeight: FontWeight.w400,
-            color: isDark ? Colors.white : Colors.black,
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _limitController,
+              keyboardType: TextInputType.number,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.black,
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                hintText: '2.000',
+                hintStyle: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF8E8E93),
+                ),
+              ),
+              onChanged: (value) => setState(() {}),
+            ),
           ),
-        ),
-        onChanged: (value) {
-          setState(() {});
-        },
+          if (_limitController.text.isNotEmpty)
+            Text(
+              '/ ay',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF8E8E93),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -538,11 +704,11 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
   }
 
   List<String> _getFilteredSuggestions() {
-    if (_controller.text.isEmpty) return _popularCategories.take(6).toList();
+    if (_controller.text.isEmpty) return _popularCategories.take(4).toList();
     
     return _popularCategories
         .where((category) => category.toLowerCase().contains(_controller.text.toLowerCase()))
-        .take(6)
+        .take(4)
         .toList();
   }
 
@@ -554,57 +720,81 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: isDark 
               ? const Color(0xFF2C2C2E) 
               : const Color(0xFFF2F2F7),
             borderRadius: BorderRadius.circular(12),
+            border: _controller.text.isNotEmpty
+              ? Border.all(
+                  color: const Color(0xFF007AFF).withValues(alpha: 0.3),
+                  width: 1,
+                )
+              : null,
           ),
-          child: TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            style: GoogleFonts.inter(
-              fontSize: 17,
-              fontWeight: FontWeight.w400,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
-              hintText: 'market, yemek, ulaşım...',
-              hintStyle: GoogleFonts.inter(
-                fontSize: 17,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF8E8E93),
+          child: Row(
+            children: [
+              Icon(
+                Icons.search,
+                color: _controller.text.isNotEmpty 
+                  ? const Color(0xFF007AFF)
+                  : const Color(0xFF8E8E93),
+                size: 16,
               ),
-            ),
-            onChanged: (value) {
-              setState(() {});
-              if (value.isNotEmpty) {
-                widget.onCategorySelected(_capitalizeText(value));
-              }
-            },
-            onSubmitted: (value) {
-              if (value.isNotEmpty) {
-                final capitalizedValue = _capitalizeText(value);
-                _controller.text = capitalizedValue;
-                widget.onCategorySelected(capitalizedValue);
-                _focusNode.unfocus();
-              }
-            },
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+
+                    hintText: 'Market, Yemek, Ulaşım...',
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: const Color(0xFF8E8E93),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {});
+                    if (value.isNotEmpty) {
+                      widget.onCategorySelected(_capitalizeText(value));
+                    }
+                  },
+                  onSubmitted: (value) {
+                    if (value.isNotEmpty) {
+                      _selectCategory(_capitalizeText(value));
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
         ),
         
         if (_showSuggestions && _getFilteredSuggestions().isNotEmpty) ...[
           const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isDark 
                 ? const Color(0xFF2C2C2E) 
-                : const Color(0xFFF2F2F7),
+                : Colors.white,
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -612,47 +802,35 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
                 Text(
                   'Önerilen Kategoriler',
                   style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF8E8E93),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: _getFilteredSuggestions().map((category) {
-                    final categoryIcon = CategoryIconService.getIcon(category.toLowerCase());
-                    final categoryColor = CategoryIconService.getColorFromMap(category.toLowerCase());
-                    
                     return GestureDetector(
                       onTap: () => _selectCategory(category),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isDark 
-                            ? const Color(0xFF1C1C1E) 
-                            : Colors.white,
-                          borderRadius: BorderRadius.circular(8),
+                          color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFF007AFF).withValues(alpha: 0.2),
+                            width: 1,
+                          ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              categoryIcon,
-                              size: 16,
-                              color: categoryColor,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              category,
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: isDark ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          category,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF007AFF),
+                          ),
                         ),
                       ),
                     );

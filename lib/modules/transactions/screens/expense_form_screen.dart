@@ -8,6 +8,9 @@ import '../../../shared/models/category_model.dart';
 import '../../../core/services/category_service_v2.dart';
 import '../../../shared/widgets/insufficient_funds_dialog.dart';
 import '../models/payment_method.dart';
+import '../models/card.dart';
+import '../../../shared/models/cash_account.dart';
+import '../../../shared/models/account_model.dart';
 import '../widgets/forms/base_transaction_form.dart';
 import '../widgets/forms/calculator_input_field.dart';
 import '../widgets/forms/expense_category_selector_v2.dart';
@@ -89,7 +92,20 @@ import '../widgets/forms/date_selector.dart';
 /// - [TransferFormScreen] for transfer transactions
 /// - [UnifiedProviderV2] for data management
 class ExpenseFormScreen extends StatefulWidget {
-  const ExpenseFormScreen({super.key});
+  final double? initialAmount;
+  final String? initialDescription;
+  final String? initialCategoryId;
+  final String? initialPaymentMethodId;
+  final DateTime? initialDate;
+  
+  const ExpenseFormScreen({
+    super.key,
+    this.initialAmount,
+    this.initialDescription,
+    this.initialCategoryId,
+    this.initialPaymentMethodId,
+    this.initialDate,
+  });
 
   @override
   State<ExpenseFormScreen> createState() => _ExpenseFormScreenState();
@@ -109,6 +125,104 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   String? _paymentMethodError;
   bool _isLoading = false;
   int _currentStep = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWithQuickNoteData();
+  }
+
+  void _initializeWithQuickNoteData() {
+    debugPrint('🔧 ExpenseForm - Initializing with data:');
+    debugPrint('  - initialAmount: ${widget.initialAmount}');
+    debugPrint('  - initialDescription: ${widget.initialDescription}');
+    debugPrint('  - initialDate: ${widget.initialDate}');
+    debugPrint('  - initialCategoryId: ${widget.initialCategoryId}');
+    
+    // Initialize amount if provided
+    if (widget.initialAmount != null) {
+      _amountController.text = widget.initialAmount!.toStringAsFixed(2);
+      debugPrint('  ✅ Amount set to: ${_amountController.text}');
+    }
+    
+    // Initialize description if provided
+    if (widget.initialDescription != null) {
+      _descriptionController.text = widget.initialDescription!;
+      debugPrint('  ✅ Description set to: ${_descriptionController.text}');
+    }
+    
+    // Initialize date if provided
+    if (widget.initialDate != null) {
+      _selectedDate = widget.initialDate!;
+      debugPrint('  ✅ Date set to: $_selectedDate');
+    }
+    
+    // Initialize category if provided
+    if (widget.initialCategoryId != null && widget.initialCategoryId!.isNotEmpty) {
+      // URL'den gelen kategori decode et - hata durumunda raw değeri kullan
+      try {
+        final decodedCategory = Uri.decodeComponent(widget.initialCategoryId!);
+        _selectedCategory = decodedCategory;
+        debugPrint('  ✅ Category set to: $_selectedCategory (decoded from: ${widget.initialCategoryId})');
+      } catch (e) {
+        // Decode hatası varsa raw değeri kullan
+        _selectedCategory = widget.initialCategoryId!;
+        debugPrint('  ⚠️ Category decode failed, using raw: $_selectedCategory (error: $e)');
+      }
+    }
+    
+    // Initialize payment method if provided
+    if (widget.initialPaymentMethodId != null) {
+      _initializePaymentMethod();
+    }
+  }
+
+
+  
+  void _initializePaymentMethod() async {
+    if (widget.initialPaymentMethodId == null) return;
+    
+    try {
+      final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+      await provider.loadAccounts();
+      
+      final account = provider.getAccountById(widget.initialPaymentMethodId!);
+      if (account != null) {
+        setState(() {
+          if (account.type == AccountType.cash) {
+            _selectedPaymentMethod = PaymentMethod(
+              type: PaymentMethodType.cash,
+              cashAccount: CashAccount(
+                id: account.id,
+                name: account.name,
+                balance: account.balance,
+                userId: account.userId,
+                currency: 'TRY',
+                createdAt: account.createdAt,
+                updatedAt: account.updatedAt,
+              ),
+            );
+          } else {
+            _selectedPaymentMethod = PaymentMethod(
+              type: PaymentMethodType.card,
+              card: PaymentCard(
+                id: account.id,
+                name: account.name,
+                number: '**** **** **** ****',
+                expiryDate: '',
+                type: account.type == AccountType.debit ? CardType.debit : CardType.credit,
+                bankName: account.bankName ?? '',
+                color: account.type == AccountType.debit ? const Color(0xFF007AFF) : const Color(0xFFFF3B30),
+                isActive: account.isActive,
+              ),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ Payment method initialization error: $e');
+    }
+  }
 
   List<String> _getStepTitles(AppLocalizations l10n) => [
     l10n.howMuchSpent,
@@ -397,9 +511,11 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       // Taksitli işlem mi kontrol et
       final installments = _selectedPaymentMethod!.installments ?? 1;
       
+      String? transactionId;
+      
       if (installments > 1) {
         // Taksitli işlem oluştur
-        await providerV2.createInstallmentTransaction(
+        transactionId = await providerV2.createInstallmentTransaction(
           sourceAccountId: sourceAccountId,
           totalAmount: amount,
           count: installments,
@@ -411,7 +527,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
         );
       } else {
         // Normal işlem oluştur
-        await providerV2.createTransaction(
+        transactionId = await providerV2.createTransaction(
           type: v2.TransactionType.expense,
           amount: amount,
           description: _descriptionController.text.trim().isEmpty 
@@ -430,7 +546,8 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
             backgroundColor: const Color(0xFF34C759),
           ),
         );
-        Navigator.pop(context);
+        // Transaction ID'sini döndür
+        Navigator.pop(context, transactionId);
       }
     } catch (e) {
       print('🔍 Expense save error: $e (type: ${e.runtimeType})');

@@ -42,6 +42,9 @@ class AppPageScaffold extends StatelessWidget {
   /// Horizontal padding
   final double horizontalPadding;
   
+  /// Body top padding (varsayılan 20)
+  final double bodyTopPadding;
+  
   /// SliverAppBar'ın expanded height'ı
   final double expandedHeight;
   
@@ -69,6 +72,7 @@ class AppPageScaffold extends StatelessWidget {
     this.floatingActionButtonLocation,
     this.bottomPadding = 120,
     this.horizontalPadding = 20,
+    this.bodyTopPadding = 20,
     this.expandedHeight = 120,
     this.titleFontSize = 28,
     this.subtitleFontSize = 14,
@@ -168,7 +172,7 @@ class AppPageScaffold extends StatelessWidget {
         SliverPadding(
           padding: EdgeInsets.fromLTRB(
             horizontalPadding, 
-            20, 
+            bodyTopPadding,
             horizontalPadding, 
             bottomPadding,
           ),

@@ -278,13 +278,10 @@ class TransactionDetailModal extends StatelessWidget {
                   Positioned(
                     bottom: 6,
                     right: 8,
-                    child: Text(
-                      '*${transaction.card.lastFourDigits}',
-                      style: GoogleFonts.inter(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white.withValues(alpha: 0.9),
-                      ),
+                    child: Icon(
+                      Icons.credit_card,
+                      color: Colors.white.withValues(alpha: 0.9),
+                      size: 12,
                     ),
                   ),
                 ] else ...[

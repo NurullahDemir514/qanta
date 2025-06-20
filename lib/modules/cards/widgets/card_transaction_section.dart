@@ -206,7 +206,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
         amount: amount,
         time: time,
         type: transactionType,
-        categoryIcon: category?.icon,
+        categoryIcon: transaction.categoryName ?? category?.icon, // Prioritize category name
         categoryColor: category?.color,
         isDark: isDark,
         isFirst: isFirst,

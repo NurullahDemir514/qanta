@@ -115,7 +115,7 @@ class CategoryServiceV2 {
   static Future<CategoryModel> createCategory({
     required CategoryType type,
     required String name,
-    String icon = 'category',
+    String icon = 'label',
     String color = '#6B7280',
     int sortOrder = 0,
   }) async {

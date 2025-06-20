@@ -8,6 +8,7 @@ import 'dart:io';
 import '../../core/theme/theme_provider.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/services/profile_image_service.dart';
+import '../../core/services/quick_note_notification_service.dart';
 import '../../core/providers/unified_provider_v2.dart';
 import '../../core/providers/profile_provider.dart';
 import '../../shared/models/account_model.dart';
@@ -18,6 +19,11 @@ import '../../shared/widgets/app_page_scaffold.dart';
 import '../../shared/widgets/profile_section.dart';
 import '../../shared/widgets/profile_item.dart';
 import '../../shared/widgets/profile_avatar.dart';
+import '../settings/pages/privacy_policy_page.dart';
+import '../settings/pages/terms_of_service_page.dart';
+import '../settings/pages/support_page.dart';
+import '../settings/pages/change_password_page.dart';
+import '../settings/pages/faq_page.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -137,11 +143,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           await profileProvider.updateProfileImage(newImageUrl);
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profil fotoğrafı güncellendi! ✅'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
+                      const SnackBar(
+            content: Text('Profil fotoğrafı güncellendi'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
           );
         }
       }
@@ -181,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Profil fotoğrafı silindi! ✅'),
+            content: Text('Profil fotoğrafı silindi'),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
           ),
@@ -279,13 +285,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       );
                     },
                   ),
-                  ProfileItem(
-                    icon: Icons.notifications_outlined,
-                    title: l10n.notifications,
-                    onTap: () {
-                      // TODO: Navigate to notifications settings
+                  FutureBuilder<bool>(
+                    future: QuickNoteNotificationService.isEnabled(),
+                    builder: (context, snapshot) {
+                      final isEnabled = snapshot.data ?? false;
+                      return ProfileItem(
+                        icon: Icons.edit_note_outlined,
+                        title: 'Hızlı Notlar',
+                        subtitle: 'Anında not alma için kalıcı bildirim',
+                        trailing: Switch(
+                          value: isEnabled,
+                          onChanged: (value) async {
+                            final success = await QuickNoteNotificationService.setEnabled(value);
+                            
+                            if (success) {
+                              setState(() {}); // Refresh the UI
+                              
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(value 
+                                    ? 'Hızlı notlar bildirimi açıldı'
+                                    : 'Hızlı notlar bildirimi kapatıldı'),
+                                  backgroundColor: value ? Colors.green : Colors.orange,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            } else {
+                              // Permission denied
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Bildirim izni gerekli! Lütfen ayarlardan açın.'),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      );
                     },
                   ),
+
                 ],
               ),
               const SizedBox(height: 24),
@@ -297,22 +337,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ProfileItem(
                     icon: Icons.lock_outline,
                     title: l10n.changePassword,
-                    onTap: () {
-                      // TODO: Navigate to change password
-                    },
+                    onTap: () => _showChangePasswordDialog(context),
                   ),
                   ProfileItem(
-                    icon: Icons.fingerprint_outlined,
-                    title: l10n.biometricAuth,
+                    icon: Icons.policy_outlined,
+                    title: l10n.privacyPolicy,
                     onTap: () {
-                      // TODO: Navigate to biometric settings
-                    },
-                  ),
-                  ProfileItem(
-                    icon: Icons.privacy_tip_outlined,
-                    title: l10n.privacy,
-                    onTap: () {
-                      // TODO: Navigate to privacy settings
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrivacyPolicyPage(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -327,21 +363,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: Icons.help_outline,
                     title: l10n.contactSupport,
                     onTap: () {
-                      // TODO: Navigate to support
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SupportPage(),
+                        ),
+                      );
                     },
                   ),
                   ProfileItem(
                     icon: Icons.description_outlined,
                     title: l10n.termsOfService,
                     onTap: () {
-                      // TODO: Navigate to terms
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TermsOfServicePage(),
+                        ),
+                      );
                     },
                   ),
                   ProfileItem(
-                    icon: Icons.policy_outlined,
-                    title: l10n.privacyPolicy,
+                    icon: Icons.help_outline,
+                    title: 'Sık Sorulan Sorular',
                     onTap: () {
-                      // TODO: Navigate to privacy policy
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FAQPage(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -357,20 +408,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: l10n.version,
                     subtitle: '1.0.0',
                     onTap: null, // Non-interactive
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              
-              // Test Data Section (Development only)
-              ProfileSection(
-                title: 'Test Verisi (Geliştirme)',
-                children: [
-                  ProfileItem(
-                    icon: Icons.science_outlined,
-                    title: 'Test Verisi Oluştur',
-                    subtitle: 'V2 provider için örnek hesap ve işlemler',
-                    onTap: () => _createTestData(context),
                   ),
                 ],
               ),
@@ -723,138 +760,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _createTestData(BuildContext context) async {
-    try {
-      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
-      // Show loading dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-      
-      // Create test accounts
-      debugPrint('🧪 Creating test accounts...');
-      
-      // 1. Create a credit card
-      final creditCardId = await providerV2.createAccount(
-        type: AccountType.credit,
-        name: 'Akbank Kredi Kartı',
-        bankName: 'Akbank',
-        balance: -2500.0, // Negative for credit card debt
-        creditLimit: 10000.0,
-        statementDay: 15,
-        dueDay: 5,
-      );
-      
-      // 2. Create a debit card
-      final debitCardId = await providerV2.createAccount(
-        type: AccountType.debit,
-        name: 'İş Bankası Vadesiz',
-        bankName: 'İş Bankası',
-        balance: 5000.0,
-      );
-      
-      // 3. Create a cash account
-      final cashAccountId = await providerV2.createAccount(
-        type: AccountType.cash,
-        name: 'Nakit',
-        balance: 500.0,
-      );
-      
-      debugPrint('✅ Test accounts created');
-      
-      // Create test transactions
-      debugPrint('🧪 Creating test transactions...');
-      
-      // Income transaction
-      await providerV2.createTransaction(
-        type: TransactionType.income,
-        amount: 8000.0,
-        description: 'Maaş',
-        sourceAccountId: debitCardId,
-        transactionDate: DateTime.now().subtract(const Duration(days: 5)),
-      );
-      
-      // Expense transactions
-      await providerV2.createTransaction(
-        type: TransactionType.expense,
-        amount: 150.0,
-        description: 'Market alışverişi',
-        sourceAccountId: creditCardId,
-        transactionDate: DateTime.now().subtract(const Duration(days: 2)),
-      );
-      
-      await providerV2.createTransaction(
-        type: TransactionType.expense,
-        amount: 50.0,
-        description: 'Kahve',
-        sourceAccountId: cashAccountId,
-        transactionDate: DateTime.now().subtract(const Duration(days: 1)),
-      );
-      
-      await providerV2.createTransaction(
-        type: TransactionType.expense,
-        amount: 300.0,
-        description: 'Benzin',
-        sourceAccountId: debitCardId,
-        transactionDate: DateTime.now(),
-      );
-      
-      // Transfer transaction
-      await providerV2.createTransaction(
-        type: TransactionType.transfer,
-        amount: 200.0,
-        description: 'Nakit çekme',
-        sourceAccountId: debitCardId,
-        targetAccountId: cashAccountId,
-        transactionDate: DateTime.now().subtract(const Duration(days: 3)),
-      );
-      
-      // Create an installment transaction
-      await providerV2.createInstallmentTransaction(
-        sourceAccountId: creditCardId,
-        totalAmount: 1200.0,
-        count: 6,
-        description: 'Telefon',
-        startDate: DateTime.now().subtract(const Duration(days: 30)),
-      );
-      
-      debugPrint('✅ Test transactions created');
-      
-      // Close loading dialog
-      if (context.mounted) {
-        Navigator.of(context).pop();
-        
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Test verisi başarıyla oluşturuldu!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-      
-    } catch (e) {
-      debugPrint('❌ Error creating test data: $e');
-      
-      // Close loading dialog
-      if (context.mounted) {
-        Navigator.of(context).pop();
-        
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Test verisi oluşturulurken hata: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    }
+  void _showChangePasswordDialog(BuildContext context) {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => const ChangePasswordPage(),
+      ),
+    );
   }
+
+  
 } 

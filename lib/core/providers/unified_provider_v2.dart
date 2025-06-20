@@ -832,6 +832,61 @@ class UnifiedProviderV2 extends ChangeNotifier {
     }
   }
 
+  /// Update account details
+  Future<AccountModel?> updateAccount({
+    required String accountId,
+    String? name,
+    String? bankName,
+    double? balance,
+    double? creditLimit,
+    int? statementDay,
+    int? dueDay,
+    bool? isActive,
+  }) async {
+    try {
+      debugPrint('🔄 Updating account: $accountId');
+      
+      final updatedAccount = await AccountServiceV2.updateAccount(
+        accountId: accountId,
+        name: name,
+        bankName: bankName,
+        creditLimit: creditLimit,
+        statementDay: statementDay,
+        dueDay: dueDay,
+        isActive: isActive,
+      );
+      
+      // If balance is provided, update it separately
+      if (balance != null) {
+        final currentAccount = getAccountById(accountId);
+        if (currentAccount != null) {
+          final currentBalance = currentAccount.balance;
+          final difference = balance - currentBalance;
+          final operation = difference >= 0 ? 'add' : 'subtract';
+          final amount = difference.abs();
+          
+          await AccountServiceV2.updateAccountBalance(
+            accountId: accountId,
+            amount: amount,
+            operation: operation,
+          );
+        }
+      }
+      
+      // Reload accounts and summaries
+      await Future.wait([
+        loadAccounts(),
+        _loadSummaries(),
+      ]);
+      
+      debugPrint('✅ Account updated: $accountId');
+      return updatedAccount;
+    } catch (e) {
+      debugPrint('❌ Error updating account: $e');
+      rethrow;
+    }
+  }
+
   /// Legacy: Has cards check
   bool get hasCards => _accounts.isNotEmpty;
   

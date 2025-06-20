@@ -140,7 +140,7 @@ class CurrencyUtils {
   static String getFallbackCurrencyDisplay(Currency currency) {
     switch (currency) {
       case Currency.TRY:
-        return 'TL';
+        return '₺';
       case Currency.USD:
         return 'USD';
       case Currency.EUR:

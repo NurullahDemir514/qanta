@@ -7,6 +7,7 @@ import '../../../shared/models/transaction_model.dart';
 import '../screens/expense_form_screen.dart';
 import '../screens/income_form_screen.dart';
 import '../screens/transfer_form_screen.dart';
+import '../../home/pages/quick_notes_page.dart';
 
 class TransactionFab extends StatefulWidget {
   const TransactionFab({super.key});
@@ -62,6 +63,23 @@ class _TransactionFabState extends State<TransactionFab> {
     }
   }
 
+  void _onQuickNoteSelected() {
+    HapticFeedback.selectionClick();
+    
+    // Önce FAB'ı kapat
+    setState(() {
+      _isExpanded = false;
+    });
+    
+    // Hızlı Not sayfasını aç
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const QuickNotesPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -83,6 +101,14 @@ class _TransactionFabState extends State<TransactionFab> {
         children: [
           // Speed Dial Options
           if (_isExpanded) ...[
+            // Quick Note Option
+            _buildQuickNoteOption(
+              context: context,
+              isDark: isDark,
+            ),
+            
+            const SizedBox(height: 12),
+            
             // Transfer Option
             _buildSpeedDialOption(
               context: context,
@@ -115,6 +141,94 @@ class _TransactionFabState extends State<TransactionFab> {
           _buildMainFab(context, l10n, isDark, isSmallScreen),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuickNoteOption({
+    required BuildContext context,
+    required bool isDark,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Label
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF1C1C1E).withOpacity(0.9)
+                : Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.06),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            border: isDark 
+                ? Border.all(
+                    color: const Color(0xFF38383A).withOpacity(0.3),
+                    width: 0.5,
+                  )
+                : null,
+          ),
+          child: Text(
+            'Hızlı Not',
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: isDark 
+                  ? const Color(0xFFFFFFFF)
+                  : const Color(0xFF1C1C1E),
+              letterSpacing: -0.1,
+            ),
+          ),
+        ),
+        
+        const SizedBox(width: 12),
+        
+        // Mini FAB - iOS tarzı sade
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFF2F2F7),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            border: isDark 
+                ? Border.all(
+                    color: const Color(0xFF38383A).withOpacity(0.5),
+                    width: 0.5,
+                  )
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _onQuickNoteSelected,
+              borderRadius: BorderRadius.circular(22),
+              child: const Icon(
+                Icons.note_add_rounded,
+                color: Color(0xFFFF9500), // iOS turuncu
+                size: 20,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

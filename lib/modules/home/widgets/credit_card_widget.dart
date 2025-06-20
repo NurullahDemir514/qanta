@@ -113,7 +113,7 @@ class CreditCardWidget extends StatelessWidget {
                             child: Text(
                               bankName?.toUpperCase() ?? cardTypeLabel.toUpperCase(),
                               style: GoogleFonts.inter(
-                                fontSize: 9,
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                                 letterSpacing: 0.8,
@@ -123,7 +123,7 @@ class CreditCardWidget extends StatelessWidget {
                         ],
                       ),
                       
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       
                       // Card name
                       Column(
@@ -132,7 +132,7 @@ class CreditCardWidget extends StatelessWidget {
                           Text(
                             'KART ADI',
                             style: GoogleFonts.inter(
-                              fontSize: 8,
+                              fontSize: 11,
                               color: Colors.white.withValues(alpha: 0.7),
                               letterSpacing: 0.5,
                             ),
@@ -151,7 +151,7 @@ class CreditCardWidget extends StatelessWidget {
                         ],
                       ),
                       
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       const Spacer(),
                       
                       // Credit Card Usage Info
@@ -178,7 +178,7 @@ class CreditCardWidget extends StatelessWidget {
                           ),
                         ),
                         
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -186,7 +186,7 @@ class CreditCardWidget extends StatelessWidget {
                             Text(
                               'Kullanım: ${usagePercentage!.toStringAsFixed(1)}%',
                               style: GoogleFonts.inter(
-                                fontSize: 9,
+                                fontSize: 11,
                                 color: Colors.white.withValues(alpha: 0.8),
                               ),
                             ),
@@ -196,13 +196,13 @@ class CreditCardWidget extends StatelessWidget {
                                   Icon(
                                     Icons.schedule,
                                     color: Colors.white.withValues(alpha: 0.8),
-                                    size: 10,
+                                    size: 12,
                                   ),
                                   const SizedBox(width: 2),
                                   Text(
                                     'Son Ödeme: ${_formatDueDate(statementDate!)}',
                                     style: GoogleFonts.inter(
-                                      fontSize: 9,
+                                      fontSize: 11,
                                       color: Colors.white.withValues(alpha: 0.8),
                                     ),
                                   ),
@@ -211,7 +211,7 @@ class CreditCardWidget extends StatelessWidget {
                           ],
                         ),
                         
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 2),
                       ],
                       
                       // Balance Info
@@ -226,7 +226,7 @@ class CreditCardWidget extends StatelessWidget {
                                 Text(
                                   isCreditCardWithDebt ? 'Kullanılabilir Limit' : l10n.availableBalance,
                                   style: GoogleFonts.inter(
-                                    fontSize: 9,
+                                    fontSize: 11,
                                     color: Colors.white.withValues(alpha: 0.8),
                                   ),
                                 ),
@@ -245,8 +245,9 @@ class CreditCardWidget extends StatelessWidget {
                                   CurrencyUtils.buildCurrencyText(
                                     'Borç: ${themeProvider.formatAmount(totalDebt!)}',
                                     style: GoogleFonts.inter(
-                                      fontSize: 7,
-                                      color: Colors.white.withValues(alpha: 0.7),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white.withValues(alpha: 0.9),
                                     ),
                                     currency: themeProvider.currency,
                                   ),
@@ -305,21 +306,14 @@ class CreditCardWidget extends StatelessWidget {
     final currentMonth = now.month;
     final currentYear = now.year;
     
-    DateTime statementDateTime = DateTime(currentYear, currentMonth, statementDate);
+    // Bu ayın ekstre tarihini hesapla
+    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDate);
     
-    if (statementDateTime.isBefore(now)) {
-      if (currentMonth == 12) {
-        statementDateTime = DateTime(currentYear + 1, 1, statementDate);
-      } else {
-        statementDateTime = DateTime(currentYear, currentMonth + 1, statementDate);
-      }
-    }
-    
-    DateTime tentativeDueDate = statementDateTime.add(const Duration(days: 10));
-    
-    DateTime dueDate = tentativeDueDate;
-    while (dueDate.weekday > 5) {
-      dueDate = dueDate.add(const Duration(days: 1));
+    // Bu ayın son ödeme tarihini hesapla
+    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    // İlk hafta içi günü bul
+    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
     
     const monthNames = [
@@ -327,6 +321,25 @@ class CreditCardWidget extends StatelessWidget {
       'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
     ];
     
-    return '${dueDate.day} ${monthNames[dueDate.month]}';
+    // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini göster
+    if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
+      return '${currentDueDate.day} ${monthNames[currentDueDate.month]}';
+    }
+    
+    // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
+    DateTime nextStatementDate;
+    if (currentMonth == 12) {
+      nextStatementDate = DateTime(currentYear + 1, 1, statementDate);
+    } else {
+      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDate);
+    }
+    
+    // Gelecek ayın son ödeme tarihini hesapla
+    DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
+    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      nextDueDate = nextDueDate.add(const Duration(days: 1));
+    }
+    
+    return '${nextDueDate.day} ${monthNames[nextDueDate.month]}';
   }
 } 

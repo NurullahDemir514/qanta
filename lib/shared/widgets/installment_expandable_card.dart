@@ -157,24 +157,46 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
 
   @override
   Widget build(BuildContext context) {
-    // Get category icon using CategoryIconService - avoid 'category' field
+    // Get category icon using CategoryIconService - prioritize category name over icon field
     IconData? categoryIconData;
-    if (widget.categoryIcon != null && widget.categoryIcon != 'category') {
-      categoryIconData = CategoryIconService.getIcon(widget.categoryIcon!);
+    
+    // First try to extract category name from title (more reliable)
+    String? categoryName;
+    if (widget.title.contains('(') && widget.title.contains('Taksit)')) {
+      // Extract category name from title like "Benzin (6 Taksit)" -> "benzin"
+      categoryName = widget.title.split('(')[0].trim().toLowerCase();
+    }
+    
+    // Try category name first (e.g., "benzin", "market", etc.)
+    if (categoryName != null) {
+      categoryIconData = CategoryIconService.getIcon(categoryName);
+    }
+    
+    // Only fallback to category.icon if category name lookup failed
+    if (categoryIconData == null || categoryIconData == Icons.tag) {
+      if (widget.categoryIcon != null && widget.categoryIcon != 'category') {
+        categoryIconData = CategoryIconService.getIcon(widget.categoryIcon!);
+      }
     }
 
     // Get category color using CategoryIconService - prioritize centralized colors
     Color? categoryColorData;
     
-    // First try to get color from centralized map using icon name
-    if (widget.categoryIcon != null) {
+    // First try to get color from centralized map using category name
+    if (categoryName != null) {
+      categoryColorData = CategoryIconService.getColorFromMap(
+        categoryName,
+        categoryType: widget.type == TransactionType.income ? 'income' : 'expense',
+      );
+    } else if (widget.categoryIcon != null) {
+      // Try icon name (e.g., "restaurant", "car", etc.)
       categoryColorData = CategoryIconService.getColorFromMap(
         widget.categoryIcon!,
         categoryType: widget.type == TransactionType.income ? 'income' : 'expense',
       );
     }
     
-    // If no centralized color found, fall back to hex color
+    // If no centralized color found, fall back to hex color from database
     if (categoryColorData == null || categoryColorData == CategoryIconService.getColorFromMap('default')) {
       if (widget.categoryColor != null) {
         categoryColorData = CategoryIconService.getColor(widget.categoryColor!);

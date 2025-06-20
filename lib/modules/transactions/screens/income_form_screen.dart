@@ -8,6 +8,9 @@ import '../../../shared/models/category_model.dart';
 import '../../../core/services/category_service_v2.dart';
 import '../../../shared/widgets/insufficient_funds_dialog.dart';
 import '../models/payment_method.dart';
+import '../models/card.dart';
+import '../../../shared/models/cash_account.dart';
+import '../../../shared/models/account_model.dart';
 import '../widgets/forms/base_transaction_form.dart';
 import '../widgets/forms/calculator_input_field.dart';
 import '../widgets/forms/income_category_selector.dart';
@@ -17,7 +20,20 @@ import '../widgets/forms/description_field.dart';
 import '../widgets/forms/date_selector.dart';
 
 class IncomeFormScreen extends StatefulWidget {
-  const IncomeFormScreen({super.key});
+  final double? initialAmount;
+  final String? initialDescription;
+  final String? initialCategoryId;
+  final String? initialPaymentMethodId;
+  final DateTime? initialDate;
+  
+  const IncomeFormScreen({
+    super.key,
+    this.initialAmount,
+    this.initialDescription,
+    this.initialCategoryId,
+    this.initialPaymentMethodId,
+    this.initialDate,
+  });
 
   @override
   State<IncomeFormScreen> createState() => _IncomeFormScreenState();
@@ -37,6 +53,92 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
   String? _paymentMethodError;
   bool _isLoading = false;
   int _currentStep = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWithQuickNoteData();
+  }
+
+  void _initializeWithQuickNoteData() {
+    // Initialize amount if provided
+    if (widget.initialAmount != null) {
+      _amountController.text = widget.initialAmount!.toStringAsFixed(2);
+    }
+    
+    // Initialize description if provided
+    if (widget.initialDescription != null) {
+      _descriptionController.text = widget.initialDescription!;
+    }
+    
+    // Initialize date if provided
+    if (widget.initialDate != null) {
+      _selectedDate = widget.initialDate!;
+    }
+    
+    // Initialize category if provided
+    if (widget.initialCategoryId != null && widget.initialCategoryId!.isNotEmpty) {
+      // URL'den gelen kategori decode et - hata durumunda raw değeri kullan
+      try {
+        final decodedCategory = Uri.decodeComponent(widget.initialCategoryId!);
+        _selectedCategory = decodedCategory;
+      } catch (e) {
+        // Decode hatası varsa raw değeri kullan
+        _selectedCategory = widget.initialCategoryId!;
+        debugPrint('⚠️ Income form category decode failed, using raw: $_selectedCategory');
+      }
+    }
+    
+    // Initialize payment method if provided
+    if (widget.initialPaymentMethodId != null) {
+      _initializePaymentMethod();
+    }
+  }
+  
+  void _initializePaymentMethod() async {
+    if (widget.initialPaymentMethodId == null) return;
+    
+    try {
+      final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+      await provider.loadAccounts();
+      
+      final account = provider.getAccountById(widget.initialPaymentMethodId!);
+      if (account != null) {
+        setState(() {
+          if (account.type == AccountType.cash) {
+            _selectedPaymentMethod = PaymentMethod(
+              type: PaymentMethodType.cash,
+              cashAccount: CashAccount(
+                id: account.id,
+                name: account.name,
+                balance: account.balance,
+                userId: account.userId,
+                currency: 'TRY',
+                createdAt: account.createdAt,
+                updatedAt: account.updatedAt,
+              ),
+            );
+          } else {
+            _selectedPaymentMethod = PaymentMethod(
+              type: PaymentMethodType.card,
+              card: PaymentCard(
+                id: account.id,
+                name: account.name,
+                number: '**** **** **** ****',
+                expiryDate: '',
+                type: account.type == AccountType.debit ? CardType.debit : CardType.credit,
+                bankName: account.bankName ?? '',
+                color: account.type == AccountType.debit ? const Color(0xFF007AFF) : const Color(0xFFFF3B30),
+                isActive: account.isActive,
+              ),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ Payment method initialization error: $e');
+    }
+  }
 
   List<String> _getStepTitles(AppLocalizations l10n) => [
     l10n.howMuchEarned,
@@ -279,7 +381,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       }
       
       // Create income transaction using v2 system
-      await providerV2.createTransaction(
+      final transactionId = await providerV2.createTransaction(
         type: v2.TransactionType.income,
         amount: amount,
         description: _descriptionController.text.trim().isEmpty 
@@ -297,7 +399,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
             backgroundColor: const Color(0xFF34C759),
           ),
         );
-        Navigator.pop(context);
+        // Transaction ID'sini döndür
+        Navigator.pop(context, transactionId);
       }
     } catch (e) {
       if (mounted) {

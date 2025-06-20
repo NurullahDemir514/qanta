@@ -146,7 +146,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
         });
 
         // Bütçe aşımı kontrolü
-        _checkBudgetAlerts(updatedStats);
+        _checkBudgetAlerts();
       }
     } catch (e) {
       debugPrint('Budget stats güncellenirken hata: $e');
@@ -169,17 +169,19 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
     return false;
   }
 
-  void _checkBudgetAlerts(List<BudgetCategoryStats> stats) {
+  void _checkBudgetAlerts() {
+    if (_budgetStats.isEmpty || !mounted) return;
+    
     final now = DateTime.now();
     
-    for (final stat in stats) {
+    for (final stat in _budgetStats) {
       final progress = stat.progressPercentage;
-      final categoryKey = stat.categoryId;
+      final categoryKey = stat.categoryName.toLowerCase();
       
-      // Cooldown kontrolü
+      // Cooldown kontrolü (24 saat)
       if (_lastAlertTimes.containsKey(categoryKey)) {
         final lastAlert = _lastAlertTimes[categoryKey]!;
-        if (now.difference(lastAlert) < _alertCooldown) {
+        if (now.difference(lastAlert) < const Duration(hours: 24)) {
           continue; // Bu kategori için henüz cooldown süresi dolmamış
         }
       }
@@ -188,16 +190,11 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
       String alertMessage = '';
       Color alertColor = Colors.red;
       
-      if (stat.isOverBudget) {
-        // Bütçe aşıldı
+      // Sadece bütçe aşıldığında uyarı göster (kritik durum)
+      if (stat.isOverBudget && progress > 1.2) { // %120'den fazla aşıldığında
         shouldShowAlert = true;
-        alertMessage = '${stat.categoryName} bütçesi aşıldı! (${(progress * 100).toStringAsFixed(0)}%)';
+        alertMessage = '${stat.categoryName} bütçesi ciddi şekilde aşıldı! (${(progress * 100).toStringAsFixed(0)}%)';
         alertColor = const Color(0xFFFF3B30);
-      } else if (progress > 0.8) {
-        // %80 uyarısı
-        shouldShowAlert = true;
-        alertMessage = '${stat.categoryName} bütçesinin %${(progress * 100).toStringAsFixed(0)}\'i kullanıldı!';
-        alertColor = const Color(0xFFFF9500);
       }
       
       if (shouldShowAlert) {
@@ -209,7 +206,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
           SnackBar(
             content: Text(alertMessage),
             backgroundColor: alertColor,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 1),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -252,19 +249,12 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                   ),
                   GestureDetector(
                     onTap: () => _showBudgetManagement(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF007AFF).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Yönet',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF007AFF),
-                        ),
+                    child: Text(
+                      'Yönet',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF007AFF),
                       ),
                     ),
                   ),
@@ -321,7 +311,6 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
       onTap: () => _showBudgetManagement(context),
       child: Container(
         width: cardWidth,
-        margin: const EdgeInsets.only(left: 16, right: 8),
         child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
         child: Column(
@@ -399,8 +388,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
       child: Container(
         width: cardWidth,
         margin: EdgeInsets.only(
-          left: index == 0 ? 16 : 8,
-          right: 8,
+          right: index == (_budgetStats.length - 1) ? 0 : 12,
         ),
         decoration: BoxDecoration(
         color: isDark 

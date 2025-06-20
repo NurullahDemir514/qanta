@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="72dp"
+    android:height="72dp"
+    android:viewportWidth="720"
+    android:viewportHeight="720">
+
+    <!-- Büyük beyaz Q harfi -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M160,80
+            c-110,58 -164,166 -154,316
+            c6,132 40,198 138,272
+            c70,52 210,66 300,28
+            c64,-26 76,-28 98,-2
+            c12,16 50,28 82,28
+            l58,0 -42,-56
+            c-42,-56 -42,-60 -8,-162
+            c58,-182 -6,-358 -166,-440
+            c-68,-34 -228,-26 -306,16
+            z
+            m286,84
+            c66,50 104,170 86,268
+            c-14,70 -16,72 -52,40
+            c-20,-18 -60,-30 -92,-26
+            l-54,6 56,66
+            c66,78 48,104 -74,104
+            c-198,0 -280,-298 -126,-452
+            c62,-62 182,-66 256,-6
+            z" />
+</vector>

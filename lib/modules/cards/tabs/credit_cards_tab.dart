@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/events/card_events.dart';
@@ -180,13 +181,38 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
           ),
         ),
         message: Text(
-          creditCard['formattedCardNumber'] ?? '**** **** **** ****',
+          'Kredi Kartı',
           style: GoogleFonts.inter(
             fontSize: 14,
             color: CupertinoColors.secondaryLabel,
           ),
         ),
         actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              _showStatements(creditCard);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  CupertinoIcons.doc_text,
+                  color: CupertinoColors.systemBlue,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Ekstreler',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: CupertinoColors.systemBlue,
+                  ),
+                ),
+              ],
+            ),
+          ),
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
@@ -255,52 +281,61 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
   }
 
   void _showDeleteConfirmation(creditCard) {
-    showCupertinoDialog(
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
+      builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
           'Kartı Sil',
           style: GoogleFonts.inter(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
           ),
         ),
-        content: Text(
-          '${creditCard['cardName'] ?? AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta')} kartını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+        message: Text(
+          '${creditCard['cardName'] ?? AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta')} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.',
           style: GoogleFonts.inter(
             fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
           ),
         ),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(
-              'İptal',
-              style: GoogleFonts.inter(
-                fontSize: 17,
-                fontWeight: FontWeight.w500,
-                color: CupertinoColors.systemBlue,
-              ),
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-          CupertinoDialogAction(
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
             isDestructiveAction: true,
-            child: Text(
-              'Sil',
-              style: GoogleFonts.inter(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: CupertinoColors.destructiveRed,
-              ),
-            ),
             onPressed: () {
               Navigator.pop(context);
               _deleteCard(creditCard);
             },
+            child: Text(
+              'Sil',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ),
         ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(
+            'İptal',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  void _showStatements(creditCard) {
+    HapticFeedback.lightImpact();
+    
+    context.push('/credit-card-statements?cardId=${creditCard['id']}&cardName=${Uri.encodeComponent(creditCard['cardName'] ?? 'Kredi Kartı')}&bankName=${Uri.encodeComponent(AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta'))}&statementDay=${creditCard['statementDate'] ?? 15}');
   }
 
   void _editCard(creditCard) {

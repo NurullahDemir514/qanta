@@ -197,7 +197,9 @@ class AccountSelector extends StatelessWidget {
                   Text(
                     account.id == 'cash' 
                       ? l10n.digitalWallet
-                      : '•••• ${account.lastFourDigits}',
+                      : account.type == CardType.credit 
+                        ? 'Kredi Kartı'
+                        : 'Banka Kartı',
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,

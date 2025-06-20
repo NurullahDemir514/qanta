@@ -71,22 +71,40 @@ class CreditCardModel {
 
   // Son ödeme tarihini hesapla
   DateTime get nextDueDate {
-    final statementDate = nextStatementDate;
-    var dueMonth = statementDate.month;
-    var dueYear = statementDate.year;
+    final now = DateTime.now();
+    final currentMonth = now.month;
+    final currentYear = now.year;
     
-    // Son ödeme tarihi ekstre tarihinden sonraki ayda
-    dueMonth++;
-    if (dueMonth > 12) {
-      dueMonth = 1;
-      dueYear++;
+    // Bu ayın ekstre tarihini hesapla
+    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDate);
+    
+    // Bu ayın son ödeme tarihini hesapla
+    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    // İlk hafta içi günü bul
+    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
     
-    // Ayın son gününü kontrol et
-    final lastDayOfMonth = DateTime(dueYear, dueMonth + 1, 0).day;
-    final actualDueDate = dueDate > lastDayOfMonth ? lastDayOfMonth : dueDate;
+    // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini döndür
+    if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
+      return currentDueDate;
+    }
     
-    return DateTime(dueYear, dueMonth, actualDueDate);
+    // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
+    DateTime nextStatementDate;
+    if (currentMonth == 12) {
+      nextStatementDate = DateTime(currentYear + 1, 1, statementDate);
+    } else {
+      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDate);
+    }
+    
+    // Gelecek ayın son ödeme tarihini hesapla
+    DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
+    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      nextDueDate = nextDueDate.add(const Duration(days: 1));
+    }
+    
+    return nextDueDate;
   }
 
   // Kalan gün sayısı (son ödeme tarihine)

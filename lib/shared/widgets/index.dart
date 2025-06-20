@@ -16,6 +16,7 @@ export 'custom_button.dart';
 export 'bank_autocomplete_field.dart';
 export 'thousands_separator_input_formatter.dart';
 export 'installment_expandable_card.dart';
+export 'qanta_logo.dart';
 
 // Cards module widgets
 // export '../modules/cards/widgets/card_transaction_section.dart'; 

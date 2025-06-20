@@ -9,6 +9,10 @@ import '../modules/profile/profile_screen.dart';
 import '../modules/cards/cards_screen.dart';
 import '../modules/insights/statistics_screen.dart';
 import '../modules/home/pages/budget_management_page.dart';
+import '../modules/home/pages/quick_notes_page.dart';
+import '../modules/transactions/screens/expense_form_screen.dart';
+import '../modules/transactions/screens/income_form_screen.dart';
+import '../modules/cards/screens/credit_card_statements_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -192,6 +196,131 @@ class AppRouter {
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const BudgetManagementPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: curve),
+            );
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      ),
+      GoRoute(
+        path: '/quick-notes',
+        name: 'quick-notes',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const QuickNotesPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: curve),
+            );
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      ),
+      GoRoute(
+        path: '/income-form',
+        name: 'income-form',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: IncomeFormScreen(
+            initialDescription: state.uri.queryParameters['description'],
+            initialDate: state.uri.queryParameters['date'] != null 
+                ? DateTime.fromMillisecondsSinceEpoch(int.parse(state.uri.queryParameters['date']!))
+                : null,
+            initialAmount: state.uri.queryParameters['amount'] != null
+                ? double.tryParse(state.uri.queryParameters['amount']!)
+                : null,
+            initialCategoryId: state.uri.queryParameters['category'],
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(0.0, 1.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: curve),
+            );
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      ),
+      GoRoute(
+        path: '/expense-form',
+        name: 'expense-form',
+        pageBuilder: (context, state) {
+          // Debug: URL parametrelerini logla
+          print('🚨 ROUTER CALLED - Expense Form');
+          print('URI: ${state.uri}');
+          print('Query Parameters: ${state.uri.queryParameters}');
+          print('Amount param: ${state.uri.queryParameters['amount']}');
+          print('Category param: ${state.uri.queryParameters['category']}');
+          
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: ExpenseFormScreen(
+              key: ValueKey('expense-form-${DateTime.now().millisecondsSinceEpoch}'),
+              initialDescription: state.uri.queryParameters['description'],
+              initialDate: state.uri.queryParameters['date'] != null 
+                  ? DateTime.fromMillisecondsSinceEpoch(int.parse(state.uri.queryParameters['date']!))
+                  : null,
+              initialAmount: state.uri.queryParameters['amount'] != null
+                  ? double.tryParse(state.uri.queryParameters['amount']!)
+                  : null,
+              initialCategoryId: state.uri.queryParameters['category'],
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
+
+              var tween = Tween(begin: begin, end: end).chain(
+                CurveTween(curve: curve),
+              );
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 400),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/credit-card-statements',
+        name: 'credit-card-statements',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: CreditCardStatementsScreen(
+            cardId: state.uri.queryParameters['cardId'] ?? '',
+            cardName: state.uri.queryParameters['cardName'] ?? '',
+            bankName: state.uri.queryParameters['bankName'] ?? '',
+            statementDay: int.tryParse(state.uri.queryParameters['statementDay'] ?? '15') ?? 15,
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;

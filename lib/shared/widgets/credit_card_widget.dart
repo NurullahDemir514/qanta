@@ -104,14 +104,14 @@ class CreditCardWidget extends StatelessWidget {
                   
                   const SizedBox(height: 8),
                   
-                  // Card number (last 4 digits)
+                  // Card type
                   Text(
-                    '**** **** **** ${card.lastFourDigits}',
+                    'Kredi Kartı',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      letterSpacing: 2,
+                      letterSpacing: 1,
                     ),
                   ),
                   

@@ -190,7 +190,7 @@ class _DebitCardsTabState extends State<DebitCardsTab> {
           ),
         ),
         message: Text(
-          card['maskedCardNumber'] ?? '**** **** **** ****',
+          'Banka Kartı',
           style: GoogleFonts.inter(
             fontSize: 14,
             color: CupertinoColors.secondaryLabel,
@@ -265,50 +265,53 @@ class _DebitCardsTabState extends State<DebitCardsTab> {
   }
 
   void _showDeleteConfirmation(card) {
-    showCupertinoDialog(
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
+      builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
           'Kartı Sil',
           style: GoogleFonts.inter(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
           ),
         ),
-        content: Text(
-          '${card['cardName'] ?? AppConstants.getBankName(card['bankCode'] ?? 'qanta')} kartını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+        message: Text(
+          '${card['cardName'] ?? AppConstants.getBankName(card['bankCode'] ?? 'qanta')} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.',
           style: GoogleFonts.inter(
             fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
           ),
         ),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(
-              'İptal',
-              style: GoogleFonts.inter(
-                fontSize: 17,
-                fontWeight: FontWeight.w500,
-                color: CupertinoColors.systemBlue,
-              ),
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-          CupertinoDialogAction(
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
             isDestructiveAction: true,
-            child: Text(
-              'Sil',
-              style: GoogleFonts.inter(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: CupertinoColors.destructiveRed,
-              ),
-            ),
             onPressed: () {
               Navigator.pop(context);
               _deleteCard(card);
             },
+            child: Text(
+              'Sil',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ),
         ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(
+            'İptal',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }

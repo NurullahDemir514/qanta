@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/app_page_scaffold.dart';
 import '../../../shared/widgets/animated_empty_state.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../core/providers/unified_provider_v2.dart';
-import '../widgets/transaction_filter_chips.dart';
+import '../../../core/services/transaction_service_v2.dart' as service;
 import '../widgets/transaction_search_bar.dart';
+import '../widgets/transaction_time_period_selector.dart';
+import '../widgets/transaction_combined_filters.dart';
+import '../widgets/transaction_sort_selector.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../shared/widgets/ios_transaction_list.dart';
 import '../../../shared/models/payment_card_model.dart' as pcm;
@@ -24,9 +29,12 @@ class TransactionsScreen extends StatefulWidget {
 class _TransactionsScreenState extends State<TransactionsScreen> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
+  final _numberFormat = NumberFormat('#,##0', 'tr_TR'); // Türkçe binlik ayıraç
   
   // Filter state using V2 transaction types
   v2.TransactionType? _selectedFilter;
+  TimePeriod _selectedTimePeriod = TimePeriod.all;
+  SortType _selectedSortType = SortType.dateNewest;
   String _searchQuery = '';
 
   @override
@@ -50,12 +58,41 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       filtered = filtered.where((t) => t.type == _selectedFilter).toList();
     }
     
+    // Apply time period filter
+    final dateRange = _selectedTimePeriod.getDateRange();
+    if (dateRange != null) {
+      filtered = filtered.where((t) {
+        final transactionDate = t.transactionDate;
+        return transactionDate.isAfter(dateRange.start.subtract(const Duration(seconds: 1))) &&
+               transactionDate.isBefore(dateRange.end.add(const Duration(seconds: 1)));
+      }).toList();
+    }
+    
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((t) => 
         t.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
         (t.categoryName?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)
       ).toList();
+    }
+    
+    // Apply sorting
+    switch (_selectedSortType) {
+      case SortType.dateNewest:
+        filtered.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+        break;
+      case SortType.dateOldest:
+        filtered.sort((a, b) => a.transactionDate.compareTo(b.transactionDate));
+        break;
+      case SortType.amountHighest:
+        filtered.sort((a, b) => b.amount.compareTo(a.amount));
+        break;
+      case SortType.amountLowest:
+        filtered.sort((a, b) => a.amount.compareTo(b.amount));
+        break;
+      case SortType.alphabetical:
+        filtered.sort((a, b) => a.description.toLowerCase().compareTo(b.description.toLowerCase()));
+        break;
     }
     
     return filtered;
@@ -73,6 +110,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     });
   }
 
+  void _onTimePeriodChanged(TimePeriod period) {
+    setState(() {
+      _selectedTimePeriod = period;
+    });
+  }
+
+  void _onSortTypeChanged(SortType sortType) {
+    setState(() {
+      _selectedSortType = sortType;
+    });
+  }
+
   Future<void> _onRefresh() async {
     final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
     await providerV2.loadTransactions();
@@ -86,14 +135,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     
     return AppPageScaffold(
       title: l10n.transactions,
+      bodyTopPadding: 0, // Stats kartını filtrelerden hemen sonra başlat
       searchBar: TransactionSearchBar(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
               ),
-      filters: TransactionFilterChips(
-              selectedFilter: _selectedFilter,
-              onFilterChanged: _onFilterChanged,
-            ),
+      filters: TransactionCombinedFilters(
+        selectedTransactionType: _selectedFilter,
+        selectedTimePeriod: _selectedTimePeriod,
+        selectedSortType: _selectedSortType,
+        onTransactionTypeChanged: _onFilterChanged,
+        onTimePeriodChanged: _onTimePeriodChanged,
+        onSortTypeChanged: _onSortTypeChanged,
+      ),
       onRefresh: _onRefresh,
       scrollController: _scrollController,
       body: _buildBody(filteredTransactions, l10n, isDark),
@@ -125,10 +179,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       );
     }
 
-        // Transaction list
+        // Transaction list with quick stats
     return SliverToBoxAdapter(
       child: Column(
         children: [
+          // Quick stats card
+          _buildQuickStatsCard(transactions, isDark),
+          const SizedBox(height: 16),
+          
+          // Transaction list
           if (transactions.isNotEmpty) ...[
             TransactionDesignSystem.buildTransactionList(
               transactions: _buildTransactionWidgets(transactions, isDark),
@@ -143,6 +202,114 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
       },
     );
+  }
+
+  Widget _buildQuickStatsCard(List<v2.TransactionWithDetailsV2> transactions, bool isDark) {
+    // Calculate stats
+    double totalIncome = 0;
+    double totalExpenses = 0;
+    int transactionCount = transactions.length;
+    
+    for (final transaction in transactions) {
+      if (transaction.type == v2.TransactionType.income) {
+        totalIncome += transaction.amount;
+      } else if (transaction.type == v2.TransactionType.expense) {
+        totalExpenses += transaction.amount;
+      }
+    }
+    
+    final netAmount = totalIncome - totalExpenses;
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          // Income
+          Expanded(
+            child: _buildStatItem(
+              title: 'Gelir',
+              amount: totalIncome,
+              color: const Color(0xFF10B981),
+              isDark: isDark,
+            ),
+          ),
+          
+          Container(
+            width: 1,
+            height: 40,
+            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+          ),
+          
+          // Expenses
+          Expanded(
+            child: _buildStatItem(
+              title: 'Gider',
+              amount: totalExpenses,
+              color: const Color(0xFFEF4444),
+              isDark: isDark,
+            ),
+          ),
+          
+          Container(
+            width: 1,
+            height: 40,
+            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+          ),
+          
+          // Net
+          Expanded(
+            child: _buildStatItem(
+              title: 'Net',
+              amount: netAmount,
+              color: netAmount >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+              isDark: isDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem({
+    required String title,
+    required double amount,
+    required Color color,
+    required bool isDark,
+  }) {
+    return Column(
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '₺${_formatNumber(amount)}',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatNumber(double number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else {
+      // Binlik ayıraçlı tam sayı formatı
+      return _numberFormat.format(number);
+    }
   }
 
   List<Widget> _buildTransactionWidgets(List<v2.TransactionWithDetailsV2> transactions, bool isDark) {
@@ -294,7 +461,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       categoryColorData: categoryColor,    // Use direct Color
       isDark: isDark,
       onLongPress: () {
-        // TODO: Add delete functionality if needed
+        _showTransactionDeleteDialog(context, transaction);
       },
     );
   }
@@ -308,7 +475,191 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
   }
 
+  /// Show delete dialog for regular transactions
+  void _showTransactionDeleteDialog(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(
+          'İşlemi Sil',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
+          ),
+        ),
+        message: Text(
+          '${transaction.description} işlemini silmek istediğinizden emin misiniz?\n\nTutar: ₺${_numberFormat.format(transaction.amount)}',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
+          ),
+        ),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteTransaction(transaction);
+            },
+            child: Text(
+              'Sil',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(
+            'İptal',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Show delete dialog for installment transactions
   void _showInstallmentDeleteDialog(BuildContext context, v2.TransactionWithDetailsV2 transaction, Map<String, int?>? installmentInfo) {
-    // Implement the logic to show the delete dialog
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(
+          'Taksitli İşlemi Sil',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
+          ),
+        ),
+        message: Text(
+          '${transaction.description} taksitli işlemini tamamen silmek istediğinizden emin misiniz?\n\nToplam Tutar: ₺${_numberFormat.format(transaction.amount)}\n\nBu işlem tüm taksitleri silecek ve ödenen tutarlar geri iade edilecektir.',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF8E8E93),
+          ),
+        ),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteInstallmentTransaction(transaction);
+            },
+            child: Text(
+              'Tümünü Sil',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(
+            'İptal',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Delete regular transaction
+  Future<void> _deleteTransaction(v2.TransactionWithDetailsV2 transaction) async {
+    try {
+      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+      
+      // Show loading indicator
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('İşlem siliniyor...'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+      
+      // Delete transaction using provider (same as recent transactions)
+      final success = await providerV2.deleteTransaction(transaction.id);
+      
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('İşlem silindi'),
+            backgroundColor: Color(0xFF34C759),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Error deleting transaction: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('İşlem silinirken hata oluştu: $e'),
+            backgroundColor: const Color(0xFFEF4444),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Delete installment transaction
+  Future<void> _deleteInstallmentTransaction(v2.TransactionWithDetailsV2 transaction) async {
+    try {
+      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+      
+      // Show loading indicator
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Taksitli işlem siliniyor...'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+      
+      // Delete installment transaction using provider
+      final success = await providerV2.deleteInstallmentTransaction(transaction.id);
+      
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Taksitli işlem silindi'),
+            backgroundColor: Color(0xFF34C759),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Error deleting installment transaction: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Taksitli işlem silinirken hata oluştu: $e'),
+            backgroundColor: const Color(0xFFEF4444),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 } 

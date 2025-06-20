@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/services/profile_image_service.dart';
+import '../../core/services/quick_note_notification_service.dart';
 import '../../core/providers/unified_card_provider.dart';
 import '../../core/providers/unified_provider_v2.dart';
 import '../../l10n/app_localizations.dart';
@@ -20,8 +21,12 @@ import 'widgets/balance_overview_card.dart';
 import 'widgets/budget_overview_card.dart';
 import 'widgets/cards_section.dart';
 import 'widgets/recent_transactions_section.dart';
+import 'widgets/quick_notes_card.dart';
+import 'widgets/notifications_section.dart';
 import 'utils/greeting_utils.dart';
 import '../../core/providers/profile_provider.dart';
+import '../../shared/widgets/quick_note_dialog.dart';
+import '../../shared/widgets/reminder_checker.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -150,28 +155,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Load data with new provider
+    // Initialize providers
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadDataWithNewProvider();
+      context.read<UnifiedProviderV2>().loadAllData();
+      // Set context for notification service
+      QuickNoteNotificationService.setContext(context);
     });
-  }
-
-  Future<void> _loadDataWithNewProvider() async {
-    try {
-      if (!mounted) return;
-      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
-      // Load data with new provider
-      if (providerV2.accounts.isEmpty) {
-        debugPrint('🔄 Loading data with QANTA v2 provider...');
-        await providerV2.loadAllData();
-        debugPrint('✅ Data loaded with QANTA v2 provider');
-      } else {
-        debugPrint('✅ Data already loaded with QANTA v2 provider');
-      }
-    } catch (e) {
-      debugPrint('❌ Error loading data with QANTA v2 provider: $e');
-    }
   }
 
   @override
@@ -184,7 +173,9 @@ class _HomeScreenState extends State<HomeScreen> {
         final firstName = GreetingUtils.getFirstName(fullName);
         final profileImageUrl = profileProvider.profileImageUrl;
         
-        return AppPageScaffold(
+        return Stack(
+          children: [
+            AppPageScaffold(
           title: l10n.greetingHello(firstName),
           subtitle: GreetingUtils.getGreetingByTime(l10n),
           titleFontSize: 18,
@@ -225,6 +216,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const BalanceOverviewCard(),
               const SizedBox(height: 24),
               
+              // Notifications Section (only shows if there are pending reminders)
+              const NotificationsSection(),
+              const SizedBox(height: 24),
+              
               // Budget Overview Card
               const BudgetOverviewCard(),
               const SizedBox(height: 24),
@@ -251,6 +246,9 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
           ),
+            ),
+
+          ],
         );
       },
     );

@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/providers/credit_card_provider.dart';
+import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/models/credit_card_model.dart';
 import '../../../shared/utils/currency_utils.dart';
 
 class EditCreditCardForm extends StatefulWidget {
-  final CreditCardModel creditCard;
+  final dynamic creditCard; // Can be CreditCardModel or Map
   final VoidCallback? onSuccess;
 
   const EditCreditCardForm({
@@ -27,13 +27,68 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
   final _cardNameController = TextEditingController();
   final _creditLimitController = TextEditingController();
   final _totalDebtController = TextEditingController();
-  final _lastFourDigitsController = TextEditingController();
 
   String? _selectedBankCode;
   int _statementDate = 1;
   int _dueDate = 1;
   bool _isLoading = false;
-  String? _lastFourDigitsError;
+
+  // Helper methods to extract data from either CreditCardModel or Map
+  String get cardId {
+    if (widget.creditCard is Map) {
+      return widget.creditCard['id'] as String;
+    } else {
+      return widget.creditCard.id;
+    }
+  }
+
+  String get bankCode {
+    if (widget.creditCard is Map) {
+      return widget.creditCard['bankCode'] ?? 'qanta';
+    } else {
+      return widget.creditCard.bankCode;
+    }
+  }
+
+  String? get cardName {
+    if (widget.creditCard is Map) {
+      return widget.creditCard['cardName'] as String?;
+    } else {
+      return widget.creditCard.cardName;
+    }
+  }
+
+  double get creditLimit {
+    if (widget.creditCard is Map) {
+      return (widget.creditCard['creditLimit'] as num?)?.toDouble() ?? 0.0;
+    } else {
+      return widget.creditCard.creditLimit;
+    }
+  }
+
+  double get totalDebt {
+    if (widget.creditCard is Map) {
+      return (widget.creditCard['totalDebt'] as num?)?.toDouble() ?? 0.0;
+    } else {
+      return widget.creditCard.totalDebt;
+    }
+  }
+
+  int get statementDate {
+    if (widget.creditCard is Map) {
+      return widget.creditCard['statementDate'] as int? ?? 1;
+    } else {
+      return widget.creditCard.statementDate;
+    }
+  }
+
+  int get dueDate {
+    if (widget.creditCard is Map) {
+      return widget.creditCard['dueDate'] as int? ?? 1;
+    } else {
+      return widget.creditCard.dueDate;
+    }
+  }
 
   @override
   void initState() {
@@ -42,13 +97,12 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
   }
 
   void _initializeForm() {
-    _selectedBankCode = widget.creditCard.bankCode;
-    _cardNameController.text = widget.creditCard.cardName ?? '';
-    _creditLimitController.text = widget.creditCard.creditLimit.toStringAsFixed(0);
-    _totalDebtController.text = widget.creditCard.totalDebt.toStringAsFixed(0);
-    _lastFourDigitsController.text = widget.creditCard.lastFourDigits ?? '';
-    _statementDate = widget.creditCard.statementDate;
-    _dueDate = widget.creditCard.dueDate;
+    _selectedBankCode = bankCode;
+    _cardNameController.text = cardName ?? '';
+    _creditLimitController.text = creditLimit.toStringAsFixed(0);
+    _totalDebtController.text = totalDebt.toStringAsFixed(0);
+    _statementDate = statementDate;
+    _dueDate = dueDate;
   }
 
   @override
@@ -56,7 +110,6 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
     _cardNameController.dispose();
     _creditLimitController.dispose();
     _totalDebtController.dispose();
-    _lastFourDigitsController.dispose();
     super.dispose();
   }
 
@@ -66,55 +119,47 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
     final currentMonth = now.month;
     final currentYear = now.year;
     
-    // Ekstre tarihini bul
-    DateTime statementDateTime = DateTime(currentYear, currentMonth, statementDate);
+    // Bu ayın ekstre tarihini hesapla
+    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDate);
     
-    // Eğer bu ayın ekstre tarihi geçmişse, gelecek aya al
-    if (statementDateTime.isBefore(now)) {
-      if (currentMonth == 12) {
-        statementDateTime = DateTime(currentYear + 1, 1, statementDate);
-      } else {
-        statementDateTime = DateTime(currentYear, currentMonth + 1, statementDate);
-      }
+    // Bu ayın son ödeme tarihini hesapla
+    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    // İlk hafta içi günü bul
+    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
     
-    // Ekstre tarihinden 10 gün sonra
-    DateTime tentativeDueDate = statementDateTime.add(const Duration(days: 10));
-    
-    // İlk hafta içi günü bul (Pazartesi=1, Salı=2, ..., Cuma=5)
-    DateTime dueDate = tentativeDueDate;
-    while (dueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
-      dueDate = dueDate.add(const Duration(days: 1));
+    // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme gününü döndür
+    if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
+      return currentDueDate.day;
     }
     
-    return dueDate.day;
-  }
-
-  void _validateLastFourDigits(String value) {
-    setState(() {
-      if (value.isEmpty) {
-        _lastFourDigitsError = null;
-      } else if (value.length != 4) {
-        _lastFourDigitsError = 'Son 4 hane tam olarak 4 rakam olmalıdır';
-      } else if (!RegExp(r'^\d{4}$').hasMatch(value)) {
-        _lastFourDigitsError = 'Sadece rakam girebilirsiniz';
-      } else {
-        _lastFourDigitsError = null;
-      }
-    });
+    // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
+    DateTime nextStatementDate;
+    if (currentMonth == 12) {
+      nextStatementDate = DateTime(currentYear + 1, 1, statementDate);
+    } else {
+      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDate);
+    }
+    
+    // Gelecek ayın son ödeme tarihini hesapla
+    DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
+    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      nextDueDate = nextDueDate.add(const Duration(days: 1));
+    }
+    
+    return nextDueDate.day;
   }
 
   void _validateForm() {
     _formKey.currentState?.validate();
-    _validateLastFourDigits(_lastFourDigitsController.text);
   }
 
   Future<void> _submitForm() async {
     _validateForm();
 
     if (_selectedBankCode == null || 
-        _creditLimitController.text.trim().isEmpty ||
-        _lastFourDigitsError != null) {
+        _creditLimitController.text.trim().isEmpty) {
       return;
     }
 
@@ -123,25 +168,26 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
     });
 
     try {
-      final creditCardProvider = context.read<CreditCardProvider>();
+      final unifiedProvider = context.read<UnifiedProviderV2>();
       
       final creditLimit = double.tryParse(_creditLimitController.text.replaceAll(',', '')) ?? 0.0;
       final totalDebt = _totalDebtController.text.trim().isEmpty 
           ? 0.0 
           : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
 
-      final success = await creditCardProvider.updateCreditCard(
-        cardId: widget.creditCard.id,
-        cardName: _cardNameController.text.trim().isEmpty 
+      final success = await unifiedProvider.updateAccount(
+        accountId: cardId,
+        name: _cardNameController.text.trim().isEmpty 
             ? null 
             : _cardNameController.text.trim(),
+        bankName: _selectedBankCode,
+        balance: totalDebt, // Mevcut borç pozitif olarak kaydedilir
         creditLimit: creditLimit,
-        totalDebt: totalDebt,
-        statementDate: _statementDate,
-        dueDate: _calculateDueDate(_statementDate),
+        statementDay: _statementDate,
+        dueDay: _calculateDueDate(_statementDate),
       );
 
-      if (success && mounted) {
+      if (success != null && mounted) {
         // Başarılı mesajı göster
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -380,61 +426,6 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                       style: GoogleFonts.inter(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Son 4 Hane
-                    Text(
-                      'Son 4 Hane (Opsiyonel)',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _lastFourDigitsController,
-                      keyboardType: TextInputType.number,
-                      maxLength: 4,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      decoration: InputDecoration(
-                        hintText: '1234',
-                        filled: true,
-                        fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: _lastFourDigitsError != null 
-                                ? const Color(0xFFFF3B30)
-                                : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: _lastFourDigitsError != null 
-                                ? const Color(0xFFFF3B30)
-                                : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF6D6D70),
-                            width: 2,
-                          ),
-                        ),
-                        counterText: '',
-                        errorText: _lastFourDigitsError,
-                      ),
-                      style: GoogleFonts.inter(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      onChanged: _validateLastFourDigits,
                     ),
 
                     const SizedBox(height: 20),

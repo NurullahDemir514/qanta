@@ -6,6 +6,7 @@ import '../../core/services/supabase_service.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/custom_button.dart';
+import '../../shared/widgets/qanta_logo.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -123,6 +124,10 @@ class _RegisterPageState extends State<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 24),
+                const Center(
+                  child: QantaLogo.medium(),
+                ),
+                const SizedBox(height: 32),
                 Text(
                   l10n.createAccount,
                   style: GoogleFonts.inter(

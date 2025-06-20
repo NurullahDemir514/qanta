@@ -68,6 +68,17 @@ class SupabaseService {
       rethrow;
     }
   }
+
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+    } catch (e) {
+      debugPrint('Error updating password: $e');
+      rethrow;
+    }
+  }
   
   // Database methods
   SupabaseQueryBuilder from(String table) => client.from(table);

@@ -98,26 +98,16 @@ class _CardDetailContent extends StatelessWidget {
     final now = DateTime.now();
     final currentMonth = now.month;
     final currentYear = now.year;
+    final statementDay = this.statementDate ?? 1;
     
-    // Ekstre tarihini bul
-    DateTime statementDateTime = DateTime(currentYear, currentMonth, this.statementDate ?? 1);
+    // Bu ayın ekstre tarihini hesapla
+    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDay);
     
-    // Eğer bu ayın ekstre tarihi geçmişse, gelecek aya al
-    if (statementDateTime.isBefore(now)) {
-      if (currentMonth == 12) {
-        statementDateTime = DateTime(currentYear + 1, 1, this.statementDate ?? 1);
-      } else {
-        statementDateTime = DateTime(currentYear, currentMonth + 1, this.statementDate ?? 1);
-      }
-    }
-    
-    // Ekstre tarihinden 10 gün sonra
-    DateTime tentativeDueDate = statementDateTime.add(const Duration(days: 10));
-    
-    // İlk hafta içi günü bul (Pazartesi=1, Salı=2, ..., Cuma=5)
-    DateTime dueDate = tentativeDueDate;
-    while (dueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
-      dueDate = dueDate.add(const Duration(days: 1));
+    // Bu ayın son ödeme tarihini hesapla
+    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    // İlk hafta içi günü bul
+    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
     
     // Türkçe ay isimleri
@@ -126,7 +116,26 @@ class _CardDetailContent extends StatelessWidget {
       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
     ];
     
-    return '${dueDate.day} ${monthNames[dueDate.month]}';
+    // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini göster
+    if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
+      return '${currentDueDate.day} ${monthNames[currentDueDate.month]}';
+    }
+    
+    // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
+    DateTime nextStatementDate;
+    if (currentMonth == 12) {
+      nextStatementDate = DateTime(currentYear + 1, 1, statementDay);
+    } else {
+      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDay);
+    }
+    
+    // Gelecek ayın son ödeme tarihini hesapla
+    DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
+    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      nextDueDate = nextDueDate.add(const Duration(days: 1));
+    }
+    
+    return '${nextDueDate.day} ${monthNames[nextDueDate.month]}';
   }
 
   bool get _isCreditCard => totalDebt != null && creditLimit != null;

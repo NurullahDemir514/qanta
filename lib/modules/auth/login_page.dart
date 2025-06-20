@@ -6,6 +6,7 @@ import '../../core/services/supabase_service.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/custom_button.dart';
+import '../../shared/widgets/qanta_logo.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -101,6 +102,10 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 24),
+                const Center(
+                  child: QantaLogo.medium(),
+                ),
+                const SizedBox(height: 32),
                 Text(
                   l10n.welcome,
                   style: GoogleFonts.inter(

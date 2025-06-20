@@ -13,6 +13,8 @@ import 'core/providers/profile_provider.dart';
 import 'core/theme/light_theme.dart';
 import 'core/theme/dark_theme.dart';
 import 'core/supabase_client.dart';
+import 'core/services/quick_note_notification_service.dart';
+import 'core/services/reminder_service.dart';
 import 'routes/app_router.dart';
 import 'modules/insights/providers/statistics_provider.dart';
 
@@ -26,6 +28,23 @@ void main() async {
   } catch (e) {
     debugPrint('❌ Supabase initialization failed: $e');
     // Continue without Supabase for now
+  }
+  
+  // Initialize Quick Note Notification Service
+  try {
+    await QuickNoteNotificationService.initialize();
+    await QuickNoteNotificationService.startIfEnabled();
+    debugPrint('✅ Quick Note Notification Service initialized');
+  } catch (e) {
+    debugPrint('❌ Quick Note Notification Service initialization failed: $e');
+  }
+  
+  // Initialize Reminder Service
+  try {
+    await ReminderService.cleanupOldReminders();
+    debugPrint('✅ Reminder Service initialized');
+  } catch (e) {
+    debugPrint('❌ Reminder Service initialization failed: $e');
   }
   
   runApp(const MyApp());

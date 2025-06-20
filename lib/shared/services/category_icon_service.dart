@@ -118,6 +118,10 @@ class CategoryIconService {
     'yemek': Icons.restaurant_rounded,
     'coffee': Icons.local_cafe_rounded,
     'kahve': Icons.local_cafe_rounded,
+    'cafe': Icons.local_cafe_rounded,
+    'starbucks': Icons.local_cafe_rounded,
+    'çay': Icons.local_cafe_rounded,
+    'tea': Icons.local_cafe_rounded,
     'groceries': Icons.shopping_cart_rounded,
     'market': Icons.shopping_cart_rounded,
     'supermarket': Icons.shopping_cart_rounded,
@@ -125,12 +129,31 @@ class CategoryIconService {
     'grocery': Icons.shopping_cart_rounded,
     'bakkal': Icons.shopping_cart_rounded,
     'marketler': Icons.shopping_cart_rounded,
+    'migros': Icons.shopping_cart_rounded,
+    'carrefour': Icons.shopping_cart_rounded,
+    'bim': Icons.shopping_cart_rounded,
+    'a101': Icons.shopping_cart_rounded,
+    'şok': Icons.shopping_cart_rounded,
     'fast_food': Icons.fastfood_rounded,
     'fast': Icons.fastfood_rounded,
+    'mcdonalds': Icons.fastfood_rounded,
+    'burger_king': Icons.fastfood_rounded,
+    'kfc': Icons.fastfood_rounded,
     'alcohol': Icons.local_bar_rounded,
     'alkol': Icons.local_bar_rounded,
     'delivery': Icons.delivery_dining_rounded,
     'teslimat': Icons.delivery_dining_rounded,
+    'yemeksepeti': Icons.delivery_dining_rounded,
+    'getir': Icons.delivery_dining_rounded,
+    'trendyol': Icons.delivery_dining_rounded,
+    'pizza': Icons.local_pizza_rounded,
+    'burger': Icons.lunch_dining_rounded,
+    'hamburger': Icons.lunch_dining_rounded,
+    'döner': Icons.lunch_dining_rounded,
+    'kebab': Icons.lunch_dining_rounded,
+    'sushi': Icons.set_meal_rounded,
+    'chinese': Icons.ramen_dining_rounded,
+    'çin': Icons.ramen_dining_rounded,
     
     // Transportation
     'transport': Icons.directions_car_rounded,
@@ -141,11 +164,24 @@ class CategoryIconService {
     'gas': Icons.local_gas_station_rounded,
     'local_gas_station': Icons.local_gas_station_rounded,
     'yakıt': Icons.local_gas_station_rounded,
+    'benzin': Icons.local_gas_station_rounded,
+    'diesel': Icons.local_gas_station_rounded,
+    'dizel': Icons.local_gas_station_rounded,
+    'petrol': Icons.local_gas_station_rounded,
+    'shell': Icons.local_gas_station_rounded,
+    'bp': Icons.local_gas_station_rounded,
+    'opet': Icons.local_gas_station_rounded,
+    'total': Icons.local_gas_station_rounded,
     'public_transport': Icons.directions_bus_rounded,
     'toplu_taşıma': Icons.directions_bus_rounded,
     'taxi': Icons.local_taxi_rounded,
+    'taksi': Icons.local_taxi_rounded,
+    'local_taxi': Icons.local_taxi_rounded,
+    'uber': Icons.local_taxi_rounded,
+    'bitaksi': Icons.local_taxi_rounded,
     'parking': Icons.local_parking_rounded,
     'park': Icons.local_parking_rounded,
+    'otopark': Icons.local_parking_rounded,
     'motorcycle': Icons.two_wheeler_rounded,
     'motosiklet': Icons.two_wheeler_rounded,
     'bicycle': Icons.pedal_bike_rounded,
@@ -154,6 +190,16 @@ class CategoryIconService {
     'tren': Icons.train_rounded,
     'subway': Icons.subway_rounded,
     'metro': Icons.subway_rounded,
+    'bus': Icons.directions_bus_rounded,
+    'otobüs': Icons.directions_bus_rounded,
+    'dolmuş': Icons.directions_bus_rounded,
+    'minibüs': Icons.directions_bus_rounded,
+    'ferry': Icons.directions_boat_rounded,
+    'vapur': Icons.directions_boat_rounded,
+    'plane': Icons.flight_rounded,
+    'uçak': Icons.flight_rounded,
+    'flight_takeoff': Icons.flight_takeoff_rounded,
+    'flight_land': Icons.flight_land_rounded,
     
     // Shopping
     'shopping': Icons.shopping_bag_rounded,
@@ -166,7 +212,6 @@ class CategoryIconService {
     'elektronik': Icons.devices_rounded,
     'furniture': Icons.chair_rounded,
     'mobilya': Icons.chair_rounded,
-    'books': Icons.menu_book_rounded,
     'kitap': Icons.menu_book_rounded,
     'gifts': Icons.card_giftcard_rounded,
     'hediyeler': Icons.card_giftcard_rounded,
@@ -174,6 +219,14 @@ class CategoryIconService {
     'mücevher': Icons.diamond_rounded,
     'shoes': Icons.sports_rounded,
     'ayakkabı': Icons.sports_rounded,
+    'nike': Icons.sports_rounded,
+    'adidas': Icons.sports_rounded,
+    'cosmetics': Icons.face_retouching_natural_rounded,
+    'kozmetik': Icons.face_retouching_natural_rounded,
+    'makeup': Icons.face_retouching_natural_rounded,
+    'makyaj': Icons.face_retouching_natural_rounded,
+    'perfume': Icons.local_florist_rounded,
+    'parfüm': Icons.local_florist_rounded,
     
     // Entertainment & Lifestyle
     'entertainment': Icons.movie_rounded,
@@ -193,6 +246,18 @@ class CategoryIconService {
     'hobi': Icons.palette_rounded,
     'photography': Icons.camera_alt_rounded,
     'fotoğraf': Icons.camera_alt_rounded,
+    'cinema': Icons.movie_rounded,
+    'sinema': Icons.movie_rounded,
+    'theater': Icons.theater_comedy_rounded,
+    'tiyatro': Icons.theater_comedy_rounded,
+    'books': Icons.auto_stories_rounded,
+    'kitaplar': Icons.auto_stories_rounded,
+    'reading': Icons.auto_stories_rounded,
+    'okuma': Icons.auto_stories_rounded,
+    'netflix': Icons.play_circle_rounded,
+    'youtube': Icons.play_circle_rounded,
+    'spotify': Icons.music_note_rounded,
+    'apple_music': Icons.music_note_rounded,
     
     // Bills & Utilities
     'bills': Icons.receipt_long_rounded,
@@ -210,10 +275,22 @@ class CategoryIconService {
     'tv': Icons.tv_rounded,
     'subscription': Icons.subscriptions_rounded,
     'abonelik': Icons.subscriptions_rounded,
+    'digiturk': Icons.tv_rounded,
+    'tivibu': Icons.tv_rounded,
+    'turkcell': Icons.phone_rounded,
+    'vodafone': Icons.phone_rounded,
+    'türk_telekom': Icons.phone_rounded,
+    'superonline': Icons.wifi_rounded,
+    'ttnet': Icons.wifi_rounded,
     'insurance': Icons.security_rounded,
     'sigorta': Icons.security_rounded,
     'bank_fees': Icons.account_balance_rounded,
     'banka_ücreti': Icons.account_balance_rounded,
+    'atm': Icons.local_atm_rounded,
+    'atm_fee': Icons.local_atm_rounded,
+    'atm_ücreti': Icons.local_atm_rounded,
+    'interest': Icons.trending_up_rounded,
+    'faiz': Icons.trending_up_rounded,
     
     // Health & Wellness
     'health': Icons.local_hospital_rounded,
@@ -237,6 +314,10 @@ class CategoryIconService {
     'terapi': Icons.psychology_rounded,
     'nutrition': Icons.dining_rounded,
     'beslenme': Icons.dining_rounded,
+    'supplement': Icons.medication_rounded,
+    'takviye': Icons.medication_rounded,
+    'vitamin': Icons.medication_rounded,
+    'protein': Icons.fitness_center_rounded,
     
     // Education & Learning
     'education': Icons.school_rounded,
@@ -339,9 +420,11 @@ class CategoryIconService {
     'para_al': Icons.call_received_rounded,
     
     // === DEFAULT/FALLBACK ===
-    'other': Icons.more_horiz_rounded,
-    'category': Icons.more_horiz_rounded,
-    'diğer': Icons.more_horiz_rounded,
+    'label': Icons.tag,
+    'folder': Icons.tag,
+    'other': Icons.tag,
+    'category': Icons.tag,
+    'diğer': Icons.tag,
   };
 
   /// Get icon data from icon name string with fast map lookup
@@ -358,10 +441,10 @@ class CategoryIconService {
   /// - Icon names: 'restaurant_rounded', 'directions_car'
   /// 
   /// **Fallback:**
-  /// Returns `Icons.more_horiz_rounded` for unknown icon names
+  /// Returns `Icons.tag` for unknown icon names
   static IconData getIcon(String iconName) {
     final normalizedName = iconName.toLowerCase().trim();
-    return _iconMap[normalizedName] ?? Icons.more_horiz_rounded;
+    return _iconMap[normalizedName] ?? Icons.tag;
   }
 
   /// Get icon with validation
@@ -376,7 +459,7 @@ class CategoryIconService {
       debugPrint('⚠️ CategoryIconService: Unknown icon name "$iconName"');
     }
     
-    return icon ?? Icons.more_horiz_rounded;
+    return icon ?? Icons.tag;
   }
 
   /// Check if icon name exists in the map
@@ -416,115 +499,186 @@ class CategoryIconService {
   /// **Centralized Color Map**
   /// 
   /// Single source of truth for all category and transaction colors.
-  /// Organized by category type with consistent iOS system colors.
+  /// Colors are chosen to be meaningful and intuitive:
+  /// - Income categories: Green shades (money coming in)
+  /// - Expense categories: Red/warm shades (money going out) 
+  /// - Specific categories: Contextual colors (coffee=brown, fuel=gray, etc.)
   /// 
   /// **Benefits:**
   /// - O(1) color lookup performance
-  /// - Consistent color scheme across app
+  /// - Intuitive color associations
   /// - Easy maintenance and updates
   /// - Supports multiple aliases per color
   static const Map<String, Color> _colorMap = {
     // === TRANSACTION TYPE COLORS ===
-    'income_default': Color(0xFF10B981),      // Modern emerald green
-    'expense_default': Color(0xFFEF4444),     // Modern red
-    'transfer_default': Color(0xFF3B82F6),    // Modern blue
+    'income_default': Color(0xFF22C55E),      // Green for income
+    'expense_default': Color(0xFFEF4444),     // Red for expenses
+    'transfer_default': Color(0xFF3B82F6),    // Blue for transfers
     
-    // === FOOD & DINING COLORS ===
-    'restaurant': Color(0xFFFF6B6B),          // Coral red
-    'food': Color(0xFFFF6B6B),
-    'yemek': Color(0xFFFF6B6B),
-    'coffee': Color(0xFF8B4513),              // Saddle brown
+    // === INCOME CATEGORIES (GREEN SHADES) ===
+    'work': Color(0xFF16A34A),                // Dark green
+    'salary': Color(0xFF16A34A),
+    'maaş': Color(0xFF16A34A),
+    'business': Color(0xFF15803D),            // Darker green
+    'iş': Color(0xFF15803D),
+    'investment': Color(0xFF10B981),          // Emerald green
+    'yatırım': Color(0xFF10B981),
+    'gift': Color(0xFF22C55E),                // Medium green
+    'hediye': Color(0xFF22C55E),
+    'rental': Color(0xFF059669),              // Teal green
+    'kira': Color(0xFF059669),
+    'freelance': Color(0xFF34D399),           // Light green
+    'bonus': Color(0xFF6EE7B7),               // Very light green
+    'commission': Color(0xFF10B981),          // Emerald
+    'komisyon': Color(0xFF10B981),
+    
+    // === FOOD & DINING COLORS (RED/WARM TONES) ===
+    'restaurant': Color(0xFFDC2626),          // Red for dining out
+    'food': Color(0xFFDC2626),
+    'yemek': Color(0xFFDC2626),
+    'coffee': Color(0xFF8B4513),              // Brown for coffee ☕
     'kahve': Color(0xFF8B4513),
-    'groceries': Color(0xFFF59E0B),           // Modern amber (shopping color)
-    'market': Color(0xFFF59E0B),
-    'fast_food': Color(0xFFFF8C42),           // Bright orange
-    'fast': Color(0xFFFF8C42),
-    'alcohol': Color(0xFF9333EA),             // Modern purple
-    'alkol': Color(0xFF9333EA),
-    'delivery': Color(0xFF06B6D4),            // Modern cyan
-    'teslimat': Color(0xFF06B6D4),
+    'cafe': Color(0xFF8B4513),
+    'çay': Color(0xFF059669),                 // Green for tea 🍵
+    'tea': Color(0xFF059669),
+    'groceries': Color(0xFFEF4444),           // Red for grocery expenses
+    'market': Color(0xFFEF4444),
+    'supermarket': Color(0xFFEF4444),
+    'süpermarket': Color(0xFFEF4444),
+    'migros': Color(0xFFEF4444),
+    'carrefour': Color(0xFFEF4444),
+    'bim': Color(0xFFEF4444),
+    'fast_food': Color(0xFFEA580C),           // Orange for fast food
+    'fast': Color(0xFFEA580C),
+    'mcdonalds': Color(0xFFEA580C),
+    'burger_king': Color(0xFFEA580C),
+    'pizza': Color(0xFFDC2626),               // Red for pizza
+    'alcohol': Color(0xFF7C3AED),             // Purple for alcohol
+    'alkol': Color(0xFF7C3AED),
+    'delivery': Color(0xFFDC2626),            // Red for delivery expenses
+    'teslimat': Color(0xFFDC2626),
+    'yemeksepeti': Color(0xFFDC2626),
+    'getir': Color(0xFFDC2626),
     
-    // === TRANSPORTATION COLORS ===
-    'transport': Color(0xFF3B82F6),           // Modern blue
-    'car': Color(0xFF3B82F6),
-    'directions_car': Color(0xFF3B82F6),
-    'ulaşım': Color(0xFF3B82F6),
-    'fuel': Color(0xFF6B7280),                // Cool gray
+    // === TRANSPORTATION COLORS (RED/WARM TONES FOR EXPENSES) ===
+    'transport': Color(0xFFDC2626),           // Red for transport expenses
+    'car': Color(0xFFDC2626),
+    'directions_car': Color(0xFFDC2626),
+    'ulaşım': Color(0xFFDC2626),
+    'fuel': Color(0xFF6B7280),                // Gray for fuel ⛽
     'gas': Color(0xFF6B7280),
-    'local_gas_station': Color(0xFF6B7280),
+    'benzin': Color(0xFF6B7280),
+    'diesel': Color(0xFF6B7280),
+    'petrol': Color(0xFF6B7280),
     'yakıt': Color(0xFF6B7280),
-    'public_transport': Color(0xFF06B6D4),    // Modern cyan
-    'toplu_taşıma': Color(0xFF06B6D4),
-    'taxi': Color(0xFFEAB308),                // Modern yellow
-    'parking': Color(0xFF6B7280),             // Cool gray
+    'shell': Color(0xFF6B7280),
+    'bp': Color(0xFF6B7280),
+    'opet': Color(0xFF6B7280),
+    'public_transport': Color(0xFFEF4444),    // Red for public transport
+    'toplu_taşıma': Color(0xFFEF4444),
+    'bus': Color(0xFFEF4444),
+    'otobüs': Color(0xFFEF4444),
+    'metro': Color(0xFFEF4444),
+    'taxi': Color(0xFFFBBF24),                // Yellow for taxi 🚕
+    'taksi': Color(0xFFFBBF24),
+    'uber': Color(0xFFFBBF24),
+    'bitaksi': Color(0xFFFBBF24),
+    'parking': Color(0xFF6B7280),             // Gray for parking
     'park': Color(0xFF6B7280),
-    'motorcycle': Color(0xFF374151),          // Dark gray
+    'otopark': Color(0xFF6B7280),
+    'motorcycle': Color(0xFF374151),          // Dark gray for motorcycle
     'motosiklet': Color(0xFF374151),
-    'bicycle': Color(0xFF10B981),             // Modern emerald
-    'bisiklet': Color(0xFF10B981),
+    'bicycle': Color(0xFF059669),             // Green for eco-friendly bike
+    'bisiklet': Color(0xFF059669),
     
-    // === SHOPPING COLORS ===
-    'shopping': Color(0xFFF59E0B),            // Modern amber
-    'shopping_cart': Color(0xFFF59E0B),
-    'shopping_bag': Color(0xFFF59E0B),
-    'alışveriş': Color(0xFFF59E0B),
-    'clothing': Color(0xFFEC4899),            // Modern pink
+    // === SHOPPING COLORS (RED/WARM TONES FOR EXPENSES) ===
+    'shopping': Color(0xFFDC2626),            // Red for shopping expenses
+    'shopping_cart': Color(0xFFDC2626),
+    'shopping_bag': Color(0xFFDC2626),
+    'alışveriş': Color(0xFFDC2626),
+    'clothing': Color(0xFFEC4899),            // Pink for clothing 👗
     'kıyafet': Color(0xFFEC4899),
-    'electronics': Color(0xFF6366F1),         // Modern indigo
+    'nike': Color(0xFFEC4899),
+    'adidas': Color(0xFFEC4899),
+    'electronics': Color(0xFF6366F1),         // Blue for electronics 📱
     'elektronik': Color(0xFF6366F1),
-    'furniture': Color(0xFF92400E),           // Brown
+    'furniture': Color(0xFF92400E),           // Brown for furniture 🪑
     'mobilya': Color(0xFF92400E),
-    'books': Color(0xFF6B7280),               // Cool gray
+    'books': Color(0xFF6B7280),               // Gray for books 📚
     'kitap': Color(0xFF6B7280),
-    'jewelry': Color(0xFFD97706),             // Modern amber
-    'mücevher': Color(0xFFD97706),
+    'kitaplar': Color(0xFF6B7280),
+    'jewelry': Color(0xFFFBBF24),             // Gold for jewelry 💍
+    'mücevher': Color(0xFFFBBF24),
+    'cosmetics': Color(0xFFEC4899),           // Pink for cosmetics 💄
+    'kozmetik': Color(0xFFEC4899),
+    'makeup': Color(0xFFEC4899),
+    'makyaj': Color(0xFFEC4899),
+    'perfume': Color(0xFF7C3AED),             // Purple for perfume
+    'parfüm': Color(0xFF7C3AED),
     
-    // === ENTERTAINMENT COLORS ===
-    'entertainment': Color(0xFF8B5CF6),       // Modern violet
-    'movie': Color(0xFF8B5CF6),
-    'eğlence': Color(0xFF8B5CF6),
-    'music': Color(0xFFA855F7),               // Modern purple
+    // === ENTERTAINMENT COLORS (RED/WARM TONES FOR EXPENSES) ===
+    'entertainment': Color(0xFFDC2626),       // Red for entertainment expenses
+    'movie': Color(0xFFDC2626),
+    'eğlence': Color(0xFFDC2626),
+    'cinema': Color(0xFFDC2626),
+    'sinema': Color(0xFFDC2626),
+    'theater': Color(0xFF7C3AED),             // Purple for theater 🎭
+    'tiyatro': Color(0xFF7C3AED),
+    'music': Color(0xFFA855F7),               // Purple for music 🎵
     'müzik': Color(0xFFA855F7),
-    'gaming': Color(0xFF059669),              // Modern green
+    'spotify': Color(0xFF22C55E),             // Spotify green
+    'apple_music': Color(0xFFA855F7),
+    'gaming': Color(0xFF059669),              // Green for gaming 🎮
     'oyun': Color(0xFF059669),
-    'streaming': Color(0xFFDC2626),           // Modern red
+    'streaming': Color(0xFFDC2626),           // Red for streaming
     'yayın': Color(0xFFDC2626),
-    'concerts': Color(0xFF6366F1),            // Modern indigo
+    'netflix': Color(0xFFDC2626),             // Netflix red
+    'youtube': Color(0xFFDC2626),             // YouTube red
+    'concerts': Color(0xFF6366F1),            // Blue for concerts 🎤
     'konser': Color(0xFF6366F1),
-    'photography': Color(0xFF6B7280),         // Cool gray
+    'photography': Color(0xFF6B7280),         // Gray for photography 📷
     'fotoğraf': Color(0xFF6B7280),
     
-    // === BILLS & UTILITIES COLORS ===
-    'bills': Color(0xFF2563EB),               // Modern blue
-    'receipt': Color(0xFF2563EB),
-    'receipt_long': Color(0xFF2563EB),
-    'faturalar': Color(0xFF2563EB),
-    'electricity': Color(0xFFFDE047),         // Modern yellow
-    'elektrik': Color(0xFFFDE047),
-    'water': Color(0xFF0EA5E9),               // Modern sky blue
+    // === BILLS & UTILITIES COLORS (RED/WARM TONES FOR EXPENSES) ===
+    'bills': Color(0xFFDC2626),               // Red for bills
+    'receipt': Color(0xFFDC2626),
+    'receipt_long': Color(0xFFDC2626),
+    'faturalar': Color(0xFFDC2626),
+    'electricity': Color(0xFFFBBF24),         // Yellow for electricity ⚡
+    'elektrik': Color(0xFFFBBF24),
+    'water': Color(0xFF0EA5E9),               // Blue for water 💧
     'su': Color(0xFF0EA5E9),
-    'internet': Color(0xFF06B6D4),            // Modern cyan
-    'phone': Color(0xFF10B981),               // Modern emerald
-    'telefon': Color(0xFF10B981),
-    'subscription': Color(0xFFF59E0B),        // Modern amber
-    'abonelik': Color(0xFFF59E0B),
-    'insurance': Color(0xFF3B82F6),           // Modern blue
+    'internet': Color(0xFF6366F1),            // Blue for internet 🌐
+    'phone': Color(0xFF059669),               // Green for phone 📱
+    'telefon': Color(0xFF059669),
+    'turkcell': Color(0xFF059669),
+    'vodafone': Color(0xFFDC2626),            // Vodafone red
+    'türk_telekom': Color(0xFF6366F1),        // TT blue
+    'subscription': Color(0xFFDC2626),        // Red for subscriptions
+    'abonelik': Color(0xFFDC2626),
+    'digiturk': Color(0xFF6366F1),            // Blue for TV
+    'tivibu': Color(0xFF6366F1),
+    'insurance': Color(0xFF3B82F6),           // Blue for insurance 🛡️
     'sigorta': Color(0xFF3B82F6),
     
-    // === HEALTH & WELLNESS COLORS ===
-    'health': Color(0xFF10B981),              // Modern emerald
-    'healthcare': Color(0xFF10B981),
-    'health_and_safety': Color(0xFF10B981),
-    'local_hospital': Color(0xFF10B981),
-    'sağlık': Color(0xFF10B981),
-    'doctor': Color(0xFF0EA5E9),              // Modern sky blue
-    'doktor': Color(0xFF0EA5E9),
-    'pharmacy': Color(0xFF22C55E),            // Modern green
+    // === HEALTH & WELLNESS COLORS (RED/WARM TONES FOR EXPENSES) ===
+    'health': Color(0xFFDC2626),              // Red for health expenses
+    'healthcare': Color(0xFFDC2626),
+    'health_and_safety': Color(0xFFDC2626),
+    'local_hospital': Color(0xFFDC2626),
+    'sağlık': Color(0xFFDC2626),
+    'doctor': Color(0xFFEF4444),              // Red for doctor visits
+    'doktor': Color(0xFFEF4444),
+    'pharmacy': Color(0xFF22C55E),            // Green for pharmacy 💊
     'eczane': Color(0xFF22C55E),
-    'fitness': Color(0xFF059669),             // Modern green
+    'supplement': Color(0xFF22C55E),          // Green for supplements
+    'takviye': Color(0xFF22C55E),
+    'vitamin': Color(0xFF22C55E),
+    'fitness': Color(0xFF059669),             // Green for fitness 💪
     'gym': Color(0xFF059669),
     'spor': Color(0xFF059669),
-    'spa': Color(0xFFEC4899),                 // Modern pink
+    'protein': Color(0xFF059669),
+    'spa': Color(0xFFEC4899),                 // Pink for spa 💆
     'beauty': Color(0xFFEC4899),
     'güzellik': Color(0xFFEC4899),
     
@@ -559,40 +713,10 @@ class CategoryIconService {
     'childcare': Color(0xFFFBBF24),           // Soft yellow
     'çocuk_bakımı': Color(0xFFFBBF24),
     
-    // === INCOME CATEGORY COLORS ===
-    'work': Color(0xFF10B981),                // Modern emerald
-    'salary': Color(0xFF10B981),
-    'maaş': Color(0xFF10B981),
-    'freelance': Color(0xFF3B82F6),           // Modern blue
-    'laptop': Color(0xFF3B82F6),
-    'business': Color(0xFF8B5CF6),            // Modern violet
-    'iş': Color(0xFF8B5CF6),
-    'investment': Color(0xFFF59E0B),          // Modern amber
-    'yatırım': Color(0xFFF59E0B),
-    'rental': Color(0xFF059669),              // Modern green
-    'kira': Color(0xFF059669),
-    'home': Color(0xFF059669),
-    'bonus': Color(0xFFEF4444),               // Modern red
-    'star': Color(0xFFEF4444),
-    'gift': Color(0xFFEC4899),                // Modern pink
-    'hediye': Color(0xFFEC4899),
-    'card_giftcard': Color(0xFFEC4899),
-    'commission': Color(0xFF22C55E),          // Modern green
-    'komisyon': Color(0xFF22C55E),
-    'dividend': Color(0xFF10B981),            // Modern emerald
-    'temettü': Color(0xFF10B981),
-    'crypto': Color(0xFFF59E0B),              // Modern amber
-    'kripto': Color(0xFFF59E0B),
-    'stocks': Color(0xFF0EA5E9),              // Modern sky blue
-    'hisse': Color(0xFF0EA5E9),
-    'royalty': Color(0xFFA855F7),             // Modern purple
-    'telif': Color(0xFFA855F7),
-    'pension': Color(0xFF06B6D4),             // Modern cyan
-    'emekli': Color(0xFF06B6D4),
-    'social_benefits': Color(0xFF6366F1),     // Modern indigo
-    'sosyal_yardım': Color(0xFF6366F1),
     
     // === DEFAULT COLORS ===
+    'label': Color(0xFF6B7280),               // Cool gray for label
+    'folder': Color(0xFF6B7280),              // Cool gray for folder
     'default': Color(0xFF6B7280),             // Cool gray
     'other': Color(0xFF6B7280),
     'diğer': Color(0xFF6B7280),
@@ -962,7 +1086,7 @@ class CategoryIconService {
   /// Returns the category color with 10% opacity for use
   /// as background color in category selectors.
   static Color getBackgroundColor(String colorInput) {
-    return getColor(colorInput).withOpacity(0.1);
+    return getColor(colorInput).withValues(alpha: 0.1);
   }
   
   /// Get predefined color for expense categories

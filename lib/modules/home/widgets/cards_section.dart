@@ -27,7 +27,7 @@ class _CardsSectionState extends State<CardsSection> {
   void initState() {
     super.initState();
     _pageController = PageController(
-      viewportFraction: AppConstants.cardViewportFraction,
+      viewportFraction: 0.9,
       initialPage: 0,
     );
   }
@@ -174,25 +174,23 @@ class _CardsSectionState extends State<CardsSection> {
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
+                GestureDetector(
+                  onTap: () {
                     context.push('/cards');
                   },
                   child: Text(
                     l10n.seeAll,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: const Color(0xFF007AFF),
                       fontWeight: FontWeight.w500,
+                      color: const Color(0xFF007AFF),
                     ),
                   ),
                 ),
               ],
             ),
-          const SizedBox(height: 10),
           Container(
             height: AppConstants.cardSectionHeight,
-            margin: const EdgeInsets.symmetric(horizontal: AppConstants.cardMarginHorizontal),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -256,23 +254,22 @@ class _CardsSectionState extends State<CardsSection> {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              TextButton(
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   context.push('/cards');
                 },
                 child: Text(
                   l10n.seeAll,
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: const Color(0xFF007AFF),
                     fontWeight: FontWeight.w500,
+                    color: const Color(0xFF007AFF),
                   ),
                 ),
               ),
             ],
           ),
         const SizedBox(height: 10),
-        
         // Cards PageView
         SizedBox(
           height: AppConstants.cardSectionHeight,
@@ -280,6 +277,7 @@ class _CardsSectionState extends State<CardsSection> {
             builder: (context, themeProvider, child) {
               return PageView.builder(
                 controller: _pageController,
+                padEnds: false,
                 onPageChanged: (index) {
                   setState(() {
                     _currentPage = index;
@@ -299,8 +297,8 @@ class _CardsSectionState extends State<CardsSection> {
                       
                       return Transform.scale(
                         scale: Curves.easeOut.transform(value),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: AppConstants.cardMarginHorizontal),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: card['cardType'] == 'cash'
                               ? CashBalanceCard(
                                   balance: card['balance'] as double,

@@ -50,6 +50,8 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Bu uygulama profil fotoğrafı seçmek için fotoğraf galerisine erişim gerektirir.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Bu uygulama video çekmek için mikrofona erişim gerektirir.</string>
+	<string>Bu uygulama sesli not özelliği için mikrofona erişim gerektirir.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Bu uygulama sesli notları metne dönüştürmek için konuşma tanıma özelliğine erişim gerektirir.</string>
 </dict>
 </plist>

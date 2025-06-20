@@ -323,12 +323,12 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   /// **Credit Card Overpayment Logic:**
   /// ```
   /// Example:
-  /// Credit Limit: 10,000 TL
-  /// Available Limit: 7,000 TL
-  /// Current Debt: 3,000 TL (10,000 - 7,000)
-  /// Transfer Amount: 5,000 TL
-  /// Overpayment: 2,000 TL (5,000 - 3,000)
-  /// Result: Card will have 2,000 TL positive balance
+        /// Credit Limit: 10,000₺
+      /// Available Limit: 7,000₺
+      /// Current Debt: 3,000₺ (10,000 - 7,000)
+      /// Transfer Amount: 5,000₺
+      /// Overpayment: 2,000₺ (5,000 - 3,000)
+      /// Result: Card will have 2,000₺ positive balance
   /// ```
   /// 
   /// **Error Handling:**

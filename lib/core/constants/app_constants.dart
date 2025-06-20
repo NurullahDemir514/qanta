@@ -74,8 +74,8 @@ class AppConstants {
 
   // Card Dimensions
   static const double cardWidth = 320.0;
-  static const double cardHeight = 200.0;
-  static const double cardAspectRatio = cardWidth / cardHeight; // 16:9 ratio
+  static const double cardHeight = 180.0;
+  static const double cardAspectRatio = 16 / 9; // 16:9 ratio
   static const double miniCardWidth = 200.0;
   static const double miniCardHeight = 125.0;
   static const double cardBorderRadius = 16.0;
@@ -386,6 +386,8 @@ class AppConstants {
   static const String iconPath = 'assets/icons/';
   static const String imagePath = 'assets/images/';
   static const String logoPath = '${imagePath}logo.png';
+  static const String logoWhitePath = '${imagePath}logo_white.png';
+  static const String logoSmallPath = '${imagePath}logo_small.png';
 
   // API Constants
   static const int apiTimeoutSeconds = 30;

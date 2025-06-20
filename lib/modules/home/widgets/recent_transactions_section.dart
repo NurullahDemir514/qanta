@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
-import '../../../shared/models/transaction_model_v2.dart' as v2;
+import '../../../shared/models/models_v2.dart' as v2;
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
 
@@ -34,33 +34,17 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Başlık
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.recentTransactions,
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Navigate to transactions page
-                      // TODO: Implement navigation
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF007AFF).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    
-                    ),
-                  ),
-                ],
+            Padding(
+              padding: const EdgeInsets.only(left: 0),
+              child: Text(
+                l10n.recentTransactions,
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
               ),
+            ),
             
             const SizedBox(height: 10),
             
@@ -217,16 +201,16 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     
     // If no centralized color found, fall back to hex color from database
     if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
-      if (category?.color != null) {
-        categoryColor = CategoryIconService.getColor(category!.color);
-      } else if (category?.icon != null) {
-        // Use predefined colors based on category type and icon
-        final isIncomeCategory = transactionType == TransactionType.income;
-        categoryColor = CategoryIconService.getCategoryColor(
-          iconName: category!.icon,
-          colorHex: category.color,
-          isIncomeCategory: isIncomeCategory,
-        );
+    if (category?.color != null) {
+      categoryColor = CategoryIconService.getColor(category!.color);
+    } else if (category?.icon != null) {
+      // Use predefined colors based on category type and icon
+      final isIncomeCategory = transactionType == TransactionType.income;
+      categoryColor = CategoryIconService.getCategoryColor(
+        iconName: category!.icon,
+        colorHex: category.color,
+        isIncomeCategory: isIncomeCategory,
+      );
       }
     }
 
@@ -284,7 +268,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
         amount: amount,
         time: time,
         type: transactionType,
-        categoryIcon: category?.icon,
+        categoryIcon: transaction.categoryName ?? category?.icon, // Prioritize category name
         categoryColor: category?.color,
         isDark: isDark,
         isFirst: isFirst,

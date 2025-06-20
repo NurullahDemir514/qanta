@@ -10,9 +10,19 @@ Qanta is a modern personal finance mobile application built with Flutter, focusi
 - **Database**: Supabase
 - **Navigation**: GoRouter
 - **UI**: Material 3 Design System
-- **Fonts**: Google Fonts (Sora)
+- **Fonts**: Google Fonts (Inter)
 - **Localization**: flutter_localizations (Turkish/English)
 - **Theme**: Light/Dark mode with SharedPreferences
+
+## Color Palette
+- **Primary**: Sophisticated Grey (#6D6D70) - Main brand color
+- **Secondary**: Mint Green (#34D399) - Accent and success color
+- **iOS Blue**: (#007AFF) - Interactive elements and buttons
+- **Success**: Green (#4CAF50) - Positive actions and income
+- **Error**: Red (#FF4C4C) - Negative actions and expenses
+- **Warning**: Amber (#FFC300) - Alerts and cautions
+- **Info**: Cyan (#00C2FF) - Information and transfers
+- **Neutral**: Light Grey (#A0A0A0) - Secondary text and borders
 
 ## Project Structure
 ```
@@ -68,8 +78,8 @@ lib/
 
 ### Styling & Theming
 - Use Material 3 design system
-- Follow the established color scheme (#00FFB3 mint green primary)
-- Use Google Fonts Sora throughout the app
+- Follow the established color scheme (Grey #6D6D70 primary, Mint #34D399 secondary)
+- Use Google Fonts Inter throughout the app
 - Implement responsive design with MediaQuery
 - Use Theme.of(context) for colors and text styles
 - Support both light and dark themes

@@ -1,16 +1,85 @@
-# qanta
+# Qanta - Personal Finance App
 
-A new Flutter project.
+Modern bir kişisel finans yönetimi mobil uygulaması. Flutter ile geliştirilmiş, bütçe yönetimi, harcama takibi, yatırım portföyü ve AI destekli finansal analitikler sunar.
 
-## Getting Started
+## 🎯 Özellikler
 
-This project is a starting point for a Flutter application.
+- **Harcama Takibi**: Gelir ve giderleri kategorize ederek takip edin
+- **Kart Yönetimi**: Kredi kartları, banka kartları ve nakit hesapları
+- **Bütçe Planlama**: Aylık bütçe hedefleri ve takibi
+- **Finansal Analitikler**: Detaylı raporlar ve grafikler
+- **AI Öneriler**: Akıllı finansal öneriler ve insights
+- **Multi-dil Desteği**: Türkçe ve İngilizce
+- **Tema Desteği**: Açık ve koyu tema seçenekleri
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠 Teknoloji Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Framework**: Flutter 3.8.1+
+- **Dil**: Dart
+- **State Management**: Provider
+- **Veritabanı**: Supabase
+- **Navigasyon**: GoRouter
+- **UI**: Material 3 Design System
+- **Fontlar**: Google Fonts (Inter)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🎨 Renk Paleti
+
+- **Primary**: Sophisticated Grey (#6D6D70)
+- **Secondary**: Mint Green (#34D399)
+- **iOS Blue**: (#007AFF)
+- **Success**: Green (#4CAF50)
+- **Error**: Red (#FF4C4C)
+
+## 📱 Kurulum
+
+1. Flutter SDK'yı yükleyin (3.8.1+)
+2. Projeyi klonlayın:
+   ```bash
+   git clone [repository-url]
+   cd qanta
+   ```
+3. Bağımlılıkları yükleyin:
+   ```bash
+   flutter pub get
+   ```
+4. Uygulamayı çalıştırın:
+   ```bash
+   flutter run
+   ```
+
+## 🖼 Logo Assets
+
+Logo dosyaları `assets/images/` klasöründe bulunmalıdır:
+- `logo.png` - Ana logo (512x512px)
+- `logo_white.png` - Beyaz logo (512x512px)
+- `logo_small.png` - Küçük logo (128x128px)
+
+Detaylı bilgi için: `assets/images/README.md`
+
+## 📁 Proje Yapısı
+
+```
+lib/
+├── core/                 # Temel servisler ve yapılandırma
+├── modules/             # Özellik modülleri
+│   ├── auth/           # Kimlik doğrulama
+│   ├── home/           # Ana sayfa
+│   ├── transactions/   # İşlem yönetimi
+│   ├── cards/          # Kart yönetimi
+│   ├── insights/       # Analitikler
+│   └── settings/       # Ayarlar
+├── shared/             # Paylaşılan bileşenler
+└── l10n/              # Çoklu dil desteği
+```
+
+## 🤝 Katkıda Bulunma
+
+1. Fork edin
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Add amazing feature'`)
+4. Branch'i push edin (`git push origin feature/amazing-feature`)
+5. Pull Request oluşturun
+
+## 📄 Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır.

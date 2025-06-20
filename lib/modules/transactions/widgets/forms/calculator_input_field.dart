@@ -322,20 +322,31 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                   ? const Color(0xFF1C1C1E)
                   : const Color(0xFFF2F2F7),
           borderRadius: BorderRadius.circular(8),
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              height: 50,
-              alignment: Alignment.center,
-              child: Text(
-                text,
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: isOperator
-                      ? isDark ? Colors.white : Colors.black
-                      : isDark ? Colors.white : Colors.black,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: isDark 
+                ? Border.all(
+                    color: const Color(0xFF38383A),
+                    width: 0.5,
+                  )
+                : null,
+            ),
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: 60,
+                alignment: Alignment.center,
+                child: Text(
+                  text,
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isOperator
+                        ? isDark ? Colors.white : Colors.black
+                        : isDark ? Colors.white : Colors.black,
+                  ),
                 ),
               ),
             ),

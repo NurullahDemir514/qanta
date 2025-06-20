@@ -55,28 +55,36 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
     final currentMonth = now.month;
     final currentYear = now.year;
     
-    // Ekstre tarihini bul
-    DateTime statementDateTime = DateTime(currentYear, currentMonth, statementDate);
+    // Bu ayın ekstre tarihini hesapla
+    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDate);
     
-    // Eğer bu ayın ekstre tarihi geçmişse, gelecek aya al
-    if (statementDateTime.isBefore(now)) {
-      if (currentMonth == 12) {
-        statementDateTime = DateTime(currentYear + 1, 1, statementDate);
-      } else {
-        statementDateTime = DateTime(currentYear, currentMonth + 1, statementDate);
-      }
+    // Bu ayın son ödeme tarihini hesapla
+    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    // İlk hafta içi günü bul
+    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
     
-    // Ekstre tarihinden 10 gün sonra
-    DateTime tentativeDueDate = statementDateTime.add(const Duration(days: 10));
-    
-    // İlk hafta içi günü bul (Pazartesi=1, Salı=2, ..., Cuma=5)
-    DateTime dueDate = tentativeDueDate;
-    while (dueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
-      dueDate = dueDate.add(const Duration(days: 1));
+    // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme gününü döndür
+    if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
+      return currentDueDate.day;
     }
     
-    return dueDate.day;
+    // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
+    DateTime nextStatementDate;
+    if (currentMonth == 12) {
+      nextStatementDate = DateTime(currentYear + 1, 1, statementDate);
+    } else {
+      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDate);
+    }
+    
+    // Gelecek ayın son ödeme tarihini hesapla
+    DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
+    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      nextDueDate = nextDueDate.add(const Duration(days: 1));
+    }
+    
+    return nextDueDate.day;
   }
 
   Future<void> _submitForm() async {
@@ -100,7 +108,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
         type: AccountType.credit,
         name: _cardNameController.text.trim(),
         bankName: _selectedBankCode,
-        balance: -totalDebt,
+        balance: totalDebt, // Mevcut borç pozitif olarak kaydedilir
         creditLimit: creditLimit,
         statementDay: _statementDate,
         dueDay: _calculateDueDate(_statementDate),
@@ -618,25 +626,14 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
     final currentMonth = now.month;
     final currentYear = now.year;
     
-    // Ekstre tarihini bul
-    DateTime statementDateTime = DateTime(currentYear, currentMonth, _statementDate);
+    // Bu ayın ekstre tarihini hesapla
+    DateTime currentStatementDate = DateTime(currentYear, currentMonth, _statementDate);
     
-    // Eğer bu ayın ekstre tarihi geçmişse, gelecek aya al
-    if (statementDateTime.isBefore(now)) {
-      if (currentMonth == 12) {
-        statementDateTime = DateTime(currentYear + 1, 1, _statementDate);
-      } else {
-        statementDateTime = DateTime(currentYear, currentMonth + 1, _statementDate);
-      }
-    }
-    
-    // Ekstre tarihinden 10 gün sonra
-    DateTime tentativeDueDate = statementDateTime.add(const Duration(days: 10));
-    
-    // İlk hafta içi günü bul (Pazartesi=1, Salı=2, ..., Cuma=5)
-    DateTime dueDate = tentativeDueDate;
-    while (dueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
-      dueDate = dueDate.add(const Duration(days: 1));
+    // Bu ayın son ödeme tarihini hesapla
+    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    // İlk hafta içi günü bul
+    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
     
     // Türkçe ay isimleri
@@ -645,6 +642,25 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
     ];
     
-    return '${dueDate.day} ${monthNames[dueDate.month]}';
+    // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini göster
+    if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
+      return '${currentDueDate.day} ${monthNames[currentDueDate.month]}';
+    }
+    
+    // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
+    DateTime nextStatementDate;
+    if (currentMonth == 12) {
+      nextStatementDate = DateTime(currentYear + 1, 1, _statementDate);
+    } else {
+      nextStatementDate = DateTime(currentYear, currentMonth + 1, _statementDate);
+    }
+    
+    // Gelecek ayın son ödeme tarihini hesapla
+    DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
+    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+      nextDueDate = nextDueDate.add(const Duration(days: 1));
+    }
+    
+    return '${nextDueDate.day} ${monthNames[nextDueDate.month]}';
   }
 } 

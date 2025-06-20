@@ -10,7 +10,7 @@ import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 
 class EditDebitCardForm extends StatefulWidget {
-  final DebitCardModel debitCard;
+  final dynamic debitCard; // Can be DebitCardModel or Map
   final VoidCallback? onSuccess;
 
   const EditDebitCardForm({
@@ -27,11 +27,42 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
   final _formKey = GlobalKey<FormState>();
   final _cardNameController = TextEditingController();
   final _balanceController = TextEditingController();
-  final _lastFourDigitsController = TextEditingController();
 
   String? _selectedBankCode;
   bool _isLoading = false;
-  String? _lastFourDigitsError;
+
+  // Helper methods to extract data from either DebitCardModel or Map
+  String get cardId {
+    if (widget.debitCard is Map) {
+      return widget.debitCard['id'] as String;
+    } else {
+      return widget.debitCard.id;
+    }
+  }
+
+  String get bankCode {
+    if (widget.debitCard is Map) {
+      return widget.debitCard['bankCode'] ?? 'qanta';
+    } else {
+      return widget.debitCard.bankCode;
+    }
+  }
+
+  double get balance {
+    if (widget.debitCard is Map) {
+      return (widget.debitCard['balance'] as num?)?.toDouble() ?? 0.0;
+    } else {
+      return widget.debitCard.balance;
+    }
+  }
+
+  String? get cardName {
+    if (widget.debitCard is Map) {
+      return widget.debitCard['cardName'] as String?;
+    } else {
+      return widget.debitCard.cardName;
+    }
+  }
 
   @override
   void initState() {
@@ -40,45 +71,27 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
   }
 
   void _initializeForm() {
-    _selectedBankCode = widget.debitCard.bankCode;
-    _cardNameController.text = widget.debitCard.cardName ?? '';
-    _balanceController.text = widget.debitCard.balance.toStringAsFixed(0);
-    _lastFourDigitsController.text = widget.debitCard.lastFourDigits ?? '';
+    _selectedBankCode = bankCode;
+    _cardNameController.text = cardName ?? '';
+    _balanceController.text = balance.toStringAsFixed(0);
   }
 
   @override
   void dispose() {
     _cardNameController.dispose();
     _balanceController.dispose();
-    _lastFourDigitsController.dispose();
     super.dispose();
-  }
-
-  void _validateLastFourDigits(String value) {
-    setState(() {
-      if (value.isEmpty) {
-        _lastFourDigitsError = null;
-      } else if (value.length != 4) {
-        _lastFourDigitsError = 'Son 4 hane tam olarak 4 rakam olmalıdır';
-      } else if (!RegExp(r'^\d{4}$').hasMatch(value)) {
-        _lastFourDigitsError = 'Sadece rakam girebilirsiniz';
-      } else {
-        _lastFourDigitsError = null;
-      }
-    });
   }
 
   void _validateForm() {
     _formKey.currentState?.validate();
-    _validateLastFourDigits(_lastFourDigitsController.text);
   }
 
   Future<void> _submitForm() async {
     _validateForm();
 
     if (_selectedBankCode == null || 
-        _balanceController.text.trim().isEmpty ||
-        _lastFourDigitsError != null) {
+        _balanceController.text.trim().isEmpty) {
       return;
     }
 
@@ -92,13 +105,10 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
       final balance = double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0;
 
       final success = await debitCardProvider.updateDebitCard(
-        cardId: widget.debitCard.id,
+        cardId: cardId,
         cardName: _cardNameController.text.trim().isEmpty 
             ? null 
             : _cardNameController.text.trim(),
-        lastFourDigits: _lastFourDigitsController.text.trim().isEmpty 
-            ? null 
-            : _lastFourDigitsController.text.trim(),
         balance: balance,
       );
 
@@ -341,61 +351,6 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                       style: GoogleFonts.inter(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Son 4 Hane
-                    Text(
-                      'Son 4 Hane (Opsiyonel)',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _lastFourDigitsController,
-                      keyboardType: TextInputType.number,
-                      maxLength: 4,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      decoration: InputDecoration(
-                        hintText: '1234',
-                        filled: true,
-                        fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: _lastFourDigitsError != null 
-                                ? const Color(0xFFFF3B30)
-                                : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: _lastFourDigitsError != null 
-                                ? const Color(0xFFFF3B30)
-                                : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF6D6D70),
-                            width: 2,
-                          ),
-                        ),
-                        counterText: '',
-                        errorText: _lastFourDigitsError,
-                      ),
-                      style: GoogleFonts.inter(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      onChanged: _validateLastFourDigits,
                     ),
 
                     const SizedBox(height: 20),
