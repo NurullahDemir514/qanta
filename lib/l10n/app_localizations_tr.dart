@@ -245,6 +245,31 @@ class AppLocalizationsTr extends AppLocalizations {
   String get budgetUsed => 'Kullanıldı';
 
   @override
+  String get remaining => 'kaldı';
+
+  @override
+  String get installment => 'Taksitli';
+
+  @override
+  String get categoryHint => 'kahve, market, benzin...';
+
+  @override
+  String get noBudgetDefined => 'Henüz bütçe tanımlanmamış';
+
+  @override
+  String get createBudgetDescription =>
+      'Harcama limitlerinizi takip etmek için bütçe oluşturun';
+
+  @override
+  String get createBudget => 'Bütçe Oluştur';
+
+  @override
+  String get expenseLimitTracking => 'Harcama Limit Takibi';
+
+  @override
+  String get manage => 'Yönet';
+
+  @override
   String get thisMonthGrowth => 'bu ay';
 
   @override
@@ -1328,4 +1353,28 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get moreCategories => 'daha fazla kategori';
+
+  @override
+  String get netWorth => 'Net Değer';
+
+  @override
+  String get positive => 'Pozitif';
+
+  @override
+  String get negative => 'Negatif';
+
+  @override
+  String get totalAssets => 'Toplam Varlık';
+
+  @override
+  String get totalDebts => 'Toplam Borç';
+
+  @override
+  String get availableCredit => 'Kullanılabilir Kredi';
+
+  @override
+  String get netAmount => 'Net';
+
+  @override
+  String get transactionCount => 'İşlem';
 }

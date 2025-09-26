@@ -69,24 +69,6 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
       );
 
       if (success != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Banka kartı başarıyla eklendi',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-            backgroundColor: const Color(0xFF34C759),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-
         widget.onSuccess?.call();
         Navigator.of(context).pop();
       }

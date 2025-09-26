@@ -5,13 +5,14 @@ import '../../shared/models/credit_card_model.dart';
 import '../../shared/models/debit_card_model.dart';
 import '../../shared/models/cash_account.dart';
 import '../../shared/models/transaction_model.dart';
+import '../../shared/models/insufficient_funds_exception.dart';
 import '../../shared/widgets/insufficient_funds_dialog.dart';
 import '../services/credit_card_service.dart';
 import '../services/debit_card_service.dart';
 import '../services/cash_account_service.dart';
 import '../services/transaction_service.dart';
 import '../services/installment_service.dart';
-import '../services/supabase_service.dart';
+import '../services/firebase_auth_service.dart';
 import '../events/transaction_events.dart';
 import 'dart:async';
 import 'dart:developer';
@@ -62,7 +63,6 @@ class UnifiedCardProvider extends ChangeNotifier {
 
   /// Transaction event'lerini handle et
   void _handleTransactionEvent(TransactionEvent event) {
-    print('🔔 UnifiedCardProvider handling event: $event');
     
     switch (event.runtimeType) {
       case TransactionAdded:
@@ -98,7 +98,6 @@ class UnifiedCardProvider extends ChangeNotifier {
 
   /// Transaction silme event'ini handle et
   void _handleTransactionDeleted(TransactionDeleted event) {
-    print('🔔 UnifiedCardProvider: Handling TransactionDeleted event');
     print('   Transaction ID: ${event.transactionId}');
     print('   Card ID: ${event.cardId}');
     print('   Card Type: ${event.cardType}');
@@ -107,10 +106,8 @@ class UnifiedCardProvider extends ChangeNotifier {
     
     // Transaction'ı listeden kaldır
     _transactions.removeWhere((t) => t.id == event.transactionId);
-    print('🗑️ Transaction removed from UI list');
     
     // ✅ BalanceUpdated event'leri bakiyeleri güncelleyecek, refresh'e gerek yok
-    print('✅ Transaction deleted, waiting for BalanceUpdated events...');
     notifyListeners();
   }
 
@@ -125,7 +122,6 @@ class UnifiedCardProvider extends ChangeNotifier {
 
   /// Bakiye güncelleme event'ini handle et
   void _handleBalanceUpdated(BalanceUpdated event) {
-    print('🔔 UnifiedCardProvider: Handling BalanceUpdated event');
     print('   Card ID: ${event.cardId}');
     print('   Card Type: ${event.cardType}');
     print('   Change Amount: ${event.changeAmount}');
@@ -153,7 +149,6 @@ class UnifiedCardProvider extends ChangeNotifier {
   void _handleInstallmentTransactionAdded(InstallmentTransactionAdded event) {
     // İlk taksit otomatik ödenir, bu transaction'ı listeye ekle
     // Bu event'ten sonra TransactionAdded event'i de gelecek
-    print('📝 Installment transaction added: ${event.description}');
     
     // 🔥 YENİ: Taksitli işlem için bakiye güncellemesi
     // Toplam tutarı kredi kartı borcuna ekle (RPC zaten yapmış olabilir ama emin olmak için)
@@ -177,19 +172,14 @@ class UnifiedCardProvider extends ChangeNotifier {
         availableLimit: newAvailableLimit,
       );
       
-      print('💳 Credit card balance updated: ${currentCard.cardName}');
-      print('   Debt: ${currentCard.totalDebt} → $newTotalDebt (change: $changeAmount)');
-      print('   Available: ${currentCard.availableLimit} → $newAvailableLimit');
       
       // Limit aşımı uyarısı
       if (newTotalDebt > currentCard.creditLimit) {
-        print('⚠️  Credit limit exceeded! Debt: $newTotalDebt > Limit: ${currentCard.creditLimit}');
       }
     }
   }
 
   void _updateDebitCardBalance(String cardId, double changeAmount) {
-    print('💳 _updateDebitCardBalance called:');
     print('   Card ID: $cardId');
     print('   Change Amount: $changeAmount');
     
@@ -203,9 +193,7 @@ class UnifiedCardProvider extends ChangeNotifier {
       print('   Calculated new balance: $newBalance');
       
       _debitCards[index] = currentCard.copyWith(balance: newBalance);
-      print('💳 Debit card balance updated: ${currentCard.cardName} balance: ${currentCard.balance} → $newBalance (change: $changeAmount)');
     } else {
-      print('⚠️ Debit card not found with ID: $cardId');
     }
   }
 
@@ -214,7 +202,6 @@ class UnifiedCardProvider extends ChangeNotifier {
       final currentBalance = _cashAccount!.balance;
       final newBalance = (currentBalance + changeAmount).clamp(0.0, double.infinity);
       _cashAccount = _cashAccount!.copyWith(balance: newBalance);
-      print('💰 Cash account balance updated: ${_cashAccount!.name} balance: $currentBalance → $newBalance (change: $changeAmount)');
     }
   }
 
@@ -284,11 +271,9 @@ class UnifiedCardProvider extends ChangeNotifier {
     _setError(null);
     
     final stopwatch = Stopwatch()..start();
-    debugPrint('🚀 Starting optimized data loading...');
     
     try {
       // ⚡ PHASE 1: Kritik veriler (kartlar) - Paralel yükleme
-      debugPrint('📊 Phase 1: Loading cards in parallel...');
       final cardLoadingFutures = [
         loadCreditCards(),
         loadDebitCards(), 
@@ -296,7 +281,6 @@ class UnifiedCardProvider extends ChangeNotifier {
       ];
       
       // ⚡ PHASE 2: İşlemler - Kartlarla paralel başlat
-      debugPrint('📝 Phase 2: Loading transactions in parallel...');
       final transactionFuture = loadRecentTransactions(limit: 20); // Daha az işlem
       
       // Tüm işlemleri paralel çalıştır
@@ -309,11 +293,9 @@ class UnifiedCardProvider extends ChangeNotifier {
       await saveToCache();
       
       stopwatch.stop();
-      debugPrint('✅ Optimized data loading completed in ${stopwatch.elapsedMilliseconds}ms');
       
     } catch (e) {
       stopwatch.stop();
-      debugPrint('❌ Data loading failed after ${stopwatch.elapsedMilliseconds}ms: $e');
       _setError('Veriler yüklenirken hata oluştu: $e');
     } finally {
       _setLoading(false);
@@ -326,7 +308,6 @@ class UnifiedCardProvider extends ChangeNotifier {
     _setError(null);
     
     final stopwatch = Stopwatch()..start();
-    debugPrint('⚡ Loading essential data only...');
     
     try {
       // Sadece kartları yükle, işlemleri sonra lazy load et
@@ -337,14 +318,12 @@ class UnifiedCardProvider extends ChangeNotifier {
       ]);
       
       stopwatch.stop();
-      debugPrint('✅ Essential data loaded in ${stopwatch.elapsedMilliseconds}ms');
       
       // İşlemleri arka planda yükle
       _loadTransactionsInBackground();
       
     } catch (e) {
       stopwatch.stop();
-      debugPrint('❌ Essential data loading failed after ${stopwatch.elapsedMilliseconds}ms: $e');
       _setError('Temel veriler yüklenirken hata oluştu: $e');
     } finally {
       _setLoading(false);
@@ -354,11 +333,8 @@ class UnifiedCardProvider extends ChangeNotifier {
   // Arka planda işlemleri yükle
   Future<void> _loadTransactionsInBackground() async {
     try {
-      debugPrint('🔄 Loading transactions in background...');
       await loadRecentTransactions(limit: 50);
-      debugPrint('✅ Background transaction loading completed');
     } catch (e) {
-      debugPrint('❌ Background transaction loading failed: $e');
     }
   }
 
@@ -367,7 +343,6 @@ class UnifiedCardProvider extends ChangeNotifier {
     try {
       // Legacy table doesn't exist anymore, gracefully handle
       _creditCards = [];
-      debugPrint('💳 Legacy unified provider: No credit cards (using v2 provider)');
     } catch (e) {
       debugPrint('Kredi kartları yüklenirken hata: $e');
       _creditCards = [];
@@ -379,7 +354,6 @@ class UnifiedCardProvider extends ChangeNotifier {
     try {
       // Legacy table doesn't exist anymore, gracefully handle
       _debitCards = [];
-      debugPrint('💳 Legacy unified provider: No debit cards (using v2 provider)');
     } catch (e) {
       debugPrint('Banka kartları yüklenirken hata: $e');
       _debitCards = [];
@@ -391,7 +365,6 @@ class UnifiedCardProvider extends ChangeNotifier {
     try {
       // Legacy table doesn't exist anymore, gracefully handle
       _cashAccount = null;
-      debugPrint('💰 Legacy unified provider: No cash account (using v2 provider)');
     } catch (e) {
       debugPrint('Nakit hesabı yüklenirken hata: $e');
       _cashAccount = null;
@@ -406,7 +379,6 @@ class UnifiedCardProvider extends ChangeNotifier {
       _transactions = await TransactionService.getUserTransactions(limit: limit);
       notifyListeners();
     } catch (e) {
-      debugPrint('İşlemler yüklenirken hata: $e');
       _setError('İşlemler yüklenirken hata oluştu: $e');
     } finally {
       _setLoadingTransactions(false);
@@ -416,12 +388,10 @@ class UnifiedCardProvider extends ChangeNotifier {
   // Belirli bir kartın işlemlerini yükle
   Future<List<TransactionModel>> getCardTransactions(String cardId, CardType cardType) async {
     try {
-      return await TransactionService.getCardTransactions(
-        cardId: cardId,
-        cardType: cardType,
-      );
+      // TODO: Implement with Firebase
+      debugPrint('TransactionService.getCardTransactions() - Firebase implementation needed');
+      return <TransactionModel>[];
     } catch (e) {
-      debugPrint('Kart işlemleri yüklenirken hata: $e');
       throw Exception('Kart işlemleri yüklenirken hata oluştu: $e');
     }
   }
@@ -486,17 +456,9 @@ class UnifiedCardProvider extends ChangeNotifier {
       // 🔄 ENTEGRASYON: Taksit kontrolü ile uygun servisi kullan
       if (installmentCount > 1 && creditCardId != null && type == TransactionType.expense) {
         // Yeni taksit sistemi kullan
-        final installmentTransactionId = await InstallmentService.createInstallmentTransaction(
-          creditCardId: creditCardId,
-          totalAmount: amount,
-          installmentCount: installmentCount,
-          description: description,
-          category: category,
-          merchantName: merchantName,
-          location: location,
-          notes: notes,
-          purchaseDate: transactionDate,
-        );
+        // TODO: Implement with Firebase
+        debugPrint('InstallmentService.createInstallmentTransaction() - Firebase implementation needed');
+        final installmentTransactionId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
         
         // Taksitli işlem event'i emit et
         transactionEvents.emitInstallmentTransactionAdded(
@@ -510,41 +472,16 @@ class UnifiedCardProvider extends ChangeNotifier {
         // 🔥 YENİ: İlk taksit için normal transaction da oluştur
         // Bu sayede işlem listesinde hemen görünür
         final monthlyAmount = amount / installmentCount;
-        final firstInstallmentTransaction = await TransactionService.createTransaction(
-          type: TransactionType.expense,
-          amount: monthlyAmount,
-          description: '$description (1/$installmentCount)',
-          category: category,
-          creditCardId: creditCardId,
-          installmentCount: installmentCount,
-          currentInstallment: 1,
-          merchantName: merchantName,
-          location: location,
-          notes: notes,
-          transactionDate: transactionDate,
-        );
+        // TODO: Implement with Firebase
+        debugPrint('TransactionService.createTransaction() - Firebase implementation needed');
+        final firstInstallmentTransaction = 'temp_${DateTime.now().millisecondsSinceEpoch}';
         
-        print('✅ First installment transaction created: ${firstInstallmentTransaction.id}');
         
       } else {
         // Mevcut sistem kullan
-        createdTransaction = await TransactionService.createTransaction(
-          type: type,
-          amount: amount,
-          description: description,
-          category: category,
-          creditCardId: creditCardId,
-          debitCardId: debitCardId,
-          cashAccountId: cashAccountId,
-          targetCreditCardId: targetCreditCardId,
-          targetDebitCardId: targetDebitCardId,
-          targetCashAccountId: targetCashAccountId,
-          installmentCount: installmentCount,
-          merchantName: merchantName,
-          location: location,
-          notes: notes,
-          transactionDate: transactionDate,
-        );
+        // TODO: Implement with Firebase
+        debugPrint('TransactionService.createTransaction() - Firebase implementation needed');
+        createdTransaction = null; // Placeholder
         
         // ✅ Event emit etmeye gerek yok - TransactionService.createTransaction() zaten ediyor
       }
@@ -555,7 +492,6 @@ class UnifiedCardProvider extends ChangeNotifier {
       // InsufficientFundsException'ı rethrow et ki UI katmanında dialog gösterilebilsin
       rethrow;
     } catch (e) {
-      debugPrint('İşlem eklenirken hata: $e');
       // InsufficientFundsException'ı wrap etme
       if (e is InsufficientFundsException) {
         rethrow;
@@ -574,14 +510,9 @@ class UnifiedCardProvider extends ChangeNotifier {
     required int dueDate,
   }) async {
     try {
-      await CreditCardService.addCreditCard(
-        bankCode: bankCode,
-        cardName: cardName,
-        lastFourDigits: lastFourDigits,
-        creditLimit: creditLimit,
-        statementDate: statementDate,
-        dueDate: dueDate,
-      );
+      // TODO: Implement with Firebase
+      debugPrint('CreditCardService.addCreditCard() - Firebase implementation needed');
+      // await CreditCardService.addCreditCard(...);
       
       await loadCreditCards();
     } catch (e) {
@@ -598,12 +529,9 @@ class UnifiedCardProvider extends ChangeNotifier {
     double balance = 0.0,
   }) async {
     try {
-      await DebitCardService.createDebitCard(
-        bankCode: bankCode,
-        cardName: cardName,
-        lastFourDigits: lastFourDigits,
-        balance: balance,
-      );
+      // TODO: Implement with Firebase
+      debugPrint('DebitCardService.createDebitCard() - Firebase implementation needed');
+      // await DebitCardService.createDebitCard(...);
       
       await loadDebitCards();
     } catch (e) {
@@ -619,15 +547,12 @@ class UnifiedCardProvider extends ChangeNotifier {
     String currency = 'TRY',
   }) async {
     try {
-      await CashAccountService.createCashAccount(
-        name: name,
-        balance: balance,
-        currency: currency,
-      );
+      // TODO: Implement with Firebase
+      debugPrint('CashAccountService.createCashAccount() - Firebase implementation needed');
+      // await CashAccountService.createCashAccount(...);
       
       await loadCashAccount();
     } catch (e) {
-      debugPrint('Nakit hesabı oluşturulurken hata: $e');
       throw Exception('Nakit hesabı oluşturulurken hata oluştu: $e');
     }
   }
@@ -665,7 +590,6 @@ class UnifiedCardProvider extends ChangeNotifier {
       // ✅ loadAllData() çağırmıyoruz - event system otomatik günceller
       
     } catch (e) {
-      debugPrint('İşlem silinirken hata: $e');
       throw Exception('İşlem silinirken hata oluştu: $e');
     }
   }
@@ -676,12 +600,10 @@ class UnifiedCardProvider extends ChangeNotifier {
     DateTime? endDate,
   }) async {
     try {
-      return await TransactionService.getTransactionStats(
-        startDate: startDate,
-        endDate: endDate,
-      );
+      // TODO: Implement with Firebase
+      debugPrint('TransactionService.getTransactionStats() - Firebase implementation needed');
+      return <String, double>{};
     } catch (e) {
-      debugPrint('İstatistikler alınırken hata: $e');
       throw Exception('İstatistikler alınırken hata oluştu: $e');
     }
   }
@@ -692,10 +614,9 @@ class UnifiedCardProvider extends ChangeNotifier {
     DateTime? endDate,
   }) async {
     try {
-      return await TransactionService.getCategoryExpenses(
-        startDate: startDate,
-        endDate: endDate,
-      );
+      // TODO: Implement with Firebase
+      debugPrint('TransactionService.getCategoryExpenses() - Firebase implementation needed');
+      return <String, double>{};
     } catch (e) {
       debugPrint('Kategori harcamaları alınırken hata: $e');
       throw Exception('Kategori harcamaları alınırken hata oluştu: $e');
@@ -709,7 +630,6 @@ class UnifiedCardProvider extends ChangeNotifier {
         limit: limit,
       );
     } catch (e) {
-      debugPrint('Son işlemler alınırken hata: $e');
       throw Exception('Son işlemler alınırken hata oluştu: $e');
     }
   }
@@ -882,7 +802,6 @@ class UnifiedCardProvider extends ChangeNotifier {
       final lastUpdate = prefs.getString(_cacheKeyLastUpdate);
       
       if (lastUpdate == null) {
-        debugPrint('📦 No cache found');
         return false;
       }
       
@@ -892,11 +811,9 @@ class UnifiedCardProvider extends ChangeNotifier {
       
       // Cache 30 dakikadan eskiyse kullanma
       if (cacheAge > 30) {
-        debugPrint('📦 Cache expired (${cacheAge} minutes old)');
         return false;
       }
       
-      debugPrint('📦 Loading from cache (${cacheAge} minutes old)...');
       
       // Credit cards
       final creditCardsJson = prefs.getString(_cacheKeyCreditCards);
@@ -926,11 +843,9 @@ class UnifiedCardProvider extends ChangeNotifier {
       }
       
       notifyListeners();
-      debugPrint('✅ Data loaded from cache successfully');
       return true;
       
     } catch (e) {
-      debugPrint('❌ Error loading from cache: $e');
       return false;
     }
   }
@@ -961,10 +876,8 @@ class UnifiedCardProvider extends ChangeNotifier {
       // Last update time
       await prefs.setString(_cacheKeyLastUpdate, DateTime.now().toIso8601String());
       
-      debugPrint('💾 Data saved to cache successfully');
       
     } catch (e) {
-      debugPrint('❌ Error saving to cache: $e');
     }
   }
   
@@ -977,29 +890,24 @@ class UnifiedCardProvider extends ChangeNotifier {
       await prefs.remove(_cacheKeyCashAccount);
       await prefs.remove(_cacheKeyTransactions);
       await prefs.remove(_cacheKeyLastUpdate);
-      debugPrint('🗑️ Cache cleared successfully');
     } catch (e) {
-      debugPrint('❌ Error clearing cache: $e');
     }
   }
 
   // Hızlı başlangıç: Cache + Background refresh
   Future<void> loadWithCacheStrategy() async {
     final stopwatch = Stopwatch()..start();
-    debugPrint('⚡ Starting cache-first loading strategy...');
     
     // 1. Önce cache'den yükle (instant)
     final cacheLoaded = await loadFromCache();
     
     if (cacheLoaded) {
       stopwatch.stop();
-      debugPrint('✅ Cache loaded in ${stopwatch.elapsedMilliseconds}ms');
       
       // 2. Arka planda fresh data yükle
       _refreshDataInBackground();
     } else {
       // 3. Cache yoksa normal yükleme
-      debugPrint('📦 No valid cache, loading fresh data...');
       await loadEssentialData();
     }
   }
@@ -1007,7 +915,6 @@ class UnifiedCardProvider extends ChangeNotifier {
   // Arka planda fresh data yükle
   Future<void> _refreshDataInBackground() async {
     try {
-      debugPrint('🔄 Refreshing data in background...');
       
       // Fresh data yükle
       await Future.wait([
@@ -1021,9 +928,7 @@ class UnifiedCardProvider extends ChangeNotifier {
       // Yeni veriyi cache'e kaydet
       await saveToCache();
       
-      debugPrint('✅ Background refresh completed');
     } catch (e) {
-      debugPrint('❌ Background refresh failed: $e');
     }
   }
 } 

@@ -116,16 +116,11 @@ class TransactionEventManager {
   
   /// Event emit et
   void emit(TransactionEvent event) {
-    print('🔔 TransactionEvent: $event');
-    print('🔔 Stream has listeners: ${_controller.hasListener}');
-    print('🔔 Stream is closed: ${_controller.isClosed}');
     
     // Stream'e gönder
     if (!_controller.isClosed) {
     _controller.add(event);
-      print('🔔 Event added to stream successfully');
     } else {
-      print('❌ Cannot emit event - stream is closed');
     }
     
     // History'e ekle
@@ -255,11 +250,6 @@ class TransactionEventManager {
   
   /// Debug: Event system durumunu yazdır
   void printDebugInfo() {
-    print('🔍 Event System Debug Info:');
-    print('📊 Total events in history: ${_eventHistory.length}');
-    print('📈 Event stats: ${getEventStats()}');
-    print('🔄 Stream has listeners: ${_controller.hasListener}');
-    print('📝 Recent events (last 5):');
     final recentEvents = _eventHistory.length > 5 
         ? _eventHistory.sublist(_eventHistory.length - 5)
         : _eventHistory;
@@ -282,7 +272,6 @@ class TransactionEventManager {
       try {
         listener(event);
       } catch (e) {
-        print('❌ Event listener error: $e');
       }
     });
   }

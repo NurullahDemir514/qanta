@@ -308,6 +308,38 @@
   "@budgetUsed": {
     "description": "Budget used label"
   },
+  "remaining": "left",
+  "@remaining": {
+    "description": "Remaining amount label"
+  },
+  "installment": "Installment",
+  "@installment": {
+    "description": "Installment transaction chip text"
+  },
+  "categoryHint": "coffee, market, fuel...",
+  "@categoryHint": {
+    "description": "Category input hint text"
+  },
+  "noBudgetDefined": "No budget defined yet",
+  "@noBudgetDefined": {
+    "description": "No budget defined message"
+  },
+  "createBudgetDescription": "Create a budget to track your spending limits",
+  "@createBudgetDescription": {
+    "description": "Create budget description"
+  },
+  "createBudget": "Create Budget",
+  "@createBudget": {
+    "description": "Create budget button text"
+  },
+  "expenseLimitTracking": "Expense Limit Tracking",
+  "@expenseLimitTracking": {
+    "description": "Expense limit tracking title"
+  },
+  "manage": "Manage",
+  "@manage": {
+    "description": "Manage button text"
+  },
   "thisMonthGrowth": "this month",
   "@thisMonthGrowth": {
     "description": "This month growth indicator"
@@ -1739,5 +1771,13 @@
   "average": "Average",
   "needsImprovement": "Needs Improvement",
   "dailyAverage": "Daily Average",
-  "moreCategories": "more categories"
+  "moreCategories": "more categories",
+  "netWorth": "Net Worth",
+  "positive": "Positive",
+  "negative": "Negative",
+  "totalAssets": "Total Assets",
+  "totalDebts": "Total Debts",
+  "availableCredit": "Available Credit",
+  "netAmount": "Net",
+  "transactionCount": "Transactions"
 } 

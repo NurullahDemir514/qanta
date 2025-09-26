@@ -36,7 +36,6 @@ class CategoryTestHelper {
       'üniversite', 'otel', 'eğitim',
     ];
     
-    debugPrint('🧪 Testing Expense Categories:');
     for (final category in testCategories) {
       final suggestion = SmartCategoryService.suggestCategoryStyle(
         name: category,
@@ -46,7 +45,6 @@ class CategoryTestHelper {
       final icon = CategoryIconService.getIcon(suggestion.iconName);
       final color = CategoryIconService.getColor(suggestion.colorHex);
       
-      debugPrint('   📁 $category -> ${suggestion.iconName} (${suggestion.colorHex}) [${suggestion.confidence}]');
     }
   }
   
@@ -58,7 +56,6 @@ class CategoryTestHelper {
       'emeklilik', 'sosyal yardım', 'bonus',
     ];
     
-    debugPrint('🧪 Testing Income Categories:');
     for (final category in testCategories) {
       final suggestion = SmartCategoryService.suggestCategoryStyle(
         name: category,
@@ -68,7 +65,6 @@ class CategoryTestHelper {
       final icon = CategoryIconService.getIcon(suggestion.iconName);
       final color = CategoryIconService.getColor(suggestion.colorHex);
       
-      debugPrint('   💰 $category -> ${suggestion.iconName} (${suggestion.colorHex}) [${suggestion.confidence}]');
     }
   }
   
@@ -190,28 +186,22 @@ class CategoryTestHelper {
   
   /// Test popular suggestions
   static void testPopularSuggestions() {
-    debugPrint('🧪 Testing Popular Income Suggestions:');
     final incomeSuggestions = SmartCategoryService.getPopularCategories(isIncomeCategory: true);
     for (final suggestion in incomeSuggestions) {
-      debugPrint('   💰 ${suggestion.name} -> ${suggestion.icon} (${suggestion.color})');
     }
     
-    debugPrint('🧪 Testing Popular Expense Suggestions:');
     final expenseSuggestions = SmartCategoryService.getPopularCategories(isIncomeCategory: false);
     for (final suggestion in expenseSuggestions.take(10)) {  // Show first 10
-      debugPrint('   📁 ${suggestion.name} -> ${suggestion.icon} (${suggestion.color})');
     }
   }
   
   /// Run all tests
   static void runAllTests() {
-    debugPrint('🚀 Running Category System Tests...\n');
     testExpenseCategories();
     debugPrint('');
     testIncomeCategories();
     debugPrint('');
     testPopularSuggestions();
-    debugPrint('\n✅ All tests completed!');
   }
 }
 

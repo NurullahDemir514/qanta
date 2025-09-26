@@ -272,13 +272,6 @@ class AppRouter {
         path: '/expense-form',
         name: 'expense-form',
         pageBuilder: (context, state) {
-          // Debug: URL parametrelerini logla
-          print('🚨 ROUTER CALLED - Expense Form');
-          print('URI: ${state.uri}');
-          print('Query Parameters: ${state.uri.queryParameters}');
-          print('Amount param: ${state.uri.queryParameters['amount']}');
-          print('Category param: ${state.uri.queryParameters['category']}');
-          
           return CustomTransitionPage(
             key: state.pageKey,
             child: ExpenseFormScreen(
@@ -320,6 +313,7 @@ class AppRouter {
             cardName: state.uri.queryParameters['cardName'] ?? '',
             bankName: state.uri.queryParameters['bankName'] ?? '',
             statementDay: int.tryParse(state.uri.queryParameters['statementDay'] ?? '15') ?? 15,
+            dueDay: int.tryParse(state.uri.queryParameters['dueDay'] ?? ''),
           ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);

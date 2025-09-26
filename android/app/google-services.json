@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "982050181554",
+    "project_id": "qanta-de0b9",
+    "storage_bucket": "qanta-de0b9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982050181554:android:fde5f8e429dcdfa475d4ab",
+        "android_client_info": {
+          "package_name": "com.qanta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWae10cgw8ZyE4Xnf6PfEq7yWlhZ0KSZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

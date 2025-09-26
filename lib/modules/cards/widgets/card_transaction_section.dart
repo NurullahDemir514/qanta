@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
+import '../../../shared/models/account_model.dart';
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,7 +30,35 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
   @override
   void initState() {
     super.initState();
-    // V2 provider handles all data loading automatically
+    // Card section açılırken taksit verilerini güncelle
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+      provider.loadInstallments();
+      // Load transactions for this specific card
+      _loadCardTransactions(provider);
+    });
+  }
+
+  /// Load transactions for this specific card
+  Future<void> _loadCardTransactions(UnifiedProviderV2 provider) async {
+    try {
+      final account = provider.getAccountById(widget.cardId);
+      if (account == null) return;
+
+      switch (account.type) {
+        case AccountType.credit:
+          await provider.getCreditCardTransactions(creditCardId: widget.cardId);
+          break;
+        case AccountType.debit:
+          await provider.getDebitCardTransactions(debitCardId: widget.cardId);
+          break;
+        case AccountType.cash:
+          await provider.getCashAccountTransactions(cashAccountId: widget.cardId);
+          break;
+      }
+    } catch (e) {
+      debugPrint('Error loading card transactions: $e');
+    }
   }
 
   @override
@@ -37,7 +67,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
 
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
-        debugPrint('🎯 CardTransactionSection using V2 provider for card: ${widget.cardName}');
+    
         
         // Use v2 provider data - filter transactions by account
         final account = providerV2.getAccountById(widget.cardId);
@@ -154,69 +184,83 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
         ? providerV2.getCategoryById(transaction.categoryId!)
         : null;
 
-    // FALLBACK: Check if description contains installment pattern like (1/4)
+    // FALLBACK: Check if description contains installment pattern like (1/4) or (3 taksit)
     final hasInstallmentPattern = RegExp(r'\(\d+/\d+\)').hasMatch(transaction.description);
-    final isActualInstallment = transaction.isInstallment || hasInstallmentPattern;
+    final hasInstallmentText = RegExp(r'\(\d+ taksit\)').hasMatch(transaction.description);
+    final isActualInstallment = transaction.isInstallment || hasInstallmentPattern || hasInstallmentText;
 
     // Build title - sadece description göster (kategori adı gereksiz)
     String title = transaction.categoryName ?? transaction.description;
-    
-    // Card name - for transfers, show source → target
-    String cardName = widget.cardName;
-    if (transactionType == TransactionType.transfer) {
-      final sourceAccount = transaction.sourceAccountName ?? 'Hesap';
-      final targetAccount = transaction.targetAccountName ?? 'Hesap';
-      cardName = TransactionDesignSystem.formatTransferSubtitle(sourceAccount, targetAccount);
-    } else {
-      // Shorten regular card names
-      cardName = TransactionDesignSystem.shortenAccountName(cardName);
+    // Taksitli ise taksit bilgisini ekleme, sadece InstallmentExpandableCard'da gösterilecek
+    String installmentText = '';
+    int? effectiveInstallmentCount = transaction.installmentCount;
+    int currentInstallment = 1;
+    if ((transaction.installmentCount == null || transaction.installmentCount! < 1) && transaction.installmentId != null) {
+      final info = Provider.of<UnifiedProviderV2>(context, listen: false).getInstallmentInfo(transaction.installmentId);
+      if (info != null) {
+        effectiveInstallmentCount = info['totalInstallments'];
+        currentInstallment = info['currentInstallment'] ?? 1;
+      }
     }
+    if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
+      installmentText = '$currentInstallment/$effectiveInstallmentCount Taksit';
+    } else if (effectiveInstallmentCount == 1) {
+      installmentText = 'Peşin';
+    }
+    
+    // Card name - centralized logic
+    final cardName = TransactionDesignSystem.formatCardName(
+      cardName: widget.cardName,
+      transactionType: transactionType.name,
+      sourceAccountName: transaction.sourceAccountName,
+      targetAccountName: transaction.targetAccountName,
+    );
 
     // Format amount
     final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
 
-    // Format time
-    final time = TransactionDesignSystem.formatTime(transaction.transactionDate);
+    // Use displayTime from transaction model (dynamic date formatting)
+    final time = transaction.displayTime;
 
     // Check if this should be displayed as an installment
     if (isActualInstallment) {
-      // Extract installment info from pattern if available
-      Map<String, int?>? installmentInfo;
-      if (hasInstallmentPattern) {
-        final match = RegExp(r'\((\d+)/(\d+)\)').firstMatch(transaction.description);
-        if (match != null) {
-          installmentInfo = {
-            'currentInstallment': int.tryParse(match.group(1)!),
-            'totalInstallments': int.tryParse(match.group(2)!),
-          };
-        }
+      // Extract installment info from description
+      String cleanTitle = title;
+      int? totalInstallments;
+      double? totalAmount;
+      double? monthlyAmount;
+      
+      // Parse "(3 taksit)" pattern
+      final installmentMatch = RegExp(r'\((\d+) taksit\)').firstMatch(transaction.description);
+      if (installmentMatch != null) {
+        totalInstallments = int.tryParse(installmentMatch.group(1)!);
+        totalAmount = transaction.amount; // This is the total amount
+        monthlyAmount = totalAmount / (totalInstallments ?? 1); // Calculate monthly amount
+        cleanTitle = transaction.description.replaceAll(RegExp(r'\s*\(\d+ taksit\)'), '').trim();
+        
       }
-
-      // Get installment count for title
-      final totalInstallments = installmentInfo?['totalInstallments'];
-      final installmentSuffix = totalInstallments != null ? ' ($totalInstallments Taksit)' : ' (Taksitli)';
-
-      // Remove installment pattern from title for cleaner display
-      final cleanTitle = title.replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '');
-
+      
+      
       return InstallmentExpandableCard(
-        installmentId: transaction.installmentId, // This might be null for fallback cases
-        title: '$cleanTitle$installmentSuffix',
-        subtitle: cardName,
-        amount: amount,
+        installmentId: transaction.installmentId,
+        title: transaction.categoryName ?? transaction.description, // Kategori adı
+        subtitle: cardName, // Banka adı
+        amount: TransactionDesignSystem.formatAmount(totalAmount ?? transaction.amount, transactionType),
         time: time,
         type: transactionType,
-        categoryIcon: transaction.categoryName ?? category?.icon, // Prioritize category name
-        categoryColor: category?.color,
+        categoryIcon: transaction.categoryName ?? category?.iconName,
+        categoryColor: category?.colorHex,
         isDark: isDark,
         isFirst: isFirst,
         isLast: isLast,
-        currentInstallment: installmentInfo?['currentInstallment'],
-        totalInstallments: installmentInfo?['totalInstallments'],
+        currentInstallment: 1,
+        totalInstallments: totalInstallments,
+        totalAmount: totalAmount,
+        monthlyAmount: monthlyAmount,
+        isPaid: false,
         onLongPress: () {
-          print('🔍 Long press detected on installment transaction: ${transaction.description}');
           HapticFeedback.mediumImpact();
-          _showInstallmentDeleteActionSheet(context, transaction, installmentInfo);
+          _showInstallmentDeleteActionSheet(context, transaction, null);
         },
       );
     }
@@ -232,7 +276,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     // Only fallback to category.icon if category name lookup failed
     if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
       if (category?.icon != null && category!.icon != 'category') {
-        categoryIcon = CategoryIconService.getIcon(category.icon);
+        categoryIcon = CategoryIconService.getIcon(category.iconName);
       }
     }
 
@@ -249,7 +293,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     } else if (category?.icon != null) {
       // Try icon name (e.g., "restaurant", "car", etc.)
       categoryColor = CategoryIconService.getColorFromMap(
-        category!.icon,
+        category!.iconName,
         categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
       );
     }
@@ -257,34 +301,31 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     // If no centralized color found, fall back to hex color from database
     if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
       if (category?.color != null) {
-        categoryColor = CategoryIconService.getColor(category!.color);
+        categoryColor = CategoryIconService.getColor(category!.colorHex);
       } else if (category?.icon != null) {
         // Use predefined colors based on category type and icon
         final isIncomeCategory = transactionType == TransactionType.income;
         categoryColor = CategoryIconService.getCategoryColor(
-          iconName: category!.icon,
-          colorHex: category.color,
+          iconName: category!.iconName,
+          colorHex: category.colorHex,
           isIncomeCategory: isIncomeCategory,
         );
       }
     }
 
-    return TransactionDesignSystem.buildTransactionItem(
-      title: title,
-      subtitle: cardName,
-      amount: amount,
-      time: time,
-      type: transactionType,
-      categoryIconData: categoryIcon,      // Use direct IconData
-      categoryColorData: categoryColor,    // Use direct Color
+    // Regular transaction - use Firebase integrated design system
+    return TransactionDesignSystem.buildTransactionItemFromV2(
+      transaction: transaction,
       isDark: isDark,
-      isFirst: isFirst,
-      isLast: isLast,
+      time: time,
+      categoryIconData: categoryIcon,
+      categoryColorData: categoryColor,
       onLongPress: () {
-        print('🔍 Long press detected on v2 card transaction: ${transaction.description}');
         HapticFeedback.mediumImpact();
         _showV2DeleteActionSheet(context, transaction);
       },
+      isFirst: isFirst,
+      isLast: isLast,
     );
   }
 
@@ -372,6 +413,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     }
   }
 
+
   /// Show installment delete action sheet
   void _showInstallmentDeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction, Map<String, int?>? installmentInfo) {
     showCupertinoModalPopup<void>(
@@ -429,12 +471,12 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
   Future<void> _deleteInstallmentTransaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) async {
     try {
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      debugPrint('🗑️ CardTransactionSection: Deleting installment transaction: ${transaction.id}');
+
 
       // Use enhanced installment deletion that refunds total amount
       await providerV2.deleteInstallmentTransaction(transaction.id);
 
-      debugPrint('✅ CardTransactionSection: Installment transaction deleted successfully');
+      
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -446,7 +488,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
         );
       }
     } catch (e) {
-      debugPrint('❌ CardTransactionSection: Error deleting installment transaction: $e');
+      
       
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/services/supabase_service.dart';
+import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/utils/currency_utils.dart';
@@ -153,8 +153,8 @@ class _CardDetailContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final user = SupabaseService.instance.currentUser;
-    final userName = user?.userMetadata?['full_name'] as String? ?? l10n.defaultUserName;
+    final user = FirebaseAuthService.currentUser;
+    final userName = user?.displayName ?? l10n.defaultUserName;
     
     return Container(
       decoration: BoxDecoration(

@@ -193,6 +193,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
         final creditCards = provider.creditCards;
         final debitCards = provider.debitCards;
         final cashAccounts = provider.cashAccounts;
+        
 
         return Column(
           children: [
@@ -306,6 +307,10 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                       isSelected: isSelected || isSelectedForInstallments,
                   onTap: () {
                     HapticFeedback.selectionClick();
+                        debugPrint('   Card Name: ${paymentCard.name}');
+                        debugPrint('   Card ID: ${paymentCard.id}');
+                        debugPrint('   Card Type: ${paymentCard.type}');
+                        
                         setState(() {
                           _selectedCreditCard = paymentCard;
                           _selectedInstallments = null;
@@ -313,11 +318,17 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                         
                         // Clear any existing payment method selection
                         // This ensures other payment methods are deselected
-                        widget.onPaymentMethodSelected(PaymentMethod(
+                        final selectedMethod = PaymentMethod(
                           type: PaymentMethodType.card,
                           card: paymentCard,
                           installments: 1, // Default to 1 installment when card is first selected
-                        ));
+                        );
+                        
+                        debugPrint('   Type: ${selectedMethod.type}');
+                        debugPrint('   Card ID: ${selectedMethod.card?.id}');
+                        debugPrint('   Card Name: ${selectedMethod.card?.name}');
+                        
+                        widget.onPaymentMethodSelected(selectedMethod);
                       },
                       balance: (cardData['availableLimit'] as num?)?.toDouble(),
                     ),

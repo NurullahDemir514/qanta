@@ -39,11 +39,12 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
   void initState() {
     super.initState();
     
-    // Provider referansını sakla - SADECE REFERANS, YÜKLEMİYORUZ
+    // Provider referansını sakla ve Firebase'den veri yükle
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _unifiedProviderV2 = UnifiedProviderV2.instance;
-        // _creditCardProvider!.loadCreditCards(); // ← KALDIRILDI: Event'ler bakiyeyi güncelliyor
+        // Load all data from Firebase
+        _unifiedProviderV2!.loadAllData();
         
         // Provider listener'ı ekle
         if (_providerListener != null) {
@@ -91,25 +92,21 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
   void _setupCreditCardEventListeners() {
     cardEvents.listen<CreditCardAdded>((event) {
       if (mounted) {
-        debugPrint('💳 Credit card added: ${event.creditCard.cardName}');
       }
     });
     
     cardEvents.listen<CreditCardUpdated>((event) {
       if (mounted) {
-        debugPrint('💳 Credit card updated: ${event.newCard.cardName}');
       }
     });
     
     cardEvents.listen<CreditCardDeleted>((event) {
       if (mounted) {
-        debugPrint('💳 Credit card deleted: ${event.cardId}');
       }
     });
     
     cardEvents.listen<CreditCardBalanceUpdated>((event) {
       if (mounted) {
-        debugPrint('💳 Credit card balance updated: ${event.cardId} (${event.changeAmount})');
       }
     });
   }
@@ -335,7 +332,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
   void _showStatements(creditCard) {
     HapticFeedback.lightImpact();
     
-    context.push('/credit-card-statements?cardId=${creditCard['id']}&cardName=${Uri.encodeComponent(creditCard['cardName'] ?? 'Kredi Kartı')}&bankName=${Uri.encodeComponent(AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta'))}&statementDay=${creditCard['statementDate'] ?? 15}');
+    context.push('/credit-card-statements?cardId=${creditCard['id']}&cardName=${Uri.encodeComponent(creditCard['cardName'] ?? 'Kredi Kartı')}&bankName=${Uri.encodeComponent(AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta'))}&statementDay=${creditCard['statementDate'] ?? 15}&dueDay=${creditCard['dueDate'] ?? ''}');
   }
 
   void _editCard(creditCard) {
@@ -363,6 +360,11 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
     HapticFeedback.heavyImpact();
     
     try {
+      
+      if (creditCard['id'] == null || creditCard['id'].toString().isEmpty) {
+        return;
+      }
+      
       final success = await _unifiedProviderV2!.deleteCreditCard(creditCard['id']);
       
       if (success && mounted) {
@@ -451,7 +453,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
 
         if (unifiedProviderV2.creditCards.isEmpty) {
           return SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
+            physics: const BouncingScrollPhysics(),
             child: Column(
               children: [
                 const SizedBox(height: 60), // Üstten boşluk (CashTab ile aynı)
@@ -494,7 +496,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
             final isDark = Theme.of(context).brightness == Brightness.dark;
             
             return SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(), // Üst seviye scroll'a bırak
+              physics: const BouncingScrollPhysics(), // Transaction list'in arkadan kayabilmesi için
               child: Column(
                 children: [
                   // Kredi kartları tam genişlik
@@ -579,7 +581,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
                       ),
                     ),
                   
-                  const SizedBox(height: 20), // CashTab ile aynı bottom spacing
+                  const SizedBox(height: 125), // Scroll sorunu için 125px bottom padding
                 ],
               ),
             );

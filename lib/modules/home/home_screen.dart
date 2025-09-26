@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/services/supabase_service.dart';
+import '../../core/services/firebase_auth_service.dart';
 import '../../core/services/profile_image_service.dart';
 import '../../core/services/quick_note_notification_service.dart';
 import '../../core/providers/unified_card_provider.dart';
@@ -205,46 +205,38 @@ class _HomeScreenState extends State<HomeScreen> {
               if (!mounted) return;
               final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
               await providerV2.refresh();
-              debugPrint('✅ Data refreshed with QANTA v2 provider');
             } catch (e) {
-              debugPrint('❌ Error refreshing with QANTA v2 provider: $e');
             }
           },
-          body: SliverList(
-            delegate: SliverChildListDelegate([
-              // Balance Overview Card
-              const BalanceOverviewCard(),
-              const SizedBox(height: 24),
-              
-              // Notifications Section (only shows if there are pending reminders)
-              const NotificationsSection(),
-              const SizedBox(height: 24),
-              
-              // Budget Overview Card
-              const BudgetOverviewCard(),
-              const SizedBox(height: 24),
-              
-              // Cards Section
-              const CardsSection(),
-              const SizedBox(height: 24),
-              
-              // Recent Transactions
-              const RecentTransactionsSection(),
-              const SizedBox(height: 20),
-            ]),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-              
-              if (providerV2.accounts.isEmpty) {
-                // Show add card dialog if no accounts
-                _showAddCardDialog(context);
-              } else {
-                // Navigate to add transaction
-                context.push('/add-transaction');
-              }
-            },
+          body: SliverToBoxAdapter(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double containerWidth = constraints.maxWidth * 1;
+                    return Container(
+                      width: containerWidth,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const BalanceOverviewCard(),
+                          const SizedBox(height: 24),
+                          const NotificationsSection(),
+                          const SizedBox(height: 24),
+                          const BudgetOverviewCard(),
+                          const SizedBox(height: 24),
+                          const CardsSection(),
+                          const SizedBox(height: 24),
+                          const RecentTransactionsSection(),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
             ),
 

@@ -18,7 +18,7 @@ class QuickNotesCard extends StatefulWidget {
 }
 
 class _QuickNotesCardState extends State<QuickNotesCard> {
-  List<QuickNote> _pendingNotes = [];
+  List<Map<String, dynamic>> _pendingNotes = [];
   bool _isLoading = false;
 
   @override
@@ -31,11 +31,10 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     setState(() => _isLoading = true);
     try {
       final notes = await QuickNoteService.getPendingNotes();
-      print('📝 Loaded ${notes.length} notes:');
       for (var note in notes) {
-        print('   - ID: ${note.id}, Type: ${note.type}, ImagePath: ${note.imagePath}');
+        print('   - ID: ${note['id']}, Type: ${note['type']}, ImagePath: ${note['image_path']}');
       }
-      setState(() => _pendingNotes = notes);
+      setState(() => _pendingNotes = notes.cast<Map<String, dynamic>>());
     } catch (e) {
       debugPrint('Hızlı notlar yüklenirken hata: $e');
     } finally {
@@ -175,7 +174,10 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
               itemCount: _pendingNotes.length > 3 ? 3 : _pendingNotes.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                final note = _pendingNotes[index];
+                final noteMap = _pendingNotes[index];
+                // Convert Map to QuickNote
+                final note = QuickNote.fromJson(noteMap);
+                debugPrint('QuickNotesCard: Converting Map to QuickNote');
                 return _buildNoteItem(note, isDark);
               },
             ),
@@ -189,7 +191,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => QuickNotesPage(notes: _pendingNotes),
+                      builder: (context) => QuickNotesPage(notes: _pendingNotes.cast<QuickNote>()),
                     ),
                   );
                 },
@@ -210,7 +212,6 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
 
   Widget _buildNoteItem(QuickNote note, bool isDark) {
     // Debug: Image path'i yazdır
-    print('🔍 Note ID: ${note.id}, Type: ${note.type}, ImagePath: ${note.imagePath}');
     
     return Container(
       padding: const EdgeInsets.all(12),
@@ -356,7 +357,6 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _showAddOptionsDialog() async {
-    print('🔧 _showAddOptionsDialog called');
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     showModalBottomSheet(
@@ -417,7 +417,6 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                       subtitle: 'Kameradan fotoğraf çek',
                       color: const Color(0xFFFF9500),
                       onTap: () async {
-                        print('📷 Camera button tapped');
                         Navigator.pop(context);
                         await Future.delayed(const Duration(milliseconds: 100));
                         _takePicture();
@@ -431,7 +430,6 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                       subtitle: 'Galeriden fotoğraf seç',
                       color: const Color(0xFF34C759),
                       onTap: () async {
-                        print('🖼️ Gallery button tapped');
                         Navigator.pop(context);
                         await Future.delayed(const Duration(milliseconds: 100));
                         _pickImageFromGallery();
@@ -517,7 +515,6 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _takePicture() async {
-    print('📷 _takePicture called');
     final ImagePicker picker = ImagePicker();
     try {
       final XFile? image = await picker.pickImage(
@@ -527,16 +524,12 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         imageQuality: 80,
       );
       
-      print('📷 Image picker result: ${image?.path}');
       
       if (image != null) {
-        print('📷 Calling _showImageNoteDialog with path: ${image.path}');
         await _showImageNoteDialog(image.path);
       } else {
-        print('📷 No image selected');
       }
     } catch (e) {
-      print('📷 Error taking picture: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -549,7 +542,6 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _pickImageFromGallery() async {
-    print('🖼️ _pickImageFromGallery called');
     final ImagePicker picker = ImagePicker();
     try {
       final XFile? image = await picker.pickImage(
@@ -559,16 +551,12 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         imageQuality: 80,
       );
       
-      print('🖼️ Gallery picker result: ${image?.path}');
       
       if (image != null) {
-        print('🖼️ Calling _showImageNoteDialog with path: ${image.path}');
         await _showImageNoteDialog(image.path);
       } else {
-        print('🖼️ No image selected from gallery');
       }
     } catch (e) {
-      print('🖼️ Error picking from gallery: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -581,7 +569,6 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _showImageNoteDialog(String imagePath) async {
-    print('🖼️ _showImageNoteDialog called with path: $imagePath');
     final controller = TextEditingController();
     
     final result = await showDialog<String>(
@@ -651,11 +638,10 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
 
   Future<void> _addImageNote(String content, String imagePath) async {
     try {
-      print('📸 Adding image note - Content: $content, ImagePath: $imagePath');
       
       await QuickNoteService.addQuickNote(
         content: content,
-        type: QuickNoteType.image,
+        type: 'image',
         imagePath: imagePath,
       );
       await _loadPendingNotes();
@@ -744,7 +730,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     try {
       await QuickNoteService.addQuickNote(
         content: content,
-        type: QuickNoteType.text,
+        type: 'text',
       );
       await _loadPendingNotes();
       

@@ -148,82 +148,57 @@ class _TransactionFabState extends State<TransactionFab> {
     required BuildContext context,
     required bool isDark,
   }) {
+    const color = Color(0xFF6D6D70); // Nötr gri
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Label
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF1C1C1E).withOpacity(0.9)
-                : Colors.white.withOpacity(0.9),
+            color: isDark ? const Color(0xFF232326).withOpacity(0.92) : Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.06),
+                color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.06),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
             ],
-            border: isDark 
-                ? Border.all(
-                    color: const Color(0xFF38383A).withOpacity(0.3),
-                    width: 0.5,
-                  )
-                : null,
+            border: Border.all(
+              color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+              width: 1,
+            ),
           ),
           child: Text(
             'Hızlı Not',
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: isDark 
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFF1C1C1E),
+              color: color,
               letterSpacing: -0.1,
             ),
           ),
         ),
-        
         const SizedBox(width: 12),
-        
-        // Mini FAB - iOS tarzı sade
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFF2F2F7),
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                  width: 1,
+                ),
               ),
-            ],
-            border: isDark 
-                ? Border.all(
-                    color: const Color(0xFF38383A).withOpacity(0.5),
-                    width: 0.5,
-                  )
-                : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: _onQuickNoteSelected,
-              borderRadius: BorderRadius.circular(22),
-              child: const Icon(
-                Icons.note_add_rounded,
-                color: Color(0xFFFF9500), // iOS turuncu
-                size: 20,
+              child: IconButton(
+                icon: const Icon(Icons.edit_note_rounded, color: color, size: 22),
+                onPressed: _onQuickNoteSelected,
+                splashRadius: 24,
               ),
             ),
           ),
@@ -237,98 +212,79 @@ class _TransactionFabState extends State<TransactionFab> {
     required TransactionType transactionType,
     required bool isDark,
   }) {
-    final l10n = AppLocalizations.of(context)!;
-    
-    // iOS tarzı sade renkler
-    Color optionColor;
+    final iconData = transactionType == TransactionType.income
+        ? Icons.arrow_downward_rounded
+        : transactionType == TransactionType.expense
+            ? Icons.arrow_upward_rounded
+            : Icons.compare_arrows_rounded;
+    final label = transactionType == TransactionType.income
+        ? 'Gelir'
+        : transactionType == TransactionType.expense
+            ? 'Gider'
+            : 'Transfer';
+    // Her seçenek için düz renkler
+    Color color;
     switch (transactionType) {
       case TransactionType.income:
-        optionColor = const Color(0xFF34C759); // iOS yeşil
+        color = const Color(0xFF22C55E); // Yeşil
         break;
       case TransactionType.expense:
-        optionColor = const Color(0xFFFF3B30); // iOS kırmızı
+        color = const Color(0xFFFF5858); // Kırmızı
         break;
       case TransactionType.transfer:
-        optionColor = const Color(0xFF007AFF); // iOS mavi
+        color = const Color(0xFF007AFF); // Mavi
         break;
     }
-    
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Label
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF1C1C1E).withOpacity(0.9)
-                : Colors.white.withOpacity(0.9),
+            color: isDark ? const Color(0xFF232326).withOpacity(0.92) : Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.06),
+                color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.06),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
             ],
-            border: isDark 
-                ? Border.all(
-                    color: const Color(0xFF38383A).withOpacity(0.3),
-                    width: 0.5,
-                  )
-                : null,
+            border: Border.all(
+              color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+              width: 1,
+            ),
           ),
           child: Text(
-            transactionType.getName(l10n),
+            label,
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: isDark 
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFF1C1C1E),
+              color: color,
               letterSpacing: -0.1,
             ),
           ),
         ),
-        
         const SizedBox(width: 12),
-        
-        // Mini FAB - iOS tarzı sade
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFF2F2F7),
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                  width: 1,
+                ),
               ),
-            ],
-            border: isDark 
-                ? Border.all(
-                    color: const Color(0xFF38383A).withOpacity(0.5),
-                    width: 0.5,
-                  )
-                : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => _onTransactionTypeSelected(transactionType),
-              borderRadius: BorderRadius.circular(22),
-              child: Icon(
-                transactionType.icon,
-                color: optionColor,
-                size: 20,
+              child: IconButton(
+                icon: Icon(iconData, color: color, size: 22),
+                onPressed: () => _onTransactionTypeSelected(transactionType),
+                splashRadius: 24,
               ),
             ),
           ),
@@ -338,84 +294,38 @@ class _TransactionFabState extends State<TransactionFab> {
   }
 
   Widget _buildMainFab(BuildContext context, AppLocalizations l10n, bool isDark, bool isSmallScreen) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? const Color(0xFF1C1C1E).withOpacity(0.9)
-            : Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withOpacity(0.4)
-                : Colors.black.withOpacity(0.1),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.04),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-            spreadRadius: 0,
-          ),
-        ],
-        border: isDark
-            ? Border.all(
-                color: const Color(0xFF38383A).withOpacity(0.3),
-                width: 0.5,
-              )
-            : Border.all(
-                color: const Color(0xFFE5E5EA).withOpacity(0.3),
-                width: 0.5,
+    return GestureDetector(
+      onTap: _toggleFab,
+      child: AnimatedScale(
+        scale: _isExpanded ? 1.08 : 1.0,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                border: Border.all(
+                  color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                  width: 1.2,
+                ),
               ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: _toggleFab,
-              borderRadius: BorderRadius.circular(28),
-              splashColor: Colors.transparent,
-              highlightColor: isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.black.withOpacity(0.03),
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isSmallScreen ? 16 : 20,
-                  vertical: isSmallScreen ? 12 : 14,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _isExpanded ? Icons.close_rounded : Icons.add_rounded,
-                      size: isSmallScreen ? 18 : 20,
-                      color: isDark 
-                          ? const Color(0xFFFFFFFF)
-                          : const Color(0xFF1C1C1E),
-                    ),
-                    SizedBox(width: isSmallScreen ? 8 : 10),
-                    Text(
-                      _isExpanded
-                          ? l10n.close 
-                          : (isSmallScreen ? 'İşlem' : l10n.addTransaction),
-                      style: GoogleFonts.inter(
-                        fontSize: isSmallScreen ? 13 : 14,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: -0.1,
-                        color: isDark 
-                            ? const Color(0xFFFFFFFF)
-                            : const Color(0xFF1C1C1E),
-                      ),
-                    ),
-                  ],
-                ),
+              child: Icon(
+                _isExpanded ? Icons.close : Icons.add,
+                color: isDark ? Colors.white : Colors.black,
+                size: 28,
               ),
             ),
           ),

@@ -73,7 +73,6 @@ class DebitCardProvider with ChangeNotifier {
     try {
       // Legacy table doesn't exist anymore, gracefully handle
       _debitCards = [];
-      debugPrint('💳 Legacy debit card provider: No data (using v2 provider)');
     } catch (e) {
       debugPrint('DebitCardProvider Error: Banka kartları yüklenemedi: $e');
       _setError('Banka kartları yüklenirken hata oluştu: $e');
@@ -95,7 +94,6 @@ class DebitCardProvider with ChangeNotifier {
 
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy debit card creation disabled - use v2 provider');
       throw Exception('Legacy debit card creation disabled - use v2 provider');
     } catch (e) {
       debugPrint('Banka kartı eklenirken hata: $e');
@@ -113,7 +111,6 @@ class DebitCardProvider with ChangeNotifier {
   }) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy balance update disabled - use v2 provider');
       return false;
     } catch (e) {
       debugPrint('Bakiye güncellenirken hata: $e');
@@ -136,7 +133,6 @@ class DebitCardProvider with ChangeNotifier {
 
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy card update disabled - use v2 provider');
       return false;
     } catch (e) {
       debugPrint('Banka kartı güncellenirken hata: $e');
@@ -154,7 +150,6 @@ class DebitCardProvider with ChangeNotifier {
 
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy card deletion disabled - use v2 provider');
       return false;
     } catch (e) {
       debugPrint('Banka kartı silinirken hata: $e');
@@ -177,10 +172,8 @@ class DebitCardProvider with ChangeNotifier {
   }) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy spend money disabled - use v2 provider');
       return false;
     } catch (e) {
-      debugPrint('Para harcama işlemi sırasında hata: $e');
       _setError('Para harcama işlemi sırasında hata oluştu: $e');
       return false;
     }
@@ -193,10 +186,8 @@ class DebitCardProvider with ChangeNotifier {
   }) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy add money disabled - use v2 provider');
       return false;
     } catch (e) {
-      debugPrint('Para ekleme işlemi sırasında hata: $e');
       _setError('Para ekleme işlemi sırasında hata oluştu: $e');
       return false;
     }
@@ -210,10 +201,8 @@ class DebitCardProvider with ChangeNotifier {
   }) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy transfer disabled - use v2 provider');
       return false;
     } catch (e) {
-      debugPrint('Transfer işlemi sırasında hata: $e');
       _setError('Transfer sırasında hata oluştu: $e');
       return false;
     }

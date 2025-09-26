@@ -77,11 +77,8 @@ class AccountModel {
     return (usedCredit / creditLimit!) * 100;
   }
 
-  /// Display name with bank info if available
+  /// Display name - always return just the name field
   String get displayName {
-    if (bankName != null && bankName!.isNotEmpty) {
-      return '$bankName - $name';
-    }
     return name;
   }
 
@@ -110,9 +107,35 @@ class AccountModel {
       statementDay: json['statement_day'] as int?,
       dueDay: json['due_day'] as int?,
       isActive: json['is_active'] as bool? ?? true,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: _parseDateTime(json['created_at']),
+      updatedAt: _parseDateTime(json['updated_at']),
     );
+  }
+
+  /// Parse DateTime from various formats (String, Timestamp, DateTime)
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    
+    if (value is DateTime) return value;
+    
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+    
+    // Handle Firestore Timestamp
+    if (value.runtimeType.toString().contains('Timestamp')) {
+      try {
+        return (value as dynamic).toDate();
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+    
+    return DateTime.now();
   }
 
   /// Convert to JSON

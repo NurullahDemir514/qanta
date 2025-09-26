@@ -8,6 +8,10 @@ class BudgetModel {
   final int year;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final double spentAmount;
+
+  // Computed properties
+  double get amount => monthlyLimit;
 
   BudgetModel({
     required this.id,
@@ -19,6 +23,7 @@ class BudgetModel {
     required this.year,
     required this.createdAt,
     required this.updatedAt,
+    this.spentAmount = 0.0,
   });
 
   factory BudgetModel.fromJson(Map<String, dynamic> json) {
@@ -30,9 +35,34 @@ class BudgetModel {
       monthlyLimit: (json['monthly_limit'] as num).toDouble(),
       month: json['month'] as int,
       year: json['year'] as int,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: _parseDateTime(json['created_at']),
+      updatedAt: _parseDateTime(json['updated_at']),
+      spentAmount: (json['spent_amount'] as num?)?.toDouble() ?? 0.0,
     );
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+
+    if (value is DateTime) return value;
+
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+
+    if (value.runtimeType.toString().contains('Timestamp')) {
+      try {
+        return (value as dynamic).toDate();
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+
+    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() {
@@ -46,6 +76,7 @@ class BudgetModel {
       'year': year,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'spent_amount': spentAmount,
     };
   }
 
@@ -59,6 +90,7 @@ class BudgetModel {
     int? year,
     DateTime? createdAt,
     DateTime? updatedAt,
+    double? spentAmount,
   }) {
     return BudgetModel(
       id: id ?? this.id,
@@ -70,6 +102,7 @@ class BudgetModel {
       year: year ?? this.year,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      spentAmount: spentAmount ?? this.spentAmount,
     );
   }
 }

@@ -12,64 +12,54 @@ import 'core/providers/unified_provider_v2.dart';
 import 'core/providers/profile_provider.dart';
 import 'core/theme/light_theme.dart';
 import 'core/theme/dark_theme.dart';
-import 'core/supabase_client.dart';
 import 'core/services/quick_note_notification_service.dart';
 import 'core/services/reminder_service.dart';
 import 'routes/app_router.dart';
 import 'modules/insights/providers/statistics_provider.dart';
+import 'core/providers/statement_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'core/firebase_client.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Supabase
+
+  // Initialize Firebase
   try {
-    await SupabaseManager.init();
-    debugPrint('✅ Supabase initialized successfully');
+    await FirebaseManager.init();
   } catch (e) {
-    debugPrint('❌ Supabase initialization failed: $e');
-    // Continue without Supabase for now
+    // Continue without Firebase for now
   }
-  
+
   // Initialize Quick Note Notification Service
   try {
     await QuickNoteNotificationService.initialize();
     await QuickNoteNotificationService.startIfEnabled();
-    debugPrint('✅ Quick Note Notification Service initialized');
   } catch (e) {
-    debugPrint('❌ Quick Note Notification Service initialization failed: $e');
   }
-  
+
   // Initialize Reminder Service
   try {
     await ReminderService.cleanupOldReminders();
-    debugPrint('✅ Reminder Service initialized');
   } catch (e) {
-    debugPrint('❌ Reminder Service initialization failed: $e');
   }
-  
-  runApp(const MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  runApp(
+    MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => StatementProvider()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => ProfileProvider()),
-        
+
         // QANTA v2 provider (main provider)
         ChangeNotifierProvider(create: (context) => UnifiedProviderV2.instance),
-        
+
         // Statistics provider
         ChangeNotifierProxyProvider<UnifiedProviderV2, StatisticsProvider>(
           create: (context) => StatisticsProvider(UnifiedProviderV2.instance),
           update: (context, unifiedProvider, statisticsProvider) =>
               statisticsProvider ?? StatisticsProvider(unifiedProvider),
         ),
-        
+
         // Legacy providers disabled to prevent duplicate balance updates
         // TODO: Remove these completely after full migration to V2
         // ChangeNotifierProvider(create: (context) => CashAccountProvider.instance),
@@ -82,12 +72,12 @@ class MyApp extends StatelessWidget {
           return MaterialApp.router(
             title: 'Qanta',
             debugShowCheckedModeBanner: false,
-            
+
             // Theme configuration
             theme: LightTheme.theme,
             darkTheme: DarkTheme.theme,
             themeMode: themeProvider.themeMode,
-            
+
             // Localization configuration
             localizationsDelegates: const [
               AppLocalizations.delegate,
@@ -100,12 +90,11 @@ class MyApp extends StatelessWidget {
               Locale('en'), // English
             ],
             locale: themeProvider.locale, // Use locale from provider
-            
             // Router configuration
             routerConfig: AppRouter.router,
           );
         },
       ),
-    );
-  }
+    ),
+  );
 }

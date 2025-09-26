@@ -48,47 +48,24 @@ class QantaLogo extends StatelessWidget {
   }
 
   Widget _buildLogo(String logoPath) {
-    return Container(
+    return Image.asset(
+      logoPath,
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.2),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.2),
-        child: Image.asset(
-          logoPath,
-          width: size,
-          height: size,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            // Fallback to gradient container with Q letter
-            return Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF10B981),
-                    Color(0xFF34D399),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(size * 0.2),
-              ),
-              child: Center(
-                child: Text(
-                  'Q',
-                  style: TextStyle(
-                    fontSize: size * 0.5,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        // Fallback: sadece Q harfi, arka plan yok
+        return Center(
+          child: Text(
+            'Q',
+            style: TextStyle(
+              fontSize: size * 0.5,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        );
+      },
     );
   }
 } 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/services/transaction_service.dart';
+import '../../shared/models/insufficient_funds_exception.dart';
 import 'ios_dialog.dart';
 
 class InsufficientFundsDialog extends StatelessWidget {

@@ -1,0 +1,256 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // =====================================================
+    // KULLANICI VERİLERİ - Ana Koleksiyon
+    // =====================================================
+    match /users/{userId} {
+      // Sadece kendi verilerine erişim
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // =====================================================
+      // HESAPLAR (accounts) - Kredi, Debit, Nakit
+      // =====================================================
+      match /accounts/{accountId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Hesap doğrulama
+        function isValidAccount() {
+          return resource.data.user_id == userId &&
+                 resource.data.keys().hasAll(['type', 'name', 'balance', 'is_active', 'created_at', 'updated_at']);
+        }
+        
+        // Yeni hesap oluşturma doğrulama
+        function isValidNewAccount() {
+          return request.auth.uid == userId &&
+                 request.resource.data.user_id == userId &&
+                 request.resource.data.keys().hasAll(['type', 'name', 'balance', 'is_active', 'created_at', 'updated_at']) &&
+                 request.resource.data.type in ['credit', 'debit', 'cash'] &&
+                 request.resource.data.balance is number &&
+                 request.resource.data.is_active is bool;
+        }
+        
+        // Hesap güncelleme doğrulama
+        allow update: if request.auth != null && 
+                       request.auth.uid == userId && 
+                       isValidAccount() &&
+                       request.resource.data.user_id == userId;
+      }
+      
+      // =====================================================
+      // İŞLEMLER (transactions) - Subcollection
+      // =====================================================
+      match /transactions/{transactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // İşlem doğrulama
+        function isValidTransaction() {
+          return resource.data.user_id == userId &&
+                 resource.data.keys().hasAll(['account_id', 'type', 'amount', 'description', 'transaction_date', 'is_paid']);
+        }
+        
+        // Yeni işlem oluşturma doğrulama
+        function isValidNewTransaction() {
+          return request.auth.uid == userId &&
+                 request.resource.data.user_id == userId &&
+                 request.resource.data.keys().hasAll(['account_id', 'type', 'amount', 'description', 'transaction_date', 'is_paid']) &&
+                 request.resource.data.type in ['expense', 'income', 'transfer'] &&
+                 request.resource.data.amount is number &&
+                 request.resource.data.is_paid is bool;
+        }
+      }
+      
+      // =====================================================
+      // KATEGORİLER (categories)
+      // =====================================================
+      match /categories/{categoryId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Kategori doğrulama
+        function isValidCategory() {
+          return resource.data.user_id == userId &&
+                 resource.data.keys().hasAll(['type', 'name', 'icon', 'color', 'is_active']);
+        }
+        
+        // Yeni kategori oluşturma doğrulama
+        function isValidNewCategory() {
+          return request.auth.uid == userId &&
+                 request.resource.data.user_id == userId &&
+                 request.resource.data.keys().hasAll(['type', 'name', 'icon', 'color', 'is_active']) &&
+                 request.resource.data.type in ['expense', 'income'] &&
+                 request.resource.data.is_active is bool;
+        }
+      }
+      
+      // =====================================================
+      // BÜTÇELER (budgets)
+      // =====================================================
+      match /budgets/{budgetId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // =====================================================
+      // TAKSİTLER (installments)
+      // =====================================================
+      match /installments/{installmentId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // =====================================================
+      // TAKSİT MASTER KAYITLARI (installment_transactions)
+      // =====================================================
+      match /installment_transactions/{installmentTransactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // =====================================================
+      // TAKSİT DETAYLARI (installment_details)
+      // =====================================================
+      match /installment_details/{installmentDetailId} {
+        allow read, write: if request.auth != null;
+      }
+      
+      // =====================================================
+      // HIZLI NOTLAR (quick_notes)
+      // =====================================================
+      match /quick_notes/{noteId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // =====================================================
+    // İŞLEMLER (transactions) - Ana Collection
+    // =====================================================
+    match /transactions/{transactionId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+      
+      // İşlem doğrulama
+      function isValidTransaction() {
+        return resource.data.user_id == request.auth.uid &&
+               resource.data.keys().hasAll(['source_account_id', 'type', 'amount', 'description', 'transaction_date', 'is_paid']);
+      }
+      
+      // Yeni işlem oluşturma doğrulama
+      function isValidNewTransaction() {
+        return request.auth.uid == request.resource.data.user_id &&
+               request.resource.data.keys().hasAll(['user_id', 'source_account_id', 'type', 'amount', 'description', 'transaction_date', 'is_paid']) &&
+               request.resource.data.type in ['expense', 'income', 'transfer'] &&
+               request.resource.data.amount is number &&
+               request.resource.data.is_paid is bool;
+      }
+      
+      // İşlem güncelleme doğrulama
+      allow update: if request.auth != null && 
+                     request.auth.uid == resource.data.user_id && 
+                     isValidTransaction() &&
+                     request.resource.data.user_id == request.auth.uid;
+      
+      // İşlem oluşturma doğrulama
+      allow create: if request.auth != null && 
+                     request.auth.uid == request.resource.data.user_id && 
+                     isValidNewTransaction();
+    }
+    
+// =====================================================
+// TAKSİT MASTERLARI (installment_masters) - Ana Collection
+// =====================================================
+match /installment_masters/{installmentMasterId} {
+  allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+}
+
+// =====================================================
+// TAKSİT DETAYLARI (installment_details) - Ana Collection
+// =====================================================
+match /installment_details/{installmentDetailId} {
+  allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+}
+    
+    // =====================================================
+    // EKSTRE ÖDEMELERİ (statement_payments)
+    // =====================================================
+    match /statement_payments/{statementPaymentId} {
+      // Basit yetki kontrolü - sadece authenticated kullanıcılar
+      allow read, write: if request.auth != null;
+      
+      // Ekstre ödeme doğrulama
+      function isValidStatementPayment() {
+        return resource.data.user_id == request.auth.uid &&
+               resource.data.keys().hasAll(['card_id', 'period_start', 'period_end', 'due_date', 'is_paid', 'created_at', 'updated_at']);
+      }
+      
+      // Yeni ekstre ödeme oluşturma doğrulama
+      function isValidNewStatementPayment() {
+        return request.auth.uid == request.resource.data.user_id &&
+               request.resource.data.keys().hasAll(['user_id', 'card_id', 'period_start', 'period_end', 'due_date', 'is_paid', 'created_at', 'updated_at']) &&
+               request.resource.data.is_paid is bool;
+      }
+      
+      // Ekstre ödeme güncelleme doğrulama
+      allow update: if request.auth != null && 
+                     request.auth.uid == resource.data.user_id && 
+                     isValidStatementPayment() &&
+                     request.resource.data.user_id == request.auth.uid;
+      
+      // Ekstre ödeme oluşturma doğrulama
+      allow create: if request.auth != null && 
+                     request.auth.uid == request.resource.data.user_id && 
+                     isValidNewStatementPayment();
+    }
+    
+    // =====================================================
+    // BÜTÇELER (budgets) - Kullanıcı Bütçe Yönetimi
+    // =====================================================
+    match /budgets/{budgetId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+      
+      // Bütçe doğrulama
+      function isValidBudget() {
+        return resource.data.user_id == request.auth.uid &&
+               resource.data.keys().hasAll(['category_id', 'category_name', 'monthly_limit', 'month', 'year', 'is_active', 'created_at', 'updated_at']);
+      }
+      
+      // Yeni bütçe oluşturma doğrulama
+      function isValidNewBudget() {
+        return request.auth.uid == request.resource.data.user_id &&
+               request.resource.data.keys().hasAll(['user_id', 'category_id', 'category_name', 'monthly_limit', 'month', 'year', 'is_active', 'created_at', 'updated_at']) &&
+               request.resource.data.monthly_limit is number &&
+               request.resource.data.monthly_limit > 0 &&
+               request.resource.data.month is number &&
+               request.resource.data.month >= 1 &&
+               request.resource.data.month <= 12 &&
+               request.resource.data.year is number &&
+               request.resource.data.year >= 2020 &&
+               request.resource.data.is_active is bool;
+      }
+      
+      // Bütçe güncelleme doğrulama
+      allow update: if request.auth != null && 
+                     request.auth.uid == resource.data.user_id && 
+                     isValidBudget() &&
+                     request.resource.data.user_id == request.auth.uid;
+      
+      // Bütçe oluşturma doğrulama
+      allow create: if request.auth != null && 
+                     request.auth.uid == request.resource.data.user_id && 
+                     isValidNewBudget();
+    }
+    
+    // =====================================================
+    // SİSTEM KATEGORİLERİ - Herkes okuyabilir
+    // =====================================================
+    match /system_categories/{categoryId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Sadece admin yazabilir
+    }
+    
+    // =====================================================
+    // GENEL KURALLAR
+    // =====================================================
+    
+    // Tüm diğer belgeler reddedilir
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

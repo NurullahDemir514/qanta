@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
-import '../../../shared/models/category_model.dart';
+import '../../../shared/models/unified_category_model.dart';
 import '../../../core/services/category_service_v2.dart';
 import '../../../shared/widgets/insufficient_funds_dialog.dart';
 import '../models/payment_method.dart';
@@ -129,56 +129,30 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeWithQuickNoteData();
-  }
-
-  void _initializeWithQuickNoteData() {
-    debugPrint('🔧 ExpenseForm - Initializing with data:');
-    debugPrint('  - initialAmount: ${widget.initialAmount}');
-    debugPrint('  - initialDescription: ${widget.initialDescription}');
-    debugPrint('  - initialDate: ${widget.initialDate}');
-    debugPrint('  - initialCategoryId: ${widget.initialCategoryId}');
     
-    // Initialize amount if provided
     if (widget.initialAmount != null) {
-      _amountController.text = widget.initialAmount!.toStringAsFixed(2);
-      debugPrint('  ✅ Amount set to: ${_amountController.text}');
+      _amountController.text = widget.initialAmount.toString();
     }
     
-    // Initialize description if provided
     if (widget.initialDescription != null) {
       _descriptionController.text = widget.initialDescription!;
-      debugPrint('  ✅ Description set to: ${_descriptionController.text}');
     }
     
-    // Initialize date if provided
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate!;
-      debugPrint('  ✅ Date set to: $_selectedDate');
     }
     
-    // Initialize category if provided
-    if (widget.initialCategoryId != null && widget.initialCategoryId!.isNotEmpty) {
-      // URL'den gelen kategori decode et - hata durumunda raw değeri kullan
+    if (widget.initialCategoryId != null) {
       try {
-        final decodedCategory = Uri.decodeComponent(widget.initialCategoryId!);
-        _selectedCategory = decodedCategory;
-        debugPrint('  ✅ Category set to: $_selectedCategory (decoded from: ${widget.initialCategoryId})');
+        _selectedCategory = Uri.decodeComponent(widget.initialCategoryId!);
       } catch (e) {
-        // Decode hatası varsa raw değeri kullan
         _selectedCategory = widget.initialCategoryId!;
-        debugPrint('  ⚠️ Category decode failed, using raw: $_selectedCategory (error: $e)');
       }
     }
     
-    // Initialize payment method if provided
-    if (widget.initialPaymentMethodId != null) {
-      _initializePaymentMethod();
-    }
+    _initializePaymentMethod();
   }
 
-
-  
   void _initializePaymentMethod() async {
     if (widget.initialPaymentMethodId == null) return;
     
@@ -220,7 +194,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
         });
       }
     } catch (e) {
-      debugPrint('❌ Payment method initialization error: $e');
+      
     }
   }
 
@@ -251,6 +225,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    
     
     return BaseTransactionForm(
       title: l10n.expenseType,
@@ -401,6 +376,38 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
             _paymentMethodError = 'Lütfen bir ödeme yöntemi seçin';
           });
           isValid = false;
+        } else {
+          final amount = double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0;
+          if (amount > 0) {
+            String? error;
+            if (_selectedPaymentMethod!.isCash) {
+              final balance = _selectedPaymentMethod!.cashAccount?.balance ?? 0;
+              if (balance < amount) {
+                error = 'Nakit bakiyesi yetersiz. Mevcut: ${_formatCurrency(balance)}';
+              }
+            } else if (_selectedPaymentMethod!.card != null) {
+              final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+              final account = provider.getAccountById(_selectedPaymentMethod!.card!.id);
+              if (account != null) {
+                if (account.type == AccountType.debit) {
+                  if (account.balance < amount) {
+                    error = 'Banka kartı bakiyesi yetersiz. Mevcut: ${_formatCurrency(account.balance)}';
+                  }
+                } else if (account.type == AccountType.credit) {
+                  final available = account.availableAmount;
+                  if (available < amount) {
+                    error = 'Kredi kartı limiti yetersiz. Kalan limit: ${_formatCurrency(available)}';
+                  }
+                }
+              }
+            }
+            if (error != null) {
+              setState(() {
+                _paymentMethodError = error;
+              });
+              isValid = false;
+            }
+          }
         }
         break;
     }
@@ -464,7 +471,6 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   /// v2.1.0: Fixed parameter names and transaction creation
   /// v2.0.0: Migrated to UnifiedProviderV2 system
   void _saveExpense() async {
-    // Zaten işlem yapılıyorsa tekrar yapma
     if (_isLoading) return;
     
     setState(() {
@@ -481,18 +487,20 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
         try {
           // Önce varolan kategoriyi ara
           final existingCategories = providerV2.categories
-              .where((cat) => cat.name.toLowerCase() == _selectedCategory!.toLowerCase() && cat.type == CategoryType.expense)
+              .where((cat) => cat.displayName.toLowerCase() == _selectedCategory!.toLowerCase() && cat.categoryType == CategoryType.expense)
               .toList();
           
           if (existingCategories.isNotEmpty) {
             categoryId = existingCategories.first.id;
           } else {
             // Yeni kategori oluştur
-            final newCategory = await CategoryServiceV2.createCategory(
+            // TODO: Implement with Firebase
+            // Create new category using UnifiedProviderV2
+            final newCategory = await providerV2.createCategory(
               type: CategoryType.expense,
               name: _selectedCategory!,
-              icon: 'category',
-              color: '#FF6B6B',
+              iconName: 'category',
+              colorHex: '#6B7280',
             );
             categoryId = newCategory.id;
           }
@@ -508,31 +516,31 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
         ? _selectedPaymentMethod!.cashAccount!.id
         : _selectedPaymentMethod!.card!.id;
       
-      // Taksitli işlem mi kontrol et
+      // Taksit sayısını al
       final installments = _selectedPaymentMethod!.installments ?? 1;
+      final description = _descriptionController.text.trim().isEmpty 
+        ? 'Gider' 
+        : _descriptionController.text.trim();
       
       String? transactionId;
       
-      if (installments > 1) {
-        // Taksitli işlem oluştur
+      // Kredi kartı işlemleri için her zaman taksitli sistem kullan (peşin dahil)
+      if (_selectedPaymentMethod!.card?.type == CardType.credit) {
+        // Kredi kartı - her zaman taksitli sistem kullan (peşin = 1 taksit)
         transactionId = await providerV2.createInstallmentTransaction(
           sourceAccountId: sourceAccountId,
           totalAmount: amount,
           count: installments,
-          description: _descriptionController.text.trim().isEmpty 
-            ? 'Gider' 
-            : _descriptionController.text.trim(),
+          description: description,
           categoryId: categoryId,
           startDate: _selectedDate,
         );
       } else {
-        // Normal işlem oluştur
+        // Banka kartı/nakit - normal işlem
         transactionId = await providerV2.createTransaction(
           type: v2.TransactionType.expense,
           amount: amount,
-          description: _descriptionController.text.trim().isEmpty 
-            ? 'Gider' 
-            : _descriptionController.text.trim(),
+          description: description,
           sourceAccountId: sourceAccountId,
           categoryId: categoryId,
           transactionDate: _selectedDate,
@@ -540,17 +548,10 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       }
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gider kaydedildi: ${_formatCurrency(amount)}'),
-            backgroundColor: const Color(0xFF34C759),
-          ),
-        );
-        // Transaction ID'sini döndür
         Navigator.pop(context, transactionId);
       }
     } catch (e) {
-      print('🔍 Expense save error: $e (type: ${e.runtimeType})');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

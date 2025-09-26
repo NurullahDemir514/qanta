@@ -57,7 +57,6 @@ class CashAccountProvider extends ChangeNotifier {
     try {
       // Legacy table doesn't exist anymore, gracefully handle
       _cashAccount = null;
-      debugPrint('💰 Legacy cash account provider: No data (using v2 provider)');
     } catch (e) {
       debugPrint('CashAccountProvider Error: Nakit hesabı yüklenemedi: $e');
       _setError('Nakit hesabı yüklenemedi: $e');
@@ -78,10 +77,8 @@ class CashAccountProvider extends ChangeNotifier {
     
     try {
       // Legacy functionality disabled - use v2 provider instead
-      debugPrint('💰 Legacy cash account creation disabled - use v2 provider');
       throw Exception('Legacy cash account creation disabled - use v2 provider');
     } catch (e) {
-      debugPrint('Nakit hesabı oluşturulurken hata: $e');
       _setError('Nakit hesabı oluşturulurken hata oluştu: $e');
     } finally {
       _setLoading(false);
@@ -94,7 +91,6 @@ class CashAccountProvider extends ChangeNotifier {
     
     try {
       // Legacy functionality disabled
-      debugPrint('💰 Legacy balance update disabled - use v2 provider');
     } catch (e) {
       debugPrint('Bakiye güncellenirken hata: $e');
       _setError('Bakiye güncellenirken hata oluştu: $e');
@@ -107,7 +103,6 @@ class CashAccountProvider extends ChangeNotifier {
     
     try {
       // Legacy functionality disabled
-      debugPrint('💰 Legacy add money disabled - use v2 provider');
     } catch (e) {
       debugPrint('Para eklenirken hata: $e');
       _setError('Para eklenirken hata oluştu: $e');
@@ -120,7 +115,6 @@ class CashAccountProvider extends ChangeNotifier {
     
     try {
       // Legacy functionality disabled
-      debugPrint('💰 Legacy withdraw money disabled - use v2 provider');
     } catch (e) {
       debugPrint('Para çıkarılırken hata: $e');
       _setError('Para çıkarılırken hata oluştu: $e');
@@ -136,7 +130,6 @@ class CashAccountProvider extends ChangeNotifier {
     
     try {
       // Legacy functionality disabled
-      debugPrint('💰 Legacy delete cash account disabled - use v2 provider');
     } catch (e) {
       debugPrint('Nakit hesabı silinirken hata: $e');
       _setError('Nakit hesabı silinirken hata oluştu: $e');
@@ -185,7 +178,6 @@ class CashAccountProvider extends ChangeNotifier {
   Future<bool> updateCashBalance(double difference, {String? description}) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💰 Legacy updateCashBalance disabled - use v2 provider');
       return false;
     } catch (e) {
       debugPrint('Bakiye güncellenirken hata: $e');
@@ -203,7 +195,6 @@ class CashAccountProvider extends ChangeNotifier {
   Future<bool> updateAccountName(String newName) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💰 Legacy updateAccountName disabled - use v2 provider');
       return false;
     } catch (e) {
       debugPrint('Hesap adı güncellenirken hata: $e');

@@ -53,5 +53,7 @@
 	<string>Bu uygulama sesli not özelliği için mikrofona erişim gerektirir.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Bu uygulama sesli notları metne dönüştürmek için konuşma tanıma özelliğine erişim gerektirir.</string>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>Bildirimler için izin gereklidir.</string>
 </dict>
 </plist>

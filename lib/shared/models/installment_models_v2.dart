@@ -136,18 +136,58 @@ class InstallmentDetailModel {
   });
 
   /// Whether this installment is overdue
-  bool get isOverdue => !isPaid && dueDate.isBefore(DateTime.now());
+  bool get isOverdue {
+    if (isPaid) return false;
+    
+    // İlk taksit için özel mantık: Bugün oluşturulan taksit vadesi geçmiş sayılmaz
+    if (installmentNumber == 1) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final dueDateOnly = DateTime(dueDate.year, dueDate.month, dueDate.day);
+      
+      // İlk taksit sadece yarın ve sonrası için vadesi geçmiş sayılır
+      return dueDateOnly.isBefore(today);
+    }
+    
+    // Diğer taksitler için normal mantık
+    return dueDate.isBefore(DateTime.now());
+  }
 
   /// Whether this installment is due soon (within 7 days)
   bool get isDueSoon {
     if (isPaid) return false;
+    
+    // İlk taksit için özel mantık: Bugün oluşturulan taksit "vadesi yaklaşıyor" sayılmaz
+    if (installmentNumber == 1) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final dueDateOnly = DateTime(dueDate.year, dueDate.month, dueDate.day);
+      
+      // İlk taksit sadece yarın ve sonrası için "vadesi yaklaşıyor" sayılır
+      final difference = dueDateOnly.difference(today).inDays;
+      return difference >= 1 && difference <= 7;
+    }
+    
+    // Diğer taksitler için normal mantık
     final now = DateTime.now();
     final difference = dueDate.difference(now).inDays;
     return difference >= 0 && difference <= 7;
   }
 
   /// Days until due (negative if overdue)
-  int get daysUntilDue => dueDate.difference(DateTime.now()).inDays;
+  int get daysUntilDue {
+    // İlk taksit için özel mantık: Bugün oluşturulan taksit için 0 gün
+    if (installmentNumber == 1) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final dueDateOnly = DateTime(dueDate.year, dueDate.month, dueDate.day);
+      
+      return dueDateOnly.difference(today).inDays;
+    }
+    
+    // Diğer taksitler için normal mantık
+    return dueDate.difference(DateTime.now()).inDays;
+  }
 
   /// Create from JSON
   factory InstallmentDetailModel.fromJson(Map<String, dynamic> json) {
@@ -273,11 +313,11 @@ class InstallmentWithProgressModel extends InstallmentTransactionModel {
       totalAmount: (json['total_amount'] as num).toDouble(),
       monthlyAmount: (json['monthly_amount'] as num).toDouble(),
       count: json['count'] as int,
-      startDate: DateTime.parse(json['start_date'] as String),
+      startDate: json['start_date'] is DateTime ? json['start_date'] as DateTime : DateTime.parse(json['start_date'] as String),
       description: json['description'] as String,
       categoryId: json['category_id'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] is DateTime ? json['created_at'] as DateTime : DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] is DateTime ? json['updated_at'] as DateTime : DateTime.parse(json['updated_at'] as String),
       accountName: json['account_name'] as String?,
       paidCount: json['paid_count'] as int? ?? 0,
       totalCount: json['total_count'] as int? ?? 0,

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import '../../core/providers/unified_provider_v2.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/services/category_icon_service.dart';
 import '../../shared/utils/currency_utils.dart';
-import '../../shared/models/category_model.dart';
+import '../../shared/models/unified_category_model.dart';
 import '../../l10n/app_localizations.dart';
 
 enum TimePeriod { thisMonth, lastMonth, last3Months }
@@ -21,6 +22,8 @@ class StatisticsScreen extends StatefulWidget {
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
   TimePeriod _selectedPeriod = TimePeriod.thisMonth;
+  bool _showChart = true; // Default to chart view
+  int _selectedTab = 0; // 0: Harcama, 1: Gelir, 2: Net
   final NumberFormat _numberFormat = NumberFormat('#,##0', 'tr_TR');
 
   @override
@@ -64,14 +67,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: _buildQuickStats(provider, isDark),
               ),
               
+              // Monthly Trend Chart
+              SliverToBoxAdapter(
+                child: _buildMonthlyTrendChart(provider, isDark),
+              ),
+              
               // Spending by Category
               SliverToBoxAdapter(
                 child: _buildCategoryBreakdown(provider, isDark),
-              ),
-              
-              // Monthly Trend
-              SliverToBoxAdapter(
-                child: _buildMonthlyTrend(provider, isDark),
               ),
               
               SliverToBoxAdapter(
@@ -590,287 +593,39 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
   }
 
-  Widget _buildMonthlyTrend(UnifiedProviderV2 provider, bool isDark) {
-    final currentTransactions = _getFilteredTransactions(provider);
-    final previousTransactions = _getPreviousPeriodTransactions(provider);
-    
-    final currentIncome = currentTransactions.where((t) => t.signedAmount > 0).fold<double>(0, (sum, t) => sum + t.amount);
-    final currentExpenses = currentTransactions.where((t) => t.signedAmount < 0).fold<double>(0, (sum, t) => sum + t.amount);
-    final currentNet = currentIncome - currentExpenses;
-    
-    final previousIncome = previousTransactions.where((t) => t.signedAmount > 0).fold<double>(0, (sum, t) => sum + t.amount);
-    final previousExpenses = previousTransactions.where((t) => t.signedAmount < 0).fold<double>(0, (sum, t) => sum + t.amount);
-    final previousNet = previousIncome - previousExpenses;
-    
-         // Doğru hesaplama mantığı
-     final expenseChange = previousExpenses > 0 
-         ? ((currentExpenses - previousExpenses) / previousExpenses * 100) 
-         : (currentExpenses > 0 ? 100.0 : 0.0); // Önceki dönem 0, bu dönem var ise %100 artış
-         
-     final incomeChange = previousIncome > 0 
-         ? ((currentIncome - previousIncome) / previousIncome * 100)
-         : (currentIncome > 0 ? 100.0 : 0.0); // Önceki dönem 0, bu dönem var ise %100 artış
-         
-     final netChange = previousNet != 0 
-         ? ((currentNet - previousNet) / previousNet.abs() * 100)
-         : (currentNet != 0 ? (currentNet > 0 ? 100.0 : -100.0) : 0.0);
-
-    // Eğer önceki dönemde hiç işlem yoksa karşılaştırma gösterme
-    if (previousTransactions.isEmpty) {
-    return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : AppColors.lightCard,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              Icons.analytics_outlined,
-              size: 32,
-              color: AppColors.secondary,
-            ),
-            const SizedBox(height: 12),
-                                      Text(
-               '${_getPreviousPeriodName()} ile Karşılaştırma',
-               style: GoogleFonts.inter(
-                 fontSize: 16,
-                 fontWeight: FontWeight.w600,
-                 color: isDark ? AppColors.darkText : AppColors.lightText,
-               ),
-             ),
-             const SizedBox(height: 4),
-                Text(
-                                                    'Bu dönemde hareket bulunmuyor',
-                  style: GoogleFonts.inter(
-                 fontSize: 12,
-                 color: AppColors.secondary,
-                  ),
-                ),
-              ],
-            ),
-      );
-    }
-
+  Widget _buildMonthlyTrendChart(UnifiedProviderV2 provider, bool isDark) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
+      decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${_getPreviousPeriodName()} ile Karşılaştırma',
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: isDark ? AppColors.darkText : AppColors.lightText,
+          // Tab Bar
+          Container(
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              children: [
+                _buildTabButton('Harcama', 0, Icons.trending_down, isDark),
+                const SizedBox(width: 8),
+                _buildTabButton('Gelir', 1, Icons.trending_up, isDark),
+                const SizedBox(width: 8),
+                _buildTabButton('Net', 2, Icons.account_balance, isDark),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
           
-          // Gider Karşılaştırması
-          _buildComparisonItem(
-            'Giderler',
-            currentExpenses,
-            previousExpenses,
-            expenseChange,
-            AppColors.error,
-            isDark,
-            isExpense: true,
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Gelir Karşılaştırması
-          _buildComparisonItem(
-            'Gelirler',
-            currentIncome,
-            previousIncome,
-            incomeChange,
-            AppColors.success,
-            isDark,
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Net Karşılaştırması
-          _buildComparisonItem(
-            'Net Bakiye',
-            currentNet,
-            previousNet,
-            netChange,
-            currentNet >= 0 ? AppColors.success : AppColors.error,
-            isDark,
-            isNet: true,
+          // Content based on selected tab
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: _buildTabContent(provider, isDark),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildComparisonItem(
-    String title,
-    double currentValue,
-    double previousValue,
-    double changePercent,
-    Color color,
-    bool isDark, {
-    bool isExpense = false,
-    bool isNet = false,
-  }) {
-         final isIncrease = changePercent > 0;
-     final isDecrease = changePercent < 0;
-     final isStable = changePercent.abs() < 0.1;
-     
-     // Özel durumlar için kontrol
-     final hadPreviousValue = previousValue != 0;
-     final hasCurrentValue = currentValue != 0;
-     
-     Color trendColor;
-     IconData trendIcon;
-     String trendText;
-     
-     // Önceki dönem 0, bu dönem var
-     if (!hadPreviousValue && hasCurrentValue) {
-       if (isExpense) {
-         trendColor = AppColors.warning;
-         trendIcon = Icons.warning_amber_rounded;
-         trendText = 'Yeni harcama başladı';
-       } else if (isNet) {
-         trendColor = AppColors.success;
-         trendIcon = Icons.savings_rounded;
-         trendText = 'Artık tasarruf var';
-       } else {
-         trendColor = AppColors.success;
-         trendIcon = Icons.attach_money_rounded;
-         trendText = 'Yeni gelir kaynağı';
-       }
-     }
-     // Önceki dönem var, bu dönem 0
-     else if (hadPreviousValue && !hasCurrentValue) {
-       if (isExpense) {
-         trendColor = AppColors.success;
-         trendIcon = Icons.check_circle_rounded;
-         trendText = 'Harcama durdu';
-       } else if (isNet) {
-         trendColor = AppColors.error;
-         trendIcon = Icons.money_off_rounded;
-         trendText = 'Tasarruf bitti';
-       } else {
-         trendColor = AppColors.error;
-         trendIcon = Icons.trending_down_rounded;
-         trendText = 'Gelir kesildi';
-       }
-     }
-     // Normal karşılaştırma
-     else if (isStable) {
-       trendColor = AppColors.secondary;
-       trendIcon = Icons.horizontal_rule_rounded;
-       trendText = 'Sabit kaldı';
-     } else if (isExpense) {
-       // Gider için azalış iyi, artış kötü
-       if (isDecrease) {
-         trendColor = AppColors.success;
-         trendIcon = Icons.trending_down_rounded;
-         trendText = 'Harcama azaldı';
-       } else {
-         trendColor = AppColors.error;
-         trendIcon = Icons.trending_up_rounded;
-         trendText = 'Harcama arttı';
-       }
-     } else if (isNet) {
-       // Net için pozitif artış iyi, negatif artış kötü
-       if (isIncrease && currentValue > 0) {
-         trendColor = AppColors.success;
-         trendIcon = Icons.trending_up_rounded;
-         trendText = 'Tasarruf arttı';
-       } else if (isIncrease && currentValue < 0) {
-         trendColor = AppColors.error;
-         trendIcon = Icons.trending_up_rounded;
-         trendText = 'Zarar arttı';
-       } else if (isDecrease && previousValue > 0) {
-         trendColor = AppColors.warning;
-         trendIcon = Icons.trending_down_rounded;
-         trendText = 'Tasarruf azaldı';
-       } else {
-         trendColor = AppColors.success;
-         trendIcon = Icons.trending_down_rounded;
-         trendText = 'Zarar azaldı';
-       }
-     } else {
-       // Gelir için artış iyi, azalış kötü
-       if (isIncrease) {
-         trendColor = AppColors.success;
-         trendIcon = Icons.trending_up_rounded;
-         trendText = 'Gelir arttı';
-       } else {
-         trendColor = AppColors.error;
-         trendIcon = Icons.trending_down_rounded;
-         trendText = 'Gelir azaldı';
-       }
-     }
-
-    return Row(
-                  children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: trendColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            trendIcon,
-                      size: 20,
-            color: trendColor,
-          ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                        style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.darkText : AppColors.lightText,
-                    ),
-                  ),
-                  Text(
-                    '₺${_numberFormat.format(currentValue.abs())}',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: color,
-                      ),
-                    ),
-                  ],
-                ),
-              const SizedBox(height: 2),
-                             Text(
-                 _getComparisonText(trendText, changePercent, hadPreviousValue, hasCurrentValue),
-                 style: GoogleFonts.inter(
-                   fontSize: 12,
-                   fontWeight: FontWeight.w400,
-                   color: AppColors.secondary,
-                 ),
-               ),
-          ],
-        ),
-      ),
-      ],
-    );
-  }
 
   String _getPeriodTitle(TimePeriod period) {
     switch (period) {
@@ -915,6 +670,740 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
     
     return DateTime(year, month, 1);
+  }
+
+  List<MonthlyTrendData> _getMonthlyExpenseData(UnifiedProviderV2 provider) {
+    final now = DateTime.now();
+    final months = <MonthlyTrendData>[];
+    
+    // İlk işlem tarihini bul
+    DateTime? firstTransactionDate;
+    for (final transaction in provider.transactions) {
+      if (transaction.transactionDate != null) {
+        if (firstTransactionDate == null || transaction.transactionDate!.isBefore(firstTransactionDate)) {
+          firstTransactionDate = transaction.transactionDate;
+        }
+      }
+    }
+    
+    if (firstTransactionDate == null) return months; // Hiç işlem yoksa boş döndür
+    
+    // İlk işlem tarihinden itibaren tüm ayları göster
+    final firstMonth = DateTime(firstTransactionDate.year, firstTransactionDate.month, 1);
+    final currentMonth = DateTime(now.year, now.month, 1);
+    
+    DateTime monthDate = firstMonth;
+    while (monthDate.isBefore(currentMonth) || monthDate.isAtSameMomentAs(currentMonth)) {
+      final monthTransactions = provider.transactions.where((transaction) {
+        if (transaction.transactionDate == null) return false;
+        final transactionDate = transaction.transactionDate!;
+        return transactionDate.year == monthDate.year && 
+               transactionDate.month == monthDate.month &&
+               transaction.signedAmount < 0; // Sadece harcamalar
+      }).toList();
+      
+      final totalExpenses = monthTransactions.fold<double>(0, (sum, t) => sum + t.signedAmount.abs());
+      
+      final monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+      
+      months.add(MonthlyTrendData(
+        month: monthNames[monthDate.month - 1],
+        expenses: totalExpenses,
+        income: 0.0,
+      ));
+      
+      // Sonraki aya geç
+      monthDate = DateTime(monthDate.year, monthDate.month + 1, 1);
+    }
+    
+    return months;
+  }
+
+  List<MonthlyTrendData> _getMonthlyIncomeData(UnifiedProviderV2 provider) {
+    final now = DateTime.now();
+    final months = <MonthlyTrendData>[];
+    
+    // İlk işlem tarihini bul
+    DateTime? firstTransactionDate;
+    for (final transaction in provider.transactions) {
+      if (transaction.transactionDate != null) {
+        if (firstTransactionDate == null || transaction.transactionDate!.isBefore(firstTransactionDate)) {
+          firstTransactionDate = transaction.transactionDate;
+        }
+      }
+    }
+    
+    if (firstTransactionDate == null) return months; // Hiç işlem yoksa boş döndür
+    
+    // İlk işlem tarihinden itibaren tüm ayları göster
+    final firstMonth = DateTime(firstTransactionDate.year, firstTransactionDate.month, 1);
+    final currentMonth = DateTime(now.year, now.month, 1);
+    
+    DateTime monthDate = firstMonth;
+    while (monthDate.isBefore(currentMonth) || monthDate.isAtSameMomentAs(currentMonth)) {
+      final monthTransactions = provider.transactions.where((transaction) {
+        if (transaction.transactionDate == null) return false;
+        final transactionDate = transaction.transactionDate!;
+        return transactionDate.year == monthDate.year && 
+               transactionDate.month == monthDate.month &&
+               transaction.signedAmount > 0; // Sadece gelirler
+      }).toList();
+      
+      final totalIncome = monthTransactions.fold<double>(0, (sum, t) => sum + t.signedAmount);
+      
+      final monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+      
+      months.add(MonthlyTrendData(
+        month: monthNames[monthDate.month - 1],
+        expenses: totalIncome, // Gelir verisi için expenses alanını kullanıyoruz
+        income: totalIncome,
+      ));
+      
+      // Sonraki aya geç
+      monthDate = DateTime(monthDate.year, monthDate.month + 1, 1);
+    }
+    
+    return months;
+  }
+
+  List<MonthlyTrendData> _getMonthlyNetData(UnifiedProviderV2 provider) {
+    final now = DateTime.now();
+    final months = <MonthlyTrendData>[];
+    
+    // Tüm hesapların toplam başlangıç bakiyesini hesapla
+    final totalInitialBalance = provider.accounts.fold<double>(0, (sum, account) {
+      return sum + account.balance;
+    });
+    
+    // İlk işlem tarihini bul
+    DateTime? firstTransactionDate;
+    for (final transaction in provider.transactions) {
+      if (transaction.transactionDate != null) {
+        if (firstTransactionDate == null || transaction.transactionDate!.isBefore(firstTransactionDate)) {
+          firstTransactionDate = transaction.transactionDate;
+        }
+      }
+    }
+    
+    if (firstTransactionDate == null) return months; // Hiç işlem yoksa boş döndür
+    
+    // İlk işlem tarihinden itibaren tüm ayları göster
+    final firstMonth = DateTime(firstTransactionDate.year, firstTransactionDate.month, 1);
+    final currentMonth = DateTime(now.year, now.month, 1);
+    
+    DateTime monthDate = firstMonth;
+    while (monthDate.isBefore(currentMonth) || monthDate.isAtSameMomentAs(currentMonth)) {
+      // Bu aya kadar olan tüm işlemleri al
+      final transactionsUpToMonth = provider.transactions.where((transaction) {
+        if (transaction.transactionDate == null) return false;
+        final transactionDate = transaction.transactionDate!;
+        return transactionDate.isBefore(DateTime(monthDate.year, monthDate.month + 1, 1));
+      }).toList();
+      
+      // Bu aya kadar olan işlemlerin net etkisini hesapla
+      final totalIncomeUpToMonth = transactionsUpToMonth
+          .where((t) => t.signedAmount > 0)
+          .fold<double>(0, (sum, t) => sum + t.signedAmount);
+      
+      final totalExpensesUpToMonth = transactionsUpToMonth
+          .where((t) => t.signedAmount < 0)
+          .fold<double>(0, (sum, t) => sum + t.signedAmount.abs());
+      
+      // Net bakiye = Başlangıç bakiyesi + Gelirler - Harcamalar
+      final netAmount = totalInitialBalance + totalIncomeUpToMonth - totalExpensesUpToMonth;
+      
+      final monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+      
+      months.add(MonthlyTrendData(
+        month: monthNames[monthDate.month - 1],
+        expenses: netAmount, // Net bakiye için expenses alanını kullanıyoruz
+        income: totalIncomeUpToMonth,
+      ));
+      
+      // Sonraki aya geç
+      monthDate = DateTime(monthDate.year, monthDate.month + 1, 1);
+    }
+    
+    return months;
+  }
+
+  String _getTabTitle(int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return 'Harcama';
+      case 1:
+        return 'Gelir';
+      case 2:
+        return 'Net Bakiye';
+      default:
+        return 'Harcama';
+    }
+  }
+
+  double _calculateDynamicInterval(List<MonthlyTrendData> data) {
+    if (data.isEmpty) return 1000;
+    
+    final values = data.map((e) => e.expenses).toList();
+    final maxValue = values.reduce((a, b) => a > b ? a : b);
+    final minValue = values.reduce((a, b) => a < b ? a : b);
+    
+    // Net bakiye için negatif değerleri de dikkate al
+    final range = maxValue - minValue;
+    final absMaxValue = maxValue.abs() > minValue.abs() ? maxValue.abs() : minValue.abs();
+    
+    // Aralığa göre uygun interval hesapla
+    if (absMaxValue <= 1000) {
+      return 200; // 0-1000 arası için 200'şer
+    } else if (absMaxValue <= 5000) {
+      return 1000; // 0-5000 arası için 1000'er
+    } else if (absMaxValue <= 10000) {
+      return 2000; // 0-10000 arası için 2000'şer
+    } else if (absMaxValue <= 50000) {
+      return 10000; // 0-50000 arası için 10000'şer
+    } else {
+      return 25000; // 50000+ için 25000'şer
+    }
+  }
+
+  Widget _buildTabButton(String label, int tabIndex, IconData icon, bool isDark) {
+    final isSelected = _selectedTab == tabIndex;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedTab = tabIndex;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+            color: isSelected 
+              ? AppColors.primary 
+              : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+                icon,
+                size: 16,
+                color: isSelected 
+                  ? Colors.white 
+                  : AppColors.secondary,
+              ),
+              const SizedBox(width: 6),
+                                      Text(
+                label,
+               style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected 
+                    ? Colors.white 
+                    : AppColors.secondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleButton(String label, IconData icon, bool isSelected, bool isDark) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _showChart = label == 'Grafik';
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected 
+            ? AppColors.primary 
+            : (isDark ? AppColors.darkCard : AppColors.lightCard),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected 
+              ? AppColors.primary 
+              : AppColors.secondary.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected 
+                ? Colors.white 
+                : AppColors.secondary,
+            ),
+            const SizedBox(width: 6),
+                Text(
+              label,
+                  style: GoogleFonts.inter(
+                 fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isSelected 
+                  ? Colors.white 
+                  : AppColors.secondary,
+                  ),
+                ),
+              ],
+        ),
+            ),
+      );
+    }
+
+  Widget _buildTabContent(UnifiedProviderV2 provider, bool isDark) {
+    List<MonthlyTrendData> monthlyData;
+    String title;
+    Color dataColor;
+    IconData dataIcon;
+    
+    switch (_selectedTab) {
+      case 0: // Harcama
+        monthlyData = _getMonthlyExpenseData(provider);
+        title = 'Aylık Harcama Analizi';
+        dataColor = AppColors.error;
+        dataIcon = Icons.trending_down;
+        break;
+      case 1: // Gelir
+        monthlyData = _getMonthlyIncomeData(provider);
+        title = 'Aylık Gelir Analizi';
+        dataColor = AppColors.success;
+        dataIcon = Icons.trending_up;
+        break;
+      case 2: // Net
+        monthlyData = _getMonthlyNetData(provider);
+        title = 'Aylık Net Bakiye Analizi';
+        dataColor = AppColors.primary;
+        dataIcon = Icons.account_balance;
+        break;
+      default:
+        monthlyData = _getMonthlyExpenseData(provider);
+        title = 'Aylık Harcama Analizi';
+        dataColor = AppColors.error;
+        dataIcon = Icons.trending_down;
+    }
+    
+    if (monthlyData.isEmpty) {
+      return Column(
+        children: [
+          Icon(
+            dataIcon,
+            size: 48,
+            color: AppColors.secondary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Aylık $title Verisi Yok',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppColors.secondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'İlk işleminizi ekleyerek başlayın',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: AppColors.secondary.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Toggle buttons - full width
+        Row(
+          children: [
+            Expanded(
+              child: _buildToggleButton(
+                'Grafik',
+                Icons.show_chart,
+                _showChart,
+            isDark,
+          ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildToggleButton(
+                'Tablo',
+                Icons.table_chart,
+                !_showChart,
+            isDark,
+              ),
+          ),
+        ],
+      ),
+        const SizedBox(height: 20),
+        
+        // Chart or Table based on toggle
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _showChart 
+            ? _buildChartView(monthlyData, isDark, dataColor, dataIcon)
+            : _buildTableView(monthlyData, isDark, dataColor),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChartView(List<MonthlyTrendData> monthlyData, bool isDark, Color dataColor, IconData dataIcon) {
+    final values = monthlyData.map((e) => e.expenses).toList();
+    final maxValue = values.reduce((a, b) => a > b ? a : b);
+    final minValue = values.reduce((a, b) => a < b ? a : b);
+    
+    // Dinamik Y ekseni aralığı hesapla
+    final range = maxValue - minValue;
+    final padding = range * 0.1; // %10 padding
+    final chartMinY = (minValue - padding).toDouble();
+    final chartMaxY = (maxValue + padding).toDouble();
+    
+    return Column(
+      key: const ValueKey('chart'),
+      children: [
+        SizedBox(
+          height: 200,
+          child: LineChart(
+            LineChartData(
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: _calculateDynamicInterval(monthlyData),
+                getDrawingHorizontalLine: (value) {
+                  return FlLine(
+                    color: AppColors.secondary.withOpacity(0.1),
+                    strokeWidth: 1,
+                  );
+                },
+              ),
+              titlesData: FlTitlesData(
+                show: true,
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 30,
+                    interval: 1,
+                    getTitlesWidget: (double value, TitleMeta meta) {
+                      if (value.toInt() >= 0 && value.toInt() < monthlyData.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            monthlyData[value.toInt()].month,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                        );
+                      }
+                      return const Text('');
+                    },
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: _calculateDynamicInterval(monthlyData),
+                    reservedSize: 40,
+                    getTitlesWidget: (double value, TitleMeta meta) {
+                      return Text(
+                        '₺${_numberFormat.format(value.toInt())}',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.secondary,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              borderData: FlBorderData(
+                show: false,
+              ),
+              minX: 0,
+              maxX: (monthlyData.length - 1).toDouble(),
+              minY: chartMinY,
+              maxY: chartMaxY,
+              lineTouchData: LineTouchData(
+                enabled: true,
+                touchTooltipData: LineTouchTooltipData(
+                  tooltipBgColor: AppColors.primary,
+                  tooltipRoundedRadius: 8,
+                  getTooltipItems: (touchedSpots) {
+                    return touchedSpots.map((touchedSpot) {
+                      final index = touchedSpot.spotIndex;
+                      if (index >= 0 && index < monthlyData.length) {
+                        final data = monthlyData[index];
+                        return LineTooltipItem(
+                          '${data.month}\n₺${_numberFormat.format(data.expenses)}',
+                          GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white, // Beyaz yazı
+                          ),
+                        );
+                      }
+                      return null;
+                    }).toList();
+                  },
+                ),
+                handleBuiltInTouches: true,
+                getTouchedSpotIndicator: (barData, spotIndexes) {
+                  return spotIndexes.map((spotIndex) {
+                    return TouchedSpotIndicatorData(
+                      FlLine(
+                        color: dataColor,
+                        strokeWidth: 2,
+                      ),
+                      FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) {
+                          return FlDotCirclePainter(
+                            radius: 6,
+                            color: dataColor,
+                            strokeWidth: 2,
+                            strokeColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+                          );
+                        },
+                      ),
+                    );
+                  }).toList();
+                },
+              ),
+              lineBarsData: [
+                LineChartBarData(
+                  spots: monthlyData.asMap().entries.map((entry) {
+                    return FlSpot(entry.key.toDouble(), entry.value.expenses);
+                  }).toList(),
+                  isCurved: true,
+                  gradient: LinearGradient(
+                    colors: [
+                      dataColor.withOpacity(0.8),
+                      dataColor.withOpacity(0.3),
+                    ],
+                  ),
+                  barWidth: 3,
+                  isStrokeCapRound: true,
+                  dotData: FlDotData(
+                    show: true,
+                    getDotPainter: (spot, percent, barData, index) {
+                      return FlDotCirclePainter(
+                        radius: 4,
+                        color: dataColor,
+                        strokeWidth: 2,
+                        strokeColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+                      );
+                    },
+                  ),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    gradient: LinearGradient(
+                      colors: [
+                        dataColor.withOpacity(0.1),
+                        dataColor.withOpacity(0.05),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Legend
+        Row(
+                  children: [
+        Container(
+              width: 12,
+              height: 12,
+          decoration: BoxDecoration(
+                color: dataColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _getTabTitle(_selectedTab),
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppColors.secondary,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTableView(List<MonthlyTrendData> monthlyData, bool isDark, Color dataColor) {
+    return Column(
+      key: const ValueKey('table'),
+            children: [
+        // Table Header
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: dataColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+                children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Ay',
+                        style: GoogleFonts.inter(
+                    fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    color: dataColor,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  _getTabTitle(_selectedTab),
+                    style: GoogleFonts.inter(
+                    fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    color: dataColor,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Değişim',
+                 style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: dataColor,
+                  ),
+                 ),
+               ),
+          ],
+        ),
+      ),
+        const SizedBox(height: 8),
+        
+        // Table Rows
+        ...monthlyData.asMap().entries.map((entry) {
+          final index = entry.key;
+          final data = entry.value;
+          final previousData = index > 0 ? monthlyData[index - 1] : null;
+          
+          double changePercent = 0.0;
+          if (previousData != null && previousData.expenses > 0) {
+            changePercent = ((data.expenses - previousData.expenses) / previousData.expenses) * 100;
+          } else if (previousData == null && data.expenses > 0) {
+            changePercent = 100.0; // İlk ay için %100 artış
+          }
+          
+         final isIncrease = changePercent > 0;
+     final isDecrease = changePercent < 0;
+     final isStable = changePercent.abs() < 0.1;
+     
+          Color changeColor = AppColors.secondary;
+          IconData changeIcon = Icons.horizontal_rule;
+          
+          if (isStable) {
+            changeColor = AppColors.secondary;
+            changeIcon = Icons.horizontal_rule;
+          } else if (isIncrease) {
+            changeColor = dataColor;
+            changeIcon = Icons.trending_up;
+          } else if (isDecrease) {
+            changeColor = dataColor.withOpacity(0.7);
+            changeIcon = Icons.trending_down;
+          }
+          
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard.withOpacity(0.5) : AppColors.lightCard.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.secondary.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: Row(
+            children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    data.month,
+                        style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? AppColors.darkText : AppColors.lightText,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    '₺${_numberFormat.format(data.expenses)}',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: dataColor,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    children: [
+                      Icon(
+                        changeIcon,
+                        size: 16,
+                        color: changeColor,
+                      ),
+                      const SizedBox(width: 4),
+                             Text(
+                        changePercent.abs() < 0.1 
+                          ? 'Sabit'
+                          : '${changePercent > 0 ? '+' : ''}${changePercent.toStringAsFixed(1)}%',
+                 style: GoogleFonts.inter(
+                   fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: changeColor,
+                 ),
+               ),
+          ],
+        ),
+      ),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
   }
 
   List<dynamic> _getFilteredTransactions(UnifiedProviderV2 provider) {
@@ -986,34 +1475,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }).toList();
    }
 
-   String _getComparisonText(String trendText, double changePercent, bool hadPreviousValue, bool hasCurrentValue) {
-     // Özel durumlar
-     if (!hadPreviousValue && hasCurrentValue) {
-       return 'İlk kez görüldü';
-     } else if (hadPreviousValue && !hasCurrentValue) {
-       return 'Tamamen durdu';
-     } else if (changePercent.abs() < 0.1) {
-       return 'Neredeyse aynı';
-     } else {
-       // Yüzde değerine göre farklı ifadeler
-       final absPercent = changePercent.abs();
-       String intensityText = '';
-       
-       if (absPercent >= 100) {
-         intensityText = 'çok büyük oranda';
-       } else if (absPercent >= 50) {
-         intensityText = 'büyük oranda';
-       } else if (absPercent >= 25) {
-         intensityText = 'önemli ölçüde';
-       } else if (absPercent >= 10) {
-         intensityText = 'belirgin şekilde';
-       } else {
-         intensityText = 'hafif';
-       }
-       
-       return '$intensityText (%${absPercent.toStringAsFixed(1)})';
-     }
-   }
 
   List<CategoryStat> _calculateCategoryStats(UnifiedProviderV2 provider) {
     final transactions = _getFilteredTransactions(provider);
@@ -1046,12 +1507,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       
       categoryStats.add(CategoryStat(
         id: categoryId,
-        name: category?.name ?? _getFallbackCategoryName(categoryId),
-        icon: _getCategoryIcon(category?.icon ?? categoryId),
+        name: category?.displayName ?? _getFallbackCategoryName(categoryId),
+        icon: _getCategoryIcon(category?.iconName ?? categoryId),
         amount: amount,
         transactionCount: count,
         percentage: percentage,
-        color: _getCategoryColor(category?.color ?? categoryId),
+        color: _getCategoryColor(category?.colorHex ?? categoryId),
       ));
     });
     
@@ -1060,7 +1521,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   // Provider'dan kategori verisini al
-  CategoryModel? _getCategoryFromProvider(UnifiedProviderV2 provider, String categoryId) {
+  UnifiedCategoryModel? _getCategoryFromProvider(UnifiedProviderV2 provider, String categoryId) {
     try {
       return provider.categories.firstWhere((category) => category.id == categoryId);
     } catch (e) {
@@ -1177,5 +1638,17 @@ class CategoryStat {
     required this.transactionCount,
     required this.percentage,
     required this.color,
+  });
+}
+
+class MonthlyTrendData {
+  final String month;
+  final double expenses;
+  final double income;
+
+  MonthlyTrendData({
+    required this.month,
+    required this.expenses,
+    required this.income,
   });
 } 

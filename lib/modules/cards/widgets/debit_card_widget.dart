@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../shared/models/debit_card_model.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/services/supabase_service.dart';
+import '../../../core/services/firebase_auth_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/utils/currency_utils.dart';
 
@@ -46,7 +46,7 @@ class DebitCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final user = SupabaseService.instance.currentUser;
+    final user = FirebaseAuthService.currentUser;
     
     // Get design from constants
     final gradientColors = AppConstants.getBankGradientColors(bankCode);

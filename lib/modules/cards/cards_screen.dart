@@ -4,6 +4,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../core/providers/cash_account_provider.dart';
 import '../../core/providers/debit_card_provider.dart';
 import '../../core/providers/credit_card_provider.dart';
+import '../../core/providers/unified_provider_v2.dart';
 import '../../core/events/card_events.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/app_page_scaffold.dart';
@@ -161,12 +162,9 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
                 ],
                           ),
               onRefresh: () async {
-                // Tüm kartları yenile
-                await Future.wait([
-                  CashAccountProvider.instance.loadCashAccount(),
-                  DebitCardProvider.instance.loadDebitCards(),
-                  CreditCardProvider.instance.loadCreditCards(),
-                ]);
+                // Tüm verileri Firebase'den yenile
+                final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+                await provider.loadAllData();
               },
               body: SliverFillRemaining(
                     child: TabBarView(

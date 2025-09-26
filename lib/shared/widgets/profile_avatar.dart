@@ -59,7 +59,6 @@ class ProfileAvatar extends StatelessWidget {
                     return _buildPlaceholder(isDark);
                   },
                   errorBuilder: (context, error, stackTrace) {
-                    debugPrint('❌ Error loading profile image: $error');
                     return _buildPlaceholder(isDark);
                   },
                 )

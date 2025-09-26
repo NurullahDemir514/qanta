@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/services/installment_service_v2.dart';
+import '../../core/services/unified_installment_service.dart';
 import '../../shared/models/installment_models_v2.dart';
 import '../design_system/transaction_design_system.dart';
 import '../services/category_icon_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class InstallmentExpandableCard extends StatefulWidget {
   final String? installmentId;
@@ -20,6 +22,9 @@ class InstallmentExpandableCard extends StatefulWidget {
   final VoidCallback? onLongPress;
   final int? currentInstallment;
   final int? totalInstallments;
+  final double? totalAmount; // Toplam tutar
+  final double? monthlyAmount; // Aylık tutar
+  final bool isPaid; // Payment status for statement tracking
 
   const InstallmentExpandableCard({
     super.key,
@@ -37,6 +42,9 @@ class InstallmentExpandableCard extends StatefulWidget {
     this.onLongPress,
     this.currentInstallment,
     this.totalInstallments,
+    this.totalAmount,
+    this.monthlyAmount,
+    this.isPaid = false,
   });
 
   @override
@@ -77,12 +85,39 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
 
     try {
       if (widget.installmentId != null) {
-        // Try to load real installment details
-        final details = await InstallmentServiceV2.getInstallmentDetails(widget.installmentId!);
+        // Load real installment details from Firebase
+        debugPrint('Loading installment details for: ${widget.installmentId}');
+        final details = await UnifiedInstallmentService.getInstallmentDetails(widget.installmentId!);
+        
+        if (details.isEmpty) {
+          debugPrint('⚠️ No installment details found for ID: ${widget.installmentId}');
+          setState(() {
+            _installmentDetails = [];
+            _isLoading = false;
+          });
+          return;
+        }
+        
+        // Convert to InstallmentDetailModel
+        final installmentDetails = details.map((detail) => InstallmentDetailModel(
+          id: detail['id'] as String,
+          installmentTransactionId: detail['installment_transaction_id'] as String,
+          installmentNumber: detail['installment_number'] as int,
+          amount: (detail['amount'] as num).toDouble(),
+          dueDate: detail['due_date'] as DateTime,
+          isPaid: detail['is_paid'] as bool,
+          paidDate: detail['paid_date'] as DateTime?,
+          transactionId: detail['transaction_id'] as String?,
+          createdAt: detail['created_at'] as DateTime,
+          updatedAt: detail['updated_at'] as DateTime,
+        )).toList();
+        
+        debugPrint('✅ Loaded ${installmentDetails.length} installment details for ID: ${widget.installmentId}');
         setState(() {
-          _installmentDetails = details;
+          _installmentDetails = installmentDetails;
           _isLoading = false;
         });
+        
       } else if (widget.currentInstallment != null && widget.totalInstallments != null) {
         // Create fallback installment details from pattern info
         _installmentDetails = _createFallbackInstallmentDetails();
@@ -95,7 +130,6 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
         });
       }
     } catch (e) {
-      debugPrint('❌ Error loading installment details: $e');
       
       // If real data fails and we have pattern info, use fallback
       if (widget.currentInstallment != null && widget.totalInstallments != null) {
@@ -165,6 +199,9 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
     if (widget.title.contains('(') && widget.title.contains('Taksit)')) {
       // Extract category name from title like "Benzin (6 Taksit)" -> "benzin"
       categoryName = widget.title.split('(')[0].trim().toLowerCase();
+    } else {
+      // If no taksit pattern, use the title directly
+      categoryName = widget.title.toLowerCase();
     }
     
     // Try category name first (e.g., "benzin", "market", etc.)
@@ -241,10 +278,12 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                     color: iconData.backgroundColor,
                     borderRadius: BorderRadius.circular(TransactionDesignSystem.iconBorderRadius),
                   ),
+                  child: Center(
                   child: Icon(
                     iconData.icon,
                     color: iconData.iconColor,
                     size: TransactionDesignSystem.iconSize,
+                    ),
                   ),
                 ),
                 
@@ -255,15 +294,45 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.title,
-                        style: GoogleFonts.inter(
-                          fontSize: TransactionDesignSystem.titleFontSize,
-                          fontWeight: TransactionDesignSystem.titleFontWeight,
-                          color: TransactionDesignSystem.getTitleColor(widget.isDark),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      // Title row with chip
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Title text (flexible to take available space)
+                          Flexible(
+                            child: Text(
+                              widget.title,
+                              style: GoogleFonts.inter(
+                                fontSize: TransactionDesignSystem.titleFontSize,
+                                fontWeight: TransactionDesignSystem.titleFontWeight,
+                                color: TransactionDesignSystem.getTitleColor(widget.isDark),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          // Taksitli chip
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: widget.isDark ? Colors.orange.shade800 : Colors.orange.shade100,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: widget.isDark ? Colors.orange.shade600 : Colors.orange.shade300,
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)?.installment ?? 'Taksitli',
+                              style: GoogleFonts.inter(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: TransactionDesignSystem.titleSubtitleSpacing),
                       Text(
@@ -282,14 +351,31 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Toplam tutar (ana tutar)
                     Text(
-                      widget.amount,
+                          _getDisplayAmount(),
                       style: GoogleFonts.inter(
                         fontSize: TransactionDesignSystem.amountFontSize,
                         fontWeight: TransactionDesignSystem.amountFontWeight,
                         color: TransactionDesignSystem.getAmountColor(widget.type, widget.isDark),
                       ),
                     ),
+                        // Aylık tutar (küçük)
+                        if (widget.totalAmount != null && widget.monthlyAmount != null && widget.totalInstallments != null && widget.totalInstallments! > 1)
+                          Text(
+                            '${TransactionDesignSystem.formatAmount(widget.monthlyAmount!, widget.type)}/ay',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              color: TransactionDesignSystem.getSubtitleColor(widget.isDark),
+                            ),
+                          ),
+                      ],
+                    ),
+
                   ],
                 ),
               ],
@@ -346,41 +432,22 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
   }
 
   Widget _buildInstallmentDetailRow(InstallmentDetailModel detail, bool isLast) {
-    final isPaid = detail.isPaid;
-    final isOverdue = detail.isOverdue;
-    final isDueSoon = detail.isDueSoon;
-    
-    Color statusColor;
-    IconData statusIcon;
-    
-    if (isPaid) {
-      statusColor = const Color(0xFF34C759); // Green
-      statusIcon = Icons.check_circle;
-    } else if (isOverdue) {
-      statusColor = const Color(0xFFFF3B30); // Red
-      statusIcon = Icons.error;
-    } else if (isDueSoon) {
-      statusColor = const Color(0xFFFF9500); // Orange
-      statusIcon = Icons.warning;
-    } else {
-      statusColor = TransactionDesignSystem.getSubtitleColor(widget.isDark);
-      statusIcon = Icons.schedule;
-    }
+    // Hiçbir taksit için ikon göstermeyeceğimiz için status kontrollerini kaldırdık
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          // Status icon
-          Icon(
-            statusIcon,
-            size: 16,
-            color: statusColor,
+          // Çizgi karakteri ekle - son taksit için farklı
+          Text(
+            isLast ? '└─ ' : '├─ ', // Son taksit için └─, diğerleri için ├─
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: TransactionDesignSystem.getSubtitleColor(widget.isDark),
+            ),
           ),
           
-          const SizedBox(width: 12),
-          
-          // Installment info - removed status text
+          // Installment info
           Expanded(
             child: Text(
               '${detail.installmentNumber}. Taksit - ${_formatDate(detail.dueDate)}',
@@ -397,9 +464,7 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: isPaid 
-                  ? statusColor 
-                  : TransactionDesignSystem.getAmountColor(widget.type, widget.isDark),
+              color: TransactionDesignSystem.getAmountColor(widget.type, widget.isDark),
             ),
           ),
         ],
@@ -444,6 +509,14 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
         ),
       )),
     );
+  }
+
+  /// Görüntülenecek tutarı belirler (toplam tutar varsa onu, yoksa mevcut amount'u)
+  String _getDisplayAmount() {
+    if (widget.totalAmount != null) {
+      return TransactionDesignSystem.formatAmount(widget.totalAmount!, widget.type);
+    }
+    return widget.amount;
   }
 
   String _formatDate(DateTime date) {

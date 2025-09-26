@@ -137,7 +137,6 @@ class QuickNoteNotificationService {
       // Update notification with the new note
       await _showQuickNoteNotification();
     } catch (e) {
-      debugPrint('❌ Error saving quick note: $e');
     }
   }
   

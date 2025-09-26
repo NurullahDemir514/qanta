@@ -17,13 +17,12 @@ class BalanceOverviewCard extends StatelessWidget {
     
     return Consumer2<ThemeProvider, UnifiedProviderV2>(
       builder: (context, themeProvider, providerV2, child) {
-        final totalBalance = providerV2.totalBalance;
+        final monthlySummary = providerV2.monthlySummary;
+        final netWorth = providerV2.totalBalance;
         final thisMonthIncome = providerV2.thisMonthIncome;
-        final thisMonthExpense = providerV2.thisMonthExpense;
-        final balanceChangePercentage = providerV2.balanceChangePercentage;
-        final isLoading = providerV2.isLoading;
+        final netAmount = monthlySummary['netAmount'] ?? 0.0;
         
-        debugPrint('🎯 BalanceOverviewCard using QANTA v2 provider');
+    
 
         return GestureDetector(
           onTap: () => BalanceDetailBottomSheet.show(context),
@@ -53,177 +52,125 @@ class BalanceOverviewCard extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: isLoading 
-                ? _buildLoadingState(isDark)
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.totalBalance,
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              color: isDark 
-                                ? const Color(0xFF8E8E93)
-                                : const Color(0xFF6D6D70),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: isDark 
-                                ? const Color(0xFF2C2C2E)
-                                : const Color(0xFFF2F2F7),
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: Icon(
-                              Icons.visibility_outlined,
-                              color: isDark 
-                                ? const Color(0xFF8E8E93)
-                                : const Color(0xFF6D6D70),
-                              size: 16,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        l10n.netWorth,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: isDark 
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      // Main balance with currency formatting
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Consumer<ThemeProvider>(
-                            builder: (context, provider, child) {
-                              final formattedAmount = provider.formatAmount(totalBalance);
-                              final currency = provider.currency;
-                              
-                              // Remove currency symbol to get just the number
-                              String numberOnly = formattedAmount.replaceAll(currency.symbol, '').trim();
-                              
-                              // Handle different decimal separators based on locale
-                              String mainPart;
-                              String decimalPart;
-                              
-                              if (currency.locale.startsWith('tr')) {
-                                // Turkish uses comma as decimal separator
-                                final parts = numberOnly.split(',');
-                                mainPart = parts[0];
-                                decimalPart = parts.length > 1 ? parts[1] : '00';
-                              } else {
-                                // English and others use dot as decimal separator
-                                final parts = numberOnly.split('.');
-                                mainPart = parts[0];
-                                decimalPart = parts.length > 1 ? parts[1] : '00';
-                              }
-                              
-                              return Row(
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
-                                children: [
-                                  Text(
-                                    '${currency.symbol}$mainPart',
-                                    style: CurrencyUtils.getCurrencyTextStyle(
-                                      baseStyle: GoogleFonts.inter(
-                                        fontSize: 26,
-                                        fontWeight: FontWeight.w700,
-                                        color: isDark ? Colors.white : Colors.black,
-                                        letterSpacing: -0.5,
-                                      ),
-                                      currency: currency,
-                                    ),
-                                  ),
-                                  Text(
-                                    currency.locale.startsWith('tr') ? ',$decimalPart' : '.$decimalPart',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark 
-                                        ? const Color(0xFF8E8E93)
-                                        : const Color(0xFF6D6D70),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: balanceChangePercentage >= 0 
-                                ? const Color(0xFF34C759).withValues(alpha: 0.1)
-                                : const Color(0xFFFF3B30).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  balanceChangePercentage >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                                  color: balanceChangePercentage >= 0 
-                                    ? const Color(0xFF34C759)
-                                    : const Color(0xFFFF3B30),
-                                  size: 12,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  '${balanceChangePercentage.abs().toStringAsFixed(1)}%',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: balanceChangePercentage >= 0 
-                                      ? const Color(0xFF34C759)
-                                      : const Color(0xFFFF3B30),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 12),
-                      
-                      // Stats row
-                      IntrinsicHeight(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _buildBalanceItem(
-                                label: l10n.thisMonthIncome,
-                                amount: themeProvider.formatAmount(thisMonthIncome),
-                                isPositive: true,
-                                isDark: isDark,
-                              ),
-                            ),
-                            Container(
-                              width: 1,
-                              color: isDark 
-                                ? const Color(0xFF38383A)
-                                : const Color(0xFFE5E5EA),
-                              margin: const EdgeInsets.symmetric(horizontal: 12),
-                            ),
-                            Expanded(
-                              child: _buildBalanceItem(
-                                label: l10n.thisMonthExpense,
-                                amount: themeProvider.formatAmount(thisMonthExpense),
-                                isPositive: false,
-                                isDark: isDark,
-                              ),
-                            ),
-                          ],
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: isDark 
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: Icon(
+                          Icons.account_balance_wallet_outlined,
+                          color: isDark 
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
+                          size: 16,
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  // Net Worth
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Builder(
+                        builder: (context) {
+                          final formatted = themeProvider.formatAmount(netWorth);
+                          final currency = themeProvider.currency;
+                          String numberOnly = formatted.replaceAll(currency.symbol, '').trim();
+                          String mainPart;
+                          String decimalPart;
+                          if (currency.locale.startsWith('tr')) {
+                            final parts = numberOnly.split(',');
+                            mainPart = parts[0];
+                            decimalPart = parts.length > 1 ? parts[1] : '00';
+                          } else {
+                            final parts = numberOnly.split('.');
+                            mainPart = parts[0];
+                            decimalPart = parts.length > 1 ? parts[1] : '00';
+                          }
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                '${currency.symbol}$mainPart',
+                                style: GoogleFonts.inter(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? Colors.white : Colors.black,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              Text(
+                                currency.locale.startsWith('tr') ? ',$decimalPart' : '.$decimalPart',
+                                style: GoogleFonts.inter(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),                      
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Monthly change indicator
+                  Row(
+                    children: [
+                      Icon(
+                        netAmount >= 0 ? Icons.trending_up : Icons.trending_down,
+                        color: netAmount >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFFF3B30),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        netAmount >= 0 
+                          ? 'Bu ay: +${themeProvider.formatAmount(netAmount)}'
+                          : 'Bu ay: ${themeProvider.formatAmount(netAmount)}',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: netAmount >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFFF3B30),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${themeProvider.formatAmount(thisMonthIncome)} gelir',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -231,112 +178,4 @@ class BalanceOverviewCard extends StatelessWidget {
     );
   }
 
-  Widget _buildBalanceItem({
-    required String label,
-    required String amount,
-    required bool isPositive,
-    required bool isDark,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            color: isDark 
-              ? const Color(0xFF8E8E93)
-              : const Color(0xFF6D6D70),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          amount,
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoadingState(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Header
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Toplam Bakiye',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: isDark 
-                  ? const Color(0xFF8E8E93)
-                  : const Color(0xFF6D6D70),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: isDark 
-                  ? const Color(0xFF2C2C2E)
-                  : const Color(0xFFF2F2F7),
-                borderRadius: BorderRadius.circular(7),
-              ),
-              child: Icon(
-                Icons.visibility_outlined,
-                color: isDark 
-                  ? const Color(0xFF8E8E93)
-                  : const Color(0xFF6D6D70),
-                size: 14,
-              ),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 20),
-        
-        // Loading indicator
-        Center(
-          child: Column(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    isDark 
-                      ? const Color(0xFF8E8E93)
-                      : const Color(0xFF6D6D70),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Veriler yükleniyor...',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: isDark 
-                    ? const Color(0xFF8E8E93)
-                    : const Color(0xFF6D6D70),
-                ),
-              ),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 20),
-      ],
-    );
-  }
 } 

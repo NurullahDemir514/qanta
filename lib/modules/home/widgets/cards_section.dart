@@ -45,7 +45,6 @@ class _CardsSectionState extends State<CardsSection> {
     
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
-        debugPrint('🎯 CardsSection using QANTA v2 provider');
         return _buildV2CardsSection(context, providerV2, l10n, isDark);
       },
     );
@@ -100,13 +99,13 @@ class _CardsSectionState extends State<CardsSection> {
     }
     
     // Sort cards by usage frequency (most used first)
-    _sortCardsByUsageFrequency(allCards, providerV2.transactions);
+    final sortedCards = _sortCardsByUsage(allCards, providerV2.recentTransactions);
     
-    return _buildCardsUI(context, allCards, l10n, isDark);
+    return _buildCardsUI(context, sortedCards, l10n, isDark);
   }
 
   /// Sort cards by usage frequency based on transaction count
-  void _sortCardsByUsageFrequency(List<Map<String, dynamic>> cards, List<dynamic> transactions) {
+  List<Map<String, dynamic>> _sortCardsByUsage(List<Map<String, dynamic>> cards, List<dynamic> transactions) {
     // Calculate usage count for each card
     for (final card in cards) {
       final accountId = card['accountId'] as String;
@@ -136,10 +135,7 @@ class _CardsSectionState extends State<CardsSection> {
       return usageB.compareTo(usageA); // Descending order
     });
     
-    debugPrint('📊 Cards sorted by usage frequency:');
-    for (final card in cards) {
-      debugPrint('   ${card['cardTypeLabel']}: ${card['usageCount']} transactions');
-    }
+    return cards;
   }
   
   /// Get card type priority for sorting (lower number = higher priority)

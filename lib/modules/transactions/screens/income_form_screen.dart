@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
-import '../../../shared/models/category_model.dart';
+import '../../../shared/models/unified_category_model.dart';
 import '../../../core/services/category_service_v2.dart';
 import '../../../shared/widgets/insufficient_funds_dialog.dart';
 import '../models/payment_method.dart';
@@ -85,7 +85,6 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       } catch (e) {
         // Decode hatası varsa raw değeri kullan
         _selectedCategory = widget.initialCategoryId!;
-        debugPrint('⚠️ Income form category decode failed, using raw: $_selectedCategory');
       }
     }
     
@@ -136,7 +135,6 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
         });
       }
     } catch (e) {
-      debugPrint('❌ Payment method initialization error: $e');
     }
   }
 
@@ -341,18 +339,20 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
         try {
           // Önce varolan kategoriyi ara
           final existingCategories = providerV2.categories
-              .where((cat) => cat.name.toLowerCase() == _selectedCategory!.toLowerCase() && cat.type == CategoryType.income)
+              .where((cat) => cat.displayName.toLowerCase() == _selectedCategory!.toLowerCase() && cat.categoryType == CategoryType.income)
               .toList();
           
           if (existingCategories.isNotEmpty) {
             categoryId = existingCategories.first.id;
           } else {
             // Yeni kategori oluştur
-            final newCategory = await CategoryServiceV2.createCategory(
+            // TODO: Implement with Firebase
+            // Create new category using UnifiedProviderV2
+            final newCategory = await providerV2.createCategory(
               type: CategoryType.income,
               name: _selectedCategory!,
-              icon: 'category',
-              color: '#30B0C7',
+              iconName: 'category',
+              colorHex: '#6B7280',
             );
             categoryId = newCategory.id;
           }
@@ -393,13 +393,6 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       );
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gelir kaydedildi: ${_formatCurrency(amount)}'),
-            backgroundColor: const Color(0xFF34C759),
-          ),
-        );
-        // Transaction ID'sini döndür
         Navigator.pop(context, transactionId);
       }
     } catch (e) {

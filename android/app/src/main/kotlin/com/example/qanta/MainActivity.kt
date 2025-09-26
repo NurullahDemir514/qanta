@@ -1,4 +1,4 @@
-package com.example.qanta
+package com.qanta
 
 import io.flutter.embedding.android.FlutterActivity
 

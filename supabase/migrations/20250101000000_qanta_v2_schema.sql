@@ -93,7 +93,7 @@ CREATE TABLE installment_transactions (
     source_account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
     total_amount DECIMAL(15,2) NOT NULL CHECK (total_amount > 0),
     monthly_amount DECIMAL(15,2) NOT NULL CHECK (monthly_amount > 0),
-    count INTEGER NOT NULL CHECK (count > 1),
+    count INTEGER NOT NULL CHECK (count >= 1),
     start_date DATE NOT NULL,
     description TEXT NOT NULL,
     category_id UUID REFERENCES categories(id) ON DELETE SET NULL,

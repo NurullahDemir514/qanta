@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/services/supabase_service.dart';
+import '../../../core/services/firebase_auth_service.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -49,7 +49,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     setState(() => _isLoading = true);
     
     try {
-      await SupabaseService.instance.updatePassword(_newPasswordController.text);
+      await FirebaseAuthService.updatePassword(_newPasswordController.text);
       
       if (mounted) {
         Navigator.pop(context);

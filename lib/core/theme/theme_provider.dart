@@ -31,21 +31,17 @@ class ThemeProvider extends ChangeNotifier {
     // Load theme
     final themeIndex = prefs.getInt(_themeKey) ?? 0;
     _themeMode = ThemeMode.values[themeIndex];
-    debugPrint('🎨 Loaded theme: $_themeMode (index: $themeIndex)');
     
     // Load locale
     final localeCode = prefs.getString(_localeKey) ?? 'tr';
     _locale = Locale(localeCode);
-    debugPrint('🌍 Loaded locale: $localeCode');
     
     // Load currency
     final currencyCode = prefs.getString(_currencyKey) ?? 'TRY';
     _currency = Currency.fromCode(currencyCode);
-    debugPrint('💰 Loaded currency: ${_currency.code}');
     
     // Load onboarding completion
     _onboardingCompleted = prefs.getBool(_onboardingKey) ?? false;
-    debugPrint('🎯 Onboarding completed: $_onboardingCompleted');
     
     notifyListeners();
   }
@@ -68,7 +64,6 @@ class ThemeProvider extends ChangeNotifier {
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_themeKey, _themeMode.index);
-    debugPrint('🎨 Saved theme: $_themeMode (index: ${_themeMode.index})');
     
     notifyListeners();
   }
@@ -80,7 +75,6 @@ class ThemeProvider extends ChangeNotifier {
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_localeKey, locale.languageCode);
-    debugPrint('🌍 Saved locale: ${locale.languageCode}');
     
     notifyListeners();
   }
@@ -92,7 +86,6 @@ class ThemeProvider extends ChangeNotifier {
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_currencyKey, currency.code);
-    debugPrint('💰 Saved currency: ${currency.code}');
     
     notifyListeners();
   }

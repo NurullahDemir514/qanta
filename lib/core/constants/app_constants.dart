@@ -8,7 +8,7 @@ class AppConstants {
 
   // Colors
   static const Color primaryColor = Color(0xFF6D6D70);
-  static const Color secondaryColor = Color(0xFF34D399);
+  static const Color secondaryColor = Color(0xFF4CAF50);
   static const Color primaryLightColor = Color(0xFFF7F8FA);
   static const Color successColor = Color(0xFF4CAF50);
   static const Color warningColor = Color(0xFFFFC300);
@@ -115,7 +115,7 @@ class AppConstants {
         Color(0xFF064E3B),
         Color(0xFF059669),
         Color(0xFF6D6D70),
-        Color(0xFF34D399),
+        Color(0xFF4CAF50),
       ],
       'accentColor': Color(0xFF6D6D70),
     },

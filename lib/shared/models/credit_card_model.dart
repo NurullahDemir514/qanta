@@ -16,6 +16,10 @@ class CreditCardModel {
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
+  
+  // Computed properties
+  double get currentBalance => totalDebt;
+  DateTime get paymentDate => DateTime(DateTime.now().year, DateTime.now().month, dueDate);
 
   CreditCardModel({
     required this.id,

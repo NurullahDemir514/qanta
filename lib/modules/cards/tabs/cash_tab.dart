@@ -22,7 +22,13 @@ class _CashTabState extends State<CashTab> {
   @override
   void initState() {
     super.initState();
-    // V2 provider will automatically load accounts
+    // Load all data from Firebase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+        provider.loadAllData();
+      }
+    });
     
     // 🔔 Cash account event listener'ını kur
     _setupCashEventListeners();
@@ -33,7 +39,6 @@ class _CashTabState extends State<CashTab> {
       if (mounted) {
         // Nakit bakiyesi değiştiğinde UI'ı güncelle
         // Provider zaten notifyListeners() çağırıyor, bu sadece debug için
-        debugPrint('💰 Cash balance updated: ${event.oldBalance} → ${event.newBalance}');
       }
     });
   }
@@ -61,7 +66,7 @@ class _CashTabState extends State<CashTab> {
 
         // Normal UI - Cash account should always exist due to auto-creation
         return SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(), // Üst seviye scroll'a bırak
+          physics: const BouncingScrollPhysics(), // Transaction list'in arkadan kayabilmesi için
           child: Column(
             children: [
               // Cash Balance Card
@@ -76,7 +81,6 @@ class _CashTabState extends State<CashTab> {
                         cashBalance,
                         (newBalance) {
                           // Balance updated callback - provider will automatically update
-                          debugPrint('💰 Cash balance updated to: $newBalance');
                         },
                       );
                     }
@@ -109,7 +113,7 @@ class _CashTabState extends State<CashTab> {
 
   Widget _buildLoadingSkeleton(ThemeProvider themeProvider) {
     return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
+                  physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
           // Loading skeleton for cash card

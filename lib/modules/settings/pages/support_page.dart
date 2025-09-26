@@ -63,23 +63,13 @@ class SupportPage extends StatelessWidget {
                     onTap: () => _launchEmail('support@qanta.app'),
                     isDark: isDark,
                   ),
-                  _buildDivider(isDark),
                   _buildContactItem(
                     icon: Icons.phone_outlined,
                     title: 'Telefon',
-                    subtitle: '+90 (212) 555-0123',
-                    onTap: () => _launchPhone('+902125550123'),
+                    subtitle: '+90 (545) 434-1745',
+                    onTap: () => _launchPhone('+905454341745'),
                     isDark: isDark,
                   ),
-                  _buildDivider(isDark),
-                  _buildContactItem(
-                    icon: Icons.language_outlined,
-                    title: 'Web Sitesi',
-                    subtitle: 'www.qanta.app',
-                    onTap: () => _launchUrl('https://www.qanta.app'),
-                    isDark: isDark,
-                  ),
-                  _buildDivider(isDark),
                   _buildContactItem(
                     icon: Icons.chat_bubble_outline,
                     title: 'Canlı Destek',
@@ -243,11 +233,7 @@ class SupportPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 16,
-                color: Color(0xFF8E8E93),
-              ),
+              
             ],
           ),
         ),

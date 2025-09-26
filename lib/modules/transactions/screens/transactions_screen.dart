@@ -155,7 +155,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Widget _buildBody(List<v2.TransactionWithDetailsV2> transactions, AppLocalizations l10n, bool isDark) {
-    print('🔍 TransactionsScreen build - TransactionCount: ${transactions.length}');
+
 
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
@@ -348,7 +348,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     // Only fallback to category.icon if category name lookup failed
     if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
       if (category?.icon != null && category!.icon != 'category') {
-        categoryIcon = CategoryIconService.getIcon(category.icon);
+        categoryIcon = CategoryIconService.getIcon(category.iconName);
       }
     }
 
@@ -365,7 +365,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     } else if (category?.icon != null) {
       // Try icon name (e.g., "restaurant", "car", etc.)
       categoryColor = CategoryIconService.getColorFromMap(
-        category!.icon,
+        category!.iconName,
         categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
       );
     }
@@ -373,13 +373,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     // If no centralized color found, fall back to hex color from database
     if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
       if (category?.color != null) {
-        categoryColor = CategoryIconService.getColor(category!.color);
+        categoryColor = CategoryIconService.getColor(category!.colorHex);
       } else if (category?.icon != null) {
         // Use predefined colors based on category type and icon
         final isIncomeCategory = transactionType == TransactionType.income;
         categoryColor = CategoryIconService.getCategoryColor(
-          iconName: category!.icon,
-          colorHex: category.color,
+          iconName: category!.iconName,
+          colorHex: category.colorHex,
           isIncomeCategory: isIncomeCategory,
         );
       }
@@ -391,25 +391,39 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     // Build title - sadece description göster (kategori adı gereksiz)
     String title = transaction.categoryName ?? transaction.description;
+    // Taksitli ise taksit bilgisini ekle
+    String installmentText = '';
+    int? effectiveInstallmentCount = transaction.installmentCount;
+    int currentInstallment = 1;
+    if ((transaction.installmentCount == null || transaction.installmentCount! < 1) && transaction.installmentId != null) {
+      final info = Provider.of<UnifiedProviderV2>(context, listen: false).getInstallmentInfo(transaction.installmentId);
+      if (info != null) {
+        effectiveInstallmentCount = info['totalInstallments'];
+        currentInstallment = info['currentInstallment'] ?? 1;
+      }
+    }
+    if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
+      installmentText = '$effectiveInstallmentCount Taksit';
+    } else if (effectiveInstallmentCount == 1) {
+      installmentText = 'Peşin';
+    }
+    if (installmentText.isNotEmpty) {
+      title += ' [$installmentText]';
+    }
 
     // Format amount
     final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
 
-    // Format time
-    final time = TransactionDesignSystem.formatTime(transaction.transactionDate);
+    // Use displayTime from transaction model (dynamic date formatting)
+    final time = transaction.displayTime;
 
-    // Card name
-    String cardName = transaction.sourceAccountName ?? 'Hesap';
-    
-    // For transfer transactions, show source → target
-    if (transactionType == TransactionType.transfer) {
-      final sourceAccount = transaction.sourceAccountName ?? 'Hesap';
-      final targetAccount = transaction.targetAccountName ?? 'Hesap';
-      cardName = TransactionDesignSystem.formatTransferSubtitle(sourceAccount, targetAccount);
-    } else {
-      // Shorten regular card names
-      cardName = TransactionDesignSystem.shortenAccountName(cardName);
-    }
+    // Card name - centralized logic
+    final cardName = TransactionDesignSystem.formatCardName(
+      cardName: transaction.sourceAccountName ?? 'Hesap',
+      transactionType: transactionType.name,
+      sourceAccountName: transaction.sourceAccountName,
+      targetAccountName: transaction.targetAccountName,
+    );
 
     // Check if this should be displayed as an installment
     if (isActualInstallment) {
@@ -430,36 +444,44 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       final installmentSuffix = totalInstallments != null ? ' ($totalInstallments Taksit)' : ' (Taksitli)';
       
       // Remove installment pattern from title for cleaner display
-      final cleanTitle = transaction.categoryName ?? transaction.description.replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '');
+      final cleanTitle = transaction.categoryName ?? transaction.description.replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '').replaceAll('Taksitli', '').trim();
+      final displayText = installmentText;
+      
+      // Parse installment info
+      int? installmentCount = effectiveInstallmentCount;
+      double? installmentTotalAmount = transaction.amount;
+      double? installmentMonthlyAmount = installmentTotalAmount / (installmentCount ?? 1);
       
       return InstallmentExpandableCard(
-        installmentId: transaction.installmentId, // This might be null for fallback cases
-        title: '$cleanTitle$installmentSuffix',
-        subtitle: cardName,
+        installmentId: transaction.installmentId,
+        title: transaction.categoryName ?? transaction.description, // Kategori adı
+        subtitle: cardName, // Banka adı
         amount: amount,
         time: time,
         type: transactionType,
-        categoryIcon: category?.icon,
-        categoryColor: category?.color,
+        categoryIcon: transaction.categoryName ?? category?.iconName,
+        categoryColor: category?.colorHex,
         isDark: isDark,
-        currentInstallment: installmentInfo?['currentInstallment'],
-        totalInstallments: installmentInfo?['totalInstallments'],
+        isFirst: false,
+        isLast: false,
+        currentInstallment: 1,
+        totalInstallments: installmentCount,
+        totalAmount: installmentTotalAmount,
+        monthlyAmount: installmentMonthlyAmount,
+        isPaid: transaction.isPaid,
         onLongPress: () {
-          _showInstallmentDeleteDialog(context, transaction, installmentInfo);
+          _showInstallmentDeleteDialog(context, transaction, null);
         },
       );
     }
     
-    // Regular transaction - use new centralized color system
-    return TransactionDesignSystem.buildTransactionItem(
-      title: title,
-      subtitle: cardName,
-      amount: amount,
-      time: time,
-      type: transactionType,
-      categoryIconData: categoryIcon,      // Use direct IconData
-      categoryColorData: categoryColor,    // Use direct Color
+    // Regular transaction - use Firebase integrated design system
+    return TransactionDesignSystem.buildTransactionItemFromV2(
+      transaction: transaction,
       isDark: isDark,
+      time: time,
+      categoryIconData: categoryIcon,
+      categoryColorData: categoryColor,
       onLongPress: () {
         _showTransactionDeleteDialog(context, transaction);
       },
@@ -528,6 +550,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
   }
 
+
   /// Show delete dialog for installment transactions
   void _showInstallmentDeleteDialog(BuildContext context, v2.TransactionWithDetailsV2 transaction, Map<String, int?>? installmentInfo) {
     showCupertinoModalPopup<void>(
@@ -582,44 +605,31 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   /// Delete regular transaction
-  Future<void> _deleteTransaction(v2.TransactionWithDetailsV2 transaction) async {
-    try {
-      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
-      // Show loading indicator
+  void _deleteTransaction(v2.TransactionWithDetailsV2 transaction) {
+    final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+    
+    // Delete in background immediately
+    providerV2.deleteTransaction(transaction.id).then((success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('İşlem siliniyor...'),
-            duration: Duration(seconds: 1),
+          SnackBar(
+            content: Text(success ? 'İşlem silindi' : 'Silme işlemi başarısız'),
+            backgroundColor: success ? const Color(0xFF34C759) : Colors.red,
+            duration: const Duration(seconds: 1),
           ),
         );
       }
-      
-      // Delete transaction using provider (same as recent transactions)
-      final success = await providerV2.deleteTransaction(transaction.id);
-      
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('İşlem silindi'),
-            backgroundColor: Color(0xFF34C759),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('❌ Error deleting transaction: $e');
+    }).catchError((e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('İşlem silinirken hata oluştu: $e'),
             backgroundColor: const Color(0xFFEF4444),
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
-    }
+    });
   }
 
   /// Delete installment transaction
@@ -650,7 +660,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         );
       }
     } catch (e) {
-      debugPrint('❌ Error deleting installment transaction: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

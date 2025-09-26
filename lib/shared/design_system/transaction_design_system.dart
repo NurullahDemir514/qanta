@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../services/category_icon_service.dart';
+import '../../l10n/app_localizations.dart';
 
 /// **QANTA Transaction Design System**
 /// 
@@ -68,6 +69,18 @@ class TransactionDesignSystem {
       return accountName;
     }
     
+    // Clean up common patterns like "Bank - Bank Card Name"
+    String cleanedName = accountName;
+    
+    // Remove patterns like "Akbank - Akbank Kredi Kartı" -> "Akbank Kredi Kartı"
+    final duplicatePattern = RegExp(r'^([^-]+)\s*-\s*\1\s*(.*)$');
+    final duplicateMatch = duplicatePattern.firstMatch(cleanedName);
+    if (duplicateMatch != null) {
+      final bankName = duplicateMatch.group(1)!.trim();
+      final cardName = duplicateMatch.group(2)!.trim();
+      cleanedName = '$bankName $cardName';
+    }
+    
     // Common bank name replacements for shorter display
     final bankReplacements = {
       'Türkiye İş Bankası': 'İş Bankası',
@@ -87,8 +100,8 @@ class TransactionDesignSystem {
     
     // Try bank name replacements first
     for (final entry in bankReplacements.entries) {
-      if (accountName.contains(entry.key)) {
-        final shortened = accountName.replaceAll(entry.key, entry.value);
+      if (cleanedName.contains(entry.key)) {
+        final shortened = cleanedName.replaceAll(entry.key, entry.value);
         if (shortened.length <= maxLength) {
           return shortened;
         }
@@ -96,7 +109,7 @@ class TransactionDesignSystem {
     }
     
     // If still too long, truncate with ellipsis
-    return '${accountName.substring(0, maxLength - 1)}…';
+    return '${cleanedName.substring(0, maxLength - 1)}…';
   }
   
   /// Format transfer subtitle with shortened account names
@@ -104,6 +117,34 @@ class TransactionDesignSystem {
     final shortSource = shortenAccountName(sourceAccount, maxLength: maxLength);
     final shortTarget = shortenAccountName(targetAccount, maxLength: maxLength);
     return '$shortSource → $shortTarget';
+  }
+  
+  /// **CENTRALIZED CARD NAME LOGIC**
+  /// 
+  /// This method centralizes the card name formatting logic used across
+  /// all transaction display components (CardTransactionSection, RecentTransactionsSection, TransactionsScreen).
+  /// 
+  /// Parameters:
+  /// - [cardName]: The base card name (from widget.cardName or transaction.sourceAccountName)
+  /// - [transactionType]: The type of transaction (expense, income, transfer)
+  /// - [sourceAccountName]: Source account name for transfers
+  /// - [targetAccountName]: Target account name for transfers
+  /// 
+  /// Returns formatted card name based on transaction type.
+  static String formatCardName({
+    required String cardName,
+    required String transactionType,
+    String? sourceAccountName,
+    String? targetAccountName,
+  }) {
+    if (transactionType == 'transfer') {
+      final sourceAccount = sourceAccountName ?? 'Hesap';
+      final targetAccount = targetAccountName ?? 'Hesap';
+      return formatTransferSubtitle(sourceAccount, targetAccount);
+    } else {
+      // Shorten regular card names
+      return shortenAccountName(cardName);
+    }
   }
   
   // ==================== COLOR SYSTEM ====================
@@ -238,21 +279,6 @@ class TransactionDesignSystem {
     }
   }
   
-  /// Format transaction time
-  static String formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-    
-    if (difference.inDays == 0) {
-      return 'Bugün ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-    } else if (difference.inDays == 1) {
-      return 'Dün ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} gün önce';
-    } else {
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-    }
-  }
   
   /// Add installment info to title
   static String addInstallmentInfo(String title, int? currentInstallment, int? installmentCount) {
@@ -261,6 +287,8 @@ class TransactionDesignSystem {
     }
     return title;
   }
+  
+  
   
   // ==================== MAIN COMPONENTS ====================
   
@@ -280,6 +308,8 @@ class TransactionDesignSystem {
     VoidCallback? onLongPress,
     bool isFirst = false,
     bool isLast = false,
+    bool isPaid = false,
+    bool isInstallment = false, // New parameter
   }) {
     IconData icon;
     Color iconColor;
@@ -304,6 +334,7 @@ class TransactionDesignSystem {
       time: time,
       icon: icon,
       iconColor: iconColor,
+      isInstallment: isInstallment, // Pass installment flag
       backgroundColor: iconColor.withValues(alpha: 0.1),
       amountColor: getAmountColor(type, isDark),
       isDark: isDark,
@@ -311,6 +342,7 @@ class TransactionDesignSystem {
       onLongPress: onLongPress,
       isFirst: isFirst,
       isLast: isLast,
+      isPaid: isPaid,
     );
   }
   
@@ -363,6 +395,7 @@ class TransactionDesignSystem {
     VoidCallback? onLongPress,
     bool isFirst = false,
     bool isLast = false,
+    bool isPaid = false,
   }) {
     return TransactionItem(
       title: title,
@@ -378,6 +411,80 @@ class TransactionDesignSystem {
       onLongPress: onLongPress,
       isFirst: isFirst,
       isLast: isLast,
+      isPaid: isPaid,
+    );
+  }
+
+  /// Build transaction item from TransactionWithDetailsV2 (Firebase integrated)
+  static Widget buildTransactionItemFromV2({
+    required dynamic transaction, // TransactionWithDetailsV2
+    required bool isDark,
+    String? time,
+    IconData? categoryIconData,
+    Color? categoryColorData,
+    VoidCallback? onTap,
+    VoidCallback? onLongPress,
+    bool isFirst = false,
+    bool isLast = false,
+    bool isInstallment = false,
+    int? totalInstallments,
+    double? totalAmount,
+    double? monthlyAmount,
+  }) {
+    // Convert V2 transaction type to design system type
+    TransactionType transactionType;
+    switch (transaction.type.toString().split('.').last) {
+      case 'income':
+        transactionType = TransactionType.income;
+        break;
+      case 'expense':
+        transactionType = TransactionType.expense;
+        break;
+      case 'transfer':
+        transactionType = TransactionType.transfer;
+        break;
+      default:
+        transactionType = TransactionType.expense;
+    }
+
+    // Format amount
+    final amount = formatAmount(transaction.amount, transactionType);
+
+    // Use displayTime from transaction model (dynamic date formatting)
+    final displayTime = time ?? transaction.displayTime;
+
+    // Handle installment transactions
+    String displayTitle = transaction.displayTitle;
+    String displaySubtitle = transaction.displaySubtitle;
+    
+    // Check if this is a credit card installment transaction
+    bool isCreditCardInstallment = false;
+    if (isInstallment && totalInstallments != null) {
+      // Add installment indicator to title
+      displayTitle = '${transaction.displayTitle} ($totalInstallments Taksit)';
+      isCreditCardInstallment = true;
+    } else {
+      // Check if transaction description contains installment pattern
+      final hasInstallmentPattern = RegExp(r'\(\d+ taksit\)').hasMatch(transaction.description ?? '');
+      isCreditCardInstallment = hasInstallmentPattern;
+    }
+
+    // Use the new display getters from TransactionWithDetailsV2
+    return buildTransactionItem(
+      title: displayTitle,
+      subtitle: displaySubtitle,
+      amount: amount,
+      time: displayTime,
+      type: transactionType,
+      isDark: isDark,
+      categoryIconData: categoryIconData,
+      categoryColorData: categoryColorData,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      isFirst: isFirst,
+      isLast: isLast,
+      isPaid: transaction.isPaid,
+      isInstallment: isCreditCardInstallment, // Pass installment flag
     );
   }
 }
@@ -419,6 +526,8 @@ class TransactionItem extends StatelessWidget {
   final VoidCallback? onLongPress;
   final bool isFirst;
   final bool isLast;
+  final bool isPaid;
+  final bool isInstallment; // New parameter
 
   const TransactionItem({
     super.key,
@@ -435,6 +544,8 @@ class TransactionItem extends StatelessWidget {
     this.onLongPress,
     this.isFirst = false,
     this.isLast = false,
+    this.isPaid = false,
+    this.isInstallment = false, // New parameter
   });
 
   @override
@@ -481,15 +592,47 @@ class TransactionItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      fontSize: TransactionDesignSystem.titleFontSize,
-                      fontWeight: TransactionDesignSystem.titleFontWeight,
-                      color: TransactionDesignSystem.getTitleColor(isDark),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  // Title row with chip
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Title text (flexible to take available space)
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: GoogleFonts.inter(
+                            fontSize: TransactionDesignSystem.titleFontSize,
+                            fontWeight: TransactionDesignSystem.titleFontWeight,
+                            color: TransactionDesignSystem.getTitleColor(isDark),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isInstallment) ...[
+                        SizedBox(width: 6),
+                        // Taksitli chip
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.orange.shade800 : Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isDark ? Colors.orange.shade600 : Colors.orange.shade300,
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)?.installment ?? 'Taksitli',
+                            style: GoogleFonts.inter(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   SizedBox(height: TransactionDesignSystem.titleSubtitleSpacing),
                   Text(

@@ -118,7 +118,7 @@ class TransactionDetailModal extends StatelessWidget {
                       _buildDetailRow(
                         isDark: isDark,
                         label: l10n.time,
-                        value: _formatTime(transaction.date),
+                        value: _formatDate(transaction.date),
                       ),
                       _buildDetailRow(
                         isDark: isDark,
@@ -365,9 +365,6 @@ class TransactionDetailModal extends StatelessWidget {
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  String _formatTime(DateTime date) {
-    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-  }
 
   String _formatCurrency(double amount) {
     // TransactionDesignSystem'den binlik ayırıcı ile formatlama

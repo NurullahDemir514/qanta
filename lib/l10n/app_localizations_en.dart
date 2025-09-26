@@ -243,6 +243,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetUsed => 'Used';
 
   @override
+  String get remaining => 'left';
+
+  @override
+  String get installment => 'Installment';
+
+  @override
+  String get categoryHint => 'coffee, market, fuel...';
+
+  @override
+  String get noBudgetDefined => 'No budget defined yet';
+
+  @override
+  String get createBudgetDescription =>
+      'Create a budget to track your spending limits';
+
+  @override
+  String get createBudget => 'Create Budget';
+
+  @override
+  String get expenseLimitTracking => 'Expense Limit Tracking';
+
+  @override
+  String get manage => 'Manage';
+
+  @override
   String get thisMonthGrowth => 'this month';
 
   @override
@@ -1322,4 +1347,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreCategories => 'more categories';
+
+  @override
+  String get netWorth => 'Net Worth';
+
+  @override
+  String get positive => 'Positive';
+
+  @override
+  String get negative => 'Negative';
+
+  @override
+  String get totalAssets => 'Total Assets';
+
+  @override
+  String get totalDebts => 'Total Debts';
+
+  @override
+  String get availableCredit => 'Available Credit';
+
+  @override
+  String get netAmount => 'Net';
+
+  @override
+  String get transactionCount => 'Transactions';
 }

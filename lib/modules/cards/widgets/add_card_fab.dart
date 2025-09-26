@@ -262,111 +262,50 @@ class _AddCardFabState extends State<AddCardFab>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    
-    // Responsive değerler - TransactionFab ile aynı
     final isSmallScreen = screenWidth < 375;
-    
-    // Basitleştirilmiş konum hesaplama - TransactionFab'ın solundan 5px boşluk
-    final rightPosition = isSmallScreen ? 140.0 : 150.0; // 5px daha sağa kaydırıldı
-    
-    // TransactionFab ile aynı bottom position
+    final rightPosition = isSmallScreen ? 16.0 : 20.0;
     final bottomPosition = screenHeight < 700 ? 70.0 : 80.0;
-    
     return Positioned(
       right: rightPosition,
       bottom: bottomPosition,
-      child: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Opacity(
-              opacity: _opacityAnimation.value,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark
-                    ? const Color(0xFF1C1C1E).withOpacity(0.9) // TransactionFab ile aynı opacity
-                    : Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(28), // TransactionFab ile aynı radius
-                  boxShadow: [
-                    BoxShadow(
-                      color: isDark
-                        ? Colors.black.withOpacity(0.4) // TransactionFab ile aynı
-                        : Colors.black.withOpacity(0.1),
-                      blurRadius: 16, // TransactionFab ile aynı
-                      offset: const Offset(0, 4),
-                      spreadRadius: 0,
-                    ),
-                    BoxShadow(
-                      color: isDark
-                        ? Colors.black.withOpacity(0.2) // TransactionFab ile aynı
-                        : Colors.black.withOpacity(0.04),
-                      blurRadius: 4, // TransactionFab ile aynı
-                      offset: const Offset(0, 1),
-                      spreadRadius: 0,
-                    ),
-                  ],
-                  border: isDark
-                    ? Border.all(
-                        color: const Color(0xFF38383A).withOpacity(0.3), // TransactionFab ile aynı
-                        width: 0.5,
-                      )
-                    : Border.all(
-                        color: const Color(0xFFE5E5EA).withOpacity(0.3),
-                        width: 0.5,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: FadeTransition(
+          opacity: _opacityAnimation,
+          child: GestureDetector(
+            onTap: _onFabPressed,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
                       ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28), // TransactionFab ile aynı
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // TransactionFab ile aynı blur
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: _onFabPressed,
-                        borderRadius: BorderRadius.circular(28),
-                        splashColor: Colors.transparent,
-                        highlightColor: isDark
-                          ? Colors.white.withOpacity(0.05) // TransactionFab ile aynı
-                          : Colors.black.withOpacity(0.03),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isSmallScreen ? 16 : 20, // TransactionFab ile aynı
-                            vertical: isSmallScreen ? 12 : 14,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.credit_card_outlined,
-                                size: isSmallScreen ? 18 : 20, // TransactionFab ile aynı
-                                color: isDark 
-                                  ? const Color(0xFFFFFFFF)
-                                  : const Color(0xFF1C1C1E),
-                              ),
-                              SizedBox(width: isSmallScreen ? 8 : 10),
-                              Text(
-                                isSmallScreen ? 'Kart' : 'Kart Ekle',
-                                style: GoogleFonts.inter(
-                                  fontSize: isSmallScreen ? 13 : 14,
-                                  fontWeight: FontWeight.w500, // TransactionFab ile aynı
-                                  letterSpacing: -0.1, // TransactionFab ile aynı
-                                  color: isDark 
-                                    ? const Color(0xFFFFFFFF)
-                                    : const Color(0xFF1C1C1E),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    ],
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                      width: 1.2,
                     ),
+                  ),
+                  child: Icon(
+                    Icons.add_card_rounded,
+                    color: isDark ? Colors.white : Colors.black,
+                    size: 28,
                   ),
                 ),
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

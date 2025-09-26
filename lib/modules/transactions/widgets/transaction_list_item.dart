@@ -40,10 +40,8 @@ class TransactionListItem extends StatelessWidget {
     // Format amount with proper sign and currency
     final amount = design.TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
     
-    // Format time
-    final time = transaction.transactionDate != null 
-        ? design.TransactionDesignSystem.formatTime(transaction.transactionDate!)
-        : null;
+    // Use displayTime from transaction model (dynamic date formatting)
+    final time = transaction.displayTime;
 
     // Get category name
     final categoryName = category?.name ?? transaction.categoryName ?? 'Kategori';
@@ -71,15 +69,30 @@ class TransactionListItem extends StatelessWidget {
       );
     }
 
-    return design.TransactionDesignSystem.buildTransactionItem(
-      title: transaction.description,
-      subtitle: categoryName,
-      amount: amount,
+    // Taksitli ise taksit bilgisini ekle
+    String installmentText = '';
+    int? effectiveInstallmentCount = transaction.installmentCount;
+    int currentInstallment = 1;
+    if ((transaction.installmentCount == null || transaction.installmentCount! < 1) && transaction.installmentId != null) {
+      final info = Provider.of<UnifiedProviderV2>(context, listen: false).getInstallmentInfo(transaction.installmentId);
+      if (info != null) {
+        effectiveInstallmentCount = info['totalInstallments'];
+        currentInstallment = info['currentInstallment'] ?? 1;
+      }
+    }
+    if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
+      installmentText = '$currentInstallment/$effectiveInstallmentCount Taksit';
+    } else if (effectiveInstallmentCount == 1) {
+      installmentText = 'Peşin';
+    }
+    final subtitle = installmentText.isNotEmpty ? installmentText : categoryName;
+
+    return design.TransactionDesignSystem.buildTransactionItemFromV2(
+      transaction: transaction,
+      isDark: isDark,
       time: time,
-      type: transactionType,
       categoryIconData: categoryIcon,      // Use direct IconData
       categoryColorData: categoryColor,    // Use direct Color
-      isDark: isDark,
     );
   }
 } 

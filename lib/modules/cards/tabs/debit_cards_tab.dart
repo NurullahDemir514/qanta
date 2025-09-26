@@ -44,11 +44,12 @@ class _DebitCardsTabState extends State<DebitCardsTab> {
     // Card event listener'larını başlat
     _setupCardEventListeners();
     
-    // Provider referansını sakla - SADECE REFERANS, YÜKLEMİYORUZ
+    // Provider referansını sakla ve Firebase'den veri yükle
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _unifiedProviderV2 = UnifiedProviderV2.instance;
-        // _unifiedProviderV2!.loadDebitCards(); // ← KALDIRILDI: Event'ler bakiyeyi güncelliyor
+        // Load all data from Firebase
+        _unifiedProviderV2!.loadAllData();
         
         // Provider listener'ı ekle
         if (_providerListener != null) {
@@ -341,27 +342,33 @@ class _DebitCardsTabState extends State<DebitCardsTab> {
     HapticFeedback.heavyImpact();
     
     try {
+      
+      if (card['id'] == null || card['id'].toString().isEmpty) {
+        return;
+      }
+      
       final success = await _unifiedProviderV2!.deleteDebitCard(card['id']);
       
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Kart başarıyla silindi',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-            backgroundColor: const Color(0xFF34C759),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      }
+      // Başarı snackbarı kaldırıldı
+      // if (success && mounted) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text(
+      //         'Kart başarıyla silindi',
+      //         style: GoogleFonts.inter(
+      //           fontSize: 14,
+      //           fontWeight: FontWeight.w500,
+      //           color: Colors.white,
+      //         ),
+      //       ),
+      //       backgroundColor: const Color(0xFF34C759),
+      //       behavior: SnackBarBehavior.floating,
+      //       shape: RoundedRectangleBorder(
+      //         borderRadius: BorderRadius.circular(12),
+      //       ),
+      //     ),
+      //   );
+      // }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -438,7 +445,7 @@ class _DebitCardsTabState extends State<DebitCardsTab> {
             final isDark = Theme.of(context).brightness == Brightness.dark;
             
             return SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(), // Üst seviye scroll'a bırak
+              physics: const BouncingScrollPhysics(), // Transaction list'in arkadan kayabilmesi için
               child: Column(
                 children: [
                   // Banka kartları veya Empty State

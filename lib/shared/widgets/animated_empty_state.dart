@@ -9,6 +9,9 @@ class AnimatedEmptyState extends StatefulWidget {
   final Widget? actionButton;
   final double iconSize;
   final double containerSize;
+  final double titleFontSize;
+  final double descriptionFontSize;
+  final double verticalPadding;
 
   const AnimatedEmptyState({
     super.key,
@@ -19,6 +22,9 @@ class AnimatedEmptyState extends StatefulWidget {
     this.actionButton,
     this.iconSize = 40,
     this.containerSize = 80,
+    this.titleFontSize = 20,
+    this.descriptionFontSize = 14,
+    this.verticalPadding = 40,
   });
 
   @override
@@ -109,9 +115,9 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
     
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(top: 60),
+        padding: EdgeInsets.only(top: widget.verticalPadding),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Animated Icon Container
             ScaleTransition(
@@ -138,7 +144,7 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
               ),
             ),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
             
             // Animated Title
             FadeTransition(
@@ -148,7 +154,7 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
                 child: Text(
                   widget.title,
                   style: GoogleFonts.inter(
-                    fontSize: 20,
+                    fontSize: widget.titleFontSize,
                     fontWeight: FontWeight.w600,
                     color: isDark ? Colors.white : Colors.black,
                     letterSpacing: -0.4,
@@ -158,7 +164,7 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
               ),
             ),
             
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             
             // Animated Description
             FadeTransition(
@@ -170,7 +176,7 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
                   child: Text(
                     widget.description,
                     style: GoogleFonts.inter(
-                      fontSize: 14,
+                      fontSize: widget.descriptionFontSize,
                       color: isDark 
                         ? const Color(0xFF8E8E93)
                         : const Color(0xFF6D6D70),

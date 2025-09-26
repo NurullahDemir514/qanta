@@ -320,6 +320,38 @@
   "@budgetUsed": {
     "description": "Budget used label"
   },
+  "remaining": "kaldı",
+  "@remaining": {
+    "description": "Remaining amount label"
+  },
+  "installment": "Taksitli",
+  "@installment": {
+    "description": "Installment transaction chip text"
+  },
+  "categoryHint": "kahve, market, benzin...",
+  "@categoryHint": {
+    "description": "Category input hint text"
+  },
+  "noBudgetDefined": "Henüz bütçe tanımlanmamış",
+  "@noBudgetDefined": {
+    "description": "No budget defined message"
+  },
+  "createBudgetDescription": "Harcama limitlerinizi takip etmek için bütçe oluşturun",
+  "@createBudgetDescription": {
+    "description": "Create budget description"
+  },
+  "createBudget": "Bütçe Oluştur",
+  "@createBudget": {
+    "description": "Create budget button text"
+  },
+  "expenseLimitTracking": "Harcama Limit Takibi",
+  "@expenseLimitTracking": {
+    "description": "Expense limit tracking title"
+  },
+  "manage": "Yönet",
+  "@manage": {
+    "description": "Manage button text"
+  },
   "thisMonthGrowth": "bu ay",
   "@thisMonthGrowth": {
     "description": "This month growth indicator"
@@ -1759,5 +1791,13 @@
   "average": "Orta",
   "needsImprovement": "Geliştirilmeli",
   "dailyAverage": "Günlük Ortalama",
-  "moreCategories": "daha fazla kategori"
+  "moreCategories": "daha fazla kategori",
+  "netWorth": "Net Değer",
+  "positive": "Pozitif",
+  "negative": "Negatif",
+  "totalAssets": "Toplam Varlık",
+  "totalDebts": "Toplam Borç",
+  "availableCredit": "Kullanılabilir Kredi",
+  "netAmount": "Net",
+  "transactionCount": "İşlem"
 } 

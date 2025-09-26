@@ -3,8 +3,24 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/services/statement_service.dart';
 import '../../../core/services/transaction_service_v2.dart';
+import '../../../core/services/unified_transaction_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/models/statement_period.dart';
+import '../../../shared/models/transaction_model_v2.dart';
+
+/// Pending notification data model
+class PendingNotification {
+  final String key;
+  final Map<String, dynamic> data;
+  final String message;
+
+  PendingNotification({
+    required this.key,
+    required this.data,
+    required this.message,
+  });
+}
 
 /// Ana sayfada bildirimler bölümü
 class NotificationsSection extends StatefulWidget {
@@ -15,7 +31,7 @@ class NotificationsSection extends StatefulWidget {
 }
 
 class _NotificationsSectionState extends State<NotificationsSection> {
-  List<Map<String, dynamic>> _pendingReminders = [];
+  List<PendingNotification> _pendingReminders = [];
   bool _isLoading = true;
 
   @override
@@ -33,106 +49,84 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     });
   }
 
-    Future<void> _loadPendingReminders() async {
-    debugPrint('🔔 _loadPendingReminders called!');
+  Future<void> _loadPendingReminders() async {
     try {
-      final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+      final upcomingNotifications = <PendingNotification>[];
       final now = DateTime.now();
-      final upcomingNotifications = <Map<String, dynamic>>[];
-       
-       // Önce raw account verilerini kontrol et
-       final rawCreditCards = provider.accounts.where((a) => a.type.toString() == 'AccountType.credit').toList();
-       debugPrint('🔔 Raw credit cards count: ${rawCreditCards.length}');
-       for (final card in rawCreditCards) {
-         debugPrint('🔔 Raw card: ${card.name}, balance: ${card.balance}, creditLimit: ${card.creditLimit}, available: ${card.availableAmount}');
-       }
-       
-       // Tüm kredi kartlarını kontrol et
-       for (final creditCard in provider.creditCards) {
-         final cardId = creditCard['id'] as String;
-         final cardName = creditCard['cardName'] as String? ?? creditCard['bankName'] as String? ?? 'Kredi Kartı';
-         final statementDay = creditCard['statementDay'] as int? ?? 1;
-         final totalDebt = creditCard['totalDebt'] as double? ?? 0.0;
-         final creditLimit = creditCard['creditLimit'] as double? ?? 0.0;
-         final availableLimit = creditCard['availableLimit'] as double? ?? 0.0;
-         
-         // Mevcut dönem için son ödeme tarihini hesapla
-         final currentPeriod = StatementService.getCurrentStatementPeriod(statementDay);
-         
-         // Bu dönem borcunu hesapla (mevcut ekstre dönemindeki harcamalar)
-         final debtAmount = await _calculateCurrentPeriodDebt(cardId, currentPeriod);
-         
-         debugPrint('🔔 Credit card data: cardId=$cardId, currentPeriodDebt=$debtAmount');
-         
-         final daysUntilDue = currentPeriod.dueDate.difference(now).inDays;
-         
-         debugPrint('🔔 Checking card: $cardName, dueDate: ${currentPeriod.dueDate}, daysUntil: $daysUntilDue, debt: $debtAmount, totalDebt: $totalDebt, creditLimit: $creditLimit');
+      
+      // Get all credit cards from provider
+      final providerV2 = UnifiedProviderV2.instance;
+      final creditCards = providerV2.creditCards;
+      
+      // Check each credit card for upcoming due dates
+      for (final creditCard in creditCards) {
+        final cardId = creditCard['id'] as String;
+        final cardName = creditCard['cardName'] as String? ?? creditCard['bankName'] as String? ?? 'Kredi Kartı';
+        final statementDay = creditCard['statementDay'] as int? ?? 1;
         
-        // 7 gün içinde vadesi dolacak kartları bildirim olarak ekle
+        // Calculate current period due date
+        final currentPeriod = StatementService.getCurrentStatementPeriod(statementDay);
+        
+        // Calculate current period debt
+        final debtAmount = await _calculateCurrentPeriodDebt(cardId, currentPeriod);
+        
+        // Calculate days until due date
+        final today = DateTime(now.year, now.month, now.day);
+        final dueDate = DateTime(currentPeriod.dueDate.year, currentPeriod.dueDate.month, currentPeriod.dueDate.day);
+        final daysUntilDue = dueDate.difference(today).inDays;
+        
+        // Add notifications for cards with due dates within 7 days
         if (daysUntilDue >= 0 && daysUntilDue <= 7) {
           String type;
-          String shortMessage;
           int urgencyLevel;
           
           if (daysUntilDue == 0) {
             type = 'due_date';
-            shortMessage = 'Bugün son ödeme tarihi';
             urgencyLevel = 3;
           } else if (daysUntilDue == 1) {
             type = '1_day_before';
-            shortMessage = 'Yarın son ödeme';
             urgencyLevel = 2;
           } else if (daysUntilDue <= 3) {
             type = '3_days_before';
-            shortMessage = '$daysUntilDue gün sonra vade';
             urgencyLevel = 1;
           } else {
             type = '7_days_before';
-            shortMessage = '$daysUntilDue gün sonra vade';
             urgencyLevel = 1;
           }
           
-                     upcomingNotifications.add({
-             'key': 'upcoming_${cardId}_${currentPeriod.statementDate.toIso8601String()}',
-             'data': {
-               'cardId': cardId,
-               'cardName': cardName,
-               'type': type,
-               'dueDate': currentPeriod.dueDate.toIso8601String(),
-               'dueDateText': currentPeriod.dueDateText,
-               'urgencyLevel': urgencyLevel,
-               'shortMessage': shortMessage,
-               'debtAmount': debtAmount,
-             },
-             'message': _getNotificationMessage(type, cardName, daysUntilDue),
-           });
-          
-          debugPrint('🔔 Added upcoming notification: $cardName - $type ($daysUntilDue days)');
+          upcomingNotifications.add(PendingNotification(
+            key: 'upcoming_${cardId}_${currentPeriod.statementDate.toIso8601String()}',
+            data: {
+              'cardId': cardId,
+              'cardName': cardName,
+              'type': type,
+              'dueDate': currentPeriod.dueDate.toIso8601String(),
+              'dueDateText': currentPeriod.dueDateText,
+              'urgencyLevel': urgencyLevel,
+              'debtAmount': debtAmount,
+              'daysUntilDue': daysUntilDue,
+            },
+            message: _getNotificationMessage(type, cardName, daysUntilDue),
+          ));
         }
       }
       
-      // Urgency level'a göre sırala (en acil önce)
+      // Sort by urgency level (most urgent first)
       upcomingNotifications.sort((a, b) {
-        final aUrgency = a['data']['urgencyLevel'] as int;
-        final bUrgency = b['data']['urgencyLevel'] as int;
-        return bUrgency.compareTo(aUrgency); // Descending order
+        final aUrgency = a.data['urgencyLevel'] as int;
+        final bUrgency = b.data['urgencyLevel'] as int;
+        return bUrgency.compareTo(aUrgency);
       });
       
-      debugPrint('🔔 Total upcoming notifications: ${upcomingNotifications.length}');
+      setState(() {
+        _pendingReminders = upcomingNotifications;
+        _isLoading = false;
+      });
       
-      if (mounted) {
-        setState(() {
-          _pendingReminders = upcomingNotifications;
-          _isLoading = false;
-        });
-      }
     } catch (e) {
-      debugPrint('Error loading upcoming notifications: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
   
@@ -154,37 +148,27 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   /// Mevcut ekstre dönemindeki harcamaları hesapla
   Future<double> _calculateCurrentPeriodDebt(String cardId, StatementPeriod period) async {
     try {
-      // TransactionServiceV2 kullanarak bu kartın tüm işlemlerini çek
-      final allTransactions = await TransactionServiceV2.getTransactionsByAccount(
+      // UnifiedTransactionService kullanarak bu kartın tüm işlemlerini çek
+      final allTransactions = await UnifiedTransactionService.getTransactionsByAccount(
         accountId: cardId,
-        limit: 1000,
       );
       
       // Bu dönemdeki işlemleri filtrele
       final periodTransactions = allTransactions.where((transaction) {
-        final transactionDate = transaction.transactionDate;
-        return transactionDate.isAfter(period.startDate.subtract(const Duration(days: 1))) &&
-               transactionDate.isBefore(period.endDate.add(const Duration(days: 1)));
+        return transaction.transactionDate.isAfter(period.startDate.subtract(const Duration(days: 1))) &&
+               transaction.transactionDate.isBefore(period.endDate.add(const Duration(days: 1)));
       }).toList();
       
       // Sadece expense işlemlerini topla (gider)
       double totalExpenses = 0.0;
       for (final transaction in periodTransactions) {
-        if (transaction.type.toString() == 'TransactionType.expense') {
+        if (transaction.type == TransactionType.expense) {
           totalExpenses += transaction.amount;
         }
       }
       
-             debugPrint('🔔 Period debt calculation: cardId=$cardId, allTransactions=${allTransactions.length}, periodTransactions=${periodTransactions.length}, totalExpenses=$totalExpenses');
-       debugPrint('🔔 Period: ${period.startDate} to ${period.endDate}');
-       
-       // Debug: period transactions details
-       for (final transaction in periodTransactions) {
-         debugPrint('🔔 Period transaction: ${transaction.description}, amount: ${transaction.amount}, type: ${transaction.type}, date: ${transaction.transactionDate}');
-       }
       return totalExpenses;
     } catch (e) {
-      debugPrint('🔔 Error calculating period debt: $e');
       return 0.0;
     }
   }
@@ -199,23 +183,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UnifiedProviderV2>(
-      builder: (context, provider, child) {
-        final l10n = AppLocalizations.of(context)!;
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        
-        if (_isLoading) {
-          return const SizedBox.shrink();
-        }
-        
-        // Debug: bildirim durumunu kontrol et
-        debugPrint('🔔 NotificationsSection build - isLoading: $_isLoading, reminders count: ${_pendingReminders.length}');
-        
-        // Eğer bildirim yoksa gizle
-        if (_pendingReminders.isEmpty) {
-          debugPrint('🔔 NotificationsSection hidden - no reminders');
-          return const SizedBox.shrink();
-        }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    if (_isLoading) {
+      return const SizedBox.shrink();
+    }
+    
+    if (_pendingReminders.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,8 +241,6 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               ),
         ),
       ],
-    );
-      },
     );
   }
 
@@ -334,17 +308,14 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     );
   }
 
-  Widget _buildNotificationCard(Map<String, dynamic> reminder, bool isDark, int index) {
-    final data = reminder['data'] as Map<String, dynamic>? ?? {};
+  Widget _buildNotificationCard(PendingNotification reminder, bool isDark, int index) {
+    final data = reminder.data;
     final cardId = data['cardId'] as String? ?? '';
     final type = data['type'] as String? ?? '';
     final cardName = data['cardName'] as String? ?? 'Kredi Kartı';
     final urgencyLevel = data['urgencyLevel'] as int? ?? 1;
-    final shortMessage = data['shortMessage'] as String? ?? 'Ekstre hatırlatıcısı';
     final debtAmount = data['debtAmount'] as double? ?? 0.0;
-    
-    // Debug: veri içeriğini kontrol et
-    debugPrint('🔔 Card ID: $cardId, Card name: $cardName, Type: $type, Urgency: $urgencyLevel, Debt: $debtAmount');
+    final daysUntilDue = data['daysUntilDue'] as int? ?? 0;
     
     // Urgency rengini belirle
     Color urgencyColor;
@@ -397,7 +368,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                      padding: const EdgeInsets.fromLTRB(12, 12, 8, 6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -426,7 +397,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      urgencyLevel == 3 ? 'Acil' : urgencyLevel == 2 ? 'Önemli' : 'Bilgi',
+                                             daysUntilDue == 0 ? 'Bugün' : 'Son $daysUntilDue Gün',
                       style: GoogleFonts.inter(
                         fontSize: 9,
                         fontWeight: FontWeight.w600,
@@ -453,42 +424,36 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               
               // Debt amount
               const SizedBox(height: 2),
+              Row(
+                children: [
+                  Icon(
+                    debtAmount > 0 ? Icons.account_balance_wallet_outlined : Icons.check_circle_outline,
+                    size: 16,
+                    color: debtAmount > 0 ? Color(0xFFFF453A) : Color(0xFF4CAF50),
+                  ),
+                  const SizedBox(width: 6),
               Text(
-                'Ekstre Borcu: ₺${debtAmount.toStringAsFixed(0)}',
+                    debtAmount > 0
+                        ? 'Ekstre Borcu: ₺${debtAmount.toStringAsFixed(0)}'
+                        : 'Borç yok',
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFFFF453A), // Red color for debt
+                      color: debtAmount > 0 ? const Color(0xFFFF453A) : const Color(0xFF4CAF50),
                 ),
-              ),
-              
-              const SizedBox(height: 4),
-              
-              // Short message
-              Flexible(
-                child: Text(
-                  shortMessage,
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                    color: isDark 
-                      ? const Color(0xFF8E8E93)
-                      : const Color(0xFF6D6D70),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                ],
               ),
-            ],
+              ],
           ),
         ),
       ),
     );
   }
 
-  void _showNotificationDetail(Map<String, dynamic> reminder) {
-    final data = reminder['data'] as Map<String, dynamic>? ?? {};
-    final message = reminder['message'] as String? ?? '';
+  void _showNotificationDetail(PendingNotification reminder) {
+    final data = reminder.data;
+    final message = reminder.message;
     final cardId = data['cardId'] as String? ?? '';
     final cardName = data['cardName'] as String? ?? 'Kredi Kartı';
     final dueDateString = data['dueDate'] as String? ?? '';
@@ -620,19 +585,18 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   ),
                   child: Column(
                     children: [
-                      if (debtAmount > 0) ...[
                         Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFF453A).withValues(alpha: 0.1),
+                              color: (debtAmount > 0 ? const Color(0xFFFF453A) : const Color(0xFF4CAF50)).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Icon(
-                                Icons.account_balance_wallet_outlined,
+                            child: Icon(
+                              debtAmount > 0 ? Icons.account_balance_wallet_outlined : Icons.check_circle_outline,
                                 size: 16,
-                                color: Color(0xFFFF453A),
+                              color: debtAmount > 0 ? const Color(0xFFFF453A) : const Color(0xFF4CAF50),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -651,33 +615,33 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                                     ),
                                   ),
                                   Text(
-                                    'Borç: ${debtAmount.toStringAsFixed(0)} TL',
+                                  debtAmount > 0
+                                      ? 'Borç: ${debtAmount.toStringAsFixed(0)} TL'
+                                      : 'Borç yok',
                                     style: GoogleFonts.inter(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: const Color(0xFFFF453A),
+                                    color: debtAmount > 0 ? const Color(0xFFFF453A) : const Color(0xFF4CAF50),
                                     ),
                                   ),
+                                const SizedBox(height: 4),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        
-                        if (dueDate != null) ...[
+                      if (debtAmount > 0 && dueDate != null) ...[
                           const SizedBox(height: 12),
                           const Divider(height: 1),
                           const SizedBox(height: 12),
                         ],
-                      ],
-                      
                       if (dueDate != null) ...[
                         Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                                color: const Color(0xFF007AFF).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: const Icon(
@@ -837,11 +801,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     );
   }
 
-  Widget _buildDetailedNotificationItem(Map<String, dynamic> reminder, bool isDark) {
-    final data = reminder['data'] as Map<String, dynamic>? ?? {};
+  Widget _buildDetailedNotificationItem(PendingNotification reminder, bool isDark) {
+    final data = reminder.data;
     final urgencyLevel = data['urgencyLevel'] as int? ?? 1;
     final cardName = data['cardName'] as String? ?? 'Kredi Kartı';
-    final message = reminder['message'] as String? ?? '';
+    final message = reminder.message;
     final dueDateString = data['dueDate'] as String? ?? '';
     final dueDate = dueDateString.isNotEmpty ? DateTime.tryParse(dueDateString) : null;
     final debtAmount = data['debtAmount'] as double? ?? 0.0;

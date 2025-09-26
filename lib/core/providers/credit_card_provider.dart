@@ -58,7 +58,6 @@ class CreditCardProvider extends ChangeNotifier {
     try {
       // Legacy table doesn't exist anymore, gracefully handle
       _creditCards = [];
-      debugPrint('💳 Legacy credit card provider: No data (using v2 provider)');
     } catch (e) {
       debugPrint('CreditCardProvider Error: Kredi kartları yüklenemedi: $e');
       _setError(e.toString());
@@ -84,7 +83,6 @@ class CreditCardProvider extends ChangeNotifier {
 
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy credit card creation disabled - use v2 provider');
       throw Exception('Legacy credit card creation disabled - use v2 provider');
     } catch (e) {
       debugPrint('Kredi kartı eklenirken hata: $e');
@@ -110,7 +108,6 @@ class CreditCardProvider extends ChangeNotifier {
 
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy credit card update disabled - use v2 provider');
       return false;
     } catch (e) {
       debugPrint('Kredi kartı güncellenirken hata: $e');
@@ -128,7 +125,6 @@ class CreditCardProvider extends ChangeNotifier {
 
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy credit card deletion disabled - use v2 provider');
       return false;
     } catch (e) {
       debugPrint('Kredi kartı silinirken hata: $e');
@@ -155,10 +151,8 @@ class CreditCardProvider extends ChangeNotifier {
   }) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy payment disabled - use v2 provider');
       return false;
     } catch (e) {
-      debugPrint('Ödeme işlemi sırasında hata: $e');
       _setError(e.toString());
       return false;
     }
@@ -171,10 +165,8 @@ class CreditCardProvider extends ChangeNotifier {
   }) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy debt payment disabled - use v2 provider');
       return false;
     } catch (e) {
-      debugPrint('Borç ödeme işlemi sırasında hata: $e');
       _setError(e.toString());
       return false;
     }
@@ -192,7 +184,6 @@ class CreditCardProvider extends ChangeNotifier {
   }) async {
     try {
       // Legacy functionality disabled
-      debugPrint('💳 Legacy balance update disabled - use v2 provider');
       return false;
     } catch (e) {
       debugPrint('Bakiye güncellenirken hata: $e');

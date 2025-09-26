@@ -340,6 +340,7 @@ class _IOSTransactionListItem extends StatelessWidget {
       onLongPress: transaction.onLongPress,
       isFirst: isFirst,
       isLast: isLast,
+      isPaid: false, // CardTransactionModel doesn't have isPaid field yet
     );
   }
 }

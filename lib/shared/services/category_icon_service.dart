@@ -425,6 +425,22 @@ class CategoryIconService {
     'other': Icons.tag,
     'category': Icons.tag,
     'diğer': Icons.tag,
+    // === CUSTOM/NEW CATEGORIES ===
+    'pet_food': Icons.pets_rounded,
+    'evcil_hayvan_maması': Icons.pets_rounded,
+    'toy': Icons.toys_rounded,
+    'oyuncak': Icons.toys_rounded,
+    'hairdresser': Icons.content_cut_rounded,
+    'psychologist': Icons.psychology_rounded,
+    'natural_gas': Icons.fireplace_rounded,
+    'cargo': Icons.local_shipping_rounded,
+    'office': Icons.apartment_rounded,
+    'cleaning_supplies': Icons.cleaning_services_rounded,
+    'gift_item': Icons.card_giftcard_rounded,
+    'fish': Icons.set_meal_rounded,
+    'laundry': Icons.local_laundry_service_rounded,
+    'home_renovation': Icons.handyman_rounded,
+    'pet_vet': Icons.local_hospital_rounded,
   };
 
   /// Get icon data from icon name string with fast map lookup
@@ -456,7 +472,6 @@ class CategoryIconService {
     final icon = _iconMap[normalizedName];
     
     if (icon == null && logInvalid) {
-      debugPrint('⚠️ CategoryIconService: Unknown icon name "$iconName"');
     }
     
     return icon ?? Icons.tag;
@@ -527,7 +542,7 @@ class CategoryIconService {
     'hediye': Color(0xFF22C55E),
     'rental': Color(0xFF059669),              // Teal green
     'kira': Color(0xFF059669),
-    'freelance': Color(0xFF34D399),           // Light green
+    'freelance': Color(0xFF4CAF50),           // Success green
     'bonus': Color(0xFF6EE7B7),               // Very light green
     'commission': Color(0xFF10B981),          // Emerald
     'komisyon': Color(0xFF10B981),
@@ -720,6 +735,22 @@ class CategoryIconService {
     'default': Color(0xFF6B7280),             // Cool gray
     'other': Color(0xFF6B7280),
     'diğer': Color(0xFF6B7280),
+    // === CUSTOM/NEW CATEGORY COLORS ===
+    'pet_food': Color(0xFF8B5CF6),
+    'evcil_hayvan_maması': Color(0xFF8B5CF6),
+    'toy': Color(0xFFF59E42),
+    'oyuncak': Color(0xFFF59E42),
+    'hairdresser': Color(0xFFEC4899),
+    'psychologist': Color(0xFF6366F1),
+    'natural_gas': Color(0xFF60A5FA),
+    'cargo': Color(0xFF6B7280),
+    'office': Color(0xFF6366F1),
+    'cleaning_supplies': Color(0xFF10B981),
+    'gift_item': Color(0xFF22C55E),
+    'fish': Color(0xFF0EA5E9),
+    'laundry': Color(0xFF60A5FA),
+    'home_renovation': Color(0xFFF59E42),
+    'pet_vet': Color(0xFF10B981),
   };
   
   /// Get color from centralized color map

@@ -31,9 +31,9 @@ class QuickNotesPage extends StatefulWidget {
 }
 
 class _QuickNotesPageState extends State<QuickNotesPage> {
-  List<QuickNote> _allNotes = [];
-  List<QuickNote> _pendingNotes = [];
-  List<QuickNote> _processedNotes = [];
+  List<Map<String, dynamic>> _allNotes = [];
+  List<Map<String, dynamic>> _pendingNotes = [];
+  List<Map<String, dynamic>> _processedNotes = [];
   bool _isLoading = false;
   bool _showProcessed = false;
   final TextEditingController _quickAddController = TextEditingController();
@@ -54,9 +54,32 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
     super.initState();
     if (widget.notes != null) {
       // Eğer notes parametresi varsa, onları kullan
-      _pendingNotes = widget.notes!.where((note) => !note.isProcessed).toList();
-      _processedNotes = widget.notes!.where((note) => note.isProcessed).toList();
-      _allNotes = widget.notes!;
+      // TODO: Convert QuickNote to Map<String, dynamic>
+      debugPrint('QuickNotesPage: Converting QuickNote to Map<String, dynamic>');
+      _pendingNotes = widget.notes!.where((note) => !note.isProcessed).map((note) => {
+        'id': note.id,
+        'content': note.content,
+        'type': note.type.toString().split('.').last,
+        'image_path': note.imagePath,
+        'is_processed': note.isProcessed,
+        'created_at': note.createdAt.toIso8601String(),
+      }).toList();
+      _processedNotes = widget.notes!.where((note) => note.isProcessed).map((note) => {
+        'id': note.id,
+        'content': note.content,
+        'type': note.type.toString().split('.').last,
+        'image_path': note.imagePath,
+        'is_processed': note.isProcessed,
+        'created_at': note.createdAt.toIso8601String(),
+      }).toList();
+      _allNotes = widget.notes!.map((note) => {
+        'id': note.id,
+        'content': note.content,
+        'type': note.type.toString().split('.').last,
+        'image_path': note.imagePath,
+        'is_processed': note.isProcessed,
+        'created_at': note.createdAt.toIso8601String(),
+      }).toList();
     }
     _loadNotes();
     _initSpeech();
@@ -76,16 +99,16 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
       // Load from database only
       final allNotes = await QuickNoteService.getUserQuickNotes();
       final pendingNotes = await QuickNoteService.getPendingNotes();
-      final processedNotes = allNotes.where((note) => note.isProcessed).toList();
+      final processedNotes = allNotes.where((note) => note['is_processed'] == true).toList();
       
       // Sort by creation date (latest first)
-      pendingNotes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      processedNotes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      pendingNotes.sort((a, b) => DateTime.parse(b['created_at']).compareTo(DateTime.parse(a['created_at'])));
+      processedNotes.sort((a, b) => DateTime.parse(b['created_at']).compareTo(DateTime.parse(a['created_at'])));
       
       setState(() {
-        _allNotes = allNotes;
-        _pendingNotes = pendingNotes;
-        _processedNotes = processedNotes;
+        _allNotes = allNotes.cast<Map<String, dynamic>>();
+        _pendingNotes = pendingNotes.cast<Map<String, dynamic>>();
+        _processedNotes = processedNotes.cast<Map<String, dynamic>>();
       });
     } catch (e) {
       // Error loading notes
@@ -100,10 +123,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return WillPopScope(
-      onWillPop: () async {
-        GoRouter.of(context).go('/home');
-        return false; // Prevent default pop behavior
-      },
+      onWillPop: () async => true,
       child: Scaffold(
         backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
         appBar: AppBar(
@@ -119,7 +139,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
             ),
           ),
           leading: IconButton(
-            onPressed: () => GoRouter.of(context).go('/home'),
+            onPressed: () => context.pop(),
             icon: Icon(
               Icons.arrow_back_ios_rounded,
               color: isDark ? Colors.white : Colors.black,
@@ -144,14 +164,14 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
                       if (_showProcessed)
                         _buildNotesSection(
                           title: 'İşleme Dönüştürülen Notlar',
-                          notes: _processedNotes,
+                          notes: _processedNotes.cast<QuickNote>(),
                           isDark: isDark,
                           emptyMessage: 'Henüz işleme dönüştürülen not yok',
                         )
                       else
                         _buildNotesSection(
                           title: 'Bekleyen Notlar',
-                          notes: _pendingNotes,
+                          notes: _pendingNotes.cast<QuickNote>(),
                           isDark: isDark,
                           emptyMessage: 'Henüz bekleyen not yok\nAşağıdaki alandan hızlıca not ekleyin',
                         ),
@@ -961,7 +981,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
     try {
       await QuickNoteService.addQuickNote(
         content: content,
-        type: QuickNoteType.text,
+        type: 'text',
       );
       
       // Bildirim güncelle
@@ -1181,7 +1201,6 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
         );
       }
     } catch (e) {
-      debugPrint('❌ Not silinirken hata: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1285,7 +1304,6 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
         final extractedAmount = _extractAmountFromNote(note.content);
         final extractedCategory = _extractCategoryFromNote(note.content);
         
-        debugPrint('🔧 QuickNotes - Extracting data from: "${note.content}"');
         debugPrint('  - Extracted amount: $extractedAmount');
         debugPrint('  - Extracted category: "$extractedCategory"');
         
@@ -1317,21 +1335,16 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
             .join('&');
         final fullUrl = '$route?$queryString';
         
-        debugPrint('🔧 QuickNotes - Final URL: $fullUrl');
             
         // Form sayfasına git ve not içeriğini description olarak gönder
         if (mounted) {
-          debugPrint('🔧 Navigation to: $fullUrl');
           
           final result = await context.push(fullUrl);
           
           // Eğer transaction başarıyla kaydedildiyse (transaction ID döndüyse)
           if (result != null && result is String) {
             // Notu işlenmiş olarak işaretle ve transaction ID'sini kaydet
-            await QuickNoteService.markNoteAsProcessed(
-              noteId: note.id,
-              transactionId: result,
-            );
+            await QuickNoteService.markNoteAsProcessed(note.id);
             
             // Notları yenile
             await _loadNotes();
@@ -1359,7 +1372,6 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
         }
       }
     } catch (e) {
-      debugPrint('❌ Not dönüştürülürken hata: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1456,7 +1468,6 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
           );
         }
       } catch (e) {
-        debugPrint('❌ Not silinirken hata: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -1618,7 +1629,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
       
       await QuickNoteService.addQuickNote(
         content: noteContent,
-        type: noteType,
+        type: noteType.toString().split('.').last,
         imagePath: _selectedImage?.path,
       );
       
@@ -1863,7 +1874,6 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
         _quickAddFocus.requestFocus();
       }
     } catch (e) {
-      debugPrint('❌ Fotoğraf seçilirken hata: $e');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1908,7 +1918,6 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
       // Format: "45,00 ₺ • Çay • Kuveyt Türk Banka Kartı • 20.01.2025 14:30"
       return '$amount ₺ • $categoryName • $accountName • $date';
     } catch (e) {
-      debugPrint('❌ Transaction details error: $e');
       return null;
     }
   }
@@ -1943,7 +1952,6 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
       
       return null;
     } catch (e) {
-      debugPrint('❌ Amount extraction error: $e');
       return null;
     }
   }
@@ -2006,7 +2014,6 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
       
       return null;
     } catch (e) {
-      debugPrint('❌ Category extraction error: $e');
       return null;
     }
   }

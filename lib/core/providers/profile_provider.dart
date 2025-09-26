@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../services/supabase_service.dart';
+import '../services/firebase_auth_service.dart';
 import '../services/profile_image_service.dart';
 
 class ProfileProvider extends ChangeNotifier {
@@ -21,15 +21,14 @@ class ProfileProvider extends ChangeNotifier {
   /// Profil verilerini yükle
   Future<void> _loadProfileData() async {
     try {
-      final user = SupabaseService.instance.currentUser;
+      final user = FirebaseAuthService.currentUser;
       if (user != null) {
-        _userName = user.userMetadata?['full_name'] as String?;
+        _userName = user.displayName;
         _userEmail = user.email;
         _profileImageUrl = ProfileImageService.instance.getProfileImageUrl();
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('❌ Error loading profile data: $e');
     }
   }
 
@@ -47,7 +46,6 @@ class ProfileProvider extends ChangeNotifier {
     try {
       await _loadProfileData();
     } catch (e) {
-      debugPrint('❌ Error refreshing profile data: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -74,4 +72,4 @@ class ProfileProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
-} 
+}

@@ -542,6 +542,54 @@ abstract class AppLocalizations {
   /// **'Used'**
   String get budgetUsed;
 
+  /// Remaining amount label
+  ///
+  /// In en, this message translates to:
+  /// **'left'**
+  String get remaining;
+
+  /// Installment transaction chip text
+  ///
+  /// In en, this message translates to:
+  /// **'Installment'**
+  String get installment;
+
+  /// Category input hint text
+  ///
+  /// In en, this message translates to:
+  /// **'coffee, market, fuel...'**
+  String get categoryHint;
+
+  /// No budget defined message
+  ///
+  /// In en, this message translates to:
+  /// **'No budget defined yet'**
+  String get noBudgetDefined;
+
+  /// Create budget description
+  ///
+  /// In en, this message translates to:
+  /// **'Create a budget to track your spending limits'**
+  String get createBudgetDescription;
+
+  /// Create budget button text
+  ///
+  /// In en, this message translates to:
+  /// **'Create Budget'**
+  String get createBudget;
+
+  /// Expense limit tracking title
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Limit Tracking'**
+  String get expenseLimitTracking;
+
+  /// Manage button text
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
   /// This month growth indicator
   ///
   /// In en, this message translates to:
@@ -2659,6 +2707,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'more categories'**
   String get moreCategories;
+
+  /// No description provided for @netWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Worth'**
+  String get netWorth;
+
+  /// No description provided for @positive.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive'**
+  String get positive;
+
+  /// No description provided for @negative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative'**
+  String get negative;
+
+  /// No description provided for @totalAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Assets'**
+  String get totalAssets;
+
+  /// No description provided for @totalDebts.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Debts'**
+  String get totalDebts;
+
+  /// No description provided for @availableCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Credit'**
+  String get availableCredit;
+
+  /// No description provided for @netAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get netAmount;
+
+  /// No description provided for @transactionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionCount;
 }
 
 class _AppLocalizationsDelegate

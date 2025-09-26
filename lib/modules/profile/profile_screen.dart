@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../core/theme/theme_provider.dart';
-import '../../core/services/supabase_service.dart';
+import '../../core/services/firebase_auth_service.dart';
 import '../../core/services/profile_image_service.dart';
 import '../../core/services/quick_note_notification_service.dart';
 import '../../core/providers/unified_provider_v2.dart';
@@ -24,6 +24,7 @@ import '../settings/pages/terms_of_service_page.dart';
 import '../settings/pages/support_page.dart';
 import '../settings/pages/change_password_page.dart';
 import '../settings/pages/faq_page.dart';
+import '../../core/services/reminder_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -47,13 +48,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await ProfileImageService.instance.ensureBucketExists();
     } catch (e) {
-      debugPrint('❌ Error ensuring bucket exists: $e');
     }
   }
 
   Future<void> _showImageSourceActionSheet() async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -106,10 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
           child: Text(
             'İptal',
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -131,7 +128,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
 
         final imageFile = File(image.path);
-        final newImageUrl = await ProfileImageService.instance.uploadProfileImage(imageFile);
+        final newImageUrl = await ProfileImageService.instance
+            .uploadProfileImage(imageFile.path);
 
         if (mounted) {
           setState(() {
@@ -139,16 +137,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           });
 
           // ProfileProvider'ı güncelle
-          final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-          await profileProvider.updateProfileImage(newImageUrl);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-            content: Text('Profil fotoğrafı güncellendi'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
+          final profileProvider = Provider.of<ProfileProvider>(
+            context,
+            listen: false,
           );
+          await profileProvider.updateProfileImage(newImageUrl);
         }
       }
     } catch (e) {
@@ -182,16 +175,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
 
         // ProfileProvider'ı güncelle
-        final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-        await profileProvider.updateProfileImage(null);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil fotoğrafı silindi'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
+        final profileProvider = Provider.of<ProfileProvider>(
+          context,
+          listen: false,
         );
+        await profileProvider.updateProfileImage(null);
       }
     } catch (e) {
       if (mounted) {
@@ -213,7 +201,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
         final userName = profileProvider.userName ?? l10n.defaultUserName;
@@ -225,230 +212,249 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onRefresh: () async {
             await profileProvider.refresh();
           },
-          body: SliverList(
-            delegate: SliverChildListDelegate([
-              // Profile Header
-              _buildProfileHeader(context, l10n, userName, userEmail, profileImageUrl),
-              const SizedBox(height: 32),
-              
-              // Personal Information Section
-              ProfileSection(
-                title: l10n.personalInfo,
-                children: [
-                  ProfileItem(
-                    icon: Icons.person_outline,
-                    title: l10n.editProfile,
-                    onTap: () {
-                      // TODO: Navigate to edit profile
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              
-              // Preferences Section
-              ProfileSection(
-                title: l10n.preferences,
-                children: [
-                  Consumer<ThemeProvider>(
-                    builder: (context, themeProvider, child) {
-                      return ProfileItem(
-                        icon: themeProvider.isDarkMode 
-                          ? Icons.light_mode_outlined 
-                          : Icons.dark_mode_outlined,
-                        title: l10n.theme,
-                        subtitle: themeProvider.isDarkMode ? l10n.darkMode : l10n.lightMode,
-                        onTap: () => _showThemePicker(context, themeProvider, l10n),
-                      );
-                    },
-                  ),
-                  Consumer<ThemeProvider>(
-                    builder: (context, themeProvider, child) {
-                      return ProfileItem(
-                        icon: Icons.language_outlined,
-                        title: l10n.language,
-                        subtitle: themeProvider.isTurkish ? l10n.turkish : l10n.english,
-                        onTap: () => _showLanguagePicker(context, themeProvider, l10n),
-                      );
-                    },
-                  ),
-                  Consumer<ThemeProvider>(
-                    builder: (context, themeProvider, child) {
-                      return ProfileItem(
-                        icon: Icons.monetization_on_outlined,
-                        title: l10n.currency,
-                        subtitle: CurrencyUtils.getDisplayName(
-                          themeProvider.currency, 
-                          themeProvider.locale.languageCode
-                        ),
-                        onTap: () => _showCurrencyPicker(context, themeProvider, l10n),
-                      );
-                    },
-                  ),
-                  FutureBuilder<bool>(
-                    future: QuickNoteNotificationService.isEnabled(),
-                    builder: (context, snapshot) {
-                      final isEnabled = snapshot.data ?? false;
-                      return ProfileItem(
-                        icon: Icons.edit_note_outlined,
-                        title: 'Hızlı Notlar',
-                        subtitle: 'Anında not alma için kalıcı bildirim',
-                        trailing: Switch(
-                          value: isEnabled,
-                          onChanged: (value) async {
-                            final success = await QuickNoteNotificationService.setEnabled(value);
-                            
-                            if (success) {
-                              setState(() {}); // Refresh the UI
-                              
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(value 
-                                    ? 'Hızlı notlar bildirimi açıldı'
-                                    : 'Hızlı notlar bildirimi kapatıldı'),
-                                  backgroundColor: value ? Colors.green : Colors.orange,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            } else {
-                              // Permission denied
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Bildirim izni gerekli! Lütfen ayarlardan açın.'),
-                                  backgroundColor: Colors.red,
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
+          body: SliverToBoxAdapter(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double containerWidth = constraints.maxWidth * 1;
+                    return Container(
+                      width: containerWidth,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildProfileHeader(
+                            context,
+                            l10n,
+                            userName,
+                            userEmail,
+                            profileImageUrl,
+                          ),
 
-                ],
+                          const SizedBox(height: 24),
+                          // Preferences Section
+                          ProfileSection(
+                            title: l10n.preferences,
+                            children: [
+                              Consumer<ThemeProvider>(
+                                builder: (context, themeProvider, child) {
+                                  return ProfileItem(
+                                    icon: themeProvider.isDarkMode
+                                        ? Icons.light_mode_outlined
+                                        : Icons.dark_mode_outlined,
+                                    title: l10n.theme,
+                                    subtitle: themeProvider.isDarkMode
+                                        ? l10n.darkMode
+                                        : l10n.lightMode,
+                                    onTap: () => _showThemePicker(
+                                      context,
+                                      themeProvider,
+                                      l10n,
+                                    ),
+                                  );
+                                },
+                              ),
+                              Consumer<ThemeProvider>(
+                                builder: (context, themeProvider, child) {
+                                  return ProfileItem(
+                                    icon: Icons.language_outlined,
+                                    title: l10n.language,
+                                    subtitle: themeProvider.isTurkish
+                                        ? l10n.turkish
+                                        : l10n.english,
+                                    onTap: () => _showLanguagePicker(
+                                      context,
+                                      themeProvider,
+                                      l10n,
+                                    ),
+                                  );
+                                },
+                              ),
+                              Consumer<ThemeProvider>(
+                                builder: (context, themeProvider, child) {
+                                  return ProfileItem(
+                                    icon: Icons.monetization_on_outlined,
+                                    title: l10n.currency,
+                                    subtitle: CurrencyUtils.getDisplayName(
+                                      themeProvider.currency,
+                                      themeProvider.locale.languageCode,
+                                    ),
+                                    onTap: () => _showCurrencyPicker(
+                                      context,
+                                      themeProvider,
+                                      l10n,
+                                    ),
+                                  );
+                                },
+                              ),
+                              FutureBuilder<bool>(
+                                future:
+                                    QuickNoteNotificationService.isEnabled(),
+                                builder: (context, snapshot) {
+                                  final isEnabled = snapshot.data ?? false;
+                                  return ProfileItem(
+                                    icon: Icons.edit_note_outlined,
+                                    title: 'Hızlı Notlar',
+                                    subtitle:
+                                        'Anında not alma için kalıcı bildirim',
+                                    trailing: Switch(
+                                      value: isEnabled,
+                                      onChanged: (value) async {
+                                        final success =
+                                            await QuickNoteNotificationService.setEnabled(
+                                              value,
+                                            );
+                                        if (success) {
+                                          setState(() {});
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                value
+                                                    ? 'Hızlı notlar bildirimi açıldı'
+                                                    : 'Hızlı notlar bildirimi kapatıldı',
+                                              ),
+                                              backgroundColor: value
+                                                  ? Colors.green
+                                                  : Colors.orange,
+                                              duration: const Duration(
+                                                seconds: 2,
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Bildirim izni gerekli! Lütfen ayarlardan açın.',
+                                              ),
+                                              backgroundColor: Colors.red,
+                                              duration: Duration(seconds: 3),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          // Security Section
+                          ProfileSection(
+                            title: l10n.security,
+                            children: [
+                              ProfileItem(
+                                icon: Icons.lock_outline,
+                                title: l10n.changePassword,
+                                onTap: () => _showChangePasswordDialog(context),
+                              ),
+                              ProfileItem(
+                                icon: Icons.policy_outlined,
+                                title: l10n.privacyPolicy,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const PrivacyPolicyPage(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          // Support Section
+                          ProfileSection(
+                            title: l10n.support,
+                            children: [
+                              ProfileItem(
+                                icon: Icons.help_outline,
+                                title: l10n.contactSupport,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const SupportPage(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              ProfileItem(
+                                icon: Icons.description_outlined,
+                                title: l10n.termsOfService,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const TermsOfServicePage(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              ProfileItem(
+                                icon: Icons.help_outline,
+                                title: 'Sık Sorulan Sorular',
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const FAQPage(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          _buildLogoutButton(context, l10n),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-              const SizedBox(height: 24),
-              
-              // Security Section
-              ProfileSection(
-                title: l10n.security,
-                children: [
-                  ProfileItem(
-                    icon: Icons.lock_outline,
-                    title: l10n.changePassword,
-                    onTap: () => _showChangePasswordDialog(context),
-                  ),
-                  ProfileItem(
-                    icon: Icons.policy_outlined,
-                    title: l10n.privacyPolicy,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PrivacyPolicyPage(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              
-              // Support Section
-              ProfileSection(
-                title: l10n.support,
-                children: [
-                  ProfileItem(
-                    icon: Icons.help_outline,
-                    title: l10n.contactSupport,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SupportPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  ProfileItem(
-                    icon: Icons.description_outlined,
-                    title: l10n.termsOfService,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TermsOfServicePage(),
-                        ),
-                      );
-                    },
-                  ),
-                  ProfileItem(
-                    icon: Icons.help_outline,
-                    title: 'Sık Sorulan Sorular',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FAQPage(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              
-              // About Section
-              ProfileSection(
-                title: l10n.about,
-                children: [
-                  ProfileItem(
-                    icon: Icons.info_outline,
-                    title: l10n.version,
-                    subtitle: '1.0.0',
-                    onTap: null, // Non-interactive
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              
-              // Logout Button
-              _buildLogoutButton(context, l10n),
-              const SizedBox(height: 20),
-            ]),
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, AppLocalizations l10n, String userName, String userEmail, String? profileImageUrl) {
+  Widget _buildProfileHeader(
+    BuildContext context,
+    AppLocalizations l10n,
+    String userName,
+    String userEmail,
+    String? profileImageUrl,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark 
-          ? const Color(0xFF1C1C1E) 
-          : Colors.white,
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.08),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 4),
             spreadRadius: 0,
           ),
         ],
-        border: isDark 
-          ? Border.all(
-              color: const Color(0xFF38383A),
-              width: 0.5,
-            )
-          : null,
+        border: isDark
+            ? Border.all(color: const Color(0xFF38383A), width: 0.5)
+            : null,
       ),
       child: Row(
         children: [
@@ -475,7 +481,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -484,7 +492,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           const SizedBox(width: 16),
-          
+
           // User Info
           Expanded(
             child: Column(
@@ -503,24 +511,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   userEmail,
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
-            ),
-          ),
-          
-          // Edit Button
-          IconButton(
-            onPressed: _isUploadingImage ? null : _showImageSourceActionSheet,
-            icon: Icon(_isUploadingImage ? Icons.hourglass_empty : Icons.camera_alt_outlined),
-            style: IconButton.styleFrom(
-              backgroundColor: isDark 
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFF2F2F7),
-              foregroundColor: isDark 
-                ? const Color(0xFF8E8E93)
-                : const Color(0xFF6D6D70),
             ),
           ),
         ],
@@ -530,40 +526,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildLogoutButton(BuildContext context, AppLocalizations l10n) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark 
-          ? const Color(0xFF1C1C1E) 
-          : Colors.white,
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 2),
             spreadRadius: 0,
           ),
         ],
-        border: isDark 
-          ? Border.all(
-              color: const Color(0xFF38383A),
-              width: 0.5,
-            )
-          : null,
+        border: isDark
+            ? Border.all(color: const Color(0xFF38383A), width: 0.5)
+            : null,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
             // ProfileProvider'ı temizle
-            final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+            final profileProvider = Provider.of<ProfileProvider>(
+              context,
+              listen: false,
+            );
             profileProvider.clearProfile();
-            
-            await SupabaseService.instance.signOut();
+            // Reminderları temizle
+            await ReminderService.clearAllRemindersForCurrentUser();
+            await FirebaseAuthService.signOut();
             if (context.mounted) {
               context.go('/onboarding');
             }
@@ -592,7 +587,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showCurrencyPicker(BuildContext context, ThemeProvider themeProvider, AppLocalizations l10n) {
+  void _showCurrencyPicker(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    AppLocalizations l10n,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -611,26 +610,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            ...Currency.values.map((currency) => ListTile(
-              leading: Text(
-                currency.symbol,
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+            ...Currency.values.map(
+              (currency) => ListTile(
+                leading: Text(
+                  currency.symbol,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                title: Text(
+                  CurrencyUtils.getDisplayName(
+                    currency,
+                    themeProvider.locale.languageCode,
+                  ),
+                  style: GoogleFonts.inter(fontSize: 16),
+                ),
+                trailing: themeProvider.currency == currency
+                    ? const Icon(Icons.check, color: Color(0xFF6D6D70))
+                    : null,
+                onTap: () {
+                  themeProvider.setCurrency(currency);
+                  Navigator.pop(context);
+                },
               ),
-              title: Text(
-                CurrencyUtils.getDisplayName(currency, themeProvider.locale.languageCode),
-                style: GoogleFonts.inter(fontSize: 16),
-              ),
-              trailing: themeProvider.currency == currency
-                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
-                : null,
-              onTap: () {
-                themeProvider.setCurrency(currency);
-                Navigator.pop(context);
-              },
-            )),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -638,7 +642,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showThemePicker(BuildContext context, ThemeProvider themeProvider, AppLocalizations l10n) {
+  void _showThemePicker(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    AppLocalizations l10n,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -664,8 +672,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.inter(fontSize: 16),
               ),
               trailing: !themeProvider.isDarkMode
-                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
-                : null,
+                  ? const Icon(Icons.check, color: Color(0xFF6D6D70))
+                  : null,
               onTap: () {
                 if (themeProvider.isDarkMode) {
                   themeProvider.toggleTheme();
@@ -680,8 +688,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.inter(fontSize: 16),
               ),
               trailing: themeProvider.isDarkMode
-                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
-                : null,
+                  ? const Icon(Icons.check, color: Color(0xFF6D6D70))
+                  : null,
               onTap: () {
                 if (!themeProvider.isDarkMode) {
                   themeProvider.toggleTheme();
@@ -696,7 +704,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showLanguagePicker(BuildContext context, ThemeProvider themeProvider, AppLocalizations l10n) {
+  void _showLanguagePicker(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    AppLocalizations l10n,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -716,17 +728,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: const Text(
-                '🇹🇷',
-                style: TextStyle(fontSize: 24),
-              ),
-              title: Text(
-                l10n.turkish,
-                style: GoogleFonts.inter(fontSize: 16),
-              ),
+              leading: const Text('🇹🇷', style: TextStyle(fontSize: 24)),
+              title: Text(l10n.turkish, style: GoogleFonts.inter(fontSize: 16)),
               trailing: themeProvider.isTurkish
-                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
-                : null,
+                  ? const Icon(Icons.check, color: Color(0xFF6D6D70))
+                  : null,
               onTap: () {
                 if (!themeProvider.isTurkish) {
                   themeProvider.toggleLanguage();
@@ -735,17 +741,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             ListTile(
-              leading: const Text(
-                '🇺🇸',
-                style: TextStyle(fontSize: 24),
-              ),
-              title: Text(
-                l10n.english,
-                style: GoogleFonts.inter(fontSize: 16),
-              ),
+              leading: const Text('🇺🇸', style: TextStyle(fontSize: 24)),
+              title: Text(l10n.english, style: GoogleFonts.inter(fontSize: 16)),
               trailing: !themeProvider.isTurkish
-                ? const Icon(Icons.check, color: Color(0xFF6D6D70))
-                : null,
+                  ? const Icon(Icons.check, color: Color(0xFF6D6D70))
+                  : null,
               onTap: () {
                 if (themeProvider.isTurkish) {
                   themeProvider.toggleLanguage();
@@ -763,11 +763,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showChangePasswordDialog(BuildContext context) {
     Navigator.push(
       context,
-      CupertinoPageRoute(
-        builder: (context) => const ChangePasswordPage(),
-      ),
+      CupertinoPageRoute(builder: (context) => const ChangePasswordPage()),
     );
   }
-
-  
-} 
+}

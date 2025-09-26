@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/providers/debit_card_provider.dart';
+import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/models/debit_card_model.dart';
 import '../../../shared/utils/currency_utils.dart';
@@ -100,19 +100,20 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
     });
 
     try {
-      final debitCardProvider = context.read<DebitCardProvider>();
+      final unifiedProvider = context.read<UnifiedProviderV2>();
       
       final balance = double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0;
 
-      final success = await debitCardProvider.updateDebitCard(
-        cardId: cardId,
-        cardName: _cardNameController.text.trim().isEmpty 
+      final updatedAccount = await unifiedProvider.updateAccount(
+        accountId: cardId,
+        name: _cardNameController.text.trim().isEmpty 
             ? null 
             : _cardNameController.text.trim(),
+        bankName: _selectedBankCode,
         balance: balance,
       );
 
-      if (success && mounted) {
+      if (updatedAccount != null && mounted) {
         // Başarılı mesajı göster
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

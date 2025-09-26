@@ -1,0 +1,24 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // =====================================================
+    // KULLANICI DOSYALARI - Ana Klasör
+    // =====================================================
+    match /users/{userId}/{allPaths=**} {
+      // Sadece kendi dosyalarına erişim
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // =====================================================
+    // GENEL KURALLAR
+    // =====================================================
+    
+    // Tüm diğer dosyalar reddedilir
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

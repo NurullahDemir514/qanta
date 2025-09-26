@@ -25,8 +25,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
 
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
-        debugPrint('🔄 RecentTransactionsSection: Using V2 provider with ${providerV2.transactions.length} transactions');
-        
+        final buildStartTime = DateTime.now();
         final v2Transactions = providerV2.recentTransactions;
         final isLoadingV2 = providerV2.isLoadingTransactions;
 
@@ -60,6 +59,13 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
               _buildV2TransactionList(context, v2Transactions, isDark),
           ],
         );
+        
+        // Debug: Measure build time
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final buildEndTime = DateTime.now();
+          final buildDuration = buildEndTime.difference(buildStartTime).inMilliseconds;
+          print('🔄 RecentTransactionsSection build took ${buildDuration}ms');
+        });
       },
     );
   }
@@ -177,7 +183,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     // Only fallback to category.icon if category name lookup failed
     if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
       if (category?.icon != null && category!.icon != 'category') {
-        categoryIcon = CategoryIconService.getIcon(category.icon);
+        categoryIcon = CategoryIconService.getIcon(category.iconName);
       }
     }
 
@@ -194,7 +200,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     } else if (category?.icon != null) {
       // Try icon name (e.g., "restaurant", "car", etc.)
       categoryColor = CategoryIconService.getColorFromMap(
-        category!.icon,
+        category!.iconName,
         categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
       );
     }
@@ -202,104 +208,89 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     // If no centralized color found, fall back to hex color from database
     if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
     if (category?.color != null) {
-      categoryColor = CategoryIconService.getColor(category!.color);
+      categoryColor = CategoryIconService.getColor(category!.colorHex);
     } else if (category?.icon != null) {
       // Use predefined colors based on category type and icon
       final isIncomeCategory = transactionType == TransactionType.income;
       categoryColor = CategoryIconService.getCategoryColor(
-        iconName: category!.icon,
-        colorHex: category.color,
+        iconName: category!.iconName,
+        colorHex: category.colorHex,
         isIncomeCategory: isIncomeCategory,
       );
       }
     }
 
-    // FALLBACK: Check if description contains installment pattern like (1/4)
-    final hasInstallmentPattern = RegExp(r'\(\d+/\d+\)').hasMatch(transaction.description);
+    // Check if this is an installment transaction
+    final hasInstallmentPattern = RegExp(r'\(\d+ taksit\)').hasMatch(transaction.description);
     final isActualInstallment = transaction.isInstallment || hasInstallmentPattern;
-
-    // Build title - sadece description göster (kategori adı gereksiz)
-    String title = transaction.categoryName ?? transaction.description;
+    
+    // Parse installment info if it's an installment
+    int? totalInstallments;
+    double? totalAmount;
+    double? monthlyAmount;
+    
+    if (isActualInstallment) {
+      final installmentMatch = RegExp(r'\((\d+) taksit\)').firstMatch(transaction.description);
+      if (installmentMatch != null) {
+        totalInstallments = int.tryParse(installmentMatch.group(1)!);
+        totalAmount = transaction.amount;
+        monthlyAmount = totalAmount / (totalInstallments ?? 1);
+      }
+    }
 
     // Format amount
     final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
 
-    // Format time
-    final time = TransactionDesignSystem.formatTime(transaction.transactionDate);
+    // Use displayTime from transaction model (dynamic date formatting)
+    final time = transaction.displayTime;
 
-    // Card name
-    String cardName = transaction.sourceAccountName ?? 'Hesap';
-    
-    // For transfer transactions, show source → target
-    if (transactionType == TransactionType.transfer) {
-      final sourceAccount = transaction.sourceAccountName ?? 'Hesap';
-      final targetAccount = transaction.targetAccountName ?? 'Hesap';
-      cardName = TransactionDesignSystem.formatTransferSubtitle(sourceAccount, targetAccount);
-    } else {
-      // Shorten regular card names
-      cardName = TransactionDesignSystem.shortenAccountName(cardName);
-    }
+    // Card name - centralized logic
+    final cardName = TransactionDesignSystem.formatCardName(
+      cardName: transaction.sourceAccountName ?? 'Hesap',
+      transactionType: transactionType.name,
+      sourceAccountName: transaction.sourceAccountName,
+      targetAccountName: transaction.targetAccountName,
+    );
 
     // Check if this should be displayed as an installment
     if (isActualInstallment) {
-      // Extract installment info from pattern if available
-      Map<String, int?>? installmentInfo;
-      if (hasInstallmentPattern) {
-        final match = RegExp(r'\((\d+)/(\d+)\)').firstMatch(transaction.description);
-        if (match != null) {
-          installmentInfo = {
-            'currentInstallment': int.tryParse(match.group(1)!),
-            'totalInstallments': int.tryParse(match.group(2)!),
-          };
-        }
-      }
-      
-      // Get installment count for title
-      final totalInstallments = installmentInfo?['totalInstallments'];
-      final installmentSuffix = totalInstallments != null ? ' ($totalInstallments Taksit)' : ' (Taksitli)';
-      
-      // Remove installment pattern from title for cleaner display
-      final cleanTitle = transaction.categoryName ?? transaction.description.replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '');
-      
       return InstallmentExpandableCard(
-        installmentId: transaction.installmentId, // This might be null for fallback cases
-        title: '$cleanTitle$installmentSuffix',
-        subtitle: cardName,
+        installmentId: transaction.installmentId,
+        title: transaction.categoryName ?? transaction.description, // Kategori adı
+        subtitle: cardName, // Banka adı
         amount: amount,
         time: time,
         type: transactionType,
-        categoryIcon: transaction.categoryName ?? category?.icon, // Prioritize category name
-        categoryColor: category?.color,
+        categoryIcon: transaction.categoryName ?? category?.iconName,
+        categoryColor: category?.colorHex,
         isDark: isDark,
         isFirst: isFirst,
         isLast: isLast,
-        currentInstallment: installmentInfo?['currentInstallment'],
-        totalInstallments: installmentInfo?['totalInstallments'],
+        currentInstallment: 1,
+        totalInstallments: totalInstallments,
+        totalAmount: totalAmount,
+        monthlyAmount: monthlyAmount,
+        isPaid: transaction.isPaid,
         onLongPress: () {
-          print('🔍 Long press detected on installment transaction: ${transaction.description}');
           HapticFeedback.mediumImpact();
-          _showInstallmentDeleteActionSheet(context, transaction, installmentInfo);
+          _showInstallmentDeleteActionSheet(context, transaction, null);
         },
       );
     }
 
-    // Regular transaction - use new centralized color system
-    return TransactionDesignSystem.buildTransactionItem(
-      title: title,
-      subtitle: cardName,
-      amount: amount,
-      time: time,
-      type: transactionType,
-      categoryIconData: categoryIcon,      // Use direct IconData
-      categoryColorData: categoryColor,    // Use direct Color
+    // Regular transaction - use Firebase integrated design system
+    return TransactionDesignSystem.buildTransactionItemFromV2(
+      transaction: transaction,
       isDark: isDark,
-      isFirst: isFirst,
-      isLast: isLast,
+      time: time,
+      categoryIconData: categoryIcon,
+      categoryColorData: categoryColor,
       onLongPress: () {
-        print('🔍 Long press detected on v2 transaction: ${transaction.description}');
         HapticFeedback.mediumImpact();
         _showV2DeleteActionSheet(context, transaction);
       },
+      isFirst: isFirst,
+      isLast: isLast,
     );
   }
 
@@ -357,48 +348,33 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
   }
 
   /// Delete V2 transaction
-  Future<void> _deleteV2Transaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) async {
-    try {
-      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
-      debugPrint('🗑️ RecentTransactionsSection: Deleting v2 transaction: ${transaction.id}');
-      
-      // UnifiedProviderV2.deleteTransaction already handles:
-      // 1. Backend deletion via TransactionServiceV2.deleteTransaction
-      // 2. Local list removal with _transactions.removeWhere()
-      // 3. Account balance updates
-      // 4. Summary updates
-      // 5. notifyListeners() call
-      await providerV2.deleteTransaction(transaction.id);
-      
-      debugPrint('✅ RecentTransactionsSection: V2 transaction deleted successfully');
-      
-      // Show success message
+  void _deleteV2Transaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
+    final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+    
+    // Delete in background immediately
+    providerV2.deleteTransaction(transaction.id).then((success) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('İşlem silindi'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
+            content: Text(success ? 'İşlem silindi' : 'Silme işlemi başarısız'),
+            backgroundColor: success ? Colors.green : Colors.red,
+            duration: const Duration(seconds: 1),
           ),
         );
       }
-      
-    } catch (e) {
-      debugPrint('❌ RecentTransactionsSection: Error deleting v2 transaction: $e');
-      
-      // Show error message
+    }).catchError((e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('İşlem silinirken hata oluştu: $e'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
-    }
+    });
   }
+
 
   /// Show installment delete action sheet
   void _showInstallmentDeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction, Map<String, int?>? installmentInfo) {
@@ -458,14 +434,8 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     try {
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
       
-      debugPrint('🗑️ RecentTransactionsSection: Deleting installment transaction: ${transaction.id}');
-      
-      // Use enhanced installment deletion that refunds total amount
       await providerV2.deleteInstallmentTransaction(transaction.id);
       
-      debugPrint('✅ RecentTransactionsSection: Installment transaction deleted successfully');
-      
-      // Show success message
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -477,9 +447,6 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       }
       
     } catch (e) {
-      debugPrint('❌ RecentTransactionsSection: Error deleting installment transaction: $e');
-      
-      // Show error message
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

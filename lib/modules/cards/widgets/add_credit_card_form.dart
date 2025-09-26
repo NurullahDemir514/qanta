@@ -72,9 +72,9 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
     
     // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
     DateTime nextStatementDate;
-    if (currentMonth == 12) {
+      if (currentMonth == 12) {
       nextStatementDate = DateTime(currentYear + 1, 1, statementDate);
-    } else {
+      } else {
       nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDate);
     }
     
@@ -115,24 +115,6 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
       );
 
       if (success != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Kredi kartı başarıyla eklendi',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-            backgroundColor: const Color(0xFF34C759),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-
         widget.onSuccess?.call();
         Navigator.of(context).pop();
       }
