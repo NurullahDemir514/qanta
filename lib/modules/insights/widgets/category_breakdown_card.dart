@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../models/statistics_model.dart';
 
 class CategoryBreakdownCard extends StatelessWidget {
@@ -106,7 +108,8 @@ class CategoryBreakdownCard extends StatelessWidget {
 
   Widget _buildCategoryItem(BuildContext context, CategoryStatistic category) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final formatter = NumberFormat.currency(locale: 'tr_TR', symbol: '₺');
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    final formatter = NumberFormat.currency(locale: currency.locale, symbol: currency.symbol);
     
     // Generate a color based on category name
     final color = _getCategoryColor(category.categoryId);

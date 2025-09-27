@@ -155,7 +155,7 @@ class CashManagementService {
               autofocus: true,
               decoration: InputDecoration(
                 labelText: l10n.newBalance,
-                suffixText: '₺',
+                suffixText: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
                 border: const OutlineInputBorder(),
               ),
             ),

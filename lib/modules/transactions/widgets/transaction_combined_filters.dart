@@ -48,7 +48,7 @@ class _TransactionCombinedFiltersState extends State<TransactionCombinedFilters>
               // Transaction Type Chips
               _buildTransactionTypeChip(
                 context: context,
-                label: 'Tümü',
+                label: AppLocalizations.of(context)?.all ?? 'All',
                 isSelected: widget.selectedTransactionType == null,
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -237,7 +237,7 @@ class _TransactionCombinedFiltersState extends State<TransactionCombinedFilters>
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              _showAdvancedFilters ? 'Daha Az' : 'Daha Fazla',
+              _showAdvancedFilters ? (AppLocalizations.of(context)?.less ?? 'Less') : (AppLocalizations.of(context)?.more ?? 'More'),
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,

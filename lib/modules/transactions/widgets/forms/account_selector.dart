@@ -77,11 +77,11 @@ class AccountSelector extends StatelessWidget {
     return [
       PaymentCard(
         id: 'cash',
-        name: 'Nakit',
+        name: AppLocalizations.of(context)?.cash ?? 'Cash',
         type: CardType.debit,
         number: '0000000000000000',
         expiryDate: '',
-        bankName: 'Qanta',
+        bankName: AppLocalizations.of(context)?.bankName ?? 'Qanta',
         color: const Color(0xFF34C759),
       ),
       PaymentCard(

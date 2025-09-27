@@ -60,7 +60,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get signUp => 'Kayıt Ol';
 
   @override
-  String get forgotPassword => 'Şifremi Unuttum';
+  String get forgotPassword => 'Şifremi unuttum, ne yapmalıyım?';
 
   @override
   String get budget => 'Bütçe';
@@ -136,7 +136,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get confirmPasswordRequired => 'Şifre onayı gerekli';
 
   @override
-  String get passwordsDoNotMatch => 'Şifreler eşleşmiyor';
+  String get passwordsDoNotMatch => 'Yeni şifreler eşleşmiyor';
 
   @override
   String get confirmPassword => 'Şifreyi Onayla';
@@ -248,7 +248,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get remaining => 'kaldı';
 
   @override
-  String get installment => 'Taksitli';
+  String get installment => 'Taksit';
 
   @override
   String get categoryHint => 'kahve, market, benzin...';
@@ -364,7 +364,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get privacyPolicy => 'Gizlilik Politikası';
 
   @override
-  String get version => 'Sürüm';
+  String get version => 'Versiyon';
 
   @override
   String get contactSupport => 'Destek İletişim';
@@ -566,7 +566,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get enterValidAmount => 'Geçerli bir miktar girin';
 
   @override
-  String get cash => 'NAKİT';
+  String get cash => 'Nakit';
 
   @override
   String get digitalWallet => 'Dijital Cüzdan';
@@ -643,7 +643,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get close => 'Kapat';
 
   @override
-  String get selectTransactionType => 'İşlem Türü Seçin';
+  String get selectTransactionType => 'Yapmak istediğiniz işlem türünü seçin';
 
   @override
   String get selectTransactionTypeDesc =>
@@ -655,7 +655,9 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get errorOccurred => 'Hata oluştu. Lütfen tekrar deneyin.';
+  String errorOccurred(String error) {
+    return 'Hata: $error';
+  }
 
   @override
   String get enterAmount => 'Tutar Girin';
@@ -783,7 +785,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get monthly => 'Aylık';
 
   @override
-  String get quarterly => '3 Aylık';
+  String get quarterly => 'Üç Aylık';
 
   @override
   String get yearly => 'Yıllık';
@@ -813,7 +815,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get rent => 'Kira';
 
   @override
-  String get loan => 'Kredi/Taksit';
+  String get loan => 'Kredi';
 
   @override
   String get subscriptionDescription => 'Netflix, Spotify, YouTube';
@@ -1111,7 +1113,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cashAccountLoadError => 'Nakit hesabı yüklenirken hata oluştu';
 
   @override
-  String get unknownError => 'Bilinmeyen hata';
+  String unknownError(String error) {
+    return 'Bir hata oluştu: $error';
+  }
 
   @override
   String get retry => 'Tekrar Dene';
@@ -1325,7 +1329,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noDataYet => 'Henüz analiz edilecek veri yok';
 
   @override
-  String get addFirstTransaction => 'İlk İşlemi Ekle';
+  String get addFirstTransaction => 'İlk işleminizi ekleyerek başlayın';
 
   @override
   String get analyzingData => 'Finansal verileriniz analiz ediliyor...';
@@ -1370,11 +1374,1008 @@ class AppLocalizationsTr extends AppLocalizations {
   String get totalDebts => 'Toplam Borç';
 
   @override
-  String get availableCredit => 'Kullanılabilir Kredi';
+  String get availableCredit => 'Kullanılabilir Limit';
 
   @override
   String get netAmount => 'Net';
 
   @override
   String get transactionCount => 'İşlem';
+
+  @override
+  String get camera => 'Kamera';
+
+  @override
+  String get gallery => 'Galeri';
+
+  @override
+  String get deletePhoto => 'Fotoğrafı Sil';
+
+  @override
+  String photoUploadError(String error) {
+    return 'Fotoğraf yüklenirken hata oluştu: $error';
+  }
+
+  @override
+  String photoDeleteError(String error) {
+    return 'Fotoğraf silinirken hata oluştu: $error';
+  }
+
+  @override
+  String get fileNotFound => 'Dosya bulunamadı';
+
+  @override
+  String get fileTooLarge => 'Dosya boyutu çok büyük (max 5MB)';
+
+  @override
+  String get userSessionNotFound => 'Kullanıcı oturumu bulunamadı';
+
+  @override
+  String get photoDeletedSuccessfully => 'Fotoğraf başarıyla silindi';
+
+  @override
+  String get photoUploadedSuccessfully => 'Fotoğraf başarıyla yüklendi';
+
+  @override
+  String get selectImageSource => 'Fotoğraf Kaynağı Seçin';
+
+  @override
+  String get selectImageSourceDescription =>
+      'Fotoğrafınızı nereden seçmek istiyorsunuz?';
+
+  @override
+  String get uploadingPhoto => 'Fotoğraf yükleniyor...';
+
+  @override
+  String get deletingPhoto => 'Fotoğraf siliniyor...';
+
+  @override
+  String get profilePhoto => 'Profil Fotoğrafı';
+
+  @override
+  String get changeProfilePhoto => 'Profil Fotoğrafını Değiştir';
+
+  @override
+  String get removeProfilePhoto => 'Profil Fotoğrafını Kaldır';
+
+  @override
+  String get profilePhotoUpdated => 'Profil fotoğrafı güncellendi';
+
+  @override
+  String get profilePhotoRemoved => 'Profil fotoğrafı kaldırıldı';
+
+  @override
+  String get deleteTransaction => 'İşlemi Sil';
+
+  @override
+  String deleteTransactionConfirm(String description) {
+    return '$description işlemini silmek istediğinizden emin misiniz?';
+  }
+
+  @override
+  String get delete => 'Sil';
+
+  @override
+  String get transactionDeleted => 'İşlem silindi';
+
+  @override
+  String transactionDeleteError(String error) {
+    return 'İşlem silinirken hata oluştu: $error';
+  }
+
+  @override
+  String get deleteInstallmentTransaction => 'Taksitli İşlemi Sil';
+
+  @override
+  String deleteInstallmentTransactionConfirm(String description) {
+    return '$description taksitli işlemini tamamen silmek istediğinizden emin misiniz? Bu işlem tüm taksitleri silecektir.';
+  }
+
+  @override
+  String get installmentTransactionDeleted => 'Taksitli işlem silindi';
+
+  @override
+  String installmentTransactionDeleteError(String error) {
+    return 'Taksitli işlem silinirken hata oluştu: $error';
+  }
+
+  @override
+  String get deleteAll => 'Tümünü Sil';
+
+  @override
+  String get deleteLimit => 'Limit Sil';
+
+  @override
+  String deleteLimitConfirm(String categoryName) {
+    return '$categoryName kategorisi için belirlenen limiti silmek istediğinizden emin misiniz?';
+  }
+
+  @override
+  String get limitDeleted => 'Limit silindi';
+
+  @override
+  String get deleteLimitTooltip => 'Limiti Sil';
+
+  @override
+  String get error => 'Hata';
+
+  @override
+  String get loading => 'Yükleniyor...';
+
+  @override
+  String get loadingPastStatements => 'Geçmiş ekstreler yükleniyor...';
+
+  @override
+  String get loadingFutureStatements => 'Gelecek ekstreler yükleniyor...';
+
+  @override
+  String get loadingCards => 'Kartlar yüklenirken hata oluştu';
+
+  @override
+  String get loadingAccounts => 'Hesapları yükle';
+
+  @override
+  String get loadingStatementInfo => 'Ekstre bilgileri yüklenirken hata oluştu';
+
+  @override
+  String get paymentError => 'Ödeme işlemi sırasında hata oluştu';
+
+  @override
+  String get statementMarkError => 'Ekstre işaretlenirken hata oluştu';
+
+  @override
+  String get deleteCard => 'Kartı Sil';
+
+  @override
+  String deleteCardConfirm(String cardName) {
+    return '$cardName kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.';
+  }
+
+  @override
+  String get cardDeleted => 'Kart başarıyla silindi';
+
+  @override
+  String get cardDeleteError => 'Kart silinirken hata oluştu';
+
+  @override
+  String transactionAddError(String error) {
+    return 'İşlem eklenirken hata: $error';
+  }
+
+  @override
+  String updateError(String error) {
+    return 'Güncelleme sırasında hata oluştu: $error';
+  }
+
+  @override
+  String get deleteFailed => 'Silme işlemi başarısız';
+
+  @override
+  String get installmentTransactionDeleting => 'Taksitli işlem siliniyor...';
+
+  @override
+  String get installmentTransactionDeletedWithRefund =>
+      'Taksitli işlem silindi, toplam tutar iade edildi';
+
+  @override
+  String get cancelAction => 'İptal Et';
+
+  @override
+  String get quickNotes => 'Hızlı Notlar';
+
+  @override
+  String get quickNotesSubtitle => 'Anında not alma için kalıcı bildirim';
+
+  @override
+  String get quickNotesNotificationEnabled => 'Hızlı notlar bildirimi açıldı';
+
+  @override
+  String get quickNotesNotificationDisabled =>
+      'Hızlı notlar bildirimi kapatıldı';
+
+  @override
+  String get notificationPermissionRequired =>
+      'Bildirim izni gerekli! Lütfen ayarlardan açın.';
+
+  @override
+  String get frequentlyAskedQuestions => 'Sık Sorulan Sorular';
+
+  @override
+  String get account => 'Hesap';
+
+  @override
+  String get now => 'Şimdi';
+
+  @override
+  String get yesterday => 'Dün';
+
+  @override
+  String get expense => 'Gider';
+
+  @override
+  String get transfer => 'Transfer';
+
+  @override
+  String get today => 'Bugün';
+
+  @override
+  String minutesAgo(int count) {
+    return '$count dk önce';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count saat önce';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count gün önce';
+  }
+
+  @override
+  String weeksAgo(int count) {
+    return '$count hafta önce';
+  }
+
+  @override
+  String monthsAgo(int count) {
+    return '$count ay önce';
+  }
+
+  @override
+  String yearsAgo(int count) {
+    return '$count yıl önce';
+  }
+
+  @override
+  String get oneMinuteAgo => '1 dk önce';
+
+  @override
+  String get oneHourAgo => '1 saat önce';
+
+  @override
+  String get oneWeekAgo => '1 hafta önce';
+
+  @override
+  String get oneMonthAgo => '1 ay önce';
+
+  @override
+  String get oneYearAgo => '1 yıl önce';
+
+  @override
+  String get twoDaysAgo => '2 gün önce';
+
+  @override
+  String get perMonth => '/ay';
+
+  @override
+  String get net => 'Net';
+
+  @override
+  String get pleaseEnterAmount => 'Lütfen bir tutar girin';
+
+  @override
+  String get pleaseEnterValidAmount => 'Geçerli bir tutar girin';
+
+  @override
+  String get pleaseSelectSourceAccount => 'Lütfen kaynak hesap seçin';
+
+  @override
+  String get pleaseSelectTargetAccount => 'Lütfen hedef hesap seçin';
+
+  @override
+  String get sourceAndTargetSame => 'Kaynak ve hedef hesap aynı olamaz';
+
+  @override
+  String get accountInfoNotFound => 'Hesap bilgileri alınamadı';
+
+  @override
+  String get accountInfoNotFoundSingle => 'Hesap bilgisi alınamadı';
+
+  @override
+  String get pleaseSelectCategory => 'Lütfen bir kategori seçin';
+
+  @override
+  String get pleaseSelectPaymentMethod => 'Lütfen bir ödeme yöntemi seçin';
+
+  @override
+  String get cardsLoadingError => 'Kartlar yüklenirken hata oluştu';
+
+  @override
+  String get noCardsAddedYet => 'Henüz kart eklenmemiş';
+
+  @override
+  String get transaction => 'İşlem';
+
+  @override
+  String get bankName => 'Qanta';
+
+  @override
+  String get repeatsEveryWeek => 'Her hafta tekrarlanır';
+
+  @override
+  String get repeatsEveryMonth => 'Her ay tekrarlanır';
+
+  @override
+  String get repeatsEveryQuarter => 'Her üç ayda tekrarlanır';
+
+  @override
+  String get repeatsEveryYear => 'Her yıl tekrarlanır';
+
+  @override
+  String get otherFixedPayments => 'Diğer sabit ödemeler';
+
+  @override
+  String get thisWeek => 'Bu Hafta';
+
+  @override
+  String get thisYear => 'Bu Yıl';
+
+  @override
+  String get lastYear => 'Geçen Yıl';
+
+  @override
+  String get custom => 'Özel';
+
+  @override
+  String get searchTransactions => 'İşlem Ara';
+
+  @override
+  String get filterByType => 'Türe Göre Filtrele';
+
+  @override
+  String get filterByPeriod => 'Döneme Göre Filtrele';
+
+  @override
+  String get filterByCategory => 'Kategoriye Göre Filtrele';
+
+  @override
+  String get clearFilters => 'Filtreleri Temizle';
+
+  @override
+  String get applyFilters => 'Filtreleri Uygula';
+
+  @override
+  String get noResultsFound => 'Sonuç bulunamadı';
+
+  @override
+  String get tryDifferentSearch => 'Farklı bir arama deneyin';
+
+  @override
+  String get noNotesYet => 'Henüz not yok';
+
+  @override
+  String get addExpenseIncomeNotes =>
+      'Harcama veya gelir notlarınızı buraya ekleyin';
+
+  @override
+  String get justNow => 'Az önce';
+
+  @override
+  String get monday => 'Pazartesi';
+
+  @override
+  String get tuesday => 'Salı';
+
+  @override
+  String get wednesday => 'Çarşamba';
+
+  @override
+  String get thursday => 'Perşembe';
+
+  @override
+  String get friday => 'Cuma';
+
+  @override
+  String get saturday => 'Cumartesi';
+
+  @override
+  String get sunday => 'Pazar';
+
+  @override
+  String get january => 'Ocak';
+
+  @override
+  String get february => 'Şubat';
+
+  @override
+  String get march => 'Mart';
+
+  @override
+  String get april => 'Nisan';
+
+  @override
+  String get may => 'Mayıs';
+
+  @override
+  String get june => 'Haziran';
+
+  @override
+  String get july => 'Temmuz';
+
+  @override
+  String get august => 'Ağustos';
+
+  @override
+  String get september => 'Eylül';
+
+  @override
+  String get october => 'Ekim';
+
+  @override
+  String get november => 'Kasım';
+
+  @override
+  String get december => 'Aralık';
+
+  @override
+  String get textNote => 'Metin Notu';
+
+  @override
+  String get addQuickTextNote => 'Hızlı metin notu ekle';
+
+  @override
+  String get takePhoto => 'Fotoğraf Çek';
+
+  @override
+  String get takePhotoFromCamera => 'Kameradan fotoğraf çek';
+
+  @override
+  String get selectFromGallery => 'Galeriden Seç';
+
+  @override
+  String get selectPhotoFromGallery => 'Galeriden fotoğraf seç';
+
+  @override
+  String get photoCaptureError => 'Fotoğraf çekilirken hata oluştu';
+
+  @override
+  String get photoSelectionError => 'Fotoğraf seçilirken hata oluştu';
+
+  @override
+  String get add => 'Ekle';
+
+  @override
+  String get photoNote => 'Fotoğraf notu';
+
+  @override
+  String get photoNoteAdded => 'Fotoğraf notu eklendi';
+
+  @override
+  String get photoNoteAddError => 'Fotoğraf notu eklenirken hata oluştu';
+
+  @override
+  String get noteAdded => 'Not eklendi';
+
+  @override
+  String get noteAddError => 'Not eklenirken hata oluştu';
+
+  @override
+  String get noteDeleted => 'Not silindi';
+
+  @override
+  String get noteDeleteError => 'Not silinirken hata oluştu';
+
+  @override
+  String get noConvertedNotesYet => 'Henüz işleme dönüştürülen not yok';
+
+  @override
+  String get stop => 'Durdur';
+
+  @override
+  String get send => 'Gönder';
+
+  @override
+  String get processed => 'İşlendi';
+
+  @override
+  String get newest => 'En Yeni';
+
+  @override
+  String get oldest => 'En Eski';
+
+  @override
+  String get highestToLowest => 'Çoktan Aza';
+
+  @override
+  String get lowestToHighest => 'Azdan Çoğa';
+
+  @override
+  String get alphabetical => 'A-Z';
+
+  @override
+  String get more => 'Daha Fazla';
+
+  @override
+  String get less => 'Daha Az';
+
+  @override
+  String get cardName => 'Kart Adı';
+
+  @override
+  String get usage => 'Kullanım';
+
+  @override
+  String get lastPayment => 'Son Ödeme';
+
+  @override
+  String get nextPayment => 'Sonraki Ödeme';
+
+  @override
+  String get minimumPayment => 'Minimum Ödeme';
+
+  @override
+  String get totalDebt => 'Toplam Borç';
+
+  @override
+  String get noTransactionsForThisCard => 'Bu kart için henüz işlem bulunmuyor';
+
+  @override
+  String get statementSuccessfullyPaid =>
+      'Ekstre başarıyla ödendi olarak işaretlendi';
+
+  @override
+  String get bank => 'Banka';
+
+  @override
+  String get cardNameRequired => 'Kart adı gerekli';
+
+  @override
+  String get creditLimitRequired => 'Kredi limiti gerekli';
+
+  @override
+  String get debt => 'Borç';
+
+  @override
+  String get noNotifications => 'Bildirim yok';
+
+  @override
+  String get usageRate => 'Kullanım Oranı';
+
+  @override
+  String get statementDay => 'Ekstre Günü';
+
+  @override
+  String get creditCardInfo => 'Kredi Kartı Bilgileri';
+
+  @override
+  String get installmentDetailsLoadError => 'Taksit detayları yüklenemedi';
+
+  @override
+  String get tomorrow => 'Yarın';
+
+  @override
+  String get currentPassword => 'Mevcut Şifre';
+
+  @override
+  String get newPassword => 'Yeni Şifre';
+
+  @override
+  String get confirmNewPassword => 'Yeni Şifre (Tekrar)';
+
+  @override
+  String get passwordMinLengthInfo =>
+      'Şifreniz en az 6 karakter uzunluğunda olmalıdır.';
+
+  @override
+  String get passwordMinLength => 'Şifre en az 6 karakter olmalı';
+
+  @override
+  String get passwordChangedSuccessfully => 'Şifre başarıyla değiştirildi';
+
+  @override
+  String get wrongCurrentPassword => 'Mevcut şifre yanlış';
+
+  @override
+  String get passwordTooWeak => 'Şifre çok zayıf';
+
+  @override
+  String get requiresRecentLogin =>
+      'Şifrenizi değiştirmek için tekrar giriş yapın';
+
+  @override
+  String get passwordChangeFailed => 'Şifre değiştirilemedi';
+
+  @override
+  String get ok => 'Tamam';
+
+  @override
+  String get collectedInformation => 'Toplanan Bilgiler';
+
+  @override
+  String get collectedInformationContent =>
+      'Qanta uygulaması, size daha iyi hizmet verebilmek için aşağıdaki bilgileri toplar:\n\n• Hesap bilgileri (e-posta, ad-soyad)\n• Finansal işlem verileri (gelir, gider, transfer kayıtları)\n• Kart ve hesap bilgileri\n• Bütçe ve kategori tercihleri\n• Uygulama kullanım istatistikleri';
+
+  @override
+  String get informationUsage => 'Bilgilerin Kullanımı';
+
+  @override
+  String get informationUsageContent =>
+      'Toplanan bilgiler aşağıdaki amaçlarla kullanılır:\n\n• Kişisel finans yönetimi hizmetlerinin sağlanması\n• Bütçe takibi ve harcama analizlerinin yapılması\n• Uygulama performansının iyileştirilmesi\n• Güvenlik ve dolandırıcılık önleme\n• Yasal yükümlülüklerin yerine getirilmesi';
+
+  @override
+  String get dataSecurity => 'Veri Güvenliği';
+
+  @override
+  String get dataSecurityContent =>
+      'Verilerinizin güvenliği bizim için önceliktir:\n\n• Tüm veriler şifreli olarak saklanır\n• Güvenli sunucularda barındırılır\n• Düzenli güvenlik güncellemeleri yapılır\n• Yetkisiz erişimlere karşı korunur\n• Endüstri standartlarına uygun güvenlik önlemleri alınır';
+
+  @override
+  String get dataSharing => 'Veri Paylaşımı';
+
+  @override
+  String get dataSharingContent =>
+      'Kişisel verileriniz aşağıdaki durumlar dışında üçüncü taraflarla paylaşılmaz:\n\n• Yasal zorunluluklar\n• Güvenlik ihlalleri durumunda\n• Açık rızanızın bulunması\n• Hizmet sağlayıcıları ile sınırlı paylaşım (anonim)';
+
+  @override
+  String get userRights => 'Kullanıcı Hakları';
+
+  @override
+  String get userRightsContent =>
+      'KVKK kapsamında sahip olduğunuz haklar:\n\n• Kişisel verilerinizin işlenip işlenmediğini öğrenme\n• Verilerinize erişim talep etme\n• Yanlış bilgilerin düzeltilmesini isteme\n• Verilerin silinmesini talep etme\n• Hesabınızı tamamen kapatma';
+
+  @override
+  String get contact => 'İletişim';
+
+  @override
+  String get contactContent =>
+      'Gizlilik politikası ile ilgili sorularınız için:\n\nE-posta: privacy@qanta.app\nAdres: İstanbul, Türkiye\n\nBu politika son güncellenme tarihi: 20 Ocak 2025';
+
+  @override
+  String get supportAndContact => 'Destek & İletişim';
+
+  @override
+  String get phone => 'Telefon';
+
+  @override
+  String get liveSupport => 'Canlı Destek';
+
+  @override
+  String get liveSupportHours => 'Pazartesi-Cuma 09:00-18:00';
+
+  @override
+  String get isMyDataSecure => 'Verilerim güvende mi?';
+
+  @override
+  String get isMyDataSecureAnswer =>
+      'Evet, tüm verileriniz şifreli olarak saklanır ve güvenli sunucularda barındırılır. Supabase altyapısını kullanarak endüstri standartlarında güvenlik sağlıyoruz.';
+
+  @override
+  String get forgotPasswordAnswer =>
+      'Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak e-posta adresinize şifre sıfırlama bağlantısı gönderebilirsiniz.';
+
+  @override
+  String get howToDeleteAccount => 'Hesabımı nasıl silebilirim?';
+
+  @override
+  String get howToDeleteAccountAnswer =>
+      'Profil sayfasından çıkış yapabilir veya destek ekibimizle iletişime geçerek hesabınızın tamamen silinmesini talep edebilirsiniz.';
+
+  @override
+  String get isAppFree => 'Uygulama ücretsiz mi?';
+
+  @override
+  String get isAppFreeAnswer =>
+      'Evet, Qanta tamamen ücretsiz olarak kullanılabilir. Gelecekte premium özellikler eklenebilir ancak temel özellikler her zaman ücretsiz kalacaktır.';
+
+  @override
+  String get appInformation => 'Uygulama Bilgileri';
+
+  @override
+  String get lastUpdate => 'Son Güncelleme';
+
+  @override
+  String get developer => 'Geliştirici';
+
+  @override
+  String get platform => 'Platform';
+
+  @override
+  String get liveSupportTitle => 'Canlı Destek';
+
+  @override
+  String get liveSupportMessage =>
+      'Canlı destek hizmeti şu anda geliştirme aşamasındadır. Acil durumlar için lütfen e-posta veya telefon ile iletişime geçin.';
+
+  @override
+  String get serviceDescription => 'Hizmet Tanımı';
+
+  @override
+  String get serviceDescriptionContent =>
+      'Qanta, kişisel finans yönetimi için tasarlanmış bir mobil uygulamadır. Uygulama aşağıdaki hizmetleri sunar:\n\n• Gelir ve gider takibi\n• Bütçe yönetimi ve planlama\n• Kart ve hesap yönetimi\n• Finansal raporlama ve analiz\n• Taksit takibi ve yönetimi';
+
+  @override
+  String get usageTerms => 'Kullanım Koşulları';
+
+  @override
+  String get usageTermsContent =>
+      'Qanta uygulamasını kullanarak aşağıdaki koşulları kabul etmiş olursunuz:\n\n• Uygulamayı yalnızca yasal amaçlarla kullanacaksınız\n• Doğru ve güncel bilgiler sağlayacaksınız\n• Hesap güvenliğinizi koruyacaksınız\n• Diğer kullanıcıların haklarına saygı göstereceksiniz\n• Uygulamanın kötüye kullanımından kaçınacaksınız';
+
+  @override
+  String get userResponsibilities => 'Kullanıcı Sorumlulukları';
+
+  @override
+  String get userResponsibilitiesContent =>
+      'Kullanıcı olarak aşağıdaki sorumluluklarınız bulunmaktadır:\n\n• Hesap bilgilerinizi güvenli tutmak\n• Şifrenizi kimseyle paylaşmamak\n• Finansal verilerinizin doğruluğunu sağlamak\n• Uygulama kurallarına uymak\n• Güvenlik ihlallerini bildirmek';
+
+  @override
+  String get serviceLimitations => 'Hizmet Sınırlamaları';
+
+  @override
+  String get serviceLimitationsContent =>
+      'Qanta uygulaması aşağıdaki sınırlamalara tabidir:\n\n• Finansal danışmanlık hizmeti sunmaz\n• Yatırım önerisi vermez\n• Banka işlemleri gerçekleştirmez\n• Kredi veya borç verme hizmeti sunmaz\n• Vergi danışmanlığı yapmaz';
+
+  @override
+  String get intellectualProperty => 'Fikri Mülkiyet';
+
+  @override
+  String get intellectualPropertyContent =>
+      'Qanta uygulamasının tüm içeriği telif hakkı ile korunmaktadır:\n\n• Uygulama tasarımı ve kodu\n• Logo ve marka unsurları\n• Metin ve görsel içerikler\n• Algoritma ve hesaplama yöntemleri\n• Veritabanı yapısı';
+
+  @override
+  String get serviceChanges => 'Hizmet Değişiklikleri';
+
+  @override
+  String get serviceChangesContent =>
+      'Qanta, hizmetlerinde değişiklik yapma hakkını saklı tutar:\n\n• Özellik ekleme veya çıkarma\n• Fiyatlandırma değişiklikleri\n• Kullanım koşullarını güncelleme\n• Hizmet sonlandırma\n• Bakım ve güncellemeler';
+
+  @override
+  String get disclaimer => 'Sorumluluk Reddi';
+
+  @override
+  String get disclaimerContent =>
+      'Qanta aşağıdaki durumlardan sorumlu değildir:\n\n• Veri kaybı veya bozulması\n• Sistem arızaları veya kesintiler\n• Üçüncü taraf hizmet sağlayıcıları\n• Kullanıcı hatalarından kaynaklanan zararlar\n• İnternet bağlantısı sorunları';
+
+  @override
+  String get termsContact => 'İletişim';
+
+  @override
+  String get termsContactContent =>
+      'Kullanım şartları ile ilgili sorularınız için:\n\nE-posta: support@qanta.app\nWeb: www.qanta.app\nAdres: İstanbul, Türkiye\n\nBu şartlar son güncellenme tarihi: 20 Ocak 2025';
+
+  @override
+  String get faq => 'Sık Sorulan Sorular';
+
+  @override
+  String get generalQuestions => 'Genel Sorular';
+
+  @override
+  String get accountAndSecurity => 'Hesap ve Güvenlik';
+
+  @override
+  String get features => 'Özellikler';
+
+  @override
+  String get technicalIssues => 'Teknik Sorunlar';
+
+  @override
+  String get whatIsQanta => 'Qanta nedir?';
+
+  @override
+  String get whatIsQantaAnswer =>
+      'Qanta, kişisel finans yönetimi için tasarlanmış modern bir mobil uygulamadır. Gelir-gider takibi, bütçe yönetimi, kart takibi ve finansal analiz özellikleri sunar.';
+
+  @override
+  String get whichDevicesSupported => 'Hangi cihazlarda kullanabilirim?';
+
+  @override
+  String get whichDevicesSupportedAnswer =>
+      'Qanta, Android ve iOS cihazlarda kullanılabilir. Flutter teknolojisi ile geliştirilmiştir.';
+
+  @override
+  String get howToChangePassword => 'Şifremi nasıl değiştiririm?';
+
+  @override
+  String get howToChangePasswordAnswer =>
+      'Profil sayfasında \"Güvenlik\" bölümünden \"Şifre Değiştir\" seçeneğini kullanabilirsiniz.';
+
+  @override
+  String get whichCardTypesSupported =>
+      'Hangi kart türlerini destekliyorsunuz?';
+
+  @override
+  String get whichCardTypesSupportedAnswer =>
+      'Kredi kartları, banka kartları ve nakit hesapları desteklenmektedir. Tüm Türk bankaları ile uyumludur.';
+
+  @override
+  String get howDoesInstallmentTrackingWork => 'Taksit takibi nasıl çalışır?';
+
+  @override
+  String get howDoesInstallmentTrackingWorkAnswer =>
+      'Taksitli alışverişlerinizi ekleyebilir, aylık ödemelerinizi otomatik olarak takip edebilirsiniz. Sistem size hatırlatmalar gönderir.';
+
+  @override
+  String get howToUseBudgetManagement => 'Bütçe yönetimi nasıl kullanılır?';
+
+  @override
+  String get howToUseBudgetManagementAnswer =>
+      'Kategoriler için aylık limitler belirleyebilir, harcamalarınızı takip edebilir ve limit aşımlarında uyarı alabilirsiniz.';
+
+  @override
+  String get whatIsQuickNotesFeature => 'Hızlı notlar özelliği nedir?';
+
+  @override
+  String get whatIsQuickNotesFeatureAnswer =>
+      'Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarınızı kategorize edebilirsiniz.';
+
+  @override
+  String get appCrashingWhatToDo => 'Uygulama çöküyor, ne yapmalıyım?';
+
+  @override
+  String get appCrashingWhatToDoAnswer =>
+      'Önce uygulamayı tamamen kapatıp tekrar açmayı deneyin. Sorun devam ederse cihazınızı yeniden başlatın. Hala çözülmezse destek ekibimizle iletişime geçin.';
+
+  @override
+  String get dataNotSyncing => 'Verilerim senkronize olmuyor';
+
+  @override
+  String get dataNotSyncingAnswer =>
+      'İnternet bağlantınızı kontrol edin ve uygulamayı yeniden başlatın. Sorun devam ederse çıkış yapıp tekrar giriş yapmayı deneyin.';
+
+  @override
+  String get notificationsNotComing => 'Bildirimler gelmiyor';
+
+  @override
+  String get notificationsNotComingAnswer =>
+      'Cihaz ayarlarınızdan Qanta için bildirimlerin açık olduğundan emin olun. Profil sayfasından bildirim ayarlarını da kontrol edin.';
+
+  @override
+  String get howToContactSupport =>
+      'Destek ekibinizle nasıl iletişime geçebilirim?';
+
+  @override
+  String get howToContactSupportAnswer =>
+      'Profil sayfasından \"Destek & İletişim\" bölümünü kullanabilir veya support@qanta.app adresine e-posta gönderebilirsiniz.';
+
+  @override
+  String get haveSuggestionWhereToSend => 'Önerim var, nereye iletebilirim?';
+
+  @override
+  String get haveSuggestionWhereToSendAnswer =>
+      'Önerilerinizi support@qanta.app adresine gönderebilirsiniz. Tüm geri bildirimler değerlendirilir ve uygulamayı geliştirmek için kullanılır.';
+
+  @override
+  String get lastMonthChange => 'Geçen aya göre';
+
+  @override
+  String get increase => 'artış';
+
+  @override
+  String get decrease => 'azalış';
+
+  @override
+  String get noAccountsYet => 'Henüz hesap eklenmemiş';
+
+  @override
+  String get addFirstAccount => 'İlk hesabınızı ekleyerek başlayın';
+
+  @override
+  String get currentDebt => 'Mevcut Borç';
+
+  @override
+  String get totalLimit => 'Toplam Limit';
+
+  @override
+  String get cashWallet => 'Nakit Cüzdan';
+
+  @override
+  String get searchBanks => 'Banka ara...';
+
+  @override
+  String get noBanksFound => 'Banka bulunamadı';
+
+  @override
+  String get addCreditCard => 'Kredi Kartı Ekle';
+
+  @override
+  String get cardNameExample => 'Örn: VakıfBank Kredi Kartı';
+
+  @override
+  String get currentDebtOptional => 'Mevcut Borç (Opsiyonel)';
+
+  @override
+  String get addDebitCard => 'Banka Kartı Ekle';
+
+  @override
+  String get cardNameExampleDebit => 'Örn: VakıfBank Vadesiz';
+
+  @override
+  String get initialBalance => 'Başlangıç Bakiyesi';
+
+  @override
+  String get day => 'gün';
+
+  @override
+  String get firstDay => '1st';
+
+  @override
+  String get secondDay => '2nd';
+
+  @override
+  String get thirdDay => '3rd';
+
+  @override
+  String get fourthDay => '4th';
+
+  @override
+  String get fifthDay => '5th';
+
+  @override
+  String get sixthDay => '6th';
+
+  @override
+  String get seventhDay => '7th';
+
+  @override
+  String get eighthDay => '8th';
+
+  @override
+  String get ninthDay => '9th';
+
+  @override
+  String get tenthDay => '10th';
+
+  @override
+  String get eleventhDay => '11th';
+
+  @override
+  String get twelfthDay => '12th';
+
+  @override
+  String get thirteenthDay => '13th';
+
+  @override
+  String get fourteenthDay => '14th';
+
+  @override
+  String get fifteenthDay => '15th';
+
+  @override
+  String get sixteenthDay => '16th';
+
+  @override
+  String get seventeenthDay => '17th';
+
+  @override
+  String get eighteenthDay => '18th';
+
+  @override
+  String get nineteenthDay => '19th';
+
+  @override
+  String get twentiethDay => '20th';
+
+  @override
+  String get twentyFirstDay => '21st';
+
+  @override
+  String get twentySecondDay => '22nd';
+
+  @override
+  String get twentyThirdDay => '23rd';
+
+  @override
+  String get twentyFourthDay => '24th';
+
+  @override
+  String get twentyFifthDay => '25th';
+
+  @override
+  String get twentySixthDay => '26th';
+
+  @override
+  String get twentySeventhDay => '27th';
+
+  @override
+  String get twentyEighthDay => '28th';
+
+  @override
+  String get selectCardType => 'Kart Türü Seçin';
+
+  @override
+  String get addDebitCardDescription => 'Vadesiz hesap kartı ekleyin';
+
+  @override
+  String get addCreditCardDescription => 'Kredi kartı bilgilerinizi ekleyin';
 }

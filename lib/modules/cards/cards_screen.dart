@@ -67,7 +67,7 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
     cardEvents.listen<CreditCardBalanceUpdated>((event) {
       if (mounted) {
         final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
-        _showEventSnackBar('Kredi kartı bakiyesi güncellendi ($changeText ₺)', isSuccess: true);
+        _showEventSnackBar('Kredi kartı bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})', isSuccess: true);
       }
     });
     
@@ -93,7 +93,7 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
     cardEvents.listen<DebitCardBalanceUpdated>((event) {
       if (mounted) {
         final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
-        _showEventSnackBar('Banka kartı bakiyesi güncellendi ($changeText ₺)', isSuccess: true);
+        _showEventSnackBar('Banka kartı bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})', isSuccess: true);
       }
     });
     
@@ -101,7 +101,7 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
     cardEvents.listen<CashAccountUpdated>((event) {
       if (mounted) {
         final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
-        _showEventSnackBar('Nakit bakiyesi güncellendi ($changeText ₺)', isSuccess: true);
+        _showEventSnackBar('Nakit bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})', isSuccess: true);
       }
     });
   }

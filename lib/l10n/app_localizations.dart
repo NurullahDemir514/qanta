@@ -176,7 +176,7 @@ abstract class AppLocalizations {
   /// **'Logout'**
   String get logout;
 
-  /// Email field label
+  /// Email
   ///
   /// In en, this message translates to:
   /// **'Email'**
@@ -200,10 +200,10 @@ abstract class AppLocalizations {
   /// **'Sign Up'**
   String get signUp;
 
-  /// Forgot password link text
+  /// Forgot password
   ///
   /// In en, this message translates to:
-  /// **'Forgot Password?'**
+  /// **'I forgot my password, what should I do?'**
   String get forgotPassword;
 
   /// Budget feature
@@ -218,7 +218,7 @@ abstract class AppLocalizations {
   /// **'Expenses'**
   String get expenses;
 
-  /// Income tracking
+  /// Income transaction type
   ///
   /// In en, this message translates to:
   /// **'Income'**
@@ -236,7 +236,7 @@ abstract class AppLocalizations {
   /// **'Analytics'**
   String get analytics;
 
-  /// Account balance
+  /// Balance
   ///
   /// In en, this message translates to:
   /// **'Balance'**
@@ -344,7 +344,7 @@ abstract class AppLocalizations {
   /// **'Password confirmation is required'**
   String get confirmPasswordRequired;
 
-  /// Passwords do not match validation error
+  /// Passwords do not match
   ///
   /// In en, this message translates to:
   /// **'Passwords do not match'**
@@ -548,7 +548,7 @@ abstract class AppLocalizations {
   /// **'left'**
   String get remaining;
 
-  /// Installment transaction chip text
+  /// Installment
   ///
   /// In en, this message translates to:
   /// **'Installment'**
@@ -752,7 +752,7 @@ abstract class AppLocalizations {
   /// **'Edit Profile'**
   String get editProfile;
 
-  /// Notifications setting
+  /// Notifications
   ///
   /// In en, this message translates to:
   /// **'Notifications'**
@@ -764,19 +764,19 @@ abstract class AppLocalizations {
   /// **'Privacy'**
   String get privacy;
 
-  /// Terms of service
+  /// Terms of Service
   ///
   /// In en, this message translates to:
   /// **'Terms of Service'**
   String get termsOfService;
 
-  /// Privacy policy
+  /// Privacy Policy
   ///
   /// In en, this message translates to:
   /// **'Privacy Policy'**
   String get privacyPolicy;
 
-  /// App version
+  /// Version
   ///
   /// In en, this message translates to:
   /// **'Version'**
@@ -788,7 +788,7 @@ abstract class AppLocalizations {
   /// **'Contact Support'**
   String get contactSupport;
 
-  /// Change password
+  /// Change Password
   ///
   /// In en, this message translates to:
   /// **'Change Password'**
@@ -866,7 +866,7 @@ abstract class AppLocalizations {
   /// **'Balance Information'**
   String get balanceInfo;
 
-  /// Credit limit label
+  /// Credit Limit
   ///
   /// In en, this message translates to:
   /// **'Credit Limit'**
@@ -1094,7 +1094,7 @@ abstract class AppLocalizations {
   /// **'Account Breakdown'**
   String get accountBreakdown;
 
-  /// Credit card account type
+  /// Credit Card
   ///
   /// In en, this message translates to:
   /// **'Credit Card'**
@@ -1148,7 +1148,7 @@ abstract class AppLocalizations {
   /// **'Add Cash'**
   String get addCash;
 
-  /// Cancel button
+  /// Cancel button text
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
@@ -1172,10 +1172,10 @@ abstract class AppLocalizations {
   /// **'Please enter a valid amount'**
   String get enterValidAmount;
 
-  /// Cash label on cash card
+  /// Cash account
   ///
   /// In en, this message translates to:
-  /// **'CASH'**
+  /// **'Cash'**
   String get cash;
 
   /// Digital wallet label
@@ -1184,7 +1184,7 @@ abstract class AppLocalizations {
   /// **'Digital Wallet'**
   String get digitalWallet;
 
-  /// All tab label
+  /// All option
   ///
   /// In en, this message translates to:
   /// **'All'**
@@ -1322,10 +1322,10 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get close;
 
-  /// Select transaction type title
+  /// Select transaction type message
   ///
   /// In en, this message translates to:
-  /// **'Select Transaction Type'**
+  /// **'Select the type of transaction you want to make'**
   String get selectTransactionType;
 
   /// Select transaction type description
@@ -1340,11 +1340,11 @@ abstract class AppLocalizations {
   /// **'Expense saved: {amount}'**
   String expenseSaved(String amount);
 
-  /// Generic error message
+  /// Error occurred message
   ///
   /// In en, this message translates to:
-  /// **'An error occurred. Please try again.'**
-  String get errorOccurred;
+  /// **'Error: {error}'**
+  String errorOccurred(String error);
 
   /// Enter amount step title
   ///
@@ -1418,7 +1418,7 @@ abstract class AppLocalizations {
   /// **'Summary'**
   String get summary;
 
-  /// Category label
+  /// Category placeholder
   ///
   /// In en, this message translates to:
   /// **'Category'**
@@ -1655,7 +1655,7 @@ abstract class AppLocalizations {
   /// Loan category
   ///
   /// In en, this message translates to:
-  /// **'Loan/Installment'**
+  /// **'Loan'**
   String get loan;
 
   /// Subscription category description
@@ -1700,7 +1700,7 @@ abstract class AppLocalizations {
   /// **'Next'**
   String get next;
 
-  /// Save button text
+  /// Save
   ///
   /// In en, this message translates to:
   /// **'Save'**
@@ -2231,8 +2231,8 @@ abstract class AppLocalizations {
   /// Unknown error message
   ///
   /// In en, this message translates to:
-  /// **'Unknown error'**
-  String get unknownError;
+  /// **'An error occurred: {error}'**
+  String unknownError(String error);
 
   /// Retry button text
   ///
@@ -2318,7 +2318,7 @@ abstract class AppLocalizations {
   /// **'Installment Info'**
   String get installmentInfo;
 
-  /// No description provided for @availableLimit.
+  /// Available Limit
   ///
   /// In en, this message translates to:
   /// **'Available Limit'**
@@ -2444,7 +2444,7 @@ abstract class AppLocalizations {
   /// **'Save Recurring Payment'**
   String get saveRecurringPayment;
 
-  /// Empty state title when no transactions exist
+  /// No transactions message
   ///
   /// In en, this message translates to:
   /// **'No transactions yet'**
@@ -2492,7 +2492,7 @@ abstract class AppLocalizations {
   /// **'No accounts available'**
   String get noAccountsAvailable;
 
-  /// Debit card account type
+  /// Debit Card
   ///
   /// In en, this message translates to:
   /// **'Debit Card'**
@@ -2540,19 +2540,19 @@ abstract class AppLocalizations {
   /// **'Spending Trends'**
   String get spendingTrends;
 
-  /// This month label
+  /// This month
   ///
   /// In en, this message translates to:
   /// **'This Month'**
   String get thisMonth;
 
-  /// Last month label
+  /// Last month
   ///
   /// In en, this message translates to:
   /// **'Last Month'**
   String get lastMonth;
 
-  /// Last 3 months label
+  /// Last 3 months
   ///
   /// In en, this message translates to:
   /// **'Last 3 Months'**
@@ -2648,10 +2648,10 @@ abstract class AppLocalizations {
   /// **'No data to analyze yet'**
   String get noDataYet;
 
-  /// No description provided for @addFirstTransaction.
+  /// Add first transaction message
   ///
   /// In en, this message translates to:
-  /// **'Add First Transaction'**
+  /// **'Add your first transaction to get started'**
   String get addFirstTransaction;
 
   /// No description provided for @analyzingData.
@@ -2738,7 +2738,7 @@ abstract class AppLocalizations {
   /// **'Total Debts'**
   String get totalDebts;
 
-  /// No description provided for @availableCredit.
+  /// Available Credit
   ///
   /// In en, this message translates to:
   /// **'Available Credit'**
@@ -2755,6 +2755,1854 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transactions'**
   String get transactionCount;
+
+  /// Camera option for image picker
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// Gallery option for image picker
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// Delete photo option
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Photo'**
+  String get deletePhoto;
+
+  /// Photo upload error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error uploading photo: {error}'**
+  String photoUploadError(String error);
+
+  /// Photo delete error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting photo: {error}'**
+  String photoDeleteError(String error);
+
+  /// File not found error
+  ///
+  /// In en, this message translates to:
+  /// **'File not found'**
+  String get fileNotFound;
+
+  /// File too large error message
+  ///
+  /// In en, this message translates to:
+  /// **'File too large (max 5MB)'**
+  String get fileTooLarge;
+
+  /// User session not found error
+  ///
+  /// In en, this message translates to:
+  /// **'User session not found'**
+  String get userSessionNotFound;
+
+  /// Photo deleted successfully message
+  ///
+  /// In en, this message translates to:
+  /// **'Photo deleted successfully'**
+  String get photoDeletedSuccessfully;
+
+  /// Photo uploaded successfully message
+  ///
+  /// In en, this message translates to:
+  /// **'Photo uploaded successfully'**
+  String get photoUploadedSuccessfully;
+
+  /// Select image source dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Image Source'**
+  String get selectImageSource;
+
+  /// Select image source dialog description
+  ///
+  /// In en, this message translates to:
+  /// **'Where would you like to select your photo from?'**
+  String get selectImageSourceDescription;
+
+  /// Photo uploading loading message
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo...'**
+  String get uploadingPhoto;
+
+  /// Photo deleting loading message
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting photo...'**
+  String get deletingPhoto;
+
+  /// Profile photo label
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Photo'**
+  String get profilePhoto;
+
+  /// Change profile photo button
+  ///
+  /// In en, this message translates to:
+  /// **'Change Profile Photo'**
+  String get changeProfilePhoto;
+
+  /// Remove profile photo button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Profile Photo'**
+  String get removeProfilePhoto;
+
+  /// Profile photo updated message
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo updated'**
+  String get profilePhotoUpdated;
+
+  /// Profile photo removed message
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo removed'**
+  String get profilePhotoRemoved;
+
+  /// Delete transaction dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Transaction'**
+  String get deleteTransaction;
+
+  /// Delete transaction confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the transaction {description}?'**
+  String deleteTransactionConfirm(String description);
+
+  /// Delete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// Transaction deleted message
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction deleted'**
+  String get transactionDeleted;
+
+  /// Transaction delete error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting transaction: {error}'**
+  String transactionDeleteError(String error);
+
+  /// Delete installment transaction dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Installment Transaction'**
+  String get deleteInstallmentTransaction;
+
+  /// Delete installment transaction confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to completely delete the installment transaction {description}? This will delete all installments.'**
+  String deleteInstallmentTransactionConfirm(String description);
+
+  /// Installment transaction deleted message
+  ///
+  /// In en, this message translates to:
+  /// **'Installment transaction deleted'**
+  String get installmentTransactionDeleted;
+
+  /// Installment transaction delete error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting installment transaction: {error}'**
+  String installmentTransactionDeleteError(String error);
+
+  /// Delete all button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All'**
+  String get deleteAll;
+
+  /// Delete limit dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Limit'**
+  String get deleteLimit;
+
+  /// Delete limit confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the limit set for {categoryName} category?'**
+  String deleteLimitConfirm(String categoryName);
+
+  /// Limit deleted success message
+  ///
+  /// In en, this message translates to:
+  /// **'Limit deleted'**
+  String get limitDeleted;
+
+  /// Delete limit tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Limit'**
+  String get deleteLimitTooltip;
+
+  /// Error prefix
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// Loading message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// Loading past statements message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading past statements...'**
+  String get loadingPastStatements;
+
+  /// Loading future statements message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading future statements...'**
+  String get loadingFutureStatements;
+
+  /// Loading cards error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading cards'**
+  String get loadingCards;
+
+  /// Loading accounts message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading accounts'**
+  String get loadingAccounts;
+
+  /// Loading statement info error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading statement information'**
+  String get loadingStatementInfo;
+
+  /// Payment error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error occurred during payment'**
+  String get paymentError;
+
+  /// Statement mark error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error marking statement'**
+  String get statementMarkError;
+
+  /// Delete card dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Card'**
+  String get deleteCard;
+
+  /// Delete card confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete {cardName} card?\n\nThis action cannot be undone.'**
+  String deleteCardConfirm(String cardName);
+
+  /// Card deleted success message
+  ///
+  /// In en, this message translates to:
+  /// **'Card deleted successfully'**
+  String get cardDeleted;
+
+  /// Card delete error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting card'**
+  String get cardDeleteError;
+
+  /// Transaction add error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error adding transaction: {error}'**
+  String transactionAddError(String error);
+
+  /// Update error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error during update: {error}'**
+  String updateError(String error);
+
+  /// Delete failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed'**
+  String get deleteFailed;
+
+  /// Installment transaction deleting message
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting installment transaction...'**
+  String get installmentTransactionDeleting;
+
+  /// Installment transaction deleted with refund message
+  ///
+  /// In en, this message translates to:
+  /// **'Installment transaction deleted, total amount refunded'**
+  String get installmentTransactionDeletedWithRefund;
+
+  /// Cancel action button text
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelAction;
+
+  /// Quick notes feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Notes'**
+  String get quickNotes;
+
+  /// Quick notes feature subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Persistent notification for instant note taking'**
+  String get quickNotesSubtitle;
+
+  /// Quick notes notification enabled message
+  ///
+  /// In en, this message translates to:
+  /// **'Quick notes notification enabled'**
+  String get quickNotesNotificationEnabled;
+
+  /// Quick notes notification disabled message
+  ///
+  /// In en, this message translates to:
+  /// **'Quick notes notification disabled'**
+  String get quickNotesNotificationDisabled;
+
+  /// Notification permission required message
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission required! Please enable it in settings.'**
+  String get notificationPermissionRequired;
+
+  /// Frequently Asked Questions
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Asked Questions'**
+  String get frequentlyAskedQuestions;
+
+  /// Account placeholder text
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// Now time indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get now;
+
+  /// Yesterday time indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// Expense transaction type
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get expense;
+
+  /// Transfer transaction type
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transfer;
+
+  /// Today
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// Minutes ago text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min ago'**
+  String minutesAgo(int count);
+
+  /// Hours ago text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours ago'**
+  String hoursAgo(int count);
+
+  /// Days ago text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String daysAgo(int count);
+
+  /// Weeks ago text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} weeks ago'**
+  String weeksAgo(int count);
+
+  /// Months ago text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} months ago'**
+  String monthsAgo(int count);
+
+  /// Years ago text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} years ago'**
+  String yearsAgo(int count);
+
+  /// One minute ago text
+  ///
+  /// In en, this message translates to:
+  /// **'1 min ago'**
+  String get oneMinuteAgo;
+
+  /// One hour ago text
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour ago'**
+  String get oneHourAgo;
+
+  /// One week ago text
+  ///
+  /// In en, this message translates to:
+  /// **'1 week ago'**
+  String get oneWeekAgo;
+
+  /// One month ago text
+  ///
+  /// In en, this message translates to:
+  /// **'1 month ago'**
+  String get oneMonthAgo;
+
+  /// One year ago text
+  ///
+  /// In en, this message translates to:
+  /// **'1 year ago'**
+  String get oneYearAgo;
+
+  /// Two days ago text
+  ///
+  /// In en, this message translates to:
+  /// **'2 days ago'**
+  String get twoDaysAgo;
+
+  /// Per month indicator
+  ///
+  /// In en, this message translates to:
+  /// **'/month'**
+  String get perMonth;
+
+  /// Net amount
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get net;
+
+  /// Please enter amount error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an amount'**
+  String get pleaseEnterAmount;
+
+  /// Please enter valid amount error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid amount'**
+  String get pleaseEnterValidAmount;
+
+  /// Please select source account error
+  ///
+  /// In en, this message translates to:
+  /// **'Please select source account'**
+  String get pleaseSelectSourceAccount;
+
+  /// Please select target account error
+  ///
+  /// In en, this message translates to:
+  /// **'Please select target account'**
+  String get pleaseSelectTargetAccount;
+
+  /// Source and target account same error
+  ///
+  /// In en, this message translates to:
+  /// **'Source and target account cannot be the same'**
+  String get sourceAndTargetSame;
+
+  /// Account info not found error
+  ///
+  /// In en, this message translates to:
+  /// **'Account information could not be retrieved'**
+  String get accountInfoNotFound;
+
+  /// Account information could not be retrieved (single)
+  ///
+  /// In en, this message translates to:
+  /// **'Account information could not be retrieved'**
+  String get accountInfoNotFoundSingle;
+
+  /// Please select a category
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a category'**
+  String get pleaseSelectCategory;
+
+  /// Please select a payment method
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a payment method'**
+  String get pleaseSelectPaymentMethod;
+
+  /// Cards loading error
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading cards'**
+  String get cardsLoadingError;
+
+  /// No cards added yet
+  ///
+  /// In en, this message translates to:
+  /// **'No cards added yet'**
+  String get noCardsAddedYet;
+
+  /// Transaction generic term
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get transaction;
+
+  /// Bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta'**
+  String get bankName;
+
+  /// Repeats every week
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats every week'**
+  String get repeatsEveryWeek;
+
+  /// Repeats every month
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats every month'**
+  String get repeatsEveryMonth;
+
+  /// Repeats every quarter
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats every quarter'**
+  String get repeatsEveryQuarter;
+
+  /// Repeats every year
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats every year'**
+  String get repeatsEveryYear;
+
+  /// Other fixed payments
+  ///
+  /// In en, this message translates to:
+  /// **'Other fixed payments'**
+  String get otherFixedPayments;
+
+  /// This week
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get thisWeek;
+
+  /// This year
+  ///
+  /// In en, this message translates to:
+  /// **'This Year'**
+  String get thisYear;
+
+  /// Last year
+  ///
+  /// In en, this message translates to:
+  /// **'Last Year'**
+  String get lastYear;
+
+  /// Custom period
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// Search transactions placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Search Transactions'**
+  String get searchTransactions;
+
+  /// Filter by type
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Type'**
+  String get filterByType;
+
+  /// Filter by period
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Period'**
+  String get filterByPeriod;
+
+  /// Filter by category
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Category'**
+  String get filterByCategory;
+
+  /// Clear filters
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get clearFilters;
+
+  /// Apply filters
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters'**
+  String get applyFilters;
+
+  /// No results found
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResultsFound;
+
+  /// Try different search
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search'**
+  String get tryDifferentSearch;
+
+  /// No notes yet
+  ///
+  /// In en, this message translates to:
+  /// **'No notes yet'**
+  String get noNotesYet;
+
+  /// Add your expense or income notes here
+  ///
+  /// In en, this message translates to:
+  /// **'Add your expense or income notes here'**
+  String get addExpenseIncomeNotes;
+
+  /// Just now
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// Monday
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get monday;
+
+  /// Tuesday
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get tuesday;
+
+  /// Wednesday
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get wednesday;
+
+  /// Thursday
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get thursday;
+
+  /// Friday
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get friday;
+
+  /// Saturday
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get saturday;
+
+  /// Sunday
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get sunday;
+
+  /// January
+  ///
+  /// In en, this message translates to:
+  /// **'January'**
+  String get january;
+
+  /// February
+  ///
+  /// In en, this message translates to:
+  /// **'February'**
+  String get february;
+
+  /// March
+  ///
+  /// In en, this message translates to:
+  /// **'March'**
+  String get march;
+
+  /// April
+  ///
+  /// In en, this message translates to:
+  /// **'April'**
+  String get april;
+
+  /// May
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get may;
+
+  /// June
+  ///
+  /// In en, this message translates to:
+  /// **'June'**
+  String get june;
+
+  /// July
+  ///
+  /// In en, this message translates to:
+  /// **'July'**
+  String get july;
+
+  /// August
+  ///
+  /// In en, this message translates to:
+  /// **'August'**
+  String get august;
+
+  /// September
+  ///
+  /// In en, this message translates to:
+  /// **'September'**
+  String get september;
+
+  /// October
+  ///
+  /// In en, this message translates to:
+  /// **'October'**
+  String get october;
+
+  /// November
+  ///
+  /// In en, this message translates to:
+  /// **'November'**
+  String get november;
+
+  /// December
+  ///
+  /// In en, this message translates to:
+  /// **'December'**
+  String get december;
+
+  /// Text Note
+  ///
+  /// In en, this message translates to:
+  /// **'Text Note'**
+  String get textNote;
+
+  /// Add quick text note
+  ///
+  /// In en, this message translates to:
+  /// **'Add quick text note'**
+  String get addQuickTextNote;
+
+  /// Take Photo
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get takePhoto;
+
+  /// Take photo from camera
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo from camera'**
+  String get takePhotoFromCamera;
+
+  /// Select from Gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Select from Gallery'**
+  String get selectFromGallery;
+
+  /// Select photo from gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Select photo from gallery'**
+  String get selectPhotoFromGallery;
+
+  /// Error capturing photo
+  ///
+  /// In en, this message translates to:
+  /// **'Error capturing photo'**
+  String get photoCaptureError;
+
+  /// Error selecting photo
+  ///
+  /// In en, this message translates to:
+  /// **'Error selecting photo'**
+  String get photoSelectionError;
+
+  /// Add
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// Photo note
+  ///
+  /// In en, this message translates to:
+  /// **'Photo note'**
+  String get photoNote;
+
+  /// Photo note added
+  ///
+  /// In en, this message translates to:
+  /// **'Photo note added'**
+  String get photoNoteAdded;
+
+  /// Error adding photo note
+  ///
+  /// In en, this message translates to:
+  /// **'Error adding photo note'**
+  String get photoNoteAddError;
+
+  /// Note added
+  ///
+  /// In en, this message translates to:
+  /// **'Note added'**
+  String get noteAdded;
+
+  /// Error adding note
+  ///
+  /// In en, this message translates to:
+  /// **'Error adding note'**
+  String get noteAddError;
+
+  /// Note deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Note deleted'**
+  String get noteDeleted;
+
+  /// Error deleting note
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting note'**
+  String get noteDeleteError;
+
+  /// No notes converted to transactions yet
+  ///
+  /// In en, this message translates to:
+  /// **'No notes converted to transactions yet'**
+  String get noConvertedNotesYet;
+
+  /// Stop
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stop;
+
+  /// Send
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// Processed
+  ///
+  /// In en, this message translates to:
+  /// **'Processed'**
+  String get processed;
+
+  /// Newest
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get newest;
+
+  /// Oldest
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get oldest;
+
+  /// Highest to Lowest
+  ///
+  /// In en, this message translates to:
+  /// **'Highest to Lowest'**
+  String get highestToLowest;
+
+  /// Lowest to Highest
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest to Highest'**
+  String get lowestToHighest;
+
+  /// Alphabetical
+  ///
+  /// In en, this message translates to:
+  /// **'A-Z'**
+  String get alphabetical;
+
+  /// More
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// Less
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get less;
+
+  /// Card Name
+  ///
+  /// In en, this message translates to:
+  /// **'Card Name'**
+  String get cardName;
+
+  /// Usage
+  ///
+  /// In en, this message translates to:
+  /// **'Usage'**
+  String get usage;
+
+  /// Last Payment
+  ///
+  /// In en, this message translates to:
+  /// **'Last Payment'**
+  String get lastPayment;
+
+  /// Next Payment
+  ///
+  /// In en, this message translates to:
+  /// **'Next Payment'**
+  String get nextPayment;
+
+  /// Minimum Payment
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Payment'**
+  String get minimumPayment;
+
+  /// Total Debt
+  ///
+  /// In en, this message translates to:
+  /// **'Total Debt'**
+  String get totalDebt;
+
+  /// No transactions found for this card
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions found for this card'**
+  String get noTransactionsForThisCard;
+
+  /// Statement successfully marked as paid
+  ///
+  /// In en, this message translates to:
+  /// **'Statement successfully marked as paid'**
+  String get statementSuccessfullyPaid;
+
+  /// Bank
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get bank;
+
+  /// Card name is required
+  ///
+  /// In en, this message translates to:
+  /// **'Card name is required'**
+  String get cardNameRequired;
+
+  /// Credit limit is required
+  ///
+  /// In en, this message translates to:
+  /// **'Credit limit is required'**
+  String get creditLimitRequired;
+
+  /// Debt
+  ///
+  /// In en, this message translates to:
+  /// **'Debt'**
+  String get debt;
+
+  /// No notifications
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
+  String get noNotifications;
+
+  /// Usage Rate
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Rate'**
+  String get usageRate;
+
+  /// Statement Day
+  ///
+  /// In en, this message translates to:
+  /// **'Statement Day'**
+  String get statementDay;
+
+  /// Credit Card Info
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card Info'**
+  String get creditCardInfo;
+
+  /// Installment details could not be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Installment details could not be loaded'**
+  String get installmentDetailsLoadError;
+
+  /// Tomorrow
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// Current Password
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// New Password
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// Confirm New Password
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// Your password must be at least 6 characters long.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password must be at least 6 characters long.'**
+  String get passwordMinLengthInfo;
+
+  /// Password must be at least 6 characters
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordMinLength;
+
+  /// Password changed successfully
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully'**
+  String get passwordChangedSuccessfully;
+
+  /// Current password is incorrect
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is incorrect'**
+  String get wrongCurrentPassword;
+
+  /// Password is too weak
+  ///
+  /// In en, this message translates to:
+  /// **'Password is too weak'**
+  String get passwordTooWeak;
+
+  /// Please log in again to change your password
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in again to change your password'**
+  String get requiresRecentLogin;
+
+  /// Password change failed
+  ///
+  /// In en, this message translates to:
+  /// **'Password change failed'**
+  String get passwordChangeFailed;
+
+  /// OK
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// Collected Information
+  ///
+  /// In en, this message translates to:
+  /// **'Collected Information'**
+  String get collectedInformation;
+
+  /// Collected Information Content
+  ///
+  /// In en, this message translates to:
+  /// **'The Qanta application collects the following information to provide you with better service:\n\n• Account information (email, name-surname)\n• Financial transaction data (income, expense, transfer records)\n• Card and account information\n• Budget and category preferences\n• Application usage statistics'**
+  String get collectedInformationContent;
+
+  /// Information Usage
+  ///
+  /// In en, this message translates to:
+  /// **'Information Usage'**
+  String get informationUsage;
+
+  /// Information Usage Content
+  ///
+  /// In en, this message translates to:
+  /// **'The collected information is used for the following purposes:\n\n• Providing personal finance management services\n• Budget tracking and expense analysis\n• Improving application performance\n• Security and fraud prevention\n• Fulfilling legal obligations'**
+  String get informationUsageContent;
+
+  /// Data Security
+  ///
+  /// In en, this message translates to:
+  /// **'Data Security'**
+  String get dataSecurity;
+
+  /// Data Security Content
+  ///
+  /// In en, this message translates to:
+  /// **'The security of your data is our priority:\n\n• All data is stored encrypted\n• Hosted on secure servers\n• Regular security updates are made\n• Protected against unauthorized access\n• Industry-standard security measures are taken'**
+  String get dataSecurityContent;
+
+  /// Data Sharing
+  ///
+  /// In en, this message translates to:
+  /// **'Data Sharing'**
+  String get dataSharing;
+
+  /// Data Sharing Content
+  ///
+  /// In en, this message translates to:
+  /// **'Your personal data is not shared with third parties except in the following cases:\n\n• Legal obligations\n• In case of security breaches\n• With your explicit consent\n• Limited sharing with service providers (anonymous)'**
+  String get dataSharingContent;
+
+  /// User Rights
+  ///
+  /// In en, this message translates to:
+  /// **'User Rights'**
+  String get userRights;
+
+  /// User Rights Content
+  ///
+  /// In en, this message translates to:
+  /// **'Your rights under GDPR:\n\n• Learning whether your personal data is processed\n• Requesting access to your data\n• Requesting correction of incorrect information\n• Requesting deletion of data\n• Completely closing your account'**
+  String get userRightsContent;
+
+  /// Contact
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contact;
+
+  /// Contact Content
+  ///
+  /// In en, this message translates to:
+  /// **'For questions about the privacy policy:\n\nEmail: privacy@qanta.app\nAddress: Istanbul, Turkey\n\nThis policy was last updated: January 20, 2025'**
+  String get contactContent;
+
+  /// Support & Contact
+  ///
+  /// In en, this message translates to:
+  /// **'Support & Contact'**
+  String get supportAndContact;
+
+  /// Phone
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// Live Support
+  ///
+  /// In en, this message translates to:
+  /// **'Live Support'**
+  String get liveSupport;
+
+  /// Live Support Hours
+  ///
+  /// In en, this message translates to:
+  /// **'Monday-Friday 09:00-18:00'**
+  String get liveSupportHours;
+
+  /// Is my data secure?
+  ///
+  /// In en, this message translates to:
+  /// **'Is my data secure?'**
+  String get isMyDataSecure;
+
+  /// Is my data secure answer
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, all your data is stored encrypted and hosted on secure servers. We provide industry-standard security using Supabase infrastructure.'**
+  String get isMyDataSecureAnswer;
+
+  /// Forgot password answer
+  ///
+  /// In en, this message translates to:
+  /// **'You can use the \"Forgot Password\" option on the login screen to send a password reset link to your email address.'**
+  String get forgotPasswordAnswer;
+
+  /// How to delete account
+  ///
+  /// In en, this message translates to:
+  /// **'How can I delete my account?'**
+  String get howToDeleteAccount;
+
+  /// How to delete account answer
+  ///
+  /// In en, this message translates to:
+  /// **'You can log out from the profile page or contact our support team to request complete deletion of your account.'**
+  String get howToDeleteAccountAnswer;
+
+  /// Is app free?
+  ///
+  /// In en, this message translates to:
+  /// **'Is the app free?'**
+  String get isAppFree;
+
+  /// Is app free answer
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Qanta can be used completely free. Premium features may be added in the future, but basic features will always remain free.'**
+  String get isAppFreeAnswer;
+
+  /// App Information
+  ///
+  /// In en, this message translates to:
+  /// **'App Information'**
+  String get appInformation;
+
+  /// Last Update
+  ///
+  /// In en, this message translates to:
+  /// **'Last Update'**
+  String get lastUpdate;
+
+  /// Developer
+  ///
+  /// In en, this message translates to:
+  /// **'Developer'**
+  String get developer;
+
+  /// Platform
+  ///
+  /// In en, this message translates to:
+  /// **'Platform'**
+  String get platform;
+
+  /// Live Support Title
+  ///
+  /// In en, this message translates to:
+  /// **'Live Support'**
+  String get liveSupportTitle;
+
+  /// Live Support Message
+  ///
+  /// In en, this message translates to:
+  /// **'Live support service is currently in development. For urgent matters, please contact us via email or phone.'**
+  String get liveSupportMessage;
+
+  /// Service Description
+  ///
+  /// In en, this message translates to:
+  /// **'Service Description'**
+  String get serviceDescription;
+
+  /// Service Description Content
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta is a mobile application designed for personal finance management. The application offers the following services:\n\n• Income and expense tracking\n• Budget management and planning\n• Card and account management\n• Financial reporting and analysis\n• Installment tracking and management'**
+  String get serviceDescriptionContent;
+
+  /// Usage Terms
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Terms'**
+  String get usageTerms;
+
+  /// Usage Terms Content
+  ///
+  /// In en, this message translates to:
+  /// **'By using the Qanta application, you agree to the following terms:\n\n• You will use the application only for legal purposes\n• You will provide accurate and up-to-date information\n• You will protect your account security\n• You will respect the rights of other users\n• You will avoid misuse of the application'**
+  String get usageTermsContent;
+
+  /// User Responsibilities
+  ///
+  /// In en, this message translates to:
+  /// **'User Responsibilities'**
+  String get userResponsibilities;
+
+  /// User Responsibilities Content
+  ///
+  /// In en, this message translates to:
+  /// **'As a user, you have the following responsibilities:\n\n• Keeping your account information secure\n• Not sharing your password with anyone\n• Ensuring the accuracy of your financial data\n• Complying with application rules\n• Reporting security breaches'**
+  String get userResponsibilitiesContent;
+
+  /// Service Limitations
+  ///
+  /// In en, this message translates to:
+  /// **'Service Limitations'**
+  String get serviceLimitations;
+
+  /// Service Limitations Content
+  ///
+  /// In en, this message translates to:
+  /// **'The Qanta application is subject to the following limitations:\n\n• Does not provide financial advisory services\n• Does not give investment advice\n• Does not perform banking transactions\n• Does not provide credit or lending services\n• Does not provide tax advisory services'**
+  String get serviceLimitationsContent;
+
+  /// Intellectual Property
+  ///
+  /// In en, this message translates to:
+  /// **'Intellectual Property'**
+  String get intellectualProperty;
+
+  /// Intellectual Property Content
+  ///
+  /// In en, this message translates to:
+  /// **'All content of the Qanta application is protected by copyright:\n\n• Application design and code\n• Logo and brand elements\n• Text and visual content\n• Algorithms and calculation methods\n• Database structure'**
+  String get intellectualPropertyContent;
+
+  /// Service Changes
+  ///
+  /// In en, this message translates to:
+  /// **'Service Changes'**
+  String get serviceChanges;
+
+  /// Service Changes Content
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta reserves the right to make changes to its services:\n\n• Adding or removing features\n• Pricing changes\n• Updating terms of use\n• Service termination\n• Maintenance and updates'**
+  String get serviceChangesContent;
+
+  /// Disclaimer
+  ///
+  /// In en, this message translates to:
+  /// **'Disclaimer'**
+  String get disclaimer;
+
+  /// Disclaimer Content
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta is not responsible for the following situations:\n\n• Data loss or corruption\n• System failures or interruptions\n• Third-party service providers\n• Damages resulting from user errors\n• Internet connection issues'**
+  String get disclaimerContent;
+
+  /// Terms Contact
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get termsContact;
+
+  /// Terms Contact Content
+  ///
+  /// In en, this message translates to:
+  /// **'For questions about terms of service:\n\nEmail: support@qanta.app\nWeb: www.qanta.app\nAddress: Istanbul, Turkey\n\nThese terms were last updated: January 20, 2025'**
+  String get termsContactContent;
+
+  /// FAQ
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Asked Questions'**
+  String get faq;
+
+  /// General Questions
+  ///
+  /// In en, this message translates to:
+  /// **'General Questions'**
+  String get generalQuestions;
+
+  /// Account and Security
+  ///
+  /// In en, this message translates to:
+  /// **'Account and Security'**
+  String get accountAndSecurity;
+
+  /// Features
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get features;
+
+  /// Technical Issues
+  ///
+  /// In en, this message translates to:
+  /// **'Technical Issues'**
+  String get technicalIssues;
+
+  /// What is Qanta?
+  ///
+  /// In en, this message translates to:
+  /// **'What is Qanta?'**
+  String get whatIsQanta;
+
+  /// What is Qanta answer
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta is a modern mobile application designed for personal finance management. It offers income-expense tracking, budget management, card tracking, and financial analysis features.'**
+  String get whatIsQantaAnswer;
+
+  /// Which devices are supported?
+  ///
+  /// In en, this message translates to:
+  /// **'Which devices can I use it on?'**
+  String get whichDevicesSupported;
+
+  /// Which devices supported answer
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta can be used on Android and iOS devices. It is developed with Flutter technology.'**
+  String get whichDevicesSupportedAnswer;
+
+  /// How to change password
+  ///
+  /// In en, this message translates to:
+  /// **'How can I change my password?'**
+  String get howToChangePassword;
+
+  /// How to change password answer
+  ///
+  /// In en, this message translates to:
+  /// **'You can use the \"Change Password\" option from the \"Security\" section on the profile page.'**
+  String get howToChangePasswordAnswer;
+
+  /// Which card types are supported?
+  ///
+  /// In en, this message translates to:
+  /// **'Which card types do you support?'**
+  String get whichCardTypesSupported;
+
+  /// Which card types supported answer
+  ///
+  /// In en, this message translates to:
+  /// **'Credit cards, debit cards, and cash accounts are supported. Compatible with all Turkish banks.'**
+  String get whichCardTypesSupportedAnswer;
+
+  /// How does installment tracking work?
+  ///
+  /// In en, this message translates to:
+  /// **'How does installment tracking work?'**
+  String get howDoesInstallmentTrackingWork;
+
+  /// How does installment tracking work answer
+  ///
+  /// In en, this message translates to:
+  /// **'You can add installment purchases and automatically track your monthly payments. The system sends you reminders.'**
+  String get howDoesInstallmentTrackingWorkAnswer;
+
+  /// How to use budget management?
+  ///
+  /// In en, this message translates to:
+  /// **'How to use budget management?'**
+  String get howToUseBudgetManagement;
+
+  /// How to use budget management answer
+  ///
+  /// In en, this message translates to:
+  /// **'You can set monthly limits for categories, track your expenses, and receive alerts when limits are exceeded.'**
+  String get howToUseBudgetManagementAnswer;
+
+  /// What is quick notes feature?
+  ///
+  /// In en, this message translates to:
+  /// **'What is the quick notes feature?'**
+  String get whatIsQuickNotesFeature;
+
+  /// What is quick notes feature answer
+  ///
+  /// In en, this message translates to:
+  /// **'You can quickly take notes with persistent notifications, add photos, and categorize your notes.'**
+  String get whatIsQuickNotesFeatureAnswer;
+
+  /// App is crashing, what should I do?
+  ///
+  /// In en, this message translates to:
+  /// **'The app is crashing, what should I do?'**
+  String get appCrashingWhatToDo;
+
+  /// App crashing what to do answer
+  ///
+  /// In en, this message translates to:
+  /// **'First try closing the app completely and reopening it. If the problem persists, restart your device. If it still doesn\'t resolve, contact our support team.'**
+  String get appCrashingWhatToDoAnswer;
+
+  /// Data not syncing
+  ///
+  /// In en, this message translates to:
+  /// **'My data is not syncing'**
+  String get dataNotSyncing;
+
+  /// Data not syncing answer
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection and restart the app. If the problem persists, try logging out and logging back in.'**
+  String get dataNotSyncingAnswer;
+
+  /// Notifications not coming
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are not coming'**
+  String get notificationsNotComing;
+
+  /// Notifications not coming answer
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure notifications are enabled for Qanta in your device settings. Also check notification settings from the profile page.'**
+  String get notificationsNotComingAnswer;
+
+  /// How to contact support
+  ///
+  /// In en, this message translates to:
+  /// **'How can I contact your support team?'**
+  String get howToContactSupport;
+
+  /// How to contact support answer
+  ///
+  /// In en, this message translates to:
+  /// **'You can use the \"Support & Contact\" section from the profile page or send an email to support@qanta.app.'**
+  String get howToContactSupportAnswer;
+
+  /// Have suggestion, where to send
+  ///
+  /// In en, this message translates to:
+  /// **'I have a suggestion, where can I send it?'**
+  String get haveSuggestionWhereToSend;
+
+  /// Have suggestion where to send answer
+  ///
+  /// In en, this message translates to:
+  /// **'You can send your suggestions to support@qanta.app. All feedback is evaluated and used to improve the application.'**
+  String get haveSuggestionWhereToSendAnswer;
+
+  /// Last month change
+  ///
+  /// In en, this message translates to:
+  /// **'from last month'**
+  String get lastMonthChange;
+
+  /// Increase
+  ///
+  /// In en, this message translates to:
+  /// **'increase'**
+  String get increase;
+
+  /// Decrease
+  ///
+  /// In en, this message translates to:
+  /// **'decrease'**
+  String get decrease;
+
+  /// No accounts yet
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts yet'**
+  String get noAccountsYet;
+
+  /// Add first account to get started
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first account to get started'**
+  String get addFirstAccount;
+
+  /// Current Debt
+  ///
+  /// In en, this message translates to:
+  /// **'Current Debt'**
+  String get currentDebt;
+
+  /// Total Limit
+  ///
+  /// In en, this message translates to:
+  /// **'Total Limit'**
+  String get totalLimit;
+
+  /// Cash Wallet
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Wallet'**
+  String get cashWallet;
+
+  /// Search banks
+  ///
+  /// In en, this message translates to:
+  /// **'Search banks...'**
+  String get searchBanks;
+
+  /// No banks found
+  ///
+  /// In en, this message translates to:
+  /// **'No banks found'**
+  String get noBanksFound;
+
+  /// Add Credit Card
+  ///
+  /// In en, this message translates to:
+  /// **'Add Credit Card'**
+  String get addCreditCard;
+
+  /// Card name example
+  ///
+  /// In en, this message translates to:
+  /// **'E.g: VakıfBank Credit Card'**
+  String get cardNameExample;
+
+  /// Current Debt (Optional)
+  ///
+  /// In en, this message translates to:
+  /// **'Current Debt (Optional)'**
+  String get currentDebtOptional;
+
+  /// Add Debit Card
+  ///
+  /// In en, this message translates to:
+  /// **'Add Debit Card'**
+  String get addDebitCard;
+
+  /// Debit card name example
+  ///
+  /// In en, this message translates to:
+  /// **'E.g: VakıfBank Checking'**
+  String get cardNameExampleDebit;
+
+  /// Initial Balance
+  ///
+  /// In en, this message translates to:
+  /// **'Initial Balance'**
+  String get initialBalance;
+
+  /// day
+  ///
+  /// In en, this message translates to:
+  /// **'day'**
+  String get day;
+
+  /// 1st
+  ///
+  /// In en, this message translates to:
+  /// **'1st'**
+  String get firstDay;
+
+  /// 2nd
+  ///
+  /// In en, this message translates to:
+  /// **'2nd'**
+  String get secondDay;
+
+  /// 3rd
+  ///
+  /// In en, this message translates to:
+  /// **'3rd'**
+  String get thirdDay;
+
+  /// 4th
+  ///
+  /// In en, this message translates to:
+  /// **'4th'**
+  String get fourthDay;
+
+  /// 5th
+  ///
+  /// In en, this message translates to:
+  /// **'5th'**
+  String get fifthDay;
+
+  /// 6th
+  ///
+  /// In en, this message translates to:
+  /// **'6th'**
+  String get sixthDay;
+
+  /// 7th
+  ///
+  /// In en, this message translates to:
+  /// **'7th'**
+  String get seventhDay;
+
+  /// 8th
+  ///
+  /// In en, this message translates to:
+  /// **'8th'**
+  String get eighthDay;
+
+  /// 9th
+  ///
+  /// In en, this message translates to:
+  /// **'9th'**
+  String get ninthDay;
+
+  /// 10th
+  ///
+  /// In en, this message translates to:
+  /// **'10th'**
+  String get tenthDay;
+
+  /// 11th
+  ///
+  /// In en, this message translates to:
+  /// **'11th'**
+  String get eleventhDay;
+
+  /// 12th
+  ///
+  /// In en, this message translates to:
+  /// **'12th'**
+  String get twelfthDay;
+
+  /// 13th
+  ///
+  /// In en, this message translates to:
+  /// **'13th'**
+  String get thirteenthDay;
+
+  /// 14th
+  ///
+  /// In en, this message translates to:
+  /// **'14th'**
+  String get fourteenthDay;
+
+  /// 15th
+  ///
+  /// In en, this message translates to:
+  /// **'15th'**
+  String get fifteenthDay;
+
+  /// 16th
+  ///
+  /// In en, this message translates to:
+  /// **'16th'**
+  String get sixteenthDay;
+
+  /// 17th
+  ///
+  /// In en, this message translates to:
+  /// **'17th'**
+  String get seventeenthDay;
+
+  /// 18th
+  ///
+  /// In en, this message translates to:
+  /// **'18th'**
+  String get eighteenthDay;
+
+  /// 19th
+  ///
+  /// In en, this message translates to:
+  /// **'19th'**
+  String get nineteenthDay;
+
+  /// 20th
+  ///
+  /// In en, this message translates to:
+  /// **'20th'**
+  String get twentiethDay;
+
+  /// 21st
+  ///
+  /// In en, this message translates to:
+  /// **'21st'**
+  String get twentyFirstDay;
+
+  /// 22nd
+  ///
+  /// In en, this message translates to:
+  /// **'22nd'**
+  String get twentySecondDay;
+
+  /// 23rd
+  ///
+  /// In en, this message translates to:
+  /// **'23rd'**
+  String get twentyThirdDay;
+
+  /// 24th
+  ///
+  /// In en, this message translates to:
+  /// **'24th'**
+  String get twentyFourthDay;
+
+  /// 25th
+  ///
+  /// In en, this message translates to:
+  /// **'25th'**
+  String get twentyFifthDay;
+
+  /// 26th
+  ///
+  /// In en, this message translates to:
+  /// **'26th'**
+  String get twentySixthDay;
+
+  /// 27th
+  ///
+  /// In en, this message translates to:
+  /// **'27th'**
+  String get twentySeventhDay;
+
+  /// 28th
+  ///
+  /// In en, this message translates to:
+  /// **'28th'**
+  String get twentyEighthDay;
+
+  /// Select Card Type
+  ///
+  /// In en, this message translates to:
+  /// **'Select Card Type'**
+  String get selectCardType;
+
+  /// Add checking account card
+  ///
+  /// In en, this message translates to:
+  /// **'Add checking account card'**
+  String get addDebitCardDescription;
+
+  /// Add your credit card information
+  ///
+  /// In en, this message translates to:
+  /// **'Add your credit card information'**
+  String get addCreditCardDescription;
 }
 
 class _AppLocalizationsDelegate

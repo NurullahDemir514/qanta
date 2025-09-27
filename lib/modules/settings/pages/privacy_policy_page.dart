@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../l10n/app_localizations.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
@@ -7,6 +8,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: isDark 
@@ -19,14 +21,14 @@ class PrivacyPolicyPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_rounded,
-            color: Color(0xFF007AFF),
+            color: isDark ? Colors.white : Colors.black,
             size: 20,
           ),
         ),
         title: Text(
-          'Gizlilik Politikası',
+          l10n?.privacyPolicy ?? 'Privacy Policy',
           style: GoogleFonts.inter(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -55,72 +57,38 @@ class PrivacyPolicyPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSection(
-                title: '1. Toplanan Bilgiler',
-                content: '''Qanta uygulaması, size daha iyi hizmet verebilmek için aşağıdaki bilgileri toplar:
-
-• Hesap bilgileri (e-posta, ad-soyad)
-• Finansal işlem verileri (gelir, gider, transfer kayıtları)
-• Kart ve hesap bilgileri
-• Bütçe ve kategori tercihleri
-• Uygulama kullanım istatistikleri''',
+                title: '1. ${l10n?.collectedInformation ?? 'Collected Information'}',
+                content: l10n?.collectedInformationContent ?? 'Collected Information Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '2. Bilgilerin Kullanımı',
-                content: '''Toplanan bilgiler aşağıdaki amaçlarla kullanılır:
-
-• Kişisel finans yönetimi hizmetlerinin sağlanması
-• Bütçe takibi ve harcama analizlerinin yapılması
-• Uygulama performansının iyileştirilmesi
-• Güvenlik ve dolandırıcılık önleme
-• Yasal yükümlülüklerin yerine getirilmesi''',
+                title: '2. ${l10n?.informationUsage ?? 'Information Usage'}',
+                content: l10n?.informationUsageContent ?? 'Information Usage Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '3. Veri Güvenliği',
-                content: '''Verilerinizin güvenliği bizim için önceliktir:
-
-• Tüm veriler şifreli olarak saklanır
-• Güvenli sunucularda barındırılır
-• Düzenli güvenlik güncellemeleri yapılır
-• Yetkisiz erişimlere karşı korunur
-• Endüstri standartlarına uygun güvenlik önlemleri alınır''',
+                title: '3. ${l10n?.dataSecurity ?? 'Data Security'}',
+                content: l10n?.dataSecurityContent ?? 'Data Security Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '4. Veri Paylaşımı',
-                content: '''Kişisel verileriniz aşağıdaki durumlar dışında üçüncü taraflarla paylaşılmaz:
-
-• Yasal zorunluluklar
-• Güvenlik ihlalleri durumunda
-• Açık rızanızın bulunması
-• Hizmet sağlayıcıları ile sınırlı paylaşım (anonim)''',
+                title: '4. ${l10n?.dataSharing ?? 'Data Sharing'}',
+                content: l10n?.dataSharingContent ?? 'Data Sharing Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '5. Kullanıcı Hakları',
-                content: '''KVKK kapsamında sahip olduğunuz haklar:
-
-• Kişisel verilerinizin işlenip işlenmediğini öğrenme
-• Verilerinize erişim talep etme
-• Yanlış bilgilerin düzeltilmesini isteme
-• Verilerin silinmesini talep etme
-• Hesabınızı tamamen kapatma''',
+                title: '5. ${l10n?.userRights ?? 'User Rights'}',
+                content: l10n?.userRightsContent ?? 'User Rights Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '6. İletişim',
-                content: '''Gizlilik politikası ile ilgili sorularınız için:
-
-E-posta: privacy@qanta.app
-Adres: İstanbul, Türkiye
-
-Bu politika son güncellenme tarihi: 20 Ocak 2025''',
+                title: '6. ${l10n?.contact ?? 'Contact'}',
+                content: l10n?.contactContent ?? 'Contact Content',
                 isDark: isDark,
               ),
             ],

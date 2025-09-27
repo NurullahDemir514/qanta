@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/theme/theme_provider.dart';
 
 class AmountInputField extends StatelessWidget {
   final TextEditingController controller;
@@ -78,7 +80,7 @@ class AmountInputField extends StatelessWidget {
                 width: 50,
                 alignment: Alignment.center,
                 child: Text(
-                  '₺',
+                  Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,

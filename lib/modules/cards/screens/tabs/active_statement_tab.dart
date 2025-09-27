@@ -8,6 +8,7 @@ import '../../../../core/providers/statement_provider.dart';
 import '../../../../core/services/statement_service.dart';
 import '../../../../shared/models/models_v2.dart';
 import '../../../../shared/models/statement_summary.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/statement_widgets.dart';
 import '../../../../shared/models/transaction_model_v2.dart' as v2;
 
@@ -163,7 +164,7 @@ class _ActiveStatementTabState extends State<ActiveStatementTab> {
             
             // Success message
             Text(
-              'Ekstre başarıyla ödendi olarak işaretlendi',
+              AppLocalizations.of(context)?.statementSuccessfullyPaid ?? 'Statement successfully marked as paid',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
@@ -196,7 +197,7 @@ class _ActiveStatementTabState extends State<ActiveStatementTab> {
                         ),
                       ),
                       Text(
-                        '₺${statement.totalAmount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                        Provider.of<ThemeProvider>(context, listen: false).formatAmount(statement.totalAmount),
                         style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -325,7 +326,7 @@ class _ActiveStatementTabState extends State<ActiveStatementTab> {
                       
                       // Amount
                       Text(
-                        '₺${installment.amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                        Provider.of<ThemeProvider>(context, listen: false).formatAmount(installment.amount),
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -388,7 +389,7 @@ class _ActiveStatementTabState extends State<ActiveStatementTab> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: Text(
-                  'İptal',
+                  AppLocalizations.of(context)?.cancel ?? 'Cancel',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,

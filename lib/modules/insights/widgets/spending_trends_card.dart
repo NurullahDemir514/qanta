@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../models/statistics_model.dart';
 
 class SpendingTrendsCard extends StatelessWidget {
@@ -142,7 +144,8 @@ class SpendingTrendsCard extends StatelessWidget {
 
   Widget _buildTrendItem(BuildContext context, MonthlyTrend trend) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final formatter = NumberFormat.currency(locale: 'tr_TR', symbol: '₺');
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    final formatter = NumberFormat.currency(locale: currency.locale, symbol: currency.symbol);
     final monthName = _getMonthName(trend.monthYear);
     
     // Calculate trend indicators

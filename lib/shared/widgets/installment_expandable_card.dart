@@ -5,6 +5,8 @@ import '../../core/services/unified_installment_service.dart';
 import '../../shared/models/installment_models_v2.dart';
 import '../design_system/transaction_design_system.dart';
 import '../services/category_icon_service.dart';
+import '../../core/theme/theme_provider.dart';
+import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 
 class InstallmentExpandableCard extends StatefulWidget {
@@ -366,7 +368,7 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                         // Aylık tutar (küçük)
                         if (widget.totalAmount != null && widget.monthlyAmount != null && widget.totalInstallments != null && widget.totalInstallments! > 1)
                           Text(
-                            '${TransactionDesignSystem.formatAmount(widget.monthlyAmount!, widget.type)}/ay',
+                            '${TransactionDesignSystem.formatAmount(widget.monthlyAmount!, widget.type, currencySymbol: Provider.of<ThemeProvider>(context, listen: false).currency.symbol)}${AppLocalizations.of(context)?.perMonth ?? '/month'}',
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.w400,
@@ -404,7 +406,7 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
       return Padding(
         padding: const EdgeInsets.only(top: 12),
         child: Text(
-          'Taksit detayları yüklenemedi',
+          AppLocalizations.of(context)?.installmentDetailsLoadError ?? 'Installment details could not be loaded',
           style: GoogleFonts.inter(
             fontSize: 13,
             color: TransactionDesignSystem.getSubtitleColor(widget.isDark),
@@ -450,7 +452,7 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
           // Installment info
           Expanded(
             child: Text(
-              '${detail.installmentNumber}. Taksit - ${_formatDate(detail.dueDate)}',
+              '${detail.installmentNumber}. ${AppLocalizations.of(context)?.installment ?? 'Installment'} - ${_formatDate(detail.dueDate, context)}',
               style: GoogleFonts.inter(
                 fontSize: 13,
                 color: TransactionDesignSystem.getSubtitleColor(widget.isDark),
@@ -460,7 +462,7 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
           
           // Amount
           Text(
-            TransactionDesignSystem.formatAmount(detail.amount, widget.type),
+            TransactionDesignSystem.formatAmount(detail.amount, widget.type, currencySymbol: Provider.of<ThemeProvider>(context, listen: false).currency.symbol),
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -514,26 +516,37 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
   /// Görüntülenecek tutarı belirler (toplam tutar varsa onu, yoksa mevcut amount'u)
   String _getDisplayAmount() {
     if (widget.totalAmount != null) {
-      return TransactionDesignSystem.formatAmount(widget.totalAmount!, widget.type);
+      return TransactionDesignSystem.formatAmount(widget.totalAmount!, widget.type, currencySymbol: Provider.of<ThemeProvider>(context, listen: false).currency.symbol);
     }
     return widget.amount;
   }
 
-  String _formatDate(DateTime date) {
-    const monthNames = [
-      'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-      'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
-    ];
-    
+  String _formatDate(DateTime date, BuildContext context) {
     final now = DateTime.now();
     final difference = date.difference(now).inDays;
     
     if (difference == 0) {
-      return 'Bugün';
+      return AppLocalizations.of(context)?.today ?? 'Today';
     } else if (difference == 1) {
-      return 'Yarın';
+      return AppLocalizations.of(context)?.tomorrow ?? 'Tomorrow';
     } else {
-      return '${date.day} ${monthNames[date.month - 1]}';
+      // Çok dilli ay isimleri (kısaltılmış)
+      final monthNames = [
+        '', 
+        AppLocalizations.of(context)?.january?.substring(0, 3) ?? 'Jan',
+        AppLocalizations.of(context)?.february?.substring(0, 3) ?? 'Feb',
+        AppLocalizations.of(context)?.march?.substring(0, 3) ?? 'Mar',
+        AppLocalizations.of(context)?.april?.substring(0, 3) ?? 'Apr',
+        AppLocalizations.of(context)?.may?.substring(0, 3) ?? 'May',
+        AppLocalizations.of(context)?.june?.substring(0, 3) ?? 'Jun',
+        AppLocalizations.of(context)?.july?.substring(0, 3) ?? 'Jul',
+        AppLocalizations.of(context)?.august?.substring(0, 3) ?? 'Aug',
+        AppLocalizations.of(context)?.september?.substring(0, 3) ?? 'Sep',
+        AppLocalizations.of(context)?.october?.substring(0, 3) ?? 'Oct',
+        AppLocalizations.of(context)?.november?.substring(0, 3) ?? 'Nov',
+        AppLocalizations.of(context)?.december?.substring(0, 3) ?? 'Dec'
+      ];
+      return '${date.day} ${monthNames[date.month]}';
     }
   }
 } 

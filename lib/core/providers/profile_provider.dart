@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/profile_image_service.dart';
+import '../services/image_cache_service.dart';
 
 class ProfileProvider extends ChangeNotifier {
   String? _profileImageUrl;
@@ -25,10 +26,15 @@ class ProfileProvider extends ChangeNotifier {
       if (user != null) {
         _userName = user.displayName;
         _userEmail = user.email;
+        
+        // Load cached profile image URL
+        await ProfileImageService.instance.loadCachedImageUrl();
         _profileImageUrl = ProfileImageService.instance.getProfileImageUrl();
+        
         notifyListeners();
       }
     } catch (e) {
+      debugPrint('Error loading profile data: $e');
     }
   }
 
@@ -65,7 +71,17 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   /// Profil verilerini temizle (logout)
-  void clearProfile() {
+  Future<void> clearProfile() async {
+    try {
+      // Clear profile image cache
+      await ProfileImageService.instance.clearCache();
+      
+      // Clear image cache
+      await ImageCacheService.instance.clearCache();
+    } catch (e) {
+      debugPrint('Error clearing profile image cache: $e');
+    }
+    
     _profileImageUrl = null;
     _userName = null;
     _userEmail = null;

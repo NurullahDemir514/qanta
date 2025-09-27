@@ -8,6 +8,7 @@ import '../../models/card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/providers/unified_provider_v2.dart';
 import '../../../../shared/utils/currency_utils.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/models/account_model.dart';
 import '../../../../shared/models/cash_account.dart';
 
@@ -264,7 +265,7 @@ class TransferAccountSelector extends StatelessWidget {
                           if (balance != null) ...[
                             const Spacer(),
                             Text(
-                              CurrencyUtils.formatAmount(balance, Currency.TRY),
+                              Provider.of<ThemeProvider>(context, listen: false).formatAmount(balance),
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -369,7 +370,7 @@ class TransferAccountSelector extends StatelessWidget {
                           const Spacer(),
                           // Bakiye gösterimi
                           Text(
-                            _getCardBalanceText(card, cardProvider),
+                            _getCardBalanceText(card, cardProvider, context),
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -392,7 +393,7 @@ class TransferAccountSelector extends StatelessWidget {
     );
   }
 
-  String _getCardBalanceText(PaymentCard card, UnifiedProviderV2 cardProvider) {
+  String _getCardBalanceText(PaymentCard card, UnifiedProviderV2 cardProvider, BuildContext context) {
     try {
       // Kart tipine göre bakiye bilgisi al
       final cardTypeString = card.type.toString();
@@ -402,13 +403,13 @@ class TransferAccountSelector extends StatelessWidget {
         final creditCard = cardProvider.creditCards.firstWhere(
           (c) => c['id'] == card.id,
         );
-        return '${CurrencyUtils.formatAmount(creditCard['availableLimit'], Currency.TRY)} limit';
+        return '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(creditCard['availableLimit'])} limit';
       } else if (cardTypeString.contains('debit')) {
         // Banka kartı için bakiye
         final debitCard = cardProvider.debitCards.firstWhere(
           (c) => c['id'] == card.id,
         );
-        return CurrencyUtils.formatAmount(debitCard['balance'], Currency.TRY);
+        return Provider.of<ThemeProvider>(context, listen: false).formatAmount(debitCard['balance']);
       }
     } catch (e) {
       // Kart bulunamazsa boş string döndür

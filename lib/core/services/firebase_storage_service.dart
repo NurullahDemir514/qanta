@@ -3,11 +3,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'firebase_auth_service.dart';
+import '../firebase_client.dart';
 
 /// Firebase Storage Service
 /// Handles file uploads, downloads, and management for Qanta app
 class FirebaseStorageService {
-  static FirebaseStorage get _storage => FirebaseStorage.instance;
+  static FirebaseStorage get _storage => FirebaseManager.storage;
 
   /// Get current user ID
   static String? get _currentUserId => FirebaseAuthService.currentUserId;
@@ -19,21 +20,36 @@ class FirebaseStorageService {
     String? customFileName,
   }) async {
     try {
+      debugPrint('☁️ FirebaseStorageService.uploadFile() - Starting upload');
+      
       final userId = _currentUserId;
-      if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
+      if (userId == null) {
+        debugPrint('❌ No user ID found');
+        throw Exception('Kullanıcı oturumu bulunamadı');
+      }
+      debugPrint('✅ User ID: $userId');
 
       final fileName = customFileName ?? path.basename(file.path);
       final filePath = 'users/$userId/$folder/$fileName';
+      debugPrint('📁 File path: $filePath');
       
       final ref = _storage.ref().child(filePath);
+      debugPrint('🔗 Storage reference created');
       
+      debugPrint('📤 Starting file upload...');
       final uploadTask = ref.putFile(file);
+      debugPrint('📤 Upload task created, waiting for completion...');
+      
       final snapshot = await uploadTask;
+      debugPrint('✅ Upload completed, getting download URL...');
       
       final downloadUrl = await snapshot.ref.getDownloadURL();
+      debugPrint('✅ Download URL: $downloadUrl');
       
       return downloadUrl;
     } catch (e) {
+      debugPrint('❌ FirebaseStorageService.uploadFile() error: $e');
+      debugPrint('❌ Stack trace: ${StackTrace.current}');
       rethrow;
     }
   }

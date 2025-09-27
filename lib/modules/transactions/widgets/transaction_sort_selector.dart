@@ -13,15 +13,15 @@ enum SortType {
   String getName(AppLocalizations l10n) {
     switch (this) {
       case SortType.dateNewest:
-        return 'En Yeni';
+        return l10n.newest;
       case SortType.dateOldest:
-        return 'En Eski';
+        return l10n.oldest;
       case SortType.amountHighest:
-        return 'Çoktan Aza';
+        return l10n.highestToLowest;
       case SortType.amountLowest:
-        return 'Azdan Çoğa';
+        return l10n.lowestToHighest;
       case SortType.alphabetical:
-        return 'A-Z';
+        return l10n.alphabetical;
     }
   }
 

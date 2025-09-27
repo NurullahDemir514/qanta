@@ -175,7 +175,7 @@ class _CashTabState extends State<CashTab> {
             ),
             const SizedBox(height: 8),
             Text(
-              providerV2.error ?? l10n.unknownError,
+              providerV2.error?.toString() ?? 'Bilinmeyen hata',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),

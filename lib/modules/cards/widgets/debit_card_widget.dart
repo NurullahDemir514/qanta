@@ -131,7 +131,7 @@ class DebitCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'KART ADI',
+                            AppLocalizations.of(context)?.cardName ?? 'Card Name',
                             style: GoogleFonts.inter(
                               fontSize: 8,
                               color: Colors.white.withValues(alpha: 0.7),

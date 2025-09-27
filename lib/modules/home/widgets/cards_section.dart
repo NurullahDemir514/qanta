@@ -90,8 +90,8 @@ class _CardsSectionState extends State<CardsSection> {
     for (final account in providerV2.cashAccounts) {
       allCards.add({
         'cardType': 'cash',
-        'cardTypeLabel': 'Nakit',
-        'cardNumber': 'Cebinizdeki nakit',
+        'cardTypeLabel': l10n.cash,
+        'cardNumber': l10n.cashWallet,
         'balance': account.balance,
         'bankCode': 'qanta',
         'accountId': account.id, // Add account ID for usage tracking

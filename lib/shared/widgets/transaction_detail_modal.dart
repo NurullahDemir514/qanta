@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme/theme_provider.dart';
 import '../models/payment_card_model.dart';
 import '../utils/currency_utils.dart';
 import '../design_system/transaction_design_system.dart';
@@ -85,7 +87,7 @@ class TransactionDetailModal extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _formatAmount(transaction.amount),
+                        _formatAmount(transaction.amount, context),
                         style: GoogleFonts.inter(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
@@ -153,7 +155,7 @@ class TransactionDetailModal extends StatelessWidget {
                         _buildDetailRow(
                           isDark: isDark,
                           label: l10n.availableLimit,
-                          value: _formatCurrency(transaction.card.availableCredit ?? 0.0),
+                          value: _formatCurrency(transaction.card.availableCredit ?? 0.0, context),
                         ),
                     ],
                   ),
@@ -332,9 +334,9 @@ class TransactionDetailModal extends StatelessWidget {
     );
   }
 
-  String _formatAmount(double amount) {
+  String _formatAmount(double amount, BuildContext context) {
     final absAmount = amount.abs();
-    final formattedAmount = _formatCurrency(absAmount);
+    final formattedAmount = _formatCurrency(absAmount, context);
     
     if (transaction.isIncome) {
       return '+$formattedAmount';
@@ -344,9 +346,9 @@ class TransactionDetailModal extends StatelessWidget {
   }
 
   // Para birimi miktarı için widget oluşturur
-  Widget _buildAmountWidget(double amount, TextStyle style) {
+  Widget _buildAmountWidget(double amount, TextStyle style, BuildContext context) {
     final absAmount = amount.abs();
-    final formattedAmount = _formatCurrency(absAmount);
+    final formattedAmount = _formatCurrency(absAmount, context);
     final displayAmount = transaction.isIncome ? '+$formattedAmount' : '-$formattedAmount';
     
     return CurrencyUtils.buildCurrencyText(
@@ -366,14 +368,14 @@ class TransactionDetailModal extends StatelessWidget {
   }
 
 
-  String _formatCurrency(double amount) {
+  String _formatCurrency(double amount, BuildContext context) {
     // TransactionDesignSystem'den binlik ayırıcı ile formatlama
-    return TransactionDesignSystem.formatNumber(amount) + '₺';
+    return TransactionDesignSystem.formatNumber(amount) + Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
   }
 
   // Para birimi için güvenli formatlama
-  Widget _buildCurrencyText(double amount, TextStyle style) {
-    final formattedAmount = _formatCurrency(amount);
+  Widget _buildCurrencyText(double amount, TextStyle style, BuildContext context) {
+    final formattedAmount = _formatCurrency(amount, context);
     return CurrencyUtils.buildCurrencyText(
       formattedAmount,
       style: style,

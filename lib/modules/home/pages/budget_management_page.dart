@@ -8,6 +8,9 @@ import '../../../shared/services/category_icon_service.dart';
 import 'package:provider/provider.dart';
 import 'budget_add_sheet.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../shared/utils/currency_utils.dart';
+import '../../../core/theme/theme_provider.dart';
 
 class BudgetManagementPage extends StatefulWidget {
   final VoidCallback? onBudgetSaved;
@@ -101,7 +104,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorOccurred(e.toString()))),
         );
       }
     }
@@ -330,7 +333,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                   Text(
                                     stat.categoryName,
                                     style: GoogleFonts.inter(
-                                      fontSize: 17,
+                                      fontSize: 19,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.white,
                                       letterSpacing: -0.3,
@@ -338,9 +341,9 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Aylık Limit: ₺${numberFormat.format(stat.monthlyLimit)}',
+                                    'Aylık Limit: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.monthlyLimit)}',
                                     style: GoogleFonts.inter(
-                                      fontSize: 14,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.white.withOpacity(0.85),
                                     ),
@@ -375,7 +378,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                     size: 16,
                                   ),
                                   splashRadius: 18,
-                                  tooltip: 'Limiti Sil',
+                                  tooltip: AppLocalizations.of(context)!.deleteLimitTooltip,
                                 ),
                               ],
                             ),
@@ -425,9 +428,9 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                     Text(
                                       isOver
                                           ? 'Limit Aşıldı!'
-                                          : 'Kalan: ₺${numberFormat.format(remaining)}',
+                                          : 'Kalan: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(remaining)}',
                                       style: GoogleFonts.inter(
-                                        fontSize: 14,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
@@ -435,7 +438,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                     Text(
                                       '%$percentText harcandı',
                                       style: GoogleFonts.inter(
-                                        fontSize: 14,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         color: isOver
                                             ? const Color(0xFFFF4C4C)
@@ -460,7 +463,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                               ),
                             ),
                             Text(
-                              '₺${numberFormat.format(spent)}',
+                              Provider.of<ThemeProvider>(context, listen: false).formatAmount(spent),
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
@@ -486,21 +489,21 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Limit Sil',
+          AppLocalizations.of(context)!.deleteLimit,
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         content: Text(
-          '${stat.categoryName} kategorisi için belirlenen limiti silmek istediğinizden emin misiniz?',
+          AppLocalizations.of(context)!.deleteLimitConfirm(stat.categoryName),
           style: GoogleFonts.inter(fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'İptal',
+              AppLocalizations.of(context)!.cancel,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 color: const Color(0xFF8E8E93),
@@ -520,7 +523,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
               await _deleteBudget(budget.id);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)!.delete,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -581,7 +584,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
       child: Row(
         children: [
           Text(
-            '₺',
+            Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -631,14 +634,14 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
       await provider.deleteBudget(budgetId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Limit silindi')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.limitDeleted)),
         );
         widget.onBudgetSaved?.call();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorOccurred(e.toString()))),
         );
       }
     }

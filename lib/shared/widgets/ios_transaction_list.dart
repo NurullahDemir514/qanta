@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import '../models/payment_card_model.dart' as pcm;
 import 'transaction_detail_modal.dart';
 import '../design_system/transaction_design_system.dart';
@@ -91,7 +92,7 @@ class IOSTransactionList extends StatelessWidget {
         ],
 
         if (displayTransactions.isEmpty)
-          _buildEmptyState(isDark)
+          _buildEmptyState(isDark, context)
         else
           _buildTransactionList(isDark, displayTransactions),
       ],
@@ -103,8 +104,8 @@ class IOSTransactionList extends StatelessWidget {
       return IOSTransactionItem(
         title: cardTransaction.title,
         subtitle: cardTransaction.card.displayName,
-        amount: _formatCardTransactionAmount(cardTransaction),
-        time: _formatTransactionDate(cardTransaction.date),
+        amount: _formatCardTransactionAmount(cardTransaction, context),
+        time: _formatTransactionDate(cardTransaction.date, context),
         icon: cardTransaction.transactionIcon,
         iconColor: cardTransaction.transactionColor,
         iconBackgroundColor: cardTransaction.transactionColor.withValues(alpha: 0.1),
@@ -149,7 +150,7 @@ class IOSTransactionList extends StatelessWidget {
               onDeleteTransaction?.call(transaction);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)?.delete ?? 'Delete',
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -162,7 +163,7 @@ class IOSTransactionList extends StatelessWidget {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)?.cancel ?? 'Cancel',
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -177,61 +178,41 @@ class IOSTransactionList extends StatelessWidget {
     return transaction.card.displayName;
   }
 
-  String _formatCardTransactionAmount(pcm.CardTransactionModel transaction) {
+  String _formatCardTransactionAmount(pcm.CardTransactionModel transaction, BuildContext context) {
     final amount = transaction.amount.abs();
     final formattedAmount = TransactionDesignSystem.formatNumber(amount);
     
+    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
     if (transaction.isIncome) {
-      return '+$formattedAmount₺';
+      return '+$formattedAmount$currencySymbol';
     } else {
-      return '-$formattedAmount₺';
+      return '-$formattedAmount$currencySymbol';
     }
   }
 
-  String _formatTransactionDate(DateTime date) {
+  String _formatTransactionDate(DateTime date, BuildContext context) {
     final now = DateTime.now();
-    final difference = now.difference(date);
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final transactionDay = DateTime(date.year, date.month, date.day);
     
-    if (difference.inDays == 0) {
-      if (difference.inHours == 0) {
-        if (difference.inMinutes == 0) {
-          return 'Şimdi';
-        } else if (difference.inMinutes == 1) {
-          return '1 dk önce';
-        } else {
-        return '${difference.inMinutes} dk önce';
-        }
-      } else if (difference.inHours == 1) {
-        return '1 saat önce';
-      } else {
-        return '${difference.inHours} saat önce';
-      }
-    } else if (difference.inDays == 1) {
-      return 'Dün';
-    } else if (difference.inDays == 2) {
-      return '2 gün önce';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} gün önce';
-    } else if (difference.inDays < 30) {
-      final weeks = (difference.inDays / 7).floor();
-      if (weeks == 1) {
-        return '1 hafta önce';
-      } else {
-        return '$weeks hafta önce';
-      }
+    if (transactionDay == today) {
+      return AppLocalizations.of(context)?.today ?? 'Today';
+    } else if (transactionDay == yesterday) {
+      return AppLocalizations.of(context)?.yesterday ?? 'Yesterday';
     } else {
-      // Basit tarih formatı: 8 Haz veya 8/6 formatında
+      // Simple date format: 8 Sep or 8/9 format
       try {
         final formatter = DateFormat('d MMM');
         return formatter.format(date);
       } catch (e) {
-        // Fallback: basit format
+        // Fallback: simple format
         return '${date.day}/${date.month}';
       }
     }
   }
 
-  Widget _buildEmptyState(bool isDark) {
+  Widget _buildEmptyState(bool isDark, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -247,7 +228,7 @@ class IOSTransactionList extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            emptyTitle ?? 'Henüz işlem yok',
+            emptyTitle ?? AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -256,7 +237,7 @@ class IOSTransactionList extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            emptyDescription ?? 'İlk işleminizi yaptığınızda burada görünecek',
+            emptyDescription ?? AppLocalizations.of(context)?.addFirstTransaction ?? 'Add your first transaction to get started',
             style: GoogleFonts.inter(
               fontSize: 14,
               color: isDark 

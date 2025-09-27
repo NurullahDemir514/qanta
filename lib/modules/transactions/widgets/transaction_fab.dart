@@ -218,10 +218,10 @@ class _TransactionFabState extends State<TransactionFab> {
             ? Icons.arrow_upward_rounded
             : Icons.compare_arrows_rounded;
     final label = transactionType == TransactionType.income
-        ? 'Gelir'
+        ? (AppLocalizations.of(context)?.income ?? 'Income')
         : transactionType == TransactionType.expense
-            ? 'Gider'
-            : 'Transfer';
+            ? (AppLocalizations.of(context)?.expense ?? 'Expense')
+            : (AppLocalizations.of(context)?.transfer ?? 'Transfer');
     // Her seçenek için düz renkler
     Color color;
     switch (transactionType) {

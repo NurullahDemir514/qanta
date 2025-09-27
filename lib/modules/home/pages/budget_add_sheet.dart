@@ -8,6 +8,7 @@ import '../../../core/services/unified_category_service.dart';
 import '../../../shared/services/category_icon_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/unified_category_model.dart';
+import '../../../l10n/app_localizations.dart';
 
 class BudgetAddSheet extends StatefulWidget {
   final VoidCallback? onBudgetSaved;
@@ -410,7 +411,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                       ),
                     ),
                     child: Text(
-                      'İptal',
+                      AppLocalizations.of(context)?.cancel ?? 'Cancel',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

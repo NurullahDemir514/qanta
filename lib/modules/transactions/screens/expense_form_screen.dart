@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/models/unified_category_model.dart';
 import '../../../core/services/category_service_v2.dart';
@@ -207,8 +208,8 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
 
   String _formatCurrency(double amount) {
     final formatter = NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: '₺',
+      locale: Provider.of<ThemeProvider>(context, listen: false).currency.locale,
+      symbol: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
       decimalDigits: 2,
     );
     return formatter.format(amount);
@@ -327,7 +328,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     if (_selectedPaymentMethod == null) return '';
     
     if (_selectedPaymentMethod!.isCash) {
-      return _selectedPaymentMethod!.cashAccount?.name ?? 'Nakit';
+      return _selectedPaymentMethod!.cashAccount?.name ?? (AppLocalizations.of(context)?.cash ?? 'Cash');
     } else if (_selectedPaymentMethod!.card != null) {
       final cardName = _selectedPaymentMethod!.card!.name;
       final installments = _selectedPaymentMethod!.installments ?? 1;
@@ -349,14 +350,14 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       case 0: // Amount
         if (_amountController.text.isEmpty) {
           setState(() {
-            _amountError = 'Lütfen bir tutar girin';
+            _amountError = AppLocalizations.of(context)?.pleaseEnterAmount ?? 'Please enter an amount';
           });
           isValid = false;
         } else {
           final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
           if (amount == null || amount <= 0) {
             setState(() {
-              _amountError = 'Geçerli bir tutar girin';
+              _amountError = AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
             });
             isValid = false;
           }
@@ -365,7 +366,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       case 1: // Category
         if (_selectedCategory == null) {
           setState(() {
-            _categoryError = 'Lütfen bir kategori seçin';
+            _categoryError = AppLocalizations.of(context)?.pleaseSelectCategory ?? 'Please select a category';
           });
           isValid = false;
         }
@@ -373,7 +374,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       case 2: // Payment Method
         if (_selectedPaymentMethod == null) {
           setState(() {
-            _paymentMethodError = 'Lütfen bir ödeme yöntemi seçin';
+            _paymentMethodError = AppLocalizations.of(context)?.pleaseSelectPaymentMethod ?? 'Please select a payment method';
           });
           isValid = false;
         } else {
@@ -449,7 +450,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   /// - Amount: Must be > 0
   /// - Category: Must be selected
   /// - Payment method: Must be selected
-  /// - Description: Optional, defaults to "Gider"
+  /// - Description: Optional, defaults to "Expense"
   /// 
   /// **Error Handling:**
   /// - Form validation errors: Prevents save
@@ -519,7 +520,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       // Taksit sayısını al
       final installments = _selectedPaymentMethod!.installments ?? 1;
       final description = _descriptionController.text.trim().isEmpty 
-        ? 'Gider' 
+        ? (AppLocalizations.of(context)?.expense ?? 'Expense') 
         : _descriptionController.text.trim();
       
       String? transactionId;

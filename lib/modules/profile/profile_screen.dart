@@ -42,6 +42,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     // Bucket'ın var olduğundan emin ol
     _ensureBucketExists();
+    // Focus'u temizle ve klavyeyi kapat
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+    });
   }
 
   Future<void> _ensureBucketExists() async {
@@ -64,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _pickImage(ImageSource.camera);
             },
             child: Text(
-              'Kamera',
+              AppLocalizations.of(context)!.camera,
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -77,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _pickImage(ImageSource.gallery);
             },
             child: Text(
-              'Galeri',
+              AppLocalizations.of(context)!.gallery,
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -92,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _deleteProfileImage();
               },
               child: Text(
-                'Fotoğrafı Sil',
+                AppLocalizations.of(context)!.deletePhoto,
                 style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
@@ -105,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)!.cancel,
             style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
@@ -115,6 +119,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
+      debugPrint('📸 ProfileScreen._pickImage() - Starting image picker');
+      debugPrint('📸 Source: $source');
+      
       final XFile? image = await _picker.pickImage(
         source: source,
         maxWidth: 512,
@@ -122,14 +129,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         imageQuality: 80,
       );
 
+      debugPrint('📸 Image picker result: ${image?.path}');
+
       if (image != null) {
+        debugPrint('📸 Image selected, starting upload...');
         setState(() {
           _isUploadingImage = true;
         });
 
         final imageFile = File(image.path);
+        debugPrint('📸 File created: ${imageFile.path}');
+        
         final newImageUrl = await ProfileImageService.instance
             .uploadProfileImage(imageFile.path);
+
+        debugPrint('📸 Upload result: $newImageUrl');
 
         if (mounted) {
           setState(() {
@@ -142,9 +156,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             listen: false,
           );
           await profileProvider.updateProfileImage(newImageUrl);
+          
+          debugPrint('📸 ProfileProvider updated successfully');
         }
+      } else {
+        debugPrint('📸 No image selected');
       }
     } catch (e) {
+      debugPrint('❌ ProfileScreen._pickImage() error: $e');
+      debugPrint('❌ Stack trace: ${StackTrace.current}');
+      
       if (mounted) {
         setState(() {
           _isUploadingImage = false;
@@ -152,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fotoğraf yüklenirken hata oluştu: $e'),
+            content: Text(AppLocalizations.of(context)!.photoUploadError(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -189,7 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fotoğraf silinirken hata oluştu: $e'),
+            content: Text(AppLocalizations.of(context)!.photoDeleteError(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -201,6 +222,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    
+    // Focus'u temizle ve klavyeyi kapat
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+    });
+    
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
         final userName = profileProvider.userName ?? l10n.defaultUserName;
@@ -295,9 +322,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   final isEnabled = snapshot.data ?? false;
                                   return ProfileItem(
                                     icon: Icons.edit_note_outlined,
-                                    title: 'Hızlı Notlar',
+                                    title: AppLocalizations.of(context)!.quickNotes,
                                     subtitle:
-                                        'Anında not alma için kalıcı bildirim',
+                                        AppLocalizations.of(context)!.quickNotesSubtitle,
                                     trailing: Switch(
                                       value: isEnabled,
                                       onChanged: (value) async {
@@ -313,8 +340,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             SnackBar(
                                               content: Text(
                                                 value
-                                                    ? 'Hızlı notlar bildirimi açıldı'
-                                                    : 'Hızlı notlar bildirimi kapatıldı',
+                                                    ? AppLocalizations.of(context)!.quickNotesNotificationEnabled
+                                                    : AppLocalizations.of(context)!.quickNotesNotificationDisabled,
                                               ),
                                               backgroundColor: value
                                                   ? Colors.green
@@ -328,12 +355,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
-                                                'Bildirim izni gerekli! Lütfen ayarlardan açın.',
+                                                AppLocalizations.of(context)!.notificationPermissionRequired,
                                               ),
                                               backgroundColor: Colors.red,
-                                              duration: Duration(seconds: 3),
+                                              duration: const Duration(seconds: 3),
                                             ),
                                           );
                                         }
@@ -401,7 +428,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               ProfileItem(
                                 icon: Icons.help_outline,
-                                title: 'Sık Sorulan Sorular',
+                                title: AppLocalizations.of(context)!.frequentlyAskedQuestions,
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -555,7 +582,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context,
               listen: false,
             );
-            profileProvider.clearProfile();
+            await profileProvider.clearProfile();
             // Reminderları temizle
             await ReminderService.clearAllRemindersForCurrentUser();
             await FirebaseAuthService.signOut();

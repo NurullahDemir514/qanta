@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
@@ -9,6 +10,7 @@ class FirebaseManager {
   static FirebaseApp? _app;
   static FirebaseAuth? _auth;
   static FirebaseFirestore? _firestore;
+  static FirebaseStorage? _storage;
 
   /// Initialize Firebase
   static Future<void> init() async {
@@ -16,6 +18,7 @@ class FirebaseManager {
       _app = await Firebase.initializeApp();
       _auth = FirebaseAuth.instance;
       _firestore = FirebaseFirestore.instance;
+      _storage = FirebaseStorage.instance;
       
       // Configure Firestore settings
       _firestore?.settings = const Settings(
@@ -23,7 +26,13 @@ class FirebaseManager {
         cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
       );
       
+      debugPrint('✅ Firebase initialized successfully');
+      debugPrint('✅ Firebase Auth: ${_auth != null}');
+      debugPrint('✅ Firestore: ${_firestore != null}');
+      debugPrint('✅ Firebase Storage: ${_storage != null}');
+      
     } catch (e) {
+      debugPrint('❌ Firebase initialization failed: $e');
       rethrow;
     }
   }
@@ -50,6 +59,14 @@ class FirebaseManager {
       throw Exception('Firebase not initialized. Call FirebaseManager.init() first.');
     }
     return _firestore!;
+  }
+
+  /// Get Firebase Storage instance
+  static FirebaseStorage get storage {
+    if (_storage == null) {
+      throw Exception('Firebase not initialized. Call FirebaseManager.init() first.');
+    }
+    return _storage!;
   }
 
   /// Get current user

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/models/debit_card_model.dart';
 import '../../../shared/utils/currency_utils.dart';
@@ -358,7 +359,7 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
 
                     // Bakiye
                     Text(
-                      'Bakiye (₺)',
+                      'Bakiye (${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})',
                       style: CurrencyUtils.getCurrencyTextStyle(
                         baseStyle: GoogleFonts.inter(
                           fontSize: 16,

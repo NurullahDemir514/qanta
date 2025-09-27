@@ -7,6 +7,7 @@ import '../../../shared/models/account_model.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/widgets/insufficient_funds_dialog.dart';
 import '../../../shared/utils/currency_utils.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../models/payment_method.dart';
 import '../models/transfer_model.dart';
 import '../widgets/forms/base_transaction_form.dart';
@@ -60,7 +61,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   ];
 
   String _formatCurrency(double amount) {
-    return CurrencyUtils.formatAmount(amount, Currency.TRY);
+    return Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount);
   }
 
   @override
@@ -342,14 +343,14 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       case 0: // Amount
         if (_amountController.text.isEmpty) {
           setState(() {
-            _amountError = 'Lütfen bir tutar girin';
+            _amountError = AppLocalizations.of(context)?.pleaseEnterAmount ?? 'Please enter an amount';
           });
           isValid = false;
         } else {
           final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
           if (amount == null || amount <= 0) {
             setState(() {
-              _amountError = 'Geçerli bir tutar girin';
+              _amountError = AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
             });
             isValid = false;
           }
@@ -358,7 +359,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       case 1: // From Account
         if (_fromAccount == null) {
           setState(() {
-            _fromAccountError = 'Lütfen kaynak hesap seçin';
+            _fromAccountError = AppLocalizations.of(context)?.pleaseSelectSourceAccount ?? 'Please select source account';
           });
           isValid = false;
         }
@@ -366,12 +367,12 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       case 2: // To Account
         if (_toAccount == null) {
           setState(() {
-            _toAccountError = 'Lütfen hedef hesap seçin';
+            _toAccountError = AppLocalizations.of(context)?.pleaseSelectTargetAccount ?? 'Please select target account';
           });
           isValid = false;
         } else if (_fromAccount == _toAccount) {
           setState(() {
-            _toAccountError = 'Kaynak ve hedef hesap aynı olamaz';
+            _toAccountError = AppLocalizations.of(context)?.sourceAndTargetSame ?? 'Source and target account cannot be the same';
           });
           isValid = false;
         } else {
@@ -531,14 +532,14 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       }
       
       if (sourceAccountId == null || targetAccountId == null) {
-        throw Exception('Hesap bilgileri alınamadı');
+        throw Exception(AppLocalizations.of(context)?.accountInfoNotFound ?? 'Account information could not be retrieved');
       }
       
       // Create transfer using v2 system
       await providerV2.createTransaction(
         type: v2.TransactionType.transfer,
         amount: amount,
-        description: _descriptionController.text.isEmpty ? 'Transfer' : _descriptionController.text,
+        description: _descriptionController.text.isEmpty ? (AppLocalizations.of(context)?.transfer ?? 'Transfer') : _descriptionController.text,
         sourceAccountId: sourceAccountId,
         targetAccountId: targetAccountId,
         transactionDate: _selectedDate,
@@ -750,7 +751,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                 Navigator.of(context).pop();
               },
               child: Text(
-                'İptal Et',
+                AppLocalizations.of(context)!.cancelAction,
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

@@ -1,4 +1,5 @@
 import '../utils/date_utils.dart';
+import 'package:intl/intl.dart';
 
 /// Installment information for display purposes
 class InstallmentInfo {
@@ -41,9 +42,9 @@ enum TransactionType {
   String get displayName {
     switch (this) {
       case TransactionType.income:
-        return 'Gelir';
+        return 'Income';
       case TransactionType.expense:
-        return 'Gider';
+        return 'Expense';
       case TransactionType.transfer:
         return 'Transfer';
     }
@@ -309,9 +310,9 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
   String get typeDisplayName {
     switch (type) {
       case TransactionType.income:
-        return 'Gelir';
+        return 'Income';
       case TransactionType.expense:
-        return 'Gider';
+        return 'Expense';
       case TransactionType.transfer:
         return 'Transfer';
     }
@@ -337,14 +338,14 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
     switch (type) {
       case TransactionType.expense:
         // For expenses: show account name as subtitle
-        return sourceAccountName ?? 'Hesap';
+        return sourceAccountName ?? 'Account';
       case TransactionType.income:
         // For income: show account name as subtitle
-        return sourceAccountName ?? 'Hesap';
+        return sourceAccountName ?? 'Account';
       case TransactionType.transfer:
         // For transfers: show source → target as subtitle
-        final sourceAccount = sourceAccountName ?? 'Hesap';
-        final targetAccount = targetAccountName ?? 'Hesap';
+        final sourceAccount = sourceAccountName ?? 'Account';
+        final targetAccount = targetAccountName ?? 'Account';
         return '$sourceAccount → $targetAccount';
     }
   }
@@ -366,9 +367,9 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
       // currentInstallment description'dan veya null ise 1 olarak alınır
       final match = RegExp(r'(\d+)/(\d+)').firstMatch(description);
       final current = match != null ? int.tryParse(match.group(1)!) ?? 1 : 1;
-      return '$current/$installmentCount Taksit';
+      return '$current/$installmentCount Installment';
     } else if (installmentCount == 1) {
-      return 'Peşin';
+      return 'Cash';
     }
     return '';
   }
@@ -383,16 +384,18 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
     final transactionDay = DateTime(transactionDate!.year, transactionDate!.month, transactionDate!.day);
     
     if (transactionDay == today) {
-      return 'Bugün';
+      return 'Today';
     } else if (transactionDay == yesterday) {
-      return 'Dün';
+      return 'Yesterday';
     } else {
-      // Format as "15 Eylül 2025"
-      final months = [
-        '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
-      ];
-      return '${transactionDate!.day} ${months[transactionDate!.month]} ${transactionDate!.year}';
+      // Simple date format: 8 Sep or 8/9 format
+      try {
+        final formatter = DateFormat('d MMM');
+        return formatter.format(transactionDate!);
+      } catch (e) {
+        // Fallback: simple format
+        return '${transactionDate!.day}/${transactionDate!.month}';
+      }
     }
   }
 

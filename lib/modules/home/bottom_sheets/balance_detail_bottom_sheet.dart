@@ -155,7 +155,7 @@ class _BalanceDetailContent extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Henüz hesap eklenmemiş',
+                              l10n.noAccountsYet,
                               style: GoogleFonts.inter(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -166,7 +166,7 @@ class _BalanceDetailContent extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'İlk hesabınızı ekleyerek başlayın',
+                              l10n.addFirstAccount,
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 color: isDark 
@@ -383,12 +383,13 @@ class _AccountItem extends StatelessWidget {
       case AccountType.cash:
         return l10n.cashAccount;
       default:
-        return 'Hesap';
+        return 'Account';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final color = _getAccountColor();
     final isCreditCard = account.type == AccountType.credit;
     
@@ -454,7 +455,7 @@ class _AccountItem extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  account.name,
+                                  account.type == AccountType.cash ? l10n.cashWallet : account.name,
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
@@ -482,7 +483,7 @@ class _AccountItem extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Mevcut Borç',
+                                  l10n.currentDebt,
                                   style: GoogleFonts.inter(
                                     fontSize: 12,
                                     color: isDark 
@@ -507,7 +508,7 @@ class _AccountItem extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Kullanılabilir Limit',
+                                  AppLocalizations.of(context)?.availableLimit ?? 'Available Limit',
                                   style: GoogleFonts.inter(
                                     fontSize: 12,
                                     color: isDark 
@@ -530,7 +531,7 @@ class _AccountItem extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Toplam Limit',
+                                  l10n.totalLimit,
                                   style: GoogleFonts.inter(
                                     fontSize: 12,
                                     color: isDark 
@@ -576,7 +577,7 @@ class _AccountItem extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Kullanım Oranı',
+                            AppLocalizations.of(context)?.usageRate ?? 'Usage Rate',
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               color: isDark 

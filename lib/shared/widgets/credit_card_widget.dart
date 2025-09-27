@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/theme/theme_provider.dart';
 import '../models/credit_card_model.dart';
 import '../design_system/transaction_design_system.dart';
+import '../../l10n/app_localizations.dart';
 
 class CreditCardWidget extends StatelessWidget {
   final CreditCardModel card;
@@ -106,7 +109,7 @@ class CreditCardWidget extends StatelessWidget {
                   
                   // Card type
                   Text(
-                    'Kredi Kartı',
+                    AppLocalizations.of(context)?.creditCard ?? 'Credit Card',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -125,14 +128,14 @@ class CreditCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Available Credit',
+                            AppLocalizations.of(context)?.availableCredit ?? 'Available Credit',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 12,
                             ),
                           ),
                           Text(
-                            '₺${TransactionDesignSystem.formatNumber(card.creditLimit - card.totalDebt)}',
+                            Provider.of<ThemeProvider>(context, listen: false).formatAmount(card.creditLimit - card.totalDebt),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -145,14 +148,14 @@ class CreditCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'Credit Limit',
+                            AppLocalizations.of(context)?.creditLimit ?? 'Credit Limit',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 12,
                             ),
                           ),
                           Text(
-                            '₺${TransactionDesignSystem.formatNumber(card.creditLimit)}',
+                            Provider.of<ThemeProvider>(context, listen: false).formatAmount(card.creditLimit),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,

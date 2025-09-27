@@ -25,7 +25,7 @@ class TransactionFilterChips extends StatelessWidget {
         children: [
           _buildFilterChip(
             context: context,
-            label: 'Tümü',
+            label: AppLocalizations.of(context)?.all ?? 'All',
             isSelected: selectedFilter == null,
             onTap: () {
               HapticFeedback.selectionClick();

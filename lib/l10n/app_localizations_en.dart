@@ -60,7 +60,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUp => 'Sign Up';
 
   @override
-  String get forgotPassword => 'Forgot Password?';
+  String get forgotPassword => 'I forgot my password, what should I do?';
 
   @override
   String get budget => 'Budget';
@@ -564,7 +564,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterValidAmount => 'Please enter a valid amount';
 
   @override
-  String get cash => 'CASH';
+  String get cash => 'Cash';
 
   @override
   String get digitalWallet => 'Digital Wallet';
@@ -639,7 +639,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
-  String get selectTransactionType => 'Select Transaction Type';
+  String get selectTransactionType =>
+      'Select the type of transaction you want to make';
 
   @override
   String get selectTransactionTypeDesc =>
@@ -651,7 +652,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get errorOccurred => 'An error occurred. Please try again.';
+  String errorOccurred(String error) {
+    return 'Error: $error';
+  }
 
   @override
   String get enterAmount => 'Enter Amount';
@@ -809,7 +812,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rent => 'Rent';
 
   @override
-  String get loan => 'Loan/Installment';
+  String get loan => 'Loan';
 
   @override
   String get subscriptionDescription => 'Netflix, Spotify, YouTube';
@@ -1105,7 +1108,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cashAccountLoadError => 'Error loading cash account';
 
   @override
-  String get unknownError => 'Unknown error';
+  String unknownError(String error) {
+    return 'An error occurred: $error';
+  }
 
   @override
   String get retry => 'Retry';
@@ -1319,7 +1324,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noDataYet => 'No data to analyze yet';
 
   @override
-  String get addFirstTransaction => 'Add First Transaction';
+  String get addFirstTransaction => 'Add your first transaction to get started';
 
   @override
   String get analyzingData => 'Analyzing your financial data...';
@@ -1371,4 +1376,1007 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionCount => 'Transactions';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get deletePhoto => 'Delete Photo';
+
+  @override
+  String photoUploadError(String error) {
+    return 'Error uploading photo: $error';
+  }
+
+  @override
+  String photoDeleteError(String error) {
+    return 'Error deleting photo: $error';
+  }
+
+  @override
+  String get fileNotFound => 'File not found';
+
+  @override
+  String get fileTooLarge => 'File too large (max 5MB)';
+
+  @override
+  String get userSessionNotFound => 'User session not found';
+
+  @override
+  String get photoDeletedSuccessfully => 'Photo deleted successfully';
+
+  @override
+  String get photoUploadedSuccessfully => 'Photo uploaded successfully';
+
+  @override
+  String get selectImageSource => 'Select Image Source';
+
+  @override
+  String get selectImageSourceDescription =>
+      'Where would you like to select your photo from?';
+
+  @override
+  String get uploadingPhoto => 'Uploading photo...';
+
+  @override
+  String get deletingPhoto => 'Deleting photo...';
+
+  @override
+  String get profilePhoto => 'Profile Photo';
+
+  @override
+  String get changeProfilePhoto => 'Change Profile Photo';
+
+  @override
+  String get removeProfilePhoto => 'Remove Profile Photo';
+
+  @override
+  String get profilePhotoUpdated => 'Profile photo updated';
+
+  @override
+  String get profilePhotoRemoved => 'Profile photo removed';
+
+  @override
+  String get deleteTransaction => 'Delete Transaction';
+
+  @override
+  String deleteTransactionConfirm(String description) {
+    return 'Are you sure you want to delete the transaction $description?';
+  }
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get transactionDeleted => 'Transaction deleted';
+
+  @override
+  String transactionDeleteError(String error) {
+    return 'Error deleting transaction: $error';
+  }
+
+  @override
+  String get deleteInstallmentTransaction => 'Delete Installment Transaction';
+
+  @override
+  String deleteInstallmentTransactionConfirm(String description) {
+    return 'Are you sure you want to completely delete the installment transaction $description? This will delete all installments.';
+  }
+
+  @override
+  String get installmentTransactionDeleted => 'Installment transaction deleted';
+
+  @override
+  String installmentTransactionDeleteError(String error) {
+    return 'Error deleting installment transaction: $error';
+  }
+
+  @override
+  String get deleteAll => 'Delete All';
+
+  @override
+  String get deleteLimit => 'Delete Limit';
+
+  @override
+  String deleteLimitConfirm(String categoryName) {
+    return 'Are you sure you want to delete the limit set for $categoryName category?';
+  }
+
+  @override
+  String get limitDeleted => 'Limit deleted';
+
+  @override
+  String get deleteLimitTooltip => 'Delete Limit';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get loadingPastStatements => 'Loading past statements...';
+
+  @override
+  String get loadingFutureStatements => 'Loading future statements...';
+
+  @override
+  String get loadingCards => 'Error loading cards';
+
+  @override
+  String get loadingAccounts => 'Loading accounts';
+
+  @override
+  String get loadingStatementInfo => 'Error loading statement information';
+
+  @override
+  String get paymentError => 'Error occurred during payment';
+
+  @override
+  String get statementMarkError => 'Error marking statement';
+
+  @override
+  String get deleteCard => 'Delete Card';
+
+  @override
+  String deleteCardConfirm(String cardName) {
+    return 'Are you sure you want to delete $cardName card?\n\nThis action cannot be undone.';
+  }
+
+  @override
+  String get cardDeleted => 'Card deleted successfully';
+
+  @override
+  String get cardDeleteError => 'Error deleting card';
+
+  @override
+  String transactionAddError(String error) {
+    return 'Error adding transaction: $error';
+  }
+
+  @override
+  String updateError(String error) {
+    return 'Error during update: $error';
+  }
+
+  @override
+  String get deleteFailed => 'Delete failed';
+
+  @override
+  String get installmentTransactionDeleting =>
+      'Deleting installment transaction...';
+
+  @override
+  String get installmentTransactionDeletedWithRefund =>
+      'Installment transaction deleted, total amount refunded';
+
+  @override
+  String get cancelAction => 'Cancel';
+
+  @override
+  String get quickNotes => 'Quick Notes';
+
+  @override
+  String get quickNotesSubtitle =>
+      'Persistent notification for instant note taking';
+
+  @override
+  String get quickNotesNotificationEnabled =>
+      'Quick notes notification enabled';
+
+  @override
+  String get quickNotesNotificationDisabled =>
+      'Quick notes notification disabled';
+
+  @override
+  String get notificationPermissionRequired =>
+      'Notification permission required! Please enable it in settings.';
+
+  @override
+  String get frequentlyAskedQuestions => 'Frequently Asked Questions';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get now => 'Now';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get expense => 'Expense';
+
+  @override
+  String get transfer => 'Transfer';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String minutesAgo(int count) {
+    return '$count min ago';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count hours ago';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String weeksAgo(int count) {
+    return '$count weeks ago';
+  }
+
+  @override
+  String monthsAgo(int count) {
+    return '$count months ago';
+  }
+
+  @override
+  String yearsAgo(int count) {
+    return '$count years ago';
+  }
+
+  @override
+  String get oneMinuteAgo => '1 min ago';
+
+  @override
+  String get oneHourAgo => '1 hour ago';
+
+  @override
+  String get oneWeekAgo => '1 week ago';
+
+  @override
+  String get oneMonthAgo => '1 month ago';
+
+  @override
+  String get oneYearAgo => '1 year ago';
+
+  @override
+  String get twoDaysAgo => '2 days ago';
+
+  @override
+  String get perMonth => '/month';
+
+  @override
+  String get net => 'Net';
+
+  @override
+  String get pleaseEnterAmount => 'Please enter an amount';
+
+  @override
+  String get pleaseEnterValidAmount => 'Please enter a valid amount';
+
+  @override
+  String get pleaseSelectSourceAccount => 'Please select source account';
+
+  @override
+  String get pleaseSelectTargetAccount => 'Please select target account';
+
+  @override
+  String get sourceAndTargetSame =>
+      'Source and target account cannot be the same';
+
+  @override
+  String get accountInfoNotFound =>
+      'Account information could not be retrieved';
+
+  @override
+  String get accountInfoNotFoundSingle =>
+      'Account information could not be retrieved';
+
+  @override
+  String get pleaseSelectCategory => 'Please select a category';
+
+  @override
+  String get pleaseSelectPaymentMethod => 'Please select a payment method';
+
+  @override
+  String get cardsLoadingError => 'Error loading cards';
+
+  @override
+  String get noCardsAddedYet => 'No cards added yet';
+
+  @override
+  String get transaction => 'Transaction';
+
+  @override
+  String get bankName => 'Qanta';
+
+  @override
+  String get repeatsEveryWeek => 'Repeats every week';
+
+  @override
+  String get repeatsEveryMonth => 'Repeats every month';
+
+  @override
+  String get repeatsEveryQuarter => 'Repeats every quarter';
+
+  @override
+  String get repeatsEveryYear => 'Repeats every year';
+
+  @override
+  String get otherFixedPayments => 'Other fixed payments';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get thisYear => 'This Year';
+
+  @override
+  String get lastYear => 'Last Year';
+
+  @override
+  String get custom => 'Custom';
+
+  @override
+  String get searchTransactions => 'Search Transactions';
+
+  @override
+  String get filterByType => 'Filter by Type';
+
+  @override
+  String get filterByPeriod => 'Filter by Period';
+
+  @override
+  String get filterByCategory => 'Filter by Category';
+
+  @override
+  String get clearFilters => 'Clear Filters';
+
+  @override
+  String get applyFilters => 'Apply Filters';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get tryDifferentSearch => 'Try a different search';
+
+  @override
+  String get noNotesYet => 'No notes yet';
+
+  @override
+  String get addExpenseIncomeNotes => 'Add your expense or income notes here';
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String get monday => 'Monday';
+
+  @override
+  String get tuesday => 'Tuesday';
+
+  @override
+  String get wednesday => 'Wednesday';
+
+  @override
+  String get thursday => 'Thursday';
+
+  @override
+  String get friday => 'Friday';
+
+  @override
+  String get saturday => 'Saturday';
+
+  @override
+  String get sunday => 'Sunday';
+
+  @override
+  String get january => 'January';
+
+  @override
+  String get february => 'February';
+
+  @override
+  String get march => 'March';
+
+  @override
+  String get april => 'April';
+
+  @override
+  String get may => 'May';
+
+  @override
+  String get june => 'June';
+
+  @override
+  String get july => 'July';
+
+  @override
+  String get august => 'August';
+
+  @override
+  String get september => 'September';
+
+  @override
+  String get october => 'October';
+
+  @override
+  String get november => 'November';
+
+  @override
+  String get december => 'December';
+
+  @override
+  String get textNote => 'Text Note';
+
+  @override
+  String get addQuickTextNote => 'Add quick text note';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get takePhotoFromCamera => 'Take photo from camera';
+
+  @override
+  String get selectFromGallery => 'Select from Gallery';
+
+  @override
+  String get selectPhotoFromGallery => 'Select photo from gallery';
+
+  @override
+  String get photoCaptureError => 'Error capturing photo';
+
+  @override
+  String get photoSelectionError => 'Error selecting photo';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get photoNote => 'Photo note';
+
+  @override
+  String get photoNoteAdded => 'Photo note added';
+
+  @override
+  String get photoNoteAddError => 'Error adding photo note';
+
+  @override
+  String get noteAdded => 'Note added';
+
+  @override
+  String get noteAddError => 'Error adding note';
+
+  @override
+  String get noteDeleted => 'Note deleted';
+
+  @override
+  String get noteDeleteError => 'Error deleting note';
+
+  @override
+  String get noConvertedNotesYet => 'No notes converted to transactions yet';
+
+  @override
+  String get stop => 'Stop';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get processed => 'Processed';
+
+  @override
+  String get newest => 'Newest';
+
+  @override
+  String get oldest => 'Oldest';
+
+  @override
+  String get highestToLowest => 'Highest to Lowest';
+
+  @override
+  String get lowestToHighest => 'Lowest to Highest';
+
+  @override
+  String get alphabetical => 'A-Z';
+
+  @override
+  String get more => 'More';
+
+  @override
+  String get less => 'Less';
+
+  @override
+  String get cardName => 'Card Name';
+
+  @override
+  String get usage => 'Usage';
+
+  @override
+  String get lastPayment => 'Last Payment';
+
+  @override
+  String get nextPayment => 'Next Payment';
+
+  @override
+  String get minimumPayment => 'Minimum Payment';
+
+  @override
+  String get totalDebt => 'Total Debt';
+
+  @override
+  String get noTransactionsForThisCard => 'No transactions found for this card';
+
+  @override
+  String get statementSuccessfullyPaid =>
+      'Statement successfully marked as paid';
+
+  @override
+  String get bank => 'Bank';
+
+  @override
+  String get cardNameRequired => 'Card name is required';
+
+  @override
+  String get creditLimitRequired => 'Credit limit is required';
+
+  @override
+  String get debt => 'Debt';
+
+  @override
+  String get noNotifications => 'No notifications';
+
+  @override
+  String get usageRate => 'Usage Rate';
+
+  @override
+  String get statementDay => 'Statement Day';
+
+  @override
+  String get creditCardInfo => 'Credit Card Info';
+
+  @override
+  String get installmentDetailsLoadError =>
+      'Installment details could not be loaded';
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get passwordMinLengthInfo =>
+      'Your password must be at least 6 characters long.';
+
+  @override
+  String get passwordMinLength => 'Password must be at least 6 characters';
+
+  @override
+  String get passwordChangedSuccessfully => 'Password changed successfully';
+
+  @override
+  String get wrongCurrentPassword => 'Current password is incorrect';
+
+  @override
+  String get passwordTooWeak => 'Password is too weak';
+
+  @override
+  String get requiresRecentLogin =>
+      'Please log in again to change your password';
+
+  @override
+  String get passwordChangeFailed => 'Password change failed';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get collectedInformation => 'Collected Information';
+
+  @override
+  String get collectedInformationContent =>
+      'The Qanta application collects the following information to provide you with better service:\n\n• Account information (email, name-surname)\n• Financial transaction data (income, expense, transfer records)\n• Card and account information\n• Budget and category preferences\n• Application usage statistics';
+
+  @override
+  String get informationUsage => 'Information Usage';
+
+  @override
+  String get informationUsageContent =>
+      'The collected information is used for the following purposes:\n\n• Providing personal finance management services\n• Budget tracking and expense analysis\n• Improving application performance\n• Security and fraud prevention\n• Fulfilling legal obligations';
+
+  @override
+  String get dataSecurity => 'Data Security';
+
+  @override
+  String get dataSecurityContent =>
+      'The security of your data is our priority:\n\n• All data is stored encrypted\n• Hosted on secure servers\n• Regular security updates are made\n• Protected against unauthorized access\n• Industry-standard security measures are taken';
+
+  @override
+  String get dataSharing => 'Data Sharing';
+
+  @override
+  String get dataSharingContent =>
+      'Your personal data is not shared with third parties except in the following cases:\n\n• Legal obligations\n• In case of security breaches\n• With your explicit consent\n• Limited sharing with service providers (anonymous)';
+
+  @override
+  String get userRights => 'User Rights';
+
+  @override
+  String get userRightsContent =>
+      'Your rights under GDPR:\n\n• Learning whether your personal data is processed\n• Requesting access to your data\n• Requesting correction of incorrect information\n• Requesting deletion of data\n• Completely closing your account';
+
+  @override
+  String get contact => 'Contact';
+
+  @override
+  String get contactContent =>
+      'For questions about the privacy policy:\n\nEmail: privacy@qanta.app\nAddress: Istanbul, Turkey\n\nThis policy was last updated: January 20, 2025';
+
+  @override
+  String get supportAndContact => 'Support & Contact';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get liveSupport => 'Live Support';
+
+  @override
+  String get liveSupportHours => 'Monday-Friday 09:00-18:00';
+
+  @override
+  String get isMyDataSecure => 'Is my data secure?';
+
+  @override
+  String get isMyDataSecureAnswer =>
+      'Yes, all your data is stored encrypted and hosted on secure servers. We provide industry-standard security using Supabase infrastructure.';
+
+  @override
+  String get forgotPasswordAnswer =>
+      'You can use the \"Forgot Password\" option on the login screen to send a password reset link to your email address.';
+
+  @override
+  String get howToDeleteAccount => 'How can I delete my account?';
+
+  @override
+  String get howToDeleteAccountAnswer =>
+      'You can log out from the profile page or contact our support team to request complete deletion of your account.';
+
+  @override
+  String get isAppFree => 'Is the app free?';
+
+  @override
+  String get isAppFreeAnswer =>
+      'Yes, Qanta can be used completely free. Premium features may be added in the future, but basic features will always remain free.';
+
+  @override
+  String get appInformation => 'App Information';
+
+  @override
+  String get lastUpdate => 'Last Update';
+
+  @override
+  String get developer => 'Developer';
+
+  @override
+  String get platform => 'Platform';
+
+  @override
+  String get liveSupportTitle => 'Live Support';
+
+  @override
+  String get liveSupportMessage =>
+      'Live support service is currently in development. For urgent matters, please contact us via email or phone.';
+
+  @override
+  String get serviceDescription => 'Service Description';
+
+  @override
+  String get serviceDescriptionContent =>
+      'Qanta is a mobile application designed for personal finance management. The application offers the following services:\n\n• Income and expense tracking\n• Budget management and planning\n• Card and account management\n• Financial reporting and analysis\n• Installment tracking and management';
+
+  @override
+  String get usageTerms => 'Usage Terms';
+
+  @override
+  String get usageTermsContent =>
+      'By using the Qanta application, you agree to the following terms:\n\n• You will use the application only for legal purposes\n• You will provide accurate and up-to-date information\n• You will protect your account security\n• You will respect the rights of other users\n• You will avoid misuse of the application';
+
+  @override
+  String get userResponsibilities => 'User Responsibilities';
+
+  @override
+  String get userResponsibilitiesContent =>
+      'As a user, you have the following responsibilities:\n\n• Keeping your account information secure\n• Not sharing your password with anyone\n• Ensuring the accuracy of your financial data\n• Complying with application rules\n• Reporting security breaches';
+
+  @override
+  String get serviceLimitations => 'Service Limitations';
+
+  @override
+  String get serviceLimitationsContent =>
+      'The Qanta application is subject to the following limitations:\n\n• Does not provide financial advisory services\n• Does not give investment advice\n• Does not perform banking transactions\n• Does not provide credit or lending services\n• Does not provide tax advisory services';
+
+  @override
+  String get intellectualProperty => 'Intellectual Property';
+
+  @override
+  String get intellectualPropertyContent =>
+      'All content of the Qanta application is protected by copyright:\n\n• Application design and code\n• Logo and brand elements\n• Text and visual content\n• Algorithms and calculation methods\n• Database structure';
+
+  @override
+  String get serviceChanges => 'Service Changes';
+
+  @override
+  String get serviceChangesContent =>
+      'Qanta reserves the right to make changes to its services:\n\n• Adding or removing features\n• Pricing changes\n• Updating terms of use\n• Service termination\n• Maintenance and updates';
+
+  @override
+  String get disclaimer => 'Disclaimer';
+
+  @override
+  String get disclaimerContent =>
+      'Qanta is not responsible for the following situations:\n\n• Data loss or corruption\n• System failures or interruptions\n• Third-party service providers\n• Damages resulting from user errors\n• Internet connection issues';
+
+  @override
+  String get termsContact => 'Contact';
+
+  @override
+  String get termsContactContent =>
+      'For questions about terms of service:\n\nEmail: support@qanta.app\nWeb: www.qanta.app\nAddress: Istanbul, Turkey\n\nThese terms were last updated: January 20, 2025';
+
+  @override
+  String get faq => 'Frequently Asked Questions';
+
+  @override
+  String get generalQuestions => 'General Questions';
+
+  @override
+  String get accountAndSecurity => 'Account and Security';
+
+  @override
+  String get features => 'Features';
+
+  @override
+  String get technicalIssues => 'Technical Issues';
+
+  @override
+  String get whatIsQanta => 'What is Qanta?';
+
+  @override
+  String get whatIsQantaAnswer =>
+      'Qanta is a modern mobile application designed for personal finance management. It offers income-expense tracking, budget management, card tracking, and financial analysis features.';
+
+  @override
+  String get whichDevicesSupported => 'Which devices can I use it on?';
+
+  @override
+  String get whichDevicesSupportedAnswer =>
+      'Qanta can be used on Android and iOS devices. It is developed with Flutter technology.';
+
+  @override
+  String get howToChangePassword => 'How can I change my password?';
+
+  @override
+  String get howToChangePasswordAnswer =>
+      'You can use the \"Change Password\" option from the \"Security\" section on the profile page.';
+
+  @override
+  String get whichCardTypesSupported => 'Which card types do you support?';
+
+  @override
+  String get whichCardTypesSupportedAnswer =>
+      'Credit cards, debit cards, and cash accounts are supported. Compatible with all Turkish banks.';
+
+  @override
+  String get howDoesInstallmentTrackingWork =>
+      'How does installment tracking work?';
+
+  @override
+  String get howDoesInstallmentTrackingWorkAnswer =>
+      'You can add installment purchases and automatically track your monthly payments. The system sends you reminders.';
+
+  @override
+  String get howToUseBudgetManagement => 'How to use budget management?';
+
+  @override
+  String get howToUseBudgetManagementAnswer =>
+      'You can set monthly limits for categories, track your expenses, and receive alerts when limits are exceeded.';
+
+  @override
+  String get whatIsQuickNotesFeature => 'What is the quick notes feature?';
+
+  @override
+  String get whatIsQuickNotesFeatureAnswer =>
+      'You can quickly take notes with persistent notifications, add photos, and categorize your notes.';
+
+  @override
+  String get appCrashingWhatToDo => 'The app is crashing, what should I do?';
+
+  @override
+  String get appCrashingWhatToDoAnswer =>
+      'First try closing the app completely and reopening it. If the problem persists, restart your device. If it still doesn\'t resolve, contact our support team.';
+
+  @override
+  String get dataNotSyncing => 'My data is not syncing';
+
+  @override
+  String get dataNotSyncingAnswer =>
+      'Check your internet connection and restart the app. If the problem persists, try logging out and logging back in.';
+
+  @override
+  String get notificationsNotComing => 'Notifications are not coming';
+
+  @override
+  String get notificationsNotComingAnswer =>
+      'Make sure notifications are enabled for Qanta in your device settings. Also check notification settings from the profile page.';
+
+  @override
+  String get howToContactSupport => 'How can I contact your support team?';
+
+  @override
+  String get howToContactSupportAnswer =>
+      'You can use the \"Support & Contact\" section from the profile page or send an email to support@qanta.app.';
+
+  @override
+  String get haveSuggestionWhereToSend =>
+      'I have a suggestion, where can I send it?';
+
+  @override
+  String get haveSuggestionWhereToSendAnswer =>
+      'You can send your suggestions to support@qanta.app. All feedback is evaluated and used to improve the application.';
+
+  @override
+  String get lastMonthChange => 'from last month';
+
+  @override
+  String get increase => 'increase';
+
+  @override
+  String get decrease => 'decrease';
+
+  @override
+  String get noAccountsYet => 'No accounts yet';
+
+  @override
+  String get addFirstAccount => 'Add your first account to get started';
+
+  @override
+  String get currentDebt => 'Current Debt';
+
+  @override
+  String get totalLimit => 'Total Limit';
+
+  @override
+  String get cashWallet => 'Cash Wallet';
+
+  @override
+  String get searchBanks => 'Search banks...';
+
+  @override
+  String get noBanksFound => 'No banks found';
+
+  @override
+  String get addCreditCard => 'Add Credit Card';
+
+  @override
+  String get cardNameExample => 'E.g: VakıfBank Credit Card';
+
+  @override
+  String get currentDebtOptional => 'Current Debt (Optional)';
+
+  @override
+  String get addDebitCard => 'Add Debit Card';
+
+  @override
+  String get cardNameExampleDebit => 'E.g: VakıfBank Checking';
+
+  @override
+  String get initialBalance => 'Initial Balance';
+
+  @override
+  String get day => 'day';
+
+  @override
+  String get firstDay => '1st';
+
+  @override
+  String get secondDay => '2nd';
+
+  @override
+  String get thirdDay => '3rd';
+
+  @override
+  String get fourthDay => '4th';
+
+  @override
+  String get fifthDay => '5th';
+
+  @override
+  String get sixthDay => '6th';
+
+  @override
+  String get seventhDay => '7th';
+
+  @override
+  String get eighthDay => '8th';
+
+  @override
+  String get ninthDay => '9th';
+
+  @override
+  String get tenthDay => '10th';
+
+  @override
+  String get eleventhDay => '11th';
+
+  @override
+  String get twelfthDay => '12th';
+
+  @override
+  String get thirteenthDay => '13th';
+
+  @override
+  String get fourteenthDay => '14th';
+
+  @override
+  String get fifteenthDay => '15th';
+
+  @override
+  String get sixteenthDay => '16th';
+
+  @override
+  String get seventeenthDay => '17th';
+
+  @override
+  String get eighteenthDay => '18th';
+
+  @override
+  String get nineteenthDay => '19th';
+
+  @override
+  String get twentiethDay => '20th';
+
+  @override
+  String get twentyFirstDay => '21st';
+
+  @override
+  String get twentySecondDay => '22nd';
+
+  @override
+  String get twentyThirdDay => '23rd';
+
+  @override
+  String get twentyFourthDay => '24th';
+
+  @override
+  String get twentyFifthDay => '25th';
+
+  @override
+  String get twentySixthDay => '26th';
+
+  @override
+  String get twentySeventhDay => '27th';
+
+  @override
+  String get twentyEighthDay => '28th';
+
+  @override
+  String get selectCardType => 'Select Card Type';
+
+  @override
+  String get addDebitCardDescription => 'Add checking account card';
+
+  @override
+  String get addCreditCardDescription => 'Add your credit card information';
 }

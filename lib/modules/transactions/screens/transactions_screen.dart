@@ -15,6 +15,8 @@ import '../widgets/transaction_combined_filters.dart';
 import '../widgets/transaction_sort_selector.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../shared/widgets/ios_transaction_list.dart';
+import '../../../shared/utils/currency_utils.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/payment_card_model.dart' as pcm;
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
@@ -192,9 +194,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             TransactionDesignSystem.buildTransactionList(
               transactions: _buildTransactionWidgets(transactions, isDark),
               isDark: isDark,
-              emptyTitle: 'Henüz işlem yok',
-              emptyDescription: 'İlk işleminizi eklemek için + butonuna dokunun',
+              emptyTitle: AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
+              emptyDescription: AppLocalizations.of(context)?.addFirstTransaction ?? 'Add your first transaction to get started',
               emptyIcon: Icons.receipt_long_outlined,
+              context: context,
             ),
           ],
         ],
@@ -231,7 +234,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           // Income
           Expanded(
             child: _buildStatItem(
-              title: 'Gelir',
+              title: AppLocalizations.of(context)?.income ?? 'Income',
               amount: totalIncome,
               color: const Color(0xFF10B981),
               isDark: isDark,
@@ -247,7 +250,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           // Expenses
           Expanded(
             child: _buildStatItem(
-              title: 'Gider',
+              title: AppLocalizations.of(context)?.expense ?? 'Expense',
               amount: totalExpenses,
               color: const Color(0xFFEF4444),
               isDark: isDark,
@@ -263,7 +266,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           // Net
           Expanded(
             child: _buildStatItem(
-              title: 'Net',
+              title: AppLocalizations.of(context)?.net ?? 'Net',
               amount: netAmount,
               color: netAmount >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
               isDark: isDark,
@@ -292,7 +295,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          '₺${_formatNumber(amount)}',
+          Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount),
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -403,26 +406,28 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       }
     }
     if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
-      installmentText = '$effectiveInstallmentCount Taksit';
+      installmentText = '$effectiveInstallmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
     } else if (effectiveInstallmentCount == 1) {
-      installmentText = 'Peşin';
+      installmentText = AppLocalizations.of(context)?.cash ?? 'Cash';
     }
     if (installmentText.isNotEmpty) {
       title += ' [$installmentText]';
     }
 
-    // Format amount
-    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
+    // Format amount with dynamic currency
+    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
+    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
 
     // Use displayTime from transaction model (dynamic date formatting)
     final time = transaction.displayTime;
 
     // Card name - centralized logic
     final cardName = TransactionDesignSystem.formatCardName(
-      cardName: transaction.sourceAccountName ?? 'Hesap',
+      cardName: transaction.sourceAccountName ?? AppLocalizations.of(context)?.account ?? 'Account',
       transactionType: transactionType.name,
       sourceAccountName: transaction.sourceAccountName,
       targetAccountName: transaction.targetAccountName,
+      context: context,
     );
 
     // Check if this should be displayed as an installment
@@ -444,7 +449,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       final installmentSuffix = totalInstallments != null ? ' ($totalInstallments Taksit)' : ' (Taksitli)';
       
       // Remove installment pattern from title for cleaner display
-      final cleanTitle = transaction.categoryName ?? transaction.description.replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '').replaceAll('Taksitli', '').trim();
+      final cleanTitle = transaction.categoryName ?? transaction.description.replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '').replaceAll(AppLocalizations.of(context)?.installment ?? 'Installment', '').trim();
       final displayText = installmentText;
       
       // Parse installment info
@@ -511,7 +516,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
         ),
         message: Text(
-          '${transaction.description} işlemini silmek istediğinizden emin misiniz?\n\nTutar: ₺${_numberFormat.format(transaction.amount)}',
+          '${transaction.description} işlemini silmek istediğinizden emin misiniz?\n\nTutar: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(transaction.amount)}',
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -526,7 +531,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               _deleteTransaction(transaction);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)?.delete ?? 'Delete',
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -539,7 +544,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)?.cancel ?? 'Cancel',
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -565,7 +570,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
         ),
         message: Text(
-          '${transaction.description} taksitli işlemini tamamen silmek istediğinizden emin misiniz?\n\nToplam Tutar: ₺${_numberFormat.format(transaction.amount)}\n\nBu işlem tüm taksitleri silecek ve ödenen tutarlar geri iade edilecektir.',
+          '${transaction.description} taksitli işlemini tamamen silmek istediğinizden emin misiniz?\n\nToplam Tutar: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(transaction.amount)}\n\nBu işlem tüm taksitleri silecek ve ödenen tutarlar geri iade edilecektir.',
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -593,7 +598,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)?.cancel ?? 'Cancel',
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -613,7 +618,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? 'İşlem silindi' : 'Silme işlemi başarısız'),
+            content: Text(success ? (AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted') : (AppLocalizations.of(context)?.deleteFailed ?? 'Delete failed')),
             backgroundColor: success ? const Color(0xFF34C759) : Colors.red,
             duration: const Duration(seconds: 1),
           ),
@@ -652,10 +657,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Taksitli işlem silindi'),
-            backgroundColor: Color(0xFF34C759),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.installmentTransactionDeleted ?? 'Installment transaction deleted'),
+            backgroundColor: const Color(0xFF34C759),
+            duration: const Duration(seconds: 2),
           ),
         );
       }

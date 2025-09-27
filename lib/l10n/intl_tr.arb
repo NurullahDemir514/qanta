@@ -1799,5 +1799,1551 @@
   "totalDebts": "Toplam Borç",
   "availableCredit": "Kullanılabilir Kredi",
   "netAmount": "Net",
-  "transactionCount": "İşlem"
+  "transactionCount": "İşlem",
+  "camera": "Kamera",
+  "@camera": {
+    "description": "Camera option for image picker"
+  },
+  "gallery": "Galeri",
+  "@gallery": {
+    "description": "Gallery option for image picker"
+  },
+  "deletePhoto": "Fotoğrafı Sil",
+  "@deletePhoto": {
+    "description": "Delete photo option"
+  },
+  "photoUploadError": "Fotoğraf yüklenirken hata oluştu: {error}",
+  "@photoUploadError": {
+    "description": "Photo upload error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "photoDeleteError": "Fotoğraf silinirken hata oluştu: {error}",
+  "@photoDeleteError": {
+    "description": "Photo delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "fileNotFound": "Dosya bulunamadı",
+  "@fileNotFound": {
+    "description": "File not found error"
+  },
+  "fileTooLarge": "Dosya boyutu çok büyük (max 5MB)",
+  "@fileTooLarge": {
+    "description": "File too large error message"
+  },
+  "userSessionNotFound": "Kullanıcı oturumu bulunamadı",
+  "@userSessionNotFound": {
+    "description": "User session not found error"
+  },
+  "photoDeletedSuccessfully": "Fotoğraf başarıyla silindi",
+  "@photoDeletedSuccessfully": {
+    "description": "Photo deleted successfully message"
+  },
+  "photoUploadedSuccessfully": "Fotoğraf başarıyla yüklendi",
+  "@photoUploadedSuccessfully": {
+    "description": "Photo uploaded successfully message"
+  },
+  "selectImageSource": "Fotoğraf Kaynağı Seçin",
+  "@selectImageSource": {
+    "description": "Select image source dialog title"
+  },
+  "selectImageSourceDescription": "Fotoğrafınızı nereden seçmek istiyorsunuz?",
+  "@selectImageSourceDescription": {
+    "description": "Select image source dialog description"
+  },
+  "uploadingPhoto": "Fotoğraf yükleniyor...",
+  "@uploadingPhoto": {
+    "description": "Photo uploading loading message"
+  },
+  "deletingPhoto": "Fotoğraf siliniyor...",
+  "@deletingPhoto": {
+    "description": "Photo deleting loading message"
+  },
+  "profilePhoto": "Profil Fotoğrafı",
+  "@profilePhoto": {
+    "description": "Profile photo label"
+  },
+  "changeProfilePhoto": "Profil Fotoğrafını Değiştir",
+  "@changeProfilePhoto": {
+    "description": "Change profile photo button"
+  },
+  "removeProfilePhoto": "Profil Fotoğrafını Kaldır",
+  "@removeProfilePhoto": {
+    "description": "Remove profile photo button"
+  },
+  "profilePhotoUpdated": "Profil fotoğrafı güncellendi",
+  "@profilePhotoUpdated": {
+    "description": "Profile photo updated message"
+  },
+  "profilePhotoRemoved": "Profil fotoğrafı kaldırıldı",
+  "@profilePhotoRemoved": {
+    "description": "Profile photo removed message"
+  },
+  "deleteTransaction": "İşlemi Sil",
+  "@deleteTransaction": {
+    "description": "Delete transaction dialog title"
+  },
+  "deleteTransactionConfirm": "{description} işlemini silmek istediğinizden emin misiniz?",
+  "@deleteTransactionConfirm": {
+    "description": "Delete transaction confirmation message",
+    "placeholders": {
+      "description": {
+        "type": "String",
+        "description": "Transaction description"
+      }
+    }
+  },
+  "delete": "Sil",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "transactionDeleted": "İşlem silindi",
+  "@transactionDeleted": {
+    "description": "Transaction deleted success message"
+  },
+  "transactionDeleteError": "İşlem silinirken hata oluştu: {error}",
+  "@transactionDeleteError": {
+    "description": "Transaction delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "deleteInstallmentTransaction": "Taksitli İşlemi Sil",
+  "@deleteInstallmentTransaction": {
+    "description": "Delete installment transaction dialog title"
+  },
+  "deleteInstallmentTransactionConfirm": "{description} taksitli işlemini tamamen silmek istediğinizden emin misiniz? Bu işlem tüm taksitleri silecektir.",
+  "@deleteInstallmentTransactionConfirm": {
+    "description": "Delete installment transaction confirmation message",
+    "placeholders": {
+      "description": {
+        "type": "String",
+        "description": "Transaction description"
+      }
+    }
+  },
+  "installmentTransactionDeleted": "Taksitli işlem başarıyla silindi",
+  "@installmentTransactionDeleted": {
+    "description": "Installment transaction deleted success message"
+  },
+  "installmentTransactionDeleteError": "Taksitli işlem silinirken hata oluştu: {error}",
+  "@installmentTransactionDeleteError": {
+    "description": "Installment transaction delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "deleteAll": "Tümünü Sil",
+  "@deleteAll": {
+    "description": "Delete all button text"
+  },
+  "deleteLimit": "Limit Sil",
+  "@deleteLimit": {
+    "description": "Delete limit dialog title"
+  },
+  "deleteLimitConfirm": "{categoryName} kategorisi için belirlenen limiti silmek istediğinizden emin misiniz?",
+  "@deleteLimitConfirm": {
+    "description": "Delete limit confirmation message",
+    "placeholders": {
+      "categoryName": {
+        "type": "String",
+        "description": "Category name"
+      }
+    }
+  },
+  "limitDeleted": "Limit silindi",
+  "@limitDeleted": {
+    "description": "Limit deleted success message"
+  },
+  "deleteLimitTooltip": "Limiti Sil",
+  "@deleteLimitTooltip": {
+    "description": "Delete limit tooltip"
+  },
+  "error": "Hata",
+  "@error": {
+    "description": "Error prefix"
+  },
+  "errorOccurred": "Hata: {error}",
+  "@errorOccurred": {
+    "description": "Error occurred message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "loading": "Yükleniyor...",
+  "@loading": {
+    "description": "Loading message"
+  },
+  "loadingPastStatements": "Geçmiş ekstreler yükleniyor...",
+  "@loadingPastStatements": {
+    "description": "Loading past statements message"
+  },
+  "loadingFutureStatements": "Gelecek ekstreler yükleniyor...",
+  "@loadingFutureStatements": {
+    "description": "Loading future statements message"
+  },
+  "loadingCards": "Kartlar yüklenirken hata oluştu",
+  "@loadingCards": {
+    "description": "Loading cards error message"
+  },
+  "loadingAccounts": "Hesapları yükle",
+  "@loadingAccounts": {
+    "description": "Loading accounts message"
+  },
+  "loadingStatementInfo": "Ekstre bilgileri yüklenirken hata oluştu",
+  "@loadingStatementInfo": {
+    "description": "Loading statement info error message"
+  },
+  "paymentError": "Ödeme işlemi sırasında hata oluştu",
+  "@paymentError": {
+    "description": "Payment error message"
+  },
+  "statementMarkError": "Ekstre işaretlenirken hata oluştu",
+  "@statementMarkError": {
+    "description": "Statement mark error message"
+  },
+  "unknownError": "Bir hata oluştu: {error}",
+  "@unknownError": {
+    "description": "Unknown error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "deleteCard": "Kartı Sil",
+  "@deleteCard": {
+    "description": "Delete card dialog title"
+  },
+  "deleteCardConfirm": "{cardName} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.",
+  "@deleteCardConfirm": {
+    "description": "Delete card confirmation message",
+    "placeholders": {
+      "cardName": {
+        "type": "String",
+        "description": "Card name"
+      }
+    }
+  },
+  "cardDeleted": "Kart başarıyla silindi",
+  "@cardDeleted": {
+    "description": "Card deleted success message"
+  },
+  "cardDeleteError": "Kart silinirken hata oluştu",
+  "@cardDeleteError": {
+    "description": "Card delete error message"
+  },
+  "transactionAddError": "İşlem eklenirken hata: {error}",
+  "@transactionAddError": {
+    "description": "Transaction add error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "updateError": "Güncelleme sırasında hata oluştu: {error}",
+  "@updateError": {
+    "description": "Update error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "deleteFailed": "Silme işlemi başarısız",
+  "@deleteFailed": {
+    "description": "Delete failed message"
+  },
+  "installmentTransactionDeleting": "Taksitli işlem siliniyor...",
+  "@installmentTransactionDeleting": {
+    "description": "Installment transaction deleting message"
+  },
+  "installmentTransactionDeletedWithRefund": "Taksitli işlem silindi, toplam tutar iade edildi",
+  "@installmentTransactionDeletedWithRefund": {
+    "description": "Installment transaction deleted with refund message"
+  },
+  "cancelAction": "İptal Et",
+  "@cancelAction": {
+    "description": "Cancel action button text"
+  },
+  "quickNotes": "Hızlı Notlar",
+  "@quickNotes": {
+    "description": "Quick notes feature title"
+  },
+  "quickNotesSubtitle": "Anında not alma için kalıcı bildirim",
+  "@quickNotesSubtitle": {
+    "description": "Quick notes feature subtitle"
+  },
+  "quickNotesNotificationEnabled": "Hızlı notlar bildirimi açıldı",
+  "@quickNotesNotificationEnabled": {
+    "description": "Quick notes notification enabled message"
+  },
+  "quickNotesNotificationDisabled": "Hızlı notlar bildirimi kapatıldı",
+  "@quickNotesNotificationDisabled": {
+    "description": "Quick notes notification disabled message"
+  },
+  "notificationPermissionRequired": "Bildirim izni gerekli! Lütfen ayarlardan açın.",
+  "@notificationPermissionRequired": {
+    "description": "Notification permission required message"
+  },
+  "frequentlyAskedQuestions": "Sık Sorulan Sorular",
+  "@frequentlyAskedQuestions": {
+    "description": "FAQ section title"
+  },
+  "account": "Hesap",
+  "@account": {
+    "description": "Account placeholder text"
+  },
+  "noTransactionsYet": "Henüz işlem yok",
+  "@noTransactionsYet": {
+    "description": "No transactions message"
+  },
+  "addFirstTransaction": "İlk işleminizi ekleyerek başlayın",
+  "@addFirstTransaction": {
+    "description": "Add first transaction message"
+  },
+  "now": "Şimdi",
+  "@now": {
+    "description": "Now time indicator"
+  },
+  "yesterday": "Dün",
+  "@yesterday": {
+    "description": "Yesterday time indicator"
+  },
+  "installment": "Taksitli",
+  "@installment": {
+    "description": "Installment indicator"
+  },
+  "delete": "Sil",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "cancel": "İptal",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "income": "Gelir",
+  "@income": {
+    "description": "Income transaction type"
+  },
+  "expense": "Gider",
+  "@expense": {
+    "description": "Expense transaction type"
+  },
+  "transfer": "Transfer",
+  "@transfer": {
+    "description": "Transfer transaction type"
+  },
+  "today": "Bugün",
+  "@today": {
+    "description": "Today indicator"
+  },
+  "installment": "Taksit",
+  "@installment": {
+    "description": "Installment text"
+  },
+  "cash": "Peşin",
+  "@cash": {
+    "description": "Cash payment text"
+  },
+  "transactionDeleted": "İşlem silindi",
+  "@transactionDeleted": {
+    "description": "Transaction deleted message"
+  },
+  "deleteFailed": "Silme işlemi başarısız",
+  "@deleteFailed": {
+    "description": "Delete failed message"
+  },
+  "minutesAgo": "{count} dk önce",
+  "@minutesAgo": {
+    "description": "Minutes ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} saat önce",
+  "@hoursAgo": {
+    "description": "Hours ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} gün önce",
+  "@daysAgo": {
+    "description": "Days ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weeksAgo": "{count} hafta önce",
+  "@weeksAgo": {
+    "description": "Weeks ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthsAgo": "{count} ay önce",
+  "@monthsAgo": {
+    "description": "Months ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yearsAgo": "{count} yıl önce",
+  "@yearsAgo": {
+    "description": "Years ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "oneMinuteAgo": "1 dk önce",
+  "@oneMinuteAgo": {
+    "description": "One minute ago text"
+  },
+  "oneHourAgo": "1 saat önce",
+  "@oneHourAgo": {
+    "description": "One hour ago text"
+  },
+  "oneWeekAgo": "1 hafta önce",
+  "@oneWeekAgo": {
+    "description": "One week ago text"
+  },
+  "oneMonthAgo": "1 ay önce",
+  "@oneMonthAgo": {
+    "description": "One month ago text"
+  },
+  "oneYearAgo": "1 yıl önce",
+  "@oneYearAgo": {
+    "description": "One year ago text"
+  },
+  "twoDaysAgo": "2 gün önce",
+  "@twoDaysAgo": {
+    "description": "Two days ago text"
+  },
+  "perMonth": "/ay",
+  "@perMonth": {
+    "description": "Per month indicator"
+  },
+  "income": "Gelir",
+  "@income": {
+    "description": "Income transaction type"
+  },
+  "expense": "Gider",
+  "@expense": {
+    "description": "Expense transaction type"
+  },
+  "net": "Net",
+  "@net": {
+    "description": "Net amount"
+  },
+  "cash": "Peşin",
+  "@cash": {
+    "description": "Cash payment"
+  },
+  "installment": "Taksit",
+  "@installment": {
+    "description": "Installment"
+  },
+  "category": "Kategori",
+  "@category": {
+    "description": "Category placeholder"
+  },
+  "pleaseEnterAmount": "Lütfen bir tutar girin",
+  "@pleaseEnterAmount": {
+    "description": "Please enter amount error"
+  },
+  "pleaseEnterValidAmount": "Geçerli bir tutar girin",
+  "@pleaseEnterValidAmount": {
+    "description": "Please enter valid amount error"
+  },
+  "pleaseSelectSourceAccount": "Lütfen kaynak hesap seçin",
+  "@pleaseSelectSourceAccount": {
+    "description": "Please select source account error"
+  },
+  "pleaseSelectTargetAccount": "Lütfen hedef hesap seçin",
+  "@pleaseSelectTargetAccount": {
+    "description": "Please select target account error"
+  },
+  "sourceAndTargetSame": "Kaynak ve hedef hesap aynı olamaz",
+  "@sourceAndTargetSame": {
+    "description": "Source and target account same error"
+  },
+  "accountInfoNotFound": "Hesap bilgileri alınamadı",
+  "@accountInfoNotFound": {
+    "description": "Account info not found error"
+  },
+  "accountInfoNotFoundSingle": "Hesap bilgisi alınamadı",
+  "@accountInfoNotFoundSingle": {
+    "description": "Account info not found error (single)"
+  },
+  "pleaseSelectCategory": "Lütfen bir kategori seçin",
+  "@pleaseSelectCategory": {
+    "description": "Please select category error"
+  },
+  "pleaseSelectPaymentMethod": "Lütfen bir ödeme yöntemi seçin",
+  "@pleaseSelectPaymentMethod": {
+    "description": "Please select payment method error"
+  },
+  "cardsLoadingError": "Kartlar yüklenirken hata oluştu",
+  "@cardsLoadingError": {
+    "description": "Cards loading error"
+  },
+  "noCardsAddedYet": "Henüz kart eklenmemiş",
+  "@noCardsAddedYet": {
+    "description": "No cards added yet"
+  },
+  "cash": "Nakit",
+  "@cash": {
+    "description": "Cash account"
+  },
+  "transaction": "İşlem",
+  "@transaction": {
+    "description": "Transaction generic term"
+  },
+  "all": "Tümü",
+  "@all": {
+    "description": "All option"
+  },
+  "today": "Bugün",
+  "@today": {
+    "description": "Today"
+  },
+  "selectTransactionType": "Yapmak istediğiniz işlem türünü seçin",
+  "@selectTransactionType": {
+    "description": "Select transaction type message"
+  },
+  "bankName": "Qanta",
+  "@bankName": {
+    "description": "Bank name"
+  },
+  "installmentTransactionDeleted": "Taksitli işlem silindi",
+  "@installmentTransactionDeleted": {
+    "description": "Installment transaction deleted message"
+  },
+  "weekly": "Haftalık",
+  "@weekly": {
+    "description": "Weekly frequency"
+  },
+  "monthly": "Aylık",
+  "@monthly": {
+    "description": "Monthly frequency"
+  },
+  "quarterly": "Üç Aylık",
+  "@quarterly": {
+    "description": "Quarterly frequency"
+  },
+  "yearly": "Yıllık",
+  "@yearly": {
+    "description": "Yearly frequency"
+  },
+  "repeatsEveryWeek": "Her hafta tekrarlanır",
+  "@repeatsEveryWeek": {
+    "description": "Repeats every week"
+  },
+  "repeatsEveryMonth": "Her ay tekrarlanır",
+  "@repeatsEveryMonth": {
+    "description": "Repeats every month"
+  },
+  "repeatsEveryQuarter": "Her üç ayda tekrarlanır",
+  "@repeatsEveryQuarter": {
+    "description": "Repeats every quarter"
+  },
+  "repeatsEveryYear": "Her yıl tekrarlanır",
+  "@repeatsEveryYear": {
+    "description": "Repeats every year"
+  },
+  "subscription": "Abonelik",
+  "@subscription": {
+    "description": "Subscription category"
+  },
+  "utilities": "Faturalar",
+  "@utilities": {
+    "description": "Utilities category"
+  },
+  "insurance": "Sigorta",
+  "@insurance": {
+    "description": "Insurance category"
+  },
+  "rent": "Kira",
+  "@rent": {
+    "description": "Rent category"
+  },
+  "loan": "Kredi",
+  "@loan": {
+    "description": "Loan category"
+  },
+  "other": "Diğer",
+  "@other": {
+    "description": "Other category"
+  },
+  "otherFixedPayments": "Diğer sabit ödemeler",
+  "@otherFixedPayments": {
+    "description": "Other fixed payments"
+  },
+  "card": "Kart",
+  "@card": {
+    "description": "Card payment method"
+  },
+  "thisWeek": "Bu Hafta",
+  "@thisWeek": {
+    "description": "This week"
+  },
+  "thisMonth": "Bu Ay",
+  "@thisMonth": {
+    "description": "This month"
+  },
+  "lastMonth": "Geçen Ay",
+  "@lastMonth": {
+    "description": "Last month"
+  },
+  "last3Months": "Son 3 Ay",
+  "@last3Months": {
+    "description": "Last 3 months"
+  },
+  "thisYear": "Bu Yıl",
+  "@thisYear": {
+    "description": "This year"
+  },
+  "lastYear": "Geçen Yıl",
+  "@lastYear": {
+    "description": "Last year"
+  },
+  "custom": "Özel",
+  "@custom": {
+    "description": "Custom period"
+  },
+  "searchTransactions": "İşlem Ara",
+  "@searchTransactions": {
+    "description": "Search transactions placeholder"
+  },
+  "filterByType": "Türe Göre Filtrele",
+  "@filterByType": {
+    "description": "Filter by type"
+  },
+  "filterByPeriod": "Döneme Göre Filtrele",
+  "@filterByPeriod": {
+    "description": "Filter by period"
+  },
+  "filterByCategory": "Kategoriye Göre Filtrele",
+  "@filterByCategory": {
+    "description": "Filter by category"
+  },
+  "clearFilters": "Filtreleri Temizle",
+  "@clearFilters": {
+    "description": "Clear filters"
+  },
+  "applyFilters": "Filtreleri Uygula",
+  "@applyFilters": {
+    "description": "Apply filters"
+  },
+  "noResultsFound": "Sonuç bulunamadı",
+  "@noResultsFound": {
+    "description": "No results found"
+  },
+  "tryDifferentSearch": "Farklı bir arama deneyin",
+  "@tryDifferentSearch": {
+    "description": "Try different search"
+  },
+  "pleaseSelectCategory": "Lütfen bir kategori seçin",
+  "@pleaseSelectCategory": {
+    "description": "Please select a category"
+  },
+  "pleaseSelectPaymentMethod": "Lütfen bir ödeme yöntemi seçin",
+  "@pleaseSelectPaymentMethod": {
+    "description": "Please select a payment method"
+  },
+  "accountInfoNotFoundSingle": "Hesap bilgisi alınamadı",
+  "@accountInfoNotFoundSingle": {
+    "description": "Account information could not be retrieved (single)"
+  },
+  "noNotesYet": "Henüz not yok",
+  "@noNotesYet": {
+    "description": "No notes yet"
+  },
+  "addExpenseIncomeNotes": "Harcama veya gelir notlarınızı buraya ekleyin",
+  "@addExpenseIncomeNotes": {
+    "description": "Add your expense or income notes here"
+  },
+  "justNow": "Az önce",
+  "@justNow": {
+    "description": "Just now"
+  },
+  "monday": "Pazartesi",
+  "@monday": {
+    "description": "Monday"
+  },
+  "tuesday": "Salı",
+  "@tuesday": {
+    "description": "Tuesday"
+  },
+  "wednesday": "Çarşamba",
+  "@wednesday": {
+    "description": "Wednesday"
+  },
+  "thursday": "Perşembe",
+  "@thursday": {
+    "description": "Thursday"
+  },
+  "friday": "Cuma",
+  "@friday": {
+    "description": "Friday"
+  },
+  "saturday": "Cumartesi",
+  "@saturday": {
+    "description": "Saturday"
+  },
+  "sunday": "Pazar",
+  "@sunday": {
+    "description": "Sunday"
+  },
+  "january": "Ocak",
+  "@january": {
+    "description": "January"
+  },
+  "february": "Şubat",
+  "@february": {
+    "description": "February"
+  },
+  "march": "Mart",
+  "@march": {
+    "description": "March"
+  },
+  "april": "Nisan",
+  "@april": {
+    "description": "April"
+  },
+  "may": "Mayıs",
+  "@may": {
+    "description": "May"
+  },
+  "june": "Haziran",
+  "@june": {
+    "description": "June"
+  },
+  "july": "Temmuz",
+  "@july": {
+    "description": "July"
+  },
+  "august": "Ağustos",
+  "@august": {
+    "description": "August"
+  },
+  "september": "Eylül",
+  "@september": {
+    "description": "September"
+  },
+  "october": "Ekim",
+  "@october": {
+    "description": "October"
+  },
+  "november": "Kasım",
+  "@november": {
+    "description": "November"
+  },
+  "december": "Aralık",
+  "@december": {
+    "description": "December"
+  },
+  "textNote": "Metin Notu",
+  "@textNote": {
+    "description": "Text Note"
+  },
+  "addQuickTextNote": "Hızlı metin notu ekle",
+  "@addQuickTextNote": {
+    "description": "Add quick text note"
+  },
+  "takePhoto": "Fotoğraf Çek",
+  "@takePhoto": {
+    "description": "Take Photo"
+  },
+  "takePhotoFromCamera": "Kameradan fotoğraf çek",
+  "@takePhotoFromCamera": {
+    "description": "Take photo from camera"
+  },
+  "selectFromGallery": "Galeriden Seç",
+  "@selectFromGallery": {
+    "description": "Select from Gallery"
+  },
+  "selectPhotoFromGallery": "Galeriden fotoğraf seç",
+  "@selectPhotoFromGallery": {
+    "description": "Select photo from gallery"
+  },
+  "photoCaptureError": "Fotoğraf çekilirken hata oluştu",
+  "@photoCaptureError": {
+    "description": "Error capturing photo"
+  },
+  "photoSelectionError": "Fotoğraf seçilirken hata oluştu",
+  "@photoSelectionError": {
+    "description": "Error selecting photo"
+  },
+  "add": "Ekle",
+  "@add": {
+    "description": "Add"
+  },
+  "photoNote": "Fotoğraf notu",
+  "@photoNote": {
+    "description": "Photo note"
+  },
+  "photoNoteAdded": "Fotoğraf notu eklendi",
+  "@photoNoteAdded": {
+    "description": "Photo note added"
+  },
+  "photoNoteAddError": "Fotoğraf notu eklenirken hata oluştu",
+  "@photoNoteAddError": {
+    "description": "Error adding photo note"
+  },
+  "noteAdded": "Not eklendi",
+  "@noteAdded": {
+    "description": "Note added"
+  },
+  "noteAddError": "Not eklenirken hata oluştu",
+  "@noteAddError": {
+    "description": "Error adding note"
+  },
+  "noteDeleted": "Not silindi",
+  "@noteDeleted": {
+    "description": "Note deleted"
+  },
+  "noteDeleteError": "Not silinirken hata oluştu",
+  "@noteDeleteError": {
+    "description": "Error deleting note"
+  },
+  "noConvertedNotesYet": "Henüz işleme dönüştürülen not yok",
+  "@noConvertedNotesYet": {
+    "description": "No notes converted to transactions yet"
+  },
+  "stop": "Durdur",
+  "@stop": {
+    "description": "Stop"
+  },
+  "send": "Gönder",
+  "@send": {
+    "description": "Send"
+  },
+  "processed": "İşlendi",
+  "@processed": {
+    "description": "Processed"
+  },
+  "newest": "En Yeni",
+  "@newest": {
+    "description": "Newest"
+  },
+  "oldest": "En Eski",
+  "@oldest": {
+    "description": "Oldest"
+  },
+  "highestToLowest": "Çoktan Aza",
+  "@highestToLowest": {
+    "description": "Highest to Lowest"
+  },
+  "lowestToHighest": "Azdan Çoğa",
+  "@lowestToHighest": {
+    "description": "Lowest to Highest"
+  },
+  "alphabetical": "A-Z",
+  "@alphabetical": {
+    "description": "Alphabetical"
+  },
+  "more": "Daha Fazla",
+  "@more": {
+    "description": "More"
+  },
+  "less": "Daha Az",
+  "@less": {
+    "description": "Less"
+  },
+  "creditCard": "Kredi Kartı",
+  "@creditCard": {
+    "description": "Credit Card"
+  },
+  "availableCredit": "Kullanılabilir Limit",
+  "@availableCredit": {
+    "description": "Available Credit"
+  },
+  "creditLimit": "Kredi Limiti",
+  "@creditLimit": {
+    "description": "Credit Limit"
+  },
+  "debitCard": "Banka Kartı",
+  "@debitCard": {
+    "description": "Debit Card"
+  },
+  "balance": "Bakiye",
+  "@balance": {
+    "description": "Balance"
+  },
+  "cardName": "Kart Adı",
+  "@cardName": {
+    "description": "Card Name"
+  },
+  "usage": "Kullanım",
+  "@usage": {
+    "description": "Usage"
+  },
+  "lastPayment": "Son Ödeme",
+  "@lastPayment": {
+    "description": "Last Payment"
+  },
+  "nextPayment": "Sonraki Ödeme",
+  "@nextPayment": {
+    "description": "Next Payment"
+  },
+  "minimumPayment": "Minimum Ödeme",
+  "@minimumPayment": {
+    "description": "Minimum Payment"
+  },
+  "totalDebt": "Toplam Borç",
+  "@totalDebt": {
+    "description": "Total Debt"
+  },
+  "noTransactionsForThisCard": "Bu kart için henüz işlem bulunmuyor",
+  "@noTransactionsForThisCard": {
+    "description": "No transactions found for this card"
+  },
+  "statementSuccessfullyPaid": "Ekstre başarıyla ödendi olarak işaretlendi",
+  "@statementSuccessfullyPaid": {
+    "description": "Statement successfully marked as paid"
+  },
+  "bank": "Banka",
+  "@bank": {
+    "description": "Bank"
+  },
+  "cardNameRequired": "Kart adı gerekli",
+  "@cardNameRequired": {
+    "description": "Card name is required"
+  },
+  "creditLimitRequired": "Kredi limiti gerekli",
+  "@creditLimitRequired": {
+    "description": "Credit limit is required"
+  },
+  "availableLimit": "Kullanılabilir Limit",
+  "@availableLimit": {
+    "description": "Available Limit"
+  },
+  "debt": "Borç",
+  "@debt": {
+    "description": "Debt"
+  },
+  "notifications": "Bildirimler",
+  "@notifications": {
+    "description": "Notifications"
+  },
+  "noNotifications": "Bildirim yok",
+  "@noNotifications": {
+    "description": "No notifications"
+  },
+  "usageRate": "Kullanım Oranı",
+  "@usageRate": {
+    "description": "Usage Rate"
+  },
+  "statementDay": "Ekstre Günü",
+  "@statementDay": {
+    "description": "Statement Day"
+  },
+  "creditCardInfo": "Kredi Kartı Bilgileri",
+  "@creditCardInfo": {
+    "description": "Credit Card Info"
+  },
+  "installmentDetailsLoadError": "Taksit detayları yüklenemedi",
+  "@installmentDetailsLoadError": {
+    "description": "Installment details could not be loaded"
+  },
+  "tomorrow": "Yarın",
+  "@tomorrow": {
+    "description": "Tomorrow"
+  },
+  "changePassword": "Şifre Değiştir",
+  "@changePassword": {
+    "description": "Change Password"
+  },
+  "currentPassword": "Mevcut Şifre",
+  "@currentPassword": {
+    "description": "Current Password"
+  },
+  "newPassword": "Yeni Şifre",
+  "@newPassword": {
+    "description": "New Password"
+  },
+  "confirmNewPassword": "Yeni Şifre (Tekrar)",
+  "@confirmNewPassword": {
+    "description": "Confirm New Password"
+  },
+  "save": "Kaydet",
+  "@save": {
+    "description": "Save"
+  },
+  "passwordMinLengthInfo": "Şifreniz en az 6 karakter uzunluğunda olmalıdır.",
+  "@passwordMinLengthInfo": {
+    "description": "Your password must be at least 6 characters long."
+  },
+  "passwordsDoNotMatch": "Yeni şifreler eşleşmiyor",
+  "@passwordsDoNotMatch": {
+    "description": "Passwords do not match"
+  },
+  "passwordMinLength": "Şifre en az 6 karakter olmalı",
+  "@passwordMinLength": {
+    "description": "Password must be at least 6 characters"
+  },
+  "passwordChangedSuccessfully": "Şifre başarıyla değiştirildi",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully"
+  },
+  "wrongCurrentPassword": "Mevcut şifre yanlış",
+  "@wrongCurrentPassword": {
+    "description": "Current password is incorrect"
+  },
+  "passwordTooWeak": "Şifre çok zayıf",
+  "@passwordTooWeak": {
+    "description": "Password is too weak"
+  },
+  "requiresRecentLogin": "Şifrenizi değiştirmek için tekrar giriş yapın",
+  "@requiresRecentLogin": {
+    "description": "Please log in again to change your password"
+  },
+  "passwordChangeFailed": "Şifre değiştirilemedi",
+  "@passwordChangeFailed": {
+    "description": "Password change failed"
+  },
+  "ok": "Tamam",
+  "@ok": {
+    "description": "OK"
+  },
+  "privacyPolicy": "Gizlilik Politikası",
+  "@privacyPolicy": {
+    "description": "Privacy Policy"
+  },
+  "collectedInformation": "Toplanan Bilgiler",
+  "@collectedInformation": {
+    "description": "Collected Information"
+  },
+  "collectedInformationContent": "Qanta uygulaması, size daha iyi hizmet verebilmek için aşağıdaki bilgileri toplar:\n\n• Hesap bilgileri (e-posta, ad-soyad)\n• Finansal işlem verileri (gelir, gider, transfer kayıtları)\n• Kart ve hesap bilgileri\n• Bütçe ve kategori tercihleri\n• Uygulama kullanım istatistikleri",
+  "@collectedInformationContent": {
+    "description": "Collected Information Content"
+  },
+  "informationUsage": "Bilgilerin Kullanımı",
+  "@informationUsage": {
+    "description": "Information Usage"
+  },
+  "informationUsageContent": "Toplanan bilgiler aşağıdaki amaçlarla kullanılır:\n\n• Kişisel finans yönetimi hizmetlerinin sağlanması\n• Bütçe takibi ve harcama analizlerinin yapılması\n• Uygulama performansının iyileştirilmesi\n• Güvenlik ve dolandırıcılık önleme\n• Yasal yükümlülüklerin yerine getirilmesi",
+  "@informationUsageContent": {
+    "description": "Information Usage Content"
+  },
+  "dataSecurity": "Veri Güvenliği",
+  "@dataSecurity": {
+    "description": "Data Security"
+  },
+  "dataSecurityContent": "Verilerinizin güvenliği bizim için önceliktir:\n\n• Tüm veriler şifreli olarak saklanır\n• Güvenli sunucularda barındırılır\n• Düzenli güvenlik güncellemeleri yapılır\n• Yetkisiz erişimlere karşı korunur\n• Endüstri standartlarına uygun güvenlik önlemleri alınır",
+  "@dataSecurityContent": {
+    "description": "Data Security Content"
+  },
+  "dataSharing": "Veri Paylaşımı",
+  "@dataSharing": {
+    "description": "Data Sharing"
+  },
+  "dataSharingContent": "Kişisel verileriniz aşağıdaki durumlar dışında üçüncü taraflarla paylaşılmaz:\n\n• Yasal zorunluluklar\n• Güvenlik ihlalleri durumunda\n• Açık rızanızın bulunması\n• Hizmet sağlayıcıları ile sınırlı paylaşım (anonim)",
+  "@dataSharingContent": {
+    "description": "Data Sharing Content"
+  },
+  "userRights": "Kullanıcı Hakları",
+  "@userRights": {
+    "description": "User Rights"
+  },
+  "userRightsContent": "KVKK kapsamında sahip olduğunuz haklar:\n\n• Kişisel verilerinizin işlenip işlenmediğini öğrenme\n• Verilerinize erişim talep etme\n• Yanlış bilgilerin düzeltilmesini isteme\n• Verilerin silinmesini talep etme\n• Hesabınızı tamamen kapatma",
+  "@userRightsContent": {
+    "description": "User Rights Content"
+  },
+  "contact": "İletişim",
+  "@contact": {
+    "description": "Contact"
+  },
+  "contactContent": "Gizlilik politikası ile ilgili sorularınız için:\n\nE-posta: privacy@qanta.app\nAdres: İstanbul, Türkiye\n\nBu politika son güncellenme tarihi: 20 Ocak 2025",
+  "@contactContent": {
+    "description": "Contact Content"
+  },
+  "supportAndContact": "Destek & İletişim",
+  "@supportAndContact": {
+    "description": "Support & Contact"
+  },
+  "email": "E-posta",
+  "@email": {
+    "description": "Email"
+  },
+  "phone": "Telefon",
+  "@phone": {
+    "description": "Phone"
+  },
+  "liveSupport": "Canlı Destek",
+  "@liveSupport": {
+    "description": "Live Support"
+  },
+  "liveSupportHours": "Pazartesi-Cuma 09:00-18:00",
+  "@liveSupportHours": {
+    "description": "Live Support Hours"
+  },
+  "frequentlyAskedQuestions": "Sık Sorulan Sorular",
+  "@frequentlyAskedQuestions": {
+    "description": "Frequently Asked Questions"
+  },
+  "isMyDataSecure": "Verilerim güvende mi?",
+  "@isMyDataSecure": {
+    "description": "Is my data secure?"
+  },
+  "isMyDataSecureAnswer": "Evet, tüm verileriniz şifreli olarak saklanır ve güvenli sunucularda barındırılır.",
+  "@isMyDataSecureAnswer": {
+    "description": "Is my data secure answer"
+  },
+  "forgotPassword": "Şifremi unuttum, ne yapmalıyım?",
+  "@forgotPassword": {
+    "description": "Forgot password"
+  },
+  "forgotPasswordAnswer": "Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak şifrenizi sıfırlayabilirsiniz.",
+  "@forgotPasswordAnswer": {
+    "description": "Forgot password answer"
+  },
+  "howToDeleteAccount": "Hesabımı nasıl silebilirim?",
+  "@howToDeleteAccount": {
+    "description": "How to delete account"
+  },
+  "howToDeleteAccountAnswer": "Profil sayfasından \"Hesap Ayarları\" > \"Hesabı Sil\" seçeneğini kullanabilirsiniz.",
+  "@howToDeleteAccountAnswer": {
+    "description": "How to delete account answer"
+  },
+  "isAppFree": "Uygulama ücretsiz mi?",
+  "@isAppFree": {
+    "description": "Is app free"
+  },
+  "isAppFreeAnswer": "Evet, Qanta tamamen ücretsiz olarak kullanılabilir. Gelecekte premium özellikler eklenebilir.",
+  "@isAppFreeAnswer": {
+    "description": "Is app free answer"
+  },
+  "appInformation": "Uygulama Bilgileri",
+  "@appInformation": {
+    "description": "App Information"
+  },
+  "version": "Versiyon",
+  "@version": {
+    "description": "Version"
+  },
+  "lastUpdate": "Son Güncelleme",
+  "@lastUpdate": {
+    "description": "Last Update"
+  },
+  "developer": "Geliştirici",
+  "@developer": {
+    "description": "Developer"
+  },
+  "platform": "Platform",
+  "@platform": {
+    "description": "Platform"
+  },
+  "liveSupportTitle": "Canlı Destek",
+  "@liveSupportTitle": {
+    "description": "Live Support Title"
+  },
+  "liveSupportMessage": "Canlı destek hizmeti şu anda geliştirme aşamasındadır. Acil durumlar için lütfen e-posta veya telefon ile iletişime geçin.",
+  "@liveSupportMessage": {
+    "description": "Live Support Message"
+  },
+  "termsOfService": "Kullanım Şartları",
+  "@termsOfService": {
+    "description": "Terms of Service"
+  },
+  "serviceDescription": "Hizmet Tanımı",
+  "@serviceDescription": {
+    "description": "Service Description"
+  },
+  "serviceDescriptionContent": "Qanta, kişisel finans yönetimi için tasarlanmış bir mobil uygulamadır. Uygulama aşağıdaki hizmetleri sunar:\n\n• Gelir ve gider takibi\n• Bütçe yönetimi ve planlama\n• Kart ve hesap yönetimi\n• Finansal raporlama ve analiz\n• Taksit takibi ve yönetimi",
+  "@serviceDescriptionContent": {
+    "description": "Service Description Content"
+  },
+  "usageTerms": "Kullanım Koşulları",
+  "@usageTerms": {
+    "description": "Usage Terms"
+  },
+  "usageTermsContent": "Qanta uygulamasını kullanarak aşağıdaki koşulları kabul etmiş olursunuz:\n\n• Uygulamayı yalnızca yasal amaçlarla kullanacaksınız\n• Doğru ve güncel bilgiler sağlayacaksınız\n• Hesap güvenliğinizi koruyacaksınız\n• Diğer kullanıcıların haklarına saygı göstereceksiniz\n• Uygulamanın kötüye kullanımından kaçınacaksınız",
+  "@usageTermsContent": {
+    "description": "Usage Terms Content"
+  },
+  "userResponsibilities": "Kullanıcı Sorumlulukları",
+  "@userResponsibilities": {
+    "description": "User Responsibilities"
+  },
+  "userResponsibilitiesContent": "Kullanıcı olarak aşağıdaki sorumluluklarınız bulunmaktadır:\n\n• Hesap bilgilerinizi güvenli tutmak\n• Şifrenizi kimseyle paylaşmamak\n• Finansal verilerinizin doğruluğunu sağlamak\n• Uygulama kurallarına uymak\n• Güvenlik ihlallerini bildirmek",
+  "@userResponsibilitiesContent": {
+    "description": "User Responsibilities Content"
+  },
+  "serviceLimitations": "Hizmet Sınırlamaları",
+  "@serviceLimitations": {
+    "description": "Service Limitations"
+  },
+  "serviceLimitationsContent": "Qanta uygulaması aşağıdaki sınırlamalara tabidir:\n\n• Finansal danışmanlık hizmeti sunmaz\n• Yatırım önerisi vermez\n• Banka işlemleri gerçekleştirmez\n• Kredi veya borç verme hizmeti sunmaz\n• Vergi danışmanlığı yapmaz",
+  "@serviceLimitationsContent": {
+    "description": "Service Limitations Content"
+  },
+  "intellectualProperty": "Fikri Mülkiyet",
+  "@intellectualProperty": {
+    "description": "Intellectual Property"
+  },
+  "intellectualPropertyContent": "Qanta uygulamasının tüm içeriği telif hakkı ile korunmaktadır:\n\n• Uygulama tasarımı ve kodu\n• Logo ve marka unsurları\n• Metin ve görsel içerikler\n• Algoritma ve hesaplama yöntemleri\n• Veritabanı yapısı",
+  "@intellectualPropertyContent": {
+    "description": "Intellectual Property Content"
+  },
+  "serviceChanges": "Hizmet Değişiklikleri",
+  "@serviceChanges": {
+    "description": "Service Changes"
+  },
+  "serviceChangesContent": "Qanta, hizmetlerinde değişiklik yapma hakkını saklı tutar:\n\n• Özellik ekleme veya çıkarma\n• Fiyatlandırma değişiklikleri\n• Kullanım koşullarını güncelleme\n• Hizmet sonlandırma\n• Bakım ve güncellemeler",
+  "@serviceChangesContent": {
+    "description": "Service Changes Content"
+  },
+  "disclaimer": "Sorumluluk Reddi",
+  "@disclaimer": {
+    "description": "Disclaimer"
+  },
+  "disclaimerContent": "Qanta aşağıdaki durumlardan sorumlu değildir:\n\n• Veri kaybı veya bozulması\n• Sistem arızaları veya kesintiler\n• Üçüncü taraf hizmet sağlayıcıları\n• Kullanıcı hatalarından kaynaklanan zararlar\n• İnternet bağlantısı sorunları",
+  "@disclaimerContent": {
+    "description": "Disclaimer Content"
+  },
+  "termsContact": "İletişim",
+  "@termsContact": {
+    "description": "Terms Contact"
+  },
+  "termsContactContent": "Kullanım şartları ile ilgili sorularınız için:\n\nE-posta: support@qanta.app\nWeb: www.qanta.app\nAdres: İstanbul, Türkiye\n\nBu şartlar son güncellenme tarihi: 20 Ocak 2025",
+  "@termsContactContent": {
+    "description": "Terms Contact Content"
+  },
+  "faq": "Sık Sorulan Sorular",
+  "@faq": {
+    "description": "FAQ"
+  },
+  "generalQuestions": "Genel Sorular",
+  "@generalQuestions": {
+    "description": "General Questions"
+  },
+  "accountAndSecurity": "Hesap ve Güvenlik",
+  "@accountAndSecurity": {
+    "description": "Account and Security"
+  },
+  "features": "Özellikler",
+  "@features": {
+    "description": "Features"
+  },
+  "technicalIssues": "Teknik Sorunlar",
+  "@technicalIssues": {
+    "description": "Technical Issues"
+  },
+  "whatIsQanta": "Qanta nedir?",
+  "@whatIsQanta": {
+    "description": "What is Qanta?"
+  },
+  "whatIsQantaAnswer": "Qanta, kişisel finans yönetimi için tasarlanmış modern bir mobil uygulamadır. Gelir-gider takibi, bütçe yönetimi, kart takibi ve finansal analiz özellikleri sunar.",
+  "@whatIsQantaAnswer": {
+    "description": "What is Qanta answer"
+  },
+  "isAppFree": "Uygulama ücretsiz mi?",
+  "@isAppFree": {
+    "description": "Is app free?"
+  },
+  "isAppFreeAnswer": "Evet, Qanta tamamen ücretsiz olarak kullanılabilir. Gelecekte premium özellikler eklenebilir ancak temel özellikler her zaman ücretsiz kalacaktır.",
+  "@isAppFreeAnswer": {
+    "description": "Is app free answer"
+  },
+  "whichDevicesSupported": "Hangi cihazlarda kullanabilirim?",
+  "@whichDevicesSupported": {
+    "description": "Which devices are supported?"
+  },
+  "whichDevicesSupportedAnswer": "Qanta, Android ve iOS cihazlarda kullanılabilir. Flutter teknolojisi ile geliştirilmiştir.",
+  "@whichDevicesSupportedAnswer": {
+    "description": "Which devices supported answer"
+  },
+  "isMyDataSecure": "Verilerim güvende mi?",
+  "@isMyDataSecure": {
+    "description": "Is my data secure?"
+  },
+  "isMyDataSecureAnswer": "Evet, tüm verileriniz şifreli olarak saklanır ve güvenli sunucularda barındırılır. Supabase altyapısını kullanarak endüstri standartlarında güvenlik sağlıyoruz.",
+  "@isMyDataSecureAnswer": {
+    "description": "Is my data secure answer"
+  },
+  "forgotPassword": "Şifremi unuttum, ne yapmalıyım?",
+  "@forgotPassword": {
+    "description": "Forgot password"
+  },
+  "forgotPasswordAnswer": "Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak e-posta adresinize şifre sıfırlama bağlantısı gönderebilirsiniz.",
+  "@forgotPasswordAnswer": {
+    "description": "Forgot password answer"
+  },
+  "howToDeleteAccount": "Hesabımı nasıl silebilirim?",
+  "@howToDeleteAccount": {
+    "description": "How to delete account"
+  },
+  "howToDeleteAccountAnswer": "Profil sayfasından çıkış yapabilir veya destek ekibimizle iletişime geçerek hesabınızın tamamen silinmesini talep edebilirsiniz.",
+  "@howToDeleteAccountAnswer": {
+    "description": "How to delete account answer"
+  },
+  "howToChangePassword": "Şifremi nasıl değiştiririm?",
+  "@howToChangePassword": {
+    "description": "How to change password"
+  },
+  "howToChangePasswordAnswer": "Profil sayfasında \"Güvenlik\" bölümünden \"Şifre Değiştir\" seçeneğini kullanabilirsiniz.",
+  "@howToChangePasswordAnswer": {
+    "description": "How to change password answer"
+  },
+  "whichCardTypesSupported": "Hangi kart türlerini destekliyorsunuz?",
+  "@whichCardTypesSupported": {
+    "description": "Which card types are supported?"
+  },
+  "whichCardTypesSupportedAnswer": "Kredi kartları, banka kartları ve nakit hesapları desteklenmektedir. Tüm Türk bankaları ile uyumludur.",
+  "@whichCardTypesSupportedAnswer": {
+    "description": "Which card types supported answer"
+  },
+  "howDoesInstallmentTrackingWork": "Taksit takibi nasıl çalışır?",
+  "@howDoesInstallmentTrackingWork": {
+    "description": "How does installment tracking work?"
+  },
+  "howDoesInstallmentTrackingWorkAnswer": "Taksitli alışverişlerinizi ekleyebilir, aylık ödemelerinizi otomatik olarak takip edebilirsiniz. Sistem size hatırlatmalar gönderir.",
+  "@howDoesInstallmentTrackingWorkAnswer": {
+    "description": "How does installment tracking work answer"
+  },
+  "howToUseBudgetManagement": "Bütçe yönetimi nasıl kullanılır?",
+  "@howToUseBudgetManagement": {
+    "description": "How to use budget management?"
+  },
+  "howToUseBudgetManagementAnswer": "Kategoriler için aylık limitler belirleyebilir, harcamalarınızı takip edebilir ve limit aşımlarında uyarı alabilirsiniz.",
+  "@howToUseBudgetManagementAnswer": {
+    "description": "How to use budget management answer"
+  },
+  "whatIsQuickNotesFeature": "Hızlı notlar özelliği nedir?",
+  "@whatIsQuickNotesFeature": {
+    "description": "What is quick notes feature?"
+  },
+  "whatIsQuickNotesFeatureAnswer": "Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarınızı kategorize edebilirsiniz.",
+  "@whatIsQuickNotesFeatureAnswer": {
+    "description": "What is quick notes feature answer"
+  },
+  "appCrashingWhatToDo": "Uygulama çöküyor, ne yapmalıyım?",
+  "@appCrashingWhatToDo": {
+    "description": "App is crashing, what should I do?"
+  },
+  "appCrashingWhatToDoAnswer": "Önce uygulamayı tamamen kapatıp tekrar açmayı deneyin. Sorun devam ederse cihazınızı yeniden başlatın. Hala çözülmezse destek ekibimizle iletişime geçin.",
+  "@appCrashingWhatToDoAnswer": {
+    "description": "App crashing what to do answer"
+  },
+  "dataNotSyncing": "Verilerim senkronize olmuyor",
+  "@dataNotSyncing": {
+    "description": "Data not syncing"
+  },
+  "dataNotSyncingAnswer": "İnternet bağlantınızı kontrol edin ve uygulamayı yeniden başlatın. Sorun devam ederse çıkış yapıp tekrar giriş yapmayı deneyin.",
+  "@dataNotSyncingAnswer": {
+    "description": "Data not syncing answer"
+  },
+  "notificationsNotComing": "Bildirimler gelmiyor",
+  "@notificationsNotComing": {
+    "description": "Notifications not coming"
+  },
+  "notificationsNotComingAnswer": "Cihaz ayarlarınızdan Qanta için bildirimlerin açık olduğundan emin olun. Profil sayfasından bildirim ayarlarını da kontrol edin.",
+  "@notificationsNotComingAnswer": {
+    "description": "Notifications not coming answer"
+  },
+  "howToContactSupport": "Destek ekibinizle nasıl iletişime geçebilirim?",
+  "@howToContactSupport": {
+    "description": "How to contact support"
+  },
+  "howToContactSupportAnswer": "Profil sayfasından \"Destek & İletişim\" bölümünü kullanabilir veya support@qanta.app adresine e-posta gönderebilirsiniz.",
+  "@howToContactSupportAnswer": {
+    "description": "How to contact support answer"
+  },
+  "haveSuggestionWhereToSend": "Önerim var, nereye iletebilirim?",
+  "@haveSuggestionWhereToSend": {
+    "description": "Have suggestion, where to send"
+  },
+  "haveSuggestionWhereToSendAnswer": "Önerilerinizi support@qanta.app adresine gönderebilirsiniz. Tüm geri bildirimler değerlendirilir ve uygulamayı geliştirmek için kullanılır.",
+  "@haveSuggestionWhereToSendAnswer": {
+    "description": "Have suggestion where to send answer"
+  },
+  "lastMonthChange": "Geçen aya göre",
+  "@lastMonthChange": {
+    "description": "Last month change"
+  },
+  "increase": "artış",
+  "@increase": {
+    "description": "Increase"
+  },
+  "decrease": "azalış",
+  "@decrease": {
+    "description": "Decrease"
+  },
+  "noAccountsYet": "Henüz hesap eklenmemiş",
+  "@noAccountsYet": {
+    "description": "No accounts yet"
+  },
+  "addFirstAccount": "İlk hesabınızı ekleyerek başlayın",
+  "@addFirstAccount": {
+    "description": "Add first account to get started"
+  },
+  "currentDebt": "Mevcut Borç",
+  "@currentDebt": {
+    "description": "Current Debt"
+  },
+  "totalLimit": "Toplam Limit",
+  "@totalLimit": {
+    "description": "Total Limit"
+  },
+  "cashWallet": "Nakit Cüzdan",
+  "@cashWallet": {
+    "description": "Cash Wallet"
+  },
+  "searchBanks": "Banka ara...",
+  "@searchBanks": {
+    "description": "Search banks"
+  },
+  "noBanksFound": "Banka bulunamadı",
+  "@noBanksFound": {
+    "description": "No banks found"
+  },
+  "creditCard": "Kredi Kartı",
+  "@creditCard": {
+    "description": "Credit Card"
+  },
+  "addCreditCard": "Kredi Kartı Ekle",
+  "@addCreditCard": {
+    "description": "Add Credit Card"
+  },
+  "cardName": "Kart Adı",
+  "@cardName": {
+    "description": "Card Name"
+  },
+  "cardNameExample": "Örn: VakıfBank Kredi Kartı",
+  "@cardNameExample": {
+    "description": "Card name example"
+  },
+  "creditLimit": "Kredi Limiti",
+  "@creditLimit": {
+    "description": "Credit Limit"
+  },
+  "currentDebtOptional": "Mevcut Borç (Opsiyonel)",
+  "@currentDebtOptional": {
+    "description": "Current Debt (Optional)"
+  },
+  "statementDay": "Ekstre Günü",
+  "@statementDay": {
+    "description": "Statement Day"
+  },
+  "lastPayment": "Son Ödeme",
+  "@lastPayment": {
+    "description": "Last Payment"
+  },
+  "debitCard": "Banka Kartı",
+  "@debitCard": {
+    "description": "Debit Card"
+  },
+  "addDebitCard": "Banka Kartı Ekle",
+  "@addDebitCard": {
+    "description": "Add Debit Card"
+  },
+  "cardNameExampleDebit": "Örn: VakıfBank Vadesiz",
+  "@cardNameExampleDebit": {
+    "description": "Debit card name example"
+  },
+  "initialBalance": "Başlangıç Bakiyesi",
+  "@initialBalance": {
+    "description": "Initial Balance"
+  },
+  "january": "Ocak",
+  "@january": {
+    "description": "January"
+  },
+  "february": "Şubat",
+  "@february": {
+    "description": "February"
+  },
+  "march": "Mart",
+  "@march": {
+    "description": "March"
+  },
+  "april": "Nisan",
+  "@april": {
+    "description": "April"
+  },
+  "may": "Mayıs",
+  "@may": {
+    "description": "May"
+  },
+  "june": "Haziran",
+  "@june": {
+    "description": "June"
+  },
+  "july": "Temmuz",
+  "@july": {
+    "description": "July"
+  },
+  "august": "Ağustos",
+  "@august": {
+    "description": "August"
+  },
+  "september": "Eylül",
+  "@september": {
+    "description": "September"
+  },
+  "october": "Ekim",
+  "@october": {
+    "description": "October"
+  },
+  "november": "Kasım",
+  "@november": {
+    "description": "November"
+  },
+  "december": "Aralık",
+  "@december": {
+    "description": "December"
+  },
+  "day": "gün",
+  "@day": {
+    "description": "day"
+  },
+  "selectCardType": "Kart Türü Seçin",
+  "@selectCardType": {
+    "description": "Select Card Type"
+  },
+  "addDebitCardDescription": "Vadesiz hesap kartı ekleyin",
+  "@addDebitCardDescription": {
+    "description": "Add checking account card"
+  },
+  "addCreditCardDescription": "Kredi kartı bilgilerinizi ekleyin",
+  "@addCreditCardDescription": {
+    "description": "Add your credit card information"
+  }
 } 

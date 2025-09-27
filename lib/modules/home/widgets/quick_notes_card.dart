@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/services/services_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/models_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/ios_dialog.dart';
@@ -146,7 +147,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Henüz not yok',
+                      AppLocalizations.of(context)?.noNotesYet ?? 'No notes yet',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -155,7 +156,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Harcama veya gelir notlarınızı buraya ekleyin',
+                      AppLocalizations.of(context)?.addExpenseIncomeNotes ?? 'Add your expense or income notes here',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
@@ -335,7 +336,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     final diff = now.difference(date);
 
     if (diff.inSeconds < 30) {
-      return 'Az önce';
+      return AppLocalizations.of(context)?.justNow ?? 'Just now';
     } else if (diff.inMinutes < 1) {
       return '${diff.inSeconds} saniye önce';
     } else if (diff.inMinutes < 60) {
@@ -345,11 +346,31 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     } else if (diff.inDays == 1) {
       return 'Dün ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } else if (diff.inDays < 7) {
-      final weekdays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+      final weekdays = [
+        AppLocalizations.of(context)?.monday ?? 'Monday',
+        AppLocalizations.of(context)?.tuesday ?? 'Tuesday',
+        AppLocalizations.of(context)?.wednesday ?? 'Wednesday',
+        AppLocalizations.of(context)?.thursday ?? 'Thursday',
+        AppLocalizations.of(context)?.friday ?? 'Friday',
+        AppLocalizations.of(context)?.saturday ?? 'Saturday',
+        AppLocalizations.of(context)?.sunday ?? 'Sunday'
+      ];
       return '${weekdays[date.weekday - 1]} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } else if (diff.inDays < 365) {
-      final months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
-                     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+      final months = [
+        AppLocalizations.of(context)?.january ?? 'January',
+        AppLocalizations.of(context)?.february ?? 'February',
+        AppLocalizations.of(context)?.march ?? 'March',
+        AppLocalizations.of(context)?.april ?? 'April',
+        AppLocalizations.of(context)?.may ?? 'May',
+        AppLocalizations.of(context)?.june ?? 'June',
+        AppLocalizations.of(context)?.july ?? 'July',
+        AppLocalizations.of(context)?.august ?? 'August',
+        AppLocalizations.of(context)?.september ?? 'September',
+        AppLocalizations.of(context)?.october ?? 'October',
+        AppLocalizations.of(context)?.november ?? 'November',
+        AppLocalizations.of(context)?.december ?? 'December'
+      ];
       return '${date.day} ${months[date.month - 1]}';
     } else {
       return '${date.day}/${date.month}/${date.year}';
@@ -401,8 +422,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                   children: [
                     _buildOptionTile(
                       icon: Icons.text_fields_rounded,
-                      title: 'Metin Notu',
-                      subtitle: 'Hızlı metin notu ekle',
+                      title: AppLocalizations.of(context)?.textNote ?? 'Text Note',
+                      subtitle: AppLocalizations.of(context)?.addQuickTextNote ?? 'Add quick text note',
                       color: const Color(0xFF007AFF),
                       onTap: () {
                         Navigator.pop(context);
@@ -413,8 +434,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                     const SizedBox(height: 12),
                     _buildOptionTile(
                       icon: Icons.camera_alt_rounded,
-                      title: 'Fotoğraf Çek',
-                      subtitle: 'Kameradan fotoğraf çek',
+                      title: AppLocalizations.of(context)?.takePhoto ?? 'Take Photo',
+                      subtitle: AppLocalizations.of(context)?.takePhotoFromCamera ?? 'Take photo from camera',
                       color: const Color(0xFFFF9500),
                       onTap: () async {
                         Navigator.pop(context);
@@ -426,8 +447,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                     const SizedBox(height: 12),
                     _buildOptionTile(
                       icon: Icons.photo_library_rounded,
-                      title: 'Galeriden Seç',
-                      subtitle: 'Galeriden fotoğraf seç',
+                      title: AppLocalizations.of(context)?.selectFromGallery ?? 'Select from Gallery',
+                      subtitle: AppLocalizations.of(context)?.selectPhotoFromGallery ?? 'Select photo from gallery',
                       color: const Color(0xFF34C759),
                       onTap: () async {
                         Navigator.pop(context);
@@ -532,8 +553,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Fotoğraf çekilirken hata oluştu'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.photoCaptureError ?? 'Error capturing photo'),
             backgroundColor: Colors.red,
           ),
         );
@@ -559,8 +580,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Fotoğraf seçilirken hata oluştu'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.photoSelectionError ?? 'Error selecting photo'),
             backgroundColor: Colors.red,
           ),
         );
@@ -601,7 +622,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                hintText: 'Örn: Market fişi - 150₺',
+                hintText: 'Örn: Market fişi - 150${Provider.of<ThemeProvider>(context, listen: false).currency.symbol}',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Color(0xFFE5E5EA)),
@@ -617,11 +638,11 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         ),
         actions: [
           IOSDialogAction(
-            text: 'İptal',
+            text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
             onPressed: () => Navigator.of(context).pop(),
           ),
           IOSDialogAction(
-            text: 'Ekle',
+            text: AppLocalizations.of(context)?.add ?? 'Add',
             isPrimary: true,
             onPressed: () {
               Navigator.of(context).pop(controller.text.trim());
@@ -632,7 +653,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     );
 
     if (result != null) {
-      await _addImageNote(result.isEmpty ? 'Fotoğraf notu' : result, imagePath);
+      await _addImageNote(result.isEmpty ? (AppLocalizations.of(context)?.photoNote ?? 'Photo note') : result, imagePath);
     }
   }
 
@@ -648,8 +669,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Fotoğraf notu eklendi'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.photoNoteAdded ?? 'Photo note added'),
             backgroundColor: Colors.green,
           ),
         );
@@ -657,8 +678,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Fotoğraf notu eklenirken hata oluştu'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.photoNoteAddError ?? 'Error adding photo note'),
             backgroundColor: Colors.red,
           ),
         );
@@ -688,7 +709,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                hintText: 'Örn: Market alışverişi 150₺',
+                hintText: 'Örn: Market alışverişi 150${Provider.of<ThemeProvider>(context, listen: false).currency.symbol}',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Color(0xFFE5E5EA)),
@@ -705,11 +726,11 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         ),
         actions: [
           IOSDialogAction(
-            text: 'İptal',
+            text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
             onPressed: () => Navigator.of(context).pop(),
           ),
           IOSDialogAction(
-            text: 'Ekle',
+            text: AppLocalizations.of(context)?.add ?? 'Add',
             isPrimary: true,
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
@@ -737,7 +758,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Not eklendi'),
+            content: Text(AppLocalizations.of(context)?.noteAdded ?? 'Note added'),
             backgroundColor: Colors.green,
           ),
         );
@@ -746,7 +767,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Not eklenirken hata oluştu'),
+            content: Text(AppLocalizations.of(context)?.noteAddError ?? 'Error adding note'),
             backgroundColor: Colors.red,
           ),
         );
@@ -762,7 +783,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Not silindi'),
+            content: Text(AppLocalizations.of(context)?.noteDeleted ?? 'Note deleted'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -771,7 +792,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Not silinirken hata oluştu'),
+            content: Text(AppLocalizations.of(context)?.noteDeleteError ?? 'Error deleting note'),
             backgroundColor: Colors.red,
           ),
         );

@@ -14,17 +14,17 @@ enum TimePeriod {
   String getName(AppLocalizations l10n) {
     switch (this) {
       case TimePeriod.all:
-        return 'Tümü';
+        return l10n.all;
       case TimePeriod.today:
-        return 'Bugün';
+        return l10n.today;
       case TimePeriod.thisWeek:
-        return 'Bu Hafta';
+        return l10n.thisWeek;
       case TimePeriod.thisMonth:
-        return 'Bu Ay';
+        return l10n.thisMonth;
       case TimePeriod.lastMonth:
-        return 'Geçen Ay';
+        return l10n.lastMonth;
       case TimePeriod.last3Months:
-        return 'Son 3 Ay';
+        return l10n.last3Months;
     }
   }
 

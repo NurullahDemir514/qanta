@@ -122,6 +122,32 @@ class FirebaseAuthService {
     }
   }
 
+  /// Reauthenticate user with current password
+  static Future<void> reauthenticateUser(String currentPassword) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user is currently signed in');
+      }
+
+      if (user.email == null) {
+        throw Exception('User email is null');
+      }
+
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+      
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// Handle Firebase Auth exceptions and return user-friendly messages
   static Exception _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {

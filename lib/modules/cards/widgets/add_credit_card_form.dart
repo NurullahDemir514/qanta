@@ -27,18 +27,42 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
   final _cardNameController = TextEditingController();
   final _creditLimitController = TextEditingController();
   final _totalDebtController = TextEditingController();
+  final _searchController = TextEditingController();
 
   String? _selectedBankCode;
   int _statementDate = 1;
+  List<String> _filteredBanks = [];
   
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredBanks = AppConstants.getAvailableBanks();
+  }
 
   @override
   void dispose() {
     _cardNameController.dispose();
     _creditLimitController.dispose();
     _totalDebtController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _filterBanks(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredBanks = AppConstants.getAvailableBanks();
+      } else {
+        _filteredBanks = AppConstants.getAvailableBanks()
+            .where((bankCode) {
+              final bankName = AppConstants.getBankName(bankCode).toLowerCase();
+              return bankName.contains(query.toLowerCase());
+            })
+            .toList();
+      }
+    });
   }
 
   void _onBankSelected(String bankCode) {
@@ -46,7 +70,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
       _selectedBankCode = bankCode;
       // Auto-generate card name when bank is selected
       final bankName = AppConstants.getBankName(bankCode);
-      _cardNameController.text = '$bankName Kredi Kartı';
+      _cardNameController.text = '$bankName ${AppLocalizations.of(context)?.creditCard ?? 'Credit Card'}';
     });
   }
 
@@ -124,7 +148,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Hata: $e',
+              '${AppLocalizations.of(context)?.error ?? 'Error'}: $e',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -177,7 +201,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
             child: Row(
               children: [
                 Text(
-                  'Kredi Kartı Ekle',
+                  AppLocalizations.of(context)?.addCreditCard ?? 'Add Credit Card',
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -207,7 +231,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                   children: [
                     // Banka seçimi
                     Text(
-                      'Banka',
+                      AppLocalizations.of(context)?.bank ?? 'Bank',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -221,7 +245,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
                     // Kart adı
                     Text(
-                      'Kart Adı',
+                      AppLocalizations.of(context)?.cardName ?? 'Card Name',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -231,11 +255,11 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                     const SizedBox(height: 8),
                     _buildTextField(
                       controller: _cardNameController,
-                      hintText: 'Örn: VakıfBank Kredi Kartı',
+                      hintText: AppLocalizations.of(context)?.cardNameExample ?? 'E.g: VakıfBank Credit Card',
                       prefixIcon: Icons.credit_card,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Kart adı gerekli';
+                          return AppLocalizations.of(context)?.cardNameRequired ?? 'Card name is required';
                         }
                         return null;
                       },
@@ -245,7 +269,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
                     // Kredi limiti
                     Text(
-                      'Kredi Limiti',
+                      AppLocalizations.of(context)?.creditLimit ?? 'Credit Limit',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -262,11 +286,11 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                       inputFormatters: [ThousandsSeparatorInputFormatter()],
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Kredi limiti gerekli';
+                          return AppLocalizations.of(context)?.creditLimitRequired ?? 'Credit limit is required';
                         }
                         final amount = double.tryParse(value.replaceAll(',', ''));
                         if (amount == null || amount <= 0) {
-                          return 'Geçerli bir tutar girin';
+                          return AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
                         }
                         return null;
                       },
@@ -276,7 +300,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
                     // Mevcut borç
                     Text(
-                      'Mevcut Borç (Opsiyonel)',
+                      AppLocalizations.of(context)?.currentDebtOptional ?? 'Current Debt (Optional)',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -288,7 +312,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                       controller: _totalDebtController,
                       hintText: '0',
                       prefixIcon: Icons.receipt_long,
-                      suffixText: '₺',
+                      suffixText: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [ThousandsSeparatorInputFormatter()],
                     ),
@@ -297,7 +321,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
                     // Ekstre günü
                     Text(
-                      'Ekstre Günü',
+                      AppLocalizations.of(context)?.statementDay ?? 'Statement Day',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -327,7 +351,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Son Ödeme: ',
+                            '${AppLocalizations.of(context)?.lastPayment ?? 'Last Payment'}: ',
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -404,7 +428,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          'Kredi Kartı Ekle',
+                                          AppLocalizations.of(context)?.addCreditCard ?? 'Add Credit Card',
                                           style: GoogleFonts.inter(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,
@@ -432,64 +456,128 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
   }
 
   Widget _buildBankGrid() {
-    final banks = AppConstants.getAvailableBanks();
+    final l10n = AppLocalizations.of(context)!;
+    final banks = _filteredBanks;
     
-    return SizedBox(
-      height: 80,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: banks.length,
-        itemBuilder: (context, index) {
-          final bankCode = banks[index];
-          final bankName = AppConstants.getBankName(bankCode);
-          final accentColor = AppConstants.getBankAccentColor(bankCode);
-          final isSelected = _selectedBankCode == bankCode;
-          
-          return Container(
-            width: 100,
-            margin: EdgeInsets.only(right: index == banks.length - 1 ? 0 : 12),
-            child: GestureDetector(
-              onTap: () => _onBankSelected(bankCode),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isSelected 
-                      ? accentColor.withValues(alpha: 0.1)
-                      : (Theme.of(context).brightness == Brightness.dark 
-                          ? const Color(0xFF2C2C2E) 
-                          : const Color(0xFFF2F2F7)),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected 
-                        ? accentColor
-                        : (Theme.of(context).brightness == Brightness.dark 
-                            ? const Color(0xFF38383A) 
-                            : const Color(0xFFE5E5EA)),
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      bankName,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected 
-                            ? accentColor
-                            : Theme.of(context).colorScheme.onSurface,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+    return Column(
+      children: [
+        // Arama kutusu
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: TextField(
+            controller: _searchController,
+            onChanged: _filterBanks,
+            decoration: InputDecoration(
+              hintText: l10n.searchBanks,
+              prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 20),
+                      onPressed: () {
+                        _searchController.clear();
+                        _filterBanks('');
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF38383A)
+                      : const Color(0xFFE5E5EA),
                 ),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF38383A)
+                      : const Color(0xFFE5E5EA),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: Color(0xFF007AFF),
+                  width: 2,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-          );
-        },
-      ),
+          ),
+        ),
+        
+        // Banka listesi
+        SizedBox(
+          height: 80,
+          child: banks.isEmpty
+              ? Center(
+                  child: Text(
+                    l10n.noBanksFound,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF6D6D70),
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: banks.length,
+                  itemBuilder: (context, index) {
+                    final bankCode = banks[index];
+                    final bankName = AppConstants.getBankName(bankCode);
+                    final accentColor = AppConstants.getBankAccentColor(bankCode);
+                    final isSelected = _selectedBankCode == bankCode;
+                    
+                    return Container(
+                      width: 100,
+                      margin: EdgeInsets.only(right: index == banks.length - 1 ? 0 : 12),
+                      child: GestureDetector(
+                        onTap: () => _onBankSelected(bankCode),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected 
+                                ? accentColor.withValues(alpha: 0.1)
+                                : (Theme.of(context).brightness == Brightness.dark 
+                                    ? const Color(0xFF2C2C2E) 
+                                    : const Color(0xFFF2F2F7)),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected 
+                                  ? accentColor
+                                  : (Theme.of(context).brightness == Brightness.dark 
+                                      ? const Color(0xFF38383A) 
+                                      : const Color(0xFFE5E5EA)),
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                bankName,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected 
+                                      ? accentColor
+                                      : Theme.of(context).colorScheme.onSurface,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 
@@ -590,7 +678,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
           items: List.generate(28, (index) => index + 1).map((int value) {
             return DropdownMenuItem<int>(
               value: value,
-              child: Text('${value}. gün'),
+              child: Text(_getDayText(value)),
             );
           }).toList(),
           onChanged: (int? newValue) {
@@ -601,6 +689,42 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
         ),
       ),
     );
+  }
+
+  String _getDayText(int day) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    switch (day) {
+      case 1: return l10n.firstDay;
+      case 2: return l10n.secondDay;
+      case 3: return l10n.thirdDay;
+      case 4: return l10n.fourthDay;
+      case 5: return l10n.fifthDay;
+      case 6: return l10n.sixthDay;
+      case 7: return l10n.seventhDay;
+      case 8: return l10n.eighthDay;
+      case 9: return l10n.ninthDay;
+      case 10: return l10n.tenthDay;
+      case 11: return l10n.eleventhDay;
+      case 12: return l10n.twelfthDay;
+      case 13: return l10n.thirteenthDay;
+      case 14: return l10n.fourteenthDay;
+      case 15: return l10n.fifteenthDay;
+      case 16: return l10n.sixteenthDay;
+      case 17: return l10n.seventeenthDay;
+      case 18: return l10n.eighteenthDay;
+      case 19: return l10n.nineteenthDay;
+      case 20: return l10n.twentiethDay;
+      case 21: return l10n.twentyFirstDay;
+      case 22: return l10n.twentySecondDay;
+      case 23: return l10n.twentyThirdDay;
+      case 24: return l10n.twentyFourthDay;
+      case 25: return l10n.twentyFifthDay;
+      case 26: return l10n.twentySixthDay;
+      case 27: return l10n.twentySeventhDay;
+      case 28: return l10n.twentyEighthDay;
+      default: return '${day}. ${l10n.day}';
+    }
   }
 
   String _formatDueDate(int dueDay) {
@@ -618,10 +742,11 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
       currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
     
-    // Türkçe ay isimleri
-    const monthNames = [
-      '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+    // Localized ay isimleri
+    final l10n = AppLocalizations.of(context)!;
+    final monthNames = [
+      '', l10n.january, l10n.february, l10n.march, l10n.april, l10n.may, l10n.june,
+      l10n.july, l10n.august, l10n.september, l10n.october, l10n.november, l10n.december
     ];
     
     // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini göster

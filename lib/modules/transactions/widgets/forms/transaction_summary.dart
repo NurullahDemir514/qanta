@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/theme/theme_provider.dart';
 
 class TransactionSummary extends StatelessWidget {
   final double amount;
@@ -27,10 +29,10 @@ class TransactionSummary extends StatelessWidget {
     this.isIncome,
   });
 
-  String _formatCurrency(double amount) {
+  String _formatCurrency(double amount, BuildContext context) {
     final formatter = NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: '₺',
+      locale: Provider.of<ThemeProvider>(context, listen: false).currency.locale,
+      symbol: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
       decimalDigits: 2,
     );
     return formatter.format(amount);
@@ -43,10 +45,10 @@ class TransactionSummary extends StatelessWidget {
 
   String get _categoryDisplay => category ?? categoryName ?? '';
   String get _paymentMethodDisplay => paymentMethod ?? paymentMethodName ?? '';
-  String get _transactionTypeDisplay {
+  String _getTransactionTypeDisplay(BuildContext context) {
     if (transactionType != null) return transactionType!;
-    if (isIncome == true) return 'Gelir';
-    return 'İşlem';
+    if (isIncome == true) return AppLocalizations.of(context)?.income ?? 'Income';
+    return AppLocalizations.of(context)?.transaction ?? 'Transaction';
   }
 
   @override
@@ -99,7 +101,7 @@ class TransactionSummary extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      _transactionTypeDisplay,
+                      _getTransactionTypeDisplay(context),
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -110,7 +112,7 @@ class TransactionSummary extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatCurrency(amount),
+                      _formatCurrency(amount, context),
                       style: GoogleFonts.inter(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../models/smart_recommendation.dart';
 
 class SmartRecommendationsWidget extends StatefulWidget {
@@ -284,7 +286,7 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${recommendation.potentialSavings.toStringAsFixed(0)} ₺/ay',
+                            '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(recommendation.potentialSavings)}${AppLocalizations.of(context)?.perMonth ?? '/month'}',
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,

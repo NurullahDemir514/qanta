@@ -431,7 +431,7 @@ class _SmartCategoryCreatorState extends State<SmartCategoryCreator> {
                 ),
               ),
               child: Text(
-                'İptal',
+                AppLocalizations.of(context)?.cancel ?? 'Cancel',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/account_model.dart';
 import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 import '../../../shared/utils/currency_utils.dart';
@@ -25,15 +26,39 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
   final _formKey = GlobalKey<FormState>();
   final _cardNameController = TextEditingController();
   final _balanceController = TextEditingController();
+  final _searchController = TextEditingController();
 
   String? _selectedBankCode;
+  List<String> _filteredBanks = [];
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredBanks = AppConstants.getAvailableBanks();
+  }
 
   @override
   void dispose() {
     _cardNameController.dispose();
     _balanceController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _filterBanks(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredBanks = AppConstants.getAvailableBanks();
+      } else {
+        _filteredBanks = AppConstants.getAvailableBanks()
+            .where((bankCode) {
+              final bankName = AppConstants.getBankName(bankCode).toLowerCase();
+              return bankName.contains(query.toLowerCase());
+            })
+            .toList();
+      }
+    });
   }
 
   void _onBankSelected(String bankCode) {
@@ -41,7 +66,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
       _selectedBankCode = bankCode;
       // Auto-generate card name when bank is selected
       final bankName = AppConstants.getBankName(bankCode);
-      _cardNameController.text = '$bankName Vadesiz';
+      _cardNameController.text = '$bankName ${AppLocalizations.of(context)?.debitCard ?? 'Debit Card'}';
     });
   }
 
@@ -78,7 +103,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Hata: $e',
+              '${AppLocalizations.of(context)?.error ?? 'Error'}: $e',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -131,7 +156,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
             child: Row(
               children: [
                 Text(
-                  'Banka Kartı Ekle',
+                  AppLocalizations.of(context)?.addDebitCard ?? 'Add Debit Card',
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -161,7 +186,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                   children: [
                     // Banka seçimi
                     Text(
-                      'Banka',
+                      AppLocalizations.of(context)?.bank ?? 'Bank',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -175,7 +200,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
 
                     // Kart adı
                     Text(
-                      'Kart Adı',
+                      AppLocalizations.of(context)?.cardName ?? 'Card Name',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -185,11 +210,11 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                     const SizedBox(height: 8),
                     _buildTextField(
                       controller: _cardNameController,
-                      hintText: 'Örn: VakıfBank Vadesiz',
+                      hintText: AppLocalizations.of(context)?.cardNameExampleDebit ?? 'E.g: VakıfBank Checking',
                       prefixIcon: Icons.credit_card,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Kart adı gerekli';
+                          return AppLocalizations.of(context)?.cardNameRequired ?? 'Card name is required';
                         }
                         return null;
                       },
@@ -199,7 +224,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
 
                     // Başlangıç bakiyesi
                     Text(
-                      'Başlangıç Bakiyesi',
+                      AppLocalizations.of(context)?.initialBalance ?? 'Initial Balance',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -211,7 +236,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                       controller: _balanceController,
                       hintText: '0',
                       prefixIcon: Icons.account_balance_wallet,
-                      suffixText: '₺',
+                      suffixText: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [ThousandsSeparatorInputFormatter()],
                     ),
@@ -274,7 +299,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          'Banka Kartı Ekle',
+                                          AppLocalizations.of(context)?.addDebitCard ?? 'Add Debit Card',
                                           style: GoogleFonts.inter(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,
@@ -302,64 +327,128 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
   }
 
   Widget _buildBankGrid() {
-    final banks = AppConstants.getAvailableBanks();
+    final l10n = AppLocalizations.of(context)!;
+    final banks = _filteredBanks;
     
-    return SizedBox(
-      height: 80,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: banks.length,
-        itemBuilder: (context, index) {
-          final bankCode = banks[index];
-          final bankName = AppConstants.getBankName(bankCode);
-          final accentColor = AppConstants.getBankAccentColor(bankCode);
-          final isSelected = _selectedBankCode == bankCode;
-          
-          return Container(
-            width: 100,
-            margin: EdgeInsets.only(right: index == banks.length - 1 ? 0 : 12),
-            child: GestureDetector(
-              onTap: () => _onBankSelected(bankCode),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isSelected 
-                      ? accentColor.withValues(alpha: 0.1)
-                      : (Theme.of(context).brightness == Brightness.dark 
-                          ? const Color(0xFF2C2C2E) 
-                          : const Color(0xFFF2F2F7)),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected 
-                        ? accentColor
-                        : (Theme.of(context).brightness == Brightness.dark 
-                            ? const Color(0xFF38383A) 
-                            : const Color(0xFFE5E5EA)),
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      bankName,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected 
-                            ? accentColor
-                            : Theme.of(context).colorScheme.onSurface,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+    return Column(
+      children: [
+        // Arama kutusu
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: TextField(
+            controller: _searchController,
+            onChanged: _filterBanks,
+            decoration: InputDecoration(
+              hintText: l10n.searchBanks,
+              prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 20),
+                      onPressed: () {
+                        _searchController.clear();
+                        _filterBanks('');
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF38383A)
+                      : const Color(0xFFE5E5EA),
                 ),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF38383A)
+                      : const Color(0xFFE5E5EA),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: Color(0xFF007AFF),
+                  width: 2,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-          );
-        },
-      ),
+          ),
+        ),
+        
+        // Banka listesi
+        SizedBox(
+          height: 80,
+          child: banks.isEmpty
+              ? Center(
+                  child: Text(
+                    l10n.noBanksFound,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF6D6D70),
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: banks.length,
+                  itemBuilder: (context, index) {
+                    final bankCode = banks[index];
+                    final bankName = AppConstants.getBankName(bankCode);
+                    final accentColor = AppConstants.getBankAccentColor(bankCode);
+                    final isSelected = _selectedBankCode == bankCode;
+                    
+                    return Container(
+                      width: 100,
+                      margin: EdgeInsets.only(right: index == banks.length - 1 ? 0 : 12),
+                      child: GestureDetector(
+                        onTap: () => _onBankSelected(bankCode),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected 
+                                ? accentColor.withValues(alpha: 0.1)
+                                : (Theme.of(context).brightness == Brightness.dark 
+                                    ? const Color(0xFF2C2C2E) 
+                                    : const Color(0xFFF2F2F7)),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected 
+                                  ? accentColor
+                                  : (Theme.of(context).brightness == Brightness.dark 
+                                      ? const Color(0xFF38383A) 
+                                      : const Color(0xFFE5E5EA)),
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                bankName,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected 
+                                      ? accentColor
+                                      : Theme.of(context).colorScheme.onSurface,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 

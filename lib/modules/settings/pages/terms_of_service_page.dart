@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../l10n/app_localizations.dart';
 
 class TermsOfServicePage extends StatelessWidget {
   const TermsOfServicePage({super.key});
@@ -7,6 +8,7 @@ class TermsOfServicePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: isDark 
@@ -19,14 +21,14 @@ class TermsOfServicePage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_rounded,
-            color: Color(0xFF007AFF),
+            color: isDark ? Colors.white : Colors.black,
             size: 20,
           ),
         ),
         title: Text(
-          'Kullanım Şartları',
+          l10n?.termsOfService ?? 'Terms of Service',
           style: GoogleFonts.inter(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -55,98 +57,50 @@ class TermsOfServicePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSection(
-                title: '1. Hizmet Tanımı',
-                content: '''Qanta, kişisel finans yönetimi için tasarlanmış bir mobil uygulamadır. Uygulama aşağıdaki hizmetleri sunar:
-
-• Gelir ve gider takibi
-• Bütçe yönetimi ve planlama
-• Kart ve hesap yönetimi
-• Finansal raporlama ve analiz
-• Taksit takibi ve yönetimi''',
+                title: '1. ${l10n?.serviceDescription ?? 'Service Description'}',
+                content: l10n?.serviceDescriptionContent ?? 'Service Description Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '2. Kullanım Koşulları',
-                content: '''Qanta uygulamasını kullanarak aşağıdaki koşulları kabul etmiş olursunuz:
-
-• Uygulamayı yalnızca yasal amaçlarla kullanacaksınız
-• Doğru ve güncel bilgiler sağlayacaksınız
-• Hesap güvenliğinizi koruyacaksınız
-• Diğer kullanıcıların haklarına saygı göstereceksiniz
-• Uygulamanın kötüye kullanımından kaçınacaksınız''',
+                title: '2. ${l10n?.usageTerms ?? 'Usage Terms'}',
+                content: l10n?.usageTermsContent ?? 'Usage Terms Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '3. Kullanıcı Sorumlulukları',
-                content: '''Kullanıcı olarak aşağıdaki sorumluluklarınız bulunmaktadır:
-
-• Hesap bilgilerinizi güvenli tutmak
-• Şifrenizi kimseyle paylaşmamak
-• Finansal verilerinizin doğruluğunu sağlamak
-• Uygulama kurallarına uymak
-• Güvenlik ihlallerini bildirmek''',
+                title: '3. ${l10n?.userResponsibilities ?? 'User Responsibilities'}',
+                content: l10n?.userResponsibilitiesContent ?? 'User Responsibilities Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '4. Hizmet Sınırlamaları',
-                content: '''Qanta uygulaması aşağıdaki sınırlamalara tabidir:
-
-• Finansal danışmanlık hizmeti sunmaz
-• Yatırım önerisi vermez
-• Banka işlemleri gerçekleştirmez
-• Kredi veya borç verme hizmeti sunmaz
-• Vergi danışmanlığı yapmaz''',
+                title: '4. ${l10n?.serviceLimitations ?? 'Service Limitations'}',
+                content: l10n?.serviceLimitationsContent ?? 'Service Limitations Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '5. Fikri Mülkiyet',
-                content: '''Qanta uygulamasının tüm içeriği telif hakkı ile korunmaktadır:
-
-• Uygulama tasarımı ve kodu
-• Logo ve marka unsurları
-• Metin ve görsel içerikler
-• Algoritma ve hesaplama yöntemleri
-• Veritabanı yapısı''',
+                title: '5. ${l10n?.intellectualProperty ?? 'Intellectual Property'}',
+                content: l10n?.intellectualPropertyContent ?? 'Intellectual Property Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '6. Hizmet Değişiklikleri',
-                content: '''Qanta, hizmetlerinde değişiklik yapma hakkını saklı tutar:
-
-• Özellik ekleme veya çıkarma
-• Fiyatlandırma değişiklikleri
-• Kullanım koşullarını güncelleme
-• Hizmet sonlandırma
-• Bakım ve güncellemeler''',
+                title: '6. ${l10n?.serviceChanges ?? 'Service Changes'}',
+                content: l10n?.serviceChangesContent ?? 'Service Changes Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '7. Sorumluluk Reddi',
-                content: '''Qanta aşağıdaki durumlardan sorumlu değildir:
-
-• Veri kaybı veya bozulması
-• Sistem arızaları veya kesintiler
-• Üçüncü taraf hizmet sağlayıcıları
-• Kullanıcı hatalarından kaynaklanan zararlar
-• İnternet bağlantısı sorunları''',
+                title: '7. ${l10n?.disclaimer ?? 'Disclaimer'}',
+                content: l10n?.disclaimerContent ?? 'Disclaimer Content',
                 isDark: isDark,
               ),
               
               _buildSection(
-                title: '8. İletişim',
-                content: '''Kullanım şartları ile ilgili sorularınız için:
-
-E-posta: support@qanta.app
-Web: www.qanta.app
-Adres: İstanbul, Türkiye
-
-Bu şartlar son güncellenme tarihi: 20 Ocak 2025''',
+                title: '8. ${l10n?.termsContact ?? 'Contact'}',
+                content: l10n?.termsContactContent ?? 'Terms Contact Content',
                 isDark: isDark,
               ),
             ],

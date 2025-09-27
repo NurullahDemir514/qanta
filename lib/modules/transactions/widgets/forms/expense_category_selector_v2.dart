@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/unified_provider_v2.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/models/category_model.dart';
 import '../../../../shared/services/category_icon_service.dart';
 
@@ -118,7 +119,7 @@ class _ExpenseTagSelectorState extends State<ExpenseTagSelector> {
     final l10n = AppLocalizations.of(context)!;
     
     return Text(
-      '₺${NumberFormat('#,##0', 'tr_TR').format(remaining.toInt())} ${l10n.remaining}.',
+      '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(remaining)} ${l10n.remaining}.',
       style: GoogleFonts.inter(
         fontSize: 11,
         fontWeight: FontWeight.w500,

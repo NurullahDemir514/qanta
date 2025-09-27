@@ -1779,5 +1779,1663 @@
   "totalDebts": "Total Debts",
   "availableCredit": "Available Credit",
   "netAmount": "Net",
-  "transactionCount": "Transactions"
+  "transactionCount": "Transactions",
+  "camera": "Camera",
+  "@camera": {
+    "description": "Camera option for image picker"
+  },
+  "gallery": "Gallery",
+  "@gallery": {
+    "description": "Gallery option for image picker"
+  },
+  "deletePhoto": "Delete Photo",
+  "@deletePhoto": {
+    "description": "Delete photo option"
+  },
+  "photoUploadError": "Error uploading photo: {error}",
+  "@photoUploadError": {
+    "description": "Photo upload error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "photoDeleteError": "Error deleting photo: {error}",
+  "@photoDeleteError": {
+    "description": "Photo delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "fileNotFound": "File not found",
+  "@fileNotFound": {
+    "description": "File not found error"
+  },
+  "fileTooLarge": "File too large (max 5MB)",
+  "@fileTooLarge": {
+    "description": "File too large error message"
+  },
+  "userSessionNotFound": "User session not found",
+  "@userSessionNotFound": {
+    "description": "User session not found error"
+  },
+  "photoDeletedSuccessfully": "Photo deleted successfully",
+  "@photoDeletedSuccessfully": {
+    "description": "Photo deleted successfully message"
+  },
+  "photoUploadedSuccessfully": "Photo uploaded successfully",
+  "@photoUploadedSuccessfully": {
+    "description": "Photo uploaded successfully message"
+  },
+  "selectImageSource": "Select Image Source",
+  "@selectImageSource": {
+    "description": "Select image source dialog title"
+  },
+  "selectImageSourceDescription": "Where would you like to select your photo from?",
+  "@selectImageSourceDescription": {
+    "description": "Select image source dialog description"
+  },
+  "uploadingPhoto": "Uploading photo...",
+  "@uploadingPhoto": {
+    "description": "Photo uploading loading message"
+  },
+  "deletingPhoto": "Deleting photo...",
+  "@deletingPhoto": {
+    "description": "Photo deleting loading message"
+  },
+  "profilePhoto": "Profile Photo",
+  "@profilePhoto": {
+    "description": "Profile photo label"
+  },
+  "changeProfilePhoto": "Change Profile Photo",
+  "@changeProfilePhoto": {
+    "description": "Change profile photo button"
+  },
+  "removeProfilePhoto": "Remove Profile Photo",
+  "@removeProfilePhoto": {
+    "description": "Remove profile photo button"
+  },
+  "profilePhotoUpdated": "Profile photo updated",
+  "@profilePhotoUpdated": {
+    "description": "Profile photo updated message"
+  },
+  "profilePhotoRemoved": "Profile photo removed",
+  "@profilePhotoRemoved": {
+    "description": "Profile photo removed message"
+  },
+  "deleteTransaction": "Delete Transaction",
+  "@deleteTransaction": {
+    "description": "Delete transaction dialog title"
+  },
+  "deleteTransactionConfirm": "Are you sure you want to delete the transaction {description}?",
+  "@deleteTransactionConfirm": {
+    "description": "Delete transaction confirmation message",
+    "placeholders": {
+      "description": {
+        "type": "String",
+        "description": "Transaction description"
+      }
+    }
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "transactionDeleted": "Transaction deleted",
+  "@transactionDeleted": {
+    "description": "Transaction deleted success message"
+  },
+  "transactionDeleteError": "Error deleting transaction: {error}",
+  "@transactionDeleteError": {
+    "description": "Transaction delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "deleteInstallmentTransaction": "Delete Installment Transaction",
+  "@deleteInstallmentTransaction": {
+    "description": "Delete installment transaction dialog title"
+  },
+  "deleteInstallmentTransactionConfirm": "Are you sure you want to completely delete the installment transaction {description}? This will delete all installments.",
+  "@deleteInstallmentTransactionConfirm": {
+    "description": "Delete installment transaction confirmation message",
+    "placeholders": {
+      "description": {
+        "type": "String",
+        "description": "Transaction description"
+      }
+    }
+  },
+  "installmentTransactionDeleted": "Installment transaction deleted successfully",
+  "@installmentTransactionDeleted": {
+    "description": "Installment transaction deleted success message"
+  },
+  "installmentTransactionDeleteError": "Error deleting installment transaction: {error}",
+  "@installmentTransactionDeleteError": {
+    "description": "Installment transaction delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "deleteAll": "Delete All",
+  "@deleteAll": {
+    "description": "Delete all button text"
+  },
+  "deleteLimit": "Delete Limit",
+  "@deleteLimit": {
+    "description": "Delete limit dialog title"
+  },
+  "deleteLimitConfirm": "Are you sure you want to delete the limit set for {categoryName} category?",
+  "@deleteLimitConfirm": {
+    "description": "Delete limit confirmation message",
+    "placeholders": {
+      "categoryName": {
+        "type": "String",
+        "description": "Category name"
+      }
+    }
+  },
+  "limitDeleted": "Limit deleted",
+  "@limitDeleted": {
+    "description": "Limit deleted success message"
+  },
+  "deleteLimitTooltip": "Delete Limit",
+  "@deleteLimitTooltip": {
+    "description": "Delete limit tooltip"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error prefix"
+  },
+  "errorOccurred": "Error: {error}",
+  "@errorOccurred": {
+    "description": "Error occurred message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading message"
+  },
+  "loadingPastStatements": "Loading past statements...",
+  "@loadingPastStatements": {
+    "description": "Loading past statements message"
+  },
+  "loadingFutureStatements": "Loading future statements...",
+  "@loadingFutureStatements": {
+    "description": "Loading future statements message"
+  },
+  "loadingCards": "Error loading cards",
+  "@loadingCards": {
+    "description": "Loading cards error message"
+  },
+  "loadingAccounts": "Loading accounts",
+  "@loadingAccounts": {
+    "description": "Loading accounts message"
+  },
+  "loadingStatementInfo": "Error loading statement information",
+  "@loadingStatementInfo": {
+    "description": "Loading statement info error message"
+  },
+  "paymentError": "Error occurred during payment",
+  "@paymentError": {
+    "description": "Payment error message"
+  },
+  "statementMarkError": "Error marking statement",
+  "@statementMarkError": {
+    "description": "Statement mark error message"
+  },
+  "unknownError": "An error occurred: {error}",
+  "@unknownError": {
+    "description": "Unknown error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "deleteCard": "Delete Card",
+  "@deleteCard": {
+    "description": "Delete card dialog title"
+  },
+  "deleteCardConfirm": "Are you sure you want to delete {cardName} card?\n\nThis action cannot be undone.",
+  "@deleteCardConfirm": {
+    "description": "Delete card confirmation message",
+    "placeholders": {
+      "cardName": {
+        "type": "String",
+        "description": "Card name"
+      }
+    }
+  },
+  "cardDeleted": "Card deleted successfully",
+  "@cardDeleted": {
+    "description": "Card deleted success message"
+  },
+  "cardDeleteError": "Error deleting card",
+  "@cardDeleteError": {
+    "description": "Card delete error message"
+  },
+  "transactionAddError": "Error adding transaction: {error}",
+  "@transactionAddError": {
+    "description": "Transaction add error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "updateError": "Error during update: {error}",
+  "@updateError": {
+    "description": "Update error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message"
+      }
+    }
+  },
+  "deleteFailed": "Delete operation failed",
+  "@deleteFailed": {
+    "description": "Delete failed message"
+  },
+  "installmentTransactionDeleting": "Deleting installment transaction...",
+  "@installmentTransactionDeleting": {
+    "description": "Installment transaction deleting message"
+  },
+  "installmentTransactionDeletedWithRefund": "Installment transaction deleted, total amount refunded",
+  "@installmentTransactionDeletedWithRefund": {
+    "description": "Installment transaction deleted with refund message"
+  },
+  "cancelAction": "Cancel",
+  "@cancelAction": {
+    "description": "Cancel action button text"
+  },
+  "quickNotes": "Quick Notes",
+  "@quickNotes": {
+    "description": "Quick notes feature title"
+  },
+  "quickNotesSubtitle": "Persistent notification for instant note taking",
+  "@quickNotesSubtitle": {
+    "description": "Quick notes feature subtitle"
+  },
+  "quickNotesNotificationEnabled": "Quick notes notification enabled",
+  "@quickNotesNotificationEnabled": {
+    "description": "Quick notes notification enabled message"
+  },
+  "quickNotesNotificationDisabled": "Quick notes notification disabled",
+  "@quickNotesNotificationDisabled": {
+    "description": "Quick notes notification disabled message"
+  },
+  "notificationPermissionRequired": "Notification permission required! Please enable it in settings.",
+  "@notificationPermissionRequired": {
+    "description": "Notification permission required message"
+  },
+  "frequentlyAskedQuestions": "Frequently Asked Questions",
+  "@frequentlyAskedQuestions": {
+    "description": "FAQ section title"
+  },
+  "account": "Account",
+  "@account": {
+    "description": "Account placeholder text"
+  },
+  "noTransactionsYet": "No transactions yet",
+  "@noTransactionsYet": {
+    "description": "No transactions message"
+  },
+  "addFirstTransaction": "Add your first transaction to get started",
+  "@addFirstTransaction": {
+    "description": "Add first transaction message"
+  },
+  "now": "Now",
+  "@now": {
+    "description": "Now time indicator"
+  },
+  "yesterday": "Yesterday",
+  "@yesterday": {
+    "description": "Yesterday time indicator"
+  },
+  "installment": "Installment",
+  "@installment": {
+    "description": "Installment indicator"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "income": "Income",
+  "@income": {
+    "description": "Income transaction type"
+  },
+  "expense": "Expense",
+  "@expense": {
+    "description": "Expense transaction type"
+  },
+  "transfer": "Transfer",
+  "@transfer": {
+    "description": "Transfer transaction type"
+  },
+  "today": "Today",
+  "@today": {
+    "description": "Today indicator"
+  },
+  "installment": "Installment",
+  "@installment": {
+    "description": "Installment text"
+  },
+  "cash": "Cash",
+  "@cash": {
+    "description": "Cash payment text"
+  },
+  "transactionDeleted": "Transaction deleted",
+  "@transactionDeleted": {
+    "description": "Transaction deleted message"
+  },
+  "deleteFailed": "Delete failed",
+  "@deleteFailed": {
+    "description": "Delete failed message"
+  },
+  "minutesAgo": "{count} min ago",
+  "@minutesAgo": {
+    "description": "Minutes ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} hours ago",
+  "@hoursAgo": {
+    "description": "Hours ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} days ago",
+  "@daysAgo": {
+    "description": "Days ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weeksAgo": "{count} weeks ago",
+  "@weeksAgo": {
+    "description": "Weeks ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthsAgo": "{count} months ago",
+  "@monthsAgo": {
+    "description": "Months ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yearsAgo": "{count} years ago",
+  "@yearsAgo": {
+    "description": "Years ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "oneMinuteAgo": "1 min ago",
+  "@oneMinuteAgo": {
+    "description": "One minute ago text"
+  },
+  "oneHourAgo": "1 hour ago",
+  "@oneHourAgo": {
+    "description": "One hour ago text"
+  },
+  "oneWeekAgo": "1 week ago",
+  "@oneWeekAgo": {
+    "description": "One week ago text"
+  },
+  "oneMonthAgo": "1 month ago",
+  "@oneMonthAgo": {
+    "description": "One month ago text"
+  },
+  "oneYearAgo": "1 year ago",
+  "@oneYearAgo": {
+    "description": "One year ago text"
+  },
+  "twoDaysAgo": "2 days ago",
+  "@twoDaysAgo": {
+    "description": "Two days ago text"
+  },
+  "perMonth": "/month",
+  "@perMonth": {
+    "description": "Per month indicator"
+  },
+  "income": "Income",
+  "@income": {
+    "description": "Income transaction type"
+  },
+  "expense": "Expense",
+  "@expense": {
+    "description": "Expense transaction type"
+  },
+  "net": "Net",
+  "@net": {
+    "description": "Net amount"
+  },
+  "cash": "Cash",
+  "@cash": {
+    "description": "Cash payment"
+  },
+  "installment": "Installment",
+  "@installment": {
+    "description": "Installment"
+  },
+  "category": "Category",
+  "@category": {
+    "description": "Category placeholder"
+  },
+  "pleaseEnterAmount": "Please enter an amount",
+  "@pleaseEnterAmount": {
+    "description": "Please enter amount error"
+  },
+  "pleaseEnterValidAmount": "Please enter a valid amount",
+  "@pleaseEnterValidAmount": {
+    "description": "Please enter valid amount error"
+  },
+  "pleaseSelectSourceAccount": "Please select source account",
+  "@pleaseSelectSourceAccount": {
+    "description": "Please select source account error"
+  },
+  "pleaseSelectTargetAccount": "Please select target account",
+  "@pleaseSelectTargetAccount": {
+    "description": "Please select target account error"
+  },
+  "sourceAndTargetSame": "Source and target account cannot be the same",
+  "@sourceAndTargetSame": {
+    "description": "Source and target account same error"
+  },
+  "accountInfoNotFound": "Account information could not be retrieved",
+  "@accountInfoNotFound": {
+    "description": "Account info not found error"
+  },
+  "accountInfoNotFoundSingle": "Account information could not be retrieved",
+  "@accountInfoNotFoundSingle": {
+    "description": "Account info not found error (single)"
+  },
+  "pleaseSelectCategory": "Please select a category",
+  "@pleaseSelectCategory": {
+    "description": "Please select category error"
+  },
+  "pleaseSelectPaymentMethod": "Please select a payment method",
+  "@pleaseSelectPaymentMethod": {
+    "description": "Please select payment method error"
+  },
+  "cardsLoadingError": "Error loading cards",
+  "@cardsLoadingError": {
+    "description": "Cards loading error"
+  },
+  "noCardsAddedYet": "No cards added yet",
+  "@noCardsAddedYet": {
+    "description": "No cards added yet"
+  },
+  "cash": "Cash",
+  "@cash": {
+    "description": "Cash account"
+  },
+  "transaction": "Transaction",
+  "@transaction": {
+    "description": "Transaction generic term"
+  },
+  "all": "All",
+  "@all": {
+    "description": "All option"
+  },
+  "today": "Today",
+  "@today": {
+    "description": "Today"
+  },
+  "selectTransactionType": "Select the type of transaction you want to make",
+  "@selectTransactionType": {
+    "description": "Select transaction type message"
+  },
+  "bankName": "Qanta",
+  "@bankName": {
+    "description": "Bank name"
+  },
+  "installmentTransactionDeleted": "Installment transaction deleted",
+  "@installmentTransactionDeleted": {
+    "description": "Installment transaction deleted message"
+  },
+  "weekly": "Weekly",
+  "@weekly": {
+    "description": "Weekly frequency"
+  },
+  "monthly": "Monthly",
+  "@monthly": {
+    "description": "Monthly frequency"
+  },
+  "quarterly": "Quarterly",
+  "@quarterly": {
+    "description": "Quarterly frequency"
+  },
+  "yearly": "Yearly",
+  "@yearly": {
+    "description": "Yearly frequency"
+  },
+  "repeatsEveryWeek": "Repeats every week",
+  "@repeatsEveryWeek": {
+    "description": "Repeats every week"
+  },
+  "repeatsEveryMonth": "Repeats every month",
+  "@repeatsEveryMonth": {
+    "description": "Repeats every month"
+  },
+  "repeatsEveryQuarter": "Repeats every quarter",
+  "@repeatsEveryQuarter": {
+    "description": "Repeats every quarter"
+  },
+  "repeatsEveryYear": "Repeats every year",
+  "@repeatsEveryYear": {
+    "description": "Repeats every year"
+  },
+  "subscription": "Subscription",
+  "@subscription": {
+    "description": "Subscription category"
+  },
+  "utilities": "Utilities",
+  "@utilities": {
+    "description": "Utilities category"
+  },
+  "insurance": "Insurance",
+  "@insurance": {
+    "description": "Insurance category"
+  },
+  "rent": "Rent",
+  "@rent": {
+    "description": "Rent category"
+  },
+  "loan": "Loan",
+  "@loan": {
+    "description": "Loan category"
+  },
+  "other": "Other",
+  "@other": {
+    "description": "Other category"
+  },
+  "otherFixedPayments": "Other fixed payments",
+  "@otherFixedPayments": {
+    "description": "Other fixed payments"
+  },
+  "card": "Card",
+  "@card": {
+    "description": "Card payment method"
+  },
+  "thisWeek": "This Week",
+  "@thisWeek": {
+    "description": "This week"
+  },
+  "thisMonth": "This Month",
+  "@thisMonth": {
+    "description": "This month"
+  },
+  "lastMonth": "Last Month",
+  "@lastMonth": {
+    "description": "Last month"
+  },
+  "last3Months": "Last 3 Months",
+  "@last3Months": {
+    "description": "Last 3 months"
+  },
+  "thisYear": "This Year",
+  "@thisYear": {
+    "description": "This year"
+  },
+  "lastYear": "Last Year",
+  "@lastYear": {
+    "description": "Last year"
+  },
+  "custom": "Custom",
+  "@custom": {
+    "description": "Custom period"
+  },
+  "searchTransactions": "Search Transactions",
+  "@searchTransactions": {
+    "description": "Search transactions placeholder"
+  },
+  "filterByType": "Filter by Type",
+  "@filterByType": {
+    "description": "Filter by type"
+  },
+  "filterByPeriod": "Filter by Period",
+  "@filterByPeriod": {
+    "description": "Filter by period"
+  },
+  "filterByCategory": "Filter by Category",
+  "@filterByCategory": {
+    "description": "Filter by category"
+  },
+  "clearFilters": "Clear Filters",
+  "@clearFilters": {
+    "description": "Clear filters"
+  },
+  "applyFilters": "Apply Filters",
+  "@applyFilters": {
+    "description": "Apply filters"
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "No results found"
+  },
+  "tryDifferentSearch": "Try a different search",
+  "@tryDifferentSearch": {
+    "description": "Try different search"
+  },
+  "pleaseSelectCategory": "Please select a category",
+  "@pleaseSelectCategory": {
+    "description": "Please select a category"
+  },
+  "pleaseSelectPaymentMethod": "Please select a payment method",
+  "@pleaseSelectPaymentMethod": {
+    "description": "Please select a payment method"
+  },
+  "accountInfoNotFoundSingle": "Account information could not be retrieved",
+  "@accountInfoNotFoundSingle": {
+    "description": "Account information could not be retrieved (single)"
+  },
+  "noNotesYet": "No notes yet",
+  "@noNotesYet": {
+    "description": "No notes yet"
+  },
+  "addExpenseIncomeNotes": "Add your expense or income notes here",
+  "@addExpenseIncomeNotes": {
+    "description": "Add your expense or income notes here"
+  },
+  "justNow": "Just now",
+  "@justNow": {
+    "description": "Just now"
+  },
+  "monday": "Monday",
+  "@monday": {
+    "description": "Monday"
+  },
+  "tuesday": "Tuesday",
+  "@tuesday": {
+    "description": "Tuesday"
+  },
+  "wednesday": "Wednesday",
+  "@wednesday": {
+    "description": "Wednesday"
+  },
+  "thursday": "Thursday",
+  "@thursday": {
+    "description": "Thursday"
+  },
+  "friday": "Friday",
+  "@friday": {
+    "description": "Friday"
+  },
+  "saturday": "Saturday",
+  "@saturday": {
+    "description": "Saturday"
+  },
+  "sunday": "Sunday",
+  "@sunday": {
+    "description": "Sunday"
+  },
+  "january": "January",
+  "@january": {
+    "description": "January"
+  },
+  "february": "February",
+  "@february": {
+    "description": "February"
+  },
+  "march": "March",
+  "@march": {
+    "description": "March"
+  },
+  "april": "April",
+  "@april": {
+    "description": "April"
+  },
+  "may": "May",
+  "@may": {
+    "description": "May"
+  },
+  "june": "June",
+  "@june": {
+    "description": "June"
+  },
+  "july": "July",
+  "@july": {
+    "description": "July"
+  },
+  "august": "August",
+  "@august": {
+    "description": "August"
+  },
+  "september": "September",
+  "@september": {
+    "description": "September"
+  },
+  "october": "October",
+  "@october": {
+    "description": "October"
+  },
+  "november": "November",
+  "@november": {
+    "description": "November"
+  },
+  "december": "December",
+  "@december": {
+    "description": "December"
+  },
+  "textNote": "Text Note",
+  "@textNote": {
+    "description": "Text Note"
+  },
+  "addQuickTextNote": "Add quick text note",
+  "@addQuickTextNote": {
+    "description": "Add quick text note"
+  },
+  "takePhoto": "Take Photo",
+  "@takePhoto": {
+    "description": "Take Photo"
+  },
+  "takePhotoFromCamera": "Take photo from camera",
+  "@takePhotoFromCamera": {
+    "description": "Take photo from camera"
+  },
+  "selectFromGallery": "Select from Gallery",
+  "@selectFromGallery": {
+    "description": "Select from Gallery"
+  },
+  "selectPhotoFromGallery": "Select photo from gallery",
+  "@selectPhotoFromGallery": {
+    "description": "Select photo from gallery"
+  },
+  "photoCaptureError": "Error capturing photo",
+  "@photoCaptureError": {
+    "description": "Error capturing photo"
+  },
+  "photoSelectionError": "Error selecting photo",
+  "@photoSelectionError": {
+    "description": "Error selecting photo"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Add"
+  },
+  "photoNote": "Photo note",
+  "@photoNote": {
+    "description": "Photo note"
+  },
+  "photoNoteAdded": "Photo note added",
+  "@photoNoteAdded": {
+    "description": "Photo note added"
+  },
+  "photoNoteAddError": "Error adding photo note",
+  "@photoNoteAddError": {
+    "description": "Error adding photo note"
+  },
+  "noteAdded": "Note added",
+  "@noteAdded": {
+    "description": "Note added"
+  },
+  "noteAddError": "Error adding note",
+  "@noteAddError": {
+    "description": "Error adding note"
+  },
+  "noteDeleted": "Note deleted",
+  "@noteDeleted": {
+    "description": "Note deleted"
+  },
+  "noteDeleteError": "Error deleting note",
+  "@noteDeleteError": {
+    "description": "Error deleting note"
+  },
+  "noConvertedNotesYet": "No notes converted to transactions yet",
+  "@noConvertedNotesYet": {
+    "description": "No notes converted to transactions yet"
+  },
+  "stop": "Stop",
+  "@stop": {
+    "description": "Stop"
+  },
+  "send": "Send",
+  "@send": {
+    "description": "Send"
+  },
+  "processed": "Processed",
+  "@processed": {
+    "description": "Processed"
+  },
+  "newest": "Newest",
+  "@newest": {
+    "description": "Newest"
+  },
+  "oldest": "Oldest",
+  "@oldest": {
+    "description": "Oldest"
+  },
+  "highestToLowest": "Highest to Lowest",
+  "@highestToLowest": {
+    "description": "Highest to Lowest"
+  },
+  "lowestToHighest": "Lowest to Highest",
+  "@lowestToHighest": {
+    "description": "Lowest to Highest"
+  },
+  "alphabetical": "A-Z",
+  "@alphabetical": {
+    "description": "Alphabetical"
+  },
+  "more": "More",
+  "@more": {
+    "description": "More"
+  },
+  "less": "Less",
+  "@less": {
+    "description": "Less"
+  },
+  "creditCard": "Credit Card",
+  "@creditCard": {
+    "description": "Credit Card"
+  },
+  "availableCredit": "Available Credit",
+  "@availableCredit": {
+    "description": "Available Credit"
+  },
+  "creditLimit": "Credit Limit",
+  "@creditLimit": {
+    "description": "Credit Limit"
+  },
+  "debitCard": "Debit Card",
+  "@debitCard": {
+    "description": "Debit Card"
+  },
+  "balance": "Balance",
+  "@balance": {
+    "description": "Balance"
+  },
+  "cardName": "Card Name",
+  "@cardName": {
+    "description": "Card Name"
+  },
+  "usage": "Usage",
+  "@usage": {
+    "description": "Usage"
+  },
+  "lastPayment": "Last Payment",
+  "@lastPayment": {
+    "description": "Last Payment"
+  },
+  "nextPayment": "Next Payment",
+  "@nextPayment": {
+    "description": "Next Payment"
+  },
+  "minimumPayment": "Minimum Payment",
+  "@minimumPayment": {
+    "description": "Minimum Payment"
+  },
+  "totalDebt": "Total Debt",
+  "@totalDebt": {
+    "description": "Total Debt"
+  },
+  "noTransactionsForThisCard": "No transactions found for this card",
+  "@noTransactionsForThisCard": {
+    "description": "No transactions found for this card"
+  },
+  "statementSuccessfullyPaid": "Statement successfully marked as paid",
+  "@statementSuccessfullyPaid": {
+    "description": "Statement successfully marked as paid"
+  },
+  "bank": "Bank",
+  "@bank": {
+    "description": "Bank"
+  },
+  "cardNameRequired": "Card name is required",
+  "@cardNameRequired": {
+    "description": "Card name is required"
+  },
+  "creditLimitRequired": "Credit limit is required",
+  "@creditLimitRequired": {
+    "description": "Credit limit is required"
+  },
+  "availableLimit": "Available Limit",
+  "@availableLimit": {
+    "description": "Available Limit"
+  },
+  "debt": "Debt",
+  "@debt": {
+    "description": "Debt"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications"
+  },
+  "noNotifications": "No notifications",
+  "@noNotifications": {
+    "description": "No notifications"
+  },
+  "usageRate": "Usage Rate",
+  "@usageRate": {
+    "description": "Usage Rate"
+  },
+  "statementDay": "Statement Day",
+  "@statementDay": {
+    "description": "Statement Day"
+  },
+  "creditCardInfo": "Credit Card Info",
+  "@creditCardInfo": {
+    "description": "Credit Card Info"
+  },
+  "installmentDetailsLoadError": "Installment details could not be loaded",
+  "@installmentDetailsLoadError": {
+    "description": "Installment details could not be loaded"
+  },
+  "tomorrow": "Tomorrow",
+  "@tomorrow": {
+    "description": "Tomorrow"
+  },
+  "changePassword": "Change Password",
+  "@changePassword": {
+    "description": "Change Password"
+  },
+  "currentPassword": "Current Password",
+  "@currentPassword": {
+    "description": "Current Password"
+  },
+  "newPassword": "New Password",
+  "@newPassword": {
+    "description": "New Password"
+  },
+  "confirmNewPassword": "Confirm New Password",
+  "@confirmNewPassword": {
+    "description": "Confirm New Password"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save"
+  },
+  "passwordMinLengthInfo": "Your password must be at least 6 characters long.",
+  "@passwordMinLengthInfo": {
+    "description": "Your password must be at least 6 characters long."
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Passwords do not match"
+  },
+  "passwordMinLength": "Password must be at least 6 characters",
+  "@passwordMinLength": {
+    "description": "Password must be at least 6 characters"
+  },
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully"
+  },
+  "wrongCurrentPassword": "Current password is incorrect",
+  "@wrongCurrentPassword": {
+    "description": "Current password is incorrect"
+  },
+  "passwordTooWeak": "Password is too weak",
+  "@passwordTooWeak": {
+    "description": "Password is too weak"
+  },
+  "requiresRecentLogin": "Please log in again to change your password",
+  "@requiresRecentLogin": {
+    "description": "Please log in again to change your password"
+  },
+  "passwordChangeFailed": "Password change failed",
+  "@passwordChangeFailed": {
+    "description": "Password change failed"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OK"
+  },
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Privacy Policy"
+  },
+  "collectedInformation": "Collected Information",
+  "@collectedInformation": {
+    "description": "Collected Information"
+  },
+  "collectedInformationContent": "The Qanta application collects the following information to provide you with better service:\n\n• Account information (email, name-surname)\n• Financial transaction data (income, expense, transfer records)\n• Card and account information\n• Budget and category preferences\n• Application usage statistics",
+  "@collectedInformationContent": {
+    "description": "Collected Information Content"
+  },
+  "informationUsage": "Information Usage",
+  "@informationUsage": {
+    "description": "Information Usage"
+  },
+  "informationUsageContent": "The collected information is used for the following purposes:\n\n• Providing personal finance management services\n• Budget tracking and expense analysis\n• Improving application performance\n• Security and fraud prevention\n• Fulfilling legal obligations",
+  "@informationUsageContent": {
+    "description": "Information Usage Content"
+  },
+  "dataSecurity": "Data Security",
+  "@dataSecurity": {
+    "description": "Data Security"
+  },
+  "dataSecurityContent": "The security of your data is our priority:\n\n• All data is stored encrypted\n• Hosted on secure servers\n• Regular security updates are made\n• Protected against unauthorized access\n• Industry-standard security measures are taken",
+  "@dataSecurityContent": {
+    "description": "Data Security Content"
+  },
+  "dataSharing": "Data Sharing",
+  "@dataSharing": {
+    "description": "Data Sharing"
+  },
+  "dataSharingContent": "Your personal data is not shared with third parties except in the following cases:\n\n• Legal obligations\n• In case of security breaches\n• With your explicit consent\n• Limited sharing with service providers (anonymous)",
+  "@dataSharingContent": {
+    "description": "Data Sharing Content"
+  },
+  "userRights": "User Rights",
+  "@userRights": {
+    "description": "User Rights"
+  },
+  "userRightsContent": "Your rights under GDPR:\n\n• Learning whether your personal data is processed\n• Requesting access to your data\n• Requesting correction of incorrect information\n• Requesting deletion of data\n• Completely closing your account",
+  "@userRightsContent": {
+    "description": "User Rights Content"
+  },
+  "contact": "Contact",
+  "@contact": {
+    "description": "Contact"
+  },
+  "contactContent": "For questions about the privacy policy:\n\nEmail: privacy@qanta.app\nAddress: Istanbul, Turkey\n\nThis policy was last updated: January 20, 2025",
+  "@contactContent": {
+    "description": "Contact Content"
+  },
+  "supportAndContact": "Support & Contact",
+  "@supportAndContact": {
+    "description": "Support & Contact"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email"
+  },
+  "phone": "Phone",
+  "@phone": {
+    "description": "Phone"
+  },
+  "liveSupport": "Live Support",
+  "@liveSupport": {
+    "description": "Live Support"
+  },
+  "liveSupportHours": "Monday-Friday 09:00-18:00",
+  "@liveSupportHours": {
+    "description": "Live Support Hours"
+  },
+  "frequentlyAskedQuestions": "Frequently Asked Questions",
+  "@frequentlyAskedQuestions": {
+    "description": "Frequently Asked Questions"
+  },
+  "isMyDataSecure": "Is my data secure?",
+  "@isMyDataSecure": {
+    "description": "Is my data secure?"
+  },
+  "isMyDataSecureAnswer": "Yes, all your data is stored encrypted and hosted on secure servers.",
+  "@isMyDataSecureAnswer": {
+    "description": "Is my data secure answer"
+  },
+  "forgotPassword": "I forgot my password, what should I do?",
+  "@forgotPassword": {
+    "description": "Forgot password"
+  },
+  "forgotPasswordAnswer": "You can reset your password using the \"Forgot Password\" option on the login screen.",
+  "@forgotPasswordAnswer": {
+    "description": "Forgot password answer"
+  },
+  "howToDeleteAccount": "How can I delete my account?",
+  "@howToDeleteAccount": {
+    "description": "How to delete account"
+  },
+  "howToDeleteAccountAnswer": "You can use the \"Account Settings\" > \"Delete Account\" option from the profile page.",
+  "@howToDeleteAccountAnswer": {
+    "description": "How to delete account answer"
+  },
+  "isAppFree": "Is the app free?",
+  "@isAppFree": {
+    "description": "Is app free"
+  },
+  "isAppFreeAnswer": "Yes, Qanta can be used completely free. Premium features may be added in the future.",
+  "@isAppFreeAnswer": {
+    "description": "Is app free answer"
+  },
+  "appInformation": "App Information",
+  "@appInformation": {
+    "description": "App Information"
+  },
+  "version": "Version",
+  "@version": {
+    "description": "Version"
+  },
+  "lastUpdate": "Last Update",
+  "@lastUpdate": {
+    "description": "Last Update"
+  },
+  "developer": "Developer",
+  "@developer": {
+    "description": "Developer"
+  },
+  "platform": "Platform",
+  "@platform": {
+    "description": "Platform"
+  },
+  "liveSupportTitle": "Live Support",
+  "@liveSupportTitle": {
+    "description": "Live Support Title"
+  },
+  "liveSupportMessage": "Live support service is currently in development. For urgent matters, please contact us via email or phone.",
+  "@liveSupportMessage": {
+    "description": "Live Support Message"
+  },
+  "termsOfService": "Terms of Service",
+  "@termsOfService": {
+    "description": "Terms of Service"
+  },
+  "serviceDescription": "Service Description",
+  "@serviceDescription": {
+    "description": "Service Description"
+  },
+  "serviceDescriptionContent": "Qanta is a mobile application designed for personal finance management. The application offers the following services:\n\n• Income and expense tracking\n• Budget management and planning\n• Card and account management\n• Financial reporting and analysis\n• Installment tracking and management",
+  "@serviceDescriptionContent": {
+    "description": "Service Description Content"
+  },
+  "usageTerms": "Usage Terms",
+  "@usageTerms": {
+    "description": "Usage Terms"
+  },
+  "usageTermsContent": "By using the Qanta application, you agree to the following terms:\n\n• You will use the application only for legal purposes\n• You will provide accurate and up-to-date information\n• You will protect your account security\n• You will respect the rights of other users\n• You will avoid misuse of the application",
+  "@usageTermsContent": {
+    "description": "Usage Terms Content"
+  },
+  "userResponsibilities": "User Responsibilities",
+  "@userResponsibilities": {
+    "description": "User Responsibilities"
+  },
+  "userResponsibilitiesContent": "As a user, you have the following responsibilities:\n\n• Keeping your account information secure\n• Not sharing your password with anyone\n• Ensuring the accuracy of your financial data\n• Complying with application rules\n• Reporting security breaches",
+  "@userResponsibilitiesContent": {
+    "description": "User Responsibilities Content"
+  },
+  "serviceLimitations": "Service Limitations",
+  "@serviceLimitations": {
+    "description": "Service Limitations"
+  },
+  "serviceLimitationsContent": "The Qanta application is subject to the following limitations:\n\n• Does not provide financial advisory services\n• Does not give investment advice\n• Does not perform banking transactions\n• Does not provide credit or lending services\n• Does not provide tax advisory services",
+  "@serviceLimitationsContent": {
+    "description": "Service Limitations Content"
+  },
+  "intellectualProperty": "Intellectual Property",
+  "@intellectualProperty": {
+    "description": "Intellectual Property"
+  },
+  "intellectualPropertyContent": "All content of the Qanta application is protected by copyright:\n\n• Application design and code\n• Logo and brand elements\n• Text and visual content\n• Algorithms and calculation methods\n• Database structure",
+  "@intellectualPropertyContent": {
+    "description": "Intellectual Property Content"
+  },
+  "serviceChanges": "Service Changes",
+  "@serviceChanges": {
+    "description": "Service Changes"
+  },
+  "serviceChangesContent": "Qanta reserves the right to make changes to its services:\n\n• Adding or removing features\n• Pricing changes\n• Updating terms of use\n• Service termination\n• Maintenance and updates",
+  "@serviceChangesContent": {
+    "description": "Service Changes Content"
+  },
+  "disclaimer": "Disclaimer",
+  "@disclaimer": {
+    "description": "Disclaimer"
+  },
+  "disclaimerContent": "Qanta is not responsible for the following situations:\n\n• Data loss or corruption\n• System failures or interruptions\n• Third-party service providers\n• Damages resulting from user errors\n• Internet connection issues",
+  "@disclaimerContent": {
+    "description": "Disclaimer Content"
+  },
+  "termsContact": "Contact",
+  "@termsContact": {
+    "description": "Terms Contact"
+  },
+  "termsContactContent": "For questions about terms of service:\n\nEmail: support@qanta.app\nWeb: www.qanta.app\nAddress: Istanbul, Turkey\n\nThese terms were last updated: January 20, 2025",
+  "@termsContactContent": {
+    "description": "Terms Contact Content"
+  },
+  "faq": "Frequently Asked Questions",
+  "@faq": {
+    "description": "FAQ"
+  },
+  "generalQuestions": "General Questions",
+  "@generalQuestions": {
+    "description": "General Questions"
+  },
+  "accountAndSecurity": "Account and Security",
+  "@accountAndSecurity": {
+    "description": "Account and Security"
+  },
+  "features": "Features",
+  "@features": {
+    "description": "Features"
+  },
+  "technicalIssues": "Technical Issues",
+  "@technicalIssues": {
+    "description": "Technical Issues"
+  },
+  "whatIsQanta": "What is Qanta?",
+  "@whatIsQanta": {
+    "description": "What is Qanta?"
+  },
+  "whatIsQantaAnswer": "Qanta is a modern mobile application designed for personal finance management. It offers income-expense tracking, budget management, card tracking, and financial analysis features.",
+  "@whatIsQantaAnswer": {
+    "description": "What is Qanta answer"
+  },
+  "isAppFree": "Is the app free?",
+  "@isAppFree": {
+    "description": "Is app free?"
+  },
+  "isAppFreeAnswer": "Yes, Qanta can be used completely free. Premium features may be added in the future, but basic features will always remain free.",
+  "@isAppFreeAnswer": {
+    "description": "Is app free answer"
+  },
+  "whichDevicesSupported": "Which devices can I use it on?",
+  "@whichDevicesSupported": {
+    "description": "Which devices are supported?"
+  },
+  "whichDevicesSupportedAnswer": "Qanta can be used on Android and iOS devices. It is developed with Flutter technology.",
+  "@whichDevicesSupportedAnswer": {
+    "description": "Which devices supported answer"
+  },
+  "isMyDataSecure": "Is my data secure?",
+  "@isMyDataSecure": {
+    "description": "Is my data secure?"
+  },
+  "isMyDataSecureAnswer": "Yes, all your data is stored encrypted and hosted on secure servers. We provide industry-standard security using Supabase infrastructure.",
+  "@isMyDataSecureAnswer": {
+    "description": "Is my data secure answer"
+  },
+  "forgotPassword": "I forgot my password, what should I do?",
+  "@forgotPassword": {
+    "description": "Forgot password"
+  },
+  "forgotPasswordAnswer": "You can use the \"Forgot Password\" option on the login screen to send a password reset link to your email address.",
+  "@forgotPasswordAnswer": {
+    "description": "Forgot password answer"
+  },
+  "howToDeleteAccount": "How can I delete my account?",
+  "@howToDeleteAccount": {
+    "description": "How to delete account"
+  },
+  "howToDeleteAccountAnswer": "You can log out from the profile page or contact our support team to request complete deletion of your account.",
+  "@howToDeleteAccountAnswer": {
+    "description": "How to delete account answer"
+  },
+  "howToChangePassword": "How can I change my password?",
+  "@howToChangePassword": {
+    "description": "How to change password"
+  },
+  "howToChangePasswordAnswer": "You can use the \"Change Password\" option from the \"Security\" section on the profile page.",
+  "@howToChangePasswordAnswer": {
+    "description": "How to change password answer"
+  },
+  "whichCardTypesSupported": "Which card types do you support?",
+  "@whichCardTypesSupported": {
+    "description": "Which card types are supported?"
+  },
+  "whichCardTypesSupportedAnswer": "Credit cards, debit cards, and cash accounts are supported. Compatible with all Turkish banks.",
+  "@whichCardTypesSupportedAnswer": {
+    "description": "Which card types supported answer"
+  },
+  "howDoesInstallmentTrackingWork": "How does installment tracking work?",
+  "@howDoesInstallmentTrackingWork": {
+    "description": "How does installment tracking work?"
+  },
+  "howDoesInstallmentTrackingWorkAnswer": "You can add installment purchases and automatically track your monthly payments. The system sends you reminders.",
+  "@howDoesInstallmentTrackingWorkAnswer": {
+    "description": "How does installment tracking work answer"
+  },
+  "howToUseBudgetManagement": "How to use budget management?",
+  "@howToUseBudgetManagement": {
+    "description": "How to use budget management?"
+  },
+  "howToUseBudgetManagementAnswer": "You can set monthly limits for categories, track your expenses, and receive alerts when limits are exceeded.",
+  "@howToUseBudgetManagementAnswer": {
+    "description": "How to use budget management answer"
+  },
+  "whatIsQuickNotesFeature": "What is the quick notes feature?",
+  "@whatIsQuickNotesFeature": {
+    "description": "What is quick notes feature?"
+  },
+  "whatIsQuickNotesFeatureAnswer": "You can quickly take notes with persistent notifications, add photos, and categorize your notes.",
+  "@whatIsQuickNotesFeatureAnswer": {
+    "description": "What is quick notes feature answer"
+  },
+  "appCrashingWhatToDo": "The app is crashing, what should I do?",
+  "@appCrashingWhatToDo": {
+    "description": "App is crashing, what should I do?"
+  },
+  "appCrashingWhatToDoAnswer": "First try closing the app completely and reopening it. If the problem persists, restart your device. If it still doesn't resolve, contact our support team.",
+  "@appCrashingWhatToDoAnswer": {
+    "description": "App crashing what to do answer"
+  },
+  "dataNotSyncing": "My data is not syncing",
+  "@dataNotSyncing": {
+    "description": "Data not syncing"
+  },
+  "dataNotSyncingAnswer": "Check your internet connection and restart the app. If the problem persists, try logging out and logging back in.",
+  "@dataNotSyncingAnswer": {
+    "description": "Data not syncing answer"
+  },
+  "notificationsNotComing": "Notifications are not coming",
+  "@notificationsNotComing": {
+    "description": "Notifications not coming"
+  },
+  "notificationsNotComingAnswer": "Make sure notifications are enabled for Qanta in your device settings. Also check notification settings from the profile page.",
+  "@notificationsNotComingAnswer": {
+    "description": "Notifications not coming answer"
+  },
+  "howToContactSupport": "How can I contact your support team?",
+  "@howToContactSupport": {
+    "description": "How to contact support"
+  },
+  "howToContactSupportAnswer": "You can use the \"Support & Contact\" section from the profile page or send an email to support@qanta.app.",
+  "@howToContactSupportAnswer": {
+    "description": "How to contact support answer"
+  },
+  "haveSuggestionWhereToSend": "I have a suggestion, where can I send it?",
+  "@haveSuggestionWhereToSend": {
+    "description": "Have suggestion, where to send"
+  },
+  "haveSuggestionWhereToSendAnswer": "You can send your suggestions to support@qanta.app. All feedback is evaluated and used to improve the application.",
+  "@haveSuggestionWhereToSendAnswer": {
+    "description": "Have suggestion where to send answer"
+  },
+  "lastMonthChange": "from last month",
+  "@lastMonthChange": {
+    "description": "Last month change"
+  },
+  "increase": "increase",
+  "@increase": {
+    "description": "Increase"
+  },
+  "decrease": "decrease",
+  "@decrease": {
+    "description": "Decrease"
+  },
+  "noAccountsYet": "No accounts yet",
+  "@noAccountsYet": {
+    "description": "No accounts yet"
+  },
+  "addFirstAccount": "Add your first account to get started",
+  "@addFirstAccount": {
+    "description": "Add first account to get started"
+  },
+  "currentDebt": "Current Debt",
+  "@currentDebt": {
+    "description": "Current Debt"
+  },
+  "totalLimit": "Total Limit",
+  "@totalLimit": {
+    "description": "Total Limit"
+  },
+  "cashWallet": "Cash Wallet",
+  "@cashWallet": {
+    "description": "Cash Wallet"
+  },
+  "searchBanks": "Search banks...",
+  "@searchBanks": {
+    "description": "Search banks"
+  },
+  "noBanksFound": "No banks found",
+  "@noBanksFound": {
+    "description": "No banks found"
+  },
+  "creditCard": "Credit Card",
+  "@creditCard": {
+    "description": "Credit Card"
+  },
+  "addCreditCard": "Add Credit Card",
+  "@addCreditCard": {
+    "description": "Add Credit Card"
+  },
+  "cardName": "Card Name",
+  "@cardName": {
+    "description": "Card Name"
+  },
+  "cardNameExample": "E.g: VakıfBank Credit Card",
+  "@cardNameExample": {
+    "description": "Card name example"
+  },
+  "creditLimit": "Credit Limit",
+  "@creditLimit": {
+    "description": "Credit Limit"
+  },
+  "currentDebtOptional": "Current Debt (Optional)",
+  "@currentDebtOptional": {
+    "description": "Current Debt (Optional)"
+  },
+  "statementDay": "Statement Day",
+  "@statementDay": {
+    "description": "Statement Day"
+  },
+  "lastPayment": "Last Payment",
+  "@lastPayment": {
+    "description": "Last Payment"
+  },
+  "debitCard": "Debit Card",
+  "@debitCard": {
+    "description": "Debit Card"
+  },
+  "addDebitCard": "Add Debit Card",
+  "@addDebitCard": {
+    "description": "Add Debit Card"
+  },
+  "cardNameExampleDebit": "E.g: VakıfBank Checking",
+  "@cardNameExampleDebit": {
+    "description": "Debit card name example"
+  },
+  "initialBalance": "Initial Balance",
+  "@initialBalance": {
+    "description": "Initial Balance"
+  },
+  "january": "January",
+  "@january": {
+    "description": "January"
+  },
+  "february": "February",
+  "@february": {
+    "description": "February"
+  },
+  "march": "March",
+  "@march": {
+    "description": "March"
+  },
+  "april": "April",
+  "@april": {
+    "description": "April"
+  },
+  "may": "May",
+  "@may": {
+    "description": "May"
+  },
+  "june": "June",
+  "@june": {
+    "description": "June"
+  },
+  "july": "July",
+  "@july": {
+    "description": "July"
+  },
+  "august": "August",
+  "@august": {
+    "description": "August"
+  },
+  "september": "September",
+  "@september": {
+    "description": "September"
+  },
+  "october": "October",
+  "@october": {
+    "description": "October"
+  },
+  "november": "November",
+  "@november": {
+    "description": "November"
+  },
+  "december": "December",
+  "@december": {
+    "description": "December"
+  },
+  "day": "day",
+  "@day": {
+    "description": "day"
+  },
+  "firstDay": "1st",
+  "@firstDay": {
+    "description": "1st"
+  },
+  "secondDay": "2nd",
+  "@secondDay": {
+    "description": "2nd"
+  },
+  "thirdDay": "3rd",
+  "@thirdDay": {
+    "description": "3rd"
+  },
+  "fourthDay": "4th",
+  "@fourthDay": {
+    "description": "4th"
+  },
+  "fifthDay": "5th",
+  "@fifthDay": {
+    "description": "5th"
+  },
+  "sixthDay": "6th",
+  "@sixthDay": {
+    "description": "6th"
+  },
+  "seventhDay": "7th",
+  "@seventhDay": {
+    "description": "7th"
+  },
+  "eighthDay": "8th",
+  "@eighthDay": {
+    "description": "8th"
+  },
+  "ninthDay": "9th",
+  "@ninthDay": {
+    "description": "9th"
+  },
+  "tenthDay": "10th",
+  "@tenthDay": {
+    "description": "10th"
+  },
+  "eleventhDay": "11th",
+  "@eleventhDay": {
+    "description": "11th"
+  },
+  "twelfthDay": "12th",
+  "@twelfthDay": {
+    "description": "12th"
+  },
+  "thirteenthDay": "13th",
+  "@thirteenthDay": {
+    "description": "13th"
+  },
+  "fourteenthDay": "14th",
+  "@fourteenthDay": {
+    "description": "14th"
+  },
+  "fifteenthDay": "15th",
+  "@fifteenthDay": {
+    "description": "15th"
+  },
+  "sixteenthDay": "16th",
+  "@sixteenthDay": {
+    "description": "16th"
+  },
+  "seventeenthDay": "17th",
+  "@seventeenthDay": {
+    "description": "17th"
+  },
+  "eighteenthDay": "18th",
+  "@eighteenthDay": {
+    "description": "18th"
+  },
+  "nineteenthDay": "19th",
+  "@nineteenthDay": {
+    "description": "19th"
+  },
+  "twentiethDay": "20th",
+  "@twentiethDay": {
+    "description": "20th"
+  },
+  "twentyFirstDay": "21st",
+  "@twentyFirstDay": {
+    "description": "21st"
+  },
+  "twentySecondDay": "22nd",
+  "@twentySecondDay": {
+    "description": "22nd"
+  },
+  "twentyThirdDay": "23rd",
+  "@twentyThirdDay": {
+    "description": "23rd"
+  },
+  "twentyFourthDay": "24th",
+  "@twentyFourthDay": {
+    "description": "24th"
+  },
+  "twentyFifthDay": "25th",
+  "@twentyFifthDay": {
+    "description": "25th"
+  },
+  "twentySixthDay": "26th",
+  "@twentySixthDay": {
+    "description": "26th"
+  },
+  "twentySeventhDay": "27th",
+  "@twentySeventhDay": {
+    "description": "27th"
+  },
+  "twentyEighthDay": "28th",
+  "@twentyEighthDay": {
+    "description": "28th"
+  },
+  "selectCardType": "Select Card Type",
+  "@selectCardType": {
+    "description": "Select Card Type"
+  },
+  "addDebitCardDescription": "Add checking account card",
+  "@addDebitCardDescription": {
+    "description": "Add checking account card"
+  },
+  "addCreditCardDescription": "Add your credit card information",
+  "@addCreditCardDescription": {
+    "description": "Add your credit card information"
+  }
 } 

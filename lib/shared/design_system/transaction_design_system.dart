@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../services/category_icon_service.dart';
+import '../utils/currency_utils.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme/theme_provider.dart';
 
 /// **QANTA Transaction Design System**
 /// 
@@ -136,10 +139,11 @@ class TransactionDesignSystem {
     required String transactionType,
     String? sourceAccountName,
     String? targetAccountName,
+    BuildContext? context,
   }) {
     if (transactionType == 'transfer') {
-      final sourceAccount = sourceAccountName ?? 'Hesap';
-      final targetAccount = targetAccountName ?? 'Hesap';
+      final sourceAccount = sourceAccountName ?? (context != null ? AppLocalizations.of(context)?.account : null) ?? 'Account';
+      final targetAccount = targetAccountName ?? (context != null ? AppLocalizations.of(context)?.account : null) ?? 'Account';
       return formatTransferSubtitle(sourceAccount, targetAccount);
     } else {
       // Shorten regular card names
@@ -266,16 +270,17 @@ class TransactionDesignSystem {
   // ==================== TEXT FORMATTING ====================
   
   /// Format transaction amount
-  static String formatAmount(double amount, TransactionType type) {
+  static String formatAmount(double amount, TransactionType type, {String? currencySymbol}) {
     final formattedAmount = formatNumber(amount.abs());
+    final symbol = currencySymbol ?? Currency.TRY.symbol; // Fallback to TRY symbol
     
     switch (type) {
       case TransactionType.income:
-        return '+$formattedAmount₺';
+        return '+$formattedAmount$symbol';
       case TransactionType.expense:
-        return '-$formattedAmount₺';
+        return '-$formattedAmount$symbol';
       case TransactionType.transfer:
-        return '$formattedAmount₺';
+        return '$formattedAmount$symbol';
     }
   }
   
@@ -353,11 +358,12 @@ class TransactionDesignSystem {
     String? emptyTitle,
     String? emptyDescription,
     IconData? emptyIcon,
+    BuildContext? context,
   }) {
     if (transactions.isEmpty) {
       return TransactionEmptyState(
-        title: emptyTitle ?? 'Henüz işlem yok',
-        description: emptyDescription ?? 'İlk işleminizi ekleyerek başlayın',
+        title: emptyTitle ?? (context != null ? AppLocalizations.of(context)?.noTransactionsYet : null) ?? 'No transactions yet',
+        description: emptyDescription ?? (context != null ? AppLocalizations.of(context)?.addFirstTransaction : null) ?? 'Add your first transaction to get started',
         icon: emptyIcon ?? Icons.receipt_long_outlined,
         isDark: isDark,
       );
@@ -623,7 +629,7 @@ class TransactionItem extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            AppLocalizations.of(context)?.installment ?? 'Taksitli',
+                            AppLocalizations.of(context)?.installment ?? 'Installment',
                             style: GoogleFonts.inter(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,

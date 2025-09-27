@@ -333,5 +333,5 @@ class InstallmentWithProgressModel extends InstallmentTransactionModel {
   String get progressText => '$paidCount/$totalCount';
 
   /// Display remaining amount with currency
-  String get remainingAmountText => '₺${TransactionDesignSystem.formatNumber(remainingAmount)}';
+  String get remainingAmountText => '₺${TransactionDesignSystem.formatNumber(remainingAmount)}'; // TODO: Use dynamic currency - needs context
 } 

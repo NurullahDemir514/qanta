@@ -6,6 +6,7 @@ import '../../../../core/providers/unified_provider_v2.dart';
 import '../../../../shared/models/account_model.dart';
 import '../../../../shared/models/cash_account.dart';
 import '../../../../shared/utils/currency_utils.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../models/payment_method.dart';
 import '../../models/card.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -48,8 +49,8 @@ import '../../../../l10n/app_localizations.dart';
 /// **Installment Logic:**
 /// - Only available for credit cards
 /// - Modal bottom sheet with 1-12 month options
-/// - "Peşin" (cash) for 1 installment
-/// - "X Taksit" for multiple installments
+/// - "Cash" for 1 installment
+/// - "X Installments" for multiple installments
 /// - Automatic PaymentMethod creation with installment count
 /// 
 /// **Data Flow:**
@@ -147,7 +148,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
   
   // Para formatı için yardımcı metod
   String _formatCurrency(double amount) {
-    return CurrencyUtils.formatAmount(amount, Currency.TRY);
+    return Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount);
   }
 
   @override
@@ -171,7 +172,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
             child: Column(
               children: [
                 Text(
-                  'Kartlar yüklenirken hata oluştu',
+                  AppLocalizations.of(context)?.cardsLoadingError ?? 'Error loading cards',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: const Color(0xFFFF3B30),
@@ -389,7 +390,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                                         ),
                                       ),
                                       child: Text(
-                                        installmentCount == 1 ? 'Peşin' : '$installmentCount Taksit',
+                                        installmentCount == 1 ? (AppLocalizations.of(context)?.cash ?? 'Cash') : '$installmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}',
                                         style: GoogleFonts.inter(
                                           fontSize: MediaQuery.of(context).size.width > 600 ? 15 : 13,
                                           fontWeight: FontWeight.w500,

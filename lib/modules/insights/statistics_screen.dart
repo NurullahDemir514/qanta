@@ -10,6 +10,7 @@ import '../../shared/services/category_icon_service.dart';
 import '../../shared/utils/currency_utils.dart';
 import '../../shared/models/unified_category_model.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme/theme_provider.dart';
 
 enum TimePeriod { thisMonth, lastMonth, last3Months }
 
@@ -141,7 +142,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
             child: _buildStatCard(
                     'Gelir',
-              '₺${_numberFormat.format(income)}',
+              Provider.of<ThemeProvider>(context, listen: false).formatAmount(income),
               AppColors.success,
                     isDark,
                   ),
@@ -150,7 +151,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
             child: _buildStatCard(
                     'Gider',
-              '₺${_numberFormat.format(expenses)}',
+              Provider.of<ThemeProvider>(context, listen: false).formatAmount(expenses),
               AppColors.error,
                     isDark,
                   ),
@@ -159,7 +160,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
             child: _buildStatCard(
               'Net',
-              '₺${_numberFormat.format(balance)}',
+              Provider.of<ThemeProvider>(context, listen: false).formatAmount(balance),
               balance >= 0 ? AppColors.success : AppColors.error,
                     isDark,
                   ),
@@ -341,7 +342,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Row(
             children: [
                         Text(
-                '₺${_numberFormat.format(category.amount)}',
+                Provider.of<ThemeProvider>(context, listen: false).formatAmount(category.amount),
                           style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -427,7 +428,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   ),
                                 ),
                                                                  Text(
-                                   '${categoryTransactions.length} hareket • ₺${_numberFormat.format(category.amount)}',
+                                   '${categoryTransactions.length} hareket • ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(category.amount)}',
                                    style: GoogleFonts.inter(
                                      fontSize: 14,
                                      fontWeight: FontWeight.w400,
@@ -555,7 +556,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           ),
                         ),
                         Text(
-              '-₺${_numberFormat.format(amount)}',
+              '-${Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount)}',
                           style: GoogleFonts.inter(
                             fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -1126,7 +1127,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     reservedSize: 40,
                     getTitlesWidget: (double value, TitleMeta meta) {
                       return Text(
-                        '₺${_numberFormat.format(value.toInt())}',
+                        Provider.of<ThemeProvider>(context, listen: false).formatAmount(value.toInt().toDouble()),
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
@@ -1155,7 +1156,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       if (index >= 0 && index < monthlyData.length) {
                         final data = monthlyData[index];
                         return LineTooltipItem(
-                          '${data.month}\n₺${_numberFormat.format(data.expenses)}',
+                          '${data.month}\n${Provider.of<ThemeProvider>(context, listen: false).formatAmount(data.expenses)}',
                           GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -1367,7 +1368,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    '₺${_numberFormat.format(data.expenses)}',
+                    Provider.of<ThemeProvider>(context, listen: false).formatAmount(data.expenses),
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
+import '../../../core/theme/theme_provider.dart';
 
 class InteractiveChartWidget extends StatefulWidget {
   final List<ChartData> data;
@@ -241,7 +243,7 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
                 ),
               ),
               Text(
-                '${data.value.toStringAsFixed(0)} ₺',
+                '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(data.value)}',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -261,7 +263,7 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${change >= 0 ? '+' : ''}${change.toStringAsFixed(0)} ₺ (%${changePercent.toStringAsFixed(1)})',
+                  '${change >= 0 ? '+' : ''}${Provider.of<ThemeProvider>(context, listen: false).formatAmount(change)} (%${changePercent.toStringAsFixed(1)})',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,

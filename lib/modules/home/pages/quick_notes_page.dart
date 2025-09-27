@@ -12,6 +12,7 @@ import '../../../core/services/transaction_service_v2.dart';
 import '../../../core/services/category_service_v2.dart';
 import '../../../core/services/quick_note_notification_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/models_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/ios_dialog.dart';
@@ -166,7 +167,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
                           title: 'İşleme Dönüştürülen Notlar',
                           notes: _processedNotes.cast<QuickNote>(),
                           isDark: isDark,
-                          emptyMessage: 'Henüz işleme dönüştürülen not yok',
+                          emptyMessage: AppLocalizations.of(context)?.noConvertedNotesYet ?? 'No notes converted to transactions yet',
                         )
                       else
                         _buildNotesSection(
@@ -384,7 +385,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
       decoration: InputDecoration(
         hintText: _selectedImage != null 
             ? 'Fotoğraf için açıklama ekle...'
-            : 'Market 150₺, Kahve 25₺...',
+            : 'Market 150${Provider.of<ThemeProvider>(context, listen: false).currency.symbol}, Kahve 25${Provider.of<ThemeProvider>(context, listen: false).currency.symbol}...',
         hintStyle: GoogleFonts.inter(
           fontSize: 14,
           color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
@@ -453,7 +454,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
           borderRadius: BorderRadius.circular(4),
         ),
       ),
-      tooltip: 'Durdur',
+      tooltip: AppLocalizations.of(context)?.stop ?? 'Stop',
       visualDensity: VisualDensity.compact,
       padding: const EdgeInsets.all(6),
       constraints: const BoxConstraints(
@@ -471,7 +472,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
         color: Color(0xFF34C759),
         size: 18,
       ),
-      tooltip: 'Gönder',
+      tooltip: AppLocalizations.of(context)?.send ?? 'Send',
       visualDensity: VisualDensity.compact,
       padding: const EdgeInsets.all(6),
       constraints: const BoxConstraints(
@@ -732,7 +733,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                'İşlendi',
+                                AppLocalizations.of(context)?.processed ?? 'Processed',
                                 style: GoogleFonts.inter(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w600,
@@ -900,7 +901,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
     final diff = now.difference(date);
 
     if (diff.inSeconds < 30) {
-      return 'Az önce';
+      return AppLocalizations.of(context)?.justNow ?? 'Just now';
     } else if (diff.inMinutes < 1) {
       return '${diff.inSeconds} saniye önce';
     } else if (diff.inMinutes < 60) {
@@ -940,7 +941,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
           TextField(
             controller: controller,
             decoration: InputDecoration(
-              hintText: 'Örn: Market alışverişi 150₺',
+              hintText: 'Örn: Market alışverişi 150${Provider.of<ThemeProvider>(context, listen: false).currency.symbol}',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Color(0xFFE5E5EA)),
@@ -957,7 +958,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
       ),
       actions: [
         IOSDialogAction(
-          text: 'İptal',
+          text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
           onPressed: () => Navigator.of(context).pop(),
         ),
         IOSDialogAction(
@@ -1095,7 +1096,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
                 
                 ListTile(
                   title: Text(
-                    'Sil',
+                    AppLocalizations.of(context)?.delete ?? 'Delete',
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -1160,11 +1161,11 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
       ),
       actions: [
         IOSDialogAction(
-          text: 'İptal',
+          text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
           onPressed: () => Navigator.of(context).pop(false),
         ),
         IOSDialogAction(
-          text: 'Sil',
+          text: AppLocalizations.of(context)?.delete ?? 'Delete',
           isDestructive: true,
           onPressed: () => Navigator.of(context).pop(true),
         ),
@@ -1423,7 +1424,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'İptal',
+              AppLocalizations.of(context)?.cancel ?? 'Cancel',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -1434,7 +1435,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)?.delete ?? 'Delete',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,

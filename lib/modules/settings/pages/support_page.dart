@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SupportPage extends StatelessWidget {
   const SupportPage({super.key});
@@ -8,6 +9,7 @@ class SupportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: isDark 
@@ -20,14 +22,14 @@ class SupportPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_rounded,
-            color: Color(0xFF007AFF),
+            color: isDark ? Colors.white : Colors.black,
             size: 20,
           ),
         ),
         title: Text(
-          'Destek & İletişim',
+          l10n?.supportAndContact ?? 'Support & Contact',
           style: GoogleFonts.inter(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -58,22 +60,22 @@ class SupportPage extends StatelessWidget {
                 children: [
                   _buildContactItem(
                     icon: Icons.email_outlined,
-                    title: 'E-posta',
+                    title: l10n?.email ?? 'Email',
                     subtitle: 'support@qanta.app',
                     onTap: () => _launchEmail('support@qanta.app'),
                     isDark: isDark,
                   ),
                   _buildContactItem(
                     icon: Icons.phone_outlined,
-                    title: 'Telefon',
+                    title: l10n?.phone ?? 'Phone',
                     subtitle: '+90 (545) 434-1745',
                     onTap: () => _launchPhone('+905454341745'),
                     isDark: isDark,
                   ),
                   _buildContactItem(
                     icon: Icons.chat_bubble_outline,
-                    title: 'Canlı Destek',
-                    subtitle: 'Pazartesi-Cuma 09:00-18:00',
+                    title: l10n?.liveSupport ?? 'Live Support',
+                    subtitle: l10n?.liveSupportHours ?? 'Monday-Friday 09:00-18:00',
                     onTap: () => _showLiveChatInfo(context),
                     isDark: isDark,
                   ),
@@ -102,7 +104,7 @@ class SupportPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sık Sorulan Sorular',
+                    l10n?.frequentlyAskedQuestions ?? 'Frequently Asked Questions',
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -112,26 +114,26 @@ class SupportPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   
                   _buildFAQItem(
-                    question: 'Verilerim güvende mi?',
-                    answer: 'Evet, tüm verileriniz şifreli olarak saklanır ve güvenli sunucularda barındırılır.',
+                    question: l10n?.isMyDataSecure ?? 'Is my data secure?',
+                    answer: l10n?.isMyDataSecureAnswer ?? 'Yes, all your data is stored encrypted and hosted on secure servers.',
                     isDark: isDark,
                   ),
                   
                   _buildFAQItem(
-                    question: 'Şifremi unuttum, ne yapmalıyım?',
-                    answer: 'Giriş ekranında "Şifremi Unuttum" seçeneğini kullanarak şifrenizi sıfırlayabilirsiniz.',
+                    question: l10n?.forgotPassword ?? 'I forgot my password, what should I do?',
+                    answer: l10n?.forgotPasswordAnswer ?? 'You can reset your password using the "Forgot Password" option on the login screen.',
                     isDark: isDark,
                   ),
                   
                   _buildFAQItem(
-                    question: 'Hesabımı nasıl silebilirim?',
-                    answer: 'Profil sayfasından "Hesap Ayarları" > "Hesabı Sil" seçeneğini kullanabilirsiniz.',
+                    question: l10n?.howToDeleteAccount ?? 'How can I delete my account?',
+                    answer: l10n?.howToDeleteAccountAnswer ?? 'You can use the "Account Settings" > "Delete Account" option from the profile page.',
                     isDark: isDark,
                   ),
                   
                   _buildFAQItem(
-                    question: 'Uygulama ücretsiz mi?',
-                    answer: 'Evet, Qanta tamamen ücretsiz olarak kullanılabilir. Gelecekte premium özellikler eklenebilir.',
+                    question: l10n?.isAppFree ?? 'Is the app free?',
+                    answer: l10n?.isAppFreeAnswer ?? 'Yes, Qanta can be used completely free. Premium features may be added in the future.',
                     isDark: isDark,
                   ),
                 ],
@@ -159,7 +161,7 @@ class SupportPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Uygulama Bilgileri',
+                    l10n?.appInformation ?? 'App Information',
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -168,10 +170,10 @@ class SupportPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   
-                  _buildInfoRow('Versiyon', '1.0.0', isDark),
-                  _buildInfoRow('Son Güncelleme', '20 Ocak 2025', isDark),
-                  _buildInfoRow('Geliştirici', 'Qanta Team', isDark),
-                  _buildInfoRow('Platform', 'Flutter', isDark),
+                  _buildInfoRow(l10n?.version ?? 'Version', '1.0.0', isDark),
+                  _buildInfoRow(l10n?.lastUpdate ?? 'Last Update', '20 Ocak 2025', isDark),
+                  _buildInfoRow(l10n?.developer ?? 'Developer', 'Nurullah Onur Demir', isDark),
+                  _buildInfoRow(l10n?.platform ?? 'Platform', 'Flutter', isDark),
                 ],
               ),
             ),
@@ -331,18 +333,18 @@ class SupportPage extends StatelessWidget {
   }
 
   void _showLiveChatInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Canlı Destek'),
-        content: const Text(
-          'Canlı destek hizmeti şu anda geliştirme aşamasındadır. '
-          'Acil durumlar için lütfen e-posta veya telefon ile iletişime geçin.',
+        title: Text(l10n?.liveSupportTitle ?? 'Live Support'),
+        content: Text(
+          l10n?.liveSupportMessage ?? 'Live support service is currently in development. For urgent matters, please contact us via email or phone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Tamam'),
+            child: Text(l10n?.ok ?? 'OK'),
           ),
         ],
       ),

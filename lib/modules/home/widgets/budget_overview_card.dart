@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/budget_model.dart';
 import '../../../shared/models/unified_category_model.dart';
 import '../../../shared/services/category_icon_service.dart';
@@ -329,15 +330,15 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 24,
-                    height: 24,
+                    width: 26,
+                    height: 26,
                     decoration: BoxDecoration(
                       color: _getCategoryColor(stat.categoryName).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     child: Icon(
                       _getCategoryIcon(stat.categoryName),
-                      size: 12,
+                      size: 13,
                       color: _getCategoryColor(stat.categoryName),
                     ),
                   ),
@@ -346,7 +347,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                     child: Text(
                       stat.categoryName,
                       style: GoogleFonts.inter(
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: isDark ? Colors.white : Colors.black,
                       ),
@@ -390,9 +391,9 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                 children: [
                   Expanded(
                     child: Text(
-                      '${NumberFormat.currency(locale: 'tr_TR', symbol: '₺').format(stat.currentSpent)} / ${NumberFormat.currency(locale: 'tr_TR', symbol: '₺').format(stat.monthlyLimit)}',
+                      '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.currentSpent)} / ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.monthlyLimit)}',
                       style: GoogleFonts.inter(
-                        fontSize: 10,
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
@@ -403,7 +404,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                   Text(
                     '${stat.percentage.toStringAsFixed(0)}%',
                     style: GoogleFonts.inter(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: stat.isOverBudget 
                         ? const Color(0xFFFF453A) 

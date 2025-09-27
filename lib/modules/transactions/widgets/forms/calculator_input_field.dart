@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/utils/currency_utils.dart';
 
 class CalculatorInputField extends StatefulWidget {
@@ -148,11 +150,11 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
     HapticFeedback.lightImpact();
   }
 
-  String _formatCurrency(String value) {
+  String _formatCurrency(String value, BuildContext context) {
     final amount = double.tryParse(value);
-    if (amount == null) return CurrencyUtils.formatAmount(0, Currency.TRY);
+    if (amount == null) return Provider.of<ThemeProvider>(context, listen: false).formatAmount(0);
     
-    return CurrencyUtils.formatAmount(amount, Currency.TRY);
+    return Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount);
   }
 
   @override
@@ -204,7 +206,7 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
               ),
               const SizedBox(height: 8),
               CurrencyUtils.buildCurrencyText(
-                _formatCurrency(_displayValue),
+                _formatCurrency(_displayValue, context),
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -212,7 +214,7 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                     ? const Color(0xFF8E8E93)
                     : const Color(0xFF6D6D70),
                 ),
-                currency: Currency.TRY,
+                currency: Provider.of<ThemeProvider>(context, listen: false).currency,
               ),
             ],
           ),

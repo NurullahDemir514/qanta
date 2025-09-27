@@ -313,16 +313,16 @@ class DateUtils {
     }
     
     if (difference.inHours > 0) {
-      if (difference.inHours == 1) return '1 saat önce';
-      return '${difference.inHours} saat önce';
+      if (difference.inHours == 1) return '1 hour ago';
+      return '${difference.inHours} hours ago';
     }
     
     if (difference.inMinutes > 0) {
-      if (difference.inMinutes == 1) return '1 dakika önce';
-      return '${difference.inMinutes} dakika önce';
+      if (difference.inMinutes == 1) return '1 minute ago';
+      return '${difference.inMinutes} minutes ago';
     }
     
-    return 'Şimdi';
+    return 'Now';
   }
   
   // ===============================

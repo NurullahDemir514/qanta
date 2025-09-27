@@ -190,8 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 size: 44,
                 showBorder: true,
                 onTap: () {
-                  // TODO: Navigate to profile or show profile menu
-                  debugPrint('Profile avatar tapped');
+                  _navigateToProfile(context);
                 },
               ),
             ),
@@ -248,5 +247,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showAddCardDialog(BuildContext context) {
     // Implementation of _showAddCardDialog method
+  }
+
+  /// Navigate to profile screen
+  void _navigateToProfile(BuildContext context) {
+    // Find the MainScreen parent and switch to profile tab
+    final mainScreenState = context.findAncestorStateOfType<_MainScreenState>();
+    if (mainScreenState != null) {
+      mainScreenState._onTabChanged(4); // Profile tab index
+    } else {
+      // Fallback: navigate directly to profile screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const ProfileScreen(),
+        ),
+      );
+    }
   }
 } 

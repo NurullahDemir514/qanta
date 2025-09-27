@@ -251,7 +251,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Sil',
+                  AppLocalizations.of(context)?.delete ?? 'Delete',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -265,7 +265,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(context),
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)?.cancel ?? 'Cancel',
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -318,7 +318,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)?.cancel ?? 'Cancel',
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,

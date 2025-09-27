@@ -266,7 +266,7 @@ class AppConstants {
   },
 
   // HSBC Türkiye - Siyah-kırmızı
-  'hsbc': {
+  'hsbcturkiye': {
     'name': 'HSBC Türkiye',
     'gradientColors': [
       Color(0xFF000000), // siyah
@@ -316,6 +316,417 @@ class AppConstants {
       Color(0xFF0D47A1), // koyu mavi
       Color(0xFF1976D2),
       Color(0xFF42A5F5),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  // Türk bankaları - Ek bankalar
+  'turkishbank': {
+    'name': 'TurkishBank',
+    'gradientColors': [
+      Color(0xFF1A237E), // koyu indigo
+      Color(0xFF3F51B5),
+      Color(0xFF7986CB),
+    ],
+    'accentColor': Color(0xFF3F51B5),
+  },
+
+  'fibabank': {
+    'name': 'FibaBank',
+    'gradientColors': [
+      Color(0xFFE65100), // koyu turuncu
+      Color(0xFFFF9800),
+      Color(0xFFFFB74D),
+    ],
+    'accentColor': Color(0xFFFF9800),
+  },
+
+  'osmanli': {
+    'name': 'Osmanlı Bankası',
+    'gradientColors': [
+      Color(0xFF4A148C), // koyu mor
+      Color(0xFF7B1FA2),
+      Color(0xFFBA68C8),
+    ],
+    'accentColor': Color(0xFF7B1FA2),
+  },
+
+  'icbc': {
+    'name': 'ICBC Türkiye',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE57373),
+      Color(0xFFFFCDD2),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'citibank': {
+    'name': 'Citibank Türkiye',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF42A5F5),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'deutsche': {
+    'name': 'Deutsche Bank',
+    'gradientColors': [
+      Color(0xFF424242), // gri
+      Color(0xFF616161),
+      Color(0xFF9E9E9E),
+    ],
+    'accentColor': Color(0xFF616161),
+  },
+
+  'jpmorgan': {
+    'name': 'JPMorgan Chase',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'wellsfargo': {
+    'name': 'Wells Fargo',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'bankofamerica': {
+    'name': 'Bank of America',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF64B5F6),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'chase': {
+    'name': 'Chase Bank',
+    'gradientColors': [
+      Color(0xFF0D47A1), // koyu mavi
+      Color(0xFF1565C0),
+      Color(0xFF42A5F5),
+    ],
+    'accentColor': Color(0xFF1565C0),
+  },
+
+  'goldmansachs': {
+    'name': 'Goldman Sachs',
+    'gradientColors': [
+      Color(0xFF000000), // siyah
+      Color(0xFF424242),
+      Color(0xFF757575),
+    ],
+    'accentColor': Color(0xFF424242),
+  },
+
+  'morganstanley': {
+    'name': 'Morgan Stanley',
+    'gradientColors': [
+      Color(0xFF1A237E), // koyu indigo
+      Color(0xFF303F9F),
+      Color(0xFF5C6BC0),
+    ],
+    'accentColor': Color(0xFF303F9F),
+  },
+
+  'barclays': {
+    'name': 'Barclays',
+    'gradientColors': [
+      Color(0xFF000000), // siyah
+      Color(0xFF424242),
+      Color(0xFF9E9E9E),
+    ],
+    'accentColor': Color(0xFF424242),
+  },
+
+  'lloyds': {
+    'name': 'Lloyds Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'hsbc': {
+    'name': 'HSBC',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFFFCDD2),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'santander': {
+    'name': 'Santander',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'bnpparibas': {
+    'name': 'BNP Paribas',
+    'gradientColors': [
+      Color(0xFF1A237E), // koyu indigo
+      Color(0xFF3F51B5),
+      Color(0xFF7986CB),
+    ],
+    'accentColor': Color(0xFF3F51B5),
+  },
+
+  'societegenerale': {
+    'name': 'Société Générale',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'creditagricole': {
+    'name': 'Crédit Agricole',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'ubs': {
+    'name': 'UBS',
+    'gradientColors': [
+      Color(0xFF000000), // siyah
+      Color(0xFF424242),
+      Color(0xFF9E9E9E),
+    ],
+    'accentColor': Color(0xFF424242),
+  },
+
+  'creditSuisse': {
+    'name': 'Credit Suisse',
+    'gradientColors': [
+      Color(0xFF1A237E), // koyu indigo
+      Color(0xFF303F9F),
+      Color(0xFF5C6BC0),
+    ],
+    'accentColor': Color(0xFF303F9F),
+  },
+
+  'deutschebank': {
+    'name': 'Deutsche Bank',
+    'gradientColors': [
+      Color(0xFF000000), // siyah
+      Color(0xFF424242),
+      Color(0xFF9E9E9E),
+    ],
+    'accentColor': Color(0xFF424242),
+  },
+
+  'commerzbank': {
+    'name': 'Commerzbank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'unicredit': {
+    'name': 'UniCredit',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'intesa': {
+    'name': 'Intesa Sanpaolo',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'mizuho': {
+    'name': 'Mizuho Bank',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'mufg': {
+    'name': 'MUFG Bank',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'sumitomo': {
+    'name': 'Sumitomo Mitsui',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'standardchartered': {
+    'name': 'Standard Chartered',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'dbs': {
+    'name': 'DBS Bank',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'ocbc': {
+    'name': 'OCBC Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'uob': {
+    'name': 'UOB Bank',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'commonwealth': {
+    'name': 'Commonwealth Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'anz': {
+    'name': 'ANZ Bank',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'westpac': {
+    'name': 'Westpac',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'nab': {
+    'name': 'NAB Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'td': {
+    'name': 'TD Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'rbc': {
+    'name': 'RBC Bank',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'scotiabank': {
+    'name': 'Scotiabank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'bmo': {
+    'name': 'BMO Bank',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'cibc': {
+    'name': 'CIBC Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
     ],
     'accentColor': Color(0xFF1976D2),
   },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../l10n/app_localizations.dart';
 
 class FAQPage extends StatelessWidget {
   const FAQPage({super.key});
@@ -7,6 +8,7 @@ class FAQPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: isDark 
@@ -19,14 +21,14 @@ class FAQPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_rounded,
-            color: Color(0xFF007AFF),
+            color: isDark ? Colors.white : Colors.black,
             size: 20,
           ),
         ),
         title: Text(
-          'Gizlilik',
+          l10n?.faq ?? 'FAQ',
           style: GoogleFonts.inter(
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -40,19 +42,19 @@ class FAQPage extends StatelessWidget {
         child: Column(
           children: [
             _buildFAQSection(
-              title: 'Genel Sorular',
+              title: l10n?.generalQuestions ?? 'General Questions',
               items: [
                 FAQItem(
-                  question: 'Qanta nedir?',
-                  answer: 'Qanta, kişisel finans yönetimi için tasarlanmış modern bir mobil uygulamadır. Gelir-gider takibi, bütçe yönetimi, kart takibi ve finansal analiz özellikleri sunar.',
+                  question: l10n?.whatIsQanta ?? 'What is Qanta?',
+                  answer: l10n?.whatIsQantaAnswer ?? 'What is Qanta answer',
                 ),
                 FAQItem(
-                  question: 'Uygulama ücretsiz mi?',
-                  answer: 'Evet, Qanta tamamen ücretsiz olarak kullanılabilir. Gelecekte premium özellikler eklenebilir ancak temel özellikler her zaman ücretsiz kalacaktır.',
+                  question: l10n?.isAppFree ?? 'Is the app free?',
+                  answer: l10n?.isAppFreeAnswer ?? 'Is app free answer',
                 ),
                 FAQItem(
-                  question: 'Hangi cihazlarda kullanabilirim?',
-                  answer: 'Qanta, Android ve iOS cihazlarda kullanılabilir. Flutter teknolojisi ile geliştirilmiştir.',
+                  question: l10n?.whichDevicesSupported ?? 'Which devices are supported?',
+                  answer: l10n?.whichDevicesSupportedAnswer ?? 'Which devices supported answer',
                 ),
               ],
               isDark: isDark,
@@ -61,23 +63,23 @@ class FAQPage extends StatelessWidget {
             const SizedBox(height: 20),
             
             _buildFAQSection(
-              title: 'Hesap ve Güvenlik',
+              title: l10n?.accountAndSecurity ?? 'Account and Security',
               items: [
                 FAQItem(
-                  question: 'Verilerim güvende mi?',
-                  answer: 'Evet, tüm verileriniz şifreli olarak saklanır ve güvenli sunucularda barındırılır. Supabase altyapısını kullanarak endüstri standartlarında güvenlik sağlıyoruz.',
+                  question: l10n?.isMyDataSecure ?? 'Is my data secure?',
+                  answer: l10n?.isMyDataSecureAnswer ?? 'Is my data secure answer',
                 ),
                 FAQItem(
-                  question: 'Şifremi unuttum, ne yapmalıyım?',
-                  answer: 'Giriş ekranında "Şifremi Unuttum" seçeneğini kullanarak e-posta adresinize şifre sıfırlama bağlantısı gönderebilirsiniz.',
+                  question: l10n?.forgotPassword ?? 'Forgot password',
+                  answer: l10n?.forgotPasswordAnswer ?? 'Forgot password answer',
                 ),
                 FAQItem(
-                  question: 'Hesabımı nasıl silebilirim?',
-                  answer: 'Profil sayfasından çıkış yapabilir veya destek ekibimizle iletişime geçerek hesabınızın tamamen silinmesini talep edebilirsiniz.',
+                  question: l10n?.howToDeleteAccount ?? 'How to delete account',
+                  answer: l10n?.howToDeleteAccountAnswer ?? 'How to delete account answer',
                 ),
                 FAQItem(
-                  question: 'Şifremi nasıl değiştiririm?',
-                  answer: 'Profil sayfasında "Güvenlik" bölümünden "Şifre Değiştir" seçeneğini kullanabilirsiniz.',
+                  question: l10n?.howToChangePassword ?? 'How to change password',
+                  answer: l10n?.howToChangePasswordAnswer ?? 'How to change password answer',
                 ),
               ],
               isDark: isDark,
@@ -86,23 +88,23 @@ class FAQPage extends StatelessWidget {
             const SizedBox(height: 20),
             
             _buildFAQSection(
-              title: 'Özellikler',
+              title: l10n?.features ?? 'Features',
               items: [
                 FAQItem(
-                  question: 'Hangi kart türlerini destekliyorsunuz?',
-                  answer: 'Kredi kartları, banka kartları ve nakit hesapları desteklenmektedir. Tüm Türk bankaları ile uyumludur.',
+                  question: l10n?.whichCardTypesSupported ?? 'Which card types are supported?',
+                  answer: l10n?.whichCardTypesSupportedAnswer ?? 'Which card types supported answer',
                 ),
                 FAQItem(
-                  question: 'Taksit takibi nasıl çalışır?',
-                  answer: 'Taksitli alışverişlerinizi ekleyebilir, aylık ödemelerinizi otomatik olarak takip edebilirsiniz. Sistem size hatırlatmalar gönderir.',
+                  question: l10n?.howDoesInstallmentTrackingWork ?? 'How does installment tracking work?',
+                  answer: l10n?.howDoesInstallmentTrackingWorkAnswer ?? 'How does installment tracking work answer',
                 ),
                 FAQItem(
-                  question: 'Bütçe yönetimi nasıl kullanılır?',
-                  answer: 'Kategoriler için aylık limitler belirleyebilir, harcamalarınızı takip edebilir ve limit aşımlarında uyarı alabilirsiniz.',
+                  question: l10n?.howToUseBudgetManagement ?? 'How to use budget management?',
+                  answer: l10n?.howToUseBudgetManagementAnswer ?? 'How to use budget management answer',
                 ),
                 FAQItem(
-                  question: 'Hızlı notlar özelliği nedir?',
-                  answer: 'Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarınızı kategorize edebilirsiniz.',
+                  question: l10n?.whatIsQuickNotesFeature ?? 'What is quick notes feature?',
+                  answer: l10n?.whatIsQuickNotesFeatureAnswer ?? 'What is quick notes feature answer',
                 ),
               ],
               isDark: isDark,
@@ -111,19 +113,19 @@ class FAQPage extends StatelessWidget {
             const SizedBox(height: 20),
             
             _buildFAQSection(
-              title: 'Teknik Sorunlar',
+              title: l10n?.technicalIssues ?? 'Technical Issues',
               items: [
                 FAQItem(
-                  question: 'Uygulama çöküyor, ne yapmalıyım?',
-                  answer: 'Önce uygulamayı tamamen kapatıp tekrar açmayı deneyin. Sorun devam ederse cihazınızı yeniden başlatın. Hala çözülmezse destek ekibimizle iletişime geçin.',
+                  question: l10n?.appCrashingWhatToDo ?? 'App is crashing, what should I do?',
+                  answer: l10n?.appCrashingWhatToDoAnswer ?? 'App crashing what to do answer',
                 ),
                 FAQItem(
-                  question: 'Verilerim senkronize olmuyor',
-                  answer: 'İnternet bağlantınızı kontrol edin ve uygulamayı yeniden başlatın. Sorun devam ederse çıkış yapıp tekrar giriş yapmayı deneyin.',
+                  question: l10n?.dataNotSyncing ?? 'Data not syncing',
+                  answer: l10n?.dataNotSyncingAnswer ?? 'Data not syncing answer',
                 ),
                 FAQItem(
-                  question: 'Bildirimler gelmiyor',
-                  answer: 'Cihaz ayarlarınızdan Qanta için bildirimlerin açık olduğundan emin olun. Profil sayfasından bildirim ayarlarını da kontrol edin.',
+                  question: l10n?.notificationsNotComing ?? 'Notifications not coming',
+                  answer: l10n?.notificationsNotComingAnswer ?? 'Notifications not coming answer',
                 ),
               ],
               isDark: isDark,
@@ -132,15 +134,15 @@ class FAQPage extends StatelessWidget {
             const SizedBox(height: 20),
             
             _buildFAQSection(
-              title: 'İletişim',
+              title: l10n?.contact ?? 'Contact',
               items: [
                 FAQItem(
-                  question: 'Destek ekibinizle nasıl iletişime geçebilirim?',
-                  answer: 'Profil sayfasından "Destek & İletişim" bölümünü kullanabilir veya support@qanta.app adresine e-posta gönderebilirsiniz.',
+                  question: l10n?.howToContactSupport ?? 'How to contact support',
+                  answer: l10n?.howToContactSupportAnswer ?? 'How to contact support answer',
                 ),
                 FAQItem(
-                  question: 'Önerim var, nereye iletebilirim?',
-                  answer: 'Önerilerinizi support@qanta.app adresine gönderebilirsiniz. Tüm geri bildirimler değerlendirilir ve uygulamayı geliştirmek için kullanılır.',
+                  question: l10n?.haveSuggestionWhereToSend ?? 'Have suggestion, where to send',
+                  answer: l10n?.haveSuggestionWhereToSendAnswer ?? 'Have suggestion where to send answer',
                 ),
               ],
               isDark: isDark,
@@ -188,20 +190,7 @@ class FAQPage extends StatelessWidget {
             final item = entry.value;
             final isLast = index == items.length - 1;
             
-            return Column(
-              children: [
-                _buildFAQItem(item, isDark),
-                if (!isLast)
-                  Divider(
-                    height: 1,
-                    indent: 20,
-                    endIndent: 20,
-                    color: isDark 
-                      ? const Color(0xFF38383A)
-                      : const Color(0xFFE5E5EA),
-                  ),
-              ],
-            );
+            return _buildFAQItem(item, isDark);
           }),
           const SizedBox(height: 8),
         ],
@@ -221,8 +210,10 @@ class FAQPage extends StatelessWidget {
           color: isDark ? Colors.white : Colors.black,
         ),
       ),
-      iconColor: const Color(0xFF007AFF),
+      iconColor: isDark ? Colors.white : Colors.black,
       collapsedIconColor: const Color(0xFF8E8E93),
+      collapsedShape: Border(),
+      shape: Border(),
       children: [
         Align(
           alignment: Alignment.centerLeft,

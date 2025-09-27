@@ -1,1 +1,32 @@
-{}
+{
+  "tr": [
+    "firstDay",
+    "secondDay",
+    "thirdDay",
+    "fourthDay",
+    "fifthDay",
+    "sixthDay",
+    "seventhDay",
+    "eighthDay",
+    "ninthDay",
+    "tenthDay",
+    "eleventhDay",
+    "twelfthDay",
+    "thirteenthDay",
+    "fourteenthDay",
+    "fifteenthDay",
+    "sixteenthDay",
+    "seventeenthDay",
+    "eighteenthDay",
+    "nineteenthDay",
+    "twentiethDay",
+    "twentyFirstDay",
+    "twentySecondDay",
+    "twentyThirdDay",
+    "twentyFourthDay",
+    "twentyFifthDay",
+    "twentySixthDay",
+    "twentySeventhDay",
+    "twentyEighthDay"
+  ]
+}

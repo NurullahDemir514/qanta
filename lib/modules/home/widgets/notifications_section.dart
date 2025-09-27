@@ -5,6 +5,7 @@ import '../../../core/services/statement_service.dart';
 import '../../../core/services/transaction_service_v2.dart';
 import '../../../core/services/unified_transaction_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/models/statement_period.dart';
 import '../../../shared/models/transaction_model_v2.dart';
@@ -201,7 +202,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Bildirimler',
+              AppLocalizations.of(context)?.notifications ?? 'Notifications',
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -211,7 +212,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             GestureDetector(
               onTap: _showAllNotifications,
               child: Text(
-                'Tümü',
+                AppLocalizations.of(context)?.all ?? 'All',
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -292,7 +293,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Bildirim yok',
+              AppLocalizations.of(context)?.noNotifications ?? 'No notifications',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -434,7 +435,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   const SizedBox(width: 6),
               Text(
                     debtAmount > 0
-                        ? 'Ekstre Borcu: ₺${debtAmount.toStringAsFixed(0)}'
+                        ? 'Ekstre Borcu: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(debtAmount)}'
                         : 'Borç yok',
                 style: GoogleFonts.inter(
                   fontSize: 12,

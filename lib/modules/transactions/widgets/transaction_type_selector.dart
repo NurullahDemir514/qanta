@@ -71,7 +71,7 @@ class TransactionTypeSelector extends StatelessWidget {
                 
                 // Subtitle
                 Text(
-                  'Yapmak istediğiniz işlem türünü seçin',
+                  AppLocalizations.of(context)?.selectTransactionType ?? 'Select the type of transaction you want to make',
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,

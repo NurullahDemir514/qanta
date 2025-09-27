@@ -9,6 +9,7 @@ import '../../../../core/providers/unified_provider_v2.dart';
 import '../../../../shared/models/account_model.dart';
 import '../../../../shared/models/cash_account.dart';
 import '../../../../shared/utils/currency_utils.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class IncomePaymentMethodSelector extends StatefulWidget {
@@ -33,7 +34,7 @@ class _IncomePaymentMethodSelectorState extends State<IncomePaymentMethodSelecto
   
   // Para formatı için yardımcı metod
   String _formatCurrency(double amount) {
-    return CurrencyUtils.formatAmount(amount, Currency.TRY);
+    return Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount);
   }
 
   @override
@@ -63,7 +64,7 @@ class _IncomePaymentMethodSelectorState extends State<IncomePaymentMethodSelecto
             child: Column(
               children: [
                 Text(
-                  'Kartlar yüklenirken hata oluştu',
+                  AppLocalizations.of(context)?.cardsLoadingError ?? 'Error loading cards',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: const Color(0xFFFF3B30),

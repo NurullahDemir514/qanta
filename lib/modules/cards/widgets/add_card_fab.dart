@@ -92,7 +92,7 @@ class _AddCardFabState extends State<AddCardFab>
             Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                'Kart Türü Seçin',
+                AppLocalizations.of(context)?.selectCardType ?? 'Select Card Type',
                 style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -109,8 +109,8 @@ class _AddCardFabState extends State<AddCardFab>
                   // Debit Card Option
                   _buildCardTypeOption(
                     icon: Icons.account_balance_wallet_outlined,
-                    title: 'Banka Kartı',
-                    subtitle: 'Vadesiz hesap kartı ekleyin',
+                    title: AppLocalizations.of(context)?.debitCard ?? 'Debit Card',
+                    subtitle: AppLocalizations.of(context)?.addDebitCardDescription ?? 'Add checking account card',
                     onTap: () {
                       Navigator.pop(context);
                       _showDebitCardForm();
@@ -122,8 +122,8 @@ class _AddCardFabState extends State<AddCardFab>
                   // Credit Card Option
                   _buildCardTypeOption(
                     icon: Icons.credit_card_outlined,
-                    title: 'Kredi Kartı',
-                    subtitle: 'Kredi kartı bilgilerinizi ekleyin',
+                    title: AppLocalizations.of(context)?.creditCard ?? 'Credit Card',
+                    subtitle: AppLocalizations.of(context)?.addCreditCardDescription ?? 'Add your credit card information',
                     onTap: () {
                       Navigator.pop(context);
                       _showCreditCardForm();

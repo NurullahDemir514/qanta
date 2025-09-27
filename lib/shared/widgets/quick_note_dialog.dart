@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/services/quick_note_notification_service.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Hızlı not girişi için dialog
 class QuickNoteDialog extends StatefulWidget {
@@ -125,7 +126,7 @@ class _QuickNoteDialogState extends State<QuickNoteDialog> {
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)?.cancel ?? 'Cancel',
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w500,

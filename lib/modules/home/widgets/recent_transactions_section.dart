@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/models_v2.dart' as v2;
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
@@ -93,7 +94,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Henüz işlem yok',
+              AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -103,7 +104,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
             ),
             const SizedBox(height: 8),
             Text(
-              'İlk işleminizi ekleyerek başlayın',
+              AppLocalizations.of(context)?.addFirstTransaction ?? 'Add your first transaction to get started',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 color: const Color(0xFF8E8E93),
@@ -138,9 +139,10 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     return TransactionDesignSystem.buildTransactionList(
       transactions: transactionWidgets,
       isDark: isDark,
-      emptyTitle: 'Henüz işlem yok',
-      emptyDescription: 'İlk işleminizi ekleyerek başlayın',
+      emptyTitle: AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
+      emptyDescription: AppLocalizations.of(context)?.addFirstTransaction ?? 'Add your first transaction to get started',
       emptyIcon: Icons.receipt_long_outlined,
+      context: context,
     );
   }
 
@@ -238,18 +240,20 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       }
     }
 
-    // Format amount
-    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
+    // Format amount with dynamic currency
+    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
+    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
 
     // Use displayTime from transaction model (dynamic date formatting)
     final time = transaction.displayTime;
 
     // Card name - centralized logic
     final cardName = TransactionDesignSystem.formatCardName(
-      cardName: transaction.sourceAccountName ?? 'Hesap',
+      cardName: transaction.sourceAccountName ?? AppLocalizations.of(context)?.account ?? 'Account',
       transactionType: transactionType.name,
       sourceAccountName: transaction.sourceAccountName,
       targetAccountName: transaction.targetAccountName,
+      context: context,
     );
 
     // Check if this should be displayed as an installment
@@ -323,7 +327,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
               _deleteV2Transaction(context, transaction);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)?.delete ?? 'Delete',
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -336,7 +340,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)?.cancel ?? 'Cancel',
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -356,7 +360,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? 'İşlem silindi' : 'Silme işlemi başarısız'),
+            content: Text(success ? (AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted') : (AppLocalizations.of(context)?.deleteFailed ?? 'Delete failed')),
             backgroundColor: success ? Colors.green : Colors.red,
             duration: const Duration(seconds: 1),
           ),
@@ -405,7 +409,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
               _deleteInstallmentTransaction(context, transaction);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)?.delete ?? 'Delete',
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -418,7 +422,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)?.cancel ?? 'Cancel',
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,

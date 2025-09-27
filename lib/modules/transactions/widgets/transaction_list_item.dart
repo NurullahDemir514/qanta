@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../shared/models/transaction_model_v2.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/design_system/transaction_design_system.dart' as design;
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/services/category_icon_service.dart';
 
 class TransactionListItem extends StatelessWidget {
@@ -38,13 +39,14 @@ class TransactionListItem extends StatelessWidget {
         .firstOrNull;
 
     // Format amount with proper sign and currency
-    final amount = design.TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
+    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
+    final amount = design.TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
     
     // Use displayTime from transaction model (dynamic date formatting)
     final time = transaction.displayTime;
 
     // Get category name
-    final categoryName = category?.name ?? transaction.categoryName ?? 'Kategori';
+    final categoryName = category?.name ?? transaction.categoryName ?? (AppLocalizations.of(context)?.category ?? 'Category');
 
     // Get category icon using CategoryIconService
     IconData? categoryIcon;
@@ -83,7 +85,7 @@ class TransactionListItem extends StatelessWidget {
     if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
       installmentText = '$currentInstallment/$effectiveInstallmentCount Taksit';
     } else if (effectiveInstallmentCount == 1) {
-      installmentText = 'Peşin';
+      installmentText = AppLocalizations.of(context)?.cash ?? 'Cash';
     }
     final subtitle = installmentText.isNotEmpty ? installmentText : categoryName;
 

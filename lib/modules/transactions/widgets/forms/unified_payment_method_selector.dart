@@ -67,7 +67,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Kartlar yüklenirken hata oluştu',
+                  AppLocalizations.of(context)?.cardsLoadingError ?? 'Error loading cards',
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     color: isDark ? Colors.white54 : Colors.black54,
@@ -111,7 +111,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Henüz kart eklenmemiş',
+                      AppLocalizations.of(context)?.noCardsAddedYet ?? 'No cards added yet',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         color: isDark ? Colors.white54 : Colors.black54,
@@ -376,7 +376,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
     required AppLocalizations l10n,
     required VoidCallback onTap,
   }) {
-    final displayText = installments == 1 ? 'Peşin' : '$installments Taksit';
+    final displayText = installments == 1 ? (AppLocalizations.of(context)?.cash ?? 'Cash') : '$installments ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
     
     return Container(
       decoration: BoxDecoration(

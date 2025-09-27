@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/services/encryption_service.dart';
+import '../../core/services/firebase_auth_service.dart';
+import '../../core/services/image_cache_service.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
 class ProfileAvatar extends StatelessWidget {
   final String? imageUrl;
@@ -49,16 +54,20 @@ class ProfileAvatar extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(size / 2),
           child: imageUrl != null && imageUrl!.isNotEmpty
-              ? Image.network(
-                  imageUrl!,
-                  width: size,
-                  height: size,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return _buildPlaceholder(isDark);
-                  },
-                  errorBuilder: (context, error, stackTrace) {
+              ? FutureBuilder<Uint8List?>(
+                  future: _loadDecryptedImage(imageUrl!),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return _buildPlaceholder(isDark);
+                    }
+                    if (snapshot.hasData && snapshot.data != null) {
+                      return Image.memory(
+                        snapshot.data!,
+                        width: size,
+                        height: size,
+                        fit: BoxFit.cover,
+                      );
+                    }
                     return _buildPlaceholder(isDark);
                   },
                 )
@@ -91,5 +100,73 @@ class ProfileAvatar extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Load and decrypt image from encrypted URL (with caching)
+  Future<Uint8List?> _loadDecryptedImage(String imageUrl) async {
+    try {
+      // Initialize encryption for current user
+      final userId = FirebaseAuthService.currentUserId;
+      if (userId == null) {
+        debugPrint('❌ No user ID found for image decryption');
+        return null;
+      }
+      
+      // Security check: Verify URL belongs to current user
+      if (!_isUrlForCurrentUser(imageUrl, userId)) {
+        debugPrint('❌ Security violation: URL does not belong to current user');
+        return null;
+      }
+      
+      // Check cache first
+      if (await ImageCacheService.instance.isCached(imageUrl)) {
+        debugPrint('📱 Loading image from cache');
+        return await ImageCacheService.instance.getCachedImage(imageUrl);
+      }
+      
+      debugPrint('🌐 Loading image from Firebase Storage');
+      await EncryptionService.instance.initialize(userId);
+      
+      // Download encrypted file
+      final response = await HttpClient().getUrl(Uri.parse(imageUrl));
+      final request = await response.close();
+      final encryptedBytes = await request.fold<Uint8List>(
+        Uint8List(0),
+        (previous, element) => Uint8List.fromList([...previous, ...element]),
+      );
+      
+      // Decrypt the image
+      final decryptedBytes = await EncryptionService.instance.decryptFile(encryptedBytes);
+      
+      // Cache the decrypted image
+      await ImageCacheService.instance.cacheImage(imageUrl, decryptedBytes);
+      
+      return decryptedBytes;
+    } catch (e) {
+      debugPrint('❌ Error loading decrypted image: $e');
+      return null;
+    }
+  }
+
+  /// Security check: Verify URL belongs to current user
+  bool _isUrlForCurrentUser(String imageUrl, String userId) {
+    try {
+      // Check if URL contains the user's ID (handle both encoded and non-encoded paths)
+      final expectedPath = 'users/$userId/profile-images/';
+      final encodedPath = 'users%2F$userId%2Fprofile-images%2F';
+      
+      debugPrint('🔍 ProfileAvatar URL Security Check:');
+      debugPrint('   Image URL: $imageUrl');
+      debugPrint('   User ID: $userId');
+      debugPrint('   Expected path: $expectedPath');
+      debugPrint('   Encoded path: $encodedPath');
+      debugPrint('   Contains check (normal): ${imageUrl.contains(expectedPath)}');
+      debugPrint('   Contains check (encoded): ${imageUrl.contains(encodedPath)}');
+      
+      return imageUrl.contains(expectedPath) || imageUrl.contains(encodedPath);
+    } catch (e) {
+      debugPrint('❌ Error checking URL ownership: $e');
+      return false;
+    }
   }
 } 

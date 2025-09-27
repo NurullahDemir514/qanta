@@ -20,185 +20,105 @@ class CashBalanceCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
-      height: AppConstants.cardHeight,
+      height: 160,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: AppConstants.getCardGradientColors('cash'),
-          stops: const [0.0, 0.3, 0.7, 1.0],
+          colors: isDark 
+            ? [
+                const Color(0xFF2C2C2E),
+                const Color(0xFF1C1C1E),
+                const Color(0xFF0A0A0A),
+              ]
+            : [
+                const Color(0xFFF8F9FA),
+                const Color(0xFFE9ECEF),
+                const Color(0xFFDEE2E6),
+              ],
+          stops: const [0.0, 0.5, 1.0],
         ),
-        borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
-        boxShadow: AppConstants.getCardShadows(AppConstants.getCardAccentColor('cash')),
+        borderRadius: BorderRadius.circular(16),
+        border: isDark 
+          ? Border.all(color: const Color(0xFF38383A), width: 1)
+          : Border.all(color: const Color(0xFFE5E5EA), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: isDark 
+              ? Colors.black.withValues(alpha: 0.3)
+              : Colors.black.withValues(alpha: 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+            spreadRadius: 0,
+          ),
+        ],
       ),
-      child: Stack(
-        children: [
-          // Background pattern
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
-                gradient: AppConstants.getHolographicGradient(AppConstants.getCardAccentColor('cash')),
-              ),
-            ),
-          ),
-          
-          // Decorative circles
-          Positioned(
-            top: -30,
-            right: -30,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -20,
-            left: -20,
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.08),
-              ),
-            ),
-          ),
-          
-          // Main content
-          Padding(
-            padding: const EdgeInsets.all(AppConstants.cardPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Top row: Enhanced icon and type badge
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.account_balance_wallet_rounded,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        l10n.cash,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ),
-                  ],
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isDark 
+                      ? const Color(0xFF2C2C2E) 
+                      : const Color(0xFFF2F2F7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.account_balance_wallet_rounded,
+                    color: isDark ? Colors.white : const Color(0xFF6D6D70),
+                    size: 20,
+                  ),
                 ),
-                
-                const SizedBox(height: 20),
-                
-                // Cash Balance Label with better typography
                 Text(
-                  l10n.cashBalance.toUpperCase(),
+                  l10n.cash,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    letterSpacing: 1.2,
+                    color: isDark 
+                      ? const Color(0xFF8E8E93) 
+                      : const Color(0xFF6D6D70),
                   ),
-                ),
-                
-                const SizedBox(height: 6),
-                
-                // Balance Amount with enhanced styling
-                Text(
-                  themeProvider.formatAmount(balance),
-                  style: GoogleFonts.inter(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                    height: 1.0,
-                  ),
-                ),
-                
-                const Spacer(),
-                
-                // Bottom row: Enhanced branding and features
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      l10n.digitalWallet,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white.withValues(alpha: 0.8),
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.contactless_rounded,
-                            color: Colors.white.withValues(alpha: 0.9),
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.security_rounded,
-                            color: Colors.white.withValues(alpha: 0.9),
-                            size: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
               ],
             ),
-          ),
-        ],
+            
+            const SizedBox(height: 20),
+            
+            // Balance
+            Text(
+              l10n.cashBalance,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: isDark 
+                  ? const Color(0xFF8E8E93) 
+                  : const Color(0xFF6D6D70),
+              ),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            Text(
+              themeProvider.formatAmount(balance),
+              style: GoogleFonts.inter(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.black,
+                letterSpacing: -0.5,
+              ),
+            ),
+            
+            const Spacer(),
+          ],
+        ),
       ),
     );
   }

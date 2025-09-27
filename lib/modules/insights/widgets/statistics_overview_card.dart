@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../models/statistics_model.dart';
 
 class StatisticsOverviewCard extends StatelessWidget {
@@ -196,7 +198,8 @@ class StatisticsOverviewCard extends StatelessWidget {
     bool isFullWidth = false,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final formatter = NumberFormat.currency(locale: 'tr_TR', symbol: '₺');
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    final formatter = NumberFormat.currency(locale: currency.locale, symbol: currency.symbol);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -254,7 +257,7 @@ class StatisticsOverviewCard extends StatelessWidget {
   }) {
     final formatter = isPercentage 
       ? NumberFormat('#0.0')
-      : NumberFormat.currency(locale: 'tr_TR', symbol: '₺');
+      : NumberFormat.currency(locale: currency.locale, symbol: currency.symbol);
 
     return Container(
       padding: const EdgeInsets.all(12),

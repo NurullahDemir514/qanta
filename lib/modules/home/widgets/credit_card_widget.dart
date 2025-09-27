@@ -130,7 +130,7 @@ class CreditCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'KART ADI',
+                            AppLocalizations.of(context)?.cardName ?? 'Card Name',
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               color: Colors.white.withValues(alpha: 0.7),
@@ -184,7 +184,7 @@ class CreditCardWidget extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Kullanım: ${usagePercentage!.toStringAsFixed(1)}%',
+                              '${AppLocalizations.of(context)?.usage ?? 'Usage'}: ${usagePercentage!.toStringAsFixed(1)}%',
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 color: Colors.white.withValues(alpha: 0.8),
@@ -200,7 +200,7 @@ class CreditCardWidget extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 2),
                                   Text(
-                                    'Son Ödeme: ${_formatDueDate(statementDate!)}',
+                                    '${AppLocalizations.of(context)?.lastPayment ?? 'Last Payment'}: ${_formatDueDate(statementDate!, context)}',
                                     style: GoogleFonts.inter(
                                       fontSize: 11,
                                       color: Colors.white.withValues(alpha: 0.8),
@@ -224,7 +224,7 @@ class CreditCardWidget extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  isCreditCardWithDebt ? 'Kullanılabilir Limit' : l10n.availableBalance,
+                                  isCreditCardWithDebt ? (AppLocalizations.of(context)?.availableLimit ?? 'Available Limit') : l10n.availableBalance,
                                   style: GoogleFonts.inter(
                                     fontSize: 11,
                                     color: Colors.white.withValues(alpha: 0.8),
@@ -243,7 +243,7 @@ class CreditCardWidget extends StatelessWidget {
                                 if (isCreditCardWithDebt) ...[
                                   const SizedBox(height: 1),
                                   CurrencyUtils.buildCurrencyText(
-                                    'Borç: ${themeProvider.formatAmount(totalDebt!)}',
+                                    '${AppLocalizations.of(context)?.debt ?? 'Debt'}: ${themeProvider.formatAmount(totalDebt!)}',
                                     style: GoogleFonts.inter(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
@@ -301,7 +301,7 @@ class CreditCardWidget extends StatelessWidget {
     );
   }
 
-  String _formatDueDate(int statementDate) {
+  String _formatDueDate(int statementDate, BuildContext context) {
     final now = DateTime.now();
     final currentMonth = now.month;
     final currentYear = now.year;
@@ -316,9 +316,21 @@ class CreditCardWidget extends StatelessWidget {
       currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
     
-    const monthNames = [
-      '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-      'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
+    // Çok dilli ay isimleri (kısaltılmış)
+    final monthNames = [
+      '', 
+      AppLocalizations.of(context)?.january?.substring(0, 3) ?? 'Jan',
+      AppLocalizations.of(context)?.february?.substring(0, 3) ?? 'Feb',
+      AppLocalizations.of(context)?.march?.substring(0, 3) ?? 'Mar',
+      AppLocalizations.of(context)?.april?.substring(0, 3) ?? 'Apr',
+      AppLocalizations.of(context)?.may?.substring(0, 3) ?? 'May',
+      AppLocalizations.of(context)?.june?.substring(0, 3) ?? 'Jun',
+      AppLocalizations.of(context)?.july?.substring(0, 3) ?? 'Jul',
+      AppLocalizations.of(context)?.august?.substring(0, 3) ?? 'Aug',
+      AppLocalizations.of(context)?.september?.substring(0, 3) ?? 'Sep',
+      AppLocalizations.of(context)?.october?.substring(0, 3) ?? 'Oct',
+      AppLocalizations.of(context)?.november?.substring(0, 3) ?? 'Nov',
+      AppLocalizations.of(context)?.december?.substring(0, 3) ?? 'Dec'
     ];
     
     // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini göster

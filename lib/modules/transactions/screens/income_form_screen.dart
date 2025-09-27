@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/models/unified_category_model.dart';
 import '../../../core/services/category_service_v2.dart';
@@ -147,8 +148,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
 
   String _formatCurrency(double amount) {
     final formatter = NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: '₺',
+      locale: Provider.of<ThemeProvider>(context, listen: false).currency.locale,
+      symbol: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
       decimalDigits: 2,
     );
     return formatter.format(amount);
@@ -282,14 +283,14 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       case 0: // Amount
         if (_amountController.text.isEmpty) {
           setState(() {
-            _amountError = 'Lütfen bir tutar girin';
+            _amountError = AppLocalizations.of(context)?.pleaseEnterAmount ?? 'Please enter an amount';
           });
           isValid = false;
         } else {
           final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
           if (amount == null || amount <= 0) {
             setState(() {
-              _amountError = 'Geçerli bir tutar girin';
+              _amountError = AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
             });
             isValid = false;
           }
@@ -298,7 +299,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       case 1: // Category
         if (_selectedCategory == null) {
           setState(() {
-            _categoryError = 'Lütfen bir kategori seçin';
+            _categoryError = AppLocalizations.of(context)?.pleaseSelectCategory ?? 'Please select a category';
           });
           isValid = false;
         }
@@ -306,7 +307,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       case 2: // Payment Method
         if (_selectedPaymentMethod == null) {
           setState(() {
-            _paymentMethodError = 'Lütfen bir ödeme yöntemi seçin';
+            _paymentMethodError = AppLocalizations.of(context)?.pleaseSelectPaymentMethod ?? 'Please select a payment method';
           });
           isValid = false;
         }
@@ -377,7 +378,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       }
       
       if (accountId == null) {
-        throw Exception('Hesap bilgisi alınamadı');
+        throw Exception(AppLocalizations.of(context)?.accountInfoNotFoundSingle ?? 'Account information could not be retrieved');
       }
       
       // Create income transaction using v2 system
@@ -385,7 +386,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
         type: v2.TransactionType.income,
         amount: amount,
         description: _descriptionController.text.trim().isEmpty 
-            ? 'Gelir' 
+            ? (AppLocalizations.of(context)?.income ?? 'Income') 
             : _descriptionController.text.trim(),
         sourceAccountId: accountId,
         categoryId: categoryId,

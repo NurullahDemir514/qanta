@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../l10n/app_localizations.dart';
 
 class TransactionSearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -32,7 +33,7 @@ class TransactionSearchBar extends StatelessWidget {
           letterSpacing: -0.2,
         ),
         decoration: InputDecoration(
-          hintText: 'İşlem ara...',
+          hintText: AppLocalizations.of(context)?.searchTransactions ?? 'Search Transactions',
           hintStyle: GoogleFonts.inter(
             fontSize: 16,
             color: isDark 

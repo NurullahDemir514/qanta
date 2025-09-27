@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/models/account_model.dart';
 import '../../../shared/widgets/installment_expandable_card.dart';
@@ -104,9 +105,10 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           return TransactionDesignSystem.buildTransactionList(
             transactions: transactionWidgets,
             isDark: isDark,
-            emptyTitle: 'Henüz işlem yok',
-            emptyDescription: 'Bu kart için henüz işlem bulunmuyor',
+            emptyTitle: AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
+            emptyDescription: AppLocalizations.of(context)?.noTransactionsForThisCard ?? 'No transactions found for this card',
             emptyIcon: Icons.receipt_long_outlined,
+            context: context,
           );
         }
       },
@@ -135,7 +137,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Henüz işlem yok',
+            AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
             style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -144,7 +146,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Bu kart için henüz işlem bulunmuyor',
+            AppLocalizations.of(context)?.noTransactionsForThisCard ?? 'No transactions found for this card',
             style: GoogleFonts.inter(
               fontSize: 14,
               color: const Color(0xFF8E8E93),
@@ -205,7 +207,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
       installmentText = '$currentInstallment/$effectiveInstallmentCount Taksit';
     } else if (effectiveInstallmentCount == 1) {
-      installmentText = 'Peşin';
+      installmentText = AppLocalizations.of(context)?.cash ?? 'Cash';
     }
     
     // Card name - centralized logic
@@ -214,10 +216,12 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       transactionType: transactionType.name,
       sourceAccountName: transaction.sourceAccountName,
       targetAccountName: transaction.targetAccountName,
+      context: context,
     );
 
-    // Format amount
-    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType);
+    // Format amount with dynamic currency
+    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
+    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
 
     // Use displayTime from transaction model (dynamic date formatting)
     final time = transaction.displayTime;
@@ -245,7 +249,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
         installmentId: transaction.installmentId,
         title: transaction.categoryName ?? transaction.description, // Kategori adı
         subtitle: cardName, // Banka adı
-        amount: TransactionDesignSystem.formatAmount(totalAmount ?? transaction.amount, transactionType),
+        amount: TransactionDesignSystem.formatAmount(totalAmount ?? transaction.amount, transactionType, currencySymbol: currencySymbol),
         time: time,
         type: transactionType,
         categoryIcon: transaction.categoryName ?? category?.iconName,
@@ -335,7 +339,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'İşlemi Sil',
+          AppLocalizations.of(context)!.deleteTransaction,
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -343,7 +347,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           ),
         ),
         message: Text(
-          '${transaction.description} işlemini silmek istediğinizden emin misiniz?',
+          AppLocalizations.of(context)!.deleteTransactionConfirm(transaction.description),
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -358,7 +362,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
               _deleteV2Transaction(context, transaction);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)!.delete,
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -371,7 +375,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)!.cancel,
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -392,7 +396,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('İşlem silindi'),
+            content: Text(AppLocalizations.of(context)!.transactionDeleted),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -404,7 +408,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('İşlem silinirken hata oluştu: $e'),
+            content: Text(AppLocalizations.of(context)!.transactionDeleteError(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -420,7 +424,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'Taksitli İşlemi Sil',
+          AppLocalizations.of(context)!.deleteInstallmentTransaction,
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -428,7 +432,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           ),
         ),
         message: Text(
-          '${transaction.description} taksitli işlemini tamamen silmek istediğinizden emin misiniz? Bu işlem tüm taksitleri silecektir.',
+          AppLocalizations.of(context)!.deleteInstallmentTransactionConfirm(transaction.description),
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -443,7 +447,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
               _deleteInstallmentTransaction(context, transaction);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)!.delete,
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -456,7 +460,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
             Navigator.pop(context);
           },
           child: Text(
-            'İptal',
+            AppLocalizations.of(context)!.cancel,
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -481,7 +485,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Taksitli işlem başarıyla silindi'),
+            content: Text(AppLocalizations.of(context)!.installmentTransactionDeleted),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -493,7 +497,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('İşlem silinirken hata oluştu: $e'),
+            content: Text(AppLocalizations.of(context)!.transactionDeleteError(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
