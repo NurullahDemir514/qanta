@@ -16,6 +16,7 @@ import '../services/unified_budget_service.dart';
 import '../services/unified_installment_service.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/statement_service.dart';
+import 'statement_provider.dart';
 import '../../shared/models/unified_category_model.dart';
 import '../../shared/models/budget_model.dart';
 import '../../shared/models/statement_summary.dart';
@@ -186,6 +187,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// **Statement loading states**
   Map<String, bool> _isLoadingStatements = {};
   DateTime? _lastStatementUpdate;
+  
+  /// **StatementProvider reference for accessing current statements**
+  StatementProvider? _statementProvider;
   
   /// **Statement period cache**
   Map<String, StatementPeriod> _cachedPeriods = {};
@@ -1536,6 +1540,17 @@ class UnifiedProviderV2 extends ChangeNotifier {
   void _clearError() {
     _error = null;
   }
+  
+  /// Set StatementProvider reference for accessing current statements
+  void setStatementProvider(StatementProvider provider) {
+    _statementProvider = provider;
+  }
+  
+  /// Update current statement in cache
+  void updateCurrentStatement(String cardId, StatementSummary statement) {
+    _currentStatements[cardId] = statement;
+    notifyListeners();
+  }
 
   // Legacy compatibility methods for existing UI components
   
@@ -2409,9 +2424,63 @@ class UnifiedProviderV2 extends ChangeNotifier {
             paidAt: DateTime.now(),
           ),
         );
-        _currentStatements[cardId] = updatedStatement;
+        // Update StatementProvider's currentStatement (will also update cache)
+        if (_statementProvider != null) {
+          _statementProvider!.currentStatement = updatedStatement;
+        } else {
+          // Fallback: update cache directly if StatementProvider not available
+          _currentStatements[cardId] = updatedStatement;
+        }
+        
         notifyListeners();
       }
+
+      // Update credit card limit - reduce by statement amount when paid
+      final creditAccount = _accounts.firstWhere(
+        (account) => account.id == cardId && account.type == AccountType.credit,
+        orElse: () => throw Exception('Credit card not found'),
+      );
+      
+      // Get statement from StatementProvider if not found in cache
+      StatementSummary? statementToUse = currentStatement;
+      if (statementToUse == null && _statementProvider?.currentStatement != null) {
+        statementToUse = _statementProvider!.currentStatement;
+        print('   📋 Using StatementProvider current statement');
+      }
+      
+      // Calculate payment amount (statement total amount)
+      final statementAmount = statementToUse?.totalAmount ?? 0.0;
+      
+      print('💳 Statement Payment Debug:');
+      print('   Card ID: $cardId');
+      print('   Current Statement (cache): ${currentStatement != null ? "Found" : "NULL"}');
+      print('   StatementProvider current: ${_statementProvider?.currentStatement != null ? "Found" : "NULL"}');
+      print('   Statement To Use: ${statementToUse != null ? "Found" : "NULL"}');
+      print('   Statement Total Amount: ${statementToUse?.totalAmount}');
+      print('   Statement Remaining Amount: ${statementToUse?.remainingAmount}');
+      print('   Statement With Installments: ${statementToUse?.totalWithInstallments}');
+      print('   Statement Amount (using): $statementAmount');
+      print('   Current Balance: ${creditAccount.balance}');
+      
+      // Reduce credit card balance by statement amount (payment reduces debt)
+      final newBalance = creditAccount.balance - statementAmount;
+      print('   New Balance: $newBalance');
+      
+      final updatedCreditAccount = creditAccount.copyWith(
+        balance: newBalance, // Reduce debt by payment amount
+        updatedAt: DateTime.now(),
+      );
+      
+      // Update in local accounts list
+      final accountIndex = _accounts.indexWhere((a) => a.id == cardId);
+      if (accountIndex != -1) {
+        _accounts[accountIndex] = updatedCreditAccount;
+        print('   ✅ Local account updated');
+      }
+      
+      // Update in Firebase
+      await UnifiedAccountService.updateAccount(updatedCreditAccount);
+      print('   ✅ Firebase account updated');
 
       // Update in Firebase
       await StatementService.markStatementAsPaid(cardId, period);
@@ -2423,7 +2492,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
         _currentStatements.remove(cardId);
       }
       
+      // Update summaries after account balance change
+      await _updateSummariesLocally();
+      print('   ✅ Summaries updated');
+      
       notifyListeners();
+      print('   ✅ UI notified');
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -2510,6 +2584,116 @@ class UnifiedProviderV2 extends ChangeNotifier {
     } else {
       // Clear all statement cache if we don't know which account was affected
       clearStatementCache();
+    }
+  }
+
+  /// Process actual statement payment
+  /// 
+  /// This method handles the real payment process after user confirmation
+  Future<bool> processStatementPayment(
+    String cardId,
+    StatementPeriod period,
+    double amount,
+  ) async {
+    try {
+      // 1. Mark statement as paid in Firebase
+      await markStatementAsPaidOptimistic(cardId, period);
+
+      // 2. Create payment transaction record
+      await _createPaymentTransactionRecord(cardId, amount, period);
+
+      // 3. Update account balance (credit limit)
+      await _updateAccountBalanceAfterPayment(cardId, amount);
+
+      // 4. Refresh data
+      await loadTransactions();
+      await loadInstallments();
+      
+      return true;
+    } catch (e) {
+      debugPrint('Error processing statement payment: $e');
+      return false;
+    }
+  }
+
+  /// Create payment transaction record
+  Future<void> _createPaymentTransactionRecord(
+    String cardId,
+    double amount,
+    StatementPeriod period,
+  ) async {
+    try {
+      final paymentTransaction = {
+        'id': 'payment_${DateTime.now().millisecondsSinceEpoch}',
+        'user_id': FirebaseAuth.instance.currentUser?.uid,
+        'account_id': cardId,
+        'amount': amount,
+        'type': 'income', // Payment is income for the credit card
+        'category': 'payment',
+        'description': 'Ekstre Ödemesi - ${period.periodText}',
+        'transaction_date': DateUtils.toIso8601(DateTime.now()),
+        'created_at': DateUtils.toIso8601(DateTime.now()),
+        'is_installment': false,
+        'is_payment': true, // Mark as payment transaction
+        'statement_id': '${cardId}_${period.startDate.millisecondsSinceEpoch}',
+      };
+
+      await FirebaseFirestore.instance
+          .collection('transactions')
+          .doc(paymentTransaction['id'] as String)
+          .set(paymentTransaction);
+
+      debugPrint('Payment transaction created: ${paymentTransaction['id']}');
+    } catch (e) {
+      debugPrint('Error creating payment transaction: $e');
+      rethrow;
+    }
+  }
+
+  /// Update account balance after payment
+  Future<void> _updateAccountBalanceAfterPayment(
+    String cardId,
+    double amount,
+  ) async {
+    try {
+      final account = accounts.firstWhere((acc) => acc.id == cardId);
+      final newBalance = account.balance + amount; // Add payment to balance (reduces debt)
+
+      final updatedAccount = account.copyWith(
+        balance: newBalance,
+        updatedAt: DateTime.now(),
+      );
+      
+      await UnifiedAccountService.updateAccount(updatedAccount);
+
+      // Update local cache
+      _updateAccountBalanceDirectly(cardId, newBalance);
+      
+      debugPrint('Account balance updated after payment: $newBalance');
+    } catch (e) {
+      debugPrint('Error updating account balance after payment: $e');
+      rethrow;
+    }
+  }
+
+  /// Update account balance directly in local cache
+  void _updateAccountBalanceDirectly(String cardId, double newBalance) {
+    try {
+      final accountIndex = accounts.indexWhere((acc) => acc.id == cardId);
+      if (accountIndex != -1) {
+        accounts[accountIndex] = accounts[accountIndex].copyWith(
+          balance: newBalance,
+          updatedAt: DateTime.now(),
+        );
+        
+        // Update summaries
+        _updateSummariesLocally();
+        notifyListeners();
+        
+        debugPrint('Account balance updated locally: $newBalance');
+      }
+    } catch (e) {
+      debugPrint('Error updating account balance locally: $e');
     }
   }
 } 

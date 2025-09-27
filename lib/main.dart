@@ -46,7 +46,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => StatementProvider()),
+        ChangeNotifierProvider(create: (context) => StatementProvider.instance),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => ProfileProvider()),
 

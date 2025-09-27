@@ -12,12 +12,36 @@ import 'unified_provider_v2.dart';
 import '../services/statement_service.dart';
 
 class StatementProvider extends ChangeNotifier {
-  StatementSummary? currentStatement;
+  /// Singleton instance
+  static StatementProvider? _instance;
+  
+  /// Get singleton instance
+  static StatementProvider get instance => _instance ??= StatementProvider._();
+  
+  /// Private constructor for singleton
+  StatementProvider._();
+  
+  StatementSummary? _currentStatement;
   StatementSummary? previousStatement;
   List<StatementSummary> futureStatements = [];
   List<StatementSummary> pastStatements = [];
   bool isLoading = false;
   String? error;
+  
+  /// Get current statement
+  StatementSummary? get currentStatement => _currentStatement;
+  
+  /// Set current statement and notify listeners
+  set currentStatement(StatementSummary? value) {
+    _currentStatement = value;
+    
+    // Also update UnifiedProviderV2 cache if available
+    if (_unifiedProvider != null && value != null) {
+      _unifiedProvider!.updateCurrentStatement(value.cardId, value);
+    }
+    
+    notifyListeners();
+  }
   
   // UnifiedProviderV2 referansı
   UnifiedProviderV2? _unifiedProvider;
@@ -31,6 +55,8 @@ class StatementProvider extends ChangeNotifier {
   /// Set UnifiedProviderV2 reference
   void setUnifiedProvider(UnifiedProviderV2 provider) {
     _unifiedProvider = provider;
+    // Also set this StatementProvider in UnifiedProviderV2
+    provider.setStatementProvider(this);
   }
 
   Future<void> loadStatements(String cardId, int statementDay, {int? dueDay}) async {
@@ -48,6 +74,11 @@ class StatementProvider extends ChangeNotifier {
       _currentCardId = cardId;
       _currentStatementDay = statementDay;
       _currentDueDay = dueDay;
+      
+      // Only clear current statement if it's a different card or forced reload
+      if (_currentStatement?.cardId != cardId) {
+        _currentStatement = null;
+      }
       
       // Get UnifiedProviderV2 from context
       if (_unifiedProvider == null) {
@@ -98,12 +129,27 @@ class StatementProvider extends ChangeNotifier {
         .toList();
 
     // Calculate current statement from cached data
-    currentStatement = await _calculateStatementFromCache(
+    final newStatement = await _calculateStatementFromCache(
       cardId, 
       currentPeriod, 
       transactions, 
       installments
     );
+    
+    // Preserve isPaid status if current statement exists and is paid
+    if (_currentStatement != null && _currentStatement!.isPaid && newStatement.id == _currentStatement!.id) {
+      currentStatement = newStatement.copyWith(
+        isPaid: true,
+        paidAt: _currentStatement!.paidAt,
+        period: newStatement.period.copyWith(
+          isPaid: true,
+          paidAt: _currentStatement!.paidAt,
+        ),
+      );
+    } else {
+      currentStatement = newStatement;
+    }
+    
     notifyListeners();
 
     // For past and future statements, calculate periods locally from cache
@@ -293,21 +339,34 @@ class StatementProvider extends ChangeNotifier {
     for (final transaction in transactions) {
       final transactionDate = transaction.transactionDate;
       
+      print('   🔍 Checking transaction: ${transaction.id}');
+      print('   📅 Transaction date: $transactionDate');
+      print('   📅 Period start: ${period.startDate}');
+      print('   📅 Period end: ${period.endDate}');
+      print('   📅 Is in period: ${transactionDate.isAfter(period.startDate) && transactionDate.isBefore(period.endDate)}');
+      
       if (transactionDate.isAfter(period.startDate) && transactionDate.isBefore(period.endDate)) {
         final amount = transaction.amount;
         final type = transaction.type.toString().split('.').last;
         final isInstallment = transaction.isInstallment ?? false;
         
+        print('   ✅ Transaction in period - Amount: $amount, Type: $type, IsInstallment: $isInstallment');
+        
         if (!isInstallment) {
           if (type == 'expense') {
             totalAmount += amount.abs();
+            print('   💰 Added expense: ${amount.abs()}, Total now: $totalAmount');
           } else if (type == 'income') {
             paidAmount += amount.abs();
+            print('   💰 Added income: ${amount.abs()}, Paid now: $paidAmount');
           }
           transactionCount++;
         } else {
           transactionCount++;
+          print('   📦 Installment transaction, count: $transactionCount');
         }
+      } else {
+        print('   ❌ Transaction outside period');
       }
     }
 

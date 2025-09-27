@@ -48,7 +48,7 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
     _tabController = TabController(length: 3, vsync: this);
     optimisticPaidNotifier = ValueNotifier<bool?>(null);
     Future.microtask(() {
-      final statementProvider = Provider.of<StatementProvider>(context, listen: false);
+      final statementProvider = StatementProvider.instance;
       final unifiedProvider = Provider.of<UnifiedProviderV2>(context, listen: false);
       
       // Set UnifiedProviderV2 reference
@@ -76,7 +76,7 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final statementProvider = Provider.of<StatementProvider>(context);
+    final statementProvider = StatementProvider.instance;
     final isLoading = statementProvider.isLoading;
     final error = statementProvider.error;
     final currentStatement = statementProvider.currentStatement;
@@ -156,7 +156,7 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
                           statementDay: widget.statementDay,
                         ),
                         PastStatementsTab(
-                          pastStatements: Provider.of<StatementProvider>(context).pastStatements,
+                          pastStatements: StatementProvider.instance.pastStatements,
                           cardId: widget.cardId,
                           statementDay: widget.statementDay,
                           onStatementTap: (StatementSummary statement) {
@@ -209,7 +209,7 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                Provider.of<StatementProvider>(context, listen: false)
+                StatementProvider.instance
                     .loadStatements(widget.cardId, widget.statementDay);
               },
               child: Text('Tekrar Dene'),
