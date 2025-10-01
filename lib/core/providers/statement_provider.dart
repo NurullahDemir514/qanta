@@ -60,10 +60,6 @@ class StatementProvider extends ChangeNotifier {
   }
 
   Future<void> loadStatements(String cardId, int statementDay, {int? dueDay}) async {
-    print('🔍 StatementProvider.loadStatements called:');
-    print('   CardId: $cardId');
-    print('   StatementDay: $statementDay');
-    print('   DueDay: $dueDay');
     
     isLoading = true;
     error = null;
@@ -82,17 +78,14 @@ class StatementProvider extends ChangeNotifier {
       
       // Get UnifiedProviderV2 from context
       if (_unifiedProvider == null) {
-        print('🔍 ERROR: UnifiedProvider is NULL!');
         error = 'UnifiedProvider not available';
         return;
       }
       
       // Always use cache from UnifiedProviderV2 for consistency
       if (_unifiedProvider!.isDataLoaded) {
-        print('🔍 Using existing cache');
         await _loadStatementsFromCache(cardId, statementDay, dueDay: dueDay);
       } else {
-        print('🔍 Loading data first, then using cache');
         // If cache not available, load data first then use cache
         await _unifiedProvider!.loadAllData();
         await _loadStatementsFromCache(cardId, statementDay, dueDay: dueDay);
@@ -112,10 +105,6 @@ class StatementProvider extends ChangeNotifier {
 
   /// Load statements from UnifiedProviderV2 cache
   Future<void> _loadStatementsFromCache(String cardId, int statementDay, {int? dueDay}) async {
-    print('🔍 _loadStatementsFromCache called:');
-    print('   CardId: $cardId');
-    print('   StatementDay: $statementDay');
-    print('   DueDay: $dueDay');
     
     final currentPeriod = _calculateCurrentPeriod(statementDay, dueDay: dueDay);
     
@@ -163,7 +152,6 @@ class StatementProvider extends ChangeNotifier {
       
       // Filter out past statements with no transactions and no installments
       if (pastStatement.transactionCount == 0 && pastStatement.upcomingInstallments.isEmpty) {
-        print('   ❌ Skipping empty past statement');
         continue;
       }
       
@@ -172,7 +160,6 @@ class StatementProvider extends ChangeNotifier {
     
     // Calculate future statements from cache
     final futureResults = <StatementSummary>[];
-    print('🔍 Calculating future statements: ${futurePeriods.length} periods');
     
     // Find the last installment due date to limit future statements
     DateTime? lastInstallmentDueDate;
@@ -184,28 +171,23 @@ class StatementProvider extends ChangeNotifier {
     }
     
     for (final period in futurePeriods) {
-      print('🔍 Processing future period: ${period.startDate} to ${period.endDate}');
       final futureStatement = await _calculateStatementFromCache(cardId, period, transactions, installments);
       
       // Filter out statements with no installments and no transactions
       if (futureStatement.upcomingInstallments.isEmpty && futureStatement.transactionCount == 0) {
-        print('   ❌ Skipping empty statement');
         continue;
       }
       
       // Filter out statements after last installment due date
       if (lastInstallmentDueDate != null && period.startDate.isAfter(lastInstallmentDueDate)) {
-        print('   ❌ Skipping statement after last installment');
         continue;
       }
       
       // Filter out overdue statements with 0 amount
       if (period.dueDate.isBefore(DateTime.now()) && futureStatement.totalAmount == 0) {
-        print('   ❌ Skipping overdue statement with 0 amount');
         continue;
       }
       
-      print('   ✅ Adding statement with amount: ${futureStatement.totalAmount}');
       futureResults.add(futureStatement);
     }
 
@@ -230,7 +212,6 @@ class StatementProvider extends ChangeNotifier {
         .where('source_account_id', isEqualTo: cardId)
         .snapshots()
         .listen((snapshot) {
-      print('🔄 Transaction change detected, reloading statements...');
       _reloadStatements();
     });
     
@@ -241,7 +222,6 @@ class StatementProvider extends ChangeNotifier {
         .where('source_account_id', isEqualTo: cardId)
         .snapshots()
         .listen((snapshot) {
-      print('🔄 Installment change detected, reloading statements...');
       _reloadStatements();
     });
   }
@@ -326,10 +306,6 @@ class StatementProvider extends ChangeNotifier {
     List<dynamic> transactions,
     List<dynamic> installments,
   ) async {
-    print('🔍 _calculateStatementFromCache called:');
-    print('   Period: ${period.startDate} to ${period.endDate}');
-    print('   Transactions count: ${transactions.length}');
-    print('   Installments count: ${installments.length}');
     double totalAmount = 0.0;
     double paidAmount = 0.0;
     int transactionCount = 0;
@@ -339,34 +315,24 @@ class StatementProvider extends ChangeNotifier {
     for (final transaction in transactions) {
       final transactionDate = transaction.transactionDate;
       
-      print('   🔍 Checking transaction: ${transaction.id}');
-      print('   📅 Transaction date: $transactionDate');
-      print('   📅 Period start: ${period.startDate}');
-      print('   📅 Period end: ${period.endDate}');
-      print('   📅 Is in period: ${transactionDate.isAfter(period.startDate) && transactionDate.isBefore(period.endDate)}');
       
       if (transactionDate.isAfter(period.startDate) && transactionDate.isBefore(period.endDate)) {
         final amount = transaction.amount;
         final type = transaction.type.toString().split('.').last;
         final isInstallment = transaction.isInstallment ?? false;
         
-        print('   ✅ Transaction in period - Amount: $amount, Type: $type, IsInstallment: $isInstallment');
         
         if (!isInstallment) {
           if (type == 'expense') {
             totalAmount += amount.abs();
-            print('   💰 Added expense: ${amount.abs()}, Total now: $totalAmount');
           } else if (type == 'income') {
             paidAmount += amount.abs();
-            print('   💰 Added income: ${amount.abs()}, Paid now: $paidAmount');
           }
           transactionCount++;
         } else {
           transactionCount++;
-          print('   📦 Installment transaction, count: $transactionCount');
         }
       } else {
-        print('   ❌ Transaction outside period');
       }
     }
 

@@ -30,10 +30,11 @@ class TransactionCombinedFilters extends StatefulWidget {
 
 class _TransactionCombinedFiltersState extends State<TransactionCombinedFilters> {
   bool _showAdvancedFilters = false;
+  late AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Column(
@@ -48,7 +49,7 @@ class _TransactionCombinedFiltersState extends State<TransactionCombinedFilters>
               // Transaction Type Chips
               _buildTransactionTypeChip(
                 context: context,
-                label: AppLocalizations.of(context)?.all ?? 'All',
+                label: l10n.all,
                 isSelected: widget.selectedTransactionType == null,
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -60,7 +61,7 @@ class _TransactionCombinedFiltersState extends State<TransactionCombinedFilters>
                 padding: const EdgeInsets.only(right: 8),
                 child: _buildTransactionTypeChip(
                   context: context,
-                  label: type.displayName,
+                  label: type.getDisplayName(l10n),
                   isSelected: widget.selectedTransactionType == type,
                   onTap: () {
                     HapticFeedback.selectionClick();
@@ -237,7 +238,7 @@ class _TransactionCombinedFiltersState extends State<TransactionCombinedFilters>
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              _showAdvancedFilters ? (AppLocalizations.of(context)?.less ?? 'Less') : (AppLocalizations.of(context)?.more ?? 'More'),
+              _showAdvancedFilters ? l10n.less : l10n.more,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,

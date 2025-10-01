@@ -45,6 +45,8 @@ class _CardsSectionState extends State<CardsSection> {
     
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
+        // Debug log'ları kaldırıldı
+        
         return _buildV2CardsSection(context, providerV2, l10n, isDark);
       },
     );
@@ -210,7 +212,7 @@ class _CardsSectionState extends State<CardsSection> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz kart eklenmemiş',
+                    l10n.noCardsAddedYet,
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -219,7 +221,7 @@ class _CardsSectionState extends State<CardsSection> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'İlk kartınızı eklemek için Kartlarım sayfasına gidin',
+                    l10n.addFirstCardDescription,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: isDark 
@@ -271,6 +273,42 @@ class _CardsSectionState extends State<CardsSection> {
           height: AppConstants.cardSectionHeight,
           child: Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
+              // Eğer sadece 1 kart varsa, ortala
+              if (allCards.length == 1) {
+                final card = allCards[0];
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: card['cardType'] == 'cash'
+                        ? CashBalanceCard(
+                            balance: card['balance'] as double,
+                            themeProvider: themeProvider,
+                          )
+                        : card['cardType'] == 'debit'
+                            ? DebitCardWidget(
+                                card: card,
+                                onTap: () {
+                                  // Handle debit card tap
+                                },
+                              )
+                            : CreditCardWidget(
+                                cardType: card['cardType'] as String,
+                                cardTypeLabel: card['cardTypeLabel'] as String,
+                                cardNumber: card['cardNumber'] as String,
+                                balance: card['balance'] as double,
+                                bankCode: card['bankCode'] as String?,
+                                expiryDate: card['expiryDate'] as String?,
+                                totalDebt: card['totalDebt'] as double?,
+                                creditLimit: card['creditLimit'] as double?,
+                                usagePercentage: card['usagePercentage'] as double?,
+                                statementDate: card['statementDate'] as int?,
+                                dueDate: card['dueDate'] as int?,
+                              ),
+                  ),
+                );
+              }
+              
+              // Birden fazla kart varsa PageView kullan
               return PageView.builder(
                 controller: _pageController,
                 padEnds: false,

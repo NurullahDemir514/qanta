@@ -27,7 +27,9 @@ class CreditCardsTab extends StatefulWidget {
   State<CreditCardsTab> createState() => _CreditCardsTabState();
 }
 
-class _CreditCardsTabState extends State<CreditCardsTab> {
+class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   final PageController _pageController = PageController(
     viewportFraction: 1.0, // Tam genişlik
   );
@@ -39,12 +41,10 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
   void initState() {
     super.initState();
     
-    // Provider referansını sakla ve Firebase'den veri yükle
+    // Provider referansını sakla
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _unifiedProviderV2 = UnifiedProviderV2.instance;
-        // Load all data from Firebase
-        _unifiedProviderV2!.loadAllData();
         
         // Provider listener'ı ekle
         if (_providerListener != null) {
@@ -411,15 +411,17 @@ class _CreditCardsTabState extends State<CreditCardsTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin için gerekli
     return ListenableBuilder(
       listenable: UnifiedProviderV2.instance,
       builder: (context, child) {
         final unifiedProviderV2 = UnifiedProviderV2.instance;
-        if (unifiedProviderV2.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
+        // Loading durumunda normal UI göster
+        // if (unifiedProviderV2.isLoading) {
+        //   return const Center(
+        //     child: CircularProgressIndicator(),
+        //   );
+        // }
 
         if (unifiedProviderV2.error != null) {
           return Center(

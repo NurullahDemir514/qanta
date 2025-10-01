@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/transaction_model_v2.dart';
-import '../../../shared/models/models_v2.dart';
+import '../../../shared/models/category_model.dart';
 import '../models/statistics_model.dart';
 
 class StatisticsProvider extends ChangeNotifier {
@@ -119,7 +119,7 @@ class StatisticsProvider extends ChangeNotifier {
     for (final entry in categoryGroups.entries) {
       final categoryId = entry.key;
       final categoryTransactions = entry.value;
-      final categoryAmount = categoryTransactions.fold<double>(0, (sum, t) => sum + t.amount);
+      final categoryAmount = categoryTransactions.fold<double>(0, (sum, t) => sum + (t as TransactionWithDetailsV2).amount);
       final percentage = (categoryAmount / totalExpenses) * 100;
 
       // Get category info
@@ -144,15 +144,17 @@ class StatisticsProvider extends ChangeNotifier {
   // Get category information
   ({String name, String icon}) _getCategoryInfo(String categoryId) {
     final category = _unifiedProvider.categories
-        .cast<CategoryModel?>()
-        .firstWhere((c) => c?.id == categoryId, orElse: () => null);
+        .cast<CategoryModel>()
+        .firstWhere((c) => c.id == categoryId, orElse: () => CategoryModel(
+          id: '', 
+          name: 'Unknown', 
+          icon: '💰',
+          type: CategoryType.expense,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
     
-    if (category != null) {
-      return (name: category.name, icon: category.icon ?? '💰');
-    }
-    
-    // Default category info
-    return (name: 'Diğer', icon: '💰');
+    return (name: category.name, icon: category.icon ?? '💰');
   }
 
   // Calculate monthly trends
@@ -175,8 +177,8 @@ class StatisticsProvider extends ChangeNotifier {
       final monthYear = entry.key;
       final monthTransactions = entry.value;
       
-      final income = monthTransactions.where((t) => t.signedAmount > 0).fold<double>(0, (sum, t) => sum + t.amount);
-      final expenses = monthTransactions.where((t) => t.signedAmount < 0).fold<double>(0, (sum, t) => sum + t.amount);
+      final income = monthTransactions.where((t) => (t as TransactionWithDetailsV2).signedAmount > 0).fold<double>(0, (sum, t) => sum + (t as TransactionWithDetailsV2).amount);
+      final expenses = monthTransactions.where((t) => (t as TransactionWithDetailsV2).signedAmount < 0).fold<double>(0, (sum, t) => sum + (t as TransactionWithDetailsV2).amount);
       final netBalance = income - expenses;
       
       trends.add(MonthlyTrend(

@@ -75,7 +75,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get investments => 'Yatırımlar';
 
   @override
-  String get analytics => 'İstatistikler';
+  String get analytics => 'Analiz';
 
   @override
   String get balance => 'Bakiye';
@@ -385,7 +385,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get upcomingPayments => 'Yaklaşan Ödemeler';
 
   @override
-  String get comingSoon => 'Yakında geliyor...';
+  String get comingSoon => 'Yakında';
 
   @override
   String get cardInfo => 'Kart Bilgileri';
@@ -472,7 +472,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get recommended => 'ÖNERİLEN';
 
   @override
-  String get urgent => 'ACİL';
+  String get urgent => 'Acil';
 
   @override
   String get amount => 'Tutar';
@@ -952,7 +952,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get whichInvestmentType => 'Hangi Yatırım Türü?';
 
   @override
-  String get stocks => 'Hisse Senedi';
+  String get stocks => 'Yatırım';
 
   @override
   String get stocksDescription => 'Borsa, hisse, pay';
@@ -1254,7 +1254,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get debitCard => 'Banka Kartı';
 
   @override
-  String get statisticsTitle => 'İstatistikler';
+  String get statisticsTitle => 'Analiz';
 
   @override
   String get monthlyOverview => 'Aylık Genel Bakış';
@@ -1293,7 +1293,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noDataAvailable => 'Veri Mevcut Değil';
 
   @override
-  String get noTransactionsFound => 'Henüz işlem bulunamadı';
+  String get noTransactionsFound => 'İşlem bulunamadı';
 
   @override
   String get averageSpending => 'Ortalama Harcama';
@@ -1329,7 +1329,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noDataYet => 'Henüz analiz edilecek veri yok';
 
   @override
-  String get addFirstTransaction => 'İlk işleminizi ekleyerek başlayın';
+  String get addFirstTransaction => 'İlk harcamanızı ekleyerek başlayın';
 
   @override
   String get analyzingData => 'Finansal verileriniz analiz ediliyor...';
@@ -1356,7 +1356,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dailyAverage => 'Günlük Ortalama';
 
   @override
-  String get moreCategories => 'daha fazla kategori';
+  String get moreCategories => 'kategori daha';
 
   @override
   String get netWorth => 'Net Değer';
@@ -1449,7 +1449,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String deleteTransactionConfirm(String description) {
-    return '$description işlemini silmek istediğinizden emin misiniz?';
+    return 'işlemini silmek istediğinizden emin misiniz?';
   }
 
   @override
@@ -1472,7 +1472,8 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get installmentTransactionDeleted => 'Taksitli işlem silindi';
+  String get installmentTransactionDeleted =>
+      'Taksitli işlem silindi, toplam tutar iade edildi';
 
   @override
   String installmentTransactionDeleteError(String error) {
@@ -1600,7 +1601,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String minutesAgo(int count) {
-    return '$count dk önce';
+    return '$count dakika önce';
   }
 
   @override
@@ -1610,7 +1611,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String daysAgo(int count) {
-    return '$count gün önce';
+    return '${count}gün önce';
   }
 
   @override
@@ -1747,7 +1748,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get addExpenseIncomeNotes =>
-      'Harcama veya gelir notlarınızı buraya ekleyin';
+      'Gider veya gelir notlarınızı buraya ekleyin';
 
   @override
   String get justNow => 'Az önce';
@@ -1876,13 +1877,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get oldest => 'En Eski';
 
   @override
-  String get highestToLowest => 'Çoktan Aza';
+  String get highestToLowest => 'Yüksekten Düşüğe';
 
   @override
-  String get lowestToHighest => 'Azdan Çoğa';
+  String get lowestToHighest => 'Düşükten Yükseğe';
 
   @override
-  String get alphabetical => 'A-Z';
+  String get alphabetical => 'Alfabetik';
 
   @override
   String get more => 'Daha Fazla';
@@ -2378,4 +2379,575 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get addCreditCardDescription => 'Kredi kartı bilgilerinizi ekleyin';
+
+  @override
+  String get searchStocks => 'Hisse Ara';
+
+  @override
+  String get addStock => 'Hisse Ekle';
+
+  @override
+  String get removeStock => 'Hisse Kaldır';
+
+  @override
+  String get stockDetails => 'Hisse Detayları';
+
+  @override
+  String get stockInfo => 'Hisse Bilgileri';
+
+  @override
+  String get exchange => 'Borsa';
+
+  @override
+  String get sector => 'Sektör';
+
+  @override
+  String get country => 'Ülke';
+
+  @override
+  String get buyStock => 'Hisse Al';
+
+  @override
+  String get sellStock => 'Hisse Sat';
+
+  @override
+  String get buy => 'Alış';
+
+  @override
+  String get sell => 'Satış';
+
+  @override
+  String get noStocksYet => 'Henüz hisse takip etmiyorsunuz';
+
+  @override
+  String get addFirstStock => 'Hisse eklemek için + butonuna basın';
+
+  @override
+  String get stockAdded => 'Hisse takip listesine eklendi';
+
+  @override
+  String get stockRemoved => 'Hisse takip listesinden kaldırıldı';
+
+  @override
+  String get confirmRemoveStock =>
+      'Bu hisseyi portföyden kaldırmak istediğinizden emin misiniz?';
+
+  @override
+  String get chartComingSoon => 'Grafik Yakında';
+
+  @override
+  String get chartDescription =>
+      'Fiyat grafikleri ve analiz özellikleri geliştiriliyor';
+
+  @override
+  String get shareStock => 'Hisse Paylaş';
+
+  @override
+  String get shareFeatureComingSoon => 'Paylaşma özelliği yakında eklenecek';
+
+  @override
+  String get buyFeatureComingSoon => 'Alış işlemi yakında eklenecek';
+
+  @override
+  String get sellFeatureComingSoon => 'Satış işlemi yakında eklenecek';
+
+  @override
+  String get popularStocks => 'Popüler Hisseler';
+
+  @override
+  String get bistStocks => 'BIST Hisseleri';
+
+  @override
+  String get usStocks => 'ABD Hisseleri';
+
+  @override
+  String minutesAgoFull(int count) {
+    return '$count dakika önce';
+  }
+
+  @override
+  String hoursAgoFull(int count) {
+    return '$count saat önce';
+  }
+
+  @override
+  String daysAgoFull(int count) {
+    return '$count gün önce';
+  }
+
+  @override
+  String get investmentsIncluded => 'Yatırımlar dahil';
+
+  @override
+  String get investmentsExcluded => 'Yatırımlar hariç';
+
+  @override
+  String get addFirstCardDescription =>
+      'İlk kartınızı eklemek için Kartlarım sayfasına gidin';
+
+  @override
+  String deleteTransactionConfirmation(String description) {
+    return '$description işlemini silmek istediğinizden emin misiniz?';
+  }
+
+  @override
+  String deleteInstallmentConfirmation(String description) {
+    return '$description işlemini silmek istediğinizden emin misiniz? Tüm taksitler iade edilecektir.';
+  }
+
+  @override
+  String installmentDeleteError(String error) {
+    return 'Taksitli işlem silinirken hata oluştu: $error';
+  }
+
+  @override
+  String get dueToday => 'Bugün';
+
+  @override
+  String lastDays(int days) {
+    return 'Son $days Gün';
+  }
+
+  @override
+  String statementDebt(String amount) {
+    return 'Ekstre Borcu: $amount';
+  }
+
+  @override
+  String get noDebt => 'Borç yok';
+
+  @override
+  String get important => 'Önemli';
+
+  @override
+  String get info => 'Bilgi';
+
+  @override
+  String get statementDebtLabel => 'Ekstre Borcu';
+
+  @override
+  String debtAmount(String amount) {
+    return 'Borç: $amount TL';
+  }
+
+  @override
+  String get lastPaymentDate => 'Son Ödeme Tarihi';
+
+  @override
+  String get allNotifications => 'Tüm Bildirimler';
+
+  @override
+  String pendingNotes(int count) {
+    return '$count bekleyen not';
+  }
+
+  @override
+  String get addQuickNote => 'Hızlı Not Ekle';
+
+  @override
+  String get addQuickNoteDescription =>
+      'Harcama veya gelir notunuzu yazın. Daha sonra işlem olarak ekleyebilirsiniz.';
+
+  @override
+  String exampleExpenseNote(String currency) {
+    return 'Örn: Market alışverişi 150$currency';
+  }
+
+  @override
+  String get addPhotoNote => 'Fotoğraf Notu Ekle';
+
+  @override
+  String get addPhotoNoteDescription =>
+      'Bu fotoğraf için bir açıklama ekleyin (isteğe bağlı)';
+
+  @override
+  String examplePhotoNote(String currency) {
+    return 'Örn: Market fişi - 150$currency';
+  }
+
+  @override
+  String viewAllNotes(int count) {
+    return 'Tüm notları gör ($count)';
+  }
+
+  @override
+  String secondsAgo(int count) {
+    return '$count saniye önce';
+  }
+
+  @override
+  String yesterdayAt(String time) {
+    return 'Dün $time';
+  }
+
+  @override
+  String weekdayAt(String weekday, String time) {
+    return '$weekday $time';
+  }
+
+  @override
+  String dayMonth(int day, String month) {
+    return '$day $month';
+  }
+
+  @override
+  String dayMonthYear(int day, int month, int year) {
+    return '$day/$month/$year';
+  }
+
+  @override
+  String get januaryShort => 'Oca';
+
+  @override
+  String get februaryShort => 'Şub';
+
+  @override
+  String get marchShort => 'Mar';
+
+  @override
+  String get aprilShort => 'Nis';
+
+  @override
+  String get mayShort => 'May';
+
+  @override
+  String get juneShort => 'Haz';
+
+  @override
+  String get julyShort => 'Tem';
+
+  @override
+  String get augustShort => 'Ağu';
+
+  @override
+  String get septemberShort => 'Eyl';
+
+  @override
+  String get octoberShort => 'Eki';
+
+  @override
+  String get novemberShort => 'Kas';
+
+  @override
+  String get decemberShort => 'Ara';
+
+  @override
+  String get stocksIncluded => 'Hisse Dahil';
+
+  @override
+  String get stocksExcluded => 'Hisse Hariç';
+
+  @override
+  String get stockChip => 'Hisse';
+
+  @override
+  String get stockSale => 'Hisse Satış';
+
+  @override
+  String get stockPurchase => 'Hisse Alış';
+
+  @override
+  String get stockName => 'Hisse Adı';
+
+  @override
+  String get price => 'Fiyat';
+
+  @override
+  String get total => 'Toplam';
+
+  @override
+  String get pieces => 'adet';
+
+  @override
+  String totalTransactionsCount(int count) {
+    return '$count işlem';
+  }
+
+  @override
+  String incomeTransactionsCount(int count) {
+    return '$count gelir işlemi';
+  }
+
+  @override
+  String expenseTransactionsCount(int count) {
+    return '$count gider işlemi';
+  }
+
+  @override
+  String transferTransactionsCount(int count) {
+    return '$count transfer işlemi';
+  }
+
+  @override
+  String stockTransactionsCount(int count) {
+    return '$count hisse işlemi';
+  }
+
+  @override
+  String get allTime => 'Tüm Zamanlar';
+
+  @override
+  String get dailyAverageExpense => 'Ortalama günlük harcama';
+
+  @override
+  String get noExpenseTransactions => 'Gider işlemi bulunamadı';
+
+  @override
+  String get analyzeYourFinances => 'Finansal durumunuzu analiz edin';
+
+  @override
+  String get statistics => 'Analiz';
+
+  @override
+  String get noExpenseRecordsYet => 'Henüz gider kaydı yok';
+
+  @override
+  String get transactionHistoryEmpty => 'Hareket geçmişi boş';
+
+  @override
+  String get noSpendingInPeriod => 'Seçilen dönemde harcama yapılmamış';
+
+  @override
+  String get spendingCategories => 'Harcama Kategorileri';
+
+  @override
+  String get noTransactionsInCategory => 'Bu kategoride hareket bulunamadı';
+
+  @override
+  String get chart => 'Grafik';
+
+  @override
+  String get table => 'Tablo';
+
+  @override
+  String get monthlyExpenseAnalysis => 'Aylık Harcama Analizi';
+
+  @override
+  String get monthlyIncomeAnalysis => 'Aylık Gelir Analizi';
+
+  @override
+  String get monthlyNetBalanceAnalysis => 'Aylık Net Bakiye Analizi';
+
+  @override
+  String noMonthlyData(String title) {
+    return 'Aylık $title Verisi Yok';
+  }
+
+  @override
+  String get addFirstTransactionToStart => 'İlk işleminizi ekleyerek başlayın';
+
+  @override
+  String get month => 'Ay';
+
+  @override
+  String get change => 'Değişim';
+
+  @override
+  String get stable => 'Sabit';
+
+  @override
+  String get stockTrading => 'Hisse Alış/Satış';
+
+  @override
+  String get unknownCategory => 'Bilinmeyen Kategori';
+
+  @override
+  String get trackYourStocks => 'Hisse senetlerinizi takip edin';
+
+  @override
+  String get chartDevelopmentMessage =>
+      'Fiyat grafikleri ve analiz özellikleri geliştiriliyor';
+
+  @override
+  String get buyTransactionComingSoon => 'Alış işlemi yakında eklenecek';
+
+  @override
+  String get sellTransactionComingSoon => 'Satış işlemi yakında eklenecek';
+
+  @override
+  String get loadingPopularStocks => 'Popüler hisseler yükleniyor...';
+
+  @override
+  String get noStocksFound => 'Hisse bulunamadı';
+
+  @override
+  String get tryDifferentSearchTerm => 'Farklı bir arama terimi deneyin';
+
+  @override
+  String get dayHigh => 'Gün Yüksek';
+
+  @override
+  String get dayLow => 'Gün Düşük';
+
+  @override
+  String get volume => 'Hacim';
+
+  @override
+  String get remove => 'Kaldır';
+
+  @override
+  String get errorRemovingStock => 'Hisse kaldırılırken hata oluştu';
+
+  @override
+  String stockRemovedFromPortfolio(String stockName) {
+    return '$stockName portföyden kaldırıldı';
+  }
+
+  @override
+  String get stockTransaction => 'Hisse İşlemi';
+
+  @override
+  String get priceRequired => 'Fiyat gerekli';
+
+  @override
+  String get enterValidPrice => 'Geçerli bir fiyat girin';
+
+  @override
+  String get transactionSummary => 'İşlem Özeti';
+
+  @override
+  String get subtotal => 'Ara Toplam';
+
+  @override
+  String executeTransaction(String transactionType) {
+    return '$transactionType İşlemi Gerçekleştir';
+  }
+
+  @override
+  String get unknownStock => 'Bilinmeyen Hisse';
+
+  @override
+  String get selectStock => 'Hisse Seç';
+
+  @override
+  String get selectAccount => 'Hesap Seç';
+
+  @override
+  String get pleaseSelectStock => 'Lütfen bir hisse seçin';
+
+  @override
+  String get pleaseSelectAccount => 'Lütfen bir hesap seçin';
+
+  @override
+  String get noStockSelected => 'Hisse seçilmedi';
+
+  @override
+  String get executePurchase => 'Alış Yap';
+
+  @override
+  String get executeSale => 'Satış Yap';
+
+  @override
+  String get noStocksAddedYet => 'Henüz hisse eklenmemiş';
+
+  @override
+  String get addFirstStockInstruction =>
+      'İlk hissenizi eklemek için Hisse ekranına gidin';
+
+  @override
+  String get quantityAndPrice => 'Miktar & Fiyat';
+
+  @override
+  String get newBadge => 'YENİ';
+
+  @override
+  String get commissionRate => 'Komisyon Oranı:';
+
+  @override
+  String get commission => 'Komisyon';
+
+  @override
+  String get totalToPay => 'Toplam Ödenecek:';
+
+  @override
+  String get totalToReceive => 'Toplam Alınacak:';
+
+  @override
+  String get noCashAccountFound => 'Nakit Hesap Bulunamadı';
+
+  @override
+  String get addCashAccountForStockTrading =>
+      'Hisse işlemi yapabilmek için önce nakit hesap eklemeniz gerekiyor.';
+
+  @override
+  String get currentPrice => 'Güncel Fiyat';
+
+  @override
+  String get currentValue => 'Mevcut Değer';
+
+  @override
+  String get deleteInstallmentConfirm =>
+      'taksitli işlemini tamamen silmek istediğinizden emin misiniz?';
+
+  @override
+  String get deleteInstallmentWarning =>
+      'Bu işlem tüm taksitleri silecek ve ödenen tutarlar geri iade edilecektir.';
+
+  @override
+  String get errorDeletingTransaction => 'İşlem silinirken hata oluştu';
+
+  @override
+  String get deletingInstallmentTransaction => 'Taksitli işlem siliniyor...';
+
+  @override
+  String get errorDeletingInstallmentTransaction =>
+      'Taksitli işlem silinirken hata oluştu';
+
+  @override
+  String get cost => 'Maliyet';
+
+  @override
+  String get weightedAverageCost => 'Ağırlıklı Ortalama Alış Fiyatı';
+
+  @override
+  String get portfolioOverview => 'Portföy Özeti';
+
+  @override
+  String get totalValue => 'Toplam Değer';
+
+  @override
+  String get totalCost => 'Toplam Maliyet';
+
+  @override
+  String get totalProfitLoss => 'Toplam Kar/Zarar';
+
+  @override
+  String get totalReturn => 'Toplam Getiri';
+
+  @override
+  String get profitLoss => 'Kar/Zarar';
+
+  @override
+  String get calendar => 'Takvim';
+
+  @override
+  String get mondayShort => 'Pzt';
+
+  @override
+  String get tuesdayShort => 'Sal';
+
+  @override
+  String get wednesdayShort => 'Çar';
+
+  @override
+  String get thursdayShort => 'Per';
+
+  @override
+  String get fridayShort => 'Cum';
+
+  @override
+  String get saturdayShort => 'Cmt';
+
+  @override
+  String get sundayShort => 'Paz';
+
+  @override
+  String get analysisFeaturesInDevelopment =>
+      'Analiz özellikleri geliştiriliyor';
+
+  @override
+  String get value => 'Değer';
+
+  @override
+  String get returnLabel => 'Getiri';
 }

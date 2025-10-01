@@ -71,7 +71,7 @@ class AppPageScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.bottomPadding = 120,
-    this.horizontalPadding = 20,
+    this.horizontalPadding = 15,
     this.bodyTopPadding = 20,
     this.expandedHeight = 120,
     this.titleFontSize = 28,
@@ -193,7 +193,7 @@ class AppPageScaffold extends StatelessWidget {
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
       body: content,
       floatingActionButton: floatingActionButton,
-      floatingActionButtonLocation: floatingActionButtonLocation,
+      floatingActionButtonLocation: floatingActionButtonLocation ?? FloatingActionButtonLocation.endFloat,
     );
   }
 }
@@ -252,6 +252,7 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
           dividerHeight: 0.5,
           splashFactory: NoSplash.splashFactory,
           overlayColor: WidgetStateProperty.all(Colors.transparent),
+          tabAlignment: TabAlignment.fill,
           tabs: tabs.map((tab) => Tab(
             child: Container(
               height: 40,

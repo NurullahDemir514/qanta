@@ -130,7 +130,7 @@ class CreditCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(context)?.cardName ?? 'Card Name',
+                            l10n.cardName,
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               color: Colors.white.withValues(alpha: 0.7),
@@ -139,7 +139,7 @@ class CreditCardWidget extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            (cardName ?? (bankName != null ? '$bankName Kredi Kartı' : cardTypeLabel)).toUpperCase(),
+                            (cardName ?? (bankName != null ? '$bankName ${l10n.creditCard}' : cardTypeLabel)).toUpperCase(),
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -180,35 +180,12 @@ class CreditCardWidget extends StatelessWidget {
                         
                         const SizedBox(height: 4),
                         
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${AppLocalizations.of(context)?.usage ?? 'Usage'}: ${usagePercentage!.toStringAsFixed(1)}%',
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                color: Colors.white.withValues(alpha: 0.8),
-                              ),
-                            ),
-                            if (statementDate != null)
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.schedule,
-                                    color: Colors.white.withValues(alpha: 0.8),
-                                    size: 12,
-                                  ),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    '${AppLocalizations.of(context)?.lastPayment ?? 'Last Payment'}: ${_formatDueDate(statementDate!, context)}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11,
-                                      color: Colors.white.withValues(alpha: 0.8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ],
+                        Text(
+                          '${l10n.usage}: ${usagePercentage!.toStringAsFixed(1)}%',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
                         ),
                         
                         const SizedBox(height: 2),
@@ -224,7 +201,7 @@ class CreditCardWidget extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  isCreditCardWithDebt ? (AppLocalizations.of(context)?.availableLimit ?? 'Available Limit') : l10n.availableBalance,
+                                  isCreditCardWithDebt ? l10n.availableLimit : l10n.availableBalance,
                                   style: GoogleFonts.inter(
                                     fontSize: 11,
                                     color: Colors.white.withValues(alpha: 0.8),
@@ -243,7 +220,7 @@ class CreditCardWidget extends StatelessWidget {
                                 if (isCreditCardWithDebt) ...[
                                   const SizedBox(height: 1),
                                   CurrencyUtils.buildCurrencyText(
-                                    '${AppLocalizations.of(context)?.debt ?? 'Debt'}: ${themeProvider.formatAmount(totalDebt!)}',
+                                    '${l10n.debt}: ${themeProvider.formatAmount(totalDebt!)}',
                                     style: GoogleFonts.inter(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
@@ -256,10 +233,36 @@ class CreditCardWidget extends StatelessWidget {
                             ),
                           ),
                           
-                          Icon(
-                            Icons.contactless,
-                            color: Colors.white.withValues(alpha: 0.8),
-                            size: 18,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (statementDate != null) ...[
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.schedule,
+                                      color: Colors.white.withValues(alpha: 0.7),
+                                      size: 12,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${l10n.lastPayment}: ${_formatDueDate(statementDate!, context)}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        color: Colors.white.withValues(alpha: 1),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 15),
+                              ],
+                              Icon(
+                                Icons.contactless,
+                                color: Colors.white.withValues(alpha: 0.8),
+                                size: 18,
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -317,20 +320,21 @@ class CreditCardWidget extends StatelessWidget {
     }
     
     // Çok dilli ay isimleri (kısaltılmış)
+    final l10n = AppLocalizations.of(context)!;
     final monthNames = [
       '', 
-      AppLocalizations.of(context)?.january?.substring(0, 3) ?? 'Jan',
-      AppLocalizations.of(context)?.february?.substring(0, 3) ?? 'Feb',
-      AppLocalizations.of(context)?.march?.substring(0, 3) ?? 'Mar',
-      AppLocalizations.of(context)?.april?.substring(0, 3) ?? 'Apr',
-      AppLocalizations.of(context)?.may?.substring(0, 3) ?? 'May',
-      AppLocalizations.of(context)?.june?.substring(0, 3) ?? 'Jun',
-      AppLocalizations.of(context)?.july?.substring(0, 3) ?? 'Jul',
-      AppLocalizations.of(context)?.august?.substring(0, 3) ?? 'Aug',
-      AppLocalizations.of(context)?.september?.substring(0, 3) ?? 'Sep',
-      AppLocalizations.of(context)?.october?.substring(0, 3) ?? 'Oct',
-      AppLocalizations.of(context)?.november?.substring(0, 3) ?? 'Nov',
-      AppLocalizations.of(context)?.december?.substring(0, 3) ?? 'Dec'
+      l10n.januaryShort,
+      l10n.februaryShort,
+      l10n.marchShort,
+      l10n.aprilShort,
+      l10n.mayShort,
+      l10n.juneShort,
+      l10n.julyShort,
+      l10n.augustShort,
+      l10n.septemberShort,
+      l10n.octoberShort,
+      l10n.novemberShort,
+      l10n.decemberShort
     ];
     
     // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini göster

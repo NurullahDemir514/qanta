@@ -6,6 +6,7 @@ import '../services/category_icon_service.dart';
 import '../utils/currency_utils.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/theme_provider.dart';
+import '../models/transaction_model_v2.dart';
 
 /// **QANTA Transaction Design System**
 /// 
@@ -230,19 +231,12 @@ class TransactionDesignSystem {
     // Prioritize direct IconData/Color parameters (new system)
     if (categoryIconData != null) {
       icon = categoryIconData;
-      iconColor = categoryColorData ?? _getDefaultColorForType(type);
+      // Always use transaction type color, ignore category color
+      iconColor = _getDefaultColorForType(type);
     } else if (categoryIcon != null) {
-      // Use category icon and centralized color system (legacy support)
+      // Use category icon but always use transaction type color
       icon = getCategoryIcon(categoryIcon);
-      
-      if (categoryColor != null) {
-        // Use provided color (hex or predefined)
-        iconColor = getCategoryColor(categoryColor);
-      } else {
-        // Use centralized color based on category type
-        final categoryType = type == TransactionType.income ? 'income' : 'expense';
-        iconColor = CategoryIconService.getColorFromMap(categoryIcon, categoryType: categoryType);
-      }
+      iconColor = _getDefaultColorForType(type);
     } else {
       // Use transaction type icon and color
       icon = getTransactionTypeIcon(type);
@@ -252,18 +246,18 @@ class TransactionDesignSystem {
     return TransactionIconData(
       icon: icon,
       iconColor: iconColor,
-      backgroundColor: iconColor.withValues(alpha: 0.1),
+      backgroundColor: Colors.grey.withValues(alpha: 0.1),
     );
   }
   
   static Color _getDefaultColorForType(TransactionType type) {
     switch (type) {
       case TransactionType.income:
-        return incomeColor;
+        return const Color(0xFF22C55E); // Yeşil - Gelir
       case TransactionType.expense:
-        return expenseColor;
+        return const Color(0xFFFF3B30); // Kırmızı - Gider
       case TransactionType.transfer:
-        return transferColor;
+        return const Color(0xFF007AFF); // Mavi - Transfer
     }
   }
   
@@ -315,6 +309,7 @@ class TransactionDesignSystem {
     bool isLast = false,
     bool isPaid = false,
     bool isInstallment = false, // New parameter
+    bool isStock = false, // Stock transaction parameter
   }) {
     IconData icon;
     Color iconColor;
@@ -340,7 +335,8 @@ class TransactionDesignSystem {
       icon: icon,
       iconColor: iconColor,
       isInstallment: isInstallment, // Pass installment flag
-      backgroundColor: iconColor.withValues(alpha: 0.1),
+      isStock: isStock, // Pass stock flag
+      backgroundColor: Colors.grey.withValues(alpha: 0.1),
       amountColor: getAmountColor(type, isDark),
       isDark: isDark,
       onTap: onTap,
@@ -410,7 +406,7 @@ class TransactionDesignSystem {
       time: time,
       icon: specificIcon ?? Icons.receipt_outlined,
       iconColor: specificIconColor ?? const Color(0xFF6B7280),
-      backgroundColor: specificBackgroundColor ?? const Color(0xFF6B7280).withValues(alpha: 0.1),
+      backgroundColor: specificBackgroundColor ?? Colors.grey.withValues(alpha: 0.1),
       amountColor: specificAmountColor ?? getTitleColor(isDark),
       isDark: isDark,
       onTap: onTap,
@@ -449,6 +445,9 @@ class TransactionDesignSystem {
       case 'transfer':
         transactionType = TransactionType.transfer;
         break;
+      case 'stock':
+        transactionType = TransactionType.income; // Stock transactions show as income for display
+        break;
       default:
         transactionType = TransactionType.expense;
     }
@@ -475,6 +474,17 @@ class TransactionDesignSystem {
       isCreditCardInstallment = hasInstallmentPattern;
     }
 
+    // Check if this is a stock transaction and use expandable card
+    if (transaction.isStockTransaction) {
+      return StockExpandableCard(
+        transaction: transaction,
+        isDark: isDark,
+        onLongPress: onLongPress,
+        isFirst: isFirst,
+        isLast: isLast,
+      );
+    }
+
     // Use the new display getters from TransactionWithDetailsV2
     return buildTransactionItem(
       title: displayTitle,
@@ -491,6 +501,7 @@ class TransactionDesignSystem {
       isLast: isLast,
       isPaid: transaction.isPaid,
       isInstallment: isCreditCardInstallment, // Pass installment flag
+      isStock: transaction.isStockTransaction, // Pass stock flag
     );
   }
 }
@@ -534,6 +545,7 @@ class TransactionItem extends StatelessWidget {
   final bool isLast;
   final bool isPaid;
   final bool isInstallment; // New parameter
+  final bool isStock; // Stock transaction parameter
 
   const TransactionItem({
     super.key,
@@ -552,6 +564,7 @@ class TransactionItem extends StatelessWidget {
     this.isLast = false,
     this.isPaid = false,
     this.isInstallment = false, // New parameter
+    this.isStock = false, // Stock transaction parameter
   });
 
   @override
@@ -574,7 +587,7 @@ class TransactionItem extends StatelessWidget {
               width: TransactionDesignSystem.iconContainerSize,
               height: TransactionDesignSystem.iconContainerSize,
               decoration: BoxDecoration(
-                color: backgroundColor,
+                color: Colors.grey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(TransactionDesignSystem.iconBorderRadius),
               ),
               child: Stack(
@@ -633,7 +646,30 @@ class TransactionItem extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (isStock) ...[
+                        SizedBox(width: 6),
+                        // Stock chip
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.blue.shade800 : Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isDark ? Colors.blue.shade600 : Colors.blue.shade300,
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)?.stockChip ?? 'Stock',
+                            style: GoogleFonts.inter(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black,
                             ),
                           ),
                         ),
@@ -648,6 +684,8 @@ class TransactionItem extends StatelessWidget {
                       fontWeight: TransactionDesignSystem.subtitleFontWeight,
                       color: TransactionDesignSystem.getSubtitleColor(isDark),
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -851,6 +889,309 @@ class TransactionLoadingSkeleton extends StatelessWidget {
           ),
         )),
       ),
+    );
+  }
+}
+
+/// Hisse işlemleri için expandable kart (taksitli kart yapısını referans alır)
+class StockExpandableCard extends StatefulWidget {
+  final TransactionWithDetailsV2 transaction;
+  final bool isDark;
+  final VoidCallback? onLongPress;
+  final bool isFirst;
+  final bool isLast;
+
+  const StockExpandableCard({
+    super.key,
+    required this.transaction,
+    required this.isDark,
+    this.onLongPress,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  @override
+  State<StockExpandableCard> createState() => _StockExpandableCardState();
+}
+
+class _StockExpandableCardState extends State<StockExpandableCard>
+    with SingleTickerProviderStateMixin {
+  bool _isExpanded = false;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _toggleExpanded() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final transaction = widget.transaction;
+    
+    // Format amount
+    final amount = TransactionDesignSystem.formatAmount(transaction.amount, TransactionType.income);
+    final time = transaction.displayTime;
+    
+    // Get account name
+    final accountName = transaction.sourceAccountName ?? 'Hesap';
+    
+    // Get stock details
+    final stockSymbol = transaction.stockSymbol ?? '';
+    final stockName = transaction.stockName ?? '';
+    final stockQuantity = transaction.stockQuantity;
+    final stockPrice = transaction.stockPrice;
+    
+    // Determine action
+    final l10n = AppLocalizations.of(context)!;
+    final action = transaction.amount > 0 ? l10n.stockSale : l10n.stockPurchase;
+    final actionColor = transaction.amount > 0 ? Colors.green : Colors.red;
+    
+    // Choose icon based on action (sale/purchase)
+    final stockIcon = transaction.amount > 0 ? Icons.show_chart : Icons.bar_chart;
+
+    // Use neutral background but colored icon for stock transactions
+    final iconData = TransactionIconData(
+      icon: stockIcon,
+      backgroundColor: Colors.grey.withValues(alpha: 0.1),
+      iconColor: actionColor, // Alış kırmızı, satış yeşil
+    );
+
+    return Padding(
+      padding: EdgeInsets.only(
+        top: widget.isFirst ? TransactionDesignSystem.verticalPadding + 4 : TransactionDesignSystem.verticalPadding,
+        bottom: widget.isLast ? TransactionDesignSystem.verticalPadding + 4 : TransactionDesignSystem.verticalPadding,
+        left: TransactionDesignSystem.horizontalPadding,
+        right: TransactionDesignSystem.horizontalPadding,
+      ),
+      child: Column(
+        children: [
+          // Main transaction row
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _toggleExpanded,
+            onLongPress: widget.onLongPress,
+            child: Row(
+              children: [
+                // Icon Container
+                Container(
+                  width: TransactionDesignSystem.iconContainerSize,
+                  height: TransactionDesignSystem.iconContainerSize,
+                  decoration: BoxDecoration(
+                    color: iconData.backgroundColor,
+                    borderRadius: BorderRadius.circular(TransactionDesignSystem.iconBorderRadius),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      iconData.icon,
+                      color: iconData.iconColor,
+                      size: TransactionDesignSystem.iconSize,
+                    ),
+                  ),
+                ),
+                
+                SizedBox(width: TransactionDesignSystem.iconContentSpacing),
+                
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title row with chip
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Title
+                          Flexible(
+                            child: Text(
+                              '$action $stockSymbol',
+                              style: GoogleFonts.inter(
+                                fontSize: TransactionDesignSystem.titleFontSize,
+                                fontWeight: TransactionDesignSystem.titleFontWeight,
+                                color: TransactionDesignSystem.getTitleColor(isDark),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                           // Investment badge
+                           Container(
+                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                             decoration: BoxDecoration(
+                               color: isDark ? Colors.blue.shade800 : Colors.blue.shade100,
+                               borderRadius: BorderRadius.circular(6),
+                               border: Border.all(
+                                 color: isDark ? Colors.blue.shade600 : Colors.blue.shade300,
+                                 width: 0.5,
+                               ),
+                             ),
+                             child: Text(
+                               AppLocalizations.of(context)?.stockChip ?? 'Stock',
+                               style: GoogleFonts.inter(
+                                 fontSize: 9,
+                                 fontWeight: FontWeight.w600,
+                                 color: isDark ? Colors.white : Colors.black,
+                               ),
+                             ),
+                           ),
+                        ],
+                      ),
+                      
+                      SizedBox(height: TransactionDesignSystem.titleSubtitleSpacing),
+                      
+                      // Subtitle
+                      Text(
+                        time != null ? '$accountName • $time' : accountName,
+                        style: GoogleFonts.inter(
+                          fontSize: TransactionDesignSystem.subtitleFontSize,
+                          color: TransactionDesignSystem.getSubtitleColor(isDark),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Amount and expand arrow
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Amount column - flexible
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          // Ana tutar
+                          Text(
+                            amount,
+                            style: GoogleFonts.inter(
+                              fontSize: TransactionDesignSystem.amountFontSize,
+                              fontWeight: TransactionDesignSystem.amountFontWeight,
+                              color: actionColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          // Stock detail (small)
+                          if (stockQuantity != null && stockPrice != null)
+                            Text(
+                              '${stockQuantity.toStringAsFixed(0)} ${l10n.pieces} @ ${stockPrice.toStringAsFixed(2)} ₺',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w400,
+                                color: TransactionDesignSystem.getSubtitleColor(isDark),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
+                      ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          // Expandable stock details
+          SizeTransition(
+            sizeFactor: _animation,
+            child: _buildStockDetails(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStockDetails() {
+    final isDark = widget.isDark;
+    final transaction = widget.transaction;
+    final l10n = AppLocalizations.of(context)!;
+    final stockName = transaction.stockName ?? '';
+    final stockQuantity = transaction.stockQuantity;
+    final stockPrice = transaction.stockPrice;
+    final totalAmount = (stockQuantity ?? 0) * (stockPrice ?? 0);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, left: 52), // Align with content
+      child: Column(
+        children: [
+          if (stockName.isNotEmpty) ...[
+            _buildDetailRow(l10n.stockName, stockName, isDark),
+            const SizedBox(height: 8),
+          ],
+          if (stockQuantity != null) ...[
+            _buildDetailRow(l10n.quantity, '${stockQuantity.toStringAsFixed(0)} ${l10n.pieces}', isDark),
+            const SizedBox(height: 8),
+          ],
+          if (stockPrice != null) ...[
+            _buildDetailRow(l10n.price, '${stockPrice.toStringAsFixed(2)} ₺', isDark),
+            const SizedBox(height: 8),
+          ],
+          _buildDetailRow(l10n.total, '${totalAmount.toStringAsFixed(2)} ₺', isDark),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, bool isDark) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Label - flexible
+        Flexible(
+          flex: 2,
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: TransactionDesignSystem.getSubtitleColor(isDark),
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Value - sağa yaslanmış
+        Flexible(
+          flex: 3,
+          child: Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+            textAlign: TextAlign.end,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 } 

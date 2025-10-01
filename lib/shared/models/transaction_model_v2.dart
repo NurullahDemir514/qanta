@@ -1,5 +1,6 @@
 import '../utils/date_utils.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Installment information for display purposes
 class InstallmentInfo {
@@ -26,7 +27,8 @@ class InstallmentInfo {
 enum TransactionType {
   income('income'),
   expense('expense'),
-  transfer('transfer');
+  transfer('transfer'),
+  stock('stock');
 
   const TransactionType(this.value);
   final String value;
@@ -39,14 +41,16 @@ enum TransactionType {
   }
 
   /// Display name for UI
-  String get displayName {
+  String getDisplayName(AppLocalizations l10n) {
     switch (this) {
       case TransactionType.income:
-        return 'Income';
+        return l10n.income;
       case TransactionType.expense:
-        return 'Expense';
+        return l10n.expense;
       case TransactionType.transfer:
-        return 'Transfer';
+        return l10n.transfer;
+      case TransactionType.stock:
+        return l10n.stocks;
     }
   }
 }
@@ -71,6 +75,12 @@ class TransactionModelV2 {
   final String? notes;
   final bool isPaid; // Payment status for statement tracking
   
+  // Stock transaction specific fields
+  final String? stockSymbol;
+  final String? stockName;
+  final double? stockQuantity;
+  final double? stockPrice;
+  
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -88,6 +98,10 @@ class TransactionModelV2 {
     this.isRecurring = false,
     this.notes,
     this.isPaid = false,
+    this.stockSymbol,
+    this.stockName,
+    this.stockQuantity,
+    this.stockPrice,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -113,6 +127,8 @@ class TransactionModelV2 {
         return -amount;
       case TransactionType.transfer:
         return amount; // Neutral for transfers
+      case TransactionType.stock:
+        return amount; // Stock transactions can be positive or negative
     }
   }
 
@@ -140,6 +156,10 @@ class TransactionModelV2 {
       isRecurring: json['is_recurring'] as bool? ?? false,
       notes: json['notes'] as String?,
       isPaid: json['is_paid'] as bool? ?? false,
+      stockSymbol: json['stock_symbol'] as String?,
+      stockName: json['stock_name'] as String?,
+      stockQuantity: json['stock_quantity'] != null ? (json['stock_quantity'] as num).toDouble() : null,
+      stockPrice: json['stock_price'] != null ? (json['stock_price'] as num).toDouble() : null,
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
     );
@@ -168,6 +188,10 @@ class TransactionModelV2 {
       'is_recurring': isRecurring,
       'notes': notes,
       'is_paid': isPaid,
+      'stock_symbol': stockSymbol,
+      'stock_name': stockName,
+      'stock_quantity': stockQuantity,
+      'stock_price': stockPrice,
       'created_at': DateUtils.toIso8601(createdAt),
       'updated_at': DateUtils.toIso8601(updatedAt),
     };
@@ -188,6 +212,10 @@ class TransactionModelV2 {
     bool? isRecurring,
     String? notes,
     bool? isPaid,
+    String? stockSymbol,
+    String? stockName,
+    double? stockQuantity,
+    double? stockPrice,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -205,6 +233,10 @@ class TransactionModelV2 {
       isRecurring: isRecurring ?? this.isRecurring,
       notes: notes ?? this.notes,
       isPaid: isPaid ?? this.isPaid,
+      stockSymbol: stockSymbol ?? this.stockSymbol,
+      stockName: stockName ?? this.stockName,
+      stockQuantity: stockQuantity ?? this.stockQuantity,
+      stockPrice: stockPrice ?? this.stockPrice,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -236,6 +268,12 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
   final String? categoryColor;
   final int? installmentCount;
   final bool isInstallment; // Flag to identify installment transactions
+  
+  // Stock transaction specific fields
+  final String? stockSymbol;
+  final String? stockName;
+  final double? stockQuantity;
+  final double? stockPrice;
 
   const TransactionWithDetailsV2({
     required super.id,
@@ -262,6 +300,10 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
     this.categoryColor,
     this.installmentCount,
     this.isInstallment = false,
+    this.stockSymbol,
+    this.stockName,
+    this.stockQuantity,
+    this.stockPrice,
   });
 
   /// Create from JSON with joined data
@@ -291,6 +333,10 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
       categoryColor: json['category_color'] as String?,
       installmentCount: json['installment_count'] as int?,
       isInstallment: json['is_installment'] as bool? ?? false,
+      stockSymbol: json['stock_symbol'] as String?,
+      stockName: json['stock_name'] as String?,
+      stockQuantity: json['stock_quantity'] != null ? (json['stock_quantity'] as num).toDouble() : null,
+      stockPrice: json['stock_price'] != null ? (json['stock_price'] as num).toDouble() : null,
     );
   }
 
@@ -315,6 +361,8 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
         return 'Expense';
       case TransactionType.transfer:
         return 'Transfer';
+      case TransactionType.stock:
+        return 'Stock';
     }
   }
 
@@ -329,6 +377,13 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
         return categoryName ?? description;
       case TransactionType.transfer:
         // For transfers: show description as title
+        return description;
+      case TransactionType.stock:
+        // For stocks: show simple stock transaction title
+        if (stockSymbol != null) {
+          final action = amount > 0 ? 'Satış' : 'Alış';
+          return '$action $stockSymbol';
+        }
         return description;
     }
   }
@@ -347,8 +402,18 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
         final sourceAccount = sourceAccountName ?? 'Account';
         final targetAccount = targetAccountName ?? 'Account';
         return '$sourceAccount → $targetAccount';
+      case TransactionType.stock:
+        // For stocks: show account name and stock details as subtitle
+        final accountName = sourceAccountName ?? 'Account';
+        if (stockQuantity != null && stockPrice != null) {
+          return '$accountName • ${stockQuantity!.toStringAsFixed(0)} adet @ ${stockPrice!.toStringAsFixed(2)} ₺';
+        }
+        return accountName;
     }
   }
+  
+  /// Check if this is a stock transaction
+  bool get isStockTransaction => type == TransactionType.stock;
   
   /// Returns installment information if this is an installment transaction
   /// This should be fetched from the installment relationship, not parsed from description

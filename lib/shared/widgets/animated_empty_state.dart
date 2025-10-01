@@ -91,13 +91,18 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
   }
 
   void _startAnimations() async {
+    if (!mounted) return; // Widget dispose edilmişse çık
+    
     await Future.delayed(const Duration(milliseconds: 100));
+    if (!mounted) return; // Her adımda kontrol et
     _scaleController.forward();
     
     await Future.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
     _fadeController.forward();
     
     await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
     _slideController.forward();
   }
 

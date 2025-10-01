@@ -254,7 +254,6 @@ class TransactionEventManager {
         ? _eventHistory.sublist(_eventHistory.length - 5)
         : _eventHistory;
     for (final event in recentEvents) {
-      print('  - ${event.timestamp}: $event');
     }
   }
   

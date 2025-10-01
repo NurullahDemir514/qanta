@@ -98,11 +98,6 @@ class UnifiedCardProvider extends ChangeNotifier {
 
   /// Transaction silme event'ini handle et
   void _handleTransactionDeleted(TransactionDeleted event) {
-    print('   Transaction ID: ${event.transactionId}');
-    print('   Card ID: ${event.cardId}');
-    print('   Card Type: ${event.cardType}');
-    print('   Amount: ${event.amount}');
-    print('   Type: ${event.type}');
     
     // Transaction'ı listeden kaldır
     _transactions.removeWhere((t) => t.id == event.transactionId);
@@ -122,23 +117,15 @@ class UnifiedCardProvider extends ChangeNotifier {
 
   /// Bakiye güncelleme event'ini handle et
   void _handleBalanceUpdated(BalanceUpdated event) {
-    print('   Card ID: ${event.cardId}');
-    print('   Card Type: ${event.cardType}');
-    print('   Change Amount: ${event.changeAmount}');
-    print('   Old Balance: ${event.oldBalance}');
-    print('   New Balance: ${event.newBalance}');
     
     switch (event.cardType) {
       case CardType.credit:
-        print('   Updating credit card balance via BalanceUpdated event...');
         _updateCreditCardBalance(event.cardId, event.changeAmount);
         break;
       case CardType.debit:
-        print('   Updating debit card balance via BalanceUpdated event...');
         _updateDebitCardBalance(event.cardId, event.changeAmount);
         break;
       case CardType.cash:
-        print('   Updating cash account balance via BalanceUpdated event...');
         _updateCashAccountBalance(event.changeAmount);
         break;
     }
@@ -180,17 +167,12 @@ class UnifiedCardProvider extends ChangeNotifier {
   }
 
   void _updateDebitCardBalance(String cardId, double changeAmount) {
-    print('   Card ID: $cardId');
-    print('   Change Amount: $changeAmount');
     
     final index = _debitCards.indexWhere((card) => card.id == cardId);
     if (index != -1) {
       final currentCard = _debitCards[index];
-      print('   Current card: ${currentCard.cardName}');
-      print('   Current balance: ${currentCard.balance}');
       
       final newBalance = (currentCard.balance + changeAmount).clamp(0.0, double.infinity);
-      print('   Calculated new balance: $newBalance');
       
       _debitCards[index] = currentCard.copyWith(balance: newBalance);
     } else {

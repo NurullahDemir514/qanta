@@ -37,7 +37,7 @@ class TransactionFilterChips extends StatelessWidget {
             padding: const EdgeInsets.only(right: 8),
             child: _buildFilterChip(
               context: context,
-              label: type.displayName,
+              label: type.getDisplayName(AppLocalizations.of(context)!),
               isSelected: selectedFilter == type,
               onTap: () {
                 HapticFeedback.selectionClick();

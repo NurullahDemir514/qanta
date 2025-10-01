@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 /// **Centralized Category Management Service**
 /// 
@@ -122,6 +123,112 @@ class CategoryIconService {
     'starbucks': Icons.local_cafe_rounded,
     'çay': Icons.local_cafe_rounded,
     'tea': Icons.local_cafe_rounded,
+    'cigarette': Icons.smoking_rooms_rounded,
+    'sigara': Icons.smoking_rooms_rounded,
+    'tobacco': Icons.smoking_rooms_rounded,
+    'tütün': Icons.smoking_rooms_rounded,
+    
+    // === PERSONAL CARE & BEAUTY ===
+    'beauty': Icons.face_retouching_natural_rounded,
+    'güzellik': Icons.face_retouching_natural_rounded,
+    'cosmetics': Icons.face_retouching_natural_rounded,
+    'kozmetik': Icons.face_retouching_natural_rounded,
+    'hair': Icons.content_cut_rounded,
+    'saç': Icons.content_cut_rounded,
+    'barber': Icons.content_cut_rounded,
+    'berber': Icons.content_cut_rounded,
+    'salon': Icons.content_cut_rounded,
+    'spa': Icons.spa_rounded,
+    'massage': Icons.spa_rounded,
+    'masaj': Icons.spa_rounded,
+    'gym': Icons.fitness_center_rounded,
+    'spor': Icons.fitness_center_rounded,
+    'fitness': Icons.fitness_center_rounded,
+    'workout': Icons.fitness_center_rounded,
+    
+    // === ENTERTAINMENT & LEISURE ===
+    'cinema': Icons.movie_rounded,
+    'sinema': Icons.movie_rounded,
+    'movie': Icons.movie_rounded,
+    'film': Icons.movie_rounded,
+    'theater': Icons.theater_comedy_rounded,
+    'tiyatro': Icons.theater_comedy_rounded,
+    'concert': Icons.music_note_rounded,
+    'konser': Icons.music_note_rounded,
+    'music': Icons.music_note_rounded,
+    'müzik': Icons.music_note_rounded,
+    'gaming': Icons.sports_esports_rounded,
+    'oyun': Icons.sports_esports_rounded,
+    'game': Icons.sports_esports_rounded,
+    'book': Icons.menu_book_rounded,
+    'kitap': Icons.menu_book_rounded,
+    'reading': Icons.menu_book_rounded,
+    'okuma': Icons.menu_book_rounded,
+    'magazine': Icons.menu_book_rounded,
+    'dergi': Icons.menu_book_rounded,
+    
+    // === TECHNOLOGY & ELECTRONICS ===
+    'phone': Icons.phone_android_rounded,
+    'telefon': Icons.phone_android_rounded,
+    'mobile': Icons.phone_android_rounded,
+    'computer': Icons.computer_rounded,
+    'bilgisayar': Icons.computer_rounded,
+    'tablet': Icons.tablet_android_rounded,
+    'internet': Icons.wifi_rounded,
+    'software': Icons.apps_rounded,
+    'yazılım': Icons.apps_rounded,
+    'app': Icons.apps_rounded,
+    'subscription': Icons.subscriptions_rounded,
+    'abonelik': Icons.subscriptions_rounded,
+    'streaming': Icons.stream_rounded,
+    'netflix': Icons.stream_rounded,
+    'spotify': Icons.music_note_rounded,
+    'youtube': Icons.play_circle_rounded,
+    
+    // === HOME & GARDEN ===
+    'furniture': Icons.chair_rounded,
+    'mobilya': Icons.chair_rounded,
+    'decoration': Icons.home_rounded,
+    'dekorasyon': Icons.home_rounded,
+    'cleaning': Icons.cleaning_services_rounded,
+    'temizlik': Icons.cleaning_services_rounded,
+    'garden': Icons.yard_rounded,
+    'bahçe': Icons.yard_rounded,
+    'plant': Icons.local_florist_rounded,
+    'bitki': Icons.local_florist_rounded,
+    'tool': Icons.build_rounded,
+    'alet': Icons.build_rounded,
+    'maintenance': Icons.build_rounded,
+    'bakım': Icons.build_rounded,
+    
+    // === PETS & ANIMALS ===
+    'pet': Icons.pets_rounded,
+    'evcil': Icons.pets_rounded,
+    'dog': Icons.pets_rounded,
+    'köpek': Icons.pets_rounded,
+    'cat': Icons.pets_rounded,
+    'kedi': Icons.pets_rounded,
+    'veterinary': Icons.local_hospital_rounded,
+    'veteriner': Icons.local_hospital_rounded,
+    'pet_food': Icons.pets_rounded,
+    'mama': Icons.pets_rounded,
+    
+    // === MISCELLANEOUS ===
+    'donation': Icons.volunteer_activism_rounded,
+    'bağış': Icons.volunteer_activism_rounded,
+    'charity': Icons.volunteer_activism_rounded,
+    'yardım': Icons.volunteer_activism_rounded,
+    'insurance': Icons.security_rounded,
+    'sigorta': Icons.security_rounded,
+    'tax': Icons.receipt_long_rounded,
+    'vergi': Icons.receipt_long_rounded,
+    'fine': Icons.gavel_rounded,
+    'ceza': Icons.gavel_rounded,
+    'parking': Icons.local_parking_rounded,
+    'otopark': Icons.local_parking_rounded,
+    'toll': Icons.toll_rounded,
+    'köprü': Icons.toll_rounded,
+    'bridge': Icons.toll_rounded,
     'groceries': Icons.shopping_cart_rounded,
     'market': Icons.shopping_cart_rounded,
     'supermarket': Icons.shopping_cart_rounded,
@@ -179,9 +286,7 @@ class CategoryIconService {
     'local_taxi': Icons.local_taxi_rounded,
     'uber': Icons.local_taxi_rounded,
     'bitaksi': Icons.local_taxi_rounded,
-    'parking': Icons.local_parking_rounded,
     'park': Icons.local_parking_rounded,
-    'otopark': Icons.local_parking_rounded,
     'motorcycle': Icons.two_wheeler_rounded,
     'motosiklet': Icons.two_wheeler_rounded,
     'bicycle': Icons.pedal_bike_rounded,
@@ -210,9 +315,6 @@ class CategoryIconService {
     'kıyafet': Icons.checkroom_rounded,
     'electronics': Icons.devices_rounded,
     'elektronik': Icons.devices_rounded,
-    'furniture': Icons.chair_rounded,
-    'mobilya': Icons.chair_rounded,
-    'kitap': Icons.menu_book_rounded,
     'gifts': Icons.card_giftcard_rounded,
     'hediyeler': Icons.card_giftcard_rounded,
     'jewelry': Icons.diamond_rounded,
@@ -221,8 +323,6 @@ class CategoryIconService {
     'ayakkabı': Icons.sports_rounded,
     'nike': Icons.sports_rounded,
     'adidas': Icons.sports_rounded,
-    'cosmetics': Icons.face_retouching_natural_rounded,
-    'kozmetik': Icons.face_retouching_natural_rounded,
     'makeup': Icons.face_retouching_natural_rounded,
     'makyaj': Icons.face_retouching_natural_rounded,
     'perfume': Icons.local_florist_rounded,
@@ -230,33 +330,17 @@ class CategoryIconService {
     
     // Entertainment & Lifestyle
     'entertainment': Icons.movie_rounded,
-    'movie': Icons.movie_rounded,
     'eğlence': Icons.movie_rounded,
-    'music': Icons.music_note_rounded,
-    'müzik': Icons.music_note_rounded,
-    'gaming': Icons.sports_esports_rounded,
-    'oyun': Icons.sports_esports_rounded,
-    'streaming': Icons.play_circle_rounded,
     'yayın': Icons.play_circle_rounded,
     'concerts': Icons.library_music_rounded,
-    'konser': Icons.library_music_rounded,
     'nightlife': Icons.nightlife_rounded,
     'gece_hayatı': Icons.nightlife_rounded,
     'hobbies': Icons.palette_rounded,
     'hobi': Icons.palette_rounded,
     'photography': Icons.camera_alt_rounded,
     'fotoğraf': Icons.camera_alt_rounded,
-    'cinema': Icons.movie_rounded,
-    'sinema': Icons.movie_rounded,
-    'theater': Icons.theater_comedy_rounded,
-    'tiyatro': Icons.theater_comedy_rounded,
     'books': Icons.auto_stories_rounded,
     'kitaplar': Icons.auto_stories_rounded,
-    'reading': Icons.auto_stories_rounded,
-    'okuma': Icons.auto_stories_rounded,
-    'netflix': Icons.play_circle_rounded,
-    'youtube': Icons.play_circle_rounded,
-    'spotify': Icons.music_note_rounded,
     'apple_music': Icons.music_note_rounded,
     
     // Bills & Utilities
@@ -268,13 +352,8 @@ class CategoryIconService {
     'elektrik': Icons.bolt_rounded,
     'water': Icons.water_drop_rounded,
     'su': Icons.water_drop_rounded,
-    'internet': Icons.wifi_rounded,
-    'phone': Icons.phone_rounded,
-    'telefon': Icons.phone_rounded,
     'cable_tv': Icons.tv_rounded,
     'tv': Icons.tv_rounded,
-    'subscription': Icons.subscriptions_rounded,
-    'abonelik': Icons.subscriptions_rounded,
     'digiturk': Icons.tv_rounded,
     'tivibu': Icons.tv_rounded,
     'turkcell': Icons.phone_rounded,
@@ -282,8 +361,6 @@ class CategoryIconService {
     'türk_telekom': Icons.phone_rounded,
     'superonline': Icons.wifi_rounded,
     'ttnet': Icons.wifi_rounded,
-    'insurance': Icons.security_rounded,
-    'sigorta': Icons.security_rounded,
     'bank_fees': Icons.account_balance_rounded,
     'banka_ücreti': Icons.account_balance_rounded,
     'atm': Icons.local_atm_rounded,
@@ -304,12 +381,6 @@ class CategoryIconService {
     'eczane': Icons.local_pharmacy_rounded,
     'dental': Icons.medical_services_rounded,
     'diş': Icons.medical_services_rounded,
-    'fitness': Icons.fitness_center_rounded,
-    'gym': Icons.fitness_center_rounded,
-    'spor': Icons.fitness_center_rounded,
-    'spa': Icons.spa_rounded,
-    'beauty': Icons.spa_rounded,
-    'güzellik': Icons.spa_rounded,
     'therapy': Icons.psychology_rounded,
     'terapi': Icons.psychology_rounded,
     'nutrition': Icons.dining_rounded,
@@ -355,18 +426,10 @@ class CategoryIconService {
     'mortgage': Icons.real_estate_agent_rounded,
     'repairs': Icons.build_rounded,
     'tamir': Icons.build_rounded,
-    'cleaning': Icons.cleaning_services_rounded,
-    'temizlik': Icons.cleaning_services_rounded,
-    'garden': Icons.grass_rounded,
-    'bahçe': Icons.grass_rounded,
-    'decoration': Icons.design_services_rounded,
-    'dekorasyon': Icons.design_services_rounded,
     
     // Technology & Digital
     'tech': Icons.computer_rounded,
     'teknoloji': Icons.computer_rounded,
-    'software': Icons.code_rounded,
-    'yazılım': Icons.code_rounded,
     'cloud': Icons.cloud_rounded,
     'bulut': Icons.cloud_rounded,
     'domain': Icons.language_rounded,
@@ -384,7 +447,6 @@ class CategoryIconService {
     'pets': Icons.pets_rounded,
     'evcil_hayvan': Icons.pets_rounded,
     'vet': Icons.local_hospital_rounded,
-    'veteriner': Icons.local_hospital_rounded,
     'elderly_care': Icons.elderly_rounded,
     'yaşlı_bakımı': Icons.elderly_rounded,
     
@@ -401,7 +463,6 @@ class CategoryIconService {
     // Emergency & Others
     'emergency': Icons.emergency_rounded,
     'acil': Icons.emergency_rounded,
-    'charity': Icons.volunteer_activism_rounded,
     'hayır': Icons.volunteer_activism_rounded,
     'legal': Icons.gavel_rounded,
     'hukuki': Icons.gavel_rounded,
@@ -426,7 +487,6 @@ class CategoryIconService {
     'category': Icons.tag,
     'diğer': Icons.tag,
     // === CUSTOM/NEW CATEGORIES ===
-    'pet_food': Icons.pets_rounded,
     'evcil_hayvan_maması': Icons.pets_rounded,
     'toy': Icons.toys_rounded,
     'oyuncak': Icons.toys_rounded,
@@ -574,6 +634,112 @@ class CategoryIconService {
     'teslimat': Color(0xFFDC2626),
     'yemeksepeti': Color(0xFFDC2626),
     'getir': Color(0xFFDC2626),
+    'cigarette': Color(0xFFDC2626),           // Red for cigarette expenses (consistent with other expenses)
+    'sigara': Color(0xFFDC2626),
+    'tobacco': Color(0xFFDC2626),
+    'tütün': Color(0xFFDC2626),
+    
+    // === PERSONAL CARE & BEAUTY COLORS (PINK/PURPLE TONES) ===
+    'beauty': Color(0xFFEC4899),              // Pink for beauty expenses
+    'güzellik': Color(0xFFEC4899),
+    'cosmetics': Color(0xFFEC4899),
+    'kozmetik': Color(0xFFEC4899),
+    'hair': Color(0xFFEC4899),
+    'saç': Color(0xFFEC4899),
+    'barber': Color(0xFFEC4899),
+    'berber': Color(0xFFEC4899),
+    'salon': Color(0xFFEC4899),
+    'spa': Color(0xFFEC4899),
+    'massage': Color(0xFFEC4899),
+    'masaj': Color(0xFFEC4899),
+    'gym': Color(0xFF7C3AED),                 // Purple for fitness
+    'spor': Color(0xFF7C3AED),
+    'fitness': Color(0xFF7C3AED),
+    'workout': Color(0xFF7C3AED),
+    
+    // === ENTERTAINMENT & LEISURE COLORS (ORANGE/YELLOW TONES) ===
+    'cinema': Color(0xFFEA580C),              // Orange for entertainment
+    'sinema': Color(0xFFEA580C),
+    'movie': Color(0xFFEA580C),
+    'film': Color(0xFFEA580C),
+    'theater': Color(0xFFEA580C),
+    'tiyatro': Color(0xFFEA580C),
+    'concert': Color(0xFFEA580C),
+    'konser': Color(0xFFEA580C),
+    'music': Color(0xFFEA580C),
+    'müzik': Color(0xFFEA580C),
+    'gaming': Color(0xFFEA580C),
+    'oyun': Color(0xFFEA580C),
+    'game': Color(0xFFEA580C),
+    'book': Color(0xFFD97706),                // Amber for books
+    'kitap': Color(0xFFD97706),
+    'reading': Color(0xFFD97706),
+    'okuma': Color(0xFFD97706),
+    'magazine': Color(0xFFD97706),
+    'dergi': Color(0xFFD97706),
+    
+    // === TECHNOLOGY & ELECTRONICS COLORS (BLUE TONES) ===
+    'phone': Color(0xFF3B82F6),               // Blue for technology
+    'telefon': Color(0xFF3B82F6),
+    'mobile': Color(0xFF3B82F6),
+    'computer': Color(0xFF3B82F6),
+    'bilgisayar': Color(0xFF3B82F6),
+    'tablet': Color(0xFF3B82F6),
+    'internet': Color(0xFF3B82F6),
+    'software': Color(0xFF3B82F6),
+    'yazılım': Color(0xFF3B82F6),
+    'app': Color(0xFF3B82F6),
+    'subscription': Color(0xFF3B82F6),
+    'abonelik': Color(0xFF3B82F6),
+    'streaming': Color(0xFF3B82F6),
+    'netflix': Color(0xFF3B82F6),
+    'spotify': Color(0xFF3B82F6),
+    'youtube': Color(0xFF3B82F6),
+    
+    // === HOME & GARDEN COLORS (GREEN TONES) ===
+    'furniture': Color(0xFF059669),           // Teal for home
+    'mobilya': Color(0xFF059669),
+    'decoration': Color(0xFF059669),
+    'dekorasyon': Color(0xFF059669),
+    'cleaning': Color(0xFF059669),
+    'temizlik': Color(0xFF059669),
+    'garden': Color(0xFF059669),
+    'bahçe': Color(0xFF059669),
+    'plant': Color(0xFF059669),
+    'bitki': Color(0xFF059669),
+    'tool': Color(0xFF059669),
+    'alet': Color(0xFF059669),
+    'maintenance': Color(0xFF059669),
+    'bakım': Color(0xFF059669),
+    
+    // === PETS & ANIMALS COLORS (BROWN TONES) ===
+    'pet': Color(0xFF8B4513),                 // Brown for pets
+    'evcil': Color(0xFF8B4513),
+    'dog': Color(0xFF8B4513),
+    'köpek': Color(0xFF8B4513),
+    'cat': Color(0xFF8B4513),
+    'kedi': Color(0xFF8B4513),
+    'veterinary': Color(0xFF8B4513),
+    'veteriner': Color(0xFF8B4513),
+    'pet_food': Color(0xFF8B4513),
+    'mama': Color(0xFF8B4513),
+    
+    // === MISCELLANEOUS COLORS (VARIOUS) ===
+    'donation': Color(0xFF10B981),            // Green for donations
+    'bağış': Color(0xFF10B981),
+    'charity': Color(0xFF10B981),
+    'yardım': Color(0xFF10B981),
+    'insurance': Color(0xFF6B7280),           // Gray for insurance
+    'sigorta': Color(0xFF6B7280),
+    'tax': Color(0xFF6B7280),                 // Gray for taxes
+    'vergi': Color(0xFF6B7280),
+    'fine': Color(0xFFDC2626),                // Red for fines
+    'ceza': Color(0xFFDC2626),
+    'parking': Color(0xFF6B7280),             // Gray for parking
+    'otopark': Color(0xFF6B7280),
+    'toll': Color(0xFF6B7280),                // Gray for tolls
+    'köprü': Color(0xFF6B7280),
+    'bridge': Color(0xFF6B7280),
     
     // === TRANSPORTATION COLORS (RED/WARM TONES FOR EXPENSES) ===
     'transport': Color(0xFFDC2626),           // Red for transport expenses
@@ -598,9 +764,7 @@ class CategoryIconService {
     'taksi': Color(0xFFFBBF24),
     'uber': Color(0xFFFBBF24),
     'bitaksi': Color(0xFFFBBF24),
-    'parking': Color(0xFF6B7280),             // Gray for parking
     'park': Color(0xFF6B7280),
-    'otopark': Color(0xFF6B7280),
     'motorcycle': Color(0xFF374151),          // Dark gray for motorcycle
     'motosiklet': Color(0xFF374151),
     'bicycle': Color(0xFF059669),             // Green for eco-friendly bike
@@ -617,15 +781,10 @@ class CategoryIconService {
     'adidas': Color(0xFFEC4899),
     'electronics': Color(0xFF6366F1),         // Blue for electronics 📱
     'elektronik': Color(0xFF6366F1),
-    'furniture': Color(0xFF92400E),           // Brown for furniture 🪑
-    'mobilya': Color(0xFF92400E),
     'books': Color(0xFF6B7280),               // Gray for books 📚
-    'kitap': Color(0xFF6B7280),
     'kitaplar': Color(0xFF6B7280),
     'jewelry': Color(0xFFFBBF24),             // Gold for jewelry 💍
     'mücevher': Color(0xFFFBBF24),
-    'cosmetics': Color(0xFFEC4899),           // Pink for cosmetics 💄
-    'kozmetik': Color(0xFFEC4899),
     'makeup': Color(0xFFEC4899),
     'makyaj': Color(0xFFEC4899),
     'perfume': Color(0xFF7C3AED),             // Purple for perfume
@@ -633,24 +792,10 @@ class CategoryIconService {
     
     // === ENTERTAINMENT COLORS (RED/WARM TONES FOR EXPENSES) ===
     'entertainment': Color(0xFFDC2626),       // Red for entertainment expenses
-    'movie': Color(0xFFDC2626),
     'eğlence': Color(0xFFDC2626),
-    'cinema': Color(0xFFDC2626),
-    'sinema': Color(0xFFDC2626),
-    'theater': Color(0xFF7C3AED),             // Purple for theater 🎭
-    'tiyatro': Color(0xFF7C3AED),
-    'music': Color(0xFFA855F7),               // Purple for music 🎵
-    'müzik': Color(0xFFA855F7),
-    'spotify': Color(0xFF22C55E),             // Spotify green
     'apple_music': Color(0xFFA855F7),
-    'gaming': Color(0xFF059669),              // Green for gaming 🎮
-    'oyun': Color(0xFF059669),
-    'streaming': Color(0xFFDC2626),           // Red for streaming
     'yayın': Color(0xFFDC2626),
-    'netflix': Color(0xFFDC2626),             // Netflix red
-    'youtube': Color(0xFFDC2626),             // YouTube red
     'concerts': Color(0xFF6366F1),            // Blue for concerts 🎤
-    'konser': Color(0xFF6366F1),
     'photography': Color(0xFF6B7280),         // Gray for photography 📷
     'fotoğraf': Color(0xFF6B7280),
     
@@ -663,18 +808,11 @@ class CategoryIconService {
     'elektrik': Color(0xFFFBBF24),
     'water': Color(0xFF0EA5E9),               // Blue for water 💧
     'su': Color(0xFF0EA5E9),
-    'internet': Color(0xFF6366F1),            // Blue for internet 🌐
-    'phone': Color(0xFF059669),               // Green for phone 📱
-    'telefon': Color(0xFF059669),
     'turkcell': Color(0xFF059669),
     'vodafone': Color(0xFFDC2626),            // Vodafone red
     'türk_telekom': Color(0xFF6366F1),        // TT blue
-    'subscription': Color(0xFFDC2626),        // Red for subscriptions
-    'abonelik': Color(0xFFDC2626),
     'digiturk': Color(0xFF6366F1),            // Blue for TV
     'tivibu': Color(0xFF6366F1),
-    'insurance': Color(0xFF3B82F6),           // Blue for insurance 🛡️
-    'sigorta': Color(0xFF3B82F6),
     
     // === HEALTH & WELLNESS COLORS (RED/WARM TONES FOR EXPENSES) ===
     'health': Color(0xFFDC2626),              // Red for health expenses
@@ -689,13 +827,7 @@ class CategoryIconService {
     'supplement': Color(0xFF22C55E),          // Green for supplements
     'takviye': Color(0xFF22C55E),
     'vitamin': Color(0xFF22C55E),
-    'fitness': Color(0xFF059669),             // Green for fitness 💪
-    'gym': Color(0xFF059669),
-    'spor': Color(0xFF059669),
     'protein': Color(0xFF059669),
-    'spa': Color(0xFFEC4899),                 // Pink for spa 💆
-    'beauty': Color(0xFFEC4899),
-    'güzellik': Color(0xFFEC4899),
     
     // === EDUCATION COLORS ===
     'education': Color(0xFF2563EB),           // Modern blue
@@ -717,8 +849,6 @@ class CategoryIconService {
     // === TECHNOLOGY COLORS ===
     'tech': Color(0xFF3B82F6),                // Modern blue
     'teknoloji': Color(0xFF3B82F6),
-    'software': Color(0xFF8B5CF6),            // Modern violet
-    'yazılım': Color(0xFF8B5CF6),
     
     // === PERSONAL CARE COLORS ===
     'personal_care': Color(0xFFEC4899),       // Modern pink
@@ -736,7 +866,6 @@ class CategoryIconService {
     'other': Color(0xFF6B7280),
     'diğer': Color(0xFF6B7280),
     // === CUSTOM/NEW CATEGORY COLORS ===
-    'pet_food': Color(0xFF8B5CF6),
     'evcil_hayvan_maması': Color(0xFF8B5CF6),
     'toy': Color(0xFFF59E42),
     'oyuncak': Color(0xFFF59E42),
@@ -1114,10 +1243,10 @@ class CategoryIconService {
   
   /// Get background color with opacity
   /// 
-  /// Returns the category color with 10% opacity for use
+  /// Returns gray background color for use
   /// as background color in category selectors.
   static Color getBackgroundColor(String colorInput) {
-    return getColor(colorInput).withValues(alpha: 0.1);
+    return Colors.grey.withValues(alpha: 0.1);
   }
   
   /// Get predefined color for expense categories
@@ -1190,5 +1319,65 @@ class CategoryIconService {
     }
     
     return incomeIcons;
+  }
+
+  /// Get localized category name with context
+  static String getCategoryName(String categoryId, BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return _getFallbackCategoryName(categoryId, 'en');
+    }
+    
+    switch (categoryId) {
+      case 'food':
+        return l10n.food;
+      case 'transport':
+        return l10n.transport;
+      case 'shopping':
+        return l10n.shopping;
+      case 'entertainment':
+        return l10n.entertainment;
+      case 'bills':
+        return l10n.bills;
+      case 'health':
+        return l10n.health;
+      case 'education':
+        return l10n.education;
+      case 'travel':
+        return l10n.travel;
+      case 'other':
+        return l10n.other;
+      case 'stocks':
+        return l10n.stockTrading;
+      default:
+        return l10n.unknownCategory;
+    }
+  }
+
+  /// Get localized category name with language code (fallback)
+  static String getCategoryNameByLanguage(String categoryId, String language) {
+    return _getFallbackCategoryName(categoryId, language);
+  }
+
+  /// Internal fallback method
+  static String _getFallbackCategoryName(String categoryId, String language) {
+    final categoryNames = {
+      'food': language == 'tr' ? 'Yemek' : 'Food',
+      'transport': language == 'tr' ? 'Ulaşım' : 'Transport',
+      'shopping': language == 'tr' ? 'Alışveriş' : 'Shopping',
+      'entertainment': language == 'tr' ? 'Eğlence' : 'Entertainment',
+      'bills': language == 'tr' ? 'Faturalar' : 'Bills',
+      'health': language == 'tr' ? 'Sağlık' : 'Health',
+      'education': language == 'tr' ? 'Eğitim' : 'Education',
+      'travel': language == 'tr' ? 'Seyahat' : 'Travel',
+      'other': language == 'tr' ? 'Diğer' : 'Other',
+      'stocks': language == 'tr' ? 'Hisse Alış/Satış' : 'Stock Trading',
+    };
+    return categoryNames[categoryId] ?? (language == 'tr' ? 'Bilinmeyen Kategori' : 'Unknown Category');
+  }
+
+  /// Get fallback category name (for backward compatibility)
+  static String getFallbackCategoryName(String categoryId, String language) {
+    return getCategoryNameByLanguage(categoryId, language);
   }
 } 

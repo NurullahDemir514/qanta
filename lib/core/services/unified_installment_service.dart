@@ -99,13 +99,9 @@ class UnifiedInstallmentService {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
 
-      print('🔍 UnifiedInstallmentService.getInstallmentDetails() - Starting');
-      print('   Installment ID: $installmentId');
-      print('   User ID: $userId');
 
       // Try the indexed query first
       try {
-        print('   Trying indexed query...');
         final snapshot = await FirebaseFirestoreService.getDocuments(
           collectionName: _installmentDetailCollection,
           query: FirebaseFirestoreService.getCollection(_installmentDetailCollection)
@@ -126,22 +122,16 @@ class UnifiedInstallmentService {
           };
         }).toList();
 
-        print('   ✅ Indexed query successful, found ${results.length} details');
         for (final detail in results) {
-          print('     - Detail ID: ${detail['id']}, Installment ID: ${detail['installment_transaction_id']}, Number: ${detail['installment_number']}');
         }
         
         if (results.isEmpty) {
-          print('   ⚠️ WARNING: No installment details found for ID: $installmentId');
-          print('   This installment transaction may be corrupted or missing details');
         }
         
         return results;
       } catch (e) {
-        print('   ❌ Indexed query failed: $e');
         
         // Fallback: Get all installment details for user and filter in memory
-        print('   Using fallback method...');
         final snapshot = await FirebaseFirestoreService.getDocuments(
           collectionName: _installmentDetailCollection,
           query: FirebaseFirestoreService.getCollection(_installmentDetailCollection)
@@ -160,9 +150,7 @@ class UnifiedInstallmentService {
           };
         }).toList();
 
-        print('   Found ${allDetails.length} total installment details for user');
         for (final detail in allDetails) {
-          print('     - Detail ID: ${detail['id']}, Installment ID: ${detail['installment_transaction_id']}, Number: ${detail['installment_number']}');
         }
 
         // Filter by installment_transaction_id in memory
@@ -170,9 +158,7 @@ class UnifiedInstallmentService {
             .where((detail) => detail['installment_transaction_id'] == installmentId)
             .toList();
 
-        print('   ✅ Fallback filtering successful, found ${filteredDetails.length} matching details');
         for (final detail in filteredDetails) {
-          print('     - Filtered Detail ID: ${detail['id']}, Installment ID: ${detail['installment_transaction_id']}, Number: ${detail['installment_number']}');
         }
 
         // Sort by installment_number
@@ -309,13 +295,10 @@ class UnifiedInstallmentService {
   /// Delete installment transaction (refunds total amount)
   static Future<bool> deleteInstallmentTransaction(String installmentId) async {
     try {
-      print('🔥 UnifiedInstallmentService.deleteInstallmentTransaction() - Starting');
-      print('   Installment ID: $installmentId');
       
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
 
-      print('   User ID: $userId');
 
       // Get installment master
       final installmentDoc = await FirebaseFirestoreService.getDocumentSnapshot(
@@ -328,16 +311,12 @@ class UnifiedInstallmentService {
       final installmentData = installmentDoc.data();
       if (installmentData == null) throw Exception('Taksit master verisi bulunamadı');
       
-      print('   Installment data: $installmentData');
 
       // Get all installment details using fallback method
       List<Map<String, dynamic>> details;
       try {
-        print('   Getting installment details...');
         details = await getInstallmentDetails(installmentId);
-        print('   Found ${details.length} installment details');
       } catch (e) {
-        print('   Fallback: Getting all installment details for user...');
         // Fallback: Get all installment details for user and filter in memory
         final snapshot = await FirebaseFirestoreService.getDocuments(
           collectionName: _installmentDetailCollection,
@@ -357,17 +336,14 @@ class UnifiedInstallmentService {
         details = details
             .where((detail) => detail['installment_transaction_id'] == installmentId)
             .toList();
-        print('   Fallback found ${details.length} installment details');
       }
 
       // Check if any installments are paid
       final paidInstallments = details.where((d) => d['is_paid'] == true).toList();
       if (paidInstallments.isNotEmpty) {
-        print('   ❌ Cannot delete: ${paidInstallments.length} installments are paid');
         throw Exception('Ödenmiş taksitler var, silinemez');
       }
 
-      print('   Deleting ${details.length} installment details...');
       // Delete installment details
       final batch = FirebaseFirestore.instance.batch();
       for (final detail in details) {
@@ -376,14 +352,12 @@ class UnifiedInstallmentService {
       }
       await batch.commit();
 
-      print('   Deleting installment master...');
       // Delete installment master
       await FirebaseFirestoreService.deleteDocument(
         collectionName: _installmentCollection,
         docId: installmentId,
       );
 
-      print('   Refunding total amount to account...');
       // Refund total amount to account balance
       await _updateAccountBalance(
         accountId: (installmentData as Map<String, dynamic>)['source_account_id'] as String,
@@ -393,10 +367,8 @@ class UnifiedInstallmentService {
 
       // No delay needed - Firebase batch operations are atomic
 
-      print('   ✅ UnifiedInstallmentService deletion completed');
       return true;
     } catch (e) {
-      print('   ❌ Error in UnifiedInstallmentService.deleteInstallmentTransaction: $e');
       rethrow;
     }
   }

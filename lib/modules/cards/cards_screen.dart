@@ -31,17 +31,29 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
     _tabController = TabController(
       length: 3, 
       vsync: this,
-      animationDuration: const Duration(milliseconds: 300),
+      animationDuration: const Duration(milliseconds: 200),
     );
     
     // 🔔 Card event listener'larını kur
     _setupCardEventListeners();
+    
+    // Verileri sadece bir kez yükle
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+        provider.loadAllData();
+      }
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  String _getCardsSubtitle(AppLocalizations l10n) {
+    return l10n.manageYourCards;
   }
 
   void _setupCardEventListeners() {
@@ -153,6 +165,9 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
           builder: (context, child) {
             return AppPageScaffold(
               title: l10n.myCards,
+              subtitle: _getCardsSubtitle(l10n),
+              titleFontSize: 20,
+              subtitleFontSize: 12,
               tabBar: AppTabBar(
                         controller: _tabController,
                         tabs: [

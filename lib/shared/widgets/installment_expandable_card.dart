@@ -330,7 +330,7 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                               style: GoogleFonts.inter(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: widget.isDark ? Colors.white : Colors.black,
                               ),
                             ),
                           ),

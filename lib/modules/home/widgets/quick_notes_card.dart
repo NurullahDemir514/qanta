@@ -33,7 +33,6 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     try {
       final notes = await QuickNoteService.getPendingNotes();
       for (var note in notes) {
-        print('   - ID: ${note['id']}, Type: ${note['type']}, ImagePath: ${note['image_path']}');
       }
       setState(() => _pendingNotes = notes.cast<Map<String, dynamic>>());
     } catch (e) {
@@ -86,7 +85,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Hızlı Notlar',
+                          l10n.quickNotes,
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -95,7 +94,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                         ),
                         if (_pendingNotes.isNotEmpty)
                           Text(
-                            '${_pendingNotes.length} bekleyen not',
+                            l10n.pendingNotes(_pendingNotes.length),
                             style: GoogleFonts.inter(
                               fontSize: 12,
                               color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
@@ -197,7 +196,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                   );
                 },
                 child: Text(
-                  'Tüm notları gör (${_pendingNotes.length})',
+                  l10n.viewAllNotes(_pendingNotes.length),
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: const Color(0xFF007AFF),
@@ -335,16 +334,17 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     final now = DateTime.now();
     final diff = now.difference(date);
 
+    final l10n = AppLocalizations.of(context)!;
     if (diff.inSeconds < 30) {
-      return AppLocalizations.of(context)?.justNow ?? 'Just now';
+      return l10n.justNow;
     } else if (diff.inMinutes < 1) {
-      return '${diff.inSeconds} saniye önce';
+      return l10n.secondsAgo(diff.inSeconds);
     } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes} dakika önce';
+      return l10n.minutesAgo(diff.inMinutes);
     } else if (diff.inHours < 24) {
-      return '${diff.inHours} saat önce';
+      return l10n.hoursAgo(diff.inHours);
     } else if (diff.inDays == 1) {
-      return 'Dün ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      return l10n.yesterdayAt('${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}');
     } else if (diff.inDays < 7) {
       final weekdays = [
         AppLocalizations.of(context)?.monday ?? 'Monday',
@@ -355,29 +355,30 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         AppLocalizations.of(context)?.saturday ?? 'Saturday',
         AppLocalizations.of(context)?.sunday ?? 'Sunday'
       ];
-      return '${weekdays[date.weekday - 1]} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      return l10n.weekdayAt(weekdays[date.weekday - 1], '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}');
     } else if (diff.inDays < 365) {
       final months = [
-        AppLocalizations.of(context)?.january ?? 'January',
-        AppLocalizations.of(context)?.february ?? 'February',
-        AppLocalizations.of(context)?.march ?? 'March',
-        AppLocalizations.of(context)?.april ?? 'April',
-        AppLocalizations.of(context)?.may ?? 'May',
-        AppLocalizations.of(context)?.june ?? 'June',
-        AppLocalizations.of(context)?.july ?? 'July',
-        AppLocalizations.of(context)?.august ?? 'August',
-        AppLocalizations.of(context)?.september ?? 'September',
-        AppLocalizations.of(context)?.october ?? 'October',
-        AppLocalizations.of(context)?.november ?? 'November',
-        AppLocalizations.of(context)?.december ?? 'December'
+        l10n.january,
+        l10n.february,
+        l10n.march,
+        l10n.april,
+        l10n.may,
+        l10n.june,
+        l10n.july,
+        l10n.august,
+        l10n.september,
+        l10n.october,
+        l10n.november,
+        l10n.december
       ];
-      return '${date.day} ${months[date.month - 1]}';
+      return l10n.dayMonth(date.day, months[date.month - 1]);
     } else {
-      return '${date.day}/${date.month}/${date.year}';
+      return l10n.dayMonthYear(date.day, date.month, date.year);
     }
   }
 
   Future<void> _showAddOptionsDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     showModalBottomSheet(
@@ -406,7 +407,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
               
               // Title
               Text(
-                'Hızlı Not Ekle',
+                l10n.addQuickNote,
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -422,8 +423,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                   children: [
                     _buildOptionTile(
                       icon: Icons.text_fields_rounded,
-                      title: AppLocalizations.of(context)?.textNote ?? 'Text Note',
-                      subtitle: AppLocalizations.of(context)?.addQuickTextNote ?? 'Add quick text note',
+                      title: l10n.textNote,
+                      subtitle: l10n.addQuickTextNote,
                       color: const Color(0xFF007AFF),
                       onTap: () {
                         Navigator.pop(context);
@@ -434,8 +435,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                     const SizedBox(height: 12),
                     _buildOptionTile(
                       icon: Icons.camera_alt_rounded,
-                      title: AppLocalizations.of(context)?.takePhoto ?? 'Take Photo',
-                      subtitle: AppLocalizations.of(context)?.takePhotoFromCamera ?? 'Take photo from camera',
+                      title: l10n.takePhoto,
+                      subtitle: l10n.takePhotoFromCamera,
                       color: const Color(0xFFFF9500),
                       onTap: () async {
                         Navigator.pop(context);
@@ -447,8 +448,8 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                     const SizedBox(height: 12),
                     _buildOptionTile(
                       icon: Icons.photo_library_rounded,
-                      title: AppLocalizations.of(context)?.selectFromGallery ?? 'Select from Gallery',
-                      subtitle: AppLocalizations.of(context)?.selectPhotoFromGallery ?? 'Select photo from gallery',
+                      title: l10n.selectFromGallery,
+                      subtitle: l10n.selectPhotoFromGallery,
                       color: const Color(0xFF34C759),
                       onTap: () async {
                         Navigator.pop(context);
@@ -536,6 +537,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _takePicture() async {
+    final l10n = AppLocalizations.of(context)!;
     final ImagePicker picker = ImagePicker();
     try {
       final XFile? image = await picker.pickImage(
@@ -554,7 +556,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.photoCaptureError ?? 'Error capturing photo'),
+            content: Text(l10n.photoCaptureError),
             backgroundColor: Colors.red,
           ),
         );
@@ -563,6 +565,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _pickImageFromGallery() async {
+    final l10n = AppLocalizations.of(context)!;
     final ImagePicker picker = ImagePicker();
     try {
       final XFile? image = await picker.pickImage(
@@ -581,7 +584,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.photoSelectionError ?? 'Error selecting photo'),
+            content: Text(l10n.photoSelectionError),
             backgroundColor: Colors.red,
           ),
         );
@@ -590,12 +593,13 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _showImageNoteDialog(String imagePath) async {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     
     final result = await showDialog<String>(
       context: context,
       builder: (context) => IOSDialog(
-        title: 'Fotoğraf Notu Ekle',
+        title: l10n.addPhotoNote,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -611,7 +615,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Bu fotoğraf için bir açıklama ekleyin (isteğe bağlı)',
+              l10n.addPhotoNoteDescription,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 color: const Color(0xFF8E8E93),
@@ -622,7 +626,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                hintText: 'Örn: Market fişi - 150${Provider.of<ThemeProvider>(context, listen: false).currency.symbol}',
+                hintText: l10n.examplePhotoNote(Provider.of<ThemeProvider>(context, listen: false).currency.symbol),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Color(0xFFE5E5EA)),
@@ -638,11 +642,11 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         ),
         actions: [
           IOSDialogAction(
-            text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
+            text: l10n.cancel,
             onPressed: () => Navigator.of(context).pop(),
           ),
           IOSDialogAction(
-            text: AppLocalizations.of(context)?.add ?? 'Add',
+            text: l10n.add,
             isPrimary: true,
             onPressed: () {
               Navigator.of(context).pop(controller.text.trim());
@@ -653,11 +657,12 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     );
 
     if (result != null) {
-      await _addImageNote(result.isEmpty ? (AppLocalizations.of(context)?.photoNote ?? 'Photo note') : result, imagePath);
+      await _addImageNote(result.isEmpty ? l10n.photoNote : result, imagePath);
     }
   }
 
   Future<void> _addImageNote(String content, String imagePath) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       
       await QuickNoteService.addQuickNote(
@@ -670,7 +675,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.photoNoteAdded ?? 'Photo note added'),
+            content: Text(l10n.photoNoteAdded),
             backgroundColor: Colors.green,
           ),
         );
@@ -679,7 +684,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.photoNoteAddError ?? 'Error adding photo note'),
+            content: Text(l10n.photoNoteAddError),
             backgroundColor: Colors.red,
           ),
         );
@@ -688,17 +693,18 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _showAddNoteDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     
     final result = await showDialog<String>(
       context: context,
       builder: (context) => IOSDialog(
-        title: 'Hızlı Not Ekle',
+        title: l10n.addQuickNote,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Harcama veya gelir notunuzu yazın. Daha sonra işlem olarak ekleyebilirsiniz.',
+              l10n.addQuickNoteDescription,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 color: const Color(0xFF8E8E93),
@@ -709,7 +715,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                hintText: 'Örn: Market alışverişi 150${Provider.of<ThemeProvider>(context, listen: false).currency.symbol}',
+                hintText: l10n.exampleExpenseNote(Provider.of<ThemeProvider>(context, listen: false).currency.symbol),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Color(0xFFE5E5EA)),
@@ -726,11 +732,11 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         ),
         actions: [
           IOSDialogAction(
-            text: AppLocalizations.of(context)?.cancel ?? 'Cancel',
+            text: l10n.cancel,
             onPressed: () => Navigator.of(context).pop(),
           ),
           IOSDialogAction(
-            text: AppLocalizations.of(context)?.add ?? 'Add',
+            text: l10n.add,
             isPrimary: true,
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
@@ -748,6 +754,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _addNote(String content) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await QuickNoteService.addQuickNote(
         content: content,
@@ -758,7 +765,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.noteAdded ?? 'Note added'),
+            content: Text(l10n.noteAdded),
             backgroundColor: Colors.green,
           ),
         );
@@ -767,7 +774,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.noteAddError ?? 'Error adding note'),
+            content: Text(l10n.noteAddError),
             backgroundColor: Colors.red,
           ),
         );
@@ -776,6 +783,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   }
 
   Future<void> _deleteNote(QuickNote note) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await QuickNoteService.deleteQuickNote(note.id);
       await _loadPendingNotes();
@@ -783,7 +791,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.noteDeleted ?? 'Note deleted'),
+            content: Text(l10n.noteDeleted),
             backgroundColor: Colors.orange,
           ),
         );
@@ -792,7 +800,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.noteDeleteError ?? 'Error deleting note'),
+            content: Text(l10n.noteDeleteError),
             backgroundColor: Colors.red,
           ),
         );

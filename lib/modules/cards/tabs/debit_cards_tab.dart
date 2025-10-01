@@ -29,7 +29,9 @@ class DebitCardsTab extends StatefulWidget {
   State<DebitCardsTab> createState() => _DebitCardsTabState();
 }
 
-class _DebitCardsTabState extends State<DebitCardsTab> {
+class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   final PageController _pageController = PageController(
     viewportFraction: 1.0, // Tam genişlik
   );
@@ -44,12 +46,10 @@ class _DebitCardsTabState extends State<DebitCardsTab> {
     // Card event listener'larını başlat
     _setupCardEventListeners();
     
-    // Provider referansını sakla ve Firebase'den veri yükle
+    // Provider referansını sakla
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _unifiedProviderV2 = UnifiedProviderV2.instance;
-        // Load all data from Firebase
-        _unifiedProviderV2!.loadAllData();
         
         // Provider listener'ı ekle
         if (_providerListener != null) {
@@ -394,6 +394,7 @@ class _DebitCardsTabState extends State<DebitCardsTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin için gerekli
     return ListenableBuilder(
       listenable: UnifiedProviderV2.instance,
       builder: (context, child) {

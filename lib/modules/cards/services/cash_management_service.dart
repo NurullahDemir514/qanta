@@ -8,6 +8,7 @@ import '../../../shared/models/account_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../widgets/management_option.dart';
 import '../../../shared/widgets/ios_dialog.dart';
+import '../../transactions/widgets/forms/calculator_input_field.dart';
 
 class CashManagementService {
   static void showCashManagementBottomSheet(
@@ -131,105 +132,185 @@ class CashManagementService {
   ) {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: currentBalance.toStringAsFixed(0));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => IOSDialog(
-        title: l10n.updateCashBalanceTitle,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.updateCashBalanceMessage,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF8E8E93)
-                  : const Color(0xFF6D6D70),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: l10n.newBalance,
-                suffixText: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IOSDialogAction(
-            text: l10n.cancel,
-            isDestructive: false,
-            onPressed: () => Navigator.of(context).pop(),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        maxChildSize: 0.85,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          IOSDialogAction(
-            text: l10n.update,
-            isDestructive: false,
-            onPressed: () async {
-              final newBalance = double.tryParse(controller.text);
-              if (newBalance != null && newBalance >= 0) {
-                Navigator.of(context).pop();
-                
-                try {
-                  // Use v2 provider to update cash account
-                  final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-                  
-                  // Get cash accounts
-                  final cashAccounts = providerV2.accounts.where((a) => a.type == AccountType.cash).toList();
-                  
-                  if (cashAccounts.isNotEmpty) {
-                    // Update existing cash account
-                    final cashAccount = cashAccounts.first;
-                    await providerV2.updateAccountBalance(cashAccount.id, newBalance);
-                  } else {
-                    // Create new cash account
-                    await providerV2.createAccount(
-                      type: AccountType.cash,
-                      name: 'Nakit',
-                      balance: newBalance,
-                    );
-                  }
-                  
-                  onBalanceUpdated(newBalance);
-                  
-                  // Show success message
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.cashBalanceUpdated(
-                          Provider.of<ThemeProvider>(context, listen: false).formatAmount(newBalance)
-                        )),
-                        backgroundColor: const Color(0xFF34C759),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 36,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D1D6),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+              
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Text(
+                      l10n.updateCashBalanceTitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Hata: $e'),
-                        backgroundColor: Colors.red,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.updateCashBalanceMessage,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
                       ),
-                    );
-                  }
-                }
-              } else {
-                // Show error for invalid amount
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.enterValidAmount),
-                    backgroundColor: Colors.red,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Calculator
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: CalculatorInputField(
+                    controller: controller,
+                    onChanged: () {
+                      // Hesap makinesi değişikliklerini dinle
+                    },
                   ),
-                );
-              }
-            },
+                ),
+              ),
+              
+              // Buttons
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(
+                            color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D1D6),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          l10n.cancel,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final newBalance = double.tryParse(controller.text);
+                          if (newBalance != null && newBalance >= 0) {
+                            Navigator.of(context).pop();
+                            
+                            try {
+                              // Use v2 provider to update cash account
+                              final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+                              
+                              // Get cash accounts
+                              final cashAccounts = providerV2.accounts.where((a) => a.type == AccountType.cash).toList();
+                              
+                              if (cashAccounts.isNotEmpty) {
+                                // Update existing cash account
+                                final cashAccount = cashAccounts.first;
+                                await providerV2.updateAccountBalance(cashAccount.id, newBalance);
+                              } else {
+                                // This should not happen as _ensureDefaultCashAccount should create one
+                                // But if it does, create one manually
+                                debugPrint('CashManagementService - No cash account found, creating one');
+                                await providerV2.createAccount(
+                                  type: AccountType.cash,
+                                  name: 'Nakit',
+                                  balance: newBalance,
+                                );
+                              }
+                              
+                              onBalanceUpdated(newBalance);
+                              
+                              // Show success message
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.cashBalanceUpdated(
+                                      Provider.of<ThemeProvider>(context, listen: false).formatAmount(newBalance)
+                                    )),
+                                    backgroundColor: const Color(0xFF34C759),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Hata: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          } else {
+                            // Show error for invalid amount
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.enterValidAmount),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF007AFF),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          l10n.update,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

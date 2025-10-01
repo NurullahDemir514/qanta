@@ -22,6 +22,7 @@ import '../../shared/models/budget_model.dart';
 import '../../shared/models/statement_summary.dart';
 import '../../shared/models/statement_period.dart';
 import '../../shared/utils/date_utils.dart';
+import '../../modules/stocks/providers/stock_provider.dart';
 
 /// **QANTA v2 Unified Provider - Central Data Management System**
 /// 
@@ -175,6 +176,15 @@ class UnifiedProviderV2 extends ChangeNotifier {
   List<InstallmentWithProgressModel> _installments = [];
   List<BudgetModel> _budgets = [];
   
+  // Stock positions for net worth calculation
+  double _totalStockValue = 0.0;
+  double _totalStockCost = 0.0;
+  
+  // ==================== CACHE SYSTEM ====================
+  DateTime? _lastCacheTime;
+  static const Duration _cacheValidityDuration = Duration(minutes: 10);
+  bool _isDataCached = false;
+  
   // ===============================
   // STATEMENT CACHE
   // ===============================
@@ -190,6 +200,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
   
   /// **StatementProvider reference for accessing current statements**
   StatementProvider? _statementProvider;
+  
+  /// **StockProvider reference for accessing stock positions**
+  StockProvider? _stockProvider;
   
   /// **Statement period cache**
   Map<String, StatementPeriod> _cachedPeriods = {};
@@ -309,12 +322,25 @@ class UnifiedProviderV2 extends ChangeNotifier {
   Map<String, double> get balanceSummary => _balanceSummary;
   Map<String, dynamic> get monthlySummary => _monthlySummary;
 
-  /// Load all data
-  Future<void> loadAllData() async {
+  /// Load all data with cache optimization
+  Future<void> loadAllData({bool forceRefresh = false}) async {
+    // Cache kontrolü
+    if (!forceRefresh && _isDataCached && _lastCacheTime != null) {
+      final now = DateTime.now();
+      final cacheAge = now.difference(_lastCacheTime!);
+      
+      if (cacheAge < _cacheValidityDuration) {
+        // Cache hala geçerli, sadece balance summary güncelle
+        await _loadSummaries();
+        return;
+      }
+    }
+
     _setLoading(true);
     _clearError();
     
     try {
+      // Kritik verileri paralel yükle
       await Future.wait([
         loadAccounts(),
         loadCategories(),
@@ -323,10 +349,20 @@ class UnifiedProviderV2 extends ChangeNotifier {
         loadBudgets(),
       ]);
       
+      // Hisse verilerini ayrı yükle (hata durumunda devam et)
+      try {
+        await loadStockPositions();
+      } catch (e) {
+        // Hisse verileri yüklenemezse sessizce devam et
+      }
+      
       await _loadSummaries();
       
-      // Setup real-time listeners for automatic updates
-      _setupRealTimeListeners();
+      // Cache'i güncelle
+      _lastCacheTime = DateTime.now();
+      _isDataCached = true;
+      
+      // Real-time listeners will be set up in splash screen
       
     } catch (e) {
       _setError('Failed to load data: $e');
@@ -341,7 +377,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     notifyListeners();
     
     try {
-      debugPrint('UnifiedProviderV2.loadAccounts() - Loading accounts from Firebase');
+      // Debug log kaldırıldı
       
       // Load accounts from Firebase
       _accounts = await UnifiedAccountService.getAllAccounts();
@@ -364,6 +400,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       final cashAccounts = _accounts.where((a) => a.type == AccountType.cash).toList();
       
       if (cashAccounts.isEmpty) {
+        // Debug log kaldırıldı
         
         // Create default cash account using Firebase
         final cashAccount = AccountModel(
@@ -378,14 +415,43 @@ class UnifiedProviderV2 extends ChangeNotifier {
         );
         
         final cashAccountId = await UnifiedAccountService.addAccount(cashAccount);
+        // Debug log kaldırıldı
         
         // Reload accounts to include the new cash account
         _accounts = await UnifiedAccountService.getAllAccounts();
         
+      } else if (cashAccounts.length > 1) {
+        // Debug log kaldırıldı
+        await _cleanupDuplicateCashAccounts(cashAccounts);
       } else {
+        // Debug log kaldırıldı
       }
     } catch (e) {
+      // Debug log kaldırıldı
       // Don't rethrow - this is not critical for app functionality
+    }
+  }
+
+  /// Clean up duplicate cash accounts, keeping only the first one
+  Future<void> _cleanupDuplicateCashAccounts(List<AccountModel> cashAccounts) async {
+    try {
+      // Keep the first cash account (oldest or first created)
+      final primaryCashAccount = cashAccounts.first;
+      final duplicateAccounts = cashAccounts.skip(1).toList();
+      
+      // Debug log'ları kaldırıldı
+      
+      // Delete duplicate accounts
+      for (final duplicateAccount in duplicateAccounts) {
+        await UnifiedAccountService.deleteAccount(duplicateAccount.id);
+        // Debug log kaldırıldı
+      }
+      
+      // Reload accounts to reflect changes
+      _accounts = await UnifiedAccountService.getAllAccounts();
+      
+    } catch (e) {
+      // Debug log kaldırıldı
     }
   }
 
@@ -395,7 +461,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     notifyListeners();
     
     try {
-      debugPrint('UnifiedProviderV2.loadCategories() - Loading from Firebase');
+      // Debug log kaldırıldı
       _categories = await UnifiedCategoryService.getAllCategories();
       
       
@@ -529,7 +595,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     notifyListeners();
     
     try {
-      debugPrint('UnifiedProviderV2.loadTransactions() - Loading from Firebase');
+      // Debug log kaldırıldı
       _transactions = await UnifiedTransactionService.getAllTransactions(limit: limit);
     } catch (e) {
       rethrow;
@@ -562,7 +628,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     notifyListeners();
     
     try {
-      debugPrint('UnifiedProviderV2.loadBudgets() - Loading budgets from Firebase');
+      // Debug log kaldırıldı
       
       // Load budgets from Firebase
       _budgets = await UnifiedBudgetService.getAllBudgets();
@@ -630,7 +696,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     int? dueDay,
   }) async {
     try {
-      debugPrint('UnifiedProviderV2.createAccount() - Creating account with Firebase');
+      // Debug log kaldırıldı
       
       // Create AccountModel
       final account = AccountModel(
@@ -761,22 +827,18 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }) async {
     try {
       final startTime = DateTime.now();
-      print('🔥 UnifiedProviderV2.createTransaction() - Starting');
       
       final trimmedCategoryId = categoryId?.trim();
       
       // Ensure categories are loaded first
       if (_categories.isEmpty) {
-        print('   Loading categories...');
         final categoryStartTime = DateTime.now();
         await loadCategories();
         final categoryEndTime = DateTime.now();
         final categoryDuration = categoryEndTime.difference(categoryStartTime).inMilliseconds;
-        print('   Categories loaded in ${categoryDuration}ms');
         
         // If still empty, wait and try again
         if (_categories.isEmpty) {
-          print('   Categories still empty, waiting 3 seconds...');
           await Future.delayed(const Duration(seconds: 3));
           await loadCategories();
         }
@@ -812,12 +874,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
       );
       
       // Add transaction using Firebase service
-      print('   Adding transaction to Firebase...');
       final firebaseStartTime = DateTime.now();
       final transactionId = await UnifiedTransactionService.addTransaction(transaction);
       final firebaseEndTime = DateTime.now();
       final firebaseDuration = firebaseEndTime.difference(firebaseStartTime).inMilliseconds;
-      print('   Firebase transaction add took ${firebaseDuration}ms');
       
       // Add to local list immediately for instant UI update
       final newTransaction = TransactionWithDetailsV2(
@@ -846,34 +906,27 @@ class UnifiedProviderV2 extends ChangeNotifier {
       _transactions.insert(0, newTransaction);
       
       // Update account balance locally immediately
-      print('   Updating local account balance...');
       final balanceStartTime = DateTime.now();
       await _updateAccountBalanceLocally(newTransaction, isDelete: false);
       final balanceEndTime = DateTime.now();
       final balanceDuration = balanceEndTime.difference(balanceStartTime).inMilliseconds;
-      print('   Local balance update took ${balanceDuration}ms');
       
       // Update summaries locally immediately
-      print('   Updating local summaries...');
       final summaryStartTime = DateTime.now();
       await _updateSummariesLocally();
       final summaryEndTime = DateTime.now();
       final summaryDuration = summaryEndTime.difference(summaryStartTime).inMilliseconds;
-      print('   Local summary update took ${summaryDuration}ms');
       
       // Invalidate statement cache for affected account
       _invalidateStatementCache(transaction.sourceAccountId);
       
-      print('   Notifying listeners...');
       final notifyStartTime = DateTime.now();
       notifyListeners(); // Immediate UI update
       final notifyEndTime = DateTime.now();
       final notifyDuration = notifyEndTime.difference(notifyStartTime).inMilliseconds;
-      print('   notifyListeners() took ${notifyDuration}ms');
         
         // Update budget spent amounts in background if it's an expense
         if (type == TransactionType.expense && trimmedCategoryId != null) {
-          print('   Updating budget spent amounts...');
           final budgetStartTime = DateTime.now();
           
           // Check if budget category ID matches transaction category ID
@@ -885,22 +938,18 @@ class UnifiedProviderV2 extends ChangeNotifier {
           
           if (matchingBudget == null) {
             // Don't update budget if no matching category found
-            print('   No matching budget found, skipping budget update');
             final totalEndTime = DateTime.now();
             final totalDuration = totalEndTime.difference(startTime).inMilliseconds;
-            print('   ✅ Transaction creation completed in ${totalDuration}ms');
             return transactionId;
           }
           
           _updateBudgetSpentAmounts(trimmedCategoryId);
           final budgetEndTime = DateTime.now();
           final budgetDuration = budgetEndTime.difference(budgetStartTime).inMilliseconds;
-          print('   Budget update took ${budgetDuration}ms');
         }
         
         final totalEndTime = DateTime.now();
         final totalDuration = totalEndTime.difference(startTime).inMilliseconds;
-        print('   ✅ Transaction creation completed in ${totalDuration}ms');
         
         return transactionId;
     } catch (e) {
@@ -1026,8 +1075,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// Delete installment transaction (refunds total amount)
   Future<bool> deleteInstallmentTransaction(String transactionId) async {
     try {
-      print('🔥 UnifiedProviderV2.deleteInstallmentTransaction() - Starting deletion');
-      print('   Transaction ID: $transactionId');
       
       // Find the transaction to get installment ID
       final transaction = _transactions.firstWhere(
@@ -1035,14 +1082,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
         orElse: () => throw Exception('Transaction not found'),
       );
       
-      print('   Found transaction: ${transaction.description}');
-      print('   Installment ID: ${transaction.installmentId}');
       
       if (transaction.installmentId == null) {
         throw Exception('Transaction is not an installment');
       }
       
-      print('   Calling UnifiedInstallmentService.deleteInstallmentTransaction...');
       final startTime = DateTime.now();
       
       // Delete installment master and details using UnifiedInstallmentService
@@ -1050,10 +1094,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
       
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime).inMilliseconds;
-      print('   UnifiedInstallmentService result: $success (took ${duration}ms)');
       
       if (success) {
-        print('   Updating local state...');
         
         // Remove transaction from local list immediately
         _transactions.removeWhere((t) => t.id == transactionId);
@@ -1076,15 +1118,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
         
         // Notify listeners for immediate UI update
         notifyListeners();
-        print('   ✅ Local state updated, UI should be instant');
         
         // Delete UI transaction record from Firebase in background
         Future.microtask(() async {
           try {
             await UnifiedTransactionService.deleteTransaction(transactionId);
-            print('   ✅ UI transaction deleted from Firebase in background');
           } catch (e) {
-            print('   ⚠️ Failed to delete UI transaction from Firebase: $e');
             // Reload data to restore state
             await loadTransactions();
           }
@@ -1093,7 +1132,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       
       return success;
     } catch (e) {
-      print('   ❌ Error in deleteInstallmentTransaction: $e');
       rethrow;
     }
   }
@@ -1109,12 +1147,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }) async {
     try {
       final startTime = DateTime.now();
-      print('🔥 UnifiedProviderV2.createInstallmentTransaction() - Starting');
-      print('   Total Amount: $totalAmount');
-      print('   Count: $count');
-      print('   Description: $description');
-      print('   Source Account ID: $sourceAccountId');
-      print('   Category ID: $categoryId');
       
       // Get current credit card balance BEFORE
       final currentAccount = getAccountById(sourceAccountId);
@@ -1123,7 +1155,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       final monthlyAmount = totalAmount / count;
       
       // 1. Create installment master record
-      print('   Creating installment master record...');
       final masterStartTime = DateTime.now();
       final installmentId = await UnifiedInstallmentService.createInstallmentMaster(
         totalAmount: totalAmount,
@@ -1136,10 +1167,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
       );
       final masterEndTime = DateTime.now();
       final masterDuration = masterEndTime.difference(masterStartTime).inMilliseconds;
-      print('   Installment master creation took ${masterDuration}ms');
       
       // 2. Create installment details
-      print('   Creating installment details...');
       final detailsStartTime = DateTime.now();
       await UnifiedInstallmentService.createInstallmentDetails(
         installmentId: installmentId,
@@ -1149,10 +1178,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
       );
       final detailsEndTime = DateTime.now();
       final detailsDuration = detailsEndTime.difference(detailsStartTime).inMilliseconds;
-      print('   Installment details creation took ${detailsDuration}ms');
       
       // 3. Create transaction record for UI display
-      print('   Creating UI transaction record...');
       final uiStartTime = DateTime.now();
       await _createInstallmentTransactionRecord(
         installmentId: installmentId,
@@ -1165,10 +1192,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
       );
       final uiEndTime = DateTime.now();
       final uiDuration = uiEndTime.difference(uiStartTime).inMilliseconds;
-      print('   UI transaction record creation took ${uiDuration}ms');
       
       // 4. Update account balance locally for instant UI update
-      print('   Updating account balance locally...');
       final account = getAccountById(sourceAccountId);
       if (account != null && account.type == AccountType.credit) {
         // For credit cards: add total debt (totalAmount is positive, balance represents debt)
@@ -1186,26 +1211,21 @@ class UnifiedProviderV2 extends ChangeNotifier {
       
       // 7. Notify listeners for immediate UI update
       notifyListeners();
-      print('   ✅ Local state updated, UI should be instant');
       
       // 7. Reload data in background
       Future.microtask(() async {
         try {
-          print('   Reloading data in background...');
       await Future.wait([
         loadAccounts(),
             loadTransactions(),
         _loadSummaries(),
       ]);
-          print('   ✅ Background data reload completed');
         } catch (e) {
-          print('   ⚠️ Background data reload failed: $e');
         }
       });
       
       final totalEndTime = DateTime.now();
       final totalDuration = totalEndTime.difference(startTime).inMilliseconds;
-      print('   ✅ Installment transaction creation completed in ${totalDuration}ms');
       
       // Get updated account balance
       final updatedAccount = getAccountById(sourceAccountId);
@@ -1334,7 +1354,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     int sortOrder = 0,
   }) async {
     try {
-      debugPrint('UnifiedProviderV2.createCategory() - Creating category with Firebase');
+      // Debug log kaldırıldı
       
       final category = UnifiedCategoryModel(
         id: '', // Will be generated by Firebase
@@ -1368,7 +1388,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     int? year,
   }) async {
     try {
-      debugPrint('UnifiedProviderV2.createBudget() - Creating budget with Firebase');
+      // Debug log kaldırıldı
       
       final now = DateTime.now();
       final budgetMonth = month ?? now.month;
@@ -1481,7 +1501,13 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
   /// Refresh all data
   Future<void> refresh() async {
-    await loadAllData();
+    await loadAllData(forceRefresh: true);
+  }
+
+  /// Clear cache and force reload
+  void clearCache() {
+    _isDataCached = false;
+    _lastCacheTime = null;
   }
   
   @override
@@ -1496,10 +1522,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
   StreamSubscription? _installmentListener;
   
   /// Setup real-time listeners for automatic updates
-  void _setupRealTimeListeners() {
+  void setupRealTimeListeners() {
     // Cancel existing listeners
     _transactionListener?.cancel();
     _installmentListener?.cancel();
+    
     
     // Listen to transactions
     _transactionListener = FirebaseFirestore.instance
@@ -1507,7 +1534,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
         .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
         .snapshots()
         .listen((snapshot) {
-      print('🔄 Transaction change detected in UnifiedProviderV2, reloading...');
       loadTransactions();
       // Clear statement cache when transactions change
       clearStatementCache();
@@ -1519,7 +1545,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
         .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
         .snapshots()
         .listen((snapshot) {
-      print('🔄 Installment change detected in UnifiedProviderV2, reloading...');
       loadInstallments();
       // Clear statement cache when installments change
       clearStatementCache();
@@ -1546,6 +1571,154 @@ class UnifiedProviderV2 extends ChangeNotifier {
     _statementProvider = provider;
   }
   
+  /// Set StockProvider reference for accessing stock positions
+  void setStockProvider(StockProvider provider) {
+    _stockProvider = provider;
+    
+    // StockProvider değişikliklerini dinle
+    _stockProvider!.addListener(_onStockProviderChanged);
+  }
+  
+  /// StockProvider değişikliklerini dinle - ATOMIK GÜNCELLEME
+  void _onStockProviderChanged() {
+    if (_stockProvider != null) {
+      // Hisse pozisyonlarını güncelle
+      _updateStockValues();
+    }
+    // StockProvider yoksa mevcut değerleri koru, sıfırlama yapma
+  }
+  
+  /// Hisse değerlerini güncelle - ATOMIK GÜNCELLEME
+  void _updateStockValues() {
+    if (_stockProvider == null) {
+      // StockProvider yoksa sadece mevcut değerleri koru, sıfırlama
+      return;
+    }
+    
+    final stockPositions = _stockProvider!.stockPositions;
+    
+    // Önce yeni değerleri hesapla (sıfırlamadan)
+    double newTotalStockValue = 0.0;
+    double newTotalStockCost = 0.0;
+    
+    for (final position in stockPositions) {
+      newTotalStockValue += position.currentValue;
+      newTotalStockCost += position.totalCost;
+    }
+    
+    // ATOMIK GÜNCELLEME: Sadece geçerli değerler varsa güncelle
+    if (newTotalStockValue >= 0 && newTotalStockCost >= 0) {
+      _totalStockValue = newTotalStockValue;
+      _totalStockCost = newTotalStockCost;
+      
+      // Balance summary'yi güncelle
+      _updateBalanceSummary();
+      
+      notifyListeners();
+    }
+    // Eğer geçersiz değerler varsa, mevcut değerleri koru
+  }
+  
+  /// Check if StockProvider is set
+  bool get hasStockProvider => _stockProvider != null;
+  
+  /// Update balance summary with current values
+  void _updateBalanceSummary() {
+    
+    final totalAssets = _accounts
+        .where((account) => account.type == AccountType.cash || account.type == AccountType.debit)
+        .fold(0.0, (sum, account) => sum + account.balance);
+    
+    final totalDebts = _accounts
+        .where((account) => account.type == AccountType.credit)
+        .fold(0.0, (sum, account) => sum + (account.balance));
+    
+    final netWorth = _totalBalance + _totalStockValue;
+    
+    
+    _balanceSummary = {
+      'totalAssets': totalAssets,
+      'totalDebts': totalDebts,
+      'netWorth': netWorth, // Hisse değerlerini dahil et
+      'availableCredit': _totalCreditLimit - _totalUsedCredit,
+      'totalStockValue': _totalStockValue, // Hisse değerlerini ayrı göster
+      'totalStockCost': _totalStockCost, // Hisse toplam maliyeti
+    };
+    
+  }
+  
+  /// Update stock positions for net worth calculation - ATOMIK GÜNCELLEME
+  void updateStockPositions(List<dynamic> stockPositions) {
+    // Mevcut değerleri yedekle
+    final oldTotalStockValue = _totalStockValue;
+    final oldTotalStockCost = _totalStockCost;
+    
+    // Önce yeni değerleri hesapla (sıfırlamadan)
+    double newTotalStockValue = 0.0;
+    double newTotalStockCost = 0.0;
+    
+    for (final position in stockPositions) {
+      if (position is Map<String, dynamic>) {
+        final currentValue = position['currentValue'] as double? ?? 0.0;
+        final totalCost = position['totalCost'] as double? ?? 0.0;
+        newTotalStockValue += currentValue;
+        newTotalStockCost += totalCost;
+      }
+    }
+    
+    // ATOMIK GÜNCELLEME: Sadece geçerli değerler varsa güncelle
+    if (newTotalStockValue >= 0 && newTotalStockCost >= 0) {
+      _totalStockValue = newTotalStockValue;
+      _totalStockCost = newTotalStockCost;
+      
+      // Balance summary'yi güncelle
+      _updateBalanceSummary();
+      
+      notifyListeners();
+    } else {
+      // Geçersiz değerler varsa eski değerleri koru
+      _totalStockValue = oldTotalStockValue;
+      _totalStockCost = oldTotalStockCost;
+    }
+  }
+  
+  /// Load stock positions from StockProvider - ATOMIK GÜNCELLEME
+  Future<void> loadStockPositions() async {
+    if (_stockProvider == null) {
+      return;
+    }
+    
+    // Firebase Auth'dan kullanıcı ID'sini al
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return;
+    }
+    
+    try {
+      // Mevcut değerleri yedekle
+      final oldTotalStockValue = _totalStockValue;
+      final oldTotalStockCost = _totalStockCost;
+      
+      // StockProvider'dan hisse verilerini yükle
+      await _stockProvider!.loadWatchedStocks(user.uid);
+      await _stockProvider!.loadStockPositions(user.uid);
+      
+      // Net worth'u hemen güncelle
+      _updateStockValues();
+      
+      // Eğer güncelleme başarısızsa eski değerleri geri yükle
+      if (_totalStockValue == 0.0 && oldTotalStockValue > 0.0) {
+        _totalStockValue = oldTotalStockValue;
+        _totalStockCost = oldTotalStockCost;
+        _updateBalanceSummary();
+        notifyListeners();
+      }
+      
+    } catch (e) {
+      rethrow; // Hata durumunda yukarı fırlat
+    }
+  }
+  
   /// Update current statement in cache
   void updateCurrentStatement(String cardId, StatementSummary statement) {
     _currentStatements[cardId] = statement;
@@ -1554,9 +1727,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
   // Legacy compatibility methods for existing UI components
   
-  /// Legacy: Total balance (sum of all account balances)
+  /// Legacy: Total balance (sum of all account balances + stock values)
   double get totalBalance {
-    return _totalBalance;
+    return _totalBalance + _totalStockValue;
   }
   
   double get totalCreditLimit {
@@ -1989,6 +2162,25 @@ class UnifiedProviderV2 extends ChangeNotifier {
           }
           // If credit card is involved in transfer, do nothing (transfers don't affect credit limits)
           break;
+          
+        case TransactionType.stock:
+          // For stock transactions: affect cash account balance
+          final sourceAccount = _accounts.firstWhere(
+            (account) => account.id == transaction.sourceAccountId,
+            orElse: () => throw Exception('Source account not found'),
+          );
+          
+          if (sourceAccount.type == AccountType.cash) {
+            final updatedSourceAccount = sourceAccount.copyWith(
+              balance: sourceAccount.balance + (transaction.amount * multiplier),
+            );
+            
+            final sourceIndex = _accounts.indexWhere((a) => a.id == sourceAccount.id);
+            if (sourceIndex != -1) {
+              _accounts[sourceIndex] = updatedSourceAccount;
+            }
+          }
+          break;
       }
       
       // Update total balance immediately after account balance changes
@@ -2060,16 +2252,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
           .fold(0.0, (sum, t) => sum + t.amount);
       
       // Update balance summary with real-time calculations
-      _balanceSummary = {
-        'totalAssets': _accounts
-            .where((account) => account.type == AccountType.cash || account.type == AccountType.debit)
-            .fold(0.0, (sum, account) => sum + account.balance),
-        'totalDebts': _accounts
-            .where((account) => account.type == AccountType.credit)
-            .fold(0.0, (sum, account) => sum + (account.balance)),
-        'netWorth': _totalBalance,
-        'availableCredit': _totalCreditLimit - _totalUsedCredit,
-      };
+      _updateBalanceSummary();
       
       // Update monthly summary with real-time calculations
       _monthlySummary = {
@@ -2297,7 +2480,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       return statement;
     } catch (e) {
       if (kDebugMode) {
-        print('Error loading current statement: $e');
       }
       return null;
     } finally {
@@ -2328,7 +2510,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
           futureStatements.add(statement);
         } catch (e) {
           if (kDebugMode) {
-            print('Error calculating future statement for period ${period.periodText}: $e');
           }
         }
       }
@@ -2341,7 +2522,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       return futureStatements;
     } catch (e) {
       if (kDebugMode) {
-        print('Error loading future statements: $e');
       }
       return [];
     } finally {
@@ -2372,7 +2552,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
           pastStatements.add(statement);
         } catch (e) {
           if (kDebugMode) {
-            print('Error calculating past statement for period ${period.periodText}: $e');
           }
         }
       }
@@ -2385,7 +2564,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       return pastStatements;
     } catch (e) {
       if (kDebugMode) {
-        print('Error loading past statements: $e');
       }
       return [];
     } finally {
@@ -2445,26 +2623,14 @@ class UnifiedProviderV2 extends ChangeNotifier {
       StatementSummary? statementToUse = currentStatement;
       if (statementToUse == null && _statementProvider?.currentStatement != null) {
         statementToUse = _statementProvider!.currentStatement;
-        print('   📋 Using StatementProvider current statement');
       }
       
       // Calculate payment amount (statement total amount)
       final statementAmount = statementToUse?.totalAmount ?? 0.0;
       
-      print('💳 Statement Payment Debug:');
-      print('   Card ID: $cardId');
-      print('   Current Statement (cache): ${currentStatement != null ? "Found" : "NULL"}');
-      print('   StatementProvider current: ${_statementProvider?.currentStatement != null ? "Found" : "NULL"}');
-      print('   Statement To Use: ${statementToUse != null ? "Found" : "NULL"}');
-      print('   Statement Total Amount: ${statementToUse?.totalAmount}');
-      print('   Statement Remaining Amount: ${statementToUse?.remainingAmount}');
-      print('   Statement With Installments: ${statementToUse?.totalWithInstallments}');
-      print('   Statement Amount (using): $statementAmount');
-      print('   Current Balance: ${creditAccount.balance}');
       
       // Reduce credit card balance by statement amount (payment reduces debt)
       final newBalance = creditAccount.balance - statementAmount;
-      print('   New Balance: $newBalance');
       
       final updatedCreditAccount = creditAccount.copyWith(
         balance: newBalance, // Reduce debt by payment amount
@@ -2475,12 +2641,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
       final accountIndex = _accounts.indexWhere((a) => a.id == cardId);
       if (accountIndex != -1) {
         _accounts[accountIndex] = updatedCreditAccount;
-        print('   ✅ Local account updated');
       }
       
       // Update in Firebase
       await UnifiedAccountService.updateAccount(updatedCreditAccount);
-      print('   ✅ Firebase account updated');
 
       // Update in Firebase
       await StatementService.markStatementAsPaid(cardId, period);
@@ -2494,14 +2658,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
       
       // Update summaries after account balance change
       await _updateSummariesLocally();
-      print('   ✅ Summaries updated');
       
       notifyListeners();
-      print('   ✅ UI notified');
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Error marking statement as paid: $e');
       }
       
       // Rollback optimistic update
@@ -2546,7 +2707,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Error unmarking statement as paid: $e');
       }
       
       // Rollback optimistic update
@@ -2611,7 +2771,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       
       return true;
     } catch (e) {
-      debugPrint('Error processing statement payment: $e');
+      // Debug log kaldırıldı
       return false;
     }
   }
@@ -2643,9 +2803,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
           .doc(paymentTransaction['id'] as String)
           .set(paymentTransaction);
 
-      debugPrint('Payment transaction created: ${paymentTransaction['id']}');
+      // Debug log kaldırıldı
     } catch (e) {
-      debugPrint('Error creating payment transaction: $e');
+      // Debug log kaldırıldı
       rethrow;
     }
   }
@@ -2669,9 +2829,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Update local cache
       _updateAccountBalanceDirectly(cardId, newBalance);
       
-      debugPrint('Account balance updated after payment: $newBalance');
+      // Debug log kaldırıldı
     } catch (e) {
-      debugPrint('Error updating account balance after payment: $e');
+      // Debug log kaldırıldı
       rethrow;
     }
   }
@@ -2690,10 +2850,95 @@ class UnifiedProviderV2 extends ChangeNotifier {
         _updateSummariesLocally();
         notifyListeners();
         
-        debugPrint('Account balance updated locally: $newBalance');
+        // Debug log kaldırıldı
       }
     } catch (e) {
-      debugPrint('Error updating account balance locally: $e');
+      // Debug log kaldırıldı
+    }
+  }
+
+  /// Optimistic UI update - Transaction'ı anında UI'den kaldır
+  void removeTransactionOptimistically(String transactionId) {
+    try {
+      // Transaction'ı bul ve hesap bakiyesini güncelle
+      final transactionToRemove = transactions.firstWhere(
+        (transaction) => transaction.id == transactionId,
+        orElse: () => throw Exception('Transaction not found'),
+      );
+      
+      // Hesap bakiyesini geri al (transaction silinirse bakiye geri gelir)
+      if (transactionToRemove.sourceAccountId != null) {
+        _reverseAccountBalance(transactionToRemove.sourceAccountId!, transactionToRemove.amount);
+      }
+      
+      // Transactions listesinden kaldır
+      transactions.removeWhere((transaction) => transaction.id == transactionId);
+      
+      // Summaries'i güncelle (net değer, kartlar vs.)
+      _updateSummariesLocally();
+      
+      // UI'yi anında güncelle
+      notifyListeners();
+      
+      // Debug log'ları kaldırıldı
+      
+    } catch (e) {
+      // Debug log kaldırıldı
+    }
+  }
+
+  /// Stock transaction için özel optimistic update
+  void removeStockTransactionOptimistically(String transactionId, double amount, String? accountId) {
+    try {
+      // Hesap bakiyesini geri al
+      if (accountId != null) {
+        _reverseAccountBalance(accountId, amount);
+      }
+      
+      // Transactions listesinden kaldır
+      transactions.removeWhere((transaction) => transaction.id == transactionId);
+      
+      // Summaries'i güncelle (net değer, kartlar vs.)
+      _updateSummariesLocally();
+      
+      // UI'yi anında güncelle
+      notifyListeners();
+      
+      // Debug log'ları kaldırıldı
+      
+    } catch (e) {
+      // Debug log kaldırıldı
+    }
+  }
+
+  /// Hesap bakiyesini geri al (transaction silinirse)
+  void _reverseAccountBalance(String accountId, double transactionAmount) {
+    try {
+      final accountIndex = accounts.indexWhere((acc) => acc.id == accountId);
+      if (accountIndex != -1) {
+        // Transaction amount'u ters çevir (silinen transaction'ın etkisini geri al)
+        final reversedAmount = -transactionAmount;
+        final newBalance = accounts[accountIndex].balance + reversedAmount;
+        
+        accounts[accountIndex] = accounts[accountIndex].copyWith(
+          balance: newBalance,
+          updatedAt: DateTime.now(),
+        );
+        
+        // Debug log kaldırıldı
+      }
+    } catch (e) {
+      debugPrint('Error reversing account balance: $e');
+    }
+  }
+
+  /// Transactions'ları yenile (hata durumunda)
+  void refreshTransactions() {
+    try {
+      loadTransactions();
+      debugPrint('🔄 Transactions refreshed');
+    } catch (e) {
+      debugPrint('Error refreshing transactions: $e');
     }
   }
 } 

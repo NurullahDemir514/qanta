@@ -8,6 +8,7 @@ import '../modules/home/home_screen.dart';
 import '../modules/profile/profile_screen.dart';
 import '../modules/cards/cards_screen.dart';
 import '../modules/insights/statistics_screen.dart';
+import '../modules/calendar/calendar_screen.dart';
 import '../modules/home/pages/budget_management_page.dart';
 import '../modules/home/pages/quick_notes_page.dart';
 import '../modules/transactions/screens/expense_form_screen.dart';
@@ -173,6 +174,29 @@ class AppRouter {
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const StatisticsScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: curve),
+            );
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      ),
+      GoRoute(
+        path: '/calendar',
+        name: 'calendar',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const CalendarScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;

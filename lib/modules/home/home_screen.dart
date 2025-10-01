@@ -16,6 +16,8 @@ import '../cards/widgets/add_card_fab.dart';
 import '../transactions/index.dart';
 import '../transactions/screens/transactions_screen.dart';
 import '../insights/statistics_screen.dart';
+import '../calendar/calendar_screen.dart';
+import '../stocks/screens/stocks_screen.dart';
 import 'widgets/main_tab_bar.dart';
 import 'widgets/balance_overview_card.dart';
 import 'widgets/budget_overview_card.dart';
@@ -66,14 +68,15 @@ class _MainScreenState extends State<MainScreen> {
               const TransactionsScreen(),
               const CardsScreen(),
               const StatisticsScreen(),
-              const ProfileScreen(),
+              const CalendarScreen(),
+              const StocksScreen(),
             ],
           ),
           MainTabBar(
             currentIndex: _currentIndex,
             onTabChanged: _onTabChanged,
           ),
-          const TransactionFab(),
+          if (_currentIndex != 2 && _currentIndex != 5) const TransactionFab(),
           if (_currentIndex == 2)
             AddCardFab(currentTabIndex: _currentIndex),
         ],
@@ -157,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Initialize providers
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UnifiedProviderV2>().loadAllData();
+      // Data already loaded in splash screen, no need to reload
       // Set context for notification service
       QuickNoteNotificationService.setContext(context);
     });
@@ -251,17 +254,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Navigate to profile screen
   void _navigateToProfile(BuildContext context) {
-    // Find the MainScreen parent and switch to profile tab
-    final mainScreenState = context.findAncestorStateOfType<_MainScreenState>();
-    if (mainScreenState != null) {
-      mainScreenState._onTabChanged(4); // Profile tab index
-    } else {
-      // Fallback: navigate directly to profile screen
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => const ProfileScreen(),
-        ),
-      );
-    }
+    // Navigate directly to profile screen
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ProfileScreen(),
+      ),
+    );
   }
 } 

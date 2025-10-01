@@ -246,8 +246,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final double containerWidth = constraints.maxWidth * 1;
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
                     return Container(
                       width: containerWidth,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -587,7 +591,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             await ReminderService.clearAllRemindersForCurrentUser();
             await FirebaseAuthService.signOut();
             if (context.mounted) {
-              context.go('/onboarding');
+              context.go('/login');
             }
           },
           borderRadius: BorderRadius.circular(12),

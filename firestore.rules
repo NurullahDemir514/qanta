@@ -117,7 +117,49 @@ service cloud.firestore {
       match /quick_notes/{noteId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+      
+      // =====================================================
+      // HİSSE TAKİP LİSTESİ (watched_stocks)
+      // =====================================================
+      match /watched_stocks/{stockSymbol} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+    // =====================================================
+    // HİSSE İŞLEMLERİ (stock_transactions)
+    // =====================================================
+    match /stock_transactions/{transactionId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+    
+    // =====================================================
+    // HİSSE POZİSYONLARI (stock_positions)
+    // =====================================================
+    match /stock_positions/{stockSymbol} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+  
+  // =====================================================
+  // HİSSE İŞLEMLERİ (stock_transactions) - Collection Group Query
+  // =====================================================
+  match /{path=**}/stock_transactions/{transactionId} {
+    allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+  }
+  
+  // =====================================================
+  // HİSSE POZİSYONLARI (stock_positions) - Collection Group Query
+  // =====================================================
+  match /{path=**}/stock_positions/{stockSymbol} {
+    allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+  }
+  
+  // =====================================================
+  // HİSSE TAKİP LİSTESİ (watched_stocks) - Collection Group Query
+  // =====================================================
+  match /{path=**}/watched_stocks/{stockSymbol} {
+    allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+  }
     
     // =====================================================
     // İŞLEMLER (transactions) - Ana Collection

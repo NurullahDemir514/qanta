@@ -88,7 +88,7 @@
   "@investments": {
     "description": "Investment portfolio"
   },
-  "analytics": "İstatistikler",
+  "analytics": "Analiz",
   "@analytics": {
     "description": "Analytics menu item"
   },
@@ -1703,7 +1703,7 @@
   "@debitCard": {
     "description": "Debit card account type"
   },
-  "statisticsTitle": "İstatistikler",
+  "statisticsTitle": "Analiz",
   "@statisticsTitle": {
     "description": "Statistics page title"
   },
@@ -2326,7 +2326,7 @@
   "@noCardsAddedYet": {
     "description": "No cards added yet"
   },
-  "cash": "Nakit",
+  "cash": "NAKİT",
   "@cash": {
     "description": "Cash account"
   },
@@ -3345,5 +3345,1501 @@
   "addCreditCardDescription": "Kredi kartı bilgilerinizi ekleyin",
   "@addCreditCardDescription": {
     "description": "Add your credit card information"
+  },
+  "stocks": "Hisse Senetleri",
+  "@stocks": {
+    "description": "Stocks screen title"
+  },
+  "searchStocks": "Hisse Ara",
+  "@searchStocks": {
+    "description": "Search stocks placeholder"
+  },
+  "addStock": "Hisse Ekle",
+  "@addStock": {
+    "description": "Add stock button"
+  },
+  "removeStock": "Hisseyi Kaldır",
+  "@removeStock": {
+    "description": "Remove stock button"
+  },
+  "stockDetails": "Hisse Detayları",
+  "@stockDetails": {
+    "description": "Stock details title"
+  },
+  "stockInfo": "Hisse Bilgileri",
+  "@stockInfo": {
+    "description": "Stock information section"
+  },
+  "exchange": "Borsa",
+  "@exchange": {
+    "description": "Stock exchange"
+  },
+  "sector": "Sektör",
+  "@sector": {
+    "description": "Stock sector"
+  },
+  "country": "Ülke",
+  "@country": {
+    "description": "Stock country"
+  },
+  "currency": "Para Birimi",
+  "@currency": {
+    "description": "Currency"
+  },
+  "lastUpdate": "Son Güncelleme",
+  "@lastUpdate": {
+    "description": "Last update time"
+  },
+  "buyStock": "Hisse Alış",
+  "@buyStock": {
+    "description": "Buy stock transaction"
+  },
+  "sellStock": "Hisse Satış",
+  "@sellStock": {
+    "description": "Sell stock transaction"
+  },
+  "buy": "Alış",
+  "@buy": {
+    "description": "Buy action"
+  },
+  "sell": "Satış",
+  "@sell": {
+    "description": "Sell action"
+  },
+  "noStocksYet": "Henüz hisse takip etmiyorsunuz",
+  "@noStocksYet": {
+    "description": "No stocks being tracked"
+  },
+  "addFirstStock": "Hisse eklemek için + butonuna basın",
+  "@addFirstStock": {
+    "description": "Add first stock instruction"
+  },
+  "stockAdded": "Hisse takip listesine eklendi",
+  "@stockAdded": {
+    "description": "Stock added to watchlist"
+  },
+  "stockRemoved": "Hisse takip listesinden kaldırıldı",
+  "@stockRemoved": {
+    "description": "Stock removed from watchlist"
+  },
+  "confirmRemoveStock": "Bu hisseyi takip listesinden kaldırmak istediğinizden emin misiniz?",
+  "@confirmRemoveStock": {
+    "description": "Confirm stock removal"
+  },
+  "chartComingSoon": "Grafik Yakında",
+  "@chartComingSoon": {
+    "description": "Chart coming soon message"
+  },
+  "chartDescription": "Fiyat grafikleri ve analiz özellikleri geliştiriliyor",
+  "@chartDescription": {
+    "description": "Chart development message"
+  },
+  "shareStock": "Hisse Paylaş",
+  "@shareStock": {
+    "description": "Share stock action"
+  },
+  "shareFeatureComingSoon": "Paylaşma özelliği yakında eklenecek",
+  "@shareFeatureComingSoon": {
+    "description": "Share feature coming soon"
+  },
+  "buyFeatureComingSoon": "Alış işlemi yakında eklenecek",
+  "@buyFeatureComingSoon": {
+    "description": "Buy feature coming soon"
+  },
+  "sellFeatureComingSoon": "Satış işlemi yakında eklenecek",
+  "@sellFeatureComingSoon": {
+    "description": "Sell feature coming soon"
+  },
+  "popularStocks": "Popüler Hisseler",
+  "@popularStocks": {
+    "description": "Popular stocks section"
+  },
+  "bistStocks": "BIST Hisseleri",
+  "@bistStocks": {
+    "description": "BIST stocks section"
+  },
+  "usStocks": "ABD Hisseleri",
+  "@usStocks": {
+    "description": "US stocks section"
+  },
+  "now": "Şimdi",
+  "@now": {
+    "description": "Now time indicator"
+  },
+  "minutesAgo": "{count}dk önce",
+  "@minutesAgo": {
+    "description": "Minutes ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count}sa önce",
+  "@hoursAgo": {
+    "description": "Hours ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count}gün önce",
+  "@daysAgo": {
+    "description": "Days ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgoFull": "{count} dakika önce",
+  "@minutesAgoFull": {
+    "description": "Minutes ago full text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgoFull": "{count} saat önce",
+  "@hoursAgoFull": {
+    "description": "Hours ago full text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgoFull": "{count} gün önce",
+  "@daysAgoFull": {
+    "description": "Days ago full text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "investmentsIncluded": "Yatırımlar dahil",
+  "@investmentsIncluded": {
+    "description": "Toggle text for including investments in net worth"
+  },
+  "investmentsExcluded": "Yatırımlar hariç",
+  "@investmentsExcluded": {
+    "description": "Toggle text for excluding investments from net worth"
+  },
+  "noCardsAddedYet": "Henüz kart eklenmemiş",
+  "@noCardsAddedYet": {
+    "description": "Message when no cards are added yet"
+  },
+  "addFirstCardDescription": "İlk kartınızı eklemek için Kartlarım sayfasına gidin",
+  "@addFirstCardDescription": {
+    "description": "Description for adding first card"
+  },
+  "deleteTransaction": "İşlemi Sil",
+  "@deleteTransaction": {
+    "description": "Delete transaction action sheet title"
+  },
+  "deleteTransactionConfirmation": "{description} işlemini silmek istediğinizden emin misiniz?",
+  "@deleteTransactionConfirmation": {
+    "description": "Delete transaction confirmation message",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteInstallmentTransaction": "Taksitli İşlem Sil",
+  "@deleteInstallmentTransaction": {
+    "description": "Delete installment transaction action sheet title"
+  },
+  "deleteInstallmentConfirmation": "{description} işlemini silmek istediğinizden emin misiniz? Tüm taksitler iade edilecektir.",
+  "@deleteInstallmentConfirmation": {
+    "description": "Delete installment transaction confirmation message",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionDeleteError": "İşlem silinirken hata oluştu: {error}",
+  "@transactionDeleteError": {
+    "description": "Transaction delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "installmentTransactionDeleted": "Taksitli işlem silindi, toplam tutar iade edildi",
+  "@installmentTransactionDeleted": {
+    "description": "Installment transaction deleted success message"
+  },
+  "installmentDeleteError": "Taksitli işlem silinirken hata oluştu: {error}",
+  "@installmentDeleteError": {
+    "description": "Installment transaction delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "creditCard": "Kredi Kartı",
+  "@creditCard": {
+    "description": "Credit card default name"
+  },
+  "dueToday": "Bugün",
+  "@dueToday": {
+    "description": "Due today text"
+  },
+  "lastDays": "Son {days} Gün",
+  "@lastDays": {
+    "description": "Last X days text",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "statementDebt": "Ekstre Borcu: {amount}",
+  "@statementDebt": {
+    "description": "Statement debt text",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "noDebt": "Borç yok",
+  "@noDebt": {
+    "description": "No debt text"
+  },
+  "urgent": "Acil",
+  "@urgent": {
+    "description": "Urgent priority level"
+  },
+  "important": "Önemli",
+  "@important": {
+    "description": "Important priority level"
+  },
+  "info": "Bilgi",
+  "@info": {
+    "description": "Info priority level"
+  },
+  "statementDebtLabel": "Ekstre Borcu",
+  "@statementDebtLabel": {
+    "description": "Statement debt label"
+  },
+  "debtAmount": "Borç: {amount} TL",
+  "@debtAmount": {
+    "description": "Debt amount text",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "lastPaymentDate": "Son Ödeme Tarihi",
+  "@lastPaymentDate": {
+    "description": "Last payment date label"
+  },
+  "ok": "Tamam",
+  "@ok": {
+    "description": "OK button text"
+  },
+  "allNotifications": "Tüm Bildirimler",
+  "@allNotifications": {
+    "description": "All notifications title"
+  },
+  "close": "Kapat",
+  "@close": {
+    "description": "Close button text"
+  },
+  "lastPayment": "Son ödeme: {date}",
+  "@lastPayment": {
+    "description": "Last payment text",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "quickNotes": "Hızlı Notlar",
+  "@quickNotes": {
+    "description": "Quick notes title"
+  },
+  "pendingNotes": "{count} bekleyen not",
+  "@pendingNotes": {
+    "description": "Pending notes count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addQuickNote": "Hızlı Not Ekle",
+  "@addQuickNote": {
+    "description": "Add quick note title"
+  },
+  "addQuickNoteDescription": "Harcama veya gelir notunuzu yazın. Daha sonra işlem olarak ekleyebilirsiniz.",
+  "@addQuickNoteDescription": {
+    "description": "Add quick note description"
+  },
+  "exampleExpenseNote": "Örn: Market alışverişi 150{currency}",
+  "@exampleExpenseNote": {
+    "description": "Example expense note with currency",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "addPhotoNote": "Fotoğraf Notu Ekle",
+  "@addPhotoNote": {
+    "description": "Add photo note title"
+  },
+  "addPhotoNoteDescription": "Bu fotoğraf için bir açıklama ekleyin (isteğe bağlı)",
+  "@addPhotoNoteDescription": {
+    "description": "Add photo note description"
+  },
+  "examplePhotoNote": "Örn: Market fişi - 150{currency}",
+  "@examplePhotoNote": {
+    "description": "Example photo note with currency",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "viewAllNotes": "Tüm notları gör ({count})",
+  "@viewAllNotes": {
+    "description": "View all notes button",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsAgo": "{count} saniye önce",
+  "@secondsAgo": {
+    "description": "Seconds ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "{count} dakika önce",
+  "@minutesAgo": {
+    "description": "Minutes ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} saat önce",
+  "@hoursAgo": {
+    "description": "Hours ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yesterdayAt": "Dün {time}",
+  "@yesterdayAt": {
+    "description": "Yesterday at time text",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayAt": "{weekday} {time}",
+  "@weekdayAt": {
+    "description": "Weekday at time text",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dayMonth": "{day} {month}",
+  "@dayMonth": {
+    "description": "Day and month text",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "dayMonthYear": "{day}/{month}/{year}",
+  "@dayMonthYear": {
+    "description": "Day/month/year text",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "photoNote": "Fotoğraf notu",
+  "@photoNote": {
+    "description": "Photo note default text"
+  },
+  "photoNoteAdded": "Fotoğraf notu eklendi",
+  "@photoNoteAdded": {
+    "description": "Photo note added success message"
+  },
+  "photoNoteAddError": "Fotoğraf notu eklenirken hata oluştu",
+  "@photoNoteAddError": {
+    "description": "Photo note add error message"
+  },
+  "photoCaptureError": "Fotoğraf çekilirken hata oluştu",
+  "@photoCaptureError": {
+    "description": "Photo capture error message"
+  },
+  "photoSelectionError": "Fotoğraf seçilirken hata oluştu",
+  "@photoSelectionError": {
+    "description": "Photo selection error message"
+  },
+  "noteAdded": "Not eklendi",
+  "@noteAdded": {
+    "description": "Note added success message"
+  },
+  "noteAddError": "Not eklenirken hata oluştu",
+  "@noteAddError": {
+    "description": "Note add error message"
+  },
+  "noteDeleted": "Not silindi",
+  "@noteDeleted": {
+    "description": "Note deleted success message"
+  },
+  "noteDeleteError": "Not silinirken hata oluştu",
+  "@noteDeleteError": {
+    "description": "Note delete error message"
+  },
+  "textNote": "Metin Notu",
+  "@textNote": {
+    "description": "Text note option"
+  },
+  "addQuickTextNote": "Hızlı metin notu ekle",
+  "@addQuickTextNote": {
+    "description": "Add quick text note description"
+  },
+  "takePhoto": "Fotoğraf Çek",
+  "@takePhoto": {
+    "description": "Take photo option"
+  },
+  "takePhotoFromCamera": "Kameradan fotoğraf çek",
+  "@takePhotoFromCamera": {
+    "description": "Take photo from camera description"
+  },
+  "selectFromGallery": "Galeriden Seç",
+  "@selectFromGallery": {
+    "description": "Select from gallery option"
+  },
+  "selectPhotoFromGallery": "Galeriden fotoğraf seç",
+  "@selectPhotoFromGallery": {
+    "description": "Select photo from gallery description"
+  },
+  "addExpenseIncomeNotes": "Gider veya gelir notlarınızı buraya ekleyin",
+  "@addExpenseIncomeNotes": {
+    "description": "Add expense or income notes description"
+  },
+  "stocks": "Yatırım",
+  "@stocks": {
+    "description": "Stocks tab label"
+  },
+  "cardName": "Kart Adı",
+  "@cardName": {
+    "description": "Card name label"
+  },
+  "usage": "Kullanım",
+  "@usage": {
+    "description": "Usage percentage label"
+  },
+  "availableLimit": "Kullanılabilir Limit",
+  "@availableLimit": {
+    "description": "Available credit limit label"
+  },
+  "debt": "Borç",
+  "@debt": {
+    "description": "Debt amount label"
+  },
+  "lastPayment": "Son Ödeme",
+  "@lastPayment": {
+    "description": "Last payment date label"
+  },
+  "januaryShort": "Oca",
+  "@januaryShort": {
+    "description": "January short form"
+  },
+  "februaryShort": "Şub",
+  "@februaryShort": {
+    "description": "February short form"
+  },
+  "marchShort": "Mar",
+  "@marchShort": {
+    "description": "March short form"
+  },
+  "aprilShort": "Nis",
+  "@aprilShort": {
+    "description": "April short form"
+  },
+  "mayShort": "May",
+  "@mayShort": {
+    "description": "May short form"
+  },
+  "juneShort": "Haz",
+  "@juneShort": {
+    "description": "June short form"
+  },
+  "julyShort": "Tem",
+  "@julyShort": {
+    "description": "July short form"
+  },
+  "augustShort": "Ağu",
+  "@augustShort": {
+    "description": "August short form"
+  },
+  "septemberShort": "Eyl",
+  "@septemberShort": {
+    "description": "September short form"
+  },
+  "octoberShort": "Eki",
+  "@octoberShort": {
+    "description": "October short form"
+  },
+  "novemberShort": "Kas",
+  "@novemberShort": {
+    "description": "November short form"
+  },
+  "decemberShort": "Ara",
+  "@decemberShort": {
+    "description": "December short form"
+  },
+  "stocksIncluded": "Hisse Dahil",
+  "@stocksIncluded": {
+    "description": "Stocks included toggle text"
+  },
+  "stocksExcluded": "Hisse Hariç",
+  "@stocksExcluded": {
+    "description": "Stocks excluded toggle text"
+  },
+  "stockChip": "Hisse",
+  "@stockChip": {
+    "description": "Stock transaction chip label"
+  },
+  "stockSale": "Satış",
+  "@stockSale": {
+    "description": "Stock sale action"
+  },
+  "stockPurchase": "Alış",
+  "@stockPurchase": {
+    "description": "Stock purchase action"
+  },
+  "stockName": "Hisse Adı",
+  "@stockName": {
+    "description": "Stock name label"
+  },
+  "quantity": "Adet",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "price": "Fiyat",
+  "@price": {
+    "description": "Price label"
+  },
+  "total": "Toplam",
+  "@total": {
+    "description": "Total amount label"
+  },
+  "pieces": "adet",
+  "@pieces": {
+    "description": "Pieces unit"
+  },
+  "noTransactionsFound": "İşlem bulunamadı",
+  "@noTransactionsFound": {
+    "description": "No transactions found message"
+  },
+  "totalTransactionsCount": "{count} işlem",
+  "@totalTransactionsCount": {
+    "description": "Total transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "incomeTransactionsCount": "{count} gelir işlemi",
+  "@incomeTransactionsCount": {
+    "description": "Income transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseTransactionsCount": "{count} gider işlemi",
+  "@expenseTransactionsCount": {
+    "description": "Expense transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transferTransactionsCount": "{count} transfer işlemi",
+  "@transferTransactionsCount": {
+    "description": "Transfer transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stockTransactionsCount": "{count} hisse işlemi",
+  "@stockTransactionsCount": {
+    "description": "Stock transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "today": "Bugün",
+  "@today": {
+    "description": "Today time period"
+  },
+  "thisWeek": "Bu Hafta",
+  "@thisWeek": {
+    "description": "This week time period"
+  },
+  "thisMonth": "Bu Ay",
+  "@thisMonth": {
+    "description": "This month time period"
+  },
+  "lastMonth": "Geçen Ay",
+  "@lastMonth": {
+    "description": "Last month time period"
+  },
+  "last3Months": "Son 3 Ay",
+  "@last3Months": {
+    "description": "Last 3 months time period"
+  },
+  "thisYear": "Bu Yıl",
+  "@thisYear": {
+    "description": "This year time period"
+  },
+  "allTime": "Tüm Zamanlar",
+  "@allTime": {
+    "description": "All time period"
+  },
+  "dailyAverageExpense": "Ortalama günlük harcama",
+  "@dailyAverageExpense": {
+    "description": "Daily average expense label"
+  },
+  "noExpenseTransactions": "Gider işlemi bulunamadı",
+  "@noExpenseTransactions": {
+    "description": "No expense transactions found message"
+  },
+  "manageYourCards": "Kartlarınızı yönetin",
+  "@manageYourCards": {
+    "description": "Manage your cards subtitle"
+  },
+  "analyzeYourFinances": "Finansal durumunuzu analiz edin",
+  "@analyzeYourFinances": {
+    "description": "Analyze your finances subtitle"
+  },
+  "statistics": "Analiz",
+  "@statistics": {
+    "description": "Statistics page title"
+  },
+  "income": "Gelir",
+  "@income": {
+    "description": "Income label"
+  },
+  "expense": "Gider",
+  "@expense": {
+    "description": "Expense label"
+  },
+  "net": "Net",
+  "@net": {
+    "description": "Net balance label"
+  },
+  "netBalance": "Net Bakiye",
+  "@netBalance": {
+    "description": "Net balance full label"
+  },
+  "noExpenseRecordsYet": "Henüz gider kaydı yok",
+  "@noExpenseRecordsYet": {
+    "description": "No expense records message"
+  },
+  "transactionHistoryEmpty": "Hareket geçmişi boş",
+  "@transactionHistoryEmpty": {
+    "description": "Empty transaction history message"
+  },
+  "noSpendingInPeriod": "Seçilen dönemde harcama yapılmamış",
+  "@noSpendingInPeriod": {
+    "description": "No spending in selected period"
+  },
+  "addFirstTransaction": "İlk harcamanızı ekleyerek başlayın",
+  "@addFirstTransaction": {
+    "description": "Add first transaction message"
+  },
+  "spendingCategories": "Harcama Kategorileri",
+  "@spendingCategories": {
+    "description": "Spending categories section title"
+  },
+  "moreCategories": "kategori daha",
+  "@moreCategories": {
+    "description": "More categories text"
+  },
+  "transactions": "İşlemler",
+  "@transactions": {
+    "description": "Transactions count"
+  },
+  "noTransactionsInCategory": "Bu kategoride hareket bulunamadı",
+  "@noTransactionsInCategory": {
+    "description": "No transactions in category message"
+  },
+  "today": "Bugün",
+  "@today": {
+    "description": "Today"
+  },
+  "yesterday": "Dün",
+  "@yesterday": {
+    "description": "Yesterday"
+  },
+  "thisMonth": "Bu Ay",
+  "@thisMonth": {
+    "description": "This month"
+  },
+  "lastMonth": "Geçen Ay",
+  "@lastMonth": {
+    "description": "Last month"
+  },
+  "last3Months": "Son 3 Ay",
+  "@last3Months": {
+    "description": "Last 3 months"
+  },
+  "january": "Ocak",
+  "@january": {
+    "description": "January"
+  },
+  "february": "Şubat",
+  "@february": {
+    "description": "February"
+  },
+  "march": "Mart",
+  "@march": {
+    "description": "March"
+  },
+  "april": "Nisan",
+  "@april": {
+    "description": "April"
+  },
+  "may": "Mayıs",
+  "@may": {
+    "description": "May"
+  },
+  "june": "Haziran",
+  "@june": {
+    "description": "June"
+  },
+  "july": "Temmuz",
+  "@july": {
+    "description": "July"
+  },
+  "august": "Ağustos",
+  "@august": {
+    "description": "August"
+  },
+  "september": "Eylül",
+  "@september": {
+    "description": "September"
+  },
+  "october": "Ekim",
+  "@october": {
+    "description": "October"
+  },
+  "november": "Kasım",
+  "@november": {
+    "description": "November"
+  },
+  "december": "Aralık",
+  "@december": {
+    "description": "December"
+  },
+  "januaryShort": "Oca",
+  "@januaryShort": {
+    "description": "January short"
+  },
+  "februaryShort": "Şub",
+  "@februaryShort": {
+    "description": "February short"
+  },
+  "marchShort": "Mar",
+  "@marchShort": {
+    "description": "March short"
+  },
+  "aprilShort": "Nis",
+  "@aprilShort": {
+    "description": "April short"
+  },
+  "mayShort": "May",
+  "@mayShort": {
+    "description": "May short"
+  },
+  "juneShort": "Haz",
+  "@juneShort": {
+    "description": "June short"
+  },
+  "julyShort": "Tem",
+  "@julyShort": {
+    "description": "July short"
+  },
+  "augustShort": "Ağu",
+  "@augustShort": {
+    "description": "August short"
+  },
+  "septemberShort": "Eyl",
+  "@septemberShort": {
+    "description": "September short"
+  },
+  "octoberShort": "Eki",
+  "@octoberShort": {
+    "description": "October short"
+  },
+  "novemberShort": "Kas",
+  "@novemberShort": {
+    "description": "November short"
+  },
+  "decemberShort": "Ara",
+  "@decemberShort": {
+    "description": "December short"
+  },
+  "chart": "Grafik",
+  "@chart": {
+    "description": "Chart view"
+  },
+  "table": "Tablo",
+  "@table": {
+    "description": "Table view"
+  },
+  "monthlyExpenseAnalysis": "Aylık Harcama Analizi",
+  "@monthlyExpenseAnalysis": {
+    "description": "Monthly expense analysis title"
+  },
+  "monthlyIncomeAnalysis": "Aylık Gelir Analizi",
+  "@monthlyIncomeAnalysis": {
+    "description": "Monthly income analysis title"
+  },
+  "monthlyNetBalanceAnalysis": "Aylık Net Bakiye Analizi",
+  "@monthlyNetBalanceAnalysis": {
+    "description": "Monthly net balance analysis title"
+  },
+  "noMonthlyData": "Aylık {title} Verisi Yok",
+  "@noMonthlyData": {
+    "description": "No monthly data message",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "addFirstTransactionToStart": "İlk işleminizi ekleyerek başlayın",
+  "@addFirstTransactionToStart": {
+    "description": "Add first transaction to start message"
+  },
+  "month": "Ay",
+  "@month": {
+    "description": "Month column header"
+  },
+  "change": "Değişim",
+  "@change": {
+    "description": "Change column header"
+  },
+  "stable": "Sabit",
+  "@stable": {
+    "description": "Stable change indicator"
+  },
+  "stockTrading": "Hisse Alış/Satış",
+  "@stockTrading": {
+    "description": "Stock trading category name"
+  },
+  "food": "Yemek",
+  "@food": {
+    "description": "Food category"
+  },
+  "transport": "Ulaşım",
+  "@transport": {
+    "description": "Transport category"
+  },
+  "shopping": "Alışveriş",
+  "@shopping": {
+    "description": "Shopping category"
+  },
+  "entertainment": "Eğlence",
+  "@entertainment": {
+    "description": "Entertainment category"
+  },
+  "bills": "Faturalar",
+  "@bills": {
+    "description": "Bills category"
+  },
+  "health": "Sağlık",
+  "@health": {
+    "description": "Health category"
+  },
+  "education": "Eğitim",
+  "@education": {
+    "description": "Education category"
+  },
+  "travel": "Seyahat",
+  "@travel": {
+    "description": "Travel category"
+  },
+  "other": "Diğer",
+  "@other": {
+    "description": "Other category"
+  },
+  "unknownCategory": "Bilinmeyen Kategori",
+  "@unknownCategory": {
+    "description": "Unknown category"
+  },
+  "error": "Hata",
+  "@error": {
+    "description": "Error label"
+  },
+  "tryAgain": "Tekrar Dene",
+  "@tryAgain": {
+    "description": "Try again button"
+  },
+  "trackYourStocks": "Hisse senetlerinizi takip edin",
+  "@trackYourStocks": {
+    "description": "Stocks screen subtitle"
+  },
+  "searchStocks": "Hisse Ara",
+  "@searchStocks": {
+    "description": "Search stocks button"
+  },
+  "buyStock": "Hisse Al",
+  "@buyStock": {
+    "description": "Buy stock button"
+  },
+  "sellStock": "Hisse Sat",
+  "@sellStock": {
+    "description": "Sell stock button"
+  },
+  "stockInfo": "Hisse Bilgileri",
+  "@stockInfo": {
+    "description": "Stock information section title"
+  },
+  "exchange": "Borsa",
+  "@exchange": {
+    "description": "Stock exchange label"
+  },
+  "sector": "Sektör",
+  "@sector": {
+    "description": "Stock sector label"
+  },
+  "country": "Ülke",
+  "@country": {
+    "description": "Stock country label"
+  },
+  "currency": "Para Birimi",
+  "@currency": {
+    "description": "Stock currency label"
+  },
+  "lastUpdate": "Son Güncelleme",
+  "@lastUpdate": {
+    "description": "Last update label"
+  },
+  "chartComingSoon": "Grafik Yakında",
+  "@chartComingSoon": {
+    "description": "Chart coming soon message"
+  },
+  "chartDevelopmentMessage": "Fiyat grafikleri ve analiz özellikleri geliştiriliyor",
+  "@chartDevelopmentMessage": {
+    "description": "Chart development message"
+  },
+  "buy": "Alış",
+  "@buy": {
+    "description": "Buy action"
+  },
+  "sell": "Satış",
+  "@sell": {
+    "description": "Sell action"
+  },
+  "shareFeatureComingSoon": "Paylaşma özelliği yakında eklenecek",
+  "@shareFeatureComingSoon": {
+    "description": "Share feature coming soon message"
+  },
+  "buyTransactionComingSoon": "Alış işlemi yakında eklenecek",
+  "@buyTransactionComingSoon": {
+    "description": "Buy transaction coming soon message"
+  },
+  "sellTransactionComingSoon": "Satış işlemi yakında eklenecek",
+  "@sellTransactionComingSoon": {
+    "description": "Sell transaction coming soon message"
+  },
+  "now": "Şimdi",
+  "@now": {
+    "description": "Now time reference"
+  },
+  "loadingPopularStocks": "Popüler hisseler yükleniyor...",
+  "@loadingPopularStocks": {
+    "description": "Loading popular stocks message"
+  },
+  "noStocksFound": "Hisse bulunamadı",
+  "@noStocksFound": {
+    "description": "No stocks found message"
+  },
+  "tryDifferentSearchTerm": "Farklı bir arama terimi deneyin",
+  "@tryDifferentSearchTerm": {
+    "description": "Try different search term message"
+  },
+  "dayHigh": "Gün Yüksek",
+  "@dayHigh": {
+    "description": "Day high label"
+  },
+  "dayLow": "Gün Düşük",
+  "@dayLow": {
+    "description": "Day low label"
+  },
+  "volume": "Hacim",
+  "@volume": {
+    "description": "Volume label"
+  },
+  "removeStock": "Hisse Kaldır",
+  "@removeStock": {
+    "description": "Remove stock button"
+  },
+  "cancel": "İptal",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "remove": "Kaldır",
+  "@remove": {
+    "description": "Remove button"
+  },
+  "userSessionNotFound": "Kullanıcı oturumu bulunamadı",
+  "@userSessionNotFound": {
+    "description": "User session not found error"
+  },
+  "errorRemovingStock": "Hisse kaldırılırken hata oluştu",
+  "@errorRemovingStock": {
+    "description": "Error removing stock message"
+  },
+  "stockRemovedFromPortfolio": "{stockName} portföyden kaldırıldı",
+  "@stockRemovedFromPortfolio": {
+    "description": "Stock removed from portfolio message",
+    "placeholders": {
+      "stockName": {
+        "type": "String",
+        "example": "AAPL"
+      }
+    }
+  },
+  "confirmRemoveStock": "Bu hisseyi portföyden kaldırmak istediğinizden emin misiniz?",
+  "@confirmRemoveStock": {
+    "description": "Confirm stock removal message"
+  },
+  "stockTransaction": "Hisse İşlemi",
+  "@stockTransaction": {
+    "description": "Stock transaction title"
+  },
+  "transactionType": "İşlem Türü",
+  "@transactionType": {
+    "description": "Transaction type label"
+  },
+  "quantity": "Miktar",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "price": "Fiyat",
+  "@price": {
+    "description": "Price label"
+  },
+  "quantityRequired": "Miktar gerekli",
+  "@quantityRequired": {
+    "description": "Quantity required error"
+  },
+  "enterValidQuantity": "Geçerli bir miktar girin",
+  "@enterValidQuantity": {
+    "description": "Enter valid quantity error"
+  },
+  "priceRequired": "Fiyat gerekli",
+  "@priceRequired": {
+    "description": "Price required error"
+  },
+  "enterValidPrice": "Geçerli bir fiyat girin",
+  "@enterValidPrice": {
+    "description": "Enter valid price error"
+  },
+  "transactionSummary": "İşlem Özeti",
+  "@transactionSummary": {
+    "description": "Transaction summary title"
+  },
+  "subtotal": "Ara Toplam",
+  "@subtotal": {
+    "description": "Subtotal label"
+  },
+  "total": "Toplam",
+  "@total": {
+    "description": "Total label"
+  },
+  "pieces": "adet",
+  "@pieces": {
+    "description": "Pieces unit"
+  },
+  "executeTransaction": "{transactionType} İşlemi Gerçekleştir",
+  "@executeTransaction": {
+    "description": "Execute transaction button",
+    "placeholders": {
+      "transactionType": {
+        "type": "String",
+        "example": "Alış"
+      }
+    }
+  },
+  "unknownStock": "Bilinmeyen Hisse",
+  "@unknownStock": {
+    "description": "Unknown stock fallback"
+  },
+  "selectStock": "Hisse Seç",
+  "@selectStock": {
+    "description": "Select stock step"
+  },
+  "selectAccount": "Hesap Seç",
+  "@selectAccount": {
+    "description": "Select account step"
+  },
+  "summary": "Özet",
+  "@summary": {
+    "description": "Summary step"
+  },
+  "pleaseSelectStock": "Lütfen bir hisse seçin",
+  "@pleaseSelectStock": {
+    "description": "Please select stock message"
+  },
+  "pleaseSelectAccount": "Lütfen bir hesap seçin",
+  "@pleaseSelectAccount": {
+    "description": "Please select account message"
+  },
+  "enterValidQuantity": "Geçerli bir miktar girin",
+  "@enterValidQuantity": {
+    "description": "Enter valid quantity error"
+  },
+  "enterValidPrice": "Geçerli bir fiyat girin",
+  "@enterValidPrice": {
+    "description": "Enter valid price error"
+  },
+  "noStockSelected": "Hisse seçilmedi",
+  "@noStockSelected": {
+    "description": "No stock selected message"
+  },
+  "stockPurchase": "Hisse Alış",
+  "@stockPurchase": {
+    "description": "Stock purchase title"
+  },
+  "stockSale": "Hisse Satış",
+  "@stockSale": {
+    "description": "Stock sale title"
+  },
+  "executePurchase": "Alış Yap",
+  "@executePurchase": {
+    "description": "Execute purchase button"
+  },
+  "executeSale": "Satış Yap",
+  "@executeSale": {
+    "description": "Execute sale button"
+  },
+  "noStocksAddedYet": "Henüz hisse eklenmemiş",
+  "@noStocksAddedYet": {
+    "description": "No stocks added yet message"
+  },
+  "addFirstStockInstruction": "İlk hissenizi eklemek için Hisse ekranına gidin",
+  "@addFirstStockInstruction": {
+    "description": "Add first stock instruction"
+  },
+  "addStock": "Hisse Ekle",
+  "@addStock": {
+    "description": "Add stock button"
+  },
+  "quantityAndPrice": "Miktar & Fiyat",
+  "@quantityAndPrice": {
+    "description": "Quantity and price step"
+  },
+  "noStocksFound": "Hisse bulunamadı",
+  "@noStocksFound": {
+    "description": "No stocks found message"
+  },
+  "tryDifferentSearchTerm": "Farklı bir arama terimi deneyin",
+  "@tryDifferentSearchTerm": {
+    "description": "Try different search term message"
+  },
+  "newBadge": "YENİ",
+  "@newBadge": {
+    "description": "New badge"
+  },
+  "pieces": "adet",
+  "@pieces": {
+    "description": "Pieces unit"
+  },
+  "commissionRate": "Komisyon Oranı:",
+  "@commissionRate": {
+    "description": "Commission rate label"
+  },
+  "commission": "Komisyon",
+  "@commission": {
+    "description": "Commission label"
+  },
+  "totalToPay": "Toplam Ödenecek:",
+  "@totalToPay": {
+    "description": "Total to pay label"
+  },
+  "totalToReceive": "Toplam Alınacak:",
+  "@totalToReceive": {
+    "description": "Total to receive label"
+  },
+  "account": "Hesap",
+  "@account": {
+    "description": "Account label"
+  },
+  "quantity": "Miktar",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "price": "Fiyat",
+  "@price": {
+    "description": "Price label"
+  },
+  "total": "Toplam",
+  "@total": {
+    "description": "Total label"
+  },
+  "noCashAccountFound": "Nakit Hesap Bulunamadı",
+  "@noCashAccountFound": {
+    "description": "No cash account found message"
+  },
+  "addCashAccountForStockTrading": "Hisse işlemi yapabilmek için önce nakit hesap eklemeniz gerekiyor.",
+  "@addCashAccountForStockTrading": {
+    "description": "Add cash account for stock trading message"
+  },
+  "cash": "Nakit",
+  "@cash": {
+    "description": "Cash account type"
+  },
+  "creditCard": "Kredi Kartı",
+  "@creditCard": {
+    "description": "Credit card account type"
+  },
+  "debitCard": "Banka Kartı",
+  "@debitCard": {
+    "description": "Debit card account type"
+  },
+  "account": "Hesap",
+  "@account": {
+    "description": "Account type fallback"
+  },
+  "currentPrice": "Güncel Fiyat",
+  "@currentPrice": {
+    "description": "Current price label"
+  },
+  "currentValue": "Mevcut Değer",
+  "less": "Daha Az",
+  "more": "Daha Fazla",
+  "all": "Tümü",
+  "newest": "En Yeni",
+  "oldest": "En Eski",
+  "highestToLowest": "Yüksekten Düşüğe",
+  "lowestToHighest": "Düşükten Yükseğe",
+  "alphabetical": "Alfabetik",
+  "deleteTransaction": "İşlemi Sil",
+  "deleteTransactionConfirm": "işlemini silmek istediğinizden emin misiniz?",
+  "deleteInstallmentTransaction": "Taksitli İşlemi Sil",
+  "deleteInstallmentConfirm": "taksitli işlemini tamamen silmek istediğinizden emin misiniz?",
+  "deleteInstallmentWarning": "Bu işlem tüm taksitleri silecek ve ödenen tutarlar geri iade edilecektir.",
+  "deleteAll": "Tümünü Sil",
+  "errorDeletingTransaction": "İşlem silinirken hata oluştu",
+  "deletingInstallmentTransaction": "Taksitli işlem siliniyor...",
+  "errorDeletingInstallmentTransaction": "Taksitli işlem silinirken hata oluştu",
+  "@currentValue": {
+    "description": "Current value label (cost + profit/loss)"
+  },
+  "cost": "Maliyet",
+  "@cost": {
+    "description": "Cost label"
+  },
+  "weightedAverageCost": "Ağırlıklı Ortalama Alış Fiyatı",
+  "@weightedAverageCost": {
+    "description": "Weighted average cost label"
+  },
+  "portfolioOverview": "Portföy Özeti",
+  "@portfolioOverview": {
+    "description": "Portfolio overview title"
+  },
+  "totalValue": "Toplam Değer",
+  "@totalValue": {
+    "description": "Total portfolio value"
+  },
+  "totalCost": "Toplam Maliyet",
+  "@totalCost": {
+    "description": "Total portfolio cost"
+  },
+  "totalProfitLoss": "Toplam Kar/Zarar",
+  "@totalProfitLoss": {
+    "description": "Total profit/loss"
+  },
+  "totalReturn": "Toplam Getiri",
+  "@totalReturn": {
+    "description": "Total return percentage"
+  },
+  "profitLoss": "Kar/Zarar",
+  "@profitLoss": {
+    "description": "Profit/Loss label"
+  },
+  "calendar": "Takvim",
+  "@calendar": {
+    "description": "Calendar page title"
+  },
+  "monday": "Pazartesi",
+  "@monday": {
+    "description": "Monday"
+  },
+  "tuesday": "Salı",
+  "@tuesday": {
+    "description": "Tuesday"
+  },
+  "wednesday": "Çarşamba",
+  "@wednesday": {
+    "description": "Wednesday"
+  },
+  "thursday": "Perşembe",
+  "@thursday": {
+    "description": "Thursday"
+  },
+  "friday": "Cuma",
+  "@friday": {
+    "description": "Friday"
+  },
+  "saturday": "Cumartesi",
+  "@saturday": {
+    "description": "Saturday"
+  },
+  "sunday": "Pazar",
+  "@sunday": {
+    "description": "Sunday"
+  },
+  "mondayShort": "Pzt",
+  "@mondayShort": {
+    "description": "Monday short"
+  },
+  "tuesdayShort": "Sal",
+  "@tuesdayShort": {
+    "description": "Tuesday short"
+  },
+  "wednesdayShort": "Çar",
+  "@wednesdayShort": {
+    "description": "Wednesday short"
+  },
+  "thursdayShort": "Per",
+  "@thursdayShort": {
+    "description": "Thursday short"
+  },
+  "fridayShort": "Cum",
+  "@fridayShort": {
+    "description": "Friday short"
+  },
+  "saturdayShort": "Cmt",
+  "@saturdayShort": {
+    "description": "Saturday short"
+  },
+  "sundayShort": "Paz",
+  "@sundayShort": {
+    "description": "Sunday short"
+  },
+  "january": "Ocak",
+  "@january": {
+    "description": "January"
+  },
+  "february": "Şubat",
+  "@february": {
+    "description": "February"
+  },
+  "march": "Mart",
+  "@march": {
+    "description": "March"
+  },
+  "april": "Nisan",
+  "@april": {
+    "description": "April"
+  },
+  "may": "Mayıs",
+  "@may": {
+    "description": "May"
+  },
+  "june": "Haziran",
+  "@june": {
+    "description": "June"
+  },
+  "july": "Temmuz",
+  "@july": {
+    "description": "July"
+  },
+  "august": "Ağustos",
+  "@august": {
+    "description": "August"
+  },
+  "september": "Eylül",
+  "@september": {
+    "description": "September"
+  },
+  "october": "Ekim",
+  "@october": {
+    "description": "October"
+  },
+  "november": "Kasım",
+  "@november": {
+    "description": "November"
+  },
+  "december": "Aralık",
+  "@december": {
+    "description": "December"
+  },
+  "comingSoon": "Yakında",
+  "@comingSoon": {
+    "description": "Coming soon title"
+  },
+  "analysisFeaturesInDevelopment": "Analiz özellikleri geliştiriliyor",
+  "@analysisFeaturesInDevelopment": {
+    "description": "Analysis features development message"
+  },
+  "value": "Değer",
+  "@value": {
+    "description": "Value label"
+  },
+  "cost": "Maliyet",
+  "@cost": {
+    "description": "Cost label"
+  },
+  "returnLabel": "Getiri",
+  "@returnLabel": {
+    "description": "Return label"
   }
 } 

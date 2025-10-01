@@ -218,7 +218,7 @@ abstract class AppLocalizations {
   /// **'Expenses'**
   String get expenses;
 
-  /// Income transaction type
+  /// Income label
   ///
   /// In en, this message translates to:
   /// **'Income'**
@@ -656,7 +656,7 @@ abstract class AppLocalizations {
   /// **'Good Night! 🌙'**
   String get goodNight;
 
-  /// Currency setting
+  /// Stock currency label
   ///
   /// In en, this message translates to:
   /// **'Currency'**
@@ -800,7 +800,7 @@ abstract class AppLocalizations {
   /// **'Biometric Authentication'**
   String get biometricAuth;
 
-  /// Transactions menu item
+  /// Transactions count
   ///
   /// In en, this message translates to:
   /// **'Transactions'**
@@ -818,10 +818,10 @@ abstract class AppLocalizations {
   /// **'Upcoming Payments'**
   String get upcomingPayments;
 
-  /// Coming soon placeholder text
+  /// Coming soon title
   ///
   /// In en, this message translates to:
-  /// **'Coming soon...'**
+  /// **'Coming Soon'**
   String get comingSoon;
 
   /// Card information section title
@@ -992,10 +992,10 @@ abstract class AppLocalizations {
   /// **'RECOMMENDED'**
   String get recommended;
 
-  /// Urgent label
+  /// Urgent priority level
   ///
   /// In en, this message translates to:
-  /// **'URGENT'**
+  /// **'Urgent'**
   String get urgent;
 
   /// Amount label
@@ -1094,7 +1094,7 @@ abstract class AppLocalizations {
   /// **'Account Breakdown'**
   String get accountBreakdown;
 
-  /// Credit Card
+  /// Credit card account type
   ///
   /// In en, this message translates to:
   /// **'Credit Card'**
@@ -1148,7 +1148,7 @@ abstract class AppLocalizations {
   /// **'Add Cash'**
   String get addCash;
 
-  /// Cancel button text
+  /// Cancel button
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
@@ -1172,7 +1172,7 @@ abstract class AppLocalizations {
   /// **'Please enter a valid amount'**
   String get enterValidAmount;
 
-  /// Cash account
+  /// Cash account type
   ///
   /// In en, this message translates to:
   /// **'Cash'**
@@ -1412,7 +1412,7 @@ abstract class AppLocalizations {
   /// **'Final review and details'**
   String get lastCheckAndDetails;
 
-  /// Summary title
+  /// Summary step
   ///
   /// In en, this message translates to:
   /// **'Summary'**
@@ -1466,37 +1466,37 @@ abstract class AppLocalizations {
   /// **'Food & Drink'**
   String get foodAndDrink;
 
-  /// Transport expense category
+  /// Transport category
   ///
   /// In en, this message translates to:
   /// **'Transport'**
   String get transport;
 
-  /// Shopping expense category
+  /// Shopping category
   ///
   /// In en, this message translates to:
   /// **'Shopping'**
   String get shopping;
 
-  /// Entertainment expense category
+  /// Entertainment category
   ///
   /// In en, this message translates to:
   /// **'Entertainment'**
   String get entertainment;
 
-  /// Bills expense category
+  /// Bills category
   ///
   /// In en, this message translates to:
   /// **'Bills'**
   String get bills;
 
-  /// Health expense category
+  /// Health category
   ///
   /// In en, this message translates to:
   /// **'Health'**
   String get health;
 
-  /// Education expense category
+  /// Education category
   ///
   /// In en, this message translates to:
   /// **'Education'**
@@ -1748,7 +1748,7 @@ abstract class AppLocalizations {
   /// **'Save Income'**
   String get saveIncome;
 
-  /// Food expense category
+  /// Food category
   ///
   /// In en, this message translates to:
   /// **'Food'**
@@ -1796,7 +1796,7 @@ abstract class AppLocalizations {
   /// **'Course, books, school'**
   String get educationDescription;
 
-  /// Travel expense category
+  /// Travel category
   ///
   /// In en, this message translates to:
   /// **'Travel'**
@@ -1922,7 +1922,7 @@ abstract class AppLocalizations {
   /// **'Which Investment Type?'**
   String get whichInvestmentType;
 
-  /// Stocks investment category
+  /// Stocks tab label
   ///
   /// In en, this message translates to:
   /// **'Stocks'**
@@ -2024,16 +2024,16 @@ abstract class AppLocalizations {
   /// **'Please select investment type'**
   String get selectInvestmentTypeMessage;
 
-  /// Quantity required validation message
+  /// Quantity required error
   ///
   /// In en, this message translates to:
-  /// **'Quantity is required'**
+  /// **'Quantity required'**
   String get quantityRequired;
 
-  /// Enter valid quantity validation message
+  /// Enter valid quantity error
   ///
   /// In en, this message translates to:
-  /// **'Please enter a valid quantity'**
+  /// **'Enter a valid quantity'**
   String get enterValidQuantity;
 
   /// Rate required validation message
@@ -2300,7 +2300,7 @@ abstract class AppLocalizations {
   /// **'Time'**
   String get time;
 
-  /// No description provided for @transactionType.
+  /// Transaction type label
   ///
   /// In en, this message translates to:
   /// **'Transaction Type'**
@@ -2318,7 +2318,7 @@ abstract class AppLocalizations {
   /// **'Installment Info'**
   String get installmentInfo;
 
-  /// Available Limit
+  /// Available credit limit label
   ///
   /// In en, this message translates to:
   /// **'Available Limit'**
@@ -2480,7 +2480,7 @@ abstract class AppLocalizations {
   /// **'Connection problem occurred'**
   String get connectionError;
 
-  /// Try again button text
+  /// Try again button
   ///
   /// In en, this message translates to:
   /// **'Try Again'**
@@ -2492,7 +2492,7 @@ abstract class AppLocalizations {
   /// **'No accounts available'**
   String get noAccountsAvailable;
 
-  /// Debit Card
+  /// Debit card account type
   ///
   /// In en, this message translates to:
   /// **'Debit Card'**
@@ -2522,7 +2522,7 @@ abstract class AppLocalizations {
   /// **'Total Expenses'**
   String get totalExpenses;
 
-  /// Net balance label
+  /// Net balance full label
   ///
   /// In en, this message translates to:
   /// **'Net Balance'**
@@ -2579,7 +2579,7 @@ abstract class AppLocalizations {
   /// No transactions found message
   ///
   /// In en, this message translates to:
-  /// **'No transactions found yet'**
+  /// **'No transactions found'**
   String get noTransactionsFound;
 
   /// Average spending label
@@ -2651,7 +2651,7 @@ abstract class AppLocalizations {
   /// Add first transaction message
   ///
   /// In en, this message translates to:
-  /// **'Add your first transaction to get started'**
+  /// **'Add your first expense to get started'**
   String get addFirstTransaction;
 
   /// No description provided for @analyzingData.
@@ -2702,7 +2702,7 @@ abstract class AppLocalizations {
   /// **'Daily Average'**
   String get dailyAverage;
 
-  /// No description provided for @moreCategories.
+  /// More categories text
   ///
   /// In en, this message translates to:
   /// **'more categories'**
@@ -2870,7 +2870,7 @@ abstract class AppLocalizations {
   /// **'Profile photo removed'**
   String get profilePhotoRemoved;
 
-  /// Delete transaction dialog title
+  /// Delete transaction action sheet title
   ///
   /// In en, this message translates to:
   /// **'Delete Transaction'**
@@ -2879,7 +2879,7 @@ abstract class AppLocalizations {
   /// Delete transaction confirmation message
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete the transaction {description}?'**
+  /// **'transaction. Are you sure you want to delete it?'**
   String deleteTransactionConfirm(String description);
 
   /// Delete button text
@@ -2900,7 +2900,7 @@ abstract class AppLocalizations {
   /// **'Error deleting transaction: {error}'**
   String transactionDeleteError(String error);
 
-  /// Delete installment transaction dialog title
+  /// Delete installment transaction action sheet title
   ///
   /// In en, this message translates to:
   /// **'Delete Installment Transaction'**
@@ -2912,10 +2912,10 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to completely delete the installment transaction {description}? This will delete all installments.'**
   String deleteInstallmentTransactionConfirm(String description);
 
-  /// Installment transaction deleted message
+  /// Installment transaction deleted success message
   ///
   /// In en, this message translates to:
-  /// **'Installment transaction deleted'**
+  /// **'Installment transaction deleted, total amount refunded'**
   String get installmentTransactionDeleted;
 
   /// Installment transaction delete error message
@@ -2954,7 +2954,7 @@ abstract class AppLocalizations {
   /// **'Delete Limit'**
   String get deleteLimitTooltip;
 
-  /// Error prefix
+  /// Error label
   ///
   /// In en, this message translates to:
   /// **'Error'**
@@ -3068,7 +3068,7 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancelAction;
 
-  /// Quick notes feature title
+  /// Quick notes title
   ///
   /// In en, this message translates to:
   /// **'Quick Notes'**
@@ -3104,25 +3104,25 @@ abstract class AppLocalizations {
   /// **'Frequently Asked Questions'**
   String get frequentlyAskedQuestions;
 
-  /// Account placeholder text
+  /// Account type fallback
   ///
   /// In en, this message translates to:
   /// **'Account'**
   String get account;
 
-  /// Now time indicator
+  /// Now time reference
   ///
   /// In en, this message translates to:
   /// **'Now'**
   String get now;
 
-  /// Yesterday time indicator
+  /// Yesterday
   ///
   /// In en, this message translates to:
   /// **'Yesterday'**
   String get yesterday;
 
-  /// Expense transaction type
+  /// Expense label
   ///
   /// In en, this message translates to:
   /// **'Expense'**
@@ -3143,7 +3143,7 @@ abstract class AppLocalizations {
   /// Minutes ago text
   ///
   /// In en, this message translates to:
-  /// **'{count} min ago'**
+  /// **'{count} minutes ago'**
   String minutesAgo(int count);
 
   /// Hours ago text
@@ -3152,10 +3152,10 @@ abstract class AppLocalizations {
   /// **'{count} hours ago'**
   String hoursAgo(int count);
 
-  /// Days ago text
+  /// Days ago
   ///
   /// In en, this message translates to:
-  /// **'{count} days ago'**
+  /// **'{count}d ago'**
   String daysAgo(int count);
 
   /// Weeks ago text
@@ -3218,7 +3218,7 @@ abstract class AppLocalizations {
   /// **'/month'**
   String get perMonth;
 
-  /// Net amount
+  /// Net balance label
   ///
   /// In en, this message translates to:
   /// **'Net'**
@@ -3284,7 +3284,7 @@ abstract class AppLocalizations {
   /// **'Error loading cards'**
   String get cardsLoadingError;
 
-  /// No cards added yet
+  /// Message when no cards are added yet
   ///
   /// In en, this message translates to:
   /// **'No cards added yet'**
@@ -3332,13 +3332,13 @@ abstract class AppLocalizations {
   /// **'Other fixed payments'**
   String get otherFixedPayments;
 
-  /// This week
+  /// This week time period
   ///
   /// In en, this message translates to:
   /// **'This Week'**
   String get thisWeek;
 
-  /// This year
+  /// This year time period
   ///
   /// In en, this message translates to:
   /// **'This Year'**
@@ -3410,7 +3410,7 @@ abstract class AppLocalizations {
   /// **'No notes yet'**
   String get noNotesYet;
 
-  /// Add your expense or income notes here
+  /// Add expense or income notes description
   ///
   /// In en, this message translates to:
   /// **'Add your expense or income notes here'**
@@ -3536,49 +3536,49 @@ abstract class AppLocalizations {
   /// **'December'**
   String get december;
 
-  /// Text Note
+  /// Text note option
   ///
   /// In en, this message translates to:
   /// **'Text Note'**
   String get textNote;
 
-  /// Add quick text note
+  /// Add quick text note description
   ///
   /// In en, this message translates to:
   /// **'Add quick text note'**
   String get addQuickTextNote;
 
-  /// Take Photo
+  /// Take photo option
   ///
   /// In en, this message translates to:
   /// **'Take Photo'**
   String get takePhoto;
 
-  /// Take photo from camera
+  /// Take photo from camera description
   ///
   /// In en, this message translates to:
   /// **'Take photo from camera'**
   String get takePhotoFromCamera;
 
-  /// Select from Gallery
+  /// Select from gallery option
   ///
   /// In en, this message translates to:
   /// **'Select from Gallery'**
   String get selectFromGallery;
 
-  /// Select photo from gallery
+  /// Select photo from gallery description
   ///
   /// In en, this message translates to:
   /// **'Select photo from gallery'**
   String get selectPhotoFromGallery;
 
-  /// Error capturing photo
+  /// Photo capture error message
   ///
   /// In en, this message translates to:
   /// **'Error capturing photo'**
   String get photoCaptureError;
 
-  /// Error selecting photo
+  /// Photo selection error message
   ///
   /// In en, this message translates to:
   /// **'Error selecting photo'**
@@ -3590,43 +3590,43 @@ abstract class AppLocalizations {
   /// **'Add'**
   String get add;
 
-  /// Photo note
+  /// Photo note default text
   ///
   /// In en, this message translates to:
   /// **'Photo note'**
   String get photoNote;
 
-  /// Photo note added
+  /// Photo note added success message
   ///
   /// In en, this message translates to:
   /// **'Photo note added'**
   String get photoNoteAdded;
 
-  /// Error adding photo note
+  /// Photo note add error message
   ///
   /// In en, this message translates to:
   /// **'Error adding photo note'**
   String get photoNoteAddError;
 
-  /// Note added
+  /// Note added success message
   ///
   /// In en, this message translates to:
   /// **'Note added'**
   String get noteAdded;
 
-  /// Error adding note
+  /// Note add error message
   ///
   /// In en, this message translates to:
   /// **'Error adding note'**
   String get noteAddError;
 
-  /// Note deleted
+  /// Note deleted success message
   ///
   /// In en, this message translates to:
   /// **'Note deleted'**
   String get noteDeleted;
 
-  /// Error deleting note
+  /// Note delete error message
   ///
   /// In en, this message translates to:
   /// **'Error deleting note'**
@@ -3683,7 +3683,7 @@ abstract class AppLocalizations {
   /// Alphabetical
   ///
   /// In en, this message translates to:
-  /// **'A-Z'**
+  /// **'Alphabetical'**
   String get alphabetical;
 
   /// More
@@ -3698,19 +3698,19 @@ abstract class AppLocalizations {
   /// **'Less'**
   String get less;
 
-  /// Card Name
+  /// Card name label
   ///
   /// In en, this message translates to:
   /// **'Card Name'**
   String get cardName;
 
-  /// Usage
+  /// Usage percentage label
   ///
   /// In en, this message translates to:
   /// **'Usage'**
   String get usage;
 
-  /// Last Payment
+  /// Last payment date label
   ///
   /// In en, this message translates to:
   /// **'Last Payment'**
@@ -3764,7 +3764,7 @@ abstract class AppLocalizations {
   /// **'Credit limit is required'**
   String get creditLimitRequired;
 
-  /// Debt
+  /// Debt amount label
   ///
   /// In en, this message translates to:
   /// **'Debt'**
@@ -3866,7 +3866,7 @@ abstract class AppLocalizations {
   /// **'Password change failed'**
   String get passwordChangeFailed;
 
-  /// OK
+  /// OK button text
   ///
   /// In en, this message translates to:
   /// **'OK'**
@@ -4016,7 +4016,7 @@ abstract class AppLocalizations {
   /// **'App Information'**
   String get appInformation;
 
-  /// Last Update
+  /// Last update label
   ///
   /// In en, this message translates to:
   /// **'Last Update'**
@@ -4603,6 +4603,1020 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add your credit card information'**
   String get addCreditCardDescription;
+
+  /// Search stocks button
+  ///
+  /// In en, this message translates to:
+  /// **'Search Stocks'**
+  String get searchStocks;
+
+  /// Add stock button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Stock'**
+  String get addStock;
+
+  /// Remove stock button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Stock'**
+  String get removeStock;
+
+  /// Stock details title
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Details'**
+  String get stockDetails;
+
+  /// Stock information section title
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Information'**
+  String get stockInfo;
+
+  /// Stock exchange label
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange'**
+  String get exchange;
+
+  /// Stock sector label
+  ///
+  /// In en, this message translates to:
+  /// **'Sector'**
+  String get sector;
+
+  /// Stock country label
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// Buy stock button
+  ///
+  /// In en, this message translates to:
+  /// **'Buy Stock'**
+  String get buyStock;
+
+  /// Sell stock button
+  ///
+  /// In en, this message translates to:
+  /// **'Sell Stock'**
+  String get sellStock;
+
+  /// Buy action
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get buy;
+
+  /// Sell action
+  ///
+  /// In en, this message translates to:
+  /// **'Sell'**
+  String get sell;
+
+  /// No stocks being tracked
+  ///
+  /// In en, this message translates to:
+  /// **'You are not tracking any stocks yet'**
+  String get noStocksYet;
+
+  /// Add first stock instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Press + to add stocks'**
+  String get addFirstStock;
+
+  /// Stock added to watchlist
+  ///
+  /// In en, this message translates to:
+  /// **'Stock added to watchlist'**
+  String get stockAdded;
+
+  /// Stock removed from watchlist
+  ///
+  /// In en, this message translates to:
+  /// **'Stock removed from watchlist'**
+  String get stockRemoved;
+
+  /// Confirm stock removal message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this stock from your portfolio?'**
+  String get confirmRemoveStock;
+
+  /// Chart coming soon message
+  ///
+  /// In en, this message translates to:
+  /// **'Chart Coming Soon'**
+  String get chartComingSoon;
+
+  /// Chart development message
+  ///
+  /// In en, this message translates to:
+  /// **'Price charts and analysis features are being developed'**
+  String get chartDescription;
+
+  /// Share stock action
+  ///
+  /// In en, this message translates to:
+  /// **'Share Stock'**
+  String get shareStock;
+
+  /// Share feature coming soon message
+  ///
+  /// In en, this message translates to:
+  /// **'Share feature coming soon'**
+  String get shareFeatureComingSoon;
+
+  /// Buy feature coming soon
+  ///
+  /// In en, this message translates to:
+  /// **'Buy transaction coming soon'**
+  String get buyFeatureComingSoon;
+
+  /// Sell feature coming soon
+  ///
+  /// In en, this message translates to:
+  /// **'Sell transaction coming soon'**
+  String get sellFeatureComingSoon;
+
+  /// Popular stocks section
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Stocks'**
+  String get popularStocks;
+
+  /// BIST stocks section
+  ///
+  /// In en, this message translates to:
+  /// **'BIST Stocks'**
+  String get bistStocks;
+
+  /// US stocks section
+  ///
+  /// In en, this message translates to:
+  /// **'US Stocks'**
+  String get usStocks;
+
+  /// Minutes ago full text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes ago'**
+  String minutesAgoFull(int count);
+
+  /// Hours ago full text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours ago'**
+  String hoursAgoFull(int count);
+
+  /// Days ago full text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String daysAgoFull(int count);
+
+  /// Toggle text for including investments in net worth
+  ///
+  /// In en, this message translates to:
+  /// **'Including investments'**
+  String get investmentsIncluded;
+
+  /// Toggle text for excluding investments from net worth
+  ///
+  /// In en, this message translates to:
+  /// **'Excluding investments'**
+  String get investmentsExcluded;
+
+  /// Description for adding first card
+  ///
+  /// In en, this message translates to:
+  /// **'Go to My Cards page to add your first card'**
+  String get addFirstCardDescription;
+
+  /// Delete transaction confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the {description} transaction?'**
+  String deleteTransactionConfirmation(String description);
+
+  /// Delete installment transaction confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the {description} transaction? All installments will be refunded.'**
+  String deleteInstallmentConfirmation(String description);
+
+  /// Installment transaction delete error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting installment transaction: {error}'**
+  String installmentDeleteError(String error);
+
+  /// Due today text
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get dueToday;
+
+  /// Last X days text
+  ///
+  /// In en, this message translates to:
+  /// **'Last {days} Days'**
+  String lastDays(int days);
+
+  /// Statement debt text
+  ///
+  /// In en, this message translates to:
+  /// **'Statement Debt: {amount}'**
+  String statementDebt(String amount);
+
+  /// No debt text
+  ///
+  /// In en, this message translates to:
+  /// **'No debt'**
+  String get noDebt;
+
+  /// Important priority level
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get important;
+
+  /// Info priority level
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get info;
+
+  /// Statement debt label
+  ///
+  /// In en, this message translates to:
+  /// **'Statement Debt'**
+  String get statementDebtLabel;
+
+  /// Debt amount text
+  ///
+  /// In en, this message translates to:
+  /// **'Debt: {amount}'**
+  String debtAmount(String amount);
+
+  /// Last payment date label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Payment Date'**
+  String get lastPaymentDate;
+
+  /// All notifications title
+  ///
+  /// In en, this message translates to:
+  /// **'All Notifications'**
+  String get allNotifications;
+
+  /// Pending notes count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending notes'**
+  String pendingNotes(int count);
+
+  /// Add quick note title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Quick Note'**
+  String get addQuickNote;
+
+  /// Add quick note description
+  ///
+  /// In en, this message translates to:
+  /// **'Write your expense or income note. You can add it as a transaction later.'**
+  String get addQuickNoteDescription;
+
+  /// Example expense note with currency
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: Grocery shopping 150{currency}'**
+  String exampleExpenseNote(String currency);
+
+  /// Add photo note title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo Note'**
+  String get addPhotoNote;
+
+  /// Add photo note description
+  ///
+  /// In en, this message translates to:
+  /// **'Add a description for this photo (optional)'**
+  String get addPhotoNoteDescription;
+
+  /// Example photo note with currency
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: Receipt - 150{currency}'**
+  String examplePhotoNote(String currency);
+
+  /// View all notes button
+  ///
+  /// In en, this message translates to:
+  /// **'View all notes ({count})'**
+  String viewAllNotes(int count);
+
+  /// Seconds ago text
+  ///
+  /// In en, this message translates to:
+  /// **'{count} seconds ago'**
+  String secondsAgo(int count);
+
+  /// Yesterday at time text
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday at {time}'**
+  String yesterdayAt(String time);
+
+  /// Weekday at time text
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday} at {time}'**
+  String weekdayAt(String weekday, String time);
+
+  /// Day and month text
+  ///
+  /// In en, this message translates to:
+  /// **'{day} {month}'**
+  String dayMonth(int day, String month);
+
+  /// Day/month/year text
+  ///
+  /// In en, this message translates to:
+  /// **'{day}/{month}/{year}'**
+  String dayMonthYear(int day, int month, int year);
+
+  /// January short
+  ///
+  /// In en, this message translates to:
+  /// **'Jan'**
+  String get januaryShort;
+
+  /// February short
+  ///
+  /// In en, this message translates to:
+  /// **'Feb'**
+  String get februaryShort;
+
+  /// March short
+  ///
+  /// In en, this message translates to:
+  /// **'Mar'**
+  String get marchShort;
+
+  /// April short
+  ///
+  /// In en, this message translates to:
+  /// **'Apr'**
+  String get aprilShort;
+
+  /// May short
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get mayShort;
+
+  /// June short
+  ///
+  /// In en, this message translates to:
+  /// **'Jun'**
+  String get juneShort;
+
+  /// July short
+  ///
+  /// In en, this message translates to:
+  /// **'Jul'**
+  String get julyShort;
+
+  /// August short
+  ///
+  /// In en, this message translates to:
+  /// **'Aug'**
+  String get augustShort;
+
+  /// September short
+  ///
+  /// In en, this message translates to:
+  /// **'Sep'**
+  String get septemberShort;
+
+  /// October short
+  ///
+  /// In en, this message translates to:
+  /// **'Oct'**
+  String get octoberShort;
+
+  /// November short
+  ///
+  /// In en, this message translates to:
+  /// **'Nov'**
+  String get novemberShort;
+
+  /// December short
+  ///
+  /// In en, this message translates to:
+  /// **'Dec'**
+  String get decemberShort;
+
+  /// Stocks included toggle text
+  ///
+  /// In en, this message translates to:
+  /// **'Stocks In'**
+  String get stocksIncluded;
+
+  /// Stocks excluded toggle text
+  ///
+  /// In en, this message translates to:
+  /// **'Stocks Out'**
+  String get stocksExcluded;
+
+  /// Stock transaction chip label
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get stockChip;
+
+  /// Stock sale title
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Sale'**
+  String get stockSale;
+
+  /// Stock purchase title
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Purchase'**
+  String get stockPurchase;
+
+  /// Stock name label
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Name'**
+  String get stockName;
+
+  /// Price label
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
+  /// Total label
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// Pieces unit
+  ///
+  /// In en, this message translates to:
+  /// **'pieces'**
+  String get pieces;
+
+  /// Total transactions count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} transactions'**
+  String totalTransactionsCount(int count);
+
+  /// Income transactions count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} income transactions'**
+  String incomeTransactionsCount(int count);
+
+  /// Expense transactions count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} expense transactions'**
+  String expenseTransactionsCount(int count);
+
+  /// Transfer transactions count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} transfer transactions'**
+  String transferTransactionsCount(int count);
+
+  /// Stock transactions count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stock transactions'**
+  String stockTransactionsCount(int count);
+
+  /// All time period
+  ///
+  /// In en, this message translates to:
+  /// **'All Time'**
+  String get allTime;
+
+  /// Daily average expense label
+  ///
+  /// In en, this message translates to:
+  /// **'Daily average expense'**
+  String get dailyAverageExpense;
+
+  /// No expense transactions found message
+  ///
+  /// In en, this message translates to:
+  /// **'No expense transactions found'**
+  String get noExpenseTransactions;
+
+  /// Analyze your finances subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze your finances'**
+  String get analyzeYourFinances;
+
+  /// Statistics page title
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statistics;
+
+  /// No expense records message
+  ///
+  /// In en, this message translates to:
+  /// **'No expense records yet'**
+  String get noExpenseRecordsYet;
+
+  /// Empty transaction history message
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction history is empty'**
+  String get transactionHistoryEmpty;
+
+  /// No spending in selected period
+  ///
+  /// In en, this message translates to:
+  /// **'No spending in selected period'**
+  String get noSpendingInPeriod;
+
+  /// Spending categories section title
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Categories'**
+  String get spendingCategories;
+
+  /// No transactions in category message
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions found in this category'**
+  String get noTransactionsInCategory;
+
+  /// Chart view
+  ///
+  /// In en, this message translates to:
+  /// **'Chart'**
+  String get chart;
+
+  /// Table view
+  ///
+  /// In en, this message translates to:
+  /// **'Table'**
+  String get table;
+
+  /// Monthly expense analysis title
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Expense Analysis'**
+  String get monthlyExpenseAnalysis;
+
+  /// Monthly income analysis title
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Income Analysis'**
+  String get monthlyIncomeAnalysis;
+
+  /// Monthly net balance analysis title
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Net Balance Analysis'**
+  String get monthlyNetBalanceAnalysis;
+
+  /// No monthly data message
+  ///
+  /// In en, this message translates to:
+  /// **'No Monthly {title} Data'**
+  String noMonthlyData(String title);
+
+  /// Add first transaction to start message
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first transaction to get started'**
+  String get addFirstTransactionToStart;
+
+  /// Month column header
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get month;
+
+  /// Change column header
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get change;
+
+  /// Stable change indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Stable'**
+  String get stable;
+
+  /// Stock trading category name
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Trading'**
+  String get stockTrading;
+
+  /// Unknown category
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Category'**
+  String get unknownCategory;
+
+  /// Stocks screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Track your stocks'**
+  String get trackYourStocks;
+
+  /// Chart development message
+  ///
+  /// In en, this message translates to:
+  /// **'Price charts and analysis features are being developed'**
+  String get chartDevelopmentMessage;
+
+  /// Buy transaction coming soon message
+  ///
+  /// In en, this message translates to:
+  /// **'Buy transaction coming soon'**
+  String get buyTransactionComingSoon;
+
+  /// Sell transaction coming soon message
+  ///
+  /// In en, this message translates to:
+  /// **'Sell transaction coming soon'**
+  String get sellTransactionComingSoon;
+
+  /// Loading popular stocks message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading popular stocks...'**
+  String get loadingPopularStocks;
+
+  /// No stocks found message
+  ///
+  /// In en, this message translates to:
+  /// **'No stocks found'**
+  String get noStocksFound;
+
+  /// Try different search term message
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get tryDifferentSearchTerm;
+
+  /// Day high label
+  ///
+  /// In en, this message translates to:
+  /// **'Day High'**
+  String get dayHigh;
+
+  /// Day low label
+  ///
+  /// In en, this message translates to:
+  /// **'Day Low'**
+  String get dayLow;
+
+  /// Volume label
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get volume;
+
+  /// Remove button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// Error removing stock message
+  ///
+  /// In en, this message translates to:
+  /// **'Error removing stock'**
+  String get errorRemovingStock;
+
+  /// Stock removed from portfolio message
+  ///
+  /// In en, this message translates to:
+  /// **'{stockName} removed from portfolio'**
+  String stockRemovedFromPortfolio(String stockName);
+
+  /// Stock transaction title
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Transaction'**
+  String get stockTransaction;
+
+  /// Price required error
+  ///
+  /// In en, this message translates to:
+  /// **'Price required'**
+  String get priceRequired;
+
+  /// Enter valid price error
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price'**
+  String get enterValidPrice;
+
+  /// Transaction summary title
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Summary'**
+  String get transactionSummary;
+
+  /// Subtotal label
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get subtotal;
+
+  /// Execute transaction button
+  ///
+  /// In en, this message translates to:
+  /// **'Execute {transactionType} Transaction'**
+  String executeTransaction(String transactionType);
+
+  /// Unknown stock fallback
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Stock'**
+  String get unknownStock;
+
+  /// Select stock step
+  ///
+  /// In en, this message translates to:
+  /// **'Select Stock'**
+  String get selectStock;
+
+  /// Select account step
+  ///
+  /// In en, this message translates to:
+  /// **'Select Account'**
+  String get selectAccount;
+
+  /// Please select stock message
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a stock'**
+  String get pleaseSelectStock;
+
+  /// Please select account message
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an account'**
+  String get pleaseSelectAccount;
+
+  /// No stock selected message
+  ///
+  /// In en, this message translates to:
+  /// **'No stock selected'**
+  String get noStockSelected;
+
+  /// Execute purchase button
+  ///
+  /// In en, this message translates to:
+  /// **'Execute Purchase'**
+  String get executePurchase;
+
+  /// Execute sale button
+  ///
+  /// In en, this message translates to:
+  /// **'Execute Sale'**
+  String get executeSale;
+
+  /// No stocks added yet message
+  ///
+  /// In en, this message translates to:
+  /// **'No stocks added yet'**
+  String get noStocksAddedYet;
+
+  /// Add first stock instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the Stocks screen to add your first stock'**
+  String get addFirstStockInstruction;
+
+  /// Quantity and price step
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity & Price'**
+  String get quantityAndPrice;
+
+  /// New badge
+  ///
+  /// In en, this message translates to:
+  /// **'NEW'**
+  String get newBadge;
+
+  /// Commission rate label
+  ///
+  /// In en, this message translates to:
+  /// **'Commission Rate:'**
+  String get commissionRate;
+
+  /// Commission label
+  ///
+  /// In en, this message translates to:
+  /// **'Commission'**
+  String get commission;
+
+  /// Total to pay label
+  ///
+  /// In en, this message translates to:
+  /// **'Total to Pay:'**
+  String get totalToPay;
+
+  /// Total to receive label
+  ///
+  /// In en, this message translates to:
+  /// **'Total to Receive:'**
+  String get totalToReceive;
+
+  /// No cash account found message
+  ///
+  /// In en, this message translates to:
+  /// **'No Cash Account Found'**
+  String get noCashAccountFound;
+
+  /// Add cash account for stock trading message
+  ///
+  /// In en, this message translates to:
+  /// **'You need to add a cash account first to perform stock transactions.'**
+  String get addCashAccountForStockTrading;
+
+  /// Current price label
+  ///
+  /// In en, this message translates to:
+  /// **'Current Price'**
+  String get currentPrice;
+
+  /// Current value label (cost + profit/loss)
+  ///
+  /// In en, this message translates to:
+  /// **'Current Value'**
+  String get currentValue;
+
+  /// No description provided for @deleteInstallmentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'installment transaction. Are you sure you want to delete it completely?'**
+  String get deleteInstallmentConfirm;
+
+  /// No description provided for @deleteInstallmentWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action will delete all installments and refund paid amounts.'**
+  String get deleteInstallmentWarning;
+
+  /// No description provided for @errorDeletingTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting transaction'**
+  String get errorDeletingTransaction;
+
+  /// No description provided for @deletingInstallmentTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting installment transaction...'**
+  String get deletingInstallmentTransaction;
+
+  /// No description provided for @errorDeletingInstallmentTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting installment transaction'**
+  String get errorDeletingInstallmentTransaction;
+
+  /// Cost label
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get cost;
+
+  /// Weighted average cost label
+  ///
+  /// In en, this message translates to:
+  /// **'Weighted Average Cost'**
+  String get weightedAverageCost;
+
+  /// Portfolio overview title
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio Overview'**
+  String get portfolioOverview;
+
+  /// Total portfolio value
+  ///
+  /// In en, this message translates to:
+  /// **'Total Value'**
+  String get totalValue;
+
+  /// Total portfolio cost
+  ///
+  /// In en, this message translates to:
+  /// **'Total Cost'**
+  String get totalCost;
+
+  /// Total profit/loss
+  ///
+  /// In en, this message translates to:
+  /// **'Total P&L'**
+  String get totalProfitLoss;
+
+  /// Total return percentage
+  ///
+  /// In en, this message translates to:
+  /// **'Total Return'**
+  String get totalReturn;
+
+  /// Profit/Loss label
+  ///
+  /// In en, this message translates to:
+  /// **'Profit/Loss'**
+  String get profitLoss;
+
+  /// Calendar page title
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendar;
+
+  /// Monday short
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get mondayShort;
+
+  /// Tuesday short
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get tuesdayShort;
+
+  /// Wednesday short
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get wednesdayShort;
+
+  /// Thursday short
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get thursdayShort;
+
+  /// Friday short
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get fridayShort;
+
+  /// Saturday short
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get saturdayShort;
+
+  /// Sunday short
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get sundayShort;
+
+  /// Analysis features development message
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis features in development'**
+  String get analysisFeaturesInDevelopment;
+
+  /// Value label
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get value;
+
+  /// Return label
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get returnLabel;
 }
 
 class _AppLocalizationsDelegate

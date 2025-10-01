@@ -62,7 +62,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       // Check each credit card for upcoming due dates
       for (final creditCard in creditCards) {
         final cardId = creditCard['id'] as String;
-        final cardName = creditCard['cardName'] as String? ?? creditCard['bankName'] as String? ?? 'Kredi Kartı';
+        final cardName = creditCard['cardName'] as String? ?? creditCard['bankName'] as String? ?? AppLocalizations.of(context)?.creditCard ?? 'Credit Card';
         final statementDay = creditCard['statementDay'] as int? ?? 1;
         
         // Calculate current period due date
@@ -132,6 +132,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   }
   
   String _getNotificationMessage(String type, String cardName, int daysUntil) {
+    final l10n = AppLocalizations.of(context)!;
     switch (type) {
       case 'due_date':
         return '🚨 SON GÜN! $cardName kredi kartınızın ekstre ödemesi bugün vadesi doluyor!';
@@ -310,10 +311,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   }
 
   Widget _buildNotificationCard(PendingNotification reminder, bool isDark, int index) {
+    final l10n = AppLocalizations.of(context)!;
     final data = reminder.data;
     final cardId = data['cardId'] as String? ?? '';
     final type = data['type'] as String? ?? '';
-    final cardName = data['cardName'] as String? ?? 'Kredi Kartı';
+    final cardName = data['cardName'] as String? ?? l10n.creditCard;
     final urgencyLevel = data['urgencyLevel'] as int? ?? 1;
     final debtAmount = data['debtAmount'] as double? ?? 0.0;
     final daysUntilDue = data['daysUntilDue'] as int? ?? 0;
@@ -398,7 +400,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                                             daysUntilDue == 0 ? 'Bugün' : 'Son $daysUntilDue Gün',
+                                             daysUntilDue == 0 ? l10n.dueToday : l10n.lastDays(daysUntilDue),
                       style: GoogleFonts.inter(
                         fontSize: 9,
                         fontWeight: FontWeight.w600,
@@ -435,8 +437,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                   const SizedBox(width: 6),
               Text(
                     debtAmount > 0
-                        ? 'Ekstre Borcu: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(debtAmount)}'
-                        : 'Borç yok',
+                        ? l10n.statementDebt(Provider.of<ThemeProvider>(context, listen: false).formatAmount(debtAmount))
+                        : l10n.noDebt,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,

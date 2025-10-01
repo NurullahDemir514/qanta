@@ -383,7 +383,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upcomingPayments => 'Upcoming Payments';
 
   @override
-  String get comingSoon => 'Coming soon...';
+  String get comingSoon => 'Coming Soon';
 
   @override
   String get cardInfo => 'Card Information';
@@ -470,7 +470,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recommended => 'RECOMMENDED';
 
   @override
-  String get urgent => 'URGENT';
+  String get urgent => 'Urgent';
 
   @override
   String get amount => 'Amount';
@@ -1002,10 +1002,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectInvestmentTypeMessage => 'Please select investment type';
 
   @override
-  String get quantityRequired => 'Quantity is required';
+  String get quantityRequired => 'Quantity required';
 
   @override
-  String get enterValidQuantity => 'Please enter a valid quantity';
+  String get enterValidQuantity => 'Enter a valid quantity';
 
   @override
   String get rateRequired => 'Rate is required';
@@ -1288,7 +1288,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noDataAvailable => 'No Data Available';
 
   @override
-  String get noTransactionsFound => 'No transactions found yet';
+  String get noTransactionsFound => 'No transactions found';
 
   @override
   String get averageSpending => 'Average Spending';
@@ -1324,7 +1324,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noDataYet => 'No data to analyze yet';
 
   @override
-  String get addFirstTransaction => 'Add your first transaction to get started';
+  String get addFirstTransaction => 'Add your first expense to get started';
 
   @override
   String get analyzingData => 'Analyzing your financial data...';
@@ -1444,7 +1444,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deleteTransactionConfirm(String description) {
-    return 'Are you sure you want to delete the transaction $description?';
+    return 'transaction. Are you sure you want to delete it?';
   }
 
   @override
@@ -1467,7 +1467,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get installmentTransactionDeleted => 'Installment transaction deleted';
+  String get installmentTransactionDeleted =>
+      'Installment transaction deleted, total amount refunded';
 
   @override
   String installmentTransactionDeleteError(String error) {
@@ -1598,7 +1599,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String minutesAgo(int count) {
-    return '$count min ago';
+    return '$count minutes ago';
   }
 
   @override
@@ -1608,7 +1609,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String daysAgo(int count) {
-    return '$count days ago';
+    return '${count}d ago';
   }
 
   @override
@@ -1882,7 +1883,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lowestToHighest => 'Lowest to Highest';
 
   @override
-  String get alphabetical => 'A-Z';
+  String get alphabetical => 'Alphabetical';
 
   @override
   String get more => 'More';
@@ -2379,4 +2380,578 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addCreditCardDescription => 'Add your credit card information';
+
+  @override
+  String get searchStocks => 'Search Stocks';
+
+  @override
+  String get addStock => 'Add Stock';
+
+  @override
+  String get removeStock => 'Remove Stock';
+
+  @override
+  String get stockDetails => 'Stock Details';
+
+  @override
+  String get stockInfo => 'Stock Information';
+
+  @override
+  String get exchange => 'Exchange';
+
+  @override
+  String get sector => 'Sector';
+
+  @override
+  String get country => 'Country';
+
+  @override
+  String get buyStock => 'Buy Stock';
+
+  @override
+  String get sellStock => 'Sell Stock';
+
+  @override
+  String get buy => 'Buy';
+
+  @override
+  String get sell => 'Sell';
+
+  @override
+  String get noStocksYet => 'You are not tracking any stocks yet';
+
+  @override
+  String get addFirstStock => 'Press + to add stocks';
+
+  @override
+  String get stockAdded => 'Stock added to watchlist';
+
+  @override
+  String get stockRemoved => 'Stock removed from watchlist';
+
+  @override
+  String get confirmRemoveStock =>
+      'Are you sure you want to remove this stock from your portfolio?';
+
+  @override
+  String get chartComingSoon => 'Chart Coming Soon';
+
+  @override
+  String get chartDescription =>
+      'Price charts and analysis features are being developed';
+
+  @override
+  String get shareStock => 'Share Stock';
+
+  @override
+  String get shareFeatureComingSoon => 'Share feature coming soon';
+
+  @override
+  String get buyFeatureComingSoon => 'Buy transaction coming soon';
+
+  @override
+  String get sellFeatureComingSoon => 'Sell transaction coming soon';
+
+  @override
+  String get popularStocks => 'Popular Stocks';
+
+  @override
+  String get bistStocks => 'BIST Stocks';
+
+  @override
+  String get usStocks => 'US Stocks';
+
+  @override
+  String minutesAgoFull(int count) {
+    return '$count minutes ago';
+  }
+
+  @override
+  String hoursAgoFull(int count) {
+    return '$count hours ago';
+  }
+
+  @override
+  String daysAgoFull(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String get investmentsIncluded => 'Including investments';
+
+  @override
+  String get investmentsExcluded => 'Excluding investments';
+
+  @override
+  String get addFirstCardDescription =>
+      'Go to My Cards page to add your first card';
+
+  @override
+  String deleteTransactionConfirmation(String description) {
+    return 'Are you sure you want to delete the $description transaction?';
+  }
+
+  @override
+  String deleteInstallmentConfirmation(String description) {
+    return 'Are you sure you want to delete the $description transaction? All installments will be refunded.';
+  }
+
+  @override
+  String installmentDeleteError(String error) {
+    return 'Error deleting installment transaction: $error';
+  }
+
+  @override
+  String get dueToday => 'Today';
+
+  @override
+  String lastDays(int days) {
+    return 'Last $days Days';
+  }
+
+  @override
+  String statementDebt(String amount) {
+    return 'Statement Debt: $amount';
+  }
+
+  @override
+  String get noDebt => 'No debt';
+
+  @override
+  String get important => 'Important';
+
+  @override
+  String get info => 'Info';
+
+  @override
+  String get statementDebtLabel => 'Statement Debt';
+
+  @override
+  String debtAmount(String amount) {
+    return 'Debt: $amount';
+  }
+
+  @override
+  String get lastPaymentDate => 'Last Payment Date';
+
+  @override
+  String get allNotifications => 'All Notifications';
+
+  @override
+  String pendingNotes(int count) {
+    return '$count pending notes';
+  }
+
+  @override
+  String get addQuickNote => 'Add Quick Note';
+
+  @override
+  String get addQuickNoteDescription =>
+      'Write your expense or income note. You can add it as a transaction later.';
+
+  @override
+  String exampleExpenseNote(String currency) {
+    return 'E.g.: Grocery shopping 150$currency';
+  }
+
+  @override
+  String get addPhotoNote => 'Add Photo Note';
+
+  @override
+  String get addPhotoNoteDescription =>
+      'Add a description for this photo (optional)';
+
+  @override
+  String examplePhotoNote(String currency) {
+    return 'E.g.: Receipt - 150$currency';
+  }
+
+  @override
+  String viewAllNotes(int count) {
+    return 'View all notes ($count)';
+  }
+
+  @override
+  String secondsAgo(int count) {
+    return '$count seconds ago';
+  }
+
+  @override
+  String yesterdayAt(String time) {
+    return 'Yesterday at $time';
+  }
+
+  @override
+  String weekdayAt(String weekday, String time) {
+    return '$weekday at $time';
+  }
+
+  @override
+  String dayMonth(int day, String month) {
+    return '$day $month';
+  }
+
+  @override
+  String dayMonthYear(int day, int month, int year) {
+    return '$day/$month/$year';
+  }
+
+  @override
+  String get januaryShort => 'Jan';
+
+  @override
+  String get februaryShort => 'Feb';
+
+  @override
+  String get marchShort => 'Mar';
+
+  @override
+  String get aprilShort => 'Apr';
+
+  @override
+  String get mayShort => 'May';
+
+  @override
+  String get juneShort => 'Jun';
+
+  @override
+  String get julyShort => 'Jul';
+
+  @override
+  String get augustShort => 'Aug';
+
+  @override
+  String get septemberShort => 'Sep';
+
+  @override
+  String get octoberShort => 'Oct';
+
+  @override
+  String get novemberShort => 'Nov';
+
+  @override
+  String get decemberShort => 'Dec';
+
+  @override
+  String get stocksIncluded => 'Stocks In';
+
+  @override
+  String get stocksExcluded => 'Stocks Out';
+
+  @override
+  String get stockChip => 'Stock';
+
+  @override
+  String get stockSale => 'Stock Sale';
+
+  @override
+  String get stockPurchase => 'Stock Purchase';
+
+  @override
+  String get stockName => 'Stock Name';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get pieces => 'pieces';
+
+  @override
+  String totalTransactionsCount(int count) {
+    return '$count transactions';
+  }
+
+  @override
+  String incomeTransactionsCount(int count) {
+    return '$count income transactions';
+  }
+
+  @override
+  String expenseTransactionsCount(int count) {
+    return '$count expense transactions';
+  }
+
+  @override
+  String transferTransactionsCount(int count) {
+    return '$count transfer transactions';
+  }
+
+  @override
+  String stockTransactionsCount(int count) {
+    return '$count stock transactions';
+  }
+
+  @override
+  String get allTime => 'All Time';
+
+  @override
+  String get dailyAverageExpense => 'Daily average expense';
+
+  @override
+  String get noExpenseTransactions => 'No expense transactions found';
+
+  @override
+  String get analyzeYourFinances => 'Analyze your finances';
+
+  @override
+  String get statistics => 'Statistics';
+
+  @override
+  String get noExpenseRecordsYet => 'No expense records yet';
+
+  @override
+  String get transactionHistoryEmpty => 'Transaction history is empty';
+
+  @override
+  String get noSpendingInPeriod => 'No spending in selected period';
+
+  @override
+  String get spendingCategories => 'Spending Categories';
+
+  @override
+  String get noTransactionsInCategory =>
+      'No transactions found in this category';
+
+  @override
+  String get chart => 'Chart';
+
+  @override
+  String get table => 'Table';
+
+  @override
+  String get monthlyExpenseAnalysis => 'Monthly Expense Analysis';
+
+  @override
+  String get monthlyIncomeAnalysis => 'Monthly Income Analysis';
+
+  @override
+  String get monthlyNetBalanceAnalysis => 'Monthly Net Balance Analysis';
+
+  @override
+  String noMonthlyData(String title) {
+    return 'No Monthly $title Data';
+  }
+
+  @override
+  String get addFirstTransactionToStart =>
+      'Add your first transaction to get started';
+
+  @override
+  String get month => 'Month';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get stable => 'Stable';
+
+  @override
+  String get stockTrading => 'Stock Trading';
+
+  @override
+  String get unknownCategory => 'Unknown Category';
+
+  @override
+  String get trackYourStocks => 'Track your stocks';
+
+  @override
+  String get chartDevelopmentMessage =>
+      'Price charts and analysis features are being developed';
+
+  @override
+  String get buyTransactionComingSoon => 'Buy transaction coming soon';
+
+  @override
+  String get sellTransactionComingSoon => 'Sell transaction coming soon';
+
+  @override
+  String get loadingPopularStocks => 'Loading popular stocks...';
+
+  @override
+  String get noStocksFound => 'No stocks found';
+
+  @override
+  String get tryDifferentSearchTerm => 'Try a different search term';
+
+  @override
+  String get dayHigh => 'Day High';
+
+  @override
+  String get dayLow => 'Day Low';
+
+  @override
+  String get volume => 'Volume';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get errorRemovingStock => 'Error removing stock';
+
+  @override
+  String stockRemovedFromPortfolio(String stockName) {
+    return '$stockName removed from portfolio';
+  }
+
+  @override
+  String get stockTransaction => 'Stock Transaction';
+
+  @override
+  String get priceRequired => 'Price required';
+
+  @override
+  String get enterValidPrice => 'Enter a valid price';
+
+  @override
+  String get transactionSummary => 'Transaction Summary';
+
+  @override
+  String get subtotal => 'Subtotal';
+
+  @override
+  String executeTransaction(String transactionType) {
+    return 'Execute $transactionType Transaction';
+  }
+
+  @override
+  String get unknownStock => 'Unknown Stock';
+
+  @override
+  String get selectStock => 'Select Stock';
+
+  @override
+  String get selectAccount => 'Select Account';
+
+  @override
+  String get pleaseSelectStock => 'Please select a stock';
+
+  @override
+  String get pleaseSelectAccount => 'Please select an account';
+
+  @override
+  String get noStockSelected => 'No stock selected';
+
+  @override
+  String get executePurchase => 'Execute Purchase';
+
+  @override
+  String get executeSale => 'Execute Sale';
+
+  @override
+  String get noStocksAddedYet => 'No stocks added yet';
+
+  @override
+  String get addFirstStockInstruction =>
+      'Go to the Stocks screen to add your first stock';
+
+  @override
+  String get quantityAndPrice => 'Quantity & Price';
+
+  @override
+  String get newBadge => 'NEW';
+
+  @override
+  String get commissionRate => 'Commission Rate:';
+
+  @override
+  String get commission => 'Commission';
+
+  @override
+  String get totalToPay => 'Total to Pay:';
+
+  @override
+  String get totalToReceive => 'Total to Receive:';
+
+  @override
+  String get noCashAccountFound => 'No Cash Account Found';
+
+  @override
+  String get addCashAccountForStockTrading =>
+      'You need to add a cash account first to perform stock transactions.';
+
+  @override
+  String get currentPrice => 'Current Price';
+
+  @override
+  String get currentValue => 'Current Value';
+
+  @override
+  String get deleteInstallmentConfirm =>
+      'installment transaction. Are you sure you want to delete it completely?';
+
+  @override
+  String get deleteInstallmentWarning =>
+      'This action will delete all installments and refund paid amounts.';
+
+  @override
+  String get errorDeletingTransaction => 'Error deleting transaction';
+
+  @override
+  String get deletingInstallmentTransaction =>
+      'Deleting installment transaction...';
+
+  @override
+  String get errorDeletingInstallmentTransaction =>
+      'Error deleting installment transaction';
+
+  @override
+  String get cost => 'Cost';
+
+  @override
+  String get weightedAverageCost => 'Weighted Average Cost';
+
+  @override
+  String get portfolioOverview => 'Portfolio Overview';
+
+  @override
+  String get totalValue => 'Total Value';
+
+  @override
+  String get totalCost => 'Total Cost';
+
+  @override
+  String get totalProfitLoss => 'Total P&L';
+
+  @override
+  String get totalReturn => 'Total Return';
+
+  @override
+  String get profitLoss => 'Profit/Loss';
+
+  @override
+  String get calendar => 'Calendar';
+
+  @override
+  String get mondayShort => 'Mon';
+
+  @override
+  String get tuesdayShort => 'Tue';
+
+  @override
+  String get wednesdayShort => 'Wed';
+
+  @override
+  String get thursdayShort => 'Thu';
+
+  @override
+  String get fridayShort => 'Fri';
+
+  @override
+  String get saturdayShort => 'Sat';
+
+  @override
+  String get sundayShort => 'Sun';
+
+  @override
+  String get analysisFeaturesInDevelopment =>
+      'Analysis features in development';
+
+  @override
+  String get value => 'Value';
+
+  @override
+  String get returnLabel => 'Return';
 }

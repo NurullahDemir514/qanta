@@ -2306,7 +2306,7 @@
   "@noCardsAddedYet": {
     "description": "No cards added yet"
   },
-  "cash": "Cash",
+  "cash": "CASH",
   "@cash": {
     "description": "Cash account"
   },
@@ -3437,5 +3437,1501 @@
   "addCreditCardDescription": "Add your credit card information",
   "@addCreditCardDescription": {
     "description": "Add your credit card information"
+  },
+  "stocks": "Stocks",
+  "@stocks": {
+    "description": "Stocks screen title"
+  },
+  "searchStocks": "Search Stocks",
+  "@searchStocks": {
+    "description": "Search stocks placeholder"
+  },
+  "addStock": "Add Stock",
+  "@addStock": {
+    "description": "Add stock button"
+  },
+  "removeStock": "Remove Stock",
+  "@removeStock": {
+    "description": "Remove stock button"
+  },
+  "stockDetails": "Stock Details",
+  "@stockDetails": {
+    "description": "Stock details title"
+  },
+  "stockInfo": "Stock Information",
+  "@stockInfo": {
+    "description": "Stock information section"
+  },
+  "exchange": "Exchange",
+  "@exchange": {
+    "description": "Stock exchange"
+  },
+  "sector": "Sector",
+  "@sector": {
+    "description": "Stock sector"
+  },
+  "country": "Country",
+  "@country": {
+    "description": "Stock country"
+  },
+  "currency": "Currency",
+  "@currency": {
+    "description": "Currency"
+  },
+  "lastUpdate": "Last Update",
+  "@lastUpdate": {
+    "description": "Last update time"
+  },
+  "buyStock": "Stock Purchase",
+  "@buyStock": {
+    "description": "Buy stock transaction"
+  },
+  "sellStock": "Stock Sale",
+  "@sellStock": {
+    "description": "Sell stock transaction"
+  },
+  "buy": "Buy",
+  "@buy": {
+    "description": "Buy action"
+  },
+  "sell": "Sell",
+  "@sell": {
+    "description": "Sell action"
+  },
+  "noStocksYet": "You are not tracking any stocks yet",
+  "@noStocksYet": {
+    "description": "No stocks being tracked"
+  },
+  "addFirstStock": "Press + to add stocks",
+  "@addFirstStock": {
+    "description": "Add first stock instruction"
+  },
+  "stockAdded": "Stock added to watchlist",
+  "@stockAdded": {
+    "description": "Stock added to watchlist"
+  },
+  "stockRemoved": "Stock removed from watchlist",
+  "@stockRemoved": {
+    "description": "Stock removed from watchlist"
+  },
+  "confirmRemoveStock": "Are you sure you want to remove this stock from your watchlist?",
+  "@confirmRemoveStock": {
+    "description": "Confirm stock removal"
+  },
+  "chartComingSoon": "Chart Coming Soon",
+  "@chartComingSoon": {
+    "description": "Chart coming soon message"
+  },
+  "chartDescription": "Price charts and analysis features are being developed",
+  "@chartDescription": {
+    "description": "Chart development message"
+  },
+  "shareStock": "Share Stock",
+  "@shareStock": {
+    "description": "Share stock action"
+  },
+  "shareFeatureComingSoon": "Share feature coming soon",
+  "@shareFeatureComingSoon": {
+    "description": "Share feature coming soon"
+  },
+  "buyFeatureComingSoon": "Buy transaction coming soon",
+  "@buyFeatureComingSoon": {
+    "description": "Buy feature coming soon"
+  },
+  "sellFeatureComingSoon": "Sell transaction coming soon",
+  "@sellFeatureComingSoon": {
+    "description": "Sell feature coming soon"
+  },
+  "popularStocks": "Popular Stocks",
+  "@popularStocks": {
+    "description": "Popular stocks section"
+  },
+  "bistStocks": "BIST Stocks",
+  "@bistStocks": {
+    "description": "BIST stocks section"
+  },
+  "usStocks": "US Stocks",
+  "@usStocks": {
+    "description": "US stocks section"
+  },
+  "now": "Now",
+  "@now": {
+    "description": "Now time indicator"
+  },
+  "minutesAgo": "{count}m ago",
+  "@minutesAgo": {
+    "description": "Minutes ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count}h ago",
+  "@hoursAgo": {
+    "description": "Hours ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count}d ago",
+  "@daysAgo": {
+    "description": "Days ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgoFull": "{count} minutes ago",
+  "@minutesAgoFull": {
+    "description": "Minutes ago full text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgoFull": "{count} hours ago",
+  "@hoursAgoFull": {
+    "description": "Hours ago full text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgoFull": "{count} days ago",
+  "@daysAgoFull": {
+    "description": "Days ago full text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "investmentsIncluded": "Including investments",
+  "@investmentsIncluded": {
+    "description": "Toggle text for including investments in net worth"
+  },
+  "investmentsExcluded": "Excluding investments",
+  "@investmentsExcluded": {
+    "description": "Toggle text for excluding investments from net worth"
+  },
+  "noCardsAddedYet": "No cards added yet",
+  "@noCardsAddedYet": {
+    "description": "Message when no cards are added yet"
+  },
+  "addFirstCardDescription": "Go to My Cards page to add your first card",
+  "@addFirstCardDescription": {
+    "description": "Description for adding first card"
+  },
+  "deleteTransaction": "Delete Transaction",
+  "@deleteTransaction": {
+    "description": "Delete transaction action sheet title"
+  },
+  "deleteTransactionConfirmation": "Are you sure you want to delete the {description} transaction?",
+  "@deleteTransactionConfirmation": {
+    "description": "Delete transaction confirmation message",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteInstallmentTransaction": "Delete Installment Transaction",
+  "@deleteInstallmentTransaction": {
+    "description": "Delete installment transaction action sheet title"
+  },
+  "deleteInstallmentConfirmation": "Are you sure you want to delete the {description} transaction? All installments will be refunded.",
+  "@deleteInstallmentConfirmation": {
+    "description": "Delete installment transaction confirmation message",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionDeleteError": "Error deleting transaction: {error}",
+  "@transactionDeleteError": {
+    "description": "Transaction delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "installmentTransactionDeleted": "Installment transaction deleted, total amount refunded",
+  "@installmentTransactionDeleted": {
+    "description": "Installment transaction deleted success message"
+  },
+  "installmentDeleteError": "Error deleting installment transaction: {error}",
+  "@installmentDeleteError": {
+    "description": "Installment transaction delete error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "creditCard": "Credit Card",
+  "@creditCard": {
+    "description": "Credit card default name"
+  },
+  "dueToday": "Today",
+  "@dueToday": {
+    "description": "Due today text"
+  },
+  "lastDays": "Last {days} Days",
+  "@lastDays": {
+    "description": "Last X days text",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "statementDebt": "Statement Debt: {amount}",
+  "@statementDebt": {
+    "description": "Statement debt text",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "noDebt": "No debt",
+  "@noDebt": {
+    "description": "No debt text"
+  },
+  "urgent": "Urgent",
+  "@urgent": {
+    "description": "Urgent priority level"
+  },
+  "important": "Important",
+  "@important": {
+    "description": "Important priority level"
+  },
+  "info": "Info",
+  "@info": {
+    "description": "Info priority level"
+  },
+  "statementDebtLabel": "Statement Debt",
+  "@statementDebtLabel": {
+    "description": "Statement debt label"
+  },
+  "debtAmount": "Debt: {amount}",
+  "@debtAmount": {
+    "description": "Debt amount text",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "lastPaymentDate": "Last Payment Date",
+  "@lastPaymentDate": {
+    "description": "Last payment date label"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OK button text"
+  },
+  "allNotifications": "All Notifications",
+  "@allNotifications": {
+    "description": "All notifications title"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
+  },
+  "lastPayment": "Last payment: {date}",
+  "@lastPayment": {
+    "description": "Last payment text",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "quickNotes": "Quick Notes",
+  "@quickNotes": {
+    "description": "Quick notes title"
+  },
+  "pendingNotes": "{count} pending notes",
+  "@pendingNotes": {
+    "description": "Pending notes count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addQuickNote": "Add Quick Note",
+  "@addQuickNote": {
+    "description": "Add quick note title"
+  },
+  "addQuickNoteDescription": "Write your expense or income note. You can add it as a transaction later.",
+  "@addQuickNoteDescription": {
+    "description": "Add quick note description"
+  },
+  "exampleExpenseNote": "E.g.: Grocery shopping 150{currency}",
+  "@exampleExpenseNote": {
+    "description": "Example expense note with currency",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "addPhotoNote": "Add Photo Note",
+  "@addPhotoNote": {
+    "description": "Add photo note title"
+  },
+  "addPhotoNoteDescription": "Add a description for this photo (optional)",
+  "@addPhotoNoteDescription": {
+    "description": "Add photo note description"
+  },
+  "examplePhotoNote": "E.g.: Receipt - 150{currency}",
+  "@examplePhotoNote": {
+    "description": "Example photo note with currency",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "viewAllNotes": "View all notes ({count})",
+  "@viewAllNotes": {
+    "description": "View all notes button",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsAgo": "{count} seconds ago",
+  "@secondsAgo": {
+    "description": "Seconds ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "{count} minutes ago",
+  "@minutesAgo": {
+    "description": "Minutes ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} hours ago",
+  "@hoursAgo": {
+    "description": "Hours ago text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yesterdayAt": "Yesterday at {time}",
+  "@yesterdayAt": {
+    "description": "Yesterday at time text",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayAt": "{weekday} at {time}",
+  "@weekdayAt": {
+    "description": "Weekday at time text",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dayMonth": "{day} {month}",
+  "@dayMonth": {
+    "description": "Day and month text",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "dayMonthYear": "{day}/{month}/{year}",
+  "@dayMonthYear": {
+    "description": "Day/month/year text",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "photoNote": "Photo note",
+  "@photoNote": {
+    "description": "Photo note default text"
+  },
+  "photoNoteAdded": "Photo note added",
+  "@photoNoteAdded": {
+    "description": "Photo note added success message"
+  },
+  "photoNoteAddError": "Error adding photo note",
+  "@photoNoteAddError": {
+    "description": "Photo note add error message"
+  },
+  "photoCaptureError": "Error capturing photo",
+  "@photoCaptureError": {
+    "description": "Photo capture error message"
+  },
+  "photoSelectionError": "Error selecting photo",
+  "@photoSelectionError": {
+    "description": "Photo selection error message"
+  },
+  "noteAdded": "Note added",
+  "@noteAdded": {
+    "description": "Note added success message"
+  },
+  "noteAddError": "Error adding note",
+  "@noteAddError": {
+    "description": "Note add error message"
+  },
+  "noteDeleted": "Note deleted",
+  "@noteDeleted": {
+    "description": "Note deleted success message"
+  },
+  "noteDeleteError": "Error deleting note",
+  "@noteDeleteError": {
+    "description": "Note delete error message"
+  },
+  "textNote": "Text Note",
+  "@textNote": {
+    "description": "Text note option"
+  },
+  "addQuickTextNote": "Add quick text note",
+  "@addQuickTextNote": {
+    "description": "Add quick text note description"
+  },
+  "takePhoto": "Take Photo",
+  "@takePhoto": {
+    "description": "Take photo option"
+  },
+  "takePhotoFromCamera": "Take photo from camera",
+  "@takePhotoFromCamera": {
+    "description": "Take photo from camera description"
+  },
+  "selectFromGallery": "Select from Gallery",
+  "@selectFromGallery": {
+    "description": "Select from gallery option"
+  },
+  "selectPhotoFromGallery": "Select photo from gallery",
+  "@selectPhotoFromGallery": {
+    "description": "Select photo from gallery description"
+  },
+  "addExpenseIncomeNotes": "Add your expense or income notes here",
+  "@addExpenseIncomeNotes": {
+    "description": "Add expense or income notes description"
+  },
+  "stocks": "Stocks",
+  "@stocks": {
+    "description": "Stocks tab label"
+  },
+  "cardName": "Card Name",
+  "@cardName": {
+    "description": "Card name label"
+  },
+  "usage": "Usage",
+  "@usage": {
+    "description": "Usage percentage label"
+  },
+  "availableLimit": "Available Limit",
+  "@availableLimit": {
+    "description": "Available credit limit label"
+  },
+  "debt": "Debt",
+  "@debt": {
+    "description": "Debt amount label"
+  },
+  "lastPayment": "Last Payment",
+  "@lastPayment": {
+    "description": "Last payment date label"
+  },
+  "januaryShort": "Jan",
+  "@januaryShort": {
+    "description": "January short form"
+  },
+  "februaryShort": "Feb",
+  "@februaryShort": {
+    "description": "February short form"
+  },
+  "marchShort": "Mar",
+  "@marchShort": {
+    "description": "March short form"
+  },
+  "aprilShort": "Apr",
+  "@aprilShort": {
+    "description": "April short form"
+  },
+  "mayShort": "May",
+  "@mayShort": {
+    "description": "May short form"
+  },
+  "juneShort": "Jun",
+  "@juneShort": {
+    "description": "June short form"
+  },
+  "julyShort": "Jul",
+  "@julyShort": {
+    "description": "July short form"
+  },
+  "augustShort": "Aug",
+  "@augustShort": {
+    "description": "August short form"
+  },
+  "septemberShort": "Sep",
+  "@septemberShort": {
+    "description": "September short form"
+  },
+  "octoberShort": "Oct",
+  "@octoberShort": {
+    "description": "October short form"
+  },
+  "novemberShort": "Nov",
+  "@novemberShort": {
+    "description": "November short form"
+  },
+  "decemberShort": "Dec",
+  "@decemberShort": {
+    "description": "December short form"
+  },
+  "stocksIncluded": "Stocks In",
+  "@stocksIncluded": {
+    "description": "Stocks included toggle text"
+  },
+  "stocksExcluded": "Stocks Out",
+  "@stocksExcluded": {
+    "description": "Stocks excluded toggle text"
+  },
+  "stockChip": "Stock",
+  "@stockChip": {
+    "description": "Stock transaction chip label"
+  },
+  "stockSale": "Sale",
+  "@stockSale": {
+    "description": "Stock sale action"
+  },
+  "stockPurchase": "Buy",
+  "@stockPurchase": {
+    "description": "Stock purchase action"
+  },
+  "stockName": "Stock Name",
+  "@stockName": {
+    "description": "Stock name label"
+  },
+  "quantity": "Quantity",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "price": "Price",
+  "@price": {
+    "description": "Price label"
+  },
+  "total": "Total",
+  "@total": {
+    "description": "Total amount label"
+  },
+  "pieces": "pcs",
+  "@pieces": {
+    "description": "Pieces unit"
+  },
+  "noTransactionsFound": "No transactions found",
+  "@noTransactionsFound": {
+    "description": "No transactions found message"
+  },
+  "totalTransactionsCount": "{count} transactions",
+  "@totalTransactionsCount": {
+    "description": "Total transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "incomeTransactionsCount": "{count} income transactions",
+  "@incomeTransactionsCount": {
+    "description": "Income transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseTransactionsCount": "{count} expense transactions",
+  "@expenseTransactionsCount": {
+    "description": "Expense transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transferTransactionsCount": "{count} transfer transactions",
+  "@transferTransactionsCount": {
+    "description": "Transfer transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stockTransactionsCount": "{count} stock transactions",
+  "@stockTransactionsCount": {
+    "description": "Stock transactions count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "today": "Today",
+  "@today": {
+    "description": "Today time period"
+  },
+  "thisWeek": "This Week",
+  "@thisWeek": {
+    "description": "This week time period"
+  },
+  "thisMonth": "This Month",
+  "@thisMonth": {
+    "description": "This month time period"
+  },
+  "lastMonth": "Last Month",
+  "@lastMonth": {
+    "description": "Last month time period"
+  },
+  "last3Months": "Last 3 Months",
+  "@last3Months": {
+    "description": "Last 3 months time period"
+  },
+  "thisYear": "This Year",
+  "@thisYear": {
+    "description": "This year time period"
+  },
+  "allTime": "All Time",
+  "@allTime": {
+    "description": "All time period"
+  },
+  "dailyAverageExpense": "Daily average expense",
+  "@dailyAverageExpense": {
+    "description": "Daily average expense label"
+  },
+  "noExpenseTransactions": "No expense transactions found",
+  "@noExpenseTransactions": {
+    "description": "No expense transactions found message"
+  },
+  "manageYourCards": "Manage your cards",
+  "@manageYourCards": {
+    "description": "Manage your cards subtitle"
+  },
+  "analyzeYourFinances": "Analyze your finances",
+  "@analyzeYourFinances": {
+    "description": "Analyze your finances subtitle"
+  },
+  "statistics": "Statistics",
+  "@statistics": {
+    "description": "Statistics page title"
+  },
+  "income": "Income",
+  "@income": {
+    "description": "Income label"
+  },
+  "expense": "Expense",
+  "@expense": {
+    "description": "Expense label"
+  },
+  "net": "Net",
+  "@net": {
+    "description": "Net balance label"
+  },
+  "netBalance": "Net Balance",
+  "@netBalance": {
+    "description": "Net balance full label"
+  },
+  "noExpenseRecordsYet": "No expense records yet",
+  "@noExpenseRecordsYet": {
+    "description": "No expense records message"
+  },
+  "transactionHistoryEmpty": "Transaction history is empty",
+  "@transactionHistoryEmpty": {
+    "description": "Empty transaction history message"
+  },
+  "noSpendingInPeriod": "No spending in selected period",
+  "@noSpendingInPeriod": {
+    "description": "No spending in selected period"
+  },
+  "addFirstTransaction": "Add your first expense to get started",
+  "@addFirstTransaction": {
+    "description": "Add first transaction message"
+  },
+  "spendingCategories": "Spending Categories",
+  "@spendingCategories": {
+    "description": "Spending categories section title"
+  },
+  "moreCategories": "more categories",
+  "@moreCategories": {
+    "description": "More categories text"
+  },
+  "transactions": "Transactions",
+  "@transactions": {
+    "description": "Transactions count"
+  },
+  "noTransactionsInCategory": "No transactions found in this category",
+  "@noTransactionsInCategory": {
+    "description": "No transactions in category message"
+  },
+  "today": "Today",
+  "@today": {
+    "description": "Today"
+  },
+  "yesterday": "Yesterday",
+  "@yesterday": {
+    "description": "Yesterday"
+  },
+  "thisMonth": "This Month",
+  "@thisMonth": {
+    "description": "This month"
+  },
+  "lastMonth": "Last Month",
+  "@lastMonth": {
+    "description": "Last month"
+  },
+  "last3Months": "Last 3 Months",
+  "@last3Months": {
+    "description": "Last 3 months"
+  },
+  "january": "January",
+  "@january": {
+    "description": "January"
+  },
+  "february": "February",
+  "@february": {
+    "description": "February"
+  },
+  "march": "March",
+  "@march": {
+    "description": "March"
+  },
+  "april": "April",
+  "@april": {
+    "description": "April"
+  },
+  "may": "May",
+  "@may": {
+    "description": "May"
+  },
+  "june": "June",
+  "@june": {
+    "description": "June"
+  },
+  "july": "July",
+  "@july": {
+    "description": "July"
+  },
+  "august": "August",
+  "@august": {
+    "description": "August"
+  },
+  "september": "September",
+  "@september": {
+    "description": "September"
+  },
+  "october": "October",
+  "@october": {
+    "description": "October"
+  },
+  "november": "November",
+  "@november": {
+    "description": "November"
+  },
+  "december": "December",
+  "@december": {
+    "description": "December"
+  },
+  "januaryShort": "Jan",
+  "@januaryShort": {
+    "description": "January short"
+  },
+  "februaryShort": "Feb",
+  "@februaryShort": {
+    "description": "February short"
+  },
+  "marchShort": "Mar",
+  "@marchShort": {
+    "description": "March short"
+  },
+  "aprilShort": "Apr",
+  "@aprilShort": {
+    "description": "April short"
+  },
+  "mayShort": "May",
+  "@mayShort": {
+    "description": "May short"
+  },
+  "juneShort": "Jun",
+  "@juneShort": {
+    "description": "June short"
+  },
+  "julyShort": "Jul",
+  "@julyShort": {
+    "description": "July short"
+  },
+  "augustShort": "Aug",
+  "@augustShort": {
+    "description": "August short"
+  },
+  "septemberShort": "Sep",
+  "@septemberShort": {
+    "description": "September short"
+  },
+  "octoberShort": "Oct",
+  "@octoberShort": {
+    "description": "October short"
+  },
+  "novemberShort": "Nov",
+  "@novemberShort": {
+    "description": "November short"
+  },
+  "decemberShort": "Dec",
+  "@decemberShort": {
+    "description": "December short"
+  },
+  "chart": "Chart",
+  "@chart": {
+    "description": "Chart view"
+  },
+  "table": "Table",
+  "@table": {
+    "description": "Table view"
+  },
+  "monthlyExpenseAnalysis": "Monthly Expense Analysis",
+  "@monthlyExpenseAnalysis": {
+    "description": "Monthly expense analysis title"
+  },
+  "monthlyIncomeAnalysis": "Monthly Income Analysis",
+  "@monthlyIncomeAnalysis": {
+    "description": "Monthly income analysis title"
+  },
+  "monthlyNetBalanceAnalysis": "Monthly Net Balance Analysis",
+  "@monthlyNetBalanceAnalysis": {
+    "description": "Monthly net balance analysis title"
+  },
+  "noMonthlyData": "No Monthly {title} Data",
+  "@noMonthlyData": {
+    "description": "No monthly data message",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "addFirstTransactionToStart": "Add your first transaction to get started",
+  "@addFirstTransactionToStart": {
+    "description": "Add first transaction to start message"
+  },
+  "month": "Month",
+  "@month": {
+    "description": "Month column header"
+  },
+  "change": "Change",
+  "@change": {
+    "description": "Change column header"
+  },
+  "stable": "Stable",
+  "@stable": {
+    "description": "Stable change indicator"
+  },
+  "stockTrading": "Stock Trading",
+  "@stockTrading": {
+    "description": "Stock trading category name"
+  },
+  "food": "Food",
+  "@food": {
+    "description": "Food category"
+  },
+  "transport": "Transport",
+  "@transport": {
+    "description": "Transport category"
+  },
+  "shopping": "Shopping",
+  "@shopping": {
+    "description": "Shopping category"
+  },
+  "entertainment": "Entertainment",
+  "@entertainment": {
+    "description": "Entertainment category"
+  },
+  "bills": "Bills",
+  "@bills": {
+    "description": "Bills category"
+  },
+  "health": "Health",
+  "@health": {
+    "description": "Health category"
+  },
+  "education": "Education",
+  "@education": {
+    "description": "Education category"
+  },
+  "travel": "Travel",
+  "@travel": {
+    "description": "Travel category"
+  },
+  "other": "Other",
+  "@other": {
+    "description": "Other category"
+  },
+  "unknownCategory": "Unknown Category",
+  "@unknownCategory": {
+    "description": "Unknown category"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error label"
+  },
+  "tryAgain": "Try Again",
+  "@tryAgain": {
+    "description": "Try again button"
+  },
+  "trackYourStocks": "Track your stocks",
+  "@trackYourStocks": {
+    "description": "Stocks screen subtitle"
+  },
+  "searchStocks": "Search Stocks",
+  "@searchStocks": {
+    "description": "Search stocks button"
+  },
+  "buyStock": "Buy Stock",
+  "@buyStock": {
+    "description": "Buy stock button"
+  },
+  "sellStock": "Sell Stock",
+  "@sellStock": {
+    "description": "Sell stock button"
+  },
+  "stockInfo": "Stock Information",
+  "@stockInfo": {
+    "description": "Stock information section title"
+  },
+  "exchange": "Exchange",
+  "@exchange": {
+    "description": "Stock exchange label"
+  },
+  "sector": "Sector",
+  "@sector": {
+    "description": "Stock sector label"
+  },
+  "country": "Country",
+  "@country": {
+    "description": "Stock country label"
+  },
+  "currency": "Currency",
+  "@currency": {
+    "description": "Stock currency label"
+  },
+  "lastUpdate": "Last Update",
+  "@lastUpdate": {
+    "description": "Last update label"
+  },
+  "chartComingSoon": "Chart Coming Soon",
+  "@chartComingSoon": {
+    "description": "Chart coming soon message"
+  },
+  "chartDevelopmentMessage": "Price charts and analysis features are being developed",
+  "@chartDevelopmentMessage": {
+    "description": "Chart development message"
+  },
+  "buy": "Buy",
+  "@buy": {
+    "description": "Buy action"
+  },
+  "sell": "Sell",
+  "@sell": {
+    "description": "Sell action"
+  },
+  "shareFeatureComingSoon": "Share feature coming soon",
+  "@shareFeatureComingSoon": {
+    "description": "Share feature coming soon message"
+  },
+  "buyTransactionComingSoon": "Buy transaction coming soon",
+  "@buyTransactionComingSoon": {
+    "description": "Buy transaction coming soon message"
+  },
+  "sellTransactionComingSoon": "Sell transaction coming soon",
+  "@sellTransactionComingSoon": {
+    "description": "Sell transaction coming soon message"
+  },
+  "now": "Now",
+  "@now": {
+    "description": "Now time reference"
+  },
+  "loadingPopularStocks": "Loading popular stocks...",
+  "@loadingPopularStocks": {
+    "description": "Loading popular stocks message"
+  },
+  "noStocksFound": "No stocks found",
+  "@noStocksFound": {
+    "description": "No stocks found message"
+  },
+  "tryDifferentSearchTerm": "Try a different search term",
+  "@tryDifferentSearchTerm": {
+    "description": "Try different search term message"
+  },
+  "dayHigh": "Day High",
+  "@dayHigh": {
+    "description": "Day high label"
+  },
+  "dayLow": "Day Low",
+  "@dayLow": {
+    "description": "Day low label"
+  },
+  "volume": "Volume",
+  "@volume": {
+    "description": "Volume label"
+  },
+  "removeStock": "Remove Stock",
+  "@removeStock": {
+    "description": "Remove stock button"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "remove": "Remove",
+  "@remove": {
+    "description": "Remove button"
+  },
+  "userSessionNotFound": "User session not found",
+  "@userSessionNotFound": {
+    "description": "User session not found error"
+  },
+  "errorRemovingStock": "Error removing stock",
+  "@errorRemovingStock": {
+    "description": "Error removing stock message"
+  },
+  "stockRemovedFromPortfolio": "{stockName} removed from portfolio",
+  "@stockRemovedFromPortfolio": {
+    "description": "Stock removed from portfolio message",
+    "placeholders": {
+      "stockName": {
+        "type": "String",
+        "example": "AAPL"
+      }
+    }
+  },
+  "confirmRemoveStock": "Are you sure you want to remove this stock from your portfolio?",
+  "@confirmRemoveStock": {
+    "description": "Confirm stock removal message"
+  },
+  "stockTransaction": "Stock Transaction",
+  "@stockTransaction": {
+    "description": "Stock transaction title"
+  },
+  "transactionType": "Transaction Type",
+  "@transactionType": {
+    "description": "Transaction type label"
+  },
+  "quantity": "Quantity",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "price": "Price",
+  "@price": {
+    "description": "Price label"
+  },
+  "quantityRequired": "Quantity required",
+  "@quantityRequired": {
+    "description": "Quantity required error"
+  },
+  "enterValidQuantity": "Enter a valid quantity",
+  "@enterValidQuantity": {
+    "description": "Enter valid quantity error"
+  },
+  "priceRequired": "Price required",
+  "@priceRequired": {
+    "description": "Price required error"
+  },
+  "enterValidPrice": "Enter a valid price",
+  "@enterValidPrice": {
+    "description": "Enter valid price error"
+  },
+  "transactionSummary": "Transaction Summary",
+  "@transactionSummary": {
+    "description": "Transaction summary title"
+  },
+  "subtotal": "Subtotal",
+  "@subtotal": {
+    "description": "Subtotal label"
+  },
+  "total": "Total",
+  "@total": {
+    "description": "Total label"
+  },
+  "pieces": "pieces",
+  "@pieces": {
+    "description": "Pieces unit"
+  },
+  "executeTransaction": "Execute {transactionType} Transaction",
+  "@executeTransaction": {
+    "description": "Execute transaction button",
+    "placeholders": {
+      "transactionType": {
+        "type": "String",
+        "example": "Buy"
+      }
+    }
+  },
+  "unknownStock": "Unknown Stock",
+  "@unknownStock": {
+    "description": "Unknown stock fallback"
+  },
+  "selectStock": "Select Stock",
+  "@selectStock": {
+    "description": "Select stock step"
+  },
+  "selectAccount": "Select Account",
+  "@selectAccount": {
+    "description": "Select account step"
+  },
+  "summary": "Summary",
+  "@summary": {
+    "description": "Summary step"
+  },
+  "pleaseSelectStock": "Please select a stock",
+  "@pleaseSelectStock": {
+    "description": "Please select stock message"
+  },
+  "pleaseSelectAccount": "Please select an account",
+  "@pleaseSelectAccount": {
+    "description": "Please select account message"
+  },
+  "enterValidQuantity": "Enter a valid quantity",
+  "@enterValidQuantity": {
+    "description": "Enter valid quantity error"
+  },
+  "enterValidPrice": "Enter a valid price",
+  "@enterValidPrice": {
+    "description": "Enter valid price error"
+  },
+  "noStockSelected": "No stock selected",
+  "@noStockSelected": {
+    "description": "No stock selected message"
+  },
+  "stockPurchase": "Stock Purchase",
+  "@stockPurchase": {
+    "description": "Stock purchase title"
+  },
+  "stockSale": "Stock Sale",
+  "@stockSale": {
+    "description": "Stock sale title"
+  },
+  "executePurchase": "Execute Purchase",
+  "@executePurchase": {
+    "description": "Execute purchase button"
+  },
+  "executeSale": "Execute Sale",
+  "@executeSale": {
+    "description": "Execute sale button"
+  },
+  "noStocksAddedYet": "No stocks added yet",
+  "@noStocksAddedYet": {
+    "description": "No stocks added yet message"
+  },
+  "addFirstStockInstruction": "Go to the Stocks screen to add your first stock",
+  "@addFirstStockInstruction": {
+    "description": "Add first stock instruction"
+  },
+  "addStock": "Add Stock",
+  "@addStock": {
+    "description": "Add stock button"
+  },
+  "quantityAndPrice": "Quantity & Price",
+  "@quantityAndPrice": {
+    "description": "Quantity and price step"
+  },
+  "noStocksFound": "No stocks found",
+  "@noStocksFound": {
+    "description": "No stocks found message"
+  },
+  "tryDifferentSearchTerm": "Try a different search term",
+  "@tryDifferentSearchTerm": {
+    "description": "Try different search term message"
+  },
+  "newBadge": "NEW",
+  "@newBadge": {
+    "description": "New badge"
+  },
+  "pieces": "pieces",
+  "@pieces": {
+    "description": "Pieces unit"
+  },
+  "commissionRate": "Commission Rate:",
+  "@commissionRate": {
+    "description": "Commission rate label"
+  },
+  "commission": "Commission",
+  "@commission": {
+    "description": "Commission label"
+  },
+  "totalToPay": "Total to Pay:",
+  "@totalToPay": {
+    "description": "Total to pay label"
+  },
+  "totalToReceive": "Total to Receive:",
+  "@totalToReceive": {
+    "description": "Total to receive label"
+  },
+  "account": "Account",
+  "@account": {
+    "description": "Account label"
+  },
+  "quantity": "Quantity",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "price": "Price",
+  "@price": {
+    "description": "Price label"
+  },
+  "total": "Total",
+  "@total": {
+    "description": "Total label"
+  },
+  "noCashAccountFound": "No Cash Account Found",
+  "@noCashAccountFound": {
+    "description": "No cash account found message"
+  },
+  "addCashAccountForStockTrading": "You need to add a cash account first to perform stock transactions.",
+  "@addCashAccountForStockTrading": {
+    "description": "Add cash account for stock trading message"
+  },
+  "cash": "Cash",
+  "@cash": {
+    "description": "Cash account type"
+  },
+  "creditCard": "Credit Card",
+  "@creditCard": {
+    "description": "Credit card account type"
+  },
+  "debitCard": "Debit Card",
+  "@debitCard": {
+    "description": "Debit card account type"
+  },
+  "account": "Account",
+  "@account": {
+    "description": "Account type fallback"
+  },
+  "currentPrice": "Current Price",
+  "@currentPrice": {
+    "description": "Current price label"
+  },
+  "currentValue": "Current Value",
+  "less": "Less",
+  "more": "More",
+  "all": "All",
+  "newest": "Newest",
+  "oldest": "Oldest",
+  "highestToLowest": "Highest to Lowest",
+  "lowestToHighest": "Lowest to Highest",
+  "alphabetical": "Alphabetical",
+  "deleteTransaction": "Delete Transaction",
+  "deleteTransactionConfirm": "transaction. Are you sure you want to delete it?",
+  "deleteInstallmentTransaction": "Delete Installment Transaction",
+  "deleteInstallmentConfirm": "installment transaction. Are you sure you want to delete it completely?",
+  "deleteInstallmentWarning": "This action will delete all installments and refund paid amounts.",
+  "deleteAll": "Delete All",
+  "errorDeletingTransaction": "Error deleting transaction",
+  "deletingInstallmentTransaction": "Deleting installment transaction...",
+  "errorDeletingInstallmentTransaction": "Error deleting installment transaction",
+  "@currentValue": {
+    "description": "Current value label (cost + profit/loss)"
+  },
+  "cost": "Cost",
+  "@cost": {
+    "description": "Cost label"
+  },
+  "weightedAverageCost": "Weighted Average Cost",
+  "@weightedAverageCost": {
+    "description": "Weighted average cost label"
+  },
+  "portfolioOverview": "Portfolio Overview",
+  "@portfolioOverview": {
+    "description": "Portfolio overview title"
+  },
+  "totalValue": "Total Value",
+  "@totalValue": {
+    "description": "Total portfolio value"
+  },
+  "totalCost": "Total Cost",
+  "@totalCost": {
+    "description": "Total portfolio cost"
+  },
+  "totalProfitLoss": "Total P&L",
+  "@totalProfitLoss": {
+    "description": "Total profit/loss"
+  },
+  "totalReturn": "Total Return",
+  "@totalReturn": {
+    "description": "Total return percentage"
+  },
+  "profitLoss": "Profit/Loss",
+  "@profitLoss": {
+    "description": "Profit/Loss label"
+  },
+  "calendar": "Calendar",
+  "@calendar": {
+    "description": "Calendar page title"
+  },
+  "monday": "Monday",
+  "@monday": {
+    "description": "Monday"
+  },
+  "tuesday": "Tuesday",
+  "@tuesday": {
+    "description": "Tuesday"
+  },
+  "wednesday": "Wednesday",
+  "@wednesday": {
+    "description": "Wednesday"
+  },
+  "thursday": "Thursday",
+  "@thursday": {
+    "description": "Thursday"
+  },
+  "friday": "Friday",
+  "@friday": {
+    "description": "Friday"
+  },
+  "saturday": "Saturday",
+  "@saturday": {
+    "description": "Saturday"
+  },
+  "sunday": "Sunday",
+  "@sunday": {
+    "description": "Sunday"
+  },
+  "mondayShort": "Mon",
+  "@mondayShort": {
+    "description": "Monday short"
+  },
+  "tuesdayShort": "Tue",
+  "@tuesdayShort": {
+    "description": "Tuesday short"
+  },
+  "wednesdayShort": "Wed",
+  "@wednesdayShort": {
+    "description": "Wednesday short"
+  },
+  "thursdayShort": "Thu",
+  "@thursdayShort": {
+    "description": "Thursday short"
+  },
+  "fridayShort": "Fri",
+  "@fridayShort": {
+    "description": "Friday short"
+  },
+  "saturdayShort": "Sat",
+  "@saturdayShort": {
+    "description": "Saturday short"
+  },
+  "sundayShort": "Sun",
+  "@sundayShort": {
+    "description": "Sunday short"
+  },
+  "january": "January",
+  "@january": {
+    "description": "January"
+  },
+  "february": "February",
+  "@february": {
+    "description": "February"
+  },
+  "march": "March",
+  "@march": {
+    "description": "March"
+  },
+  "april": "April",
+  "@april": {
+    "description": "April"
+  },
+  "may": "May",
+  "@may": {
+    "description": "May"
+  },
+  "june": "June",
+  "@june": {
+    "description": "June"
+  },
+  "july": "July",
+  "@july": {
+    "description": "July"
+  },
+  "august": "August",
+  "@august": {
+    "description": "August"
+  },
+  "september": "September",
+  "@september": {
+    "description": "September"
+  },
+  "october": "October",
+  "@october": {
+    "description": "October"
+  },
+  "november": "November",
+  "@november": {
+    "description": "November"
+  },
+  "december": "December",
+  "@december": {
+    "description": "December"
+  },
+  "comingSoon": "Coming Soon",
+  "@comingSoon": {
+    "description": "Coming soon title"
+  },
+  "analysisFeaturesInDevelopment": "Analysis features in development",
+  "@analysisFeaturesInDevelopment": {
+    "description": "Analysis features development message"
+  },
+  "value": "Value",
+  "@value": {
+    "description": "Value label"
+  },
+  "cost": "Cost",
+  "@cost": {
+    "description": "Cost label"
+  },
+  "returnLabel": "Return",
+  "@returnLabel": {
+    "description": "Return label"
   }
 } 

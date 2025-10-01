@@ -359,7 +359,6 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
           }
         } catch (e) {
           // Kategori oluşturulamadıysa null olarak devam et
-          print('Category creation failed: $e');
           categoryId = null;
         }
       }

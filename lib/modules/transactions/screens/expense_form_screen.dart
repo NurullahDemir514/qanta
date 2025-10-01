@@ -507,7 +507,6 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
           }
         } catch (e) {
           // Kategori oluşturulamadıysa null olarak devam et
-          print('Category creation failed: $e');
           categoryId = null;
         }
       }

@@ -441,6 +441,12 @@ class UnifiedTransactionService {
           }
           // Credit cards are not affected by transfers
           break;
+        case TransactionType.stock:
+          // Stock transactions affect cash accounts
+          if (account.type == AccountType.cash) {
+            balanceChange = transaction.amount;
+          }
+          break;
       }
 
       // Only update if there's a change and it's not a credit card transfer
@@ -489,6 +495,12 @@ class UnifiedTransactionService {
             balanceChange = absoluteAmount;
           }
           // Credit cards are not affected by transfers
+          break;
+        case TransactionType.stock:
+          // Stock transactions affect cash accounts (reverse the amount)
+          if (account.type == AccountType.cash) {
+            balanceChange = -transaction.amount;
+          }
           break;
       }
 

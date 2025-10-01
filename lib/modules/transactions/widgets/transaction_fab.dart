@@ -4,10 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/models/transaction_model.dart';
+import '../../../shared/utils/fab_positioning.dart';
 import '../screens/expense_form_screen.dart';
 import '../screens/income_form_screen.dart';
 import '../screens/transfer_form_screen.dart';
 import '../../home/pages/quick_notes_page.dart';
+import '../../stocks/screens/stocks_screen.dart';
+import '../../stocks/screens/stock_transaction_form_screen.dart';
+import '../../../shared/models/stock_models.dart';
 
 class TransactionFab extends StatefulWidget {
   const TransactionFab({super.key});
@@ -80,17 +84,36 @@ class _TransactionFabState extends State<TransactionFab> {
     );
   }
 
+  void _onStockSelected() {
+    HapticFeedback.selectionClick();
+    
+    // Önce FAB'ı kapat
+    setState(() {
+      _isExpanded = false;
+    });
+    
+    // Hisse ekranını aç
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const StocksScreen(),
+      ),
+    );
+  }
+
+
+
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    
-    // Responsive değerler
-    final isSmallScreen = screenWidth < 375;
-    final rightPosition = isSmallScreen ? 16.0 : 20.0;
-    final bottomPosition = screenHeight < 700 ? 70.0 : 80.0;
+    // Responsive değerler - Navbar'ın hemen üstünde
+    final rightPosition = FabPositioning.getRightPosition(context);
+    final bottomPosition = FabPositioning.getBottomPosition(context);
+    final fabSize = FabPositioning.getFabSize(context);
+    final iconSize = FabPositioning.getIconSize(context);
+    final speedDialSpacing = FabPositioning.getSpeedDialSpacing(context);
     
     return Positioned(
       right: rightPosition,
@@ -101,13 +124,14 @@ class _TransactionFabState extends State<TransactionFab> {
         children: [
           // Speed Dial Options
           if (_isExpanded) ...[
+            
             // Quick Note Option
             _buildQuickNoteOption(
               context: context,
               isDark: isDark,
             ),
             
-            const SizedBox(height: 12),
+            SizedBox(height: speedDialSpacing),
             
             // Transfer Option
             _buildSpeedDialOption(
@@ -116,7 +140,7 @@ class _TransactionFabState extends State<TransactionFab> {
               isDark: isDark,
             ),
             
-            const SizedBox(height: 12),
+            SizedBox(height: speedDialSpacing),
             
             // Expense Option
             _buildSpeedDialOption(
@@ -125,7 +149,7 @@ class _TransactionFabState extends State<TransactionFab> {
               isDark: isDark,
             ),
             
-            const SizedBox(height: 12),
+            SizedBox(height: speedDialSpacing),
             
             // Income Option
             _buildSpeedDialOption(
@@ -134,21 +158,22 @@ class _TransactionFabState extends State<TransactionFab> {
               isDark: isDark,
             ),
             
-            const SizedBox(height: 16),
+            SizedBox(height: speedDialSpacing + 4),
           ],
           
           // Main FAB
-          _buildMainFab(context, l10n, isDark, isSmallScreen),
+          _buildMainFab(context, l10n, isDark, fabSize, iconSize),
         ],
       ),
     );
   }
 
+
   Widget _buildQuickNoteOption({
     required BuildContext context,
     required bool isDark,
   }) {
-    const color = Color(0xFF6D6D70); // Nötr gri
+    final color = isDark ? Colors.white : Colors.black; // Açık tema için siyah
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -196,7 +221,7 @@ class _TransactionFabState extends State<TransactionFab> {
                 ),
               ),
               child: IconButton(
-                icon: const Icon(Icons.edit_note_rounded, color: color, size: 22),
+                icon: Icon(Icons.edit_note_rounded, color: color, size: 22),
                 onPressed: _onQuickNoteSelected,
                 splashRadius: 24,
               ),
@@ -293,7 +318,7 @@ class _TransactionFabState extends State<TransactionFab> {
     );
   }
 
-  Widget _buildMainFab(BuildContext context, AppLocalizations l10n, bool isDark, bool isSmallScreen) {
+  Widget _buildMainFab(BuildContext context, AppLocalizations l10n, bool isDark, double fabSize, double iconSize) {
     return GestureDetector(
       onTap: _toggleFab,
       child: AnimatedScale(
@@ -305,8 +330,8 @@ class _TransactionFabState extends State<TransactionFab> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              width: 56,
-              height: 56,
+              width: fabSize,
+              height: fabSize,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
                 borderRadius: BorderRadius.circular(16),
@@ -325,7 +350,7 @@ class _TransactionFabState extends State<TransactionFab> {
               child: Icon(
                 _isExpanded ? Icons.close : Icons.add,
                 color: isDark ? Colors.white : Colors.black,
-                size: 28,
+                size: iconSize,
               ),
             ),
           ),

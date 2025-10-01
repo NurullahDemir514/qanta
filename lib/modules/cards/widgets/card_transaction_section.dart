@@ -12,6 +12,7 @@ import '../../../shared/models/account_model.dart';
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../stocks/providers/stock_provider.dart';
 
 class CardTransactionSection extends StatefulWidget {
   final String cardId;
@@ -80,12 +81,14 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
         final isLoadingV2 = providerV2.isLoadingTransactions;
         
         // V2 Content
-        if (isLoadingV2 && v2Transactions.isEmpty) {
-          return TransactionDesignSystem.buildLoadingSkeleton(
-            isDark: isDark,
-            itemCount: 3,
-          );
-        } else if (v2Transactions.isEmpty) {
+        // Loading skeleton kaldırıldı - normal UI göster
+        // if (isLoadingV2 && v2Transactions.isEmpty) {
+        //   return TransactionDesignSystem.buildLoadingSkeleton(
+        //     isDark: isDark,
+        //     itemCount: 3,
+        //   );
+        // } else 
+        if (v2Transactions.isEmpty) {
           return _buildEmptyState(isDark);
         } else {
           // Use TransactionDesignSystem.buildTransactionList for consistent design
@@ -177,6 +180,9 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
         break;
       case v2.TransactionType.transfer:
         transactionType = TransactionType.transfer;
+        break;
+      case v2.TransactionType.stock:
+        transactionType = TransactionType.income; // Treat stock as income for display
         break;
     }
 
@@ -389,18 +395,38 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
   /// Delete V2 transaction
   Future<void> _deleteV2Transaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) async {
     try {
-      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      await providerV2.deleteTransaction(transaction.id);
-      
-      // Başarı mesajı göster
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.transactionDeleted),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+      // Check if this is a stock transaction
+      if (transaction.isStockTransaction) {
+        
+        // Use StockProvider for stock transactions
+        final stockProvider = Provider.of<StockProvider>(context, listen: false);
+        await stockProvider.deleteStockTransaction(transaction.id);
+        
+        // Başarı mesajı göster
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.transactionDeleted),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        // Regular transaction - use UnifiedProviderV2
+        final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+        await providerV2.deleteTransaction(transaction.id);
+        
+        // Başarı mesajı göster
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.transactionDeleted),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       }
       
     } catch (e) {

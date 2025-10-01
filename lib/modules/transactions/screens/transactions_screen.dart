@@ -18,6 +18,7 @@ import '../../../shared/widgets/ios_transaction_list.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/payment_card_model.dart' as pcm;
+import '../../stocks/providers/stock_provider.dart';
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
 
@@ -32,6 +33,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   final _numberFormat = NumberFormat('#,##0', 'tr_TR'); // Türkçe binlik ayıraç
+  late AppLocalizations l10n;
   
   // Filter state using V2 transaction types
   v2.TransactionType? _selectedFilter;
@@ -46,10 +48,40 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    l10n = AppLocalizations.of(context)!;
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  String _getTransactionSubtitle(List<v2.TransactionWithDetailsV2> transactions, AppLocalizations l10n) {
+    if (transactions.isEmpty) {
+      return l10n.noTransactionsFound;
+    }
+    
+    // Gider işlemlerini filtrele (yatırım işlemleri hariç)
+    final expenseTransactions = transactions.where((t) => t.signedAmount < 0 && !t.isStockTransaction).toList();
+    
+    if (expenseTransactions.isEmpty) {
+      return l10n.noExpenseTransactions;
+    }
+    
+    // Toplam gider tutarı
+    final totalExpense = expenseTransactions.fold<double>(0, (sum, t) => sum + t.amount);
+    
+    // Günlük ortalama hesapla
+    final now = DateTime.now();
+    final firstTransactionDate = expenseTransactions.map((t) => t.transactionDate).reduce((a, b) => a.isBefore(b) ? a : b);
+    final daysDiff = now.difference(firstTransactionDate).inDays + 1;
+    final dailyAverage = totalExpense / daysDiff;
+    
+    return '${l10n.dailyAverageExpense}: ${NumberFormat.currency(locale: 'tr_TR', symbol: '₺').format(dailyAverage)}';
   }
 
   List<v2.TransactionWithDetailsV2> _getFilteredTransactions(List<v2.TransactionWithDetailsV2> transactions) {
@@ -137,6 +169,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     
     return AppPageScaffold(
       title: l10n.transactions,
+      subtitle: _getTransactionSubtitle(filteredTransactions, l10n),
+      titleFontSize: 24,
+      subtitleFontSize: 12,
       bodyTopPadding: 0, // Stats kartını filtrelerden hemen sonra başlat
       searchBar: TransactionSearchBar(
                 controller: _searchController,
@@ -161,18 +196,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
-        // Show loading if provider is still loading
-        if (providerV2.isLoadingTransactions && transactions.isEmpty) {
-      return SliverFillRemaining(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: TransactionDesignSystem.buildLoadingSkeleton(
-            isDark: isDark,
-            itemCount: 8,
-          ),
-        ),
-      );
-    }
+        // Loading skeleton kaldırıldı - normal UI göster
+        // if (providerV2.isLoadingTransactions && transactions.isEmpty) {
+        //   return SliverFillRemaining(
+        //     child: Padding(
+        //       padding: const EdgeInsets.all(16),
+        //       child: TransactionDesignSystem.buildLoadingSkeleton(
+        //         isDark: isDark,
+        //         itemCount: 8,
+        //       ),
+        //     ),
+        //   );
+        // }
 
         // Empty state
         if (transactions.isEmpty) {
@@ -332,6 +367,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       case v2.TransactionType.transfer:
         transactionType = TransactionType.transfer;
         break;
+      case v2.TransactionType.stock:
+        transactionType = TransactionType.income; // Treat stock as income for display
+        break;
     }
 
     // Get category info from provider
@@ -355,38 +393,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       }
     }
 
-    // Get category color using CategoryIconService - prioritize centralized colors
-    Color? categoryColor;
-    
-    // First try to get color from centralized map using category name or icon
-    if (transaction.categoryName != null) {
-      // Try category name first (e.g., "market", "yemek", etc.)
-      categoryColor = CategoryIconService.getColorFromMap(
-        transaction.categoryName!.toLowerCase(),
-        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
-      );
-    } else if (category?.icon != null) {
-      // Try icon name (e.g., "restaurant", "car", etc.)
-      categoryColor = CategoryIconService.getColorFromMap(
-        category!.iconName,
-        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
-      );
-    }
-    
-    // If no centralized color found, fall back to hex color from database
-    if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
-      if (category?.color != null) {
-        categoryColor = CategoryIconService.getColor(category!.colorHex);
-      } else if (category?.icon != null) {
-        // Use predefined colors based on category type and icon
-        final isIncomeCategory = transactionType == TransactionType.income;
-        categoryColor = CategoryIconService.getCategoryColor(
-          iconName: category!.iconName,
-          colorHex: category.colorHex,
-          isIncomeCategory: isIncomeCategory,
-        );
-      }
-    }
+    // Use transaction type color instead of category color
+    // This ensures all income transactions are green, all expense transactions are red
 
     // FALLBACK: Check if description contains installment pattern like (1/4)
     final hasInstallmentPattern = RegExp(r'\(\d+/\d+\)').hasMatch(transaction.description);
@@ -486,7 +494,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       isDark: isDark,
       time: time,
       categoryIconData: categoryIcon,
-      categoryColorData: categoryColor,
       onLongPress: () {
         _showTransactionDeleteDialog(context, transaction);
       },
@@ -508,7 +515,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'İşlemi Sil',
+          l10n.deleteTransaction,
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -516,7 +523,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
         ),
         message: Text(
-          '${transaction.description} işlemini silmek istediğinizden emin misiniz?\n\nTutar: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(transaction.amount)}',
+          '${transaction.description} ${l10n.deleteTransactionConfirm}\n\n${l10n.amount}: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(transaction.amount)}',
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -562,7 +569,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'Taksitli İşlemi Sil',
+          l10n.deleteInstallmentTransaction,
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -570,7 +577,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
         ),
         message: Text(
-          '${transaction.description} taksitli işlemini tamamen silmek istediğinizden emin misiniz?\n\nToplam Tutar: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(transaction.amount)}\n\nBu işlem tüm taksitleri silecek ve ödenen tutarlar geri iade edilecektir.',
+          '${transaction.description} ${l10n.deleteInstallmentConfirm}\n\n${l10n.totalAmount}: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(transaction.amount)}\n\n${l10n.deleteInstallmentWarning}',
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -585,7 +592,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               _deleteInstallmentTransaction(transaction);
             },
             child: Text(
-              'Tümünü Sil',
+              l10n.deleteAll,
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -613,28 +620,68 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void _deleteTransaction(v2.TransactionWithDetailsV2 transaction) {
     final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
     
-    // Delete in background immediately
-    providerV2.deleteTransaction(transaction.id).then((success) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? (AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted') : (AppLocalizations.of(context)?.deleteFailed ?? 'Delete failed')),
-            backgroundColor: success ? const Color(0xFF34C759) : Colors.red,
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      }
-    }).catchError((e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('İşlem silinirken hata oluştu: $e'),
-            backgroundColor: const Color(0xFFEF4444),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    });
+    // Check if this is a stock transaction
+    if (transaction.isStockTransaction) {
+      
+      // 1. OPTIMISTIC UI UPDATE - Önce UI'yi anında güncelle (net değer ve kartlar dahil)
+      providerV2.removeStockTransactionOptimistically(
+        transaction.id, 
+        transaction.amount, 
+        transaction.sourceAccountId
+      );
+      
+      // 2. Use StockProvider for stock transactions
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      
+      stockProvider.deleteStockTransaction(transaction.id).then((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted'),
+              backgroundColor: const Color(0xFF34C759),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      }).catchError((e) {
+        
+        // Hata durumunda UI'yi geri yükle
+        providerV2.refreshTransactions();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${l10n.errorDeletingTransaction}: $e'),
+              backgroundColor: const Color(0xFFEF4444),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      });
+    } else {
+      // Regular transaction - use UnifiedProviderV2
+      providerV2.deleteTransaction(transaction.id).then((success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(success ? (AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted') : (AppLocalizations.of(context)?.deleteFailed ?? 'Delete failed')),
+              backgroundColor: success ? const Color(0xFF34C759) : Colors.red,
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      }).catchError((e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${l10n.errorDeletingTransaction}: $e'),
+              backgroundColor: const Color(0xFFEF4444),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      });
+    }
   }
 
   /// Delete installment transaction
@@ -645,9 +692,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       // Show loading indicator
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Taksitli işlem siliniyor...'),
-            duration: Duration(seconds: 1),
+          SnackBar(
+            content: Text(l10n.deletingInstallmentTransaction),
+            duration: const Duration(seconds: 1),
           ),
         );
       }
@@ -668,7 +715,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Taksitli işlem silinirken hata oluştu: $e'),
+            content: Text('${l10n.errorDeletingInstallmentTransaction}: $e'),
             backgroundColor: const Color(0xFFEF4444),
             duration: const Duration(seconds: 3),
           ),

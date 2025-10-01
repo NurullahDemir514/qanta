@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/utils/fab_positioning.dart';
 import '../widgets/add_debit_card_form.dart';
 import '../widgets/add_credit_card_form.dart';
 
@@ -23,6 +24,8 @@ class _AddCardFabState extends State<AddCardFab>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
+  bool _isExpanded = false;
+  late AppLocalizations l10n;
 
   @override
   void initState() {
@@ -53,6 +56,12 @@ class _AddCardFabState extends State<AddCardFab>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    l10n = AppLocalizations.of(context)!;
+  }
+
+  @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
@@ -60,7 +69,9 @@ class _AddCardFabState extends State<AddCardFab>
 
   void _onFabPressed() {
     HapticFeedback.lightImpact();
-    _showCardTypeSelection();
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
   }
 
   void _showCardTypeSelection() {
@@ -257,56 +268,172 @@ class _AddCardFabState extends State<AddCardFab>
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenWidth < 375;
-    final rightPosition = isSmallScreen ? 16.0 : 20.0;
-    final bottomPosition = screenHeight < 700 ? 70.0 : 80.0;
+    // Responsive değerler - Navbar'ın hemen üstünde
+    final rightPosition = FabPositioning.getRightPosition(context);
+    final bottomPosition = FabPositioning.getBottomPosition(context);
+    final fabSize = FabPositioning.getFabSize(context);
+    final iconSize = FabPositioning.getIconSize(context);
     return Positioned(
       right: rightPosition,
       bottom: bottomPosition,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: FadeTransition(
-          opacity: _opacityAnimation,
-          child: GestureDetector(
-            onTap: _onFabPressed,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.add_card_rounded,
-                    color: isDark ? Colors.white : Colors.black,
-                    size: 28,
-                  ),
-                ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // Speed Dial Options
+          if (_isExpanded) ...[
+            // Debit Card Option
+            _buildCardOption(
+              context: context,
+              isDark: isDark,
+              icon: Icons.account_balance_rounded,
+              label: l10n.debitCard,
+              color: const Color(0xFF007AFF), // iOS Blue
+              onTap: () => _onCardTypeSelected('debit'),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Credit Card Option
+            _buildCardOption(
+              context: context,
+              isDark: isDark,
+              icon: Icons.credit_card_rounded,
+              label: l10n.creditCard,
+              color: const Color(0xFF22C55E), // Yeşil - Transaction FAB ile aynı
+              onTap: () => _onCardTypeSelected('credit'),
+            ),
+            
+            const SizedBox(height: 16),
+          ],
+          
+          // Main FAB
+          _buildMainFab(context, isDark, fabSize, iconSize),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCardOption({
+    required BuildContext context,
+    required bool isDark,
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF232326).withOpacity(0.92) : Colors.white.withOpacity(0.92),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.06),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
+            ],
+            border: Border.all(
+              color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: color, // Sadece text rengi - diğer FAB'lar gibi
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                width: 1,
+              ),
+            ),
+            child: IconButton(
+              icon: Icon(icon, color: color, size: 20),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                onTap();
+              },
+              splashRadius: 20,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMainFab(BuildContext context, bool isDark, double fabSize, double iconSize) {
+    return GestureDetector(
+      onTap: _onFabPressed,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            width: fabSize,
+            height: fabSize,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+              border: Border.all(
+                color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                width: 1.2,
+              ),
+            ),
+            child: Icon(
+              _isExpanded ? Icons.close : Icons.add_card_rounded,
+              color: isDark ? Colors.white : Colors.black,
+              size: iconSize,
             ),
           ),
         ),
       ),
     );
+  }
+
+  void _onCardTypeSelected(String cardType) {
+    setState(() {
+      _isExpanded = false;
+    });
+    
+    switch (cardType) {
+      case 'debit':
+        _showDebitCardForm();
+        break;
+      case 'credit':
+        _showCreditCardForm();
+        break;
+    }
   }
 } 

@@ -121,7 +121,6 @@ class StatementService {
       return _generateFuturePeriods(statementDay, monthsToGenerate.clamp(1, 24));
     } catch (e) {
       if (kDebugMode) {
-        print('Error getting future periods: $e');
       }
       // Fallback: return next 6 months
       return _generateFuturePeriods(statementDay, 6);
@@ -182,7 +181,6 @@ class StatementService {
       return periods;
     } catch (e) {
       if (kDebugMode) {
-        print('Error getting past periods: $e');
       }
     return [];
     }
@@ -207,16 +205,9 @@ class StatementService {
       }
 
       if (kDebugMode) {
-        print('🔥 StatementService.calculateStatementSummary() - Starting');
-        print('   Card ID: $cardId');
-        print('   Period: ${period.startDate} to ${period.endDate}');
-        print('   User ID: $userId');
-        print('   📅 Today: ${DateTime.now()}');
-        print('   📅 Statement Day: 1 (default)');
         
         // Check if this is current period
         final isCurrent = _isCurrentPeriod(period);
-        print('   📅 Is Current Period: $isCurrent');
       }
 
 
@@ -234,7 +225,6 @@ class StatementService {
           .get();
 
       if (kDebugMode && transactionsQuery.docs.isNotEmpty) {
-        print('   Found ${transactionsQuery.docs.length} transactions in period');
       }
 
       final transactions = <Map<String, dynamic>>[];
@@ -253,10 +243,7 @@ class StatementService {
         final transactionDate = data['transaction_date'];
         
         if (kDebugMode) {
-          print('   Transaction: ${data['description']} - Amount: $amount - Type: $transactionType - IsInstallment: $isInstallment');
-          print('   Transaction Date: $transactionDate');
           if (isInstallment) {
-            print('   ✅ FOUND INSTALLMENT TRANSACTION - Amount will NOT be added to total');
           }
         }
         
@@ -277,7 +264,6 @@ class StatementService {
           // For installment transactions, just count them but don't add amount
           // The amount will be calculated from installment details
           transactionCount++;
-          print('   ⚠️ Installment transaction found but amount not added: $amount (Description: $description)');
         }
         // Note: Transfers don't affect credit card debt for statement purposes
         
@@ -285,7 +271,6 @@ class StatementService {
       }
 
       if (kDebugMode && totalAmount > 0) {
-        print('   After transactions - Total Amount: $totalAmount, Count: $transactionCount');
       }
 
       // **NEW LOGIC: Get first installments for current period only**
@@ -299,7 +284,6 @@ class StatementService {
         upcomingInstallments.addAll(firstInstallments);
         
         if (kDebugMode && firstInstallments.isNotEmpty) {
-          print('   Found ${firstInstallments.length} first installments for current period');
         }
         
         // First installments are already calculated in _getFirstInstallmentsForCurrentPeriod
@@ -310,7 +294,6 @@ class StatementService {
         upcomingInstallments.addAll(regularInstallments);
 
         if (kDebugMode && regularInstallments.isNotEmpty) {
-          print('   Found ${regularInstallments.length} upcoming installments');
         }
 
         // Add installment amounts to total
@@ -337,7 +320,6 @@ class StatementService {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('Error calculating statement summary: $e');
       }
       rethrow;
     }
@@ -368,7 +350,6 @@ class StatementService {
           .get();
 
       if (kDebugMode && installmentsQuery.docs.isNotEmpty) {
-        print('   Found ${installmentsQuery.docs.length} installment details in period');
       }
 
       final installments = <UpcomingInstallment>[];
@@ -377,7 +358,6 @@ class StatementService {
         final data = doc.data();
         
         if (kDebugMode) {
-          print('   Installment Detail: ${data['description']} - Amount: ${data['amount']} - Due: ${data['due_date']} - Number: ${data['installment_number']}/${data['total_installments']}');
         }
         
         final installment = UpcomingInstallment(
@@ -397,13 +377,11 @@ class StatementService {
       }
 
       if (kDebugMode && installments.isNotEmpty) {
-        print('   Returning ${installments.length} upcoming installments');
       }
 
       return installments;
     } catch (e) {
       if (kDebugMode) {
-        print('Error getting upcoming installments: $e');
       }
       return [];
     }
@@ -446,10 +424,6 @@ class StatementService {
     final currentPeriod = getCurrentStatementPeriod(1); // Use statement day 1 as reference
     
     if (kDebugMode) {
-      print('   📅 Checking if period is current:');
-      print('   📅 Period: ${period.startDate} to ${period.endDate}');
-      print('   📅 Current: ${currentPeriod.startDate} to ${currentPeriod.endDate}');
-      print('   📅 Is current: ${period.startDate.year == currentPeriod.startDate.year && period.startDate.month == currentPeriod.startDate.month}');
     }
     
     return period.startDate.year == currentPeriod.startDate.year &&
@@ -469,9 +443,6 @@ class StatementService {
       final userId = _auth.currentUser?.uid;
       if (userId == null) return [];
 
-      print('   🔍 _getFirstInstallmentsForCurrentPeriod() - Starting');
-      print('   Card ID: $cardId');
-      print('   Period: ${period.startDate} to ${period.endDate}');
       
       // Step 1: Find installment masters created in current period
       final startDateStr = DateUtils.toIso8601(period.startDate);
@@ -484,10 +455,8 @@ class StatementService {
           .where('source_account_id', isEqualTo: cardId)
           .get();
 
-      print('   Found ${mastersQuery.docs.length} installment masters total');
 
       if (mastersQuery.docs.isEmpty) {
-        print('   ❌ No installment masters found');
         return [];
       }
 
@@ -499,15 +468,12 @@ class StatementService {
         final masterId = masterDoc.id;
         final createdAt = DateUtils.fromFirebase(masterData['created_at']);
         
-        print('   Master ID: $masterId, Created: $createdAt');
         
         // Check if created in current period
         if (createdAt.isBefore(period.startDate) || createdAt.isAfter(period.endDate)) {
-          print('   ❌ Master created outside current period, skipping');
           continue;
         }
         
-        print('   ✅ Master created in current period, getting first installment...');
         
         // Get first installment detail for this master
         final detailQuery = await _firestore
@@ -519,12 +485,10 @@ class StatementService {
             .limit(1)
             .get();
 
-        print('   Found ${detailQuery.docs.length} first installment details');
 
         if (detailQuery.docs.isNotEmpty) {
           final detailData = detailQuery.docs.first.data();
           
-          print('   First installment: ${detailData['description']} - Amount: ${detailData['amount']}');
           
           final installment = UpcomingInstallment(
             id: detailQuery.docs.first.id,
@@ -543,13 +507,10 @@ class StatementService {
         }
       }
 
-      print('   ✅ Returning ${installments.length} first installments for current period');
-      print('   Total amount: ${installments.fold(0.0, (sum, installment) => sum + installment.amount)} TL');
 
       return installments;
     } catch (e) {
       if (kDebugMode) {
-        print('Error getting first installments for current period: $e');
       }
       return [];
     }
@@ -580,7 +541,6 @@ class StatementService {
       });
     } catch (e) {
       if (kDebugMode) {
-        print('Error marking statement as paid: $e');
       }
       rethrow;
     }
@@ -601,7 +561,6 @@ class StatementService {
       });
     } catch (e) {
       if (kDebugMode) {
-        print('Error unmarking statement as paid: $e');
       }
       rethrow;
     }
@@ -623,7 +582,6 @@ class StatementService {
       return data['is_paid'] as bool? ?? false;
     } catch (e) {
       if (kDebugMode) {
-        print('Error checking statement payment status: $e');
       }
       return false;
     }
@@ -645,7 +603,6 @@ class StatementService {
       return data['paid_at'] != null ? DateUtils.fromFirebase(data['paid_at']) : null;
     } catch (e) {
       if (kDebugMode) {
-        print('Error getting statement paid date: $e');
       }
       return null;
     }
@@ -701,7 +658,6 @@ class StatementService {
     // Implementation for clearing any cached statement data
     // This can be used for testing or when data needs to be refreshed
     if (kDebugMode) {
-      print('Statement cache cleared');
     }
   }
 }

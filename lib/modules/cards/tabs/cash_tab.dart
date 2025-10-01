@@ -18,18 +18,12 @@ class CashTab extends StatefulWidget {
   State<CashTab> createState() => _CashTabState();
 }
 
-class _CashTabState extends State<CashTab> {
+class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   @override
   void initState() {
     super.initState();
-    // Load all data from Firebase
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-        provider.loadAllData();
-      }
-    });
-    
     // 🔔 Cash account event listener'ını kur
     _setupCashEventListeners();
   }
@@ -45,6 +39,7 @@ class _CashTabState extends State<CashTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin için gerekli
     final l10n = AppLocalizations.of(context)!;
     
     return Consumer2<ThemeProvider, UnifiedProviderV2>(
@@ -54,10 +49,10 @@ class _CashTabState extends State<CashTab> {
         final hasCashAccount = cashAccounts.isNotEmpty;
         final cashBalance = hasCashAccount ? cashAccounts.first.balance : 0.0;
         
-        // Loading durumunda skeleton göster
-        if (providerV2.isLoading) {
-          return _buildLoadingSkeleton(themeProvider);
-        }
+        // Loading durumunda normal UI göster
+        // if (providerV2.isLoading) {
+        //   return _buildLoadingSkeleton(themeProvider);
+        // }
 
         // Error durumunda retry butonu göster
         if (providerV2.error != null) {
@@ -65,16 +60,16 @@ class _CashTabState extends State<CashTab> {
         }
 
         // Normal UI - Cash account should always exist due to auto-creation
-        return SingleChildScrollView(
-          physics: const BouncingScrollPhysics(), // Transaction list'in arkadan kayabilmesi için
-          child: Column(
-            children: [
+        return CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            if (hasCashAccount) ...[
               // Cash Balance Card
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: GestureDetector(
-                  onTap: () {
-                    if (hasCashAccount) {
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: GestureDetector(
+                    onTap: () {
                       // Direkt güncelleme dialog'u aç
                       CashManagementService.showDirectUpdateDialog(
                         context,
@@ -83,77 +78,75 @@ class _CashTabState extends State<CashTab> {
                           // Balance updated callback - provider will automatically update
                         },
                       );
-                    }
-                  },
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 180,
-                    child: CashBalanceCard(
-                      balance: cashBalance,
-                      themeProvider: themeProvider,
+                    },
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 180,
+                      child: CashBalanceCard(
+                        balance: cashBalance,
+                        themeProvider: themeProvider,
+                      ),
                     ),
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 30),
+
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 20),
+              ),
               
               // Cash Transactions Section
-              if (hasCashAccount)
-                CardTransactionSection(
-                  cardId: cashAccounts.first.id,
-                  cardName: cashAccounts.first.name,
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: CardTransactionSection(
+                    cardId: cashAccounts.first.id,
+                    cardName: cashAccounts.first.name,
+                  ),
                 ),
+              ),
+            ] else ...[
+              // Empty state - cash account yoksa (çok nadir durum)
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 60), // Üstten boşluk (diğer tab'larla aynı)
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet_outlined,
+                        size: 80,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Nakit Hesabı Yok',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Nakit hesabınız bulunamadı',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
-          ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildLoadingSkeleton(ThemeProvider themeProvider) {
-    return SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-      child: Column(
-        children: [
-          // Loading skeleton for cash card
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Container(
-                width: double.infinity,
-                height: 180,
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    themeProvider.isDarkMode
-                      ? const Color(0xFF8E8E93)
-                      : const Color(0xFF6D6D70),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 30),
-          
-          // Loading skeleton for transactions
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: TransactionDesignSystem.buildLoadingSkeleton(
-              isDark: themeProvider.isDarkMode,
-              itemCount: 3,
-            ),
-          ),
-          
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
 
   Widget _buildErrorState(UnifiedProviderV2 providerV2, AppLocalizations l10n) {
     return Center(

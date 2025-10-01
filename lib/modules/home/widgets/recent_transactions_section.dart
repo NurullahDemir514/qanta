@@ -10,6 +10,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/models_v2.dart' as v2;
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
+import '../../stocks/providers/stock_provider.dart';
 
 class RecentTransactionsSection extends StatefulWidget {
   const RecentTransactionsSection({super.key});
@@ -49,12 +50,14 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
             const SizedBox(height: 10),
             
             // V2 İçerik
-            if (isLoadingV2 && v2Transactions.isEmpty)
-              TransactionDesignSystem.buildLoadingSkeleton(
-                isDark: isDark,
-                itemCount: 3,
-              )
-            else if (v2Transactions.isEmpty)
+            // Loading skeleton kaldırıldı - normal UI göster
+            // if (isLoadingV2 && v2Transactions.isEmpty)
+            //   TransactionDesignSystem.buildLoadingSkeleton(
+            //     isDark: isDark,
+            //     itemCount: 3,
+            //   )
+            // else 
+            if (v2Transactions.isEmpty)
               _buildEmptyState(isDark)
             else
               _buildV2TransactionList(context, v2Transactions, isDark),
@@ -65,7 +68,6 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final buildEndTime = DateTime.now();
           final buildDuration = buildEndTime.difference(buildStartTime).inMilliseconds;
-          print('🔄 RecentTransactionsSection build took ${buildDuration}ms');
         });
       },
     );
@@ -166,6 +168,9 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       case v2.TransactionType.transfer:
         transactionType = TransactionType.transfer;
         break;
+      case v2.TransactionType.stock:
+        transactionType = TransactionType.income; // Treat stock as income for display
+        break;
     }
 
     // Get category info from provider
@@ -189,38 +194,8 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       }
     }
 
-    // Get category color using CategoryIconService - prioritize centralized colors
-    Color? categoryColor;
-    
-    // First try to get color from centralized map using category name or icon
-    if (transaction.categoryName != null) {
-      // Try category name first (e.g., "market", "yemek", etc.)
-      categoryColor = CategoryIconService.getColorFromMap(
-        transaction.categoryName!.toLowerCase(),
-        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
-      );
-    } else if (category?.icon != null) {
-      // Try icon name (e.g., "restaurant", "car", etc.)
-      categoryColor = CategoryIconService.getColorFromMap(
-        category!.iconName,
-        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
-      );
-    }
-    
-    // If no centralized color found, fall back to hex color from database
-    if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
-    if (category?.color != null) {
-      categoryColor = CategoryIconService.getColor(category!.colorHex);
-    } else if (category?.icon != null) {
-      // Use predefined colors based on category type and icon
-      final isIncomeCategory = transactionType == TransactionType.income;
-      categoryColor = CategoryIconService.getCategoryColor(
-        iconName: category!.iconName,
-        colorHex: category.colorHex,
-        isIncomeCategory: isIncomeCategory,
-      );
-      }
-    }
+    // Use transaction type color instead of category color
+    // This ensures all income transactions are green, all expense transactions are red
 
     // Check if this is an installment transaction
     final hasInstallmentPattern = RegExp(r'\(\d+ taksit\)').hasMatch(transaction.description);
@@ -288,7 +263,6 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       isDark: isDark,
       time: time,
       categoryIconData: categoryIcon,
-      categoryColorData: categoryColor,
       onLongPress: () {
         HapticFeedback.mediumImpact();
         _showV2DeleteActionSheet(context, transaction);
@@ -300,11 +274,12 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
 
   /// Show delete action sheet for V2 transactions
   void _showV2DeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
+    final l10n = AppLocalizations.of(context)!;
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'İşlemi Sil',
+          l10n.deleteTransaction,
                   style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -312,7 +287,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
           ),
         ),
         message: Text(
-          '${transaction.description} işlemini silmek istediğinizden emin misiniz?',
+          l10n.deleteTransactionConfirmation(transaction.description),
                       style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -353,40 +328,82 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
 
   /// Delete V2 transaction
   void _deleteV2Transaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
+    final l10n = AppLocalizations.of(context)!;
     final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
     
-    // Delete in background immediately
-    providerV2.deleteTransaction(transaction.id).then((success) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? (AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted') : (AppLocalizations.of(context)?.deleteFailed ?? 'Delete failed')),
-            backgroundColor: success ? Colors.green : Colors.red,
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      }
-    }).catchError((e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('İşlem silinirken hata oluştu: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    });
+    // Check if this is a stock transaction
+    if (transaction.isStockTransaction) {
+      
+      // 1. OPTIMISTIC UI UPDATE - Önce UI'yi anında güncelle (net değer ve kartlar dahil)
+      providerV2.removeStockTransactionOptimistically(
+        transaction.id, 
+        transaction.amount, 
+        transaction.sourceAccountId
+      );
+      
+      // 2. Use StockProvider for stock transactions
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      
+      stockProvider.deleteStockTransaction(transaction.id).then((_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      }).catchError((e) {
+        
+        // Hata durumunda UI'yi geri yükle
+        providerV2.refreshTransactions();
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.transactionDeleteError(e.toString())),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      });
+    } else {
+      // Regular transaction - use UnifiedProviderV2
+      providerV2.deleteTransaction(transaction.id).then((success) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(success ? (AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted') : (AppLocalizations.of(context)?.deleteFailed ?? 'Delete failed')),
+              backgroundColor: success ? Colors.green : Colors.red,
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      }).catchError((e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.transactionDeleteError(e.toString())),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      });
+    }
   }
 
 
   /// Show installment delete action sheet
   void _showInstallmentDeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction, Map<String, int?>? installmentInfo) {
+    final l10n = AppLocalizations.of(context)!;
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'Taksitli İşlem Sil',
+          l10n.deleteInstallmentTransaction,
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -394,7 +411,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
           ),
         ),
         message: Text(
-          '${transaction.description} işlemini silmek istediğinizden emin misiniz? Tüm taksitler iade edilecektir.',
+          l10n.deleteInstallmentConfirmation(transaction.description),
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -435,6 +452,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
 
   /// Delete installment transaction
   Future<void> _deleteInstallmentTransaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
       
@@ -443,7 +461,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Taksitli işlem silindi, toplam tutar iade edildi'),
+            content: Text(l10n.installmentTransactionDeleted),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
           ),
@@ -454,7 +472,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Taksitli işlem silinirken hata oluştu: $e'),
+            content: Text(l10n.installmentDeleteError(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),

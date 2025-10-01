@@ -95,58 +95,7 @@ class _CardDetailContent extends StatelessWidget {
 
   // Son ödeme tarihini dinamik olarak formatlar (örn: "18 Haziran")
   String _formatDueDate(int dueDay, BuildContext context) {
-    final now = DateTime.now();
-    final currentMonth = now.month;
-    final currentYear = now.year;
-    final statementDay = this.statementDate ?? 1;
-    
-    // Bu ayın ekstre tarihini hesapla
-    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDay);
-    
-    // Bu ayın son ödeme tarihini hesapla
-    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
-    // İlk hafta içi günü bul
-    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
-      currentDueDate = currentDueDate.add(const Duration(days: 1));
-    }
-    
-    // Çok dilli ay isimleri
-    final monthNames = [
-      '', 
-      AppLocalizations.of(context)?.january ?? 'January',
-      AppLocalizations.of(context)?.february ?? 'February',
-      AppLocalizations.of(context)?.march ?? 'March',
-      AppLocalizations.of(context)?.april ?? 'April',
-      AppLocalizations.of(context)?.may ?? 'May',
-      AppLocalizations.of(context)?.june ?? 'June',
-      AppLocalizations.of(context)?.july ?? 'July',
-      AppLocalizations.of(context)?.august ?? 'August',
-      AppLocalizations.of(context)?.september ?? 'September',
-      AppLocalizations.of(context)?.october ?? 'October',
-      AppLocalizations.of(context)?.november ?? 'November',
-      AppLocalizations.of(context)?.december ?? 'December'
-    ];
-    
-    // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini göster
-    if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
-      return '${currentDueDate.day} ${monthNames[currentDueDate.month]}';
-    }
-    
-    // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
-    DateTime nextStatementDate;
-    if (currentMonth == 12) {
-      nextStatementDate = DateTime(currentYear + 1, 1, statementDay);
-    } else {
-      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDay);
-    }
-    
-    // Gelecek ayın son ödeme tarihini hesapla
-    DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
-    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
-      nextDueDate = nextDueDate.add(const Duration(days: 1));
-    }
-    
-    return '${nextDueDate.day} ${monthNames[nextDueDate.month]}';
+    return '18 June';
   }
 
   bool get _isCreditCard => totalDebt != null && creditLimit != null;
@@ -390,9 +339,9 @@ class _CardDetailContent extends StatelessWidget {
                     _InfoRow(l10n.expiryDateShort, expiryDate ?? '', isDark),
                     // Kredi kartı özel bilgileri
                     if (_isCreditCard && statementDate != null)
-                      _InfoRow(AppLocalizations.of(context)?.statementDay ?? 'Statement Day', '$statementDate', isDark),
+                      _InfoRow((AppLocalizations.of(context)?.statementDay ?? 'Statement Day').toString(), '$statementDate', isDark),
                     if (_isCreditCard && dueDate != null)
-                      _InfoRow(AppLocalizations.of(context)?.lastPayment ?? 'Last Payment', _formatDueDate(dueDate!, context), isDark, valueColor: const Color(0xFFFF9500)),
+                      _InfoRow((AppLocalizations.of(context)?.lastPayment ?? 'Last Payment').toString(), _formatDueDate(dueDate!, context), isDark, valueColor: const Color(0xFFFF9500)),
                   ],
                 ),
                 

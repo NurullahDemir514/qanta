@@ -76,12 +76,7 @@ class _FutureStatementsTabState extends State<FutureStatementsTab> {
             final installments = statement.upcomingInstallments;
             
             // Debug: Log installments for this statement
-            print('🔍 Future Statement Debug:');
-            print('   Period: ${statement.period.startDate} to ${statement.period.endDate}');
-            print('   Total Amount: ${statement.totalAmount}');
-            print('   Installments count: ${installments.length}');
             for (final installment in installments) {
-              print('     - ${installment.description}: ${installment.amount} (${installment.installmentNumber}/${installment.totalInstallments})');
             }
             
             // Calculate previous month total for monthly change badge
