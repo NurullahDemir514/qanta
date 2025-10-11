@@ -23,13 +23,18 @@ import '../../shared/models/statement_summary.dart';
 import '../../shared/models/statement_period.dart';
 import '../../shared/utils/date_utils.dart';
 import '../../modules/stocks/providers/stock_provider.dart';
+import '../../shared/models/stock_models.dart';
+import '../services/unified_cache_manager.dart';
+import '../services/cache_strategy_config.dart';
+import 'profile_provider.dart';
+import '../services/profile_image_service.dart';
 
 /// **QANTA v2 Unified Provider - Central Data Management System**
-/// 
+///
 /// This provider serves as the single source of truth for all financial data
 /// in the QANTA application. It manages accounts, transactions, categories,
 /// installments, and provides real-time data synchronization across the app.
-/// 
+///
 /// **Architecture:**
 /// ```
 /// UI Components
@@ -40,7 +45,7 @@ import '../../modules/stocks/providers/stock_provider.dart';
 ///      ↓
 /// Supabase Database (Data Storage)
 /// ```
-/// 
+///
 /// **Key Features:**
 /// - **Singleton Pattern**: Single instance across the app
 /// - **Real-time Updates**: Automatic UI refresh on data changes
@@ -48,43 +53,43 @@ import '../../modules/stocks/providers/stock_provider.dart';
 /// - **Loading States**: Granular loading indicators for each data type
 /// - **Legacy Compatibility**: Backward compatibility with v1 UI components
 /// - **Performance Optimized**: Efficient data loading and caching
-/// 
+///
 /// **Data Management:**
-/// 
+///
 /// **Accounts:**
 /// - Credit cards, debit cards, cash accounts
 /// - Real-time balance tracking
 /// - Account creation and management
-/// 
+///
 /// **Transactions:**
 /// - Income, expense, transfer transactions
 /// - Installment transaction support
 /// - Transaction history and filtering
-/// 
+///
 /// **Categories:**
 /// - Income and expense categories
 /// - System and user-defined categories
 /// - Category-based transaction filtering
-/// 
+///
 /// **Installments:**
 /// - Credit card installment tracking
 /// - Payment scheduling and progress
 /// - Automatic payment processing
-/// 
+///
 /// **Summary Data:**
 /// - Balance summaries (assets, debts, net worth)
 /// - Monthly transaction summaries
 /// - Real-time financial insights
-/// 
+///
 /// **Usage Patterns:**
-/// 
+///
 /// **Basic Data Access:**
 /// ```dart
 /// Consumer<UnifiedProviderV2>(
 ///   builder: (context, provider, child) {
 ///     if (provider.isLoading) return CircularProgressIndicator();
 ///     if (provider.error != null) return ErrorWidget(provider.error);
-///     
+///
 ///     return ListView.builder(
 ///       itemCount: provider.transactions.length,
 ///       itemBuilder: (context, index) => TransactionTile(provider.transactions[index]),
@@ -92,7 +97,7 @@ import '../../modules/stocks/providers/stock_provider.dart';
 ///   },
 /// )
 /// ```
-/// 
+///
 /// **Transaction Creation:**
 /// ```dart
 /// final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
@@ -104,56 +109,56 @@ import '../../modules/stocks/providers/stock_provider.dart';
 ///   categoryId: 'category_id',
 /// );
 /// ```
-/// 
+///
 /// **Legacy Compatibility:**
 /// - Provides legacy format data for existing UI components
 /// - Gradual migration path from v1 to v2
 /// - Maintains API compatibility where possible
-/// 
+///
 /// **Performance Considerations:**
 /// - Data is cached in memory after initial load
 /// - Selective loading with granular loading states
 /// - Efficient notifyListeners() usage
 /// - Background data refresh capabilities
-/// 
+///
 /// **Error Handling:**
 /// - Network error recovery
 /// - Graceful degradation on failures
 /// - User-friendly error messages
 /// - Automatic retry mechanisms
-/// 
+///
 /// **Dependencies:**
 /// - [AccountServiceV2] for account operations
 /// - [TransactionServiceV2] for transaction operations
 /// - [CategoryServiceV2] for category operations
 /// - [InstallmentServiceV2] for installment operations
-/// 
+///
 /// **CHANGELOG:**
-/// 
+///
 /// v2.2.0 (2024-01-XX):
 /// - Added comprehensive documentation
 /// - Improved error handling and recovery
 /// - Enhanced legacy compatibility layer
 /// - Performance optimizations
-/// 
+///
 /// v2.1.0 (2024-01-XX):
 /// - Added installment transaction support
 /// - Implemented balance and monthly summaries
 /// - Added granular loading states
 /// - Fixed data synchronization issues
-/// 
+///
 /// v2.0.0 (2024-01-XX):
 /// - Initial v2 implementation
 /// - Complete rewrite from legacy provider
 /// - New database schema integration
 /// - Service layer architecture
-/// 
+///
 /// **Migration from v1:**
 /// - Replace UnifiedCardProvider with UnifiedProviderV2
 /// - Update data access patterns to use new models
 /// - Migrate transaction creation to new API
 /// - Update UI components to handle new data structures
-/// 
+///
 /// **See also:**
 /// - [AccountServiceV2] for account management
 /// - [TransactionServiceV2] for transaction management
@@ -162,51 +167,58 @@ import '../../modules/stocks/providers/stock_provider.dart';
 class UnifiedProviderV2 extends ChangeNotifier {
   /// Singleton instance for app-wide access
   static UnifiedProviderV2? _instance;
-  
+
   /// Gets the singleton instance, creating it if necessary
   static UnifiedProviderV2 get instance => _instance ??= UnifiedProviderV2._();
-  
+
   /// Private constructor for singleton pattern
-  UnifiedProviderV2._();
-  
+  UnifiedProviderV2._() {
+    _initializeCacheManager();
+  }
+
+  /// Initialize cache manager
+  Future<void> _initializeCacheManager() async {
+    _cacheManager = UnifiedCacheManager.instance;
+    await _cacheManager.initialize();
+  }
+
   // Data lists
   List<AccountModel> _accounts = [];
   List<UnifiedCategoryModel> _categories = [];
   List<TransactionWithDetailsV2> _transactions = [];
   List<InstallmentWithProgressModel> _installments = [];
   List<BudgetModel> _budgets = [];
-  
+
   // Stock positions for net worth calculation
   double _totalStockValue = 0.0;
   double _totalStockCost = 0.0;
-  
-  // ==================== CACHE SYSTEM ====================
-  DateTime? _lastCacheTime;
-  static const Duration _cacheValidityDuration = Duration(minutes: 10);
+
+  // ==================== UNIFIED CACHE SYSTEM ====================
+  late UnifiedCacheManager _cacheManager;
   bool _isDataCached = false;
-  
+
   // ===============================
   // STATEMENT CACHE
   // ===============================
-  
+
   /// **Statement caching for improved performance**
-  Map<String, StatementSummary> _currentStatements = {};
-  Map<String, List<StatementSummary>> _futureStatements = {};
-  Map<String, List<StatementSummary>> _pastStatements = {};
-  
+  final Map<String, StatementSummary> _currentStatements = {};
+  final Map<String, List<StatementSummary>> _futureStatements = {};
+  final Map<String, List<StatementSummary>> _pastStatements = {};
+
   /// **Statement loading states**
-  Map<String, bool> _isLoadingStatements = {};
+  final Map<String, bool> _isLoadingStatements = {};
   DateTime? _lastStatementUpdate;
-  
+
   /// **StatementProvider reference for accessing current statements**
   StatementProvider? _statementProvider;
-  
+
   /// **StockProvider reference for accessing stock positions**
   StockProvider? _stockProvider;
-  
+
   /// **Statement period cache**
-  Map<String, StatementPeriod> _cachedPeriods = {};
-  
+  final Map<String, StatementPeriod> _cachedPeriods = {};
+
   // Loading states
   bool _isLoading = false;
   bool _isLoadingTransactions = false;
@@ -214,10 +226,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
   bool _isLoadingCategories = false;
   bool _isLoadingInstallments = false;
   bool _isLoadingBudgets = false;
-  
+
   // Error states
   String? _error;
-  
+
   // Balance summary
   Map<String, double> _balanceSummary = {
     'totalAssets': 0.0,
@@ -225,7 +237,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     'netWorth': 0.0,
     'availableCredit': 0.0,
   };
-  
+
   // Monthly summary
   Map<String, dynamic> _monthlySummary = {
     'totalIncome': 0.0,
@@ -233,7 +245,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     'netAmount': 0.0,
     'transactionCount': 0,
   };
-  
+
   // Real-time calculated values
   double _totalBalance = 0.0;
   double _totalCreditLimit = 0.0;
@@ -245,15 +257,29 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// Check if data is loaded
   bool get isDataLoaded => _accounts.isNotEmpty || _transactions.isNotEmpty;
   
+  /// Check if stock data is ready (loaded, even if empty)
+  bool get isStockDataReady => _stockProvider != null;
+  
+  /// Check if stock positions are ready (loaded, even if empty)
+  bool get isPositionsReady => _stockProvider != null;
+  
+  /// Check if all critical data is ready
+  bool get isFullyReady => isDataLoaded && isStockDataReady && isPositionsReady;
+
   List<AccountModel> get accounts => _accounts;
-  List<dynamic> get creditCards => legacyCreditCards; // Return legacy format for UI compatibility
-  List<dynamic> get debitCards => legacyDebitCards; // Return legacy format for UI compatibility
-  List<AccountModel> get cashAccounts => _accounts.where((a) => a.type == AccountType.cash).toList();
-  
+  List<dynamic> get creditCards =>
+      legacyCreditCards; // Return legacy format for UI compatibility
+  List<dynamic> get debitCards =>
+      legacyDebitCards; // Return legacy format for UI compatibility
+  List<AccountModel> get cashAccounts =>
+      _accounts.where((a) => a.type == AccountType.cash).toList();
+
   List<UnifiedCategoryModel> get categories => _categories;
-  List<UnifiedCategoryModel> get incomeCategories => _categories.where((c) => c.categoryType == CategoryType.income).toList();
-  List<UnifiedCategoryModel> get expenseCategories => _categories.where((c) => c.categoryType == CategoryType.expense).toList();
-  
+  List<UnifiedCategoryModel> get incomeCategories =>
+      _categories.where((c) => c.categoryType == CategoryType.income).toList();
+  List<UnifiedCategoryModel> get expenseCategories =>
+      _categories.where((c) => c.categoryType == CategoryType.expense).toList();
+
   List<TransactionWithDetailsV2> get transactions => _transactions;
   List<TransactionWithDetailsV2> get recentTransactions {
     if (_transactions.length <= 5) {
@@ -261,131 +287,213 @@ class UnifiedProviderV2 extends ChangeNotifier {
     }
     return _transactions.take(5).toList();
   }
-  
+
   List<BudgetModel> get budgets => _budgets;
   List<BudgetModel> get currentMonthBudgets {
     final now = DateTime.now();
-    final currentBudgets = _budgets.where((b) => b.month == now.month && b.year == now.year).toList();
-    for (final budget in currentBudgets) {
-    }
+    final currentBudgets = _budgets
+        .where((b) => b.month == now.month && b.year == now.year)
+        .toList();
+    for (final budget in currentBudgets) {}
     return currentBudgets;
   }
-  
+
   List<InstallmentWithProgressModel> get installments => _installments;
-  List<InstallmentWithProgressModel> get activeInstallments => _installments.where((i) => !i.isCompleted).toList();
+  List<InstallmentWithProgressModel> get activeInstallments =>
+      _installments.where((i) => !i.isCompleted).toList();
 
   // ===============================
   // STATEMENT GETTERS
   // ===============================
-  
+
   /// **Get current statement for a card**
   StatementSummary? getCurrentStatement(String cardId) {
     return _currentStatements[cardId];
   }
-  
+
   /// **Get future statements for a card**
   List<StatementSummary> getFutureStatements(String cardId) {
     return _futureStatements[cardId] ?? [];
   }
-  
+
   /// **Get past statements for a card**
   List<StatementSummary> getPastStatements(String cardId) {
     return _pastStatements[cardId] ?? [];
   }
-  
+
   /// **Check if statements are loading for a card**
   bool isLoadingStatements(String cardId) {
     return _isLoadingStatements[cardId] ?? false;
   }
-  
+
   /// **Get cached statement period**
   StatementPeriod? getCachedPeriod(String cardId, int statementDay) {
     final key = '${cardId}_$statementDay';
     return _cachedPeriods[key];
   }
-  
+
   /// **Check if statement cache is fresh (less than 5 minutes old)**
   bool get isStatementCacheFresh {
     if (_lastStatementUpdate == null) return false;
     final now = DateTime.now();
     return now.difference(_lastStatementUpdate!).inMinutes < 5;
   }
-  
+
   bool get isLoading => _isLoading;
   bool get isLoadingTransactions => _isLoadingTransactions;
   bool get isLoadingAccounts => _isLoadingAccounts;
   bool get isLoadingCategories => _isLoadingCategories;
   bool get isLoadingInstallments => _isLoadingInstallments;
   bool get isLoadingBudgets => _isLoadingBudgets;
-  
+
   String? get error => _error;
   Map<String, double> get balanceSummary => _balanceSummary;
   Map<String, dynamic> get monthlySummary => _monthlySummary;
 
-  /// Load all data with cache optimization
+  /// Cache durumunu kontrol et
+  bool get isDataCached => _isDataCached;
+
+  /// Save all data to unified cache system
+  Future<void> _saveDataToCache() async {
+    try {
+      // Accounts cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('accounts'),
+        _accounts,
+        ttl: CacheStrategyConfig.getPolicy('accounts').ttl,
+        type: CacheStrategyConfig.getPolicy('accounts').type,
+        compress: CacheStrategyConfig.getPolicy('accounts').compress,
+      );
+
+      // Categories cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('categories'),
+        _categories,
+        ttl: CacheStrategyConfig.getPolicy('categories').ttl,
+        type: CacheStrategyConfig.getPolicy('categories').type,
+        compress: CacheStrategyConfig.getPolicy('categories').compress,
+      );
+
+      // Transactions cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('transactions'),
+        _transactions,
+        ttl: CacheStrategyConfig.getPolicy('transactions').ttl,
+        type: CacheStrategyConfig.getPolicy('transactions').type,
+        compress: CacheStrategyConfig.getPolicy('transactions').compress,
+      );
+
+      // Installments cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('installments'),
+        _installments,
+        ttl: CacheStrategyConfig.getPolicy('installments').ttl,
+        type: CacheStrategyConfig.getPolicy('installments').type,
+        compress: CacheStrategyConfig.getPolicy('installments').compress,
+      );
+
+      // Budgets cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('budgets'),
+        _budgets,
+        ttl: CacheStrategyConfig.getPolicy('budgets').ttl,
+        type: CacheStrategyConfig.getPolicy('budgets').type,
+        compress: CacheStrategyConfig.getPolicy('budgets').compress,
+      );
+
+      debugPrint('✅ Data saved to unified cache system');
+    } catch (e) {
+      debugPrint('❌ Error saving data to cache: $e');
+    }
+  }
+
+  /// Load all data with unified cache system
   Future<void> loadAllData({bool forceRefresh = false}) async {
-    // Cache kontrolü
-    if (!forceRefresh && _isDataCached && _lastCacheTime != null) {
-      final now = DateTime.now();
-      final cacheAge = now.difference(_lastCacheTime!);
+    final startTime = DateTime.now().millisecondsSinceEpoch;
+    debugPrint('🔄 UnifiedProviderV2.loadAllData() START - forceRefresh: $forceRefresh (${startTime}ms)');
+    
+    // ✅ DEBOUNCE: Zaten yükleniyorsa ikinci çağrıyı engelle
+    if (_isLoading) {
+      debugPrint('⚠️ UnifiedProviderV2.loadAllData() - Already loading, skipping duplicate call');
+      return;
+    }
+    
+    // Yeni cache sistemi ile kontrol
+    if (!forceRefresh) {
+      final cachedAccounts = await _cacheManager.get<List<AccountModel>>(
+        CacheStrategyConfig.getCacheKeyForType('accounts'),
+        type: CacheStrategyConfig.getPolicy('accounts').type,
+      );
       
-      if (cacheAge < _cacheValidityDuration) {
-        // Cache hala geçerli, sadece balance summary güncelle
+      if (cachedAccounts != null && cachedAccounts.isNotEmpty) {
+        _accounts = cachedAccounts;
         await _loadSummaries();
+        notifyListeners();
+        debugPrint('✅ UnifiedProviderV2.loadAllData() END - Cache hit (${DateTime.now().millisecondsSinceEpoch - startTime}ms)');
         return;
       }
     }
 
-    _setLoading(true);
+    // Sadece gerçekten yeni veri yükleniyorsa loading state'i göster
+    if (forceRefresh || !_isDataCached) {
+      _setLoading(true);
+    }
     _clearError();
-    
+
     try {
       // Kritik verileri paralel yükle
       await Future.wait([
-        loadAccounts(),
+        loadAccounts(forceServerRead: forceRefresh),
         loadCategories(),
         loadTransactions(),
         loadInstallments(),
         loadBudgets(),
+        _loadProfileData(),
       ]);
-      
+
       // Hisse verilerini ayrı yükle (hata durumunda devam et)
       try {
         await loadStockPositions();
       } catch (e) {
         // Hisse verileri yüklenemezse sessizce devam et
       }
-      
+
       await _loadSummaries();
-      
-      // Cache'i güncelle
-      _lastCacheTime = DateTime.now();
+
+      // Yeni cache sistemi ile verileri kaydet
+      await _saveDataToCache();
       _isDataCached = true;
-      
+
       // Real-time listeners will be set up in splash screen
-      
+      debugPrint('✅ UnifiedProviderV2.loadAllData() END - Success (${DateTime.now().millisecondsSinceEpoch - startTime}ms)');
     } catch (e) {
       _setError('Failed to load data: $e');
+      debugPrint('❌ UnifiedProviderV2.loadAllData() END - Error: $e (${DateTime.now().millisecondsSinceEpoch - startTime}ms)');
     } finally {
       _setLoading(false);
     }
   }
 
   /// Load accounts
-  Future<void> loadAccounts() async {
+  Future<void> loadAccounts({bool forceServerRead = false}) async {
     _isLoadingAccounts = true;
     notifyListeners();
-    
+
     try {
-      // Debug log kaldırıldı
-      
-      // Load accounts from Firebase
-      _accounts = await UnifiedAccountService.getAllAccounts();
-      
+      if (forceServerRead) {
+        // Force server read - cache bypass
+      }
+
+      // Load accounts from Firebase with optional server read
+      _accounts = await UnifiedAccountService.getAllAccounts(
+        forceServerRead: forceServerRead,
+      );
+
+
       // Ensure default cash account exists
       await _ensureDefaultCashAccount();
-      
     } catch (e) {
+      debugPrint('   ❌ loadAccounts() HATA: $e');
       rethrow;
     } finally {
       _isLoadingAccounts = false;
@@ -397,11 +505,13 @@ class UnifiedProviderV2 extends ChangeNotifier {
   Future<void> _ensureDefaultCashAccount() async {
     try {
       // Check if user has any cash accounts
-      final cashAccounts = _accounts.where((a) => a.type == AccountType.cash).toList();
-      
+      final cashAccounts = _accounts
+          .where((a) => a.type == AccountType.cash)
+          .toList();
+
       if (cashAccounts.isEmpty) {
         // Debug log kaldırıldı
-        
+
         // Create default cash account using Firebase
         final cashAccount = AccountModel(
           id: '', // Will be generated by Firebase
@@ -413,13 +523,14 @@ class UnifiedProviderV2 extends ChangeNotifier {
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        
-        final cashAccountId = await UnifiedAccountService.addAccount(cashAccount);
+
+        final cashAccountId = await UnifiedAccountService.addAccount(
+          cashAccount,
+        );
         // Debug log kaldırıldı
-        
+
         // Reload accounts to include the new cash account
         _accounts = await UnifiedAccountService.getAllAccounts();
-        
       } else if (cashAccounts.length > 1) {
         // Debug log kaldırıldı
         await _cleanupDuplicateCashAccounts(cashAccounts);
@@ -433,23 +544,24 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   /// Clean up duplicate cash accounts, keeping only the first one
-  Future<void> _cleanupDuplicateCashAccounts(List<AccountModel> cashAccounts) async {
+  Future<void> _cleanupDuplicateCashAccounts(
+    List<AccountModel> cashAccounts,
+  ) async {
     try {
       // Keep the first cash account (oldest or first created)
       final primaryCashAccount = cashAccounts.first;
       final duplicateAccounts = cashAccounts.skip(1).toList();
-      
+
       // Debug log'ları kaldırıldı
-      
+
       // Delete duplicate accounts
       for (final duplicateAccount in duplicateAccounts) {
         await UnifiedAccountService.deleteAccount(duplicateAccount.id);
         // Debug log kaldırıldı
       }
-      
+
       // Reload accounts to reflect changes
       _accounts = await UnifiedAccountService.getAllAccounts();
-      
     } catch (e) {
       // Debug log kaldırıldı
     }
@@ -459,12 +571,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
   Future<void> loadCategories() async {
     _isLoadingCategories = true;
     notifyListeners();
-    
+
     try {
       // Debug log kaldırıldı
       _categories = await UnifiedCategoryService.getAllCategories();
-      
-      
+
       // If no categories exist, create default ones
       if (_categories.isEmpty) {
         await _createDefaultCategories();
@@ -472,9 +583,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
         await Future.delayed(const Duration(seconds: 2));
         _categories = await UnifiedCategoryService.getAllCategories();
       }
-      
-      for (final cat in _categories) {
-      }
+
+      for (final cat in _categories) {}
     } catch (e) {
       rethrow;
     } finally {
@@ -486,7 +596,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// Create default categories for new users
   Future<void> _createDefaultCategories() async {
     try {
-      
       final defaultCategories = [
         // Expense categories
         UnifiedCategoryModel(
@@ -583,7 +692,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       for (final category in defaultCategories) {
         await UnifiedCategoryService.addCategory(category);
       }
-      
     } catch (e) {
       // Don't rethrow - this is not critical for app functionality
     }
@@ -593,10 +701,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
   Future<void> loadTransactions({int limit = 50}) async {
     _isLoadingTransactions = true;
     notifyListeners();
-    
+
     try {
       // Debug log kaldırıldı
-      _transactions = await UnifiedTransactionService.getAllTransactions(limit: limit);
+      _transactions = await UnifiedTransactionService.getAllTransactions(
+        limit: limit,
+      );
     } catch (e) {
       rethrow;
     } finally {
@@ -609,11 +719,14 @@ class UnifiedProviderV2 extends ChangeNotifier {
   Future<void> loadInstallments() async {
     _isLoadingInstallments = true;
     notifyListeners();
-    
+
     try {
       // Load installments from Firebase using UnifiedInstallmentService
-      final installmentMasters = await UnifiedInstallmentService.getAllInstallmentMasters();
-      _installments = installmentMasters.map((data) => InstallmentWithProgressModel.fromJson(data)).toList();
+      final installmentMasters =
+          await UnifiedInstallmentService.getAllInstallmentMasters();
+      _installments = installmentMasters
+          .map((data) => InstallmentWithProgressModel.fromJson(data))
+          .toList();
     } catch (e) {
       rethrow;
     } finally {
@@ -626,23 +739,25 @@ class UnifiedProviderV2 extends ChangeNotifier {
   Future<void> loadBudgets() async {
     _isLoadingBudgets = true;
     notifyListeners();
-    
+
     try {
       // Debug log kaldırıldı
-      
+
       // Load budgets from Firebase
       _budgets = await UnifiedBudgetService.getAllBudgets();
-      
+
       // Fix budget category IDs to match real category IDs
       await _fixBudgetCategoryIds();
-      
+
       // Update spent amounts for current month
       final now = DateTime.now();
-      await UnifiedBudgetService.updateSpentAmountsForMonth(now.month, now.year);
-      
+      await UnifiedBudgetService.updateSpentAmountsForMonth(
+        now.month,
+        now.year,
+      );
+
       // Reload budgets to get updated spent amounts
       _budgets = await UnifiedBudgetService.getAllBudgets();
-      
     } catch (e) {
       rethrow;
     } finally {
@@ -654,16 +769,14 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// Fix budget category IDs to match real category IDs
   Future<void> _fixBudgetCategoryIds() async {
     try {
-      
       for (final budget in _budgets) {
         // Find matching category by name
         final matchingCategory = _categories.firstWhere(
           (cat) => cat.displayName.trim() == budget.categoryName.trim(),
           orElse: () => _categories.first,
         );
-        
+
         if (matchingCategory.id != budget.categoryId) {
-          
           // Update budget category ID
           await UnifiedBudgetService.updateBudgetCategoryId(
             budget.categoryId,
@@ -671,9 +784,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
           );
         }
       }
-      
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Load summaries
@@ -681,8 +792,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     try {
       // Use the local calculation method for real-time updates
       await _updateSummariesLocally();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Create new account
@@ -697,7 +807,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }) async {
     try {
       // Debug log kaldırıldı
-      
+
       // Create AccountModel
       final account = AccountModel(
         id: '', // Will be generated by Firebase
@@ -713,14 +823,14 @@ class UnifiedProviderV2 extends ChangeNotifier {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
+
       // Add account using Firebase service
       final accountId = await UnifiedAccountService.addAccount(account);
-      
+
       // Reload accounts
       await loadAccounts();
       await _loadSummaries();
-      
+
       return accountId;
     } catch (e) {
       rethrow;
@@ -728,12 +838,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   /// Creates a new transaction in the system
-  /// 
+  ///
   /// **Transaction Types Supported:**
   /// - **Income**: Money coming into an account
-  /// - **Expense**: Money going out of an account  
+  /// - **Expense**: Money going out of an account
   /// - **Transfer**: Money moving between accounts
-  /// 
+  ///
   /// **Parameters:**
   /// - [TransactionType] type: Type of transaction (income/expense/transfer)
   /// - [double] amount: Transaction amount (must be > 0)
@@ -743,27 +853,27 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// - [String?] categoryId: Category ID (optional for transfers)
   /// - [DateTime?] transactionDate: Transaction date (defaults to now)
   /// - [String?] notes: Additional notes (optional)
-  /// 
+  ///
   /// **Transaction Flow:**
   /// 1. Validates required parameters
   /// 2. Calls TransactionServiceV2.createTransaction()
   /// 3. Updates account balances automatically
   /// 4. Reloads affected data (transactions, accounts, summaries)
   /// 5. Notifies UI listeners for real-time updates
-  /// 
+  ///
   /// **Account Balance Updates:**
   /// - **Income**: Increases target account balance
   /// - **Expense**: Decreases source account balance/available limit
   /// - **Transfer**: Decreases source, increases target
-  /// 
+  ///
   /// **Error Handling:**
   /// - Validates account existence
   /// - Checks sufficient balance/limit
   /// - Handles network errors gracefully
   /// - Rolls back on failure
-  /// 
+  ///
   /// **Usage Examples:**
-  /// 
+  ///
   /// **Income Transaction:**
   /// ```dart
   /// await provider.createTransaction(
@@ -775,7 +885,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
   ///   categoryId: 'salary_category_id',
   /// );
   /// ```
-  /// 
+  ///
   /// **Expense Transaction:**
   /// ```dart
   /// await provider.createTransaction(
@@ -786,7 +896,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
   ///   categoryId: 'food_category_id',
   /// );
   /// ```
-  /// 
+  ///
   /// **Transfer Transaction:**
   /// ```dart
   /// await provider.createTransaction(
@@ -797,21 +907,21 @@ class UnifiedProviderV2 extends ChangeNotifier {
   ///   targetAccountId: 'credit_card_id',
   /// );
   /// ```
-  /// 
+  ///
   /// **Returns:**
   /// - [String] transactionId: Unique ID of created transaction
-  /// 
+  ///
   /// **Throws:**
   /// - [Exception] if required parameters are missing
   /// - [Exception] if account validation fails
   /// - [Exception] if insufficient balance/limit
   /// - [Exception] if network/database error occurs
-  /// 
+  ///
   /// **Performance:**
   /// - Optimistic UI updates where possible
   /// - Batch data reloading for efficiency
   /// - Background summary recalculation
-  /// 
+  ///
   /// **See also:**
   /// - [createInstallmentTransaction] for installment payments
   /// - [TransactionServiceV2.createTransaction] for service implementation
@@ -826,30 +936,31 @@ class UnifiedProviderV2 extends ChangeNotifier {
     String? notes,
   }) async {
     try {
-      final startTime = DateTime.now();
-      
       final trimmedCategoryId = categoryId?.trim();
-      
+
       // Ensure categories are loaded first
       if (_categories.isEmpty) {
-        final categoryStartTime = DateTime.now();
         await loadCategories();
-        final categoryEndTime = DateTime.now();
-        final categoryDuration = categoryEndTime.difference(categoryStartTime).inMilliseconds;
-        
+
         // If still empty, wait and try again
         if (_categories.isEmpty) {
           await Future.delayed(const Duration(seconds: 3));
           await loadCategories();
         }
       }
-      
+
       // Get category and account names for display
-      final category = trimmedCategoryId != null ? getCategoryById(trimmedCategoryId) : null;
+      final category = trimmedCategoryId != null
+          ? getCategoryById(trimmedCategoryId)
+          : null;
       final sourceAccount = getAccountById(sourceAccountId);
-      final targetAccount = targetAccountId != null ? getAccountById(targetAccountId) : null;
-      
-      
+      final targetAccount = targetAccountId != null
+          ? getAccountById(targetAccountId)
+          : null;
+
+      // Debug: Log category info
+      debugPrint('createTransaction - categoryId: $trimmedCategoryId, category: ${category?.displayName}');
+
       // Create TransactionWithDetailsV2
       final transaction = TransactionWithDetailsV2(
         id: '', // Will be generated by Firebase
@@ -865,20 +976,19 @@ class UnifiedProviderV2 extends ChangeNotifier {
         isPaid: true,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-          // Add display names
-          categoryName: category?.displayName,
-          sourceAccountName: sourceAccount?.displayName,
-          targetAccountName: targetAccount?.displayName,
-          sourceAccountType: sourceAccount?.typeDisplayName,
-          targetAccountType: targetAccount?.typeDisplayName,
+        // Add display names
+        categoryName: category?.displayName,
+        sourceAccountName: sourceAccount?.displayName,
+        targetAccountName: targetAccount?.displayName,
+        sourceAccountType: sourceAccount?.typeDisplayName,
+        targetAccountType: targetAccount?.typeDisplayName,
       );
-      
-      // Add transaction using Firebase service
-      final firebaseStartTime = DateTime.now();
-      final transactionId = await UnifiedTransactionService.addTransaction(transaction);
-      final firebaseEndTime = DateTime.now();
-      final firebaseDuration = firebaseEndTime.difference(firebaseStartTime).inMilliseconds;
-      
+
+      // Add transaction using Firebase service (this also updates account balance in Firebase)
+      final transactionId = await UnifiedTransactionService.addTransaction(
+        transaction,
+      );
+
       // Add to local list immediately for instant UI update
       final newTransaction = TransactionWithDetailsV2(
         id: transactionId,
@@ -904,54 +1014,53 @@ class UnifiedProviderV2 extends ChangeNotifier {
         installmentCount: transaction.installmentCount,
       );
       _transactions.insert(0, newTransaction);
-      
-      // Update account balance locally immediately
-      final balanceStartTime = DateTime.now();
-      await _updateAccountBalanceLocally(newTransaction, isDelete: false);
-      final balanceEndTime = DateTime.now();
-      final balanceDuration = balanceEndTime.difference(balanceStartTime).inMilliseconds;
-      
-      // Update summaries locally immediately
-      final summaryStartTime = DateTime.now();
+
+      // ✅ OPTIMISTIC BALANCE UPDATE: Update account balance immediately
+      await _updateAccountBalanceOptimistically(newTransaction, isReversal: false);
+
+      // Update summaries with new data
       await _updateSummariesLocally();
-      final summaryEndTime = DateTime.now();
-      final summaryDuration = summaryEndTime.difference(summaryStartTime).inMilliseconds;
-      
+
       // Invalidate statement cache for affected account
       _invalidateStatementCache(transaction.sourceAccountId);
-      
-      final notifyStartTime = DateTime.now();
+
       notifyListeners(); // Immediate UI update
-      final notifyEndTime = DateTime.now();
-      final notifyDuration = notifyEndTime.difference(notifyStartTime).inMilliseconds;
-        
-        // Update budget spent amounts in background if it's an expense
-        if (type == TransactionType.expense && trimmedCategoryId != null) {
-          final budgetStartTime = DateTime.now();
-          
-          // Check if budget category ID matches transaction category ID
-          final matchingBudget = _budgets.where(
-            (budget) => budget.categoryId == trimmedCategoryId,
-          ).isNotEmpty ? _budgets.firstWhere(
-            (budget) => budget.categoryId == trimmedCategoryId,
-          ) : null;
-          
-          if (matchingBudget == null) {
-            // Don't update budget if no matching category found
-            final totalEndTime = DateTime.now();
-            final totalDuration = totalEndTime.difference(startTime).inMilliseconds;
-            return transactionId;
-          }
-          
-          _updateBudgetSpentAmounts(trimmedCategoryId);
-          final budgetEndTime = DateTime.now();
-          final budgetDuration = budgetEndTime.difference(budgetStartTime).inMilliseconds;
+
+      // ✅ BACKGROUND RELOAD: Reload data in background without affecting UI
+      Future.microtask(() async {
+        try {
+          await Future.wait([
+            loadAccounts(forceServerRead: true),
+            loadTransactions(),
+          ]);
+          await _updateSummariesLocally();
+          notifyListeners();
+        } catch (e) {
+          // Silent error handling
         }
-        
-        final totalEndTime = DateTime.now();
-        final totalDuration = totalEndTime.difference(startTime).inMilliseconds;
-        
-        return transactionId;
+      });
+
+      // Update budget spent amounts in background if it's an expense
+      if (type == TransactionType.expense && trimmedCategoryId != null) {
+        // Check if budget category ID matches transaction category ID
+        final matchingBudget =
+            _budgets
+                .where((budget) => budget.categoryId == trimmedCategoryId)
+                .isNotEmpty
+            ? _budgets.firstWhere(
+                (budget) => budget.categoryId == trimmedCategoryId,
+              )
+            : null;
+
+        if (matchingBudget == null) {
+          // Don't update budget if no matching category found
+          return transactionId;
+        }
+
+        _updateBudgetSpentAmounts(trimmedCategoryId);
+      }
+
+      return transactionId;
     } catch (e) {
       rethrow;
     }
@@ -970,13 +1079,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
     String? notes,
   }) async {
     try {
-      
       // Get current transaction
       final currentTransaction = _transactions.firstWhere(
         (t) => t.id == transactionId,
         orElse: () => throw Exception('Transaction not found'),
       );
-      
+
       // Create updated transaction model
       final updatedTransaction = TransactionWithDetailsV2(
         id: currentTransaction.id,
@@ -1003,65 +1111,153 @@ class UnifiedProviderV2 extends ChangeNotifier {
         categoryColor: currentTransaction.categoryColor,
         installmentCount: currentTransaction.installmentCount,
       );
-      
+
       // Update in Firebase
       final success = await UnifiedTransactionService.updateTransaction(
         transactionId: transactionId,
         transaction: updatedTransaction,
       );
-      
+
       if (success) {
-      // Reload data
-      await Future.wait([
-        loadTransactions(),
-        loadAccounts(),
-        _loadSummaries(),
-      ]);
-      
+        // Reload data
+        await Future.wait([
+          loadTransactions(),
+          loadAccounts(),
+          _loadSummaries(),
+        ]);
       }
-      
+
       return success;
     } catch (e) {
       rethrow;
     }
   }
 
+  /// Update account balance optimistically (for immediate UI update)
+  Future<void> _updateAccountBalanceOptimistically(
+    TransactionWithDetailsV2 transaction, {
+    bool isReversal = false,
+  }) async {
+    try {
+      final account = getAccountById(transaction.sourceAccountId);
+      if (account == null) return;
+
+      double balanceChange = 0.0;
+      final absoluteAmount = transaction.amount.abs();
+
+      // ✅ INSTALLMENT TRANSACTION HANDLING: Special logic for installment transactions
+      if (transaction.isInstallment) {
+        // ✅ CRITICAL FIX: For installment transactions, transaction.amount already represents the total amount
+        // No need to multiply by installmentCount - the amount field already contains the total amount
+        final totalAmount = absoluteAmount;
+        
+        if (account.type == AccountType.credit) {
+          // Credit card: increase debt by total amount (decrease available limit)
+          balanceChange = isReversal ? -totalAmount : totalAmount;
+        } else {
+          // Debit/Cash: decrease balance by total amount
+          balanceChange = isReversal ? totalAmount : -totalAmount;
+        }
+      } else {
+        // Regular transaction handling
+        switch (transaction.type) {
+          case TransactionType.income:
+            if (account.type == AccountType.credit) {
+              // Credit card: decrease debt (increase available limit)
+              balanceChange = isReversal ? absoluteAmount : -absoluteAmount;
+            } else {
+              // Debit/Cash: increase balance
+              balanceChange = isReversal ? -absoluteAmount : absoluteAmount;
+            }
+            break;
+          case TransactionType.expense:
+            if (account.type == AccountType.credit) {
+              // Credit card: increase debt (decrease available limit)
+              balanceChange = isReversal ? -absoluteAmount : absoluteAmount;
+            } else {
+              // Debit/Cash: decrease balance
+              balanceChange = isReversal ? absoluteAmount : -absoluteAmount;
+            }
+            break;
+          case TransactionType.transfer:
+            if (account.type != AccountType.credit) {
+              balanceChange = isReversal ? absoluteAmount : -absoluteAmount;
+            }
+            break;
+          case TransactionType.stock:
+            if (account.type == AccountType.cash) {
+              balanceChange = isReversal ? -transaction.amount : transaction.amount;
+            }
+            break;
+        }
+      }
+
+      // Update account balance locally
+      if (balanceChange != 0.0) {
+        final updatedAccount = account.copyWith(
+          balance: account.balance + balanceChange,
+          updatedAt: DateTime.now(),
+        );
+        
+        final accountIndex = _accounts.indexWhere((a) => a.id == account.id);
+        if (accountIndex != -1) {
+          _accounts[accountIndex] = updatedAccount;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error updating account balance optimistically: $e');
+    }
+  }
+
   /// Delete transaction
   Future<bool> deleteTransaction(String transactionId) async {
     try {
-      // Find transaction to get details for balance update
+      // Find transaction to get details
       final transaction = _transactions.firstWhere(
         (t) => t.id == transactionId,
         orElse: () => throw Exception('Transaction not found'),
       );
-      
-      // Remove from local list immediately for instant UI update
-        _transactions.removeWhere((t) => t.id == transactionId);
-        
-      // Update account balance locally immediately
-      await _updateAccountBalanceLocally(transaction, isDelete: true);
-      
-      // Update summaries locally immediately
-      await _updateSummariesLocally();
-      
+
+      // ✅ OPTIMISTIC UI UPDATE: Remove from local list immediately for instant UI update
+      _transactions.removeWhere((t) => t.id == transactionId);
+
+      // ✅ OPTIMISTIC BALANCE UPDATE: Update account balance immediately
+      await _updateAccountBalanceOptimistically(transaction, isReversal: true);
+
       // Invalidate statement cache for affected account
       _invalidateStatementCache(transaction.sourceAccountId);
-      
-      notifyListeners(); // Immediate UI update
-      
-      // Delete from Firebase in background
-      final success = await UnifiedTransactionService.deleteTransaction(transactionId);
-      
-      if (success) {
-      } else {
-        // If Firebase delete failed, reload data to restore state
-        await loadTransactions();
-        await loadAccounts();
-        await _loadSummaries();
-        notifyListeners();
-      }
-      
-      return success;
+
+      notifyListeners(); // Immediate UI update for transaction removal
+
+      // ✅ BACKGROUND FIREBASE DELETE: Delete from Firebase in background
+      Future.microtask(() async {
+        try {
+          final success = await UnifiedTransactionService.deleteTransaction(
+            transactionId,
+          );
+
+          if (success) {
+            // ✅ SUCCESS: Silent background reload (no UI update needed - optimistic update already done)
+            await loadAccounts(forceServerRead: true);
+            await _updateSummariesLocally();
+            // No notifyListeners() - optimistic update already updated UI
+          } else {
+            // ✅ FAILURE: Reload transactions to restore state
+            await loadTransactions();
+            await loadAccounts(forceServerRead: true);
+            await _loadSummaries();
+            notifyListeners();
+          }
+        } catch (e) {
+          // ✅ ERROR: Reload data to restore state on error
+          await loadTransactions();
+          await loadAccounts(forceServerRead: true);
+          await _loadSummaries();
+          notifyListeners();
+        }
+      });
+
+      return true; // Always return true for optimistic update
     } catch (e) {
       // Reload data to restore state on error
       await loadTransactions();
@@ -1075,61 +1271,58 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// Delete installment transaction (refunds total amount)
   Future<bool> deleteInstallmentTransaction(String transactionId) async {
     try {
-      
       // Find the transaction to get installment ID
       final transaction = _transactions.firstWhere(
         (t) => t.id == transactionId,
         orElse: () => throw Exception('Transaction not found'),
       );
-      
-      
+
       if (transaction.installmentId == null) {
         throw Exception('Transaction is not an installment');
       }
-      
+
       final startTime = DateTime.now();
-      
+
       // Delete installment master and details using UnifiedInstallmentService
-      final success = await UnifiedInstallmentService.deleteInstallmentTransaction(transaction.installmentId!);
-      
+      final success =
+          await UnifiedInstallmentService.deleteInstallmentTransaction(
+            transaction.installmentId!,
+          );
+
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime).inMilliseconds;
-      
+
       if (success) {
-        
-        // Remove transaction from local list immediately
+        // ✅ OPTIMISTIC UI UPDATE: Remove from local list immediately
         _transactions.removeWhere((t) => t.id == transactionId);
-        
-        // Update account balance locally
-        final account = getAccountById(transaction.sourceAccountId);
-        if (account != null) {
-          // Refund the total amount (subtract from debt)
-          final updatedAccount = account.copyWith(
-            balance: account.balance - transaction.amount,
-          );
-          _accounts[_accounts.indexWhere((a) => a.id == account.id)] = updatedAccount;
-        }
-        
+
+        // ✅ OPTIMISTIC BALANCE UPDATE: Update account balance immediately
+        await _updateAccountBalanceOptimistically(transaction, isReversal: true);
+
         // Update summaries locally
         _updateSummariesLocally();
-        
+
         // Invalidate statement cache for affected account
         _invalidateStatementCache(transaction.sourceAccountId);
-        
+
         // Notify listeners for immediate UI update
         notifyListeners();
-        
-        // Delete UI transaction record from Firebase in background
+
+        // ✅ BACKGROUND CLEANUP: Delete UI transaction record from Firebase in background
         Future.microtask(() async {
           try {
             await UnifiedTransactionService.deleteTransaction(transactionId);
+            // Silent cleanup - no UI update needed
           } catch (e) {
             // Reload data to restore state
             await loadTransactions();
+            await loadAccounts(forceServerRead: true);
+            await _loadSummaries();
+            notifyListeners();
           }
         });
       }
-      
+
       return success;
     } catch (e) {
       rethrow;
@@ -1147,27 +1340,30 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }) async {
     try {
       final startTime = DateTime.now();
-      
+
       // Get current credit card balance BEFORE
       final currentAccount = getAccountById(sourceAccountId);
-      
+
       // Calculate monthly amount
       final monthlyAmount = totalAmount / count;
-      
+
       // 1. Create installment master record
       final masterStartTime = DateTime.now();
-      final installmentId = await UnifiedInstallmentService.createInstallmentMaster(
-        totalAmount: totalAmount,
-        monthlyAmount: monthlyAmount,
-        count: count,
-        description: description,
-        sourceAccountId: sourceAccountId,
-        categoryId: categoryId,
-        startDate: startDate,
-      );
+      final installmentId =
+          await UnifiedInstallmentService.createInstallmentMaster(
+            totalAmount: totalAmount,
+            monthlyAmount: monthlyAmount,
+            count: count,
+            description: description,
+            sourceAccountId: sourceAccountId,
+            categoryId: categoryId,
+            startDate: startDate,
+          );
       final masterEndTime = DateTime.now();
-      final masterDuration = masterEndTime.difference(masterStartTime).inMilliseconds;
-      
+      final masterDuration = masterEndTime
+          .difference(masterStartTime)
+          .inMilliseconds;
+
       // 2. Create installment details
       final detailsStartTime = DateTime.now();
       await UnifiedInstallmentService.createInstallmentDetails(
@@ -1177,11 +1373,13 @@ class UnifiedProviderV2 extends ChangeNotifier {
         startDate: startDate,
       );
       final detailsEndTime = DateTime.now();
-      final detailsDuration = detailsEndTime.difference(detailsStartTime).inMilliseconds;
-      
-      // 3. Create transaction record for UI display
+      final detailsDuration = detailsEndTime
+          .difference(detailsStartTime)
+          .inMilliseconds;
+
+      // 3. Create transaction record for UI display and get transaction ID
       final uiStartTime = DateTime.now();
-      await _createInstallmentTransactionRecord(
+      final transactionId = await _createInstallmentTransactionRecord(
         installmentId: installmentId,
         totalAmount: totalAmount,
         count: count,
@@ -1192,52 +1390,77 @@ class UnifiedProviderV2 extends ChangeNotifier {
       );
       final uiEndTime = DateTime.now();
       final uiDuration = uiEndTime.difference(uiStartTime).inMilliseconds;
-      
-      // 4. Update account balance locally for instant UI update
-      final account = getAccountById(sourceAccountId);
-      if (account != null && account.type == AccountType.credit) {
-        // For credit cards: add total debt (totalAmount is positive, balance represents debt)
-        final updatedAccount = account.copyWith(
-          balance: account.balance + totalAmount.abs(), // Add debt (use absolute value)
-        );
-        _accounts[_accounts.indexWhere((a) => a.id == account.id)] = updatedAccount;
-      }
-      
-      // 5. Update summaries locally for instant UI update
+
+      // 4. Get category and account names for display
+      final category = categoryId != null ? getCategoryById(categoryId) : null;
+      final sourceAccount = getAccountById(sourceAccountId);
+
+      // 5. Create transaction object for optimistic update
+      final newTransaction = TransactionWithDetailsV2(
+        id: transactionId,
+        userId: FirebaseAuthService.currentUserId ?? '',
+        type: TransactionType.expense,
+        amount: totalAmount, // Total amount for installment transactions
+        description: '$description ($count taksit)',
+        transactionDate: startDate ?? DateTime.now(),
+        categoryId: categoryId,
+        sourceAccountId: sourceAccountId,
+        installmentId: installmentId,
+        isInstallment: true,
+        installmentCount: count, // ✅ CRITICAL FIX: Set installment count
+        notes: 'Taksitli işlem - Toplam: $totalAmount TL, $count taksit',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        // Add display names
+        categoryName: category?.displayName,
+        sourceAccountName: sourceAccount?.displayName,
+        sourceAccountType: sourceAccount?.typeDisplayName,
+      );
+
+      // Add to local transactions list immediately
+      _transactions.insert(0, newTransaction);
+
+      // ✅ OPTIMISTIC BALANCE UPDATE: Update account balance immediately using optimistic method
+      await _updateAccountBalanceOptimistically(newTransaction, isReversal: false);
+
+      // Update summaries locally for instant UI update
       _updateSummariesLocally();
-      
-      // 6. Invalidate statement cache for affected account
+
+      // Invalidate statement cache for affected account
       _invalidateStatementCache(sourceAccountId);
-      
-      // 7. Notify listeners for immediate UI update
+
+      // Notify listeners for immediate UI update
       notifyListeners();
-      
-      // 7. Reload data in background
+
+      // ✅ BACKGROUND RELOAD: Reload data in background without affecting UI
       Future.microtask(() async {
         try {
-      await Future.wait([
-        loadAccounts(),
+          await Future.wait([
+            loadAccounts(forceServerRead: true),
             loadTransactions(),
-        _loadSummaries(),
-      ]);
+            _loadSummaries(),
+          ]);
+          await _updateSummariesLocally();
+          notifyListeners();
         } catch (e) {
+          // Silent error handling
         }
       });
-      
+
       final totalEndTime = DateTime.now();
       final totalDuration = totalEndTime.difference(startTime).inMilliseconds;
-      
+
       // Get updated account balance
       final updatedAccount = getAccountById(sourceAccountId);
-      
+
       return installmentId;
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Create transaction record for UI display
-  Future<void> _createInstallmentTransactionRecord({
+  /// Create transaction record for UI display and return transaction ID
+  Future<String> _createInstallmentTransactionRecord({
     required String installmentId,
     required double totalAmount,
     required int count,
@@ -1253,7 +1476,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Get category and account names for display
       final category = categoryId != null ? getCategoryById(categoryId) : null;
       final account = getAccountById(sourceAccountId);
-      
+
       // Create transaction using UnifiedTransactionService directly
       final transaction = TransactionWithDetailsV2(
         id: '', // Will be set by Firebase
@@ -1268,27 +1491,31 @@ class UnifiedProviderV2 extends ChangeNotifier {
         sourceAccountName: account?.displayName, // Set account name
         installmentId: installmentId,
         isInstallment: true, // Mark as installment transaction
+        installmentCount: count, // ✅ CRITICAL FIX: Set installment count
         notes: 'Taksitli işlem - Toplam: $totalAmount TL, $count taksit',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      await UnifiedTransactionService.addTransaction(transaction);
-
+      final transactionId = await UnifiedTransactionService.addTransaction(transaction);
+      return transactionId;
     } catch (e) {
       rethrow;
     }
   }
 
   /// Update account balance for installment
-  Future<void> _updateAccountBalanceForInstallment(String accountId, double amount) async {
+  Future<void> _updateAccountBalanceForInstallment(
+    String accountId,
+    double amount,
+  ) async {
     try {
       final account = getAccountById(accountId);
       if (account == null) throw Exception('Hesap bulunamadı');
 
       // Calculate new balance
       final newBalance = account.balance + amount;
-      
+
       // Create updated account model
       final updatedAccount = AccountModel(
         id: account.id,
@@ -1304,16 +1531,15 @@ class UnifiedProviderV2 extends ChangeNotifier {
         createdAt: account.createdAt,
         updatedAt: DateTime.now(),
       );
-      
+
       // Update in Firebase
       await UnifiedAccountService.updateAccount(updatedAccount);
-      
+
       // Update local list
       final index = _accounts.indexWhere((a) => a.id == accountId);
       if (index != -1) {
         _accounts[index] = updatedAccount;
       }
-
     } catch (e) {
       rethrow;
     }
@@ -1330,7 +1556,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
         installmentDetailId: installmentDetailId,
         paymentDate: paymentDate,
       );
-      
+
       // Reload data
       await Future.wait([
         loadInstallments(),
@@ -1338,7 +1564,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
         loadAccounts(),
         _loadSummaries(),
       ]);
-      
+
       return paidTransactionId;
     } catch (e) {
       rethrow;
@@ -1355,7 +1581,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }) async {
     try {
       // Debug log kaldırıldı
-      
+
       final category = UnifiedCategoryModel(
         id: '', // Will be generated by Firebase
         name: name.toLowerCase().replaceAll(' ', '_'),
@@ -1367,12 +1593,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
         categoryType: type,
         isUserCategory: true,
       );
-      
+
       final categoryId = await UnifiedCategoryService.addCategory(category);
-      
+
       // Reload categories
       await loadCategories();
-      
+
       return category.copyWith(id: categoryId);
     } catch (e) {
       rethrow;
@@ -1389,11 +1615,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }) async {
     try {
       // Debug log kaldırıldı
-      
+
       final now = DateTime.now();
       final budgetMonth = month ?? now.month;
       final budgetYear = year ?? now.year;
-      
+
       final budget = BudgetModel(
         id: '', // Will be generated by Firebase
         userId: '', // Will be set by service
@@ -1406,12 +1632,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
         updatedAt: DateTime.now(),
         spentAmount: 0.0,
       );
-      
+
       final budgetId = await UnifiedBudgetService.addBudget(budget);
-      
+
       // Reload budgets
       await loadBudgets();
-      
+
       return budget.copyWith(id: budgetId);
     } catch (e) {
       rethrow;
@@ -1429,16 +1655,16 @@ class UnifiedProviderV2 extends ChangeNotifier {
         monthlyLimit: monthlyLimit,
         updatedAt: DateTime.now(),
       );
-      
+
       final success = await UnifiedBudgetService.updateBudget(
         budgetId: budgetId,
         budget: updatedBudget,
       );
-      
+
       if (success) {
         await loadBudgets();
       }
-      
+
       return success;
     } catch (e) {
       return false;
@@ -1449,11 +1675,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
   Future<bool> deleteBudget(String budgetId) async {
     try {
       final success = await UnifiedBudgetService.deleteBudget(budgetId);
-      
+
       if (success) {
         await loadBudgets();
       }
-      
+
       return success;
     } catch (e) {
       return false;
@@ -1489,9 +1715,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
   /// Get transactions by account
   List<TransactionWithDetailsV2> getTransactionsByAccount(String accountId) {
-    return _transactions.where((t) => 
-      t.sourceAccountId == accountId || t.targetAccountId == accountId
-    ).toList();
+    return _transactions
+        .where(
+          (t) =>
+              t.sourceAccountId == accountId || t.targetAccountId == accountId,
+        )
+        .toList();
   }
 
   /// Get transactions by category
@@ -1505,11 +1734,16 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   /// Clear cache and force reload
-  void clearCache() {
-    _isDataCached = false;
-    _lastCacheTime = null;
+  Future<void> clearCache() async {
+    try {
+      await _cacheManager.clearAll();
+      _isDataCached = false;
+      debugPrint('✅ Unified cache cleared successfully');
+    } catch (e) {
+      debugPrint('❌ Error clearing cache: $e');
+    }
   }
-  
+
   @override
   void dispose() {
     _transactionListener?.cancel();
@@ -1520,35 +1754,34 @@ class UnifiedProviderV2 extends ChangeNotifier {
   // Real-time listeners
   StreamSubscription? _transactionListener;
   StreamSubscription? _installmentListener;
-  
+
   /// Setup real-time listeners for automatic updates
   void setupRealTimeListeners() {
     // Cancel existing listeners
     _transactionListener?.cancel();
     _installmentListener?.cancel();
-    
-    
+
     // Listen to transactions
     _transactionListener = FirebaseFirestore.instance
         .collection('transactions')
         .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
         .snapshots()
         .listen((snapshot) {
-      loadTransactions();
-      // Clear statement cache when transactions change
-      clearStatementCache();
-    });
-    
+          loadTransactions();
+          // Clear statement cache when transactions change
+          clearStatementCache();
+        });
+
     // Listen to installments
     _installmentListener = FirebaseFirestore.instance
         .collection('installment_masters')
         .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
         .snapshots()
         .listen((snapshot) {
-      loadInstallments();
-      // Clear statement cache when installments change
-      clearStatementCache();
-    });
+          loadInstallments();
+          // Clear statement cache when installments change
+          clearStatementCache();
+        });
   }
 
   // Helper methods
@@ -1565,20 +1798,20 @@ class UnifiedProviderV2 extends ChangeNotifier {
   void _clearError() {
     _error = null;
   }
-  
+
   /// Set StatementProvider reference for accessing current statements
   void setStatementProvider(StatementProvider provider) {
     _statementProvider = provider;
   }
-  
+
   /// Set StockProvider reference for accessing stock positions
   void setStockProvider(StockProvider provider) {
     _stockProvider = provider;
-    
+
     // StockProvider değişikliklerini dinle
     _stockProvider!.addListener(_onStockProviderChanged);
   }
-  
+
   /// StockProvider değişikliklerini dinle - ATOMIK GÜNCELLEME
   void _onStockProviderChanged() {
     if (_stockProvider != null) {
@@ -1587,76 +1820,101 @@ class UnifiedProviderV2 extends ChangeNotifier {
     }
     // StockProvider yoksa mevcut değerleri koru, sıfırlama yapma
   }
-  
+
   /// Hisse değerlerini güncelle - ATOMIK GÜNCELLEME
   void _updateStockValues() {
     if (_stockProvider == null) {
       // StockProvider yoksa sadece mevcut değerleri koru, sıfırlama
       return;
     }
-    
+
     final stockPositions = _stockProvider!.stockPositions;
-    
+
     // Önce yeni değerleri hesapla (sıfırlamadan)
     double newTotalStockValue = 0.0;
     double newTotalStockCost = 0.0;
-    
+
     for (final position in stockPositions) {
       newTotalStockValue += position.currentValue;
       newTotalStockCost += position.totalCost;
     }
-    
+
     // ATOMIK GÜNCELLEME: Sadece geçerli değerler varsa güncelle
     if (newTotalStockValue >= 0 && newTotalStockCost >= 0) {
       _totalStockValue = newTotalStockValue;
       _totalStockCost = newTotalStockCost;
-      
+
       // Balance summary'yi güncelle
       _updateBalanceSummary();
-      
+
       notifyListeners();
     }
     // Eğer geçersiz değerler varsa, mevcut değerleri koru
   }
-  
+
   /// Check if StockProvider is set
   bool get hasStockProvider => _stockProvider != null;
-  
+
+  /// Get watched stocks from StockProvider
+  List<Stock> get watchedStocks => _stockProvider?.watchedStocks ?? [];
+
+  /// Get stock positions from StockProvider
+  List<StockPosition> get stockPositions => _stockProvider?.stockPositions ?? [];
+
   /// Update balance summary with current values
   void _updateBalanceSummary() {
-    
-    final totalAssets = _accounts
-        .where((account) => account.type == AccountType.cash || account.type == AccountType.debit)
+    // Calculate assets from cash and debit accounts
+    double totalAssets = _accounts
+        .where(
+          (account) =>
+              account.type == AccountType.cash ||
+              account.type == AccountType.debit,
+        )
         .fold(0.0, (sum, account) => sum + account.balance);
-    
-    final totalDebts = _accounts
-        .where((account) => account.type == AccountType.credit)
-        .fold(0.0, (sum, account) => sum + (account.balance));
-    
-    final netWorth = _totalBalance + _totalStockValue;
-    
-    
+
+    // Calculate debts and overpayments from credit cards
+    double totalDebts = 0.0;
+    double creditCardOverpayments = 0.0;
+
+    for (final account in _accounts.where(
+      (a) => a.type == AccountType.credit,
+    )) {
+      if (account.balance > 0) {
+        // Pozitif balance = borç
+        totalDebts += account.balance;
+      } else if (account.balance < 0) {
+        // Negatif balance = fazla ödeme (overpayment) = varlık
+        creditCardOverpayments += account.balance.abs();
+      }
+    }
+
+    // Fazla ödemeleri varlıklara ekle
+    totalAssets += creditCardOverpayments;
+
+    // Net Worth = Toplam Varlıklar - Toplam Borçlar + Hisse Değeri
+    final netWorth = totalAssets - totalDebts + _totalStockValue;
+
+
     _balanceSummary = {
       'totalAssets': totalAssets,
       'totalDebts': totalDebts,
-      'netWorth': netWorth, // Hisse değerlerini dahil et
+      'netWorth': netWorth,
       'availableCredit': _totalCreditLimit - _totalUsedCredit,
-      'totalStockValue': _totalStockValue, // Hisse değerlerini ayrı göster
-      'totalStockCost': _totalStockCost, // Hisse toplam maliyeti
+      'totalStockValue': _totalStockValue,
+      'totalStockCost': _totalStockCost,
     };
-    
   }
-  
+
   /// Update stock positions for net worth calculation - ATOMIK GÜNCELLEME
   void updateStockPositions(List<dynamic> stockPositions) {
     // Mevcut değerleri yedekle
     final oldTotalStockValue = _totalStockValue;
     final oldTotalStockCost = _totalStockCost;
-    
+
     // Önce yeni değerleri hesapla (sıfırlamadan)
     double newTotalStockValue = 0.0;
     double newTotalStockCost = 0.0;
-    
+
     for (final position in stockPositions) {
       if (position is Map<String, dynamic>) {
         final currentValue = position['currentValue'] as double? ?? 0.0;
@@ -1665,15 +1923,15 @@ class UnifiedProviderV2 extends ChangeNotifier {
         newTotalStockCost += totalCost;
       }
     }
-    
+
     // ATOMIK GÜNCELLEME: Sadece geçerli değerler varsa güncelle
     if (newTotalStockValue >= 0 && newTotalStockCost >= 0) {
       _totalStockValue = newTotalStockValue;
       _totalStockCost = newTotalStockCost;
-      
+
       // Balance summary'yi güncelle
       _updateBalanceSummary();
-      
+
       notifyListeners();
     } else {
       // Geçersiz değerler varsa eski değerleri koru
@@ -1681,31 +1939,31 @@ class UnifiedProviderV2 extends ChangeNotifier {
       _totalStockCost = oldTotalStockCost;
     }
   }
-  
+
   /// Load stock positions from StockProvider - ATOMIK GÜNCELLEME
   Future<void> loadStockPositions() async {
     if (_stockProvider == null) {
       return;
     }
-    
+
     // Firebase Auth'dan kullanıcı ID'sini al
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return;
     }
-    
+
     try {
       // Mevcut değerleri yedekle
       final oldTotalStockValue = _totalStockValue;
       final oldTotalStockCost = _totalStockCost;
-      
-      // StockProvider'dan hisse verilerini yükle
-      await _stockProvider!.loadWatchedStocks(user.uid);
-      await _stockProvider!.loadStockPositions(user.uid);
-      
+
+      // StockProvider'dan hisse verilerini silent olarak yükle
+      await _stockProvider!.loadWatchedStocksSilently(user.uid);
+      await _stockProvider!.loadStockPositionsSilently(user.uid);
+
       // Net worth'u hemen güncelle
       _updateStockValues();
-      
+
       // Eğer güncelleme başarısızsa eski değerleri geri yükle
       if (_totalStockValue == 0.0 && oldTotalStockValue > 0.0) {
         _totalStockValue = oldTotalStockValue;
@@ -1713,12 +1971,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
         _updateBalanceSummary();
         notifyListeners();
       }
-      
     } catch (e) {
       rethrow; // Hata durumunda yukarı fırlat
     }
   }
-  
+
   /// Update current statement in cache
   void updateCurrentStatement(String cardId, StatementSummary statement) {
     _currentStatements[cardId] = statement;
@@ -1726,30 +1983,30 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   // Legacy compatibility methods for existing UI components
-  
+
   /// Legacy: Total balance (sum of all account balances + stock values)
   double get totalBalance {
     return _totalBalance + _totalStockValue;
   }
-  
+
   double get totalCreditLimit {
     return _totalCreditLimit;
   }
-  
+
   double get totalUsedCredit {
     return _totalUsedCredit;
   }
-  
+
   /// Legacy: This month income
   double get thisMonthIncome {
     return _monthlyIncome;
   }
-  
+
   /// Legacy: This month expense
   double get thisMonthExpense {
     return _monthlyExpense;
   }
-  
+
   /// Legacy: Balance change percentage (mock calculation)
   double get balanceChangePercentage {
     final income = thisMonthIncome;
@@ -1757,13 +2014,17 @@ class UnifiedProviderV2 extends ChangeNotifier {
     if (expense == 0) return income > 0 ? 100.0 : 0.0;
     return ((income - expense) / expense) * 100;
   }
-  
+
   /// Legacy: Cash account (first cash account or null)
   dynamic get cashAccount {
-    final cashAccounts = _accounts.where((a) => a.type == AccountType.cash).toList();
-    return cashAccounts.isNotEmpty ? _convertToLegacyCashAccount(cashAccounts.first) : null;
+    final cashAccounts = _accounts
+        .where((a) => a.type == AccountType.cash)
+        .toList();
+    return cashAccounts.isNotEmpty
+        ? _convertToLegacyCashAccount(cashAccounts.first)
+        : null;
   }
-  
+
   /// Convert AccountModel to legacy cash account format
   Map<String, dynamic> _convertToLegacyCashAccount(AccountModel account) {
     return {
@@ -1773,55 +2034,76 @@ class UnifiedProviderV2 extends ChangeNotifier {
       'isActive': account.isActive,
     };
   }
-  
+
   /// Legacy: Convert AccountModel to legacy credit card format
   List<Map<String, dynamic>> get legacyCreditCards {
-    return _accounts.where((a) => a.type == AccountType.credit).map((account) => {
-      'id': account.id,
-      'cardName': account.name,
-      'bankName': account.bankName ?? '',
-      'bankCode': account.bankName ?? '', // Use bankName as bankCode for now
-      'totalDebt': account.balance.abs(), // Credit card balance is debt (always positive)
-      'creditLimit': account.creditLimit ?? 0.0,
-      'availableLimit': account.availableAmount,
-      'statementDay': account.statementDay ?? 1,
-      'dueDay': account.dueDay ?? 15,
-      'statementDate': account.statementDay ?? 1,
-      'dueDate': account.dueDay ?? 15,
-      'isActive': account.isActive,
-      'formattedCardNumber': '**** **** **** ${account.id.substring(0, 4)}', // Mock card number
-      'usagePercentage': account.creditLimit != null && account.creditLimit! > 0 
-          ? (account.balance.clamp(0.0, double.infinity) / account.creditLimit!) * 100 
-          : 0.0,
-    }).toList();
+    return _accounts
+        .where((a) => a.type == AccountType.credit)
+        .map(
+          (account) => {
+            'id': account.id,
+            'cardName': account.name,
+            'bankName': account.bankName ?? '',
+            'bankCode':
+                account.bankName ?? '', // Use bankName as bankCode for now
+            'totalDebt': account.balance.clamp(0.0, double.infinity),
+            'creditLimit': account.creditLimit ?? 0.0,
+            'availableLimit': account.availableAmount,
+            'statementDay': account.statementDay ?? 1,
+            'dueDay': account.dueDay ?? 15,
+            'statementDate': account.statementDay ?? 1,
+            'dueDate': account.dueDay ?? 15,
+            'isActive': account.isActive,
+            'formattedCardNumber':
+                '**** **** **** ${account.id.substring(0, 4)}', // Mock card number
+            'usagePercentage':
+                account.creditLimit != null && account.creditLimit! > 0
+                ? (account.balance.clamp(0.0, double.infinity) /
+                          account.creditLimit!) *
+                      100
+                : 0.0,
+          },
+        )
+        .toList();
   }
-  
+
   /// Legacy: Convert AccountModel to legacy debit card format
   List<Map<String, dynamic>> get legacyDebitCards {
-    return _accounts.where((a) => a.type == AccountType.debit).map((account) => {
-      'id': account.id,
-      'cardName': account.name,
-      'bankName': account.bankName ?? '',
-      'bankCode': account.bankName ?? '', // Use bankName as bankCode for now
-      'balance': account.balance,
-      'isActive': account.isActive,
-      'maskedCardNumber': '**** **** **** ${account.id.length >= 4 ? account.id.substring(0, 4) : account.id.padRight(4, '0')}', // Mock card number
-    }).toList();
+    return _accounts
+        .where((a) => a.type == AccountType.debit)
+        .map(
+          (account) => {
+            'id': account.id,
+            'cardName': account.name,
+            'bankName': account.bankName ?? '',
+            'bankCode':
+                account.bankName ?? '', // Use bankName as bankCode for now
+            'balance': account.balance,
+            'isActive': account.isActive,
+            'maskedCardNumber':
+                '**** **** **** ${account.id.length >= 4 ? account.id.substring(0, 4) : account.id.padRight(4, '0')}', // Mock card number
+          },
+        )
+        .toList();
   }
-  
+
   /// Legacy: Convert TransactionWithDetailsV2 to legacy transaction format
   List<Map<String, dynamic>> get legacyTransactions {
-    return _transactions.map((tx) => {
-      'id': tx.id,
-      'description': tx.description,
-      'amount': tx.amount,
-      'type': tx.type.value,
-      'date': tx.transactionDate,
-      'categoryName': tx.categoryName ?? 'Diğer',
-      'sourceAccountName': tx.sourceAccountName ?? '',
-      'targetAccountName': tx.targetAccountName ?? '',
-      'notes': tx.notes,
-    }).toList();
+    return _transactions
+        .map(
+          (tx) => {
+            'id': tx.id,
+            'description': tx.description,
+            'amount': tx.amount,
+            'type': tx.type.value,
+            'date': tx.transactionDate,
+            'categoryName': tx.categoryName ?? 'Diğer',
+            'sourceAccountName': tx.sourceAccountName ?? '',
+            'targetAccountName': tx.targetAccountName ?? '',
+            'notes': tx.notes,
+          },
+        )
+        .toList();
   }
 
   /// Update account balance
@@ -1832,27 +2114,23 @@ class UnifiedProviderV2 extends ChangeNotifier {
       if (account == null) {
         throw Exception('Account not found');
       }
-      
+
       final currentBalance = account.balance;
       final difference = newBalance - currentBalance;
       final operation = difference >= 0 ? 'add' : 'subtract';
       final amount = difference.abs();
-      
+
       // Update balance in Firebase
       final success = await UnifiedAccountService.updateBalance(
-        accountId: accountId, 
-        newBalance: newBalance
+        accountId: accountId,
+        newBalance: newBalance,
       );
-      
+
       if (success) {
         // Reload accounts and summaries
-        await Future.wait([
-          loadAccounts(),
-          _loadSummaries(),
-        ]);
-        
+        await Future.wait([loadAccounts(), _loadSummaries()]);
       }
-      
+
       return success;
     } catch (e) {
       rethrow;
@@ -1871,13 +2149,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
     bool? isActive,
   }) async {
     try {
-      
       // Get current account
-        final currentAccount = getAccountById(accountId);
+      final currentAccount = getAccountById(accountId);
       if (currentAccount == null) {
         throw Exception('Account not found');
       }
-      
+
       // Create updated account model
       final updatedAccount = AccountModel(
         id: currentAccount.id,
@@ -1893,20 +2170,20 @@ class UnifiedProviderV2 extends ChangeNotifier {
         createdAt: currentAccount.createdAt,
         updatedAt: DateTime.now(),
       );
-      
+
       // Update in Firebase
       final success = await UnifiedAccountService.updateAccount(updatedAccount);
-      
+
       if (success) {
-      // Reload accounts and summaries
-      await Future.wait([
-        loadAccounts(),
-        _loadSummaries(),
-      ]);
-      
+        // Invalidate statement cache for this account
+        _invalidateStatementCache(accountId);
+        
+        // Reload accounts and summaries
+        await Future.wait([loadAccounts(), _loadSummaries()]);
+
         return updatedAccount;
       }
-      
+
       return null;
     } catch (e) {
       rethrow;
@@ -1915,14 +2192,13 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
   /// Legacy: Has cards check
   bool get hasCards => _accounts.isNotEmpty;
-  
+
   /// Legacy: Delete credit card
   Future<bool> deleteCreditCard(String cardId) async {
     try {
-      
       // Delete from Firebase
       final success = await UnifiedAccountService.deleteAccount(cardId);
-      
+
       if (success) {
         await loadAccounts(); // Refresh accounts
         notifyListeners();
@@ -1932,14 +2208,13 @@ class UnifiedProviderV2 extends ChangeNotifier {
       return false;
     }
   }
-  
+
   /// Legacy: Delete debit card
   Future<bool> deleteDebitCard(String cardId) async {
     try {
-      
       // Delete from Firebase
       final success = await UnifiedAccountService.deleteAccount(cardId);
-      
+
       if (success) {
         await loadAccounts(); // Refresh accounts
         notifyListeners();
@@ -1949,19 +2224,19 @@ class UnifiedProviderV2 extends ChangeNotifier {
       return false;
     }
   }
-  
+
   /// Legacy: Retry method
   Future<void> retry() async {
     await refresh();
   }
-  
+
   /// Legacy: Get credit card by ID
   Map<String, dynamic>? getCreditCardById(String cardId) {
     final account = getAccountById(cardId);
     if (account == null || account.type != AccountType.credit) {
       return null;
     }
-    
+
     return {
       'id': account.id,
       'cardName': account.name,
@@ -1974,14 +2249,14 @@ class UnifiedProviderV2 extends ChangeNotifier {
       'isActive': account.isActive,
     };
   }
-  
+
   /// Legacy: Get debit card by ID
   Map<String, dynamic>? getDebitCardById(String cardId) {
     final account = getAccountById(cardId);
     if (account == null || account.type != AccountType.debit) {
       return null;
     }
-    
+
     return {
       'id': account.id,
       'cardName': account.name,
@@ -1997,12 +2272,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   // ==================== INSTALLMENT HELPER METHODS ====================
-  
+
   /// Get installment info for a transaction
   /// Returns a map with currentInstallment and totalInstallments
   Map<String, int?>? getInstallmentInfo(String? installmentId) {
     if (installmentId == null) return null;
-    
+
     // Find the installment transaction
     final installment = _installments.firstWhere(
       (inst) => inst.id == installmentId,
@@ -2025,9 +2300,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
         nextDueDate: null,
       ),
     );
-    
+
     return {
-      'currentInstallment': installment.paidCount + 1, // Next installment to pay
+      'currentInstallment':
+          installment.paidCount + 1, // Next installment to pay
       'totalInstallments': installment.count,
     };
   }
@@ -2067,222 +2343,91 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   /// Update account balance locally for instant UI updates
-  Future<void> _updateAccountBalanceLocally(TransactionWithDetailsV2 transaction, {bool isDelete = false}) async {
-    try {
-      final multiplier = isDelete ? -1 : 1;
-      final absoluteAmount = transaction.amount.abs(); // Mutlak değer kullan
-      
-      switch (transaction.type) {
-        case TransactionType.income:
-          // For income: decrease debt (increase available limit) for credit cards
-          final targetAccount = _accounts.firstWhere(
-            (account) => account.id == transaction.targetAccountId,
-            orElse: () => _accounts.firstWhere(
-              (account) => account.id == transaction.sourceAccountId,
-              orElse: () => throw Exception('Target account not found'),
-            ),
-          );
-          
-          AccountModel updatedTargetAccount;
-          if (targetAccount.type == AccountType.credit) {
-            // Credit card: decrease debt (balance represents debt)
-            updatedTargetAccount = targetAccount.copyWith(
-              balance: targetAccount.balance - (absoluteAmount * multiplier),
-            );
-          } else {
-            // Debit/Cash: increase balance
-            updatedTargetAccount = targetAccount.copyWith(
-              balance: targetAccount.balance + (absoluteAmount * multiplier),
-            );
-          }
-          
-          final targetIndex = _accounts.indexWhere((a) => a.id == targetAccount.id);
-          if (targetIndex != -1) {
-            _accounts[targetIndex] = updatedTargetAccount;
-          }
-          break;
-          
-        case TransactionType.expense:
-          // For expense: increase debt (decrease available limit) for credit cards
-          final sourceAccount = _accounts.firstWhere(
-            (account) => account.id == transaction.sourceAccountId,
-            orElse: () => throw Exception('Source account not found'),
-          );
-          
-          AccountModel updatedSourceAccount;
-          if (sourceAccount.type == AccountType.credit) {
-            // Credit card: increase debt (balance represents debt)
-            updatedSourceAccount = sourceAccount.copyWith(
-              balance: sourceAccount.balance + (absoluteAmount * multiplier),
-            );
-          } else {
-            // Debit/Cash: decrease balance
-            updatedSourceAccount = sourceAccount.copyWith(
-              balance: sourceAccount.balance - (absoluteAmount * multiplier),
-            );
-          }
-          
-          final sourceIndex = _accounts.indexWhere((a) => a.id == sourceAccount.id);
-          if (sourceIndex != -1) {
-            _accounts[sourceIndex] = updatedSourceAccount;
-          }
-          break;
-          
-        case TransactionType.transfer:
-          // For transfer: only affect non-credit accounts, credit cards should not be affected by transfers
-          final sourceAccount = _accounts.firstWhere(
-            (account) => account.id == transaction.sourceAccountId,
-            orElse: () => throw Exception('Source account not found'),
-          );
-          
-          final targetAccount = _accounts.firstWhere(
-            (account) => account.id == transaction.targetAccountId,
-            orElse: () => throw Exception('Target account not found'),
-          );
-          
-          // Only process if neither account is a credit card
-          if (sourceAccount.type != AccountType.credit && targetAccount.type != AccountType.credit) {
-            final updatedSourceAccount = sourceAccount.copyWith(
-              balance: sourceAccount.balance - (absoluteAmount * multiplier),
-            );
-            
-            final updatedTargetAccount = targetAccount.copyWith(
-              balance: targetAccount.balance + (absoluteAmount * multiplier),
-            );
-            
-            final sourceIndex = _accounts.indexWhere((a) => a.id == sourceAccount.id);
-            final targetIndex = _accounts.indexWhere((a) => a.id == targetAccount.id);
-            
-            if (sourceIndex != -1) {
-              _accounts[sourceIndex] = updatedSourceAccount;
-            }
-            if (targetIndex != -1) {
-              _accounts[targetIndex] = updatedTargetAccount;
-            }
-          }
-          // If credit card is involved in transfer, do nothing (transfers don't affect credit limits)
-          break;
-          
-        case TransactionType.stock:
-          // For stock transactions: affect cash account balance
-          final sourceAccount = _accounts.firstWhere(
-            (account) => account.id == transaction.sourceAccountId,
-            orElse: () => throw Exception('Source account not found'),
-          );
-          
-          if (sourceAccount.type == AccountType.cash) {
-            final updatedSourceAccount = sourceAccount.copyWith(
-              balance: sourceAccount.balance + (transaction.amount * multiplier),
-            );
-            
-            final sourceIndex = _accounts.indexWhere((a) => a.id == sourceAccount.id);
-            if (sourceIndex != -1) {
-              _accounts[sourceIndex] = updatedSourceAccount;
-            }
-          }
-          break;
-      }
-      
-      // Update total balance immediately after account balance changes
-      _totalBalance = _accounts.fold(0.0, (sum, account) {
-        if (account.type == AccountType.credit) {
-          // Credit cards: balance is debt (negative), so subtract it
-          return sum - account.balance.abs();
-        } else {
-          // Cash and debit accounts: balance is asset (positive), so add it
-          return sum + account.balance;
-        }
-      });
-      
-      // Update total credit limit
-      _totalCreditLimit = _accounts.fold(0.0, (sum, account) => sum + (account.creditLimit ?? 0.0));
-      
-      // Update total used credit
-      _totalUsedCredit = _accounts.fold(0.0, (sum, account) {
-        if (account.type == AccountType.credit) {
-          return sum + (account.balance);
-        }
-        return sum;
-      });
-      
-    } catch (e) {
-    }
-  }
-
   /// Update summaries locally for instant UI updates
   Future<void> _updateSummariesLocally() async {
     try {
       // Calculate total balance
       _totalBalance = _accounts.fold(0.0, (sum, account) {
         if (account.type == AccountType.credit) {
-          // Credit cards: balance is debt (negative), so subtract it
-          return sum - account.balance.abs();
+          // Subtract only positive debt; ignore overpayments (negative balances)
+          return sum - account.balance.clamp(0.0, double.infinity);
         } else {
           // Cash and debit accounts: balance is asset (positive), so add it
           return sum + account.balance;
         }
       });
-      
+
       // Calculate total credit limit
-      _totalCreditLimit = _accounts.fold(0.0, (sum, account) => sum + (account.creditLimit ?? 0.0));
-      
+      _totalCreditLimit = _accounts.fold(
+        0.0,
+        (sum, account) => sum + (account.creditLimit ?? 0.0),
+      );
+
       // Calculate total used credit
       _totalUsedCredit = _accounts.fold(0.0, (sum, account) {
         if (account.type == AccountType.credit) {
-          return sum + (account.balance);
+          return sum + account.balance.clamp(0.0, double.infinity);
         }
         return sum;
       });
-      
+
       // Calculate monthly income and expense
       final now = DateTime.now();
       final startOfMonth = DateTime(now.year, now.month, 1);
       final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-      
+
       _monthlyIncome = _transactions
-          .where((t) => t.type == TransactionType.income && 
-                       t.transactionDate.isAfter(startOfMonth) && 
-                       t.transactionDate.isBefore(endOfMonth))
+          .where(
+            (t) =>
+                t.type == TransactionType.income &&
+                t.transactionDate.isAfter(startOfMonth) &&
+                t.transactionDate.isBefore(endOfMonth),
+          )
           .fold(0.0, (sum, t) => sum + t.amount);
-      
+
       _monthlyExpense = _transactions
-          .where((t) => t.type == TransactionType.expense && 
-                       t.transactionDate.isAfter(startOfMonth) && 
-                       t.transactionDate.isBefore(endOfMonth))
+          .where(
+            (t) =>
+                t.type == TransactionType.expense &&
+                t.transactionDate.isAfter(startOfMonth) &&
+                t.transactionDate.isBefore(endOfMonth),
+          )
           .fold(0.0, (sum, t) => sum + t.amount);
-      
+
       // Update balance summary with real-time calculations
       _updateBalanceSummary();
-      
+
       // Update monthly summary with real-time calculations
       _monthlySummary = {
         'totalIncome': _monthlyIncome,
         'totalExpenses': _monthlyExpense,
         'netAmount': _monthlyIncome - _monthlyExpense,
         'transactionCount': _transactions
-            .where((t) => t.transactionDate.isAfter(startOfMonth) && 
-                         t.transactionDate.isBefore(endOfMonth))
+            .where(
+              (t) =>
+                  t.transactionDate.isAfter(startOfMonth) &&
+                  t.transactionDate.isBefore(endOfMonth),
+            )
             .length,
       };
-      
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Update budget spent amounts in background
   Future<void> _updateBudgetSpentAmounts(String categoryId) async {
     try {
       final now = DateTime.now();
-      await UnifiedBudgetService.updateSpentAmountsForMonth(now.month, now.year);
-      
+      await UnifiedBudgetService.updateSpentAmountsForMonth(
+        now.month,
+        now.year,
+      );
+
       // Reload budgets to get updated spent amounts
       _budgets = await UnifiedBudgetService.getAllBudgets();
       notifyListeners();
-      
-      for (final budget in _budgets) {
-      }
-    } catch (e) {
-    }
+
+      for (final budget in _budgets) {}
+    } catch (e) {}
   }
 
   // ============================================================================
@@ -2296,18 +2441,18 @@ class UnifiedProviderV2 extends ChangeNotifier {
     int offset = 0,
   }) async {
     try {
-      
       // Debug: List all transactions first
       await UnifiedTransactionService.debugAllTransactions();
-      
+
       _isLoadingTransactions = true;
       notifyListeners();
 
-      final transactions = await UnifiedTransactionService.getCreditCardTransactions(
-        creditCardId: creditCardId,
-        limit: limit,
-        offset: offset,
-      );
+      final transactions =
+          await UnifiedTransactionService.getCreditCardTransactions(
+            creditCardId: creditCardId,
+            limit: limit,
+            offset: offset,
+          );
 
       return transactions;
     } catch (e) {
@@ -2328,11 +2473,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
       _isLoadingTransactions = true;
       notifyListeners();
 
-      final transactions = await UnifiedTransactionService.getDebitCardTransactions(
-        debitCardId: debitCardId,
-        limit: limit,
-        offset: offset,
-      );
+      final transactions =
+          await UnifiedTransactionService.getDebitCardTransactions(
+            debitCardId: debitCardId,
+            limit: limit,
+            offset: offset,
+          );
 
       return transactions;
     } catch (e) {
@@ -2353,11 +2499,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
       _isLoadingTransactions = true;
       notifyListeners();
 
-      final transactions = await UnifiedTransactionService.getCashAccountTransactions(
-        cashAccountId: cashAccountId,
-        limit: limit,
-        offset: offset,
-      );
+      final transactions =
+          await UnifiedTransactionService.getCashAccountTransactions(
+            cashAccountId: cashAccountId,
+            limit: limit,
+            offset: offset,
+          );
 
       return transactions;
     } catch (e) {
@@ -2379,8 +2526,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
       notifyListeners();
 
       // Get accounts of the specified type
-      final accounts = _accounts.where((account) => account.type == accountType).toList();
-      
+      final accounts = _accounts
+          .where((account) => account.type == accountType)
+          .toList();
+
       if (accounts.isEmpty) {
         return [];
       }
@@ -2388,16 +2537,19 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Get transactions for all accounts of this type
       List<TransactionWithDetailsV2> allTransactions = [];
       for (final account in accounts) {
-        final accountTransactions = await UnifiedTransactionService.getTransactionsByAccount(
-          accountId: account.id,
-          limit: limit,
-          offset: offset,
-        );
+        final accountTransactions =
+            await UnifiedTransactionService.getTransactionsByAccount(
+              accountId: account.id,
+              limit: limit,
+              offset: offset,
+            );
         allTransactions.addAll(accountTransactions);
       }
 
       // Sort by transaction date (newest first)
-      allTransactions.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+      allTransactions.sort(
+        (a, b) => b.transactionDate.compareTo(a.transactionDate),
+      );
 
       return allTransactions;
     } catch (e) {
@@ -2452,7 +2604,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
   // ===============================
 
   /// **Load current statement for a card**
-  Future<StatementSummary?> loadCurrentStatement(String cardId, int statementDay) async {
+  Future<StatementSummary?> loadCurrentStatement(
+    String cardId,
+    int statementDay,
+  ) async {
     try {
       _isLoadingStatements[cardId] = true;
       notifyListeners();
@@ -2464,14 +2619,17 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
       // Get current statement period
       final period = StatementService.getCurrentStatementPeriod(statementDay);
-      
+
       // Cache period for future use
       final periodKey = '${cardId}_$statementDay';
       _cachedPeriods[periodKey] = period;
 
       // Calculate statement summary
-      final statement = await StatementService.calculateStatementSummary(cardId, period);
-      
+      final statement = await StatementService.calculateStatementSummary(
+        cardId,
+        period,
+      );
+
       // Cache the result
       _currentStatements[cardId] = statement;
       _lastStatementUpdate = DateTime.now();
@@ -2479,8 +2637,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       notifyListeners();
       return statement;
     } catch (e) {
-      if (kDebugMode) {
-      }
+      if (kDebugMode) {}
       return null;
     } finally {
       _isLoadingStatements[cardId] = false;
@@ -2489,7 +2646,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   /// **Load future statements for a card**
-  Future<List<StatementSummary>> loadFutureStatements(String cardId, int statementDay) async {
+  Future<List<StatementSummary>> loadFutureStatements(
+    String cardId,
+    int statementDay,
+  ) async {
     try {
       _isLoadingStatements[cardId] = true;
       notifyListeners();
@@ -2500,17 +2660,23 @@ class UnifiedProviderV2 extends ChangeNotifier {
       }
 
       // Get future periods
-      final futurePeriods = await StatementService.getFuturePeriodsUntilLastInstallment(cardId, statementDay);
-      
+      final futurePeriods =
+          await StatementService.getFuturePeriodsUntilLastInstallment(
+            cardId,
+            statementDay,
+          );
+
       // Calculate summary for each period
       final futureStatements = <StatementSummary>[];
       for (final period in futurePeriods) {
         try {
-          final statement = await StatementService.calculateStatementSummary(cardId, period);
+          final statement = await StatementService.calculateStatementSummary(
+            cardId,
+            period,
+          );
           futureStatements.add(statement);
         } catch (e) {
-          if (kDebugMode) {
-          }
+          if (kDebugMode) {}
         }
       }
 
@@ -2521,8 +2687,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       notifyListeners();
       return futureStatements;
     } catch (e) {
-      if (kDebugMode) {
-      }
+      if (kDebugMode) {}
       return [];
     } finally {
       _isLoadingStatements[cardId] = false;
@@ -2531,7 +2696,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   /// **Load past statements for a card**
-  Future<List<StatementSummary>> loadPastStatements(String cardId, int statementDay) async {
+  Future<List<StatementSummary>> loadPastStatements(
+    String cardId,
+    int statementDay,
+  ) async {
     try {
       _isLoadingStatements[cardId] = true;
       notifyListeners();
@@ -2542,17 +2710,22 @@ class UnifiedProviderV2 extends ChangeNotifier {
       }
 
       // Get past periods
-      final pastPeriods = await StatementService.getAllPastStatementPeriods(cardId, statementDay);
-      
+      final pastPeriods = await StatementService.getAllPastStatementPeriods(
+        cardId,
+        statementDay,
+      );
+
       // Calculate summary for each period
       final pastStatements = <StatementSummary>[];
       for (final period in pastPeriods) {
         try {
-          final statement = await StatementService.calculateStatementSummary(cardId, period);
+          final statement = await StatementService.calculateStatementSummary(
+            cardId,
+            period,
+          );
           pastStatements.add(statement);
         } catch (e) {
-          if (kDebugMode) {
-          }
+          if (kDebugMode) {}
         }
       }
 
@@ -2563,8 +2736,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       notifyListeners();
       return pastStatements;
     } catch (e) {
-      if (kDebugMode) {
-      }
+      if (kDebugMode) {}
       return [];
     } finally {
       _isLoadingStatements[cardId] = false;
@@ -2579,7 +2751,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     _futureStatements.remove(cardId);
     _pastStatements.remove(cardId);
     _lastStatementUpdate = null;
-    
+
     // Load fresh data
     await Future.wait([
       loadCurrentStatement(cardId, statementDay),
@@ -2588,132 +2760,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     ]);
   }
 
-  /// **Mark statement as paid with optimistic update**
-  Future<bool> markStatementAsPaidOptimistic(String cardId, StatementPeriod period) async {
-    try {
-      // Optimistic update - update UI immediately
-      final currentStatement = _currentStatements[cardId];
-      if (currentStatement != null && currentStatement.period.startDate == period.startDate) {
-        final updatedStatement = currentStatement.copyWith(
-          isPaid: true,
-          paidAt: DateTime.now(),
-          period: currentStatement.period.copyWith(
-            isPaid: true,
-            paidAt: DateTime.now(),
-          ),
-        );
-        // Update StatementProvider's currentStatement (will also update cache)
-        if (_statementProvider != null) {
-          _statementProvider!.currentStatement = updatedStatement;
-        } else {
-          // Fallback: update cache directly if StatementProvider not available
-          _currentStatements[cardId] = updatedStatement;
-        }
-        
-        notifyListeners();
-      }
 
-      // Update credit card limit - reduce by statement amount when paid
-      final creditAccount = _accounts.firstWhere(
-        (account) => account.id == cardId && account.type == AccountType.credit,
-        orElse: () => throw Exception('Credit card not found'),
-      );
-      
-      // Get statement from StatementProvider if not found in cache
-      StatementSummary? statementToUse = currentStatement;
-      if (statementToUse == null && _statementProvider?.currentStatement != null) {
-        statementToUse = _statementProvider!.currentStatement;
-      }
-      
-      // Calculate payment amount (statement total amount)
-      final statementAmount = statementToUse?.totalAmount ?? 0.0;
-      
-      
-      // Reduce credit card balance by statement amount (payment reduces debt)
-      final newBalance = creditAccount.balance - statementAmount;
-      
-      final updatedCreditAccount = creditAccount.copyWith(
-        balance: newBalance, // Reduce debt by payment amount
-        updatedAt: DateTime.now(),
-      );
-      
-      // Update in local accounts list
-      final accountIndex = _accounts.indexWhere((a) => a.id == cardId);
-      if (accountIndex != -1) {
-        _accounts[accountIndex] = updatedCreditAccount;
-      }
-      
-      // Update in Firebase
-      await UnifiedAccountService.updateAccount(updatedCreditAccount);
-
-      // Update in Firebase
-      await StatementService.markStatementAsPaid(cardId, period);
-      
-      // Move from current to past statements
-      final updatedCurrentStatement = _currentStatements[cardId];
-      if (updatedCurrentStatement != null) {
-        _pastStatements[cardId] = [updatedCurrentStatement, ...(_pastStatements[cardId] ?? [])];
-        _currentStatements.remove(cardId);
-      }
-      
-      // Update summaries after account balance change
-      await _updateSummariesLocally();
-      
-      notifyListeners();
-      return true;
-    } catch (e) {
-      if (kDebugMode) {
-      }
-      
-      // Rollback optimistic update
-      await refreshAllStatements(cardId, period.statementDay);
-      return false;
-    }
-  }
-
-  /// **Unmark statement as paid with optimistic update**
-  Future<bool> unmarkStatementAsPaidOptimistic(String cardId, StatementPeriod period) async {
-    try {
-      // Find the statement in past statements
-      final pastStatements = _pastStatements[cardId] ?? [];
-      final statementIndex = pastStatements.indexWhere(
-        (s) => s.period.startDate == period.startDate,
-      );
-      
-      if (statementIndex == -1) return false;
-      
-      // Optimistic update - update UI immediately
-      final statement = pastStatements[statementIndex];
-      final updatedStatement = statement.copyWith(
-        isPaid: false,
-        paidAt: null,
-        period: statement.period.copyWith(
-          isPaid: false,
-          paidAt: null,
-        ),
-      );
-      
-      // Remove from past and add to current if it's the most recent unpaid
-      final updatedPastStatements = List<StatementSummary>.from(pastStatements);
-      updatedPastStatements.removeAt(statementIndex);
-      _pastStatements[cardId] = updatedPastStatements;
-      _currentStatements[cardId] = updatedStatement;
-      
-      notifyListeners();
-
-      // Update in Firebase
-      await StatementService.unmarkStatementAsPaid(cardId, period);
-      
-      return true;
-    } catch (e) {
-      if (kDebugMode) {
-      }
-      
-      // Rollback optimistic update
-      await refreshAllStatements(cardId, period.statementDay);
-      return false;
-    }
-  }
 
   /// **Clear statement cache**
   void clearStatementCache({String? cardId}) {
@@ -2731,7 +2778,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
       _isLoadingStatements.clear();
       _cachedPeriods.clear();
     }
-    
+
     _lastStatementUpdate = null;
     notifyListeners();
   }
@@ -2747,94 +2794,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
     }
   }
 
-  /// Process actual statement payment
-  /// 
-  /// This method handles the real payment process after user confirmation
-  Future<bool> processStatementPayment(
-    String cardId,
-    StatementPeriod period,
-    double amount,
-  ) async {
-    try {
-      // 1. Mark statement as paid in Firebase
-      await markStatementAsPaidOptimistic(cardId, period);
 
-      // 2. Create payment transaction record
-      await _createPaymentTransactionRecord(cardId, amount, period);
 
-      // 3. Update account balance (credit limit)
-      await _updateAccountBalanceAfterPayment(cardId, amount);
-
-      // 4. Refresh data
-      await loadTransactions();
-      await loadInstallments();
-      
-      return true;
-    } catch (e) {
-      // Debug log kaldırıldı
-      return false;
-    }
-  }
-
-  /// Create payment transaction record
-  Future<void> _createPaymentTransactionRecord(
-    String cardId,
-    double amount,
-    StatementPeriod period,
-  ) async {
-    try {
-      final paymentTransaction = {
-        'id': 'payment_${DateTime.now().millisecondsSinceEpoch}',
-        'user_id': FirebaseAuth.instance.currentUser?.uid,
-        'account_id': cardId,
-        'amount': amount,
-        'type': 'income', // Payment is income for the credit card
-        'category': 'payment',
-        'description': 'Ekstre Ödemesi - ${period.periodText}',
-        'transaction_date': DateUtils.toIso8601(DateTime.now()),
-        'created_at': DateUtils.toIso8601(DateTime.now()),
-        'is_installment': false,
-        'is_payment': true, // Mark as payment transaction
-        'statement_id': '${cardId}_${period.startDate.millisecondsSinceEpoch}',
-      };
-
-      await FirebaseFirestore.instance
-          .collection('transactions')
-          .doc(paymentTransaction['id'] as String)
-          .set(paymentTransaction);
-
-      // Debug log kaldırıldı
-    } catch (e) {
-      // Debug log kaldırıldı
-      rethrow;
-    }
-  }
-
-  /// Update account balance after payment
-  Future<void> _updateAccountBalanceAfterPayment(
-    String cardId,
-    double amount,
-  ) async {
-    try {
-      final account = accounts.firstWhere((acc) => acc.id == cardId);
-      final newBalance = account.balance + amount; // Add payment to balance (reduces debt)
-
-      final updatedAccount = account.copyWith(
-        balance: newBalance,
-        updatedAt: DateTime.now(),
-      );
-      
-      await UnifiedAccountService.updateAccount(updatedAccount);
-
-      // Update local cache
-      _updateAccountBalanceDirectly(cardId, newBalance);
-      
-      // Debug log kaldırıldı
-    } catch (e) {
-      // Debug log kaldırıldı
-      rethrow;
-    }
-  }
 
   /// Update account balance directly in local cache
   void _updateAccountBalanceDirectly(String cardId, double newBalance) {
@@ -2845,11 +2806,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
           balance: newBalance,
           updatedAt: DateTime.now(),
         );
-        
+
         // Update summaries
         _updateSummariesLocally();
         notifyListeners();
-        
+
         // Debug log kaldırıldı
       }
     } catch (e) {
@@ -2860,52 +2821,42 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// Optimistic UI update - Transaction'ı anında UI'den kaldır
   void removeTransactionOptimistically(String transactionId) {
     try {
-      // Transaction'ı bul ve hesap bakiyesini güncelle
-      final transactionToRemove = transactions.firstWhere(
+      // Transactions listesinden kaldır (balance güncellemesi deleteTransaction'da yapılacak)
+      transactions.removeWhere(
         (transaction) => transaction.id == transactionId,
-        orElse: () => throw Exception('Transaction not found'),
       );
-      
-      // Hesap bakiyesini geri al (transaction silinirse bakiye geri gelir)
-      if (transactionToRemove.sourceAccountId != null) {
-        _reverseAccountBalance(transactionToRemove.sourceAccountId!, transactionToRemove.amount);
-      }
-      
-      // Transactions listesinden kaldır
-      transactions.removeWhere((transaction) => transaction.id == transactionId);
-      
-      // Summaries'i güncelle (net değer, kartlar vs.)
-      _updateSummariesLocally();
-      
+
       // UI'yi anında güncelle
       notifyListeners();
-      
-      // Debug log'ları kaldırıldı
-      
     } catch (e) {
-      // Debug log kaldırıldı
+      debugPrint('❌ removeTransactionOptimistically error: $e');
     }
   }
 
   /// Stock transaction için özel optimistic update
-  void removeStockTransactionOptimistically(String transactionId, double amount, String? accountId) {
+  void removeStockTransactionOptimistically(
+    String transactionId,
+    double amount,
+    String? accountId,
+  ) {
     try {
       // Hesap bakiyesini geri al
       if (accountId != null) {
         _reverseAccountBalance(accountId, amount);
       }
-      
+
       // Transactions listesinden kaldır
-      transactions.removeWhere((transaction) => transaction.id == transactionId);
-      
+      transactions.removeWhere(
+        (transaction) => transaction.id == transactionId,
+      );
+
       // Summaries'i güncelle (net değer, kartlar vs.)
       _updateSummariesLocally();
-      
+
       // UI'yi anında güncelle
       notifyListeners();
-      
+
       // Debug log'ları kaldırıldı
-      
     } catch (e) {
       // Debug log kaldırıldı
     }
@@ -2919,12 +2870,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
         // Transaction amount'u ters çevir (silinen transaction'ın etkisini geri al)
         final reversedAmount = -transactionAmount;
         final newBalance = accounts[accountIndex].balance + reversedAmount;
-        
+
         accounts[accountIndex] = accounts[accountIndex].copyWith(
           balance: newBalance,
           updatedAt: DateTime.now(),
         );
-        
+
         // Debug log kaldırıldı
       }
     } catch (e) {
@@ -2941,4 +2892,123 @@ class UnifiedProviderV2 extends ChangeNotifier {
       debugPrint('Error refreshing transactions: $e');
     }
   }
-} 
+
+  // ==================== MOCK DATA METHODS ====================
+  // For Play Store screenshots only - DO NOT USE IN PRODUCTION
+
+  /// Load mock data for screenshots
+  void loadMockData(
+    List<AccountModel> mockAccounts,
+    List<TransactionModelV2> mockTransactions,
+  ) {
+    debugPrint('📸 Loading mock data for screenshots...');
+
+    // Set accounts
+    _accounts = mockAccounts;
+
+    // Convert transactions to TransactionWithDetailsV2
+    _transactions = mockTransactions.map((tx) {
+      // Find account details
+      final account = _accounts.firstWhere(
+        (acc) => acc.id == tx.sourceAccountId,
+        orElse: () => _accounts.first,
+      );
+
+      // Find category (use categoryId as category name for mock data)
+      final categoryName = tx.categoryId ?? 'Other';
+
+      return TransactionWithDetailsV2(
+        id: tx.id,
+        userId: tx.userId,
+        type: tx.type,
+        amount: tx.amount,
+        description: tx.description,
+        transactionDate: tx.transactionDate,
+        categoryId: tx.categoryId,
+        sourceAccountId: tx.sourceAccountId,
+        targetAccountId: tx.targetAccountId,
+        installmentId: tx.installmentId,
+        isRecurring: tx.isRecurring,
+        notes: tx.notes,
+        isPaid: tx.isPaid,
+        stockSymbol: tx.stockSymbol,
+        stockName: tx.stockName,
+        stockQuantity: tx.stockQuantity,
+        stockPrice: tx.stockPrice,
+        createdAt: tx.createdAt,
+        updatedAt: tx.updatedAt,
+        // Additional fields for display
+        categoryName: categoryName,
+        sourceAccountName: account.name,
+        sourceAccountType: account.type.value,
+      );
+    }).toList();
+
+    // Calculate summaries
+    _updateSummariesLocally();
+
+    // Mark as loaded
+    _isDataCached = true;
+    _isLoading = false;
+
+    notifyListeners();
+
+    debugPrint('✅ Mock data loaded successfully!');
+    debugPrint('   📊 Accounts: ${_accounts.length}');
+    debugPrint('   💸 Transactions: ${_transactions.length}');
+  }
+
+  /// Clear mock data and reload from Firebase
+  Future<void> clearMockDataAndReload() async {
+    debugPrint('🧹 Clearing mock data and reloading from Firebase...');
+
+    // Clear all data
+    _accounts.clear();
+    _transactions.clear();
+    _categories.clear();
+    _installments.clear();
+    _budgets.clear();
+
+    // Reset cache
+    _isDataCached = false;
+
+    // Clear summaries
+    _balanceSummary = {
+      'totalAssets': 0.0,
+      'totalDebts': 0.0,
+      'netWorth': 0.0,
+      'availableCredit': 0.0,
+    };
+
+    _monthlySummary = {
+      'totalIncome': 0.0,
+      'totalExpenses': 0.0,
+      'netAmount': 0.0,
+      'transactionCount': 0,
+    };
+
+    notifyListeners();
+
+    // Reload from Firebase
+    await loadAllData(forceRefresh: true);
+
+    debugPrint('✅ Real data reloaded from Firebase');
+  }
+
+  /// Load profile data (profile image, user info)
+  Future<void> _loadProfileData() async {
+    try {
+      // Profil verilerini doğrudan yükle
+      final user = FirebaseAuthService.currentUser;
+      if (user != null) {
+        // Profil fotoğrafı URL'sini cache'den yükle
+        await ProfileImageService.instance.loadCachedImageUrl();
+        final profileImageUrl = await ProfileImageService.instance.getProfileImageUrl();
+        
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading profile data: $e');
+      // Profil verileri yüklenemezse sessizce devam et
+    }
+  }
+}
