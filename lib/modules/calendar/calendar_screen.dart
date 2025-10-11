@@ -48,19 +48,32 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   String _getLocalizedMonthName(int month) {
     switch (month) {
-      case 1: return l10n.january;
-      case 2: return l10n.february;
-      case 3: return l10n.march;
-      case 4: return l10n.april;
-      case 5: return l10n.may;
-      case 6: return l10n.june;
-      case 7: return l10n.july;
-      case 8: return l10n.august;
-      case 9: return l10n.september;
-      case 10: return l10n.october;
-      case 11: return l10n.november;
-      case 12: return l10n.december;
-      default: return '';
+      case 1:
+        return l10n.january;
+      case 2:
+        return l10n.february;
+      case 3:
+        return l10n.march;
+      case 4:
+        return l10n.april;
+      case 5:
+        return l10n.may;
+      case 6:
+        return l10n.june;
+      case 7:
+        return l10n.july;
+      case 8:
+        return l10n.august;
+      case 9:
+        return l10n.september;
+      case 10:
+        return l10n.october;
+      case 11:
+        return l10n.november;
+      case 12:
+        return l10n.december;
+      default:
+        return '';
     }
   }
 
@@ -78,24 +91,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
-  Map<String, double> _getDailyAmounts(List<TransactionWithDetailsV2> transactions) {
+  Map<String, double> _getDailyAmounts(
+    List<TransactionWithDetailsV2> transactions,
+  ) {
     final Map<String, double> dailyAmounts = {};
-    
+
     for (final transaction in transactions) {
-      final dateKey = DateFormat('yyyy-MM-dd').format(transaction.transactionDate);
+      final dateKey = DateFormat(
+        'yyyy-MM-dd',
+      ).format(transaction.transactionDate);
       final amount = transaction.signedAmount;
-      
+
       if (dailyAmounts.containsKey(dateKey)) {
         dailyAmounts[dateKey] = dailyAmounts[dateKey]! + amount;
       } else {
         dailyAmounts[dateKey] = amount;
       }
     }
-    
+
     return dailyAmounts;
   }
 
-  void _showDayTransactions(DateTime date, List<TransactionWithDetailsV2> dayTransactions) {
+  void _showDayTransactions(
+    DateTime date,
+    List<TransactionWithDetailsV2> dayTransactions,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -111,9 +131,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -143,15 +165,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
         builder: (context, provider, child) {
           final transactions = provider.transactions;
           final dailyAmounts = _getDailyAmounts(transactions);
-          
+
           return Column(
             children: [
               // Month Navigation
               _buildMonthNavigation(isDark),
-              
+
               // Analysis Section
               _buildAnalysisSection(dailyAmounts, transactions, isDark),
-              
+
               // Calendar Grid
               Expanded(
                 child: _buildCalendarGrid(dailyAmounts, transactions, isDark),
@@ -196,9 +218,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildAnalysisSection(Map<String, double> dailyAmounts, List<TransactionWithDetailsV2> transactions, bool isDark) {
+  Widget _buildAnalysisSection(
+    Map<String, double> dailyAmounts,
+    List<TransactionWithDetailsV2> transactions,
+    bool isDark,
+  ) {
     final monthlyStats = _calculateMonthlyStats(dailyAmounts, transactions);
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.all(16),
@@ -206,7 +232,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? AppColors.secondary.withValues(alpha: 0.1) : AppColors.secondary.withValues(alpha: 0.05),
+          color: isDark
+              ? AppColors.secondary.withValues(alpha: 0.1)
+              : AppColors.secondary.withValues(alpha: 0.05),
           width: 1,
         ),
       ),
@@ -225,7 +253,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           Container(
             width: 1,
             height: 32,
-            color: isDark ? AppColors.secondary.withValues(alpha: 0.2) : AppColors.secondary.withValues(alpha: 0.1),
+            color: isDark
+                ? AppColors.secondary.withValues(alpha: 0.2)
+                : AppColors.secondary.withValues(alpha: 0.1),
           ),
           // Expense
           Expanded(
@@ -240,14 +270,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
           Container(
             width: 1,
             height: 32,
-            color: isDark ? AppColors.secondary.withValues(alpha: 0.2) : AppColors.secondary.withValues(alpha: 0.1),
+            color: isDark
+                ? AppColors.secondary.withValues(alpha: 0.2)
+                : AppColors.secondary.withValues(alpha: 0.1),
           ),
           // Net Balance
           Expanded(
             child: _buildCompactStat(
               label: l10n.net,
               amount: monthlyStats['netBalance']!,
-              color: monthlyStats['netBalance']! >= 0 ? Colors.blue : Colors.orange,
+              color: monthlyStats['netBalance']! >= 0
+                  ? Colors.blue
+                  : Colors.orange,
               isDark: isDark,
             ),
           ),
@@ -256,16 +290,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Map<String, double> _calculateMonthlyStats(Map<String, double> dailyAmounts, List<TransactionWithDetailsV2> transactions) {
+  Map<String, double> _calculateMonthlyStats(
+    Map<String, double> dailyAmounts,
+    List<TransactionWithDetailsV2> transactions,
+  ) {
     double totalIncome = 0.0;
     double totalExpense = 0.0;
-    
+
     for (final transaction in transactions) {
-      final transactionDate = DateTime(transaction.transactionDate.year, transaction.transactionDate.month, transaction.transactionDate.day);
+      final transactionDate = DateTime(
+        transaction.transactionDate.year,
+        transaction.transactionDate.month,
+        transaction.transactionDate.day,
+      );
       final monthDate = DateTime(_currentMonth.year, _currentMonth.month, 1);
-      
+
       // Check if transaction is in current month
-      if (transactionDate.year == monthDate.year && transactionDate.month == monthDate.month) {
+      if (transactionDate.year == monthDate.year &&
+          transactionDate.month == monthDate.month) {
         if (transaction.signedAmount > 0) {
           totalIncome += transaction.signedAmount;
         } else {
@@ -273,7 +315,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         }
       }
     }
-    
+
     return {
       'totalIncome': totalIncome,
       'totalExpense': totalExpense,
@@ -299,7 +341,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount),
+          Provider.of<ThemeProvider>(
+            context,
+            listen: false,
+          ).formatAmount(amount),
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -311,14 +356,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildCalendarGrid(Map<String, double> dailyAmounts, List<TransactionWithDetailsV2> transactions, bool isDark) {
+  Widget _buildCalendarGrid(
+    Map<String, double> dailyAmounts,
+    List<TransactionWithDetailsV2> transactions,
+    bool isDark,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
           // Weekday Headers
           _buildWeekdayHeaders(isDark),
-          
+
           // Calendar Days
           Expanded(
             child: GridView.builder(
@@ -331,19 +380,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 if (index < _firstWeekday - 1) {
                   return const SizedBox(); // Empty cells for days before month start
                 }
-                
+
                 final day = index - (_firstWeekday - 1) + 1;
-                final date = DateTime(_currentMonth.year, _currentMonth.month, day);
+                final date = DateTime(
+                  _currentMonth.year,
+                  _currentMonth.month,
+                  day,
+                );
                 final dateKey = DateFormat('yyyy-MM-dd').format(date);
                 final amount = dailyAmounts[dateKey] ?? 0.0;
-                
+
                 // Get transactions for this day
                 final dayTransactions = transactions.where((t) {
-                  final transactionDate = DateTime(t.transactionDate.year, t.transactionDate.month, t.transactionDate.day);
+                  final transactionDate = DateTime(
+                    t.transactionDate.year,
+                    t.transactionDate.month,
+                    t.transactionDate.day,
+                  );
                   return transactionDate.isAtSameMomentAs(date);
                 }).toList();
-                
-                return _buildDayCell(date, day, amount, dayTransactions, isDark);
+
+                return _buildDayCell(
+                  date,
+                  day,
+                  amount,
+                  dayTransactions,
+                  isDark,
+                );
               },
             ),
           ),
@@ -362,59 +425,75 @@ class _CalendarScreenState extends State<CalendarScreen> {
       l10n.saturdayShort,
       l10n.sundayShort,
     ];
-    
+
     return Row(
-      children: weekdays.map((day) => Expanded(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Text(
-            day,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: isDark ? AppColors.secondary : AppColors.secondary,
+      children: weekdays
+          .map(
+            (day) => Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  day,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? AppColors.secondary : AppColors.secondary,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      )).toList(),
+          )
+          .toList(),
     );
   }
 
-  Widget _buildDayCell(DateTime date, int day, double amount, List<TransactionWithDetailsV2> dayTransactions, bool isDark) {
+  Widget _buildDayCell(
+    DateTime date,
+    int day,
+    double amount,
+    List<TransactionWithDetailsV2> dayTransactions,
+    bool isDark,
+  ) {
     final isToday = date.isAtSameMomentAs(DateTime.now());
     final isIncome = amount > 0;
     final isExpense = amount < 0;
     final hasTransactions = dayTransactions.isNotEmpty;
-    
+
     return GestureDetector(
-      onTap: hasTransactions ? () => _showDayTransactions(date, dayTransactions) : null,
+      onTap: hasTransactions
+          ? () => _showDayTransactions(date, dayTransactions)
+          : null,
       child: Container(
         margin: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
-          color: isToday 
-            ? AppColors.primary.withValues(alpha: 0.1)
-            : isDark ? AppColors.darkCard : AppColors.lightCard,
+          color: isToday
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : isDark
+              ? AppColors.darkCard
+              : AppColors.lightCard,
           borderRadius: BorderRadius.circular(10),
-          border: isToday 
-            ? Border.all(color: AppColors.primary, width: 1.5)
-            : hasTransactions
+          border: isToday
+              ? Border.all(color: AppColors.primary, width: 1.5)
+              : hasTransactions
               ? Border.all(
-                  color: isDark 
-                    ? AppColors.secondary.withValues(alpha: 0.2) 
-                    : AppColors.secondary.withValues(alpha: 0.1), 
-                  width: 0.5
+                  color: isDark
+                      ? AppColors.secondary.withValues(alpha: 0.2)
+                      : AppColors.secondary.withValues(alpha: 0.1),
+                  width: 0.5,
                 )
               : null,
-          boxShadow: hasTransactions ? [
-            BoxShadow(
-              color: isDark 
-                ? Colors.black.withValues(alpha: 0.1)
-                : Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 2,
-              offset: const Offset(0, 1),
-            ),
-          ] : null,
+          boxShadow: hasTransactions
+              ? [
+                  BoxShadow(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.1)
+                        : Colors.grey.withValues(alpha: 0.1),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -425,16 +504,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: isToday ? FontWeight.w700 : FontWeight.w600,
-                color: isToday 
-                  ? AppColors.primary
-                  : isDark ? AppColors.darkText : AppColors.lightText,
+                color: isToday
+                    ? AppColors.primary
+                    : isDark
+                    ? AppColors.darkText
+                    : AppColors.lightText,
               ),
             ),
-            
+
             // Amount display with smart formatting
             if (amount != 0) ...[
               const SizedBox(height: 3),
-              _buildSmartAmountDisplay(amount, isIncome, isExpense, isDark, hasTransactions),
+              _buildSmartAmountDisplay(
+                amount,
+                isIncome,
+                isExpense,
+                isDark,
+                hasTransactions,
+              ),
             ],
           ],
         ),
@@ -442,23 +529,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildSmartAmountDisplay(double amount, bool isIncome, bool isExpense, bool isDark, bool hasTransactions) {
+  Widget _buildSmartAmountDisplay(
+    double amount,
+    bool isIncome,
+    bool isExpense,
+    bool isDark,
+    bool hasTransactions,
+  ) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final formattedAmount = themeProvider.formatAmount(amount);
-    
+
     // Determine if we need compact display
     final needsCompactDisplay = _needsCompactDisplay(formattedAmount);
-    
+
     if (needsCompactDisplay) {
       return _buildCompactAmountDisplay(amount, isIncome, isExpense, isDark);
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: isIncome 
-          ? Colors.green.withValues(alpha: 0.1)
-          : isExpense 
+        color: isIncome
+            ? Colors.green.withValues(alpha: 0.1)
+            : isExpense
             ? Colors.red.withValues(alpha: 0.1)
             : Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
@@ -468,11 +561,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
         style: GoogleFonts.inter(
           fontSize: 8,
           fontWeight: FontWeight.w700,
-          color: isIncome 
-            ? Colors.green.shade600
-            : isExpense 
+          color: isIncome
+              ? Colors.green.shade600
+              : isExpense
               ? Colors.red.shade600
-              : isDark ? AppColors.darkText : AppColors.lightText,
+              : isDark
+              ? AppColors.darkText
+              : AppColors.lightText,
         ),
         textAlign: TextAlign.center,
         maxLines: 1,
@@ -481,16 +576,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildCompactAmountDisplay(double amount, bool isIncome, bool isExpense, bool isDark) {
+  Widget _buildCompactAmountDisplay(
+    double amount,
+    bool isIncome,
+    bool isExpense,
+    bool isDark,
+  ) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final compactAmount = _formatCompactAmount(amount);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
       decoration: BoxDecoration(
-        color: isIncome 
-          ? Colors.green.withValues(alpha: 0.15)
-          : isExpense 
+        color: isIncome
+            ? Colors.green.withValues(alpha: 0.15)
+            : isExpense
             ? Colors.red.withValues(alpha: 0.15)
             : Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
@@ -500,16 +600,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
         style: GoogleFonts.inter(
           fontSize: 8,
           fontWeight: FontWeight.w700,
-          color: isIncome 
-            ? Colors.green.shade600
-            : isExpense 
+          color: isIncome
+              ? Colors.green.shade600
+              : isExpense
               ? Colors.red.shade600
-              : isDark ? AppColors.darkText : AppColors.lightText,
+              : isDark
+              ? AppColors.darkText
+              : AppColors.lightText,
         ),
       ),
     );
   }
-
 
   bool _needsCompactDisplay(String formattedAmount) {
     // Check if the formatted amount is too long for the cell
@@ -520,15 +621,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final absAmount = amount.abs();
     final isNegative = amount < 0;
     final sign = isNegative ? '-' : '';
-    
+
     if (absAmount >= 1000000) {
-      return '${sign}₺${(absAmount / 1000000).toStringAsFixed(1)}M';
+      return '$sign₺${(absAmount / 1000000).toStringAsFixed(1)}M';
     } else if (absAmount >= 1000) {
-      return '${sign}₺${(absAmount / 1000).toStringAsFixed(1)}K';
+      return '$sign₺${(absAmount / 1000).toStringAsFixed(1)}K';
     } else if (absAmount >= 100) {
-      return '${sign}₺${absAmount.toStringAsFixed(0)}';
+      return '$sign₺${absAmount.toStringAsFixed(0)}';
     } else {
-      return '${sign}₺${absAmount.toStringAsFixed(1)}';
+      return '$sign₺${absAmount.toStringAsFixed(1)}';
     }
   }
 }
@@ -546,27 +647,43 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
 
   String _getLocalizedMonthName(int month) {
     switch (month) {
-      case 1: return l10n.january;
-      case 2: return l10n.february;
-      case 3: return l10n.march;
-      case 4: return l10n.april;
-      case 5: return l10n.may;
-      case 6: return l10n.june;
-      case 7: return l10n.july;
-      case 8: return l10n.august;
-      case 9: return l10n.september;
-      case 10: return l10n.october;
-      case 11: return l10n.november;
-      case 12: return l10n.december;
-      default: return '';
+      case 1:
+        return l10n.january;
+      case 2:
+        return l10n.february;
+      case 3:
+        return l10n.march;
+      case 4:
+        return l10n.april;
+      case 5:
+        return l10n.may;
+      case 6:
+        return l10n.june;
+      case 7:
+        return l10n.july;
+      case 8:
+        return l10n.august;
+      case 9:
+        return l10n.september;
+      case 10:
+        return l10n.october;
+      case 11:
+        return l10n.november;
+      case 12:
+        return l10n.december;
+      default:
+        return '';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final totalAmount = transactions.fold(0.0, (sum, t) => sum + t.signedAmount);
-    
+    final totalAmount = transactions.fold(
+      0.0,
+      (sum, t) => sum + t.signedAmount,
+    );
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
@@ -585,7 +702,7 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           // Header
           Padding(
             padding: const EdgeInsets.all(20),
@@ -600,7 +717,9 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? AppColors.darkText : AppColors.lightText,
+                        color: isDark
+                            ? AppColors.darkText
+                            : AppColors.lightText,
                       ),
                     ),
                     Text(
@@ -614,7 +733,10 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  Provider.of<ThemeProvider>(context, listen: false).formatAmount(totalAmount),
+                  Provider.of<ThemeProvider>(
+                    context,
+                    listen: false,
+                  ).formatAmount(totalAmount),
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -624,35 +746,46 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Transactions List
           Expanded(
             child: transactions.isEmpty
-              ? Center(
-                  child: Text(
-                    l10n.noTransactionsFound,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.secondary,
+                ? Center(
+                    child: Text(
+                      l10n.noTransactionsFound,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondary,
+                      ),
                     ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    itemCount: transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = transactions[index];
+                      return _buildTransactionItemWithDesignSystem(
+                        context,
+                        transaction,
+                        isDark,
+                      );
+                    },
                   ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: transactions.length,
-                  itemBuilder: (context, index) {
-                    final transaction = transactions[index];
-                    return _buildTransactionItemWithDesignSystem(context, transaction, isDark);
-                  },
-                ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTransactionItem(BuildContext context, TransactionWithDetailsV2 transaction, bool isDark) {
+  Widget _buildTransactionItem(
+    BuildContext context,
+    TransactionWithDetailsV2 transaction,
+    bool isDark,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -660,7 +793,9 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? AppColors.secondary.withValues(alpha: 0.3) : AppColors.secondary.withValues(alpha: 0.2),
+          color: isDark
+              ? AppColors.secondary.withValues(alpha: 0.3)
+              : AppColors.secondary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -680,9 +815,9 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
               size: 20,
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Content
           Expanded(
             child: Column(
@@ -710,10 +845,13 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Amount
           Text(
-            Provider.of<ThemeProvider>(context, listen: false).formatAmount(transaction.signedAmount),
+            Provider.of<ThemeProvider>(
+              context,
+              listen: false,
+            ).formatAmount(transaction.signedAmount),
             style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -725,7 +863,11 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionItemWithDesignSystem(BuildContext context, TransactionWithDetailsV2 transaction, bool isDark) {
+  Widget _buildTransactionItemWithDesignSystem(
+    BuildContext context,
+    TransactionWithDetailsV2 transaction,
+    bool isDark,
+  ) {
     // Convert V2 transaction type to design system type
     TDS.TransactionType transactionType;
     switch (transaction.type) {
@@ -739,22 +881,25 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
         transactionType = TDS.TransactionType.transfer;
         break;
       case TransactionType.stock:
-        transactionType = TDS.TransactionType.income; // Treat stock as income for display
+        transactionType =
+            TDS.TransactionType.income; // Treat stock as income for display
         break;
     }
 
     // Get category info from provider
     final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-    final category = transaction.categoryId != null 
+    final category = transaction.categoryId != null
         ? providerV2.getCategoryById(transaction.categoryId!)
         : null;
 
     // Get category icon using CategoryIconService
     IconData? categoryIcon;
     if (transaction.categoryName != null) {
-      categoryIcon = CategoryIconService.getIcon(transaction.categoryName!.toLowerCase());
-    } 
-    
+      categoryIcon = CategoryIconService.getIcon(
+        transaction.categoryName!.toLowerCase(),
+      );
+    }
+
     if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
       if (category?.icon != null && category!.icon != 'category') {
         categoryIcon = CategoryIconService.getIcon(category.iconName);
@@ -779,6 +924,7 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: TDS.TransactionDesignSystem.buildTransactionItemFromV2(
+        context: context,
         transaction: transaction,
         isDark: isDark,
         time: time,

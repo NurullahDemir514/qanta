@@ -31,20 +31,17 @@ class SpendingTrendsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 2),
             spreadRadius: 0,
           ),
         ],
-        border: isDark 
-          ? Border.all(
-              color: const Color(0xFF38383A),
-              width: 0.5,
-            )
-          : null,
+        border: isDark
+            ? Border.all(color: const Color(0xFF38383A), width: 0.5)
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -60,21 +57,21 @@ class SpendingTrendsCard extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Simple Bar Chart
             _buildSimpleChart(context),
-            
+
             const SizedBox(height: 20),
-            
+
             // Monthly Trend List
             ...statistics.monthlyTrends.take(6).map((trend) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildTrendItem(context, trend),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -84,20 +81,20 @@ class SpendingTrendsCard extends StatelessWidget {
   Widget _buildSimpleChart(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final trends = statistics.monthlyTrends.take(6).toList();
-    
+
     if (trends.isEmpty) return const SizedBox.shrink();
 
     // Find max value for scaling
-    final maxExpense = trends.map((t) => t.expenses).reduce((a, b) => a > b ? a : b);
+    final maxExpense = trends
+        .map((t) => t.expenses)
+        .reduce((a, b) => a > b ? a : b);
     if (maxExpense == 0) return const SizedBox.shrink();
 
     return Container(
       height: 120,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark 
-          ? const Color(0xFF2C2C2E)
-          : const Color(0xFFF2F2F7),
+        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -105,7 +102,7 @@ class SpendingTrendsCard extends StatelessWidget {
         children: trends.map((trend) {
           final height = (trend.expenses / maxExpense) * 80;
           final monthName = _getMonthName(trend.monthYear);
-          
+
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -121,9 +118,9 @@ class SpendingTrendsCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Month label
                   Text(
                     monthName,
@@ -144,27 +141,29 @@ class SpendingTrendsCard extends StatelessWidget {
 
   Widget _buildTrendItem(BuildContext context, MonthlyTrend trend) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
-    final formatter = NumberFormat.currency(locale: currency.locale, symbol: currency.symbol);
+    final currency = Provider.of<ThemeProvider>(
+      context,
+      listen: false,
+    ).currency;
+    final formatter = NumberFormat.currency(
+      locale: currency.locale,
+      symbol: currency.symbol,
+    );
     final monthName = _getMonthName(trend.monthYear);
-    
+
     // Calculate trend indicators
     final isPositive = trend.netBalance >= 0;
-    final trendColor = isPositive 
-      ? const Color(0xFF00FFB3)
-      : const Color(0xFFFF6B6B);
+    final trendColor = isPositive
+        ? const Color(0xFF00FFB3)
+        : const Color(0xFFFF6B6B);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark 
-          ? const Color(0xFF2C2C2E)
-          : const Color(0xFFF8F9FA),
+        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8F9FA),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark 
-            ? const Color(0xFF38383A)
-            : const Color(0xFFE5E5EA),
+          color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
           width: 0.5,
         ),
       ),
@@ -195,7 +194,7 @@ class SpendingTrendsCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Income/Expense
           Expanded(
             flex: 3,
@@ -244,9 +243,9 @@ class SpendingTrendsCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Net Balance
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -288,20 +287,17 @@ class SpendingTrendsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 2),
             spreadRadius: 0,
           ),
         ],
-        border: isDark 
-          ? Border.all(
-              color: const Color(0xFF38383A),
-              width: 0.5,
-            )
-          : null,
+        border: isDark
+            ? Border.all(color: const Color(0xFF38383A), width: 0.5)
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -340,14 +336,14 @@ class SpendingTrendsCard extends StatelessWidget {
     try {
       final parts = monthYear.split('-');
       if (parts.length != 2) return monthYear;
-      
+
       final year = int.parse(parts[0]);
       final month = int.parse(parts[1]);
-      
+
       final date = DateTime(year, month);
       return DateFormat('MMM yyyy', 'tr_TR').format(date);
     } catch (e) {
       return monthYear;
     }
   }
-} 
+}

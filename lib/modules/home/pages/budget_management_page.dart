@@ -14,11 +14,8 @@ import '../../../core/theme/theme_provider.dart';
 
 class BudgetManagementPage extends StatefulWidget {
   final VoidCallback? onBudgetSaved;
-  
-  const BudgetManagementPage({
-    super.key,
-    this.onBudgetSaved,
-  });
+
+  const BudgetManagementPage({super.key, this.onBudgetSaved});
 
   @override
   State<BudgetManagementPage> createState() => _BudgetManagementPageState();
@@ -36,11 +33,11 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
 
   /// Calculate budget stats from budget model
   BudgetCategoryStats _calculateBudgetStats(BudgetModel budget) {
-    final percentage = budget.monthlyLimit > 0 
-        ? (budget.spentAmount / budget.monthlyLimit) * 100 
+    final percentage = budget.monthlyLimit > 0
+        ? (budget.spentAmount / budget.monthlyLimit) * 100
         : 0.0;
     final isOverBudget = budget.spentAmount > budget.monthlyLimit;
-    
+
     return BudgetCategoryStats(
       categoryId: budget.categoryId,
       categoryName: budget.categoryName,
@@ -58,28 +55,30 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     super.dispose();
   }
 
-
   bool _canSave() {
-    return _selectedCategoryName != null && 
-           _selectedCategoryName!.isNotEmpty && 
-           _limitController.text.isNotEmpty;
+    return _selectedCategoryName != null &&
+        _selectedCategoryName!.isNotEmpty &&
+        _limitController.text.isNotEmpty;
   }
 
   Future<void> _saveBudget() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_canSave()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lütfen kategori adı girin ve limit belirleyin')),
+        SnackBar(
+          content: Text(l10n.pleaseEnterCategoryAndLimit),
+        ),
       );
       return;
     }
 
     try {
       final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
+
       final limit = double.tryParse(_limitController.text.replaceAll(',', ''));
       if (limit == null || limit <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Geçerli bir limit girin')),
+          SnackBar(content: Text(l10n.enterValidLimit)),
         );
         return;
       }
@@ -97,14 +96,18 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
           _selectedCategoryName = null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Limit başarıyla kaydedildi')),
+          SnackBar(content: Text(l10n.limitSavedSuccessfully)),
         );
         widget.onBudgetSaved?.call();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorOccurred(e.toString()))),
+          SnackBar(
+            content: Text(
+              '${AppLocalizations.of(context)!.errorOccurred}: ${e.toString()}',
+            ),
+          ),
         );
       }
     }
@@ -113,15 +116,16 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<UnifiedProviderV2>(
       builder: (context, provider, child) {
         final currentBudgets = provider.currentMonthBudgets;
         final isLoading = provider.isLoadingBudgets;
-        
+
         return Scaffold(
-          backgroundColor: isDark 
-            ? const Color(0xFF000000) 
-            : const Color(0xFFF2F2F7),
+          backgroundColor: isDark
+              ? const Color(0xFF000000)
+              : const Color(0xFFF2F2F7),
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(64),
             child: Container(
@@ -137,13 +141,13 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                         size: 26,
                       ),
                       splashRadius: 24,
-                      tooltip: 'Geri',
+                      tooltip: l10n.back,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Center(
                         child: Text(
-                          'Limit Yönetimi',
+                          l10n.limitManagement,
                           style: GoogleFonts.inter(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -160,31 +164,31 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
             ),
           ),
           body: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF007AFF),
+              ? const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF007AFF)),
+                )
+              : currentBudgets.isEmpty
+              ? _buildEmptyState(isDark)
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: currentBudgets.length,
+                  itemBuilder: (context, index) {
+                    final budget = currentBudgets[index];
+                    final stat = _calculateBudgetStats(budget);
+                    return _buildBudgetCard(
+                      stat,
+                      isDark,
+                      index,
+                      currentBudgets.length,
+                    );
+                  },
                 ),
-              )
-            : currentBudgets.isEmpty
-                ? _buildEmptyState(isDark)
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: currentBudgets.length,
-                    itemBuilder: (context, index) {
-                      final budget = currentBudgets[index];
-                      final stat = _calculateBudgetStats(budget);
-                      return _buildBudgetCard(stat, isDark, index, currentBudgets.length);
-                    },
-                  ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showAddBudgetBottomSheet(context),
             backgroundColor: const Color(0xFF6D6D70),
             foregroundColor: Colors.white,
             elevation: 8,
-            child: const Icon(
-              Icons.add,
-              size: 28,
-            ),
+            child: const Icon(Icons.add, size: 28),
           ),
         );
       },
@@ -206,6 +210,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   }
 
   Widget _buildEmptyState(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -217,7 +222,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Henüz limit belirlenmemiş',
+            l10n.noLimitsSetYet,
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -226,7 +231,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Kategoriler için aylık harcama limiti\nbelirleyerek limitinizi kontrol edin',
+            l10n.setMonthlySpendingLimits,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 16,
@@ -238,10 +243,20 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     );
   }
 
-  Widget _buildBudgetCard(BudgetCategoryStats stat, bool isDark, int index, int totalCount) {
+  Widget _buildBudgetCard(
+    BudgetCategoryStats stat,
+    bool isDark,
+    int index,
+    int totalCount,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
     final numberFormat = NumberFormat('#,##0', 'tr_TR');
-    final categoryIcon = CategoryIconService.getIcon(stat.categoryName.toLowerCase());
-    final categoryColor = CategoryIconService.getColorFromMap(stat.categoryName.toLowerCase());
+    final categoryIcon = CategoryIconService.getIcon(
+      stat.categoryName.toLowerCase(),
+    );
+    final categoryColor = CategoryIconService.getColorFromMap(
+      stat.categoryName.toLowerCase(),
+    );
     final spent = stat.currentSpent;
     final percent = stat.progressPercentage;
     final percentText = (percent * 100).toStringAsFixed(0);
@@ -294,8 +309,8 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                           colors: [
                             Colors.transparent,
                             isDark
-                              ? Colors.black.withOpacity(0.18)
-                              : Colors.white.withOpacity(0.10),
+                                ? Colors.black.withOpacity(0.18)
+                                : Colors.white.withOpacity(0.10),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -341,7 +356,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Aylık Limit: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.monthlyLimit)}',
+                                    '${l10n.monthlyLimit} ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.monthlyLimit)}',
                                     style: GoogleFonts.inter(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
@@ -356,13 +371,16 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                               children: [
                                 if (isOver)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFF4C4C),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
-                                      'Aşıldı',
+                                      l10n.exceeded,
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w700,
@@ -378,7 +396,9 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                     size: 16,
                                   ),
                                   splashRadius: 18,
-                                  tooltip: AppLocalizations.of(context)!.deleteLimitTooltip,
+                                  tooltip: AppLocalizations.of(
+                                    context,
+                                  )!.deleteLimitTooltip,
                                 ),
                               ],
                             ),
@@ -396,7 +416,9 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                               children: [
                                 LayoutBuilder(
                                   builder: (context, constraints) {
-                                    final barWidth = constraints.maxWidth * value.clamp(0.0, 1.0);
+                                    final barWidth =
+                                        constraints.maxWidth *
+                                        value.clamp(0.0, 1.0);
                                     return Container(
                                       width: double.infinity,
                                       height: 8,
@@ -407,13 +429,18 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                       child: Stack(
                                         children: [
                                           AnimatedContainer(
-                                            duration: const Duration(milliseconds: 900),
+                                            duration: const Duration(
+                                              milliseconds: 900,
+                                            ),
                                             curve: Curves.easeOutCubic,
                                             width: barWidth,
                                             height: 8,
                                             decoration: BoxDecoration(
-                                              color: isOver ? const Color(0xFFFF4C4C) : Colors.white,
-                                              borderRadius: BorderRadius.circular(5),
+                                              color: isOver
+                                                  ? const Color(0xFFFF4C4C)
+                                                  : Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
                                             ),
                                           ),
                                         ],
@@ -423,12 +450,13 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                 ),
                                 const SizedBox(height: 10),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       isOver
-                                          ? 'Limit Aşıldı!'
-                                          : 'Kalan: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(remaining)}',
+                                          ? l10n.limitExceeded
+                                          : '${l10n.remaining} ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(remaining)}',
                                       style: GoogleFonts.inter(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -436,7 +464,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                                       ),
                                     ),
                                     Text(
-                                      '%$percentText harcandı',
+                                      '%$percentText ${l10n.spent}',
                                       style: GoogleFonts.inter(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -455,7 +483,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                         Row(
                           children: [
                             Text(
-                              'Harcanan: ',
+                              '${l10n.spentAmount} ',
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -463,7 +491,10 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                               ),
                             ),
                             Text(
-                              Provider.of<ThemeProvider>(context, listen: false).formatAmount(spent),
+                              Provider.of<ThemeProvider>(
+                                context,
+                                listen: false,
+                              ).formatAmount(spent),
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
@@ -490,10 +521,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
       builder: (context) => AlertDialog(
         title: Text(
           AppLocalizations.of(context)!.deleteLimit,
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         content: Text(
           AppLocalizations.of(context)!.deleteLimitConfirm(stat.categoryName),
@@ -515,7 +543,10 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
               Navigator.pop(context);
               // BudgetModel'i bul
               final now = DateTime.now();
-              final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+              final provider = Provider.of<UnifiedProviderV2>(
+                context,
+                listen: false,
+              );
               final budget = provider.currentMonthBudgets.firstWhere(
                 (b) => b.categoryId == stat.categoryId,
                 orElse: () => throw Exception('Limit bulunamadı'),
@@ -539,19 +570,27 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   Future<void> _findRealCategoryId(String categoryName) async {
     try {
       // TODO: Implement with Firebase
-      debugPrint('UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed');
+      debugPrint(
+        'UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed',
+      );
       final expenseCategories = <Map<String, dynamic>>[];
-      
+
       // TODO: Implement with Firebase
-      debugPrint('UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed');
-      UnifiedCategoryModel? matchedCategory = null;
-      
+      debugPrint(
+        'UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed',
+      );
+      UnifiedCategoryModel? matchedCategory;
+
       // TODO: Implement with Firebase
-      debugPrint('UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed');
-      
+      debugPrint(
+        'UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed',
+      );
+
       // TODO: Implement with Firebase
-      debugPrint('UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed');
-      
+      debugPrint(
+        'UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed',
+      );
+
       setState(() {
         if (matchedCategory != null) {
           _selectedCategoryId = matchedCategory.id;
@@ -567,19 +606,18 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   }
 
   Widget _buildAmountInput(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark 
-          ? const Color(0xFF2C2C2E) 
-          : const Color(0xFFF2F2F7),
+        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
         borderRadius: BorderRadius.circular(12),
         border: _limitController.text.isNotEmpty
-          ? Border.all(
-              color: const Color(0xFF007AFF).withValues(alpha: 0.3),
-              width: 1,
-            )
-          : null,
+            ? Border.all(
+                color: const Color(0xFF007AFF).withValues(alpha: 0.3),
+                width: 1,
+              )
+            : null,
       ),
       child: Row(
         children: [
@@ -604,7 +642,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
               decoration: InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
-                hintText: '2.000',
+                hintText: l10n.limitAmountHint,
                 hintStyle: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -616,7 +654,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
           ),
           if (_limitController.text.isNotEmpty)
             Text(
-              '/ ay',
+              l10n.perMonth,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -641,7 +679,11 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorOccurred(e.toString()))),
+          SnackBar(
+            content: Text(
+              '${AppLocalizations.of(context)!.errorOccurred}: ${e.toString()}',
+            ),
+          ),
         );
       }
     }
@@ -670,17 +712,21 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
   List<String> _getActiveExpenseCategories(BuildContext context) {
     final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
     return provider.expenseCategories
-      .where((cat) => true) // UnifiedCategoryModel doesn't have isActive, all are active
-      .map((cat) => cat.displayName.trim())
-      .toSet()
-      .toList();
+        .where(
+          (cat) => true,
+        ) // UnifiedCategoryModel doesn't have isActive, all are active
+        .map((cat) => cat.displayName.trim())
+        .toSet()
+        .toList();
   }
 
   List<String> _getFilteredSuggestions(BuildContext context) {
     final tags = _getActiveExpenseCategories(context);
     if (_controller.text.isEmpty) return tags;
     return tags
-        .where((tag) => tag.toLowerCase().contains(_controller.text.toLowerCase()))
+        .where(
+          (tag) => tag.toLowerCase().contains(_controller.text.toLowerCase()),
+        )
         .toList();
   }
 
@@ -711,6 +757,7 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
     final suggestions = _getFilteredSuggestions(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -724,12 +771,14 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
             color: isDark ? Colors.white : Colors.black,
           ),
           decoration: InputDecoration(
-            hintText: 'market, yemek, ulaşım...',
+            hintText: l10n.categoryHint,
             hintStyle: GoogleFonts.inter(
               color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
             ),
             filled: true,
-            fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+            fillColor: isDark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFF2F2F7),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFFF4C4C), width: 2),
@@ -763,7 +812,8 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: suggestions.map((tag) {
-                final isSelected = _controller.text.trim().toLowerCase() == tag.toLowerCase();
+                final isSelected =
+                    _controller.text.trim().toLowerCase() == tag.toLowerCase();
                 final icon = CategoryIconService.getIcon(tag.toLowerCase());
                 final color = const Color(0xFFFF4C4C);
                 return Padding(
@@ -791,23 +841,27 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
                           builder: (context, setChipState) {
                             bool isPressed = false;
                             return Listener(
-                              onPointerDown: (_) => setChipState(() => isPressed = true),
-                              onPointerUp: (_) => setChipState(() => isPressed = false),
-                              onPointerCancel: (_) => setChipState(() => isPressed = false),
+                              onPointerDown: (_) =>
+                                  setChipState(() => isPressed = true),
+                              onPointerUp: (_) =>
+                                  setChipState(() => isPressed = false),
+                              onPointerCancel: (_) =>
+                                  setChipState(() => isPressed = false),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 100),
                                 curve: Curves.easeInOut,
-                                color: isPressed ? color.withOpacity(0.08) : Colors.transparent,
+                                color: isPressed
+                                    ? color.withOpacity(0.08)
+                                    : Colors.transparent,
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        icon,
-                                        color: color,
-                                        size: 18,
-                                      ),
+                                      Icon(icon, color: color, size: 18),
                                       const SizedBox(width: 7),
                                       Text(
                                         tag,
@@ -836,4 +890,4 @@ class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
       ],
     );
   }
-} 
+}

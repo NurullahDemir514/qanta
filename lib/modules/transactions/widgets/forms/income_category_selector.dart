@@ -31,17 +31,21 @@ class _IncomeTagSelectorState extends State<IncomeTagSelector> {
   List<String> _getActiveIncomeCategories(BuildContext context) {
     final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
     return provider.incomeCategories
-      .where((cat) => true) // UnifiedCategoryModel doesn't have isActive, all are active
-      .map((cat) => cat.displayName.trim())
-      .toSet()
-      .toList();
+        .where(
+          (cat) => true,
+        ) // UnifiedCategoryModel doesn't have isActive, all are active
+        .map((cat) => cat.displayName.trim())
+        .toSet()
+        .toList();
   }
 
   List<String> _getFilteredSuggestions(BuildContext context) {
     final tags = _getActiveIncomeCategories(context);
     if (_controller.text.isEmpty) return tags;
     return tags
-        .where((tag) => tag.toLowerCase().contains(_controller.text.toLowerCase()))
+        .where(
+          (tag) => tag.toLowerCase().contains(_controller.text.toLowerCase()),
+        )
         .toList();
   }
 
@@ -96,7 +100,9 @@ class _IncomeTagSelectorState extends State<IncomeTagSelector> {
               color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
             ),
             filled: true,
-            fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+            fillColor: isDark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFF2F2F7),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
@@ -133,7 +139,8 @@ class _IncomeTagSelectorState extends State<IncomeTagSelector> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: suggestions.map((tag) {
-                final isSelected = _controller.text.trim().toLowerCase() == tag.toLowerCase();
+                final isSelected =
+                    _controller.text.trim().toLowerCase() == tag.toLowerCase();
                 final icon = CategoryIconService.getIcon(tag.toLowerCase());
                 final color = const Color(0xFF4CAF50); // Gelir için sabit yeşil
                 return Padding(
@@ -161,23 +168,27 @@ class _IncomeTagSelectorState extends State<IncomeTagSelector> {
                           builder: (context, setChipState) {
                             bool isPressed = false;
                             return Listener(
-                              onPointerDown: (_) => setChipState(() => isPressed = true),
-                              onPointerUp: (_) => setChipState(() => isPressed = false),
-                              onPointerCancel: (_) => setChipState(() => isPressed = false),
+                              onPointerDown: (_) =>
+                                  setChipState(() => isPressed = true),
+                              onPointerUp: (_) =>
+                                  setChipState(() => isPressed = false),
+                              onPointerCancel: (_) =>
+                                  setChipState(() => isPressed = false),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 100),
                                 curve: Curves.easeInOut,
-                                color: isPressed ? color.withOpacity(0.08) : Colors.transparent,
+                                color: isPressed
+                                    ? color.withOpacity(0.08)
+                                    : Colors.transparent,
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        icon,
-                                        color: color,
-                                        size: 18,
-                                      ),
+                                      Icon(icon, color: color, size: 18),
                                       const SizedBox(width: 7),
                                       Text(
                                         tag,
@@ -214,10 +225,6 @@ class IncomeCategorySelector extends IncomeTagSelector {
     super.key,
     String? selectedCategory,
     required Function(String) onCategorySelected,
-    String? errorText,
-  }) : super(
-    selectedTag: selectedCategory,
-    onTagSelected: onCategorySelected,
-    errorText: errorText,
-  );
-} 
+    super.errorText,
+  }) : super(selectedTag: selectedCategory, onTagSelected: onCategorySelected);
+}

@@ -22,26 +22,27 @@ class CardsScreen extends StatefulWidget {
   State<CardsScreen> createState() => _CardsScreenState();
 }
 
-class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin {
+class _CardsScreenState extends State<CardsScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 3, 
+      length: 3,
       vsync: this,
       animationDuration: const Duration(milliseconds: 200),
     );
-    
+
     // 🔔 Card event listener'larını kur
     _setupCardEventListeners();
-    
-    // Verileri sadece bir kez yükle
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+    // Verileri yükle ve bekle
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-        provider.loadAllData();
+        // Veriler zaten splash screen'de yükleniyor, tekrar yüklemeye gerek yok
+        setState(() {});
       }
     });
   }
@@ -60,64 +61,91 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
     // Credit card events
     cardEvents.listen<CreditCardAdded>((event) {
       if (mounted) {
-        _showEventSnackBar('Kredi kartı eklendi: ${event.creditCard.cardName}', isSuccess: true);
+        _showEventSnackBar(
+          'Kredi kartı eklendi: ${event.creditCard.cardName}',
+          isSuccess: true,
+        );
       }
     });
-    
+
     cardEvents.listen<CreditCardUpdated>((event) {
       if (mounted) {
-        _showEventSnackBar('Kredi kartı güncellendi: ${event.newCard.cardName}', isSuccess: true);
+        _showEventSnackBar(
+          'Kredi kartı güncellendi: ${event.newCard.cardName}',
+          isSuccess: true,
+        );
       }
     });
-    
+
     cardEvents.listen<CreditCardDeleted>((event) {
       if (mounted) {
         _showEventSnackBar('Kredi kartı silindi', isSuccess: true);
       }
     });
-    
+
     cardEvents.listen<CreditCardBalanceUpdated>((event) {
       if (mounted) {
-        final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
-        _showEventSnackBar('Kredi kartı bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})', isSuccess: true);
+        final changeText = event.changeAmount > 0
+            ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}'
+            : TransactionDesignSystem.formatNumber(event.changeAmount);
+        _showEventSnackBar(
+          'Kredi kartı bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})',
+          isSuccess: true,
+        );
       }
     });
-    
+
     // Debit card events
     cardEvents.listen<DebitCardAdded>((event) {
       if (mounted) {
-        _showEventSnackBar('Banka kartı eklendi: ${event.debitCard.cardName}', isSuccess: true);
+        _showEventSnackBar(
+          'Banka kartı eklendi: ${event.debitCard.cardName}',
+          isSuccess: true,
+        );
       }
     });
-    
+
     cardEvents.listen<DebitCardUpdated>((event) {
       if (mounted) {
-        _showEventSnackBar('Banka kartı güncellendi: ${event.newCard.cardName}', isSuccess: true);
+        _showEventSnackBar(
+          'Banka kartı güncellendi: ${event.newCard.cardName}',
+          isSuccess: true,
+        );
       }
     });
-    
+
     cardEvents.listen<DebitCardDeleted>((event) {
       if (mounted) {
         _showEventSnackBar('Banka kartı silindi', isSuccess: true);
       }
     });
-    
+
     cardEvents.listen<DebitCardBalanceUpdated>((event) {
       if (mounted) {
-        final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
-        _showEventSnackBar('Banka kartı bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})', isSuccess: true);
+        final changeText = event.changeAmount > 0
+            ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}'
+            : TransactionDesignSystem.formatNumber(event.changeAmount);
+        _showEventSnackBar(
+          'Banka kartı bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})',
+          isSuccess: true,
+        );
       }
     });
-    
+
     // Cash account events
     cardEvents.listen<CashAccountUpdated>((event) {
       if (mounted) {
-        final changeText = event.changeAmount > 0 ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}' : '${TransactionDesignSystem.formatNumber(event.changeAmount)}';
-        _showEventSnackBar('Nakit bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})', isSuccess: true);
+        final changeText = event.changeAmount > 0
+            ? '+${TransactionDesignSystem.formatNumber(event.changeAmount)}'
+            : TransactionDesignSystem.formatNumber(event.changeAmount);
+        _showEventSnackBar(
+          'Nakit bakiyesi güncellendi ($changeText ${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})',
+          isSuccess: true,
+        );
       }
     });
   }
-  
+
   void _showEventSnackBar(String message, {bool isSuccess = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -125,9 +153,7 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
         backgroundColor: isSuccess ? Colors.green : Colors.red,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -157,9 +183,9 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      builder: (context, themeProvider, child) {
         return AnimatedBuilder(
           animation: _tabController,
           builder: (context, child) {
@@ -169,46 +195,49 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
               titleFontSize: 20,
               subtitleFontSize: 12,
               tabBar: AppTabBar(
-                        controller: _tabController,
-                        tabs: [
-                  l10n.cash,
-                  l10n.debit,
-                  l10n.credit,
-                ],
-                          ),
+                controller: _tabController,
+                tabs: [l10n.cash, l10n.debit, l10n.credit],
+              ),
               onRefresh: () async {
                 // Tüm verileri Firebase'den yenile
-                final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-                await provider.loadAllData();
+                final provider = Provider.of<UnifiedProviderV2>(
+                  context,
+                  listen: false,
+                );
+                await provider.loadAllData(forceRefresh: true);
+                // Veriler yüklendikten sonra UI'yi güncelle
+                if (mounted) {
+                  setState(() {});
+                }
               },
               body: SliverFillRemaining(
-                    child: TabBarView(
-                      controller: _tabController,
-                      physics: const BouncingScrollPhysics(),
-                      children: [
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const BouncingScrollPhysics(),
+                  children: [
                     // Cash Tab - artık gerçek verilerle çalışıyor
-                        const CashTab(),
-                        // Debit Cards Tab
-                        DebitCardsTab(l10n: l10n),
-                        // Credit Cards Tab
-                        CreditCardsTab(l10n: l10n),
-                      ],
-                    ),
-                  ),
+                    const CashTab(),
+                    // Debit Cards Tab
+                    DebitCardsTab(l10n: l10n),
+                    // Credit Cards Tab
+                    CreditCardsTab(l10n: l10n),
+                  ],
+                ),
+              ),
             );
           },
-          );
-        },
+        );
+      },
     );
   }
 
   void _showCashManagement(BuildContext context) {
     final cashProvider = CashAccountProvider.instance;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     CashManagementService.showCashManagementBottomSheet(
-      context, 
-      isDark, 
+      context,
+      isDark,
       cashProvider.balance, // Gerçek bakiye
       (difference) async {
         // Gerçek bakiye güncelleme fonksiyonu
@@ -216,4 +245,4 @@ class _CardsScreenState extends State<CardsScreen> with TickerProviderStateMixin
       },
     );
   }
-} 
+}

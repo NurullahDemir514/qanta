@@ -22,8 +22,44 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
   bool _isSearching = false;
   String _currentQuery = '';
   Timer? _debounceTimer;
-  Map<String, List<Stock>> _searchCache = {};
+  final Map<String, List<Stock>> _searchCache = {};
   late AppLocalizations l10n;
+
+  // BIST 100 hisseleri (en popüler olanlar)
+  static const List<String> _bist100Symbols = [
+    'THYAO',
+    'AKBNK',
+    'EREGL',
+    'SAHOL',
+    'BIMAS',
+    'SISE',
+    'TUPRS',
+    'KCHOL',
+    'ASELS',
+    'SASA',
+    'DOHOL',
+    'KOZAL',
+    'FROTO',
+    'PETKM',
+    'VAKBN',
+    'TTKOM',
+    'ARCLK',
+    'EKGYO',
+    'KOZAA',
+    'PGSUS',
+    'KRDMD',
+    'TCELL',
+    'GARAN',
+    'ISCTR',
+    'HALKB',
+    'YKBNK',
+    'AKSEN',
+    'TAVHL',
+    'TOASO',
+    'ENKAI',
+    'EREGL',
+    'ENJSA',
+  ];
 
   @override
   void initState() {
@@ -49,9 +85,26 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     final results = await stockProvider.getPopularStocks();
     if (mounted) {
       setState(() {
-        _searchResults = results;
+        _searchResults = _sortStocksByBist100(results);
       });
     }
+  }
+
+  /// BIST 100 hisselerini üstte göster
+  List<Stock> _sortStocksByBist100(List<Stock> stocks) {
+    final sortedStocks = List<Stock>.from(stocks);
+    sortedStocks.sort((a, b) {
+      final aIsBist100 = _bist100Symbols.contains(a.symbol);
+      final bIsBist100 = _bist100Symbols.contains(b.symbol);
+
+      // BIST 100 hisseleri önce
+      if (aIsBist100 && !bIsBist100) return -1;
+      if (!aIsBist100 && bIsBist100) return 1;
+
+      // İkisi de BIST 100 ise veya ikisi de değilse alfabetik sıra
+      return a.symbol.compareTo(b.symbol);
+    });
+    return sortedStocks;
   }
 
   void _onSearchChanged(String query) {
@@ -86,11 +139,14 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
       final results = await stockProvider.searchStocks(query);
 
       if (mounted) {
+        // Sonuçları BIST 100'e göre sırala
+        final sortedResults = _sortStocksByBist100(results);
+
         // Cache'e kaydet
-        _searchCache[query] = results;
-        
+        _searchCache[query] = sortedResults;
+
         setState(() {
-          _searchResults = results;
+          _searchResults = sortedResults;
           _isSearching = false;
         });
       }
@@ -108,13 +164,13 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     if (userId == null) return;
 
     final stockProvider = Provider.of<StockProvider>(context, listen: false);
-    
+
     // Optimistic UI update - anında UI'yi güncelle
     stockProvider.addWatchedStockOptimistically(stock);
-    
+
     try {
       await stockProvider.addWatchedStock(userId, stock);
-      
+
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +183,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     } catch (e) {
       // Hata durumunda optimistic update'i geri al
       stockProvider.removeWatchedStockOptimistically(stock.symbol);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -154,7 +210,9 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7),
+      backgroundColor: isDark
+          ? const Color(0xFF000000)
+          : const Color(0xFFF2F2F7),
       appBar: AppBar(
         title: Text(
           l10n.searchStocks ?? 'Hisse Ara',
@@ -164,7 +222,9 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             color: isDark ? Colors.white : Colors.black,
           ),
         ),
-        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7),
+        backgroundColor: isDark
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         elevation: 0,
         leading: IconButton(
           icon: Icon(
@@ -197,13 +257,17 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    color: isDark
+                        ? const Color(0xFF38383A)
+                        : const Color(0xFFE5E5EA),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    color: isDark
+                        ? const Color(0xFF38383A)
+                        : const Color(0xFFE5E5EA),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -215,15 +279,16 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
                 ),
                 filled: true,
                 fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
           ),
 
           // Sonuçlar
-          Expanded(
-            child: _buildResults(),
-          ),
+          Expanded(child: _buildResults()),
         ],
       ),
     );
@@ -234,9 +299,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
 
     if (_isSearching) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF007AFF),
-        ),
+        child: CircularProgressIndicator(color: Color(0xFF007AFF)),
       );
     }
 
@@ -252,7 +315,9 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              _currentQuery.isEmpty ? l10n.loadingPopularStocks : l10n.noStocksFound,
+              _currentQuery.isEmpty
+                  ? l10n.loadingPopularStocks
+                  : l10n.noStocksFound,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 color: isDark ? Colors.white70 : Colors.grey[600],
@@ -280,10 +345,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
         final stock = _searchResults[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
-          child: StockSearchItem(
-            stock: stock,
-            onTap: () => _addStock(stock),
-          ),
+          child: StockSearchItem(stock: stock, onTap: () => _addStock(stock)),
         );
       },
     );

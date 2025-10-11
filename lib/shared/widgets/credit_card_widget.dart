@@ -3,23 +3,18 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/theme_provider.dart';
 import '../models/credit_card_model.dart';
-import '../design_system/transaction_design_system.dart';
 import '../../l10n/app_localizations.dart';
 
 class CreditCardWidget extends StatelessWidget {
   final CreditCardModel card;
   final VoidCallback? onTap;
 
-  const CreditCardWidget({
-    super.key,
-    required this.card,
-    this.onTap,
-  });
+  const CreditCardWidget({super.key, required this.card, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final bankColor = AppConstants.getBankAccentColor(card.bankCode);
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -48,12 +43,14 @@ class CreditCardWidget extends StatelessWidget {
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.cardBorderRadius,
+                  ),
                   gradient: AppConstants.getHolographicGradient(bankColor),
                 ),
               ),
             ),
-            
+
             // Card content
             Padding(
               padding: const EdgeInsets.all(AppConstants.cardPadding),
@@ -65,7 +62,10 @@ class CreditCardWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        AppConstants.getBankName(card.bankCode),
+                        AppConstants.getLocalizedBankName(
+                          card.bankCode,
+                          AppLocalizations.of(context)!,
+                        ),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -92,9 +92,9 @@ class CreditCardWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const Spacer(),
-                  
+
                   // Card name
                   Text(
                     card.cardName,
@@ -104,9 +104,9 @@ class CreditCardWidget extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Card type
                   Text(
                     AppLocalizations.of(context)?.creditCard ?? 'Credit Card',
@@ -117,9 +117,9 @@ class CreditCardWidget extends StatelessWidget {
                       letterSpacing: 1,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Credit info
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,14 +128,18 @@ class CreditCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(context)?.availableCredit ?? 'Available Credit',
+                            AppLocalizations.of(context)?.availableCredit ??
+                                'Available Credit',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 12,
                             ),
                           ),
                           Text(
-                            Provider.of<ThemeProvider>(context, listen: false).formatAmount(card.creditLimit - card.totalDebt),
+                            Provider.of<ThemeProvider>(
+                              context,
+                              listen: false,
+                            ).formatAmount(card.creditLimit - card.totalDebt),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -148,14 +152,18 @@ class CreditCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            AppLocalizations.of(context)?.creditLimit ?? 'Credit Limit',
+                            AppLocalizations.of(context)?.creditLimit ??
+                                'Credit Limit',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 12,
                             ),
                           ),
                           Text(
-                            Provider.of<ThemeProvider>(context, listen: false).formatAmount(card.creditLimit),
+                            Provider.of<ThemeProvider>(
+                              context,
+                              listen: false,
+                            ).formatAmount(card.creditLimit),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -174,4 +182,4 @@ class CreditCardWidget extends StatelessWidget {
       ),
     );
   }
-} 
+}

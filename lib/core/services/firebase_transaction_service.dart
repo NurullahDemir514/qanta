@@ -12,12 +12,13 @@ class FirebaseTransactionService {
   static Stream<List<Map<String, dynamic>>> getTransactionStream() {
     return FirebaseFirestoreService.getDocumentsStream(
       collectionName: _collectionName,
-      query: FirebaseFirestoreService.getCollection(_collectionName)
-          .orderBy('transaction_date', descending: true),
-    ).map((snapshot) => snapshot.docs.map((doc) => {
-      'id': doc.id,
-      ...doc.data() as Map<String, dynamic>,
-    }).toList());
+      query: FirebaseFirestoreService.getCollection(
+        _collectionName,
+      ).orderBy('transaction_date', descending: true),
+    ).map(
+      (snapshot) =>
+          snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList(),
+    );
   }
 
   /// Get all transactions for the current user
@@ -28,17 +29,14 @@ class FirebaseTransactionService {
     try {
       final snapshot = await FirebaseFirestoreService.getDocuments(
         collectionName: _collectionName,
-        query: FirebaseFirestoreService.getCollection(_collectionName)
-            .orderBy('transaction_date', descending: true)
-            .limit(limit),
+        query: FirebaseFirestoreService.getCollection(
+          _collectionName,
+        ).orderBy('transaction_date', descending: true).limit(limit),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return TransactionWithDetailsV2.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching transactions: $e');
@@ -62,11 +60,8 @@ class FirebaseTransactionService {
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return TransactionWithDetailsV2.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching transactions by type: $e');
@@ -90,11 +85,8 @@ class FirebaseTransactionService {
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return TransactionWithDetailsV2.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching transactions by account: $e');
@@ -103,7 +95,9 @@ class FirebaseTransactionService {
   }
 
   /// Add new transaction
-  static Future<String> addTransaction(TransactionWithDetailsV2 transaction) async {
+  static Future<String> addTransaction(
+    TransactionWithDetailsV2 transaction,
+  ) async {
     try {
       final docRef = await FirebaseFirestoreService.addDocument(
         collectionName: _collectionName,
@@ -153,18 +147,21 @@ class FirebaseTransactionService {
       final snapshot = await FirebaseFirestoreService.getDocuments(
         collectionName: _collectionName,
         query: FirebaseFirestoreService.getCollection(_collectionName)
-            .where('transaction_date', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-            .where('transaction_date', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+            .where(
+              'transaction_date',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+            )
+            .where(
+              'transaction_date',
+              isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+            )
             .orderBy('transaction_date', descending: true)
             .limit(limit),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return TransactionWithDetailsV2.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching transactions by date range: $e');
@@ -187,11 +184,8 @@ class FirebaseTransactionService {
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return TransactionWithDetailsV2.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching transactions by category: $e');
@@ -207,7 +201,7 @@ class FirebaseTransactionService {
     try {
       final startDate = DateTime(year, month, 1);
       final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
-      
+
       final transactions = await getTransactionsByDateRange(
         startDate: startDate,
         endDate: endDate,
@@ -225,10 +219,9 @@ class FirebaseTransactionService {
         } else if (transaction.type == TransactionType.expense) {
           totalExpense += transaction.amount;
           final categoryKey = transaction.categoryName ?? 'Diğer';
-          categoryExpenses[categoryKey] = 
+          categoryExpenses[categoryKey] =
               (categoryExpenses[categoryKey] ?? 0) + transaction.amount;
-          categoryCounts[categoryKey] = 
-              (categoryCounts[categoryKey] ?? 0) + 1;
+          categoryCounts[categoryKey] = (categoryCounts[categoryKey] ?? 0) + 1;
         }
       }
 

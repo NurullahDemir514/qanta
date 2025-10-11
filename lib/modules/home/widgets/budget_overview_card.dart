@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/budget_model.dart';
-import '../../../shared/models/unified_category_model.dart';
 import '../../../shared/services/category_icon_service.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../shared/widgets/animated_empty_state.dart';
 
 class BudgetOverviewCard extends StatefulWidget {
   const BudgetOverviewCard({super.key});
@@ -21,7 +19,9 @@ class BudgetOverviewCard extends StatefulWidget {
 class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
   // Uyarı bildirimi cooldown sistemi
   final Map<String, DateTime> _lastAlertTimes = {};
-  static const Duration _alertCooldown = Duration(minutes: 5); // 5 dakika cooldown
+  static const Duration _alertCooldown = Duration(
+    minutes: 5,
+  ); // 5 dakika cooldown
 
   @override
   void initState() {
@@ -31,11 +31,11 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
   /// Calculate budget stats from current budgets
   List<BudgetCategoryStats> _calculateBudgetStats(List<BudgetModel> budgets) {
     return budgets.map((budget) {
-      final percentage = budget.monthlyLimit > 0 
-          ? (budget.spentAmount / budget.monthlyLimit) * 100 
+      final percentage = budget.monthlyLimit > 0
+          ? (budget.spentAmount / budget.monthlyLimit) * 100
           : 0.0;
       final isOverBudget = budget.spentAmount > budget.monthlyLimit;
-      
+
       return BudgetCategoryStats(
         categoryId: budget.categoryId,
         categoryName: budget.categoryName,
@@ -48,83 +48,98 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
     }).toList();
   }
 
-
   Widget _buildEmptyStateWithAddButton(BuildContext context, bool isDark) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Container(
-      height: 120,
-      child: Stack(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+          width: 1,
+        ),
+      ),
+      child: Row(
         children: [
-          // Background
+          // Balanced Icon
           Container(
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                width: 1,
-              ),
+              color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8F9FA),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 20,
+              color: const Color(0xFFE74C3C),
             ),
           ),
-          // Content
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
-                    size: 20,
-                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+          
+          const SizedBox(width: 14),
+          
+          // Balanced Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.noBudgetDefined,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.noBudgetDefined,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.createBudgetDescription,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: isDark ? Colors.grey[500] : Colors.grey[500],
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 28,
-                    child: ElevatedButton(
-                      onPressed: () => _showAddBudgetBottomSheet(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF007AFF),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        elevation: 0,
+                ),
+              ],
+            ),
+          ),
+          
+          // Balanced CTA Button
+          Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE74C3C),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFE74C3C).withValues(alpha: 0.12),
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => _showAddBudgetBottomSheet(context),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.add_rounded,
+                        color: Colors.white,
+                        size: 15,
                       ),
-                      child: Text(
-                        l10n.createBudget,
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.add,
                         style: GoogleFonts.inter(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -136,9 +151,6 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = screenWidth > 600 ? 250.0 : 200.0;
     final l10n = AppLocalizations.of(context)!;
 
     return Consumer<UnifiedProviderV2>(
@@ -146,72 +158,12 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
         // Get current month budgets from provider
         final currentBudgets = provider.currentMonthBudgets;
 
-          // Show empty state if no budgets - but still show the header with add button
-          if (currentBudgets.isEmpty) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with add button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.expenseLimitTracking,
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _showAddBudgetBottomSheet(context),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF007AFF).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Icon(
-                              Icons.add,
-                              size: 14,
-                              color: const Color(0xFF007AFF),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => _showBudgetManagement(context),
-                          child: Text(
-                            l10n.manage,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF007AFF),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Empty state with add button
-                _buildEmptyStateWithAddButton(context, isDark),
-              ],
-            );
-          }
-
-        // Calculate budget stats from current budgets
-        final budgetStats = _calculateBudgetStats(currentBudgets);
-
-        return Column(
+        // Show empty state if no budgets - but still show the header with add button
+        if (currentBudgets.isEmpty) {
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Header with add button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -223,103 +175,105 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                       color: isDark ? Colors.white : Colors.black,
                     ),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () => _showAddBudgetBottomSheet(context),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF007AFF).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Icon(
-                            Icons.add,
-                            size: 16,
-                            color: const Color(0xFF007AFF),
-                          ),
-                        ),
+                  GestureDetector(
+                    onTap: () => _showBudgetManagement(context),
+                    child: Text(
+                      l10n.manage,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF007AFF),
                       ),
-                      GestureDetector(
-                        onTap: () => _showBudgetManagement(context),
-                        child: Text(
-                          l10n.manage,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF007AFF),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 10),
-              
-              // Horizontal scroll cards
-              SizedBox(
-                height: () {
-                  double cardHeight;
-                  if (screenHeight < 700) {
-                    cardHeight = 90.0; // Küçük ekranlar
-                  } else if (screenHeight < 800) {
-                    cardHeight = 95.0; // Orta ekranlar
-                  } else {
-                    cardHeight = 100.0; // Büyük ekranlar
-                  }
-                  
-                  return cardHeight;
-                }(),
-                child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.zero,
-                    itemCount: budgetStats.length,
-                    itemBuilder: (context, index) => _buildBudgetCard(budgetStats[index], isDark, index, budgetStats.length),
-                  ),
-              ),
+
+              const SizedBox(height: 20),
+
+              // Empty state with add button
+              _buildEmptyStateWithAddButton(context, isDark),
             ],
+          );
+        }
+
+        // Calculate budget stats from current budgets
+        final budgetStats = _calculateBudgetStats(currentBudgets);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.expenseLimitTracking,
+                  style: GoogleFonts.inter(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _showBudgetManagement(context),
+                  child: Text(
+                    l10n.manage,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF007AFF),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            // Horizontal scroll cards
+            SizedBox(
+              height: 85.h,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                itemCount: budgetStats.length,
+                itemBuilder: (context, index) => _buildBudgetCard(
+                  budgetStats[index],
+                  isDark,
+                  index,
+                  budgetStats.length,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildBudgetCard(BudgetCategoryStats stat, bool isDark, int index, int totalCount) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    
-    // Responsive card sizing
-    final isSmallScreen = screenHeight < 700;
-    final isMediumScreen = screenHeight >= 700 && screenHeight < 800;
-    final isTablet = screenWidth > 600;
-    
-    final cardWidth = isTablet ? 250.0 : (isSmallScreen ? 180.0 : 200.0);
-    final cardHeight = isSmallScreen ? 100.0 : isMediumScreen ? 110.0 : 120.0;
-    
+  Widget _buildBudgetCard(
+    BudgetCategoryStats stat,
+    bool isDark,
+    int index,
+    int totalCount,
+  ) {
     return Container(
-      width: cardWidth,
-      height: cardHeight,
-      margin: EdgeInsets.only(
-        right: index == (totalCount - 1) ? 0 : 12,
-      ),
+      width: 170.w,
+      height: 85.h,
+      margin: EdgeInsets.only(right: index == (totalCount - 1) ? 0 : 8.w),
       child: Card(
         elevation: 0,
-        color: isDark 
-          ? const Color(0xFF1C1C1E) 
-          : Colors.white,
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           side: BorderSide(
-            color: isDark 
-              ? const Color(0xFF2C2C2E) 
-              : const Color(0xFFE5E5EA),
-            width: 1,
+            color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
+            width: 1.w,
           ),
         ),
         child: Padding(
-          padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+          padding: EdgeInsets.all(12.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -330,24 +284,26 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 26,
-                    height: 26,
+                    width: 24.w,
+                    height: 24.w,
                     decoration: BoxDecoration(
-                      color: _getCategoryColor(stat.categoryName).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(7),
+                      color: _getCategoryColor(
+                        stat.categoryName,
+                      ).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(5.r),
                     ),
                     child: Icon(
                       _getCategoryIcon(stat.categoryName),
-                      size: 13,
+                      size: 12.w,
                       color: _getCategoryColor(stat.categoryName),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: 6.w),
                   Expanded(
                     child: Text(
                       stat.categoryName,
                       style: GoogleFonts.inter(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: isDark ? Colors.white : Colors.black,
                       ),
@@ -356,34 +312,34 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 8),
-              
+
+              SizedBox(height: 2.h),
+
               // Progress bar
               Container(
-                height: 3,
+                height: 3.h,
                 decoration: BoxDecoration(
-                  color: isDark 
-                    ? const Color(0xFF2C2C2E) 
-                    : const Color(0xFFE5E5EA),
-                  borderRadius: BorderRadius.circular(2),
+                  color: isDark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFE5E5EA),
+                  borderRadius: BorderRadius.circular(2.r),
                 ),
                 child: FractionallySizedBox(
                   alignment: Alignment.centerLeft,
                   widthFactor: stat.progressPercentage.clamp(0.0, 1.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: stat.isOverBudget 
-                        ? const Color(0xFFFF453A) 
-                        : const Color(0xFF34C759),
-                      borderRadius: BorderRadius.circular(2),
+                      color: stat.isOverBudget
+                          ? const Color(0xFFFF453A)
+                          : const Color(0xFF34C759),
+                      borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 8),
-              
+
+              SizedBox(height: 1.h),
+
               // Amount info
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -393,22 +349,22 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                     child: Text(
                       '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.currentSpent)} / ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.monthlyLimit)}',
                       style: GoogleFonts.inter(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4.w),
                   Text(
                     '${stat.percentage.toStringAsFixed(0)}%',
                     style: GoogleFonts.inter(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
-                      color: stat.isOverBudget 
-                        ? const Color(0xFFFF453A) 
-                        : const Color(0xFF34C759),
+                      color: stat.isOverBudget
+                          ? const Color(0xFFFF453A)
+                          : const Color(0xFF34C759),
                     ),
                   ),
                 ],

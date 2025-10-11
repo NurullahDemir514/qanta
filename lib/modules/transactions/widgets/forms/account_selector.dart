@@ -198,8 +198,8 @@ class AccountSelector extends StatelessWidget {
                     account.id == 'cash' 
                       ? l10n.digitalWallet
                       : account.type == CardType.credit 
-                        ? 'Kredi Kartı'
-                        : 'Banka Kartı',
+                        ? l10n.creditCard
+                        : l10n.debitCard,
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,

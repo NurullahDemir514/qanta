@@ -39,6 +39,24 @@ service cloud.firestore {
       }
       
       // =====================================================
+      // PROFİL (profile) - Kullanıcı profil ayarları
+      // =====================================================
+      match /profile/{profileId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Profil doğrulama
+        function isValidProfile() {
+          return resource.data.keys().hasAny(['profile_image_url', 'preferred_language', 'currency_code', 'theme_mode', 'updated_at']);
+        }
+        
+        // Profil güncelleme doğrulama
+        function isValidProfileUpdate() {
+          return request.auth.uid == userId &&
+                 request.resource.data.keys().hasAny(['profile_image_url', 'preferred_language', 'currency_code', 'theme_mode', 'updated_at']);
+        }
+      }
+      
+      // =====================================================
       // İŞLEMLER (transactions) - Subcollection
       // =====================================================
       match /transactions/{transactionId} {
@@ -276,6 +294,14 @@ match /installment_details/{installmentDetailId} {
       allow create: if request.auth != null && 
                      request.auth.uid == request.resource.data.user_id && 
                      isValidNewBudget();
+    }
+    
+    // =====================================================
+    // HIZLI NOTLAR (quick_notes) - Ana Collection
+    // =====================================================
+    match /quick_notes/{noteId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.user_id;
     }
     
     // =====================================================

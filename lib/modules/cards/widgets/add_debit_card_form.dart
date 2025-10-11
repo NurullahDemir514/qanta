@@ -13,10 +13,7 @@ import '../../../core/constants/app_constants.dart';
 class AddDebitCardForm extends StatefulWidget {
   final VoidCallback? onSuccess;
 
-  const AddDebitCardForm({
-    super.key,
-    this.onSuccess,
-  });
+  const AddDebitCardForm({super.key, this.onSuccess});
 
   @override
   State<AddDebitCardForm> createState() => _AddDebitCardFormState();
@@ -51,12 +48,10 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
       if (query.isEmpty) {
         _filteredBanks = AppConstants.getAvailableBanks();
       } else {
-        _filteredBanks = AppConstants.getAvailableBanks()
-            .where((bankCode) {
-              final bankName = AppConstants.getBankName(bankCode).toLowerCase();
-              return bankName.contains(query.toLowerCase());
-            })
-            .toList();
+        _filteredBanks = AppConstants.getAvailableBanks().where((bankCode) {
+          final bankName = AppConstants.getBankName(bankCode).toLowerCase();
+          return bankName.contains(query.toLowerCase());
+        }).toList();
       }
     });
   }
@@ -66,7 +61,8 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
       _selectedBankCode = bankCode;
       // Auto-generate card name when bank is selected
       final bankName = AppConstants.getBankName(bankCode);
-      _cardNameController.text = '$bankName ${AppLocalizations.of(context)?.debitCard ?? 'Debit Card'}';
+      _cardNameController.text =
+          '$bankName ${AppLocalizations.of(context)?.debitCard ?? 'Debit Card'}';
     });
   }
 
@@ -81,9 +77,9 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
 
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
-      
-      final balance = _balanceController.text.trim().isEmpty 
-          ? 0.0 
+
+      final balance = _balanceController.text.trim().isEmpty
+          ? 0.0
           : double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0;
 
       final success = await unifiedProvider.createAccount(
@@ -93,7 +89,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
         balance: balance,
       );
 
-      if (success != null && mounted) {
+      if (mounted) {
         widget.onSuccess?.call();
         Navigator.of(context).pop();
       }
@@ -156,7 +152,8 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
             child: Row(
               children: [
                 Text(
-                  AppLocalizations.of(context)?.addDebitCard ?? 'Add Debit Card',
+                  AppLocalizations.of(context)?.addDebitCard ??
+                      'Add Debit Card',
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -168,7 +165,9 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                   onPressed: () => Navigator.of(context).pop(),
                   icon: Icon(
                     Icons.close,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -195,7 +194,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                     ),
                     const SizedBox(height: 12),
                     _buildBankGrid(),
-                    
+
                     const SizedBox(height: 24),
 
                     // Kart adı
@@ -210,11 +209,16 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                     const SizedBox(height: 8),
                     _buildTextField(
                       controller: _cardNameController,
-                      hintText: AppLocalizations.of(context)?.cardNameExampleDebit ?? 'E.g: VakıfBank Checking',
+                      hintText:
+                          AppLocalizations.of(context)?.cardNameExampleDebit ??
+                          'E.g: VakıfBank Checking',
                       prefixIcon: Icons.credit_card,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return AppLocalizations.of(context)?.cardNameRequired ?? 'Card name is required';
+                          return AppLocalizations.of(
+                                context,
+                              )?.cardNameRequired ??
+                              'Card name is required';
                         }
                         return null;
                       },
@@ -224,7 +228,8 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
 
                     // Başlangıç bakiyesi
                     Text(
-                      AppLocalizations.of(context)?.initialBalance ?? 'Initial Balance',
+                      AppLocalizations.of(context)?.initialBalance ??
+                          'Initial Balance',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -236,8 +241,13 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                       controller: _balanceController,
                       hintText: '0',
                       prefixIcon: Icons.account_balance_wallet,
-                      suffixText: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      suffixText: Provider.of<ThemeProvider>(
+                        context,
+                        listen: false,
+                      ).currency.symbol,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [ThousandsSeparatorInputFormatter()],
                     ),
 
@@ -278,7 +288,10 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                           onTap: _isLoading ? null : _submitForm,
                           borderRadius: BorderRadius.circular(16),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
                             child: Center(
                               child: _isLoading
                                   ? SizedBox(
@@ -286,7 +299,12 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withValues(alpha: 0.9)),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white.withValues(
+                                                alpha: 0.9,
+                                              ),
+                                            ),
                                       ),
                                     )
                                   : Row(
@@ -299,7 +317,10 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          AppLocalizations.of(context)?.addDebitCard ?? 'Add Debit Card',
+                                          AppLocalizations.of(
+                                                context,
+                                              )?.addDebitCard ??
+                                              'Add Debit Card',
                                           style: GoogleFonts.inter(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,
@@ -329,7 +350,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
   Widget _buildBankGrid() {
     final l10n = AppLocalizations.of(context)!;
     final banks = _filteredBanks;
-    
+
     return Column(
       children: [
         // Arama kutusu
@@ -373,11 +394,14 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                   width: 2,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
         ),
-        
+
         // Banka listesi
         SizedBox(
           height: 80,
@@ -399,28 +423,34 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                   itemBuilder: (context, index) {
                     final bankCode = banks[index];
                     final bankName = AppConstants.getBankName(bankCode);
-                    final accentColor = AppConstants.getBankAccentColor(bankCode);
+                    final accentColor = AppConstants.getBankAccentColor(
+                      bankCode,
+                    );
                     final isSelected = _selectedBankCode == bankCode;
-                    
+
                     return Container(
                       width: 100,
-                      margin: EdgeInsets.only(right: index == banks.length - 1 ? 0 : 12),
+                      margin: EdgeInsets.only(
+                        right: index == banks.length - 1 ? 0 : 12,
+                      ),
                       child: GestureDetector(
                         onTap: () => _onBankSelected(bankCode),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isSelected 
+                            color: isSelected
                                 ? accentColor.withValues(alpha: 0.1)
-                                : (Theme.of(context).brightness == Brightness.dark 
-                                    ? const Color(0xFF2C2C2E) 
-                                    : const Color(0xFFF2F2F7)),
+                                : (Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFF2C2C2E)
+                                      : const Color(0xFFF2F2F7)),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected 
+                              color: isSelected
                                   ? accentColor
-                                  : (Theme.of(context).brightness == Brightness.dark 
-                                      ? const Color(0xFF38383A) 
-                                      : const Color(0xFFE5E5EA)),
+                                  : (Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFF38383A)
+                                        : const Color(0xFFE5E5EA)),
                               width: isSelected ? 2 : 1,
                             ),
                           ),
@@ -432,7 +462,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: isSelected 
+                                  color: isSelected
                                       ? accentColor
                                       : Theme.of(context).colorScheme.onSurface,
                                 ),
@@ -462,7 +492,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
     String? Function(String?)? validator,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -506,17 +536,11 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Color(0xFF6D6D70),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFF6D6D70), width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Color(0xFFFF3B30),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFFFF3B30), width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -525,4 +549,4 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
       ),
     );
   }
-} 
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/services/firebase_auth_service.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
@@ -47,7 +48,6 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (credential.user != null && mounted) {
-
         // Show success message with name
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -102,48 +102,51 @@ class _RegisterPageState extends State<RegisterPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: 24.w.clamp(20.w, 32.w), 
+              vertical: 16.h.clamp(12.h, 24.h),
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 const QantaLogo.large(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 Align(
                   alignment: Alignment.center,
                   child: Text(
                     l10n.signUp,
                     style: GoogleFonts.inter(
-                      fontSize: 32,
+                      fontSize: 28.sp.clamp(20.sp, 32.sp),
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Align(
                   alignment: Alignment.center,
                   child: Text(
                     l10n.registerSubtitle,
                     style: GoogleFonts.inter(
-                      fontSize: 16,
+                      fontSize: 14.sp.clamp(12.sp, 16.sp),
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(20.w.clamp(16.w, 28.w)),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? theme.colorScheme.surfaceVariant
+                        ? theme.colorScheme.surfaceContainerHighest
                         : Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(20.r.clamp(16.r, 24.r)),
                     boxShadow: [
                       BoxShadow(
                         color: theme.shadowColor.withOpacity(0.08),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
+                        blurRadius: 20.r.clamp(16.r, 28.r),
+                        offset: Offset(0, 6.h.clamp(4.h, 10.h)),
                       ),
                     ],
                   ),
@@ -190,7 +193,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 12.h),
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
@@ -233,7 +236,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 12.h),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
@@ -288,7 +291,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 12.h),
                         TextFormField(
                           controller: _confirmPasswordController,
                           obscureText: _obscureConfirmPassword,
@@ -344,28 +347,28 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 16.h),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              padding: EdgeInsets.symmetric(vertical: 14.h),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(14.r),
                               ),
                               backgroundColor: theme.colorScheme.primary,
                               foregroundColor: theme.colorScheme.onPrimary,
                               textStyle: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                fontSize: 16.sp.clamp(14.sp, 18.sp),
                               ),
                               elevation: 0,
                             ),
                             onPressed: _isLoading ? null : _signUp,
                             child: _isLoading
-                                ? const SizedBox(
-                                    height: 22,
-                                    width: 22,
+                                ? SizedBox(
+                                    height: 20.h,
+                                    width: 20.w,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                     ),
@@ -377,7 +380,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 24.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -385,7 +388,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       l10n.alreadyHaveAccount,
                       style: GoogleFonts.inter(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        fontSize: 15,
+                        fontSize: 14.sp.clamp(12.sp, 16.sp),
                       ),
                     ),
                     TextButton(
@@ -396,14 +399,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         foregroundColor: theme.colorScheme.primary,
                         textStyle: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 14.sp.clamp(12.sp, 16.sp),
                         ),
                       ),
                       child: Text(l10n.login),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 20.h),
               ],
             ),
           ),

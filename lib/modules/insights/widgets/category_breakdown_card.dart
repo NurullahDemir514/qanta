@@ -31,20 +31,17 @@ class CategoryBreakdownCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 2),
             spreadRadius: 0,
           ),
         ],
-        border: isDark 
-          ? Border.all(
-              color: const Color(0xFF38383A),
-              width: 0.5,
-            )
-          : null,
+        border: isDark
+            ? Border.all(color: const Color(0xFF38383A), width: 0.5)
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -60,25 +57,25 @@ class CategoryBreakdownCard extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Category List
             ...statistics.categoryBreakdown.take(8).map((category) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: _buildCategoryItem(context, category),
               );
-            }).toList(),
-            
+            }),
+
             // Show more indicator if there are more categories
             if (statistics.categoryBreakdown.length > 8)
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isDark 
-                    ? const Color(0xFF2C2C2E)
-                    : const Color(0xFFF2F2F7),
+                  color: isDark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFF2F2F7),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -108,9 +105,15 @@ class CategoryBreakdownCard extends StatelessWidget {
 
   Widget _buildCategoryItem(BuildContext context, CategoryStatistic category) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
-    final formatter = NumberFormat.currency(locale: currency.locale, symbol: currency.symbol);
-    
+    final currency = Provider.of<ThemeProvider>(
+      context,
+      listen: false,
+    ).currency;
+    final formatter = NumberFormat.currency(
+      locale: currency.locale,
+      symbol: currency.symbol,
+    );
+
     // Generate a color based on category name
     final color = _getCategoryColor(category.categoryId);
 
@@ -131,9 +134,9 @@ class CategoryBreakdownCard extends StatelessWidget {
             ),
           ),
         ),
-        
+
         const SizedBox(width: 12),
-        
+
         // Category Info
         Expanded(
           child: Column(
@@ -158,7 +161,7 @@ class CategoryBreakdownCard extends StatelessWidget {
             ],
           ),
         ),
-        
+
         // Amount and Percentage
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -202,20 +205,17 @@ class CategoryBreakdownCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 2),
             spreadRadius: 0,
           ),
         ],
-        border: isDark 
-          ? Border.all(
-              color: const Color(0xFF38383A),
-              width: 0.5,
-            )
-          : null,
+        border: isDark
+            ? Border.all(color: const Color(0xFF38383A), width: 0.5)
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -264,8 +264,8 @@ class CategoryBreakdownCard extends StatelessWidget {
       const Color(0xFF6C5CE7), // Indigo
       const Color(0xFFA29BFE), // Light purple
     ];
-    
+
     final index = categoryId.hashCode.abs() % colors.length;
     return colors[index];
   }
-} 
+}

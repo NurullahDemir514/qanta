@@ -1,15 +1,13 @@
 import 'package:flutter/foundation.dart';
 import '../../shared/models/cash_account.dart';
-import '../../shared/models/transaction_model.dart';
-import '../services/cash_account_service.dart';
-import '../events/card_events.dart';
 import '../events/transaction_events.dart';
 import 'dart:async';
 
 class CashAccountProvider extends ChangeNotifier {
   static CashAccountProvider? _instance;
-  static CashAccountProvider get instance => _instance ??= CashAccountProvider._();
-  
+  static CashAccountProvider get instance =>
+      _instance ??= CashAccountProvider._();
+
   CashAccountProvider._() {
     _initializeTransactionEventListeners();
   }
@@ -17,7 +15,7 @@ class CashAccountProvider extends ChangeNotifier {
   CashAccount? _cashAccount;
   bool _isLoading = false;
   String? _error;
-  
+
   // Event subscription
   StreamSubscription<TransactionEvent>? _transactionEventSubscription;
 
@@ -31,12 +29,16 @@ class CashAccountProvider extends ChangeNotifier {
 
   /// Transaction event listener'larını başlat
   void _initializeTransactionEventListeners() {
-    _transactionEventSubscription = transactionEvents.stream.listen(_handleTransactionEvent);
+    _transactionEventSubscription = transactionEvents.stream.listen(
+      _handleTransactionEvent,
+    );
   }
 
   /// Transaction event'lerini handle et
   void _handleTransactionEvent(TransactionEvent event) {
-    if (event is TransactionAdded || event is TransactionDeleted || event is TransactionUpdated) {
+    if (event is TransactionAdded ||
+        event is TransactionDeleted ||
+        event is TransactionUpdated) {
       // Nakit hesabı ile ilgili işlem varsa bakiyeyi güncelle
       // Bu basit bir yaklaşım - gerçek uygulamada daha detaylı kontrol yapılabilir
       if (mounted) {
@@ -50,10 +52,10 @@ class CashAccountProvider extends ChangeNotifier {
   /// Nakit hesabını yükle
   Future<void> loadCashAccount() async {
     if (_isLoading) return;
-    
+
     _setLoading(true);
     _clearError();
-    
+
     try {
       // Legacy table doesn't exist anymore, gracefully handle
       _cashAccount = null;
@@ -74,10 +76,12 @@ class CashAccountProvider extends ChangeNotifier {
   }) async {
     _setLoading(true);
     _clearError();
-    
+
     try {
       // Legacy functionality disabled - use v2 provider instead
-      throw Exception('Legacy cash account creation disabled - use v2 provider');
+      throw Exception(
+        'Legacy cash account creation disabled - use v2 provider',
+      );
     } catch (e) {
       _setError('Nakit hesabı oluşturulurken hata oluştu: $e');
     } finally {
@@ -88,7 +92,7 @@ class CashAccountProvider extends ChangeNotifier {
   /// Bakiye güncelle
   Future<void> updateBalance(double newBalance) async {
     if (_cashAccount == null) return;
-    
+
     try {
       // Legacy functionality disabled
     } catch (e) {
@@ -100,7 +104,7 @@ class CashAccountProvider extends ChangeNotifier {
   /// Para ekle
   Future<void> addMoney(double amount, {String? description}) async {
     if (_cashAccount == null) return;
-    
+
     try {
       // Legacy functionality disabled
     } catch (e) {
@@ -112,7 +116,7 @@ class CashAccountProvider extends ChangeNotifier {
   /// Para çıkar
   Future<void> withdrawMoney(double amount, {String? description}) async {
     if (_cashAccount == null) return;
-    
+
     try {
       // Legacy functionality disabled
     } catch (e) {
@@ -124,10 +128,10 @@ class CashAccountProvider extends ChangeNotifier {
   /// Nakit hesabını sil
   Future<void> deleteCashAccount() async {
     if (_cashAccount == null) return;
-    
+
     _setLoading(true);
     _clearError();
-    
+
     try {
       // Legacy functionality disabled
     } catch (e) {
@@ -175,7 +179,10 @@ class CashAccountProvider extends ChangeNotifier {
   }
 
   /// Bakiye güncelle (legacy compatibility)
-  Future<bool> updateCashBalance(double difference, {String? description}) async {
+  Future<bool> updateCashBalance(
+    double difference, {
+    String? description,
+  }) async {
     try {
       // Legacy functionality disabled
       return false;
@@ -220,4 +227,4 @@ class CashAccountProvider extends ChangeNotifier {
   void clearAccount() {
     clear();
   }
-} 
+}

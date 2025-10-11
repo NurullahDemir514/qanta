@@ -30,7 +30,10 @@ class _StockSelectionScreenState extends State<StockSelectionScreen> {
   @override
   void initState() {
     super.initState();
-    _loadWatchedStocks();
+    // Delay loading to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadWatchedStocks();
+    });
   }
 
   @override

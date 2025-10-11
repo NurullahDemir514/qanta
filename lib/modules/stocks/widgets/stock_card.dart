@@ -204,13 +204,22 @@ class StockCard extends StatelessWidget {
                             color: const Color(0xFF007AFF),
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            '${position!.totalQuantity.toStringAsFixed(0)} adet',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white : Colors.black,
-                            ),
+                          Consumer<StockProvider>(
+                            builder: (context, stockProvider, child) {
+                              final totalPortfolioValue = stockProvider.totalPortfolioValue;
+                              final portfolioPercentage = totalPortfolioValue > 0
+                                  ? (position!.currentValue / totalPortfolioValue) * 100
+                                  : 0.0;
+                              
+                              return Text(
+                                '${position!.totalQuantity.toStringAsFixed(0)} adet (${portfolioPercentage.toStringAsFixed(1)}%)',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black,
+                                ),
+                              );
+                            },
                           ),
                           const Spacer(),
                           Text(

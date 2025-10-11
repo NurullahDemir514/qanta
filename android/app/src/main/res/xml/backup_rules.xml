@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude Firebase Authentication and sensitive data -->
+    <exclude domain="sharedpref" path="FlutterSecureStorage"/>
+    <exclude domain="database" path="firebase_auth.db"/>
+    <exclude domain="file" path="key.properties"/>
+</full-backup-content>

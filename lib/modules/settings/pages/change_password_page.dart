@@ -17,7 +17,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _showCurrentPassword = false;
   bool _showNewPassword = false;
@@ -35,36 +35,47 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   bool get _canSave {
     return _currentPasswordController.text.isNotEmpty &&
-           _newPasswordController.text.isNotEmpty &&
-           _confirmPasswordController.text.isNotEmpty &&
-           !_isLoading;
+        _newPasswordController.text.isNotEmpty &&
+        _confirmPasswordController.text.isNotEmpty &&
+        !_isLoading;
   }
 
   Future<void> _changePassword() async {
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      _showErrorDialog(AppLocalizations.of(context)?.passwordsDoNotMatch ?? 'Passwords do not match');
+      _showErrorDialog(
+        AppLocalizations.of(context)?.passwordsDoNotMatch ??
+            'Passwords do not match',
+      );
       return;
     }
-    
+
     if (_newPasswordController.text.length < 6) {
-      _showErrorDialog(AppLocalizations.of(context)?.passwordMinLength ?? 'Password must be at least 6 characters');
+      _showErrorDialog(
+        AppLocalizations.of(context)?.passwordMinLength ??
+            'Password must be at least 6 characters',
+      );
       return;
     }
 
     setState(() => _isLoading = true);
-    
+
     try {
       // Önce mevcut şifreyi doğrula
-      await FirebaseAuthService.reauthenticateUser(_currentPasswordController.text);
-      
+      await FirebaseAuthService.reauthenticateUser(
+        _currentPasswordController.text,
+      );
+
       // Şifreyi güncelle
       await FirebaseAuthService.updatePassword(_newPasswordController.text);
-      
+
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.passwordChangedSuccessfully ?? 'Password changed successfully'),
+            content: Text(
+              AppLocalizations.of(context)?.passwordChangedSuccessfully ??
+                  'Password changed successfully',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -80,11 +91,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   String _getErrorMessage(String error) {
     if (error.contains('wrong-password')) {
-      return AppLocalizations.of(context)?.wrongCurrentPassword ?? 'Current password is incorrect';
+      return AppLocalizations.of(context)?.wrongCurrentPassword ??
+          'Current password is incorrect';
     } else if (error.contains('weak-password')) {
-      return AppLocalizations.of(context)?.passwordTooWeak ?? 'Password is too weak';
+      return AppLocalizations.of(context)?.passwordTooWeak ??
+          'Password is too weak';
     } else if (error.contains('requires-recent-login')) {
-      return AppLocalizations.of(context)?.requiresRecentLogin ?? 'Please log in again to change your password';
+      return AppLocalizations.of(context)?.requiresRecentLogin ??
+          'Please log in again to change your password';
     } else {
       return '${AppLocalizations.of(context)?.passwordChangeFailed ?? 'Password change failed'}: $error';
     }
@@ -110,15 +124,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     final isDark = CupertinoTheme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
-    
+
     return Scaffold(
-      backgroundColor: isDark 
-        ? const Color(0xFF000000) 
-        : const Color(0xFFF8F9FA),
+      backgroundColor: isDark
+          ? const Color(0xFF000000)
+          : const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: isDark 
-          ? const Color(0xFF1C1C1E) 
-          : Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -148,7 +160,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              
+
               // Current Password Section
               _buildSectionTitle('Current Password', isDark),
               const SizedBox(height: 8),
@@ -161,9 +173,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 },
                 isDark: isDark,
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // New Password Section
               _buildSectionTitle('New Password', isDark),
               const SizedBox(height: 8),
@@ -176,9 +188,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 },
                 isDark: isDark,
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Confirm Password Section
               _buildModernPasswordField(
                 controller: _confirmPasswordController,
@@ -189,9 +201,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 },
                 isDark: isDark,
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Save Button
               SizedBox(
                 width: double.infinity,
@@ -199,9 +211,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 child: ElevatedButton(
                   onPressed: _canSave ? _changePassword : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _canSave 
-                      ? const Color(0xFF007AFF) 
-                      : const Color(0xFF8E8E93),
+                    backgroundColor: _canSave
+                        ? const Color(0xFF007AFF)
+                        : const Color(0xFF8E8E93),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -209,25 +221,27 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                   ),
                   child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          l10n?.save ?? 'Save',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'SF Pro Text',
+                          ),
                         ),
-                      )
-                    : Text(
-                        l10n?.save ?? 'Save',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'SF Pro Text',
-                        ),
-                      ),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
             ],
           ),
@@ -257,14 +271,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark 
-          ? const Color(0xFF1C1C1E) 
-          : Colors.white,
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark 
-            ? const Color(0xFF38383A)
-            : const Color(0xFFE5E5EA),
+          color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
           width: 1,
         ),
         boxShadow: [
@@ -291,7 +301,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             fontFamily: 'SF Pro Text',
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           suffixIcon: IconButton(
             onPressed: onVisibilityToggle,
             icon: Icon(
@@ -341,13 +354,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               CupertinoButton(
                 padding: EdgeInsets.zero,
-                minSize: 0,
                 onPressed: onVisibilityToggle,
                 child: Icon(
                   obscureText ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
                   color: const Color(0xFF8E8E93),
                   size: 20,
                 ),
+                minimumSize: Size(0, 0),
               ),
             ],
           ),
@@ -356,11 +369,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           Divider(
             height: 1,
             indent: 16,
-            color: isDark 
-              ? const Color(0xFF38383A)
-              : const Color(0xFFE5E5EA),
+            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
           ),
       ],
     );
   }
-} 
+}

@@ -1,15 +1,12 @@
 import 'package:flutter/foundation.dart';
 import '../../shared/models/debit_card_model.dart';
-import '../../shared/models/transaction_model.dart';
-import '../services/debit_card_service.dart';
-import '../events/card_events.dart';
 import '../events/transaction_events.dart';
 import 'dart:async';
 
 class DebitCardProvider with ChangeNotifier {
   static DebitCardProvider? _instance;
   static DebitCardProvider get instance => _instance ??= DebitCardProvider._();
-  
+
   DebitCardProvider._() {
     _initializeTransactionEventListeners();
   }
@@ -17,7 +14,7 @@ class DebitCardProvider with ChangeNotifier {
   List<DebitCardModel> _debitCards = [];
   bool _isLoading = false;
   String? _error;
-  
+
   // Event subscription
   StreamSubscription<TransactionEvent>? _transactionEventSubscription;
 
@@ -29,10 +26,12 @@ class DebitCardProvider with ChangeNotifier {
   int get cardCount => _debitCards.length;
 
   // Toplam bakiye
-  double get totalBalance => _debitCards.fold(0.0, (sum, card) => sum + card.balance);
+  double get totalBalance =>
+      _debitCards.fold(0.0, (sum, card) => sum + card.balance);
 
   // Aktif kartlar
-  List<DebitCardModel> get activeCards => _debitCards.where((card) => card.isActive).toList();
+  List<DebitCardModel> get activeCards =>
+      _debitCards.where((card) => card.isActive).toList();
 
   // Belirli bir kartı ID ile bul
   DebitCardModel? getCardById(String cardId) {
@@ -50,12 +49,16 @@ class DebitCardProvider with ChangeNotifier {
 
   /// Transaction event listener'larını başlat
   void _initializeTransactionEventListeners() {
-    _transactionEventSubscription = transactionEvents.stream.listen(_handleTransactionEvent);
+    _transactionEventSubscription = transactionEvents.stream.listen(
+      _handleTransactionEvent,
+    );
   }
 
   /// Transaction event'lerini handle et
   void _handleTransactionEvent(TransactionEvent event) {
-    if (event is TransactionAdded || event is TransactionDeleted || event is TransactionUpdated) {
+    if (event is TransactionAdded ||
+        event is TransactionDeleted ||
+        event is TransactionUpdated) {
       // Banka kartı ile ilgili işlem varsa bakiyeyi güncelle
       if (mounted) {
         loadDebitCards();
@@ -236,4 +239,4 @@ class DebitCardProvider with ChangeNotifier {
     _transactionEventSubscription?.cancel();
     super.dispose();
   }
-} 
+}

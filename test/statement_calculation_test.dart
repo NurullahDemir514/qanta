@@ -1,9 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:qanta/core/services/statement_service.dart';
 import 'package:qanta/shared/models/statement_period.dart';
 import 'package:qanta/shared/models/statement_summary.dart';
-import 'package:qanta/shared/models/installment_models_v2.dart';
 import 'package:qanta/shared/utils/date_utils.dart';
 
 void main() {
@@ -123,9 +120,18 @@ void main() {
 
         // Act
         final period = StatementPeriod(
-          startDate: DateUtils.getStatementPeriodStart(statementDay, referenceDate: referenceDate),
-          endDate: DateUtils.getStatementPeriodEnd(statementDay, referenceDate: referenceDate),
-          dueDate: DateUtils.getStatementDueDate(statementDay, referenceDate: referenceDate),
+          startDate: DateUtils.getStatementPeriodStart(
+            statementDay,
+            referenceDate: referenceDate,
+          ),
+          endDate: DateUtils.getStatementPeriodEnd(
+            statementDay,
+            referenceDate: referenceDate,
+          ),
+          dueDate: DateUtils.getStatementDueDate(
+            statementDay,
+            referenceDate: referenceDate,
+          ),
           statementDay: statementDay,
           isPaid: false,
         );
@@ -133,7 +139,10 @@ void main() {
         // Assert
         expect(period.startDate, equals(DateTime(2025, 10, 1)));
         expect(period.endDate, equals(DateTime(2025, 10, 31)));
-        expect(period.dueDate, equals(DateTime(2025, 11, 25))); // 15 days after period end
+        expect(
+          period.dueDate,
+          equals(DateTime(2025, 11, 25)),
+        ); // 15 days after period end
         expect(period.statementDay, equals(1));
         expect(period.isPaid, equals(false));
       });

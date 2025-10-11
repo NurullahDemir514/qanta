@@ -41,9 +41,12 @@ class QantaLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logoPath = customLogoPath ?? 
-        (isWhite ? AppConstants.imagePath + 'logo_white.png' : AppConstants.logoPath);
-    
+    final logoPath =
+        customLogoPath ??
+        (isWhite
+            ? '${AppConstants.imagePath}logo_white.png'
+            : AppConstants.logoPath);
+
     return _buildLogo(logoPath);
   }
 
@@ -68,4 +71,4 @@ class QantaLogo extends StatelessWidget {
       },
     );
   }
-} 
+}

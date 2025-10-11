@@ -6,8 +6,6 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/models/unified_category_model.dart';
-import '../../../core/services/category_service_v2.dart';
-import '../../../shared/widgets/insufficient_funds_dialog.dart';
 import '../models/payment_method.dart';
 import '../models/card.dart';
 import '../../../shared/models/cash_account.dart';
@@ -26,7 +24,8 @@ class IncomeFormScreen extends StatefulWidget {
   final String? initialCategoryId;
   final String? initialPaymentMethodId;
   final DateTime? initialDate;
-  
+  final int initialStep;
+
   const IncomeFormScreen({
     super.key,
     this.initialAmount,
@@ -34,6 +33,7 @@ class IncomeFormScreen extends StatefulWidget {
     this.initialCategoryId,
     this.initialPaymentMethodId,
     this.initialDate,
+    this.initialStep = 0,
   });
 
   @override
@@ -44,11 +44,11 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _pageController = PageController();
-  
+
   String? _selectedCategory;
   PaymentMethod? _selectedPaymentMethod;
   DateTime _selectedDate = DateTime.now();
-  
+
   String? _amountError;
   String? _categoryError;
   String? _paymentMethodError;
@@ -58,6 +58,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
   @override
   void initState() {
     super.initState();
+    _currentStep = widget.initialStep;
     _initializeWithQuickNoteData();
   }
 
@@ -66,19 +67,20 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
     if (widget.initialAmount != null) {
       _amountController.text = widget.initialAmount!.toStringAsFixed(2);
     }
-    
+
     // Initialize description if provided
     if (widget.initialDescription != null) {
       _descriptionController.text = widget.initialDescription!;
     }
-    
+
     // Initialize date if provided
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate!;
     }
-    
+
     // Initialize category if provided
-    if (widget.initialCategoryId != null && widget.initialCategoryId!.isNotEmpty) {
+    if (widget.initialCategoryId != null &&
+        widget.initialCategoryId!.isNotEmpty) {
       // URL'den gelen kategori decode et - hata durumunda raw değeri kullan
       try {
         final decodedCategory = Uri.decodeComponent(widget.initialCategoryId!);
@@ -88,20 +90,20 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
         _selectedCategory = widget.initialCategoryId!;
       }
     }
-    
+
     // Initialize payment method if provided
     if (widget.initialPaymentMethodId != null) {
       _initializePaymentMethod();
     }
   }
-  
+
   void _initializePaymentMethod() async {
     if (widget.initialPaymentMethodId == null) return;
-    
+
     try {
       final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
       await provider.loadAccounts();
-      
+
       final account = provider.getAccountById(widget.initialPaymentMethodId!);
       if (account != null) {
         setState(() {
@@ -126,17 +128,20 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
                 name: account.name,
                 number: '**** **** **** ****',
                 expiryDate: '',
-                type: account.type == AccountType.debit ? CardType.debit : CardType.credit,
+                type: account.type == AccountType.debit
+                    ? CardType.debit
+                    : CardType.credit,
                 bankName: account.bankName ?? '',
-                color: account.type == AccountType.debit ? const Color(0xFF007AFF) : const Color(0xFFFF3B30),
+                color: account.type == AccountType.debit
+                    ? const Color(0xFF007AFF)
+                    : const Color(0xFFFF3B30),
                 isActive: account.isActive,
               ),
             );
           }
         });
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   List<String> _getStepTitles(AppLocalizations l10n) => [
@@ -148,8 +153,14 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
 
   String _formatCurrency(double amount) {
     final formatter = NumberFormat.currency(
-      locale: Provider.of<ThemeProvider>(context, listen: false).currency.locale,
-      symbol: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
+      locale: Provider.of<ThemeProvider>(
+        context,
+        listen: false,
+      ).currency.locale,
+      symbol: Provider.of<ThemeProvider>(
+        context,
+        listen: false,
+      ).currency.symbol,
       decimalDigits: 2,
     );
     return formatter.format(amount);
@@ -166,7 +177,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return BaseTransactionForm(
       title: l10n.incomeType,
       stepTitles: _getStepTitles(l10n),
@@ -192,7 +203,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
             },
           ),
         ),
-        
+
         // Step 2: Category
         BaseFormStep(
           title: l10n.whichCategoryEarned,
@@ -207,7 +218,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
             errorText: _categoryError,
           ),
         ),
-        
+
         // Step 3: Payment Method
         BaseFormStep(
           title: l10n.howDidYouReceive,
@@ -222,32 +233,36 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
             errorText: _paymentMethodError,
           ),
         ),
-        
+
         // Step 4: Summary and Details
         BaseFormStep(
-          title: l10n.lastCheckAndDetails,
+          title: l10n.details,
           content: Column(
             children: [
               // Transaction Summary
               if (_selectedCategory != null && _selectedPaymentMethod != null)
                 TransactionSummary(
-                  amount: double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0,
+                  amount:
+                      double.tryParse(
+                        _amountController.text.replaceAll(',', '.'),
+                      ) ??
+                      0,
                   category: _selectedCategory!,
                   paymentMethod: _selectedPaymentMethod!.displayName,
                   date: _selectedDate,
                   isIncome: true,
                 ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Description Field
               DescriptionField(
                 controller: _descriptionController,
                 hintText: 'Gelir açıklaması (opsiyonel)',
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Date Selector
               DateSelector(
                 selectedDate: _selectedDate,
@@ -283,14 +298,20 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       case 0: // Amount
         if (_amountController.text.isEmpty) {
           setState(() {
-            _amountError = AppLocalizations.of(context)?.pleaseEnterAmount ?? 'Please enter an amount';
+            _amountError =
+                AppLocalizations.of(context)?.pleaseEnterAmount ??
+                'Please enter an amount';
           });
           isValid = false;
         } else {
-          final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
+          final amount = double.tryParse(
+            _amountController.text.replaceAll(',', '.'),
+          );
           if (amount == null || amount <= 0) {
             setState(() {
-              _amountError = AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
+              _amountError =
+                  AppLocalizations.of(context)?.pleaseEnterValidAmount ??
+                  'Please enter a valid amount';
             });
             isValid = false;
           }
@@ -299,7 +320,9 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       case 1: // Category
         if (_selectedCategory == null) {
           setState(() {
-            _categoryError = AppLocalizations.of(context)?.pleaseSelectCategory ?? 'Please select a category';
+            _categoryError =
+                AppLocalizations.of(context)?.pleaseSelectCategory ??
+                'Please select a category';
           });
           isValid = false;
         }
@@ -307,7 +330,9 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       case 2: // Payment Method
         if (_selectedPaymentMethod == null) {
           setState(() {
-            _paymentMethodError = AppLocalizations.of(context)?.pleaseSelectPaymentMethod ?? 'Please select a payment method';
+            _paymentMethodError =
+                AppLocalizations.of(context)?.pleaseSelectPaymentMethod ??
+                'Please select a payment method';
           });
           isValid = false;
         }
@@ -333,16 +358,21 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
     try {
       final amount = double.parse(_amountController.text.replaceAll(',', '.'));
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
+
       // Tag'i category'ye çevir (otomatik oluştur)
       String? categoryId;
       if (_selectedCategory != null && _selectedCategory!.isNotEmpty) {
         try {
           // Önce varolan kategoriyi ara
           final existingCategories = providerV2.categories
-              .where((cat) => cat.displayName.toLowerCase() == _selectedCategory!.toLowerCase() && cat.categoryType == CategoryType.income)
+              .where(
+                (cat) =>
+                    cat.displayName.toLowerCase() ==
+                        _selectedCategory!.toLowerCase() &&
+                    cat.categoryType == CategoryType.income,
+              )
               .toList();
-          
+
           if (existingCategories.isNotEmpty) {
             categoryId = existingCategories.first.id;
           } else {
@@ -362,10 +392,10 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
           categoryId = null;
         }
       }
-      
+
       // Get account ID from payment method
       String? accountId;
-      
+
       if (_selectedPaymentMethod!.isCash) {
         // Get cash account ID
         final cashAccounts = providerV2.cashAccounts;
@@ -375,23 +405,26 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       } else if (_selectedPaymentMethod!.card != null) {
         accountId = _selectedPaymentMethod!.card!.id;
       }
-      
+
       if (accountId == null) {
-        throw Exception(AppLocalizations.of(context)?.accountInfoNotFoundSingle ?? 'Account information could not be retrieved');
+        throw Exception(
+          AppLocalizations.of(context)?.accountInfoNotFoundSingle ??
+              'Account information could not be retrieved',
+        );
       }
-      
+
       // Create income transaction using v2 system
       final transactionId = await providerV2.createTransaction(
         type: v2.TransactionType.income,
         amount: amount,
-        description: _descriptionController.text.trim().isEmpty 
-            ? (AppLocalizations.of(context)?.income ?? 'Income') 
+        description: _descriptionController.text.trim().isEmpty
+            ? (AppLocalizations.of(context)?.income ?? 'Income')
             : _descriptionController.text.trim(),
         sourceAccountId: accountId,
         categoryId: categoryId,
         transactionDate: _selectedDate,
       );
-      
+
       if (mounted) {
         Navigator.pop(context, transactionId);
       }
@@ -412,4 +445,4 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       }
     }
   }
-} 
+}

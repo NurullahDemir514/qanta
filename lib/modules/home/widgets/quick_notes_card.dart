@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/services/services_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/models_v2.dart';
@@ -19,7 +18,7 @@ class QuickNotesCard extends StatefulWidget {
 }
 
 class _QuickNotesCardState extends State<QuickNotesCard> {
-  List<Map<String, dynamic>> _pendingNotes = [];
+  List<QuickNote> _pendingNotes = [];
   bool _isLoading = false;
 
   @override
@@ -32,9 +31,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     setState(() => _isLoading = true);
     try {
       final notes = await QuickNoteService.getPendingNotes();
-      for (var note in notes) {
-      }
-      setState(() => _pendingNotes = notes.cast<Map<String, dynamic>>());
+      setState(() => _pendingNotes = notes);
     } catch (e) {
       debugPrint('Hızlı notlar yüklenirken hata: $e');
     } finally {
@@ -94,10 +91,12 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                         ),
                         if (_pendingNotes.isNotEmpty)
                           Text(
-                            l10n.pendingNotes(_pendingNotes.length),
+                            l10n.pendingNotesCount(_pendingNotes.length),
                             style: GoogleFonts.inter(
                               fontSize: 12,
-                              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                              color: isDark
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
                             ),
                           ),
                       ],
@@ -106,12 +105,11 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                 ),
                 IconButton(
                   onPressed: _showAddOptionsDialog,
-                  icon: const Icon(
-                    Icons.add_rounded,
-                    color: Color(0xFF007AFF),
-                  ),
+                  icon: const Icon(Icons.add_rounded, color: Color(0xFF007AFF)),
                   style: IconButton.styleFrom(
-                    backgroundColor: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                    backgroundColor: const Color(
+                      0xFF007AFF,
+                    ).withValues(alpha: 0.1),
                     minimumSize: const Size(32, 32),
                   ),
                 ),
@@ -123,9 +121,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(16),
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: Center(child: CircularProgressIndicator()),
             )
           else if (_pendingNotes.isEmpty)
             Padding(
@@ -134,7 +130,9 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                  color: isDark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFF2F2F7),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -142,23 +140,31 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                     Icon(
                       Icons.note_add_outlined,
                       size: 32,
-                      color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                      color: isDark
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF6D6D70),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      AppLocalizations.of(context)?.noNotesYet ?? 'No notes yet',
+                      AppLocalizations.of(context)?.noNotesYet ??
+                          'No notes yet',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                        color: isDark
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      AppLocalizations.of(context)?.addExpenseIncomeNotes ?? 'Add your expense or income notes here',
+                      AppLocalizations.of(context)?.addExpenseIncomeNotes ??
+                          'Add your expense or income notes here',
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                        color: isDark
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -174,10 +180,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
               itemCount: _pendingNotes.length > 3 ? 3 : _pendingNotes.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                final noteMap = _pendingNotes[index];
-                // Convert Map to QuickNote
-                final note = QuickNote.fromJson(noteMap);
-                debugPrint('QuickNotesCard: Converting Map to QuickNote');
+                final note = _pendingNotes[index];
                 return _buildNoteItem(note, isDark);
               },
             ),
@@ -191,7 +194,9 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => QuickNotesPage(notes: _pendingNotes.cast<QuickNote>()),
+                      builder: (context) => QuickNotesPageNew(
+                        notes: _pendingNotes.cast<QuickNote>(),
+                      ),
                     ),
                   );
                 },
@@ -212,7 +217,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
 
   Widget _buildNoteItem(QuickNote note, bool isDark) {
     // Debug: Image path'i yazdır
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -257,7 +262,9 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                   _formatDate(note.createdAt),
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                    color: isDark
+                        ? const Color(0xFF8E8E93)
+                        : const Color(0xFF6D6D70),
                   ),
                 ),
                 // Image preview if exists
@@ -275,7 +282,9 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                           height: 60,
                           width: 80,
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF48484A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF48484A)
+                                : const Color(0xFFE5E5EA),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Icon(
@@ -344,7 +353,9 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     } else if (diff.inHours < 24) {
       return l10n.hoursAgo(diff.inHours);
     } else if (diff.inDays == 1) {
-      return l10n.yesterdayAt('${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}');
+      return l10n.yesterdayAt(
+        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
+      );
     } else if (diff.inDays < 7) {
       final weekdays = [
         AppLocalizations.of(context)?.monday ?? 'Monday',
@@ -353,9 +364,12 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         AppLocalizations.of(context)?.thursday ?? 'Thursday',
         AppLocalizations.of(context)?.friday ?? 'Friday',
         AppLocalizations.of(context)?.saturday ?? 'Saturday',
-        AppLocalizations.of(context)?.sunday ?? 'Sunday'
+        AppLocalizations.of(context)?.sunday ?? 'Sunday',
       ];
-      return l10n.weekdayAt(weekdays[date.weekday - 1], '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}');
+      return l10n.weekdayAt(
+        weekdays[date.weekday - 1],
+        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
+      );
     } else if (diff.inDays < 365) {
       final months = [
         l10n.january,
@@ -369,7 +383,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         l10n.september,
         l10n.october,
         l10n.november,
-        l10n.december
+        l10n.december,
       ];
       return l10n.dayMonth(date.day, months[date.month - 1]);
     } else {
@@ -380,7 +394,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   Future<void> _showAddOptionsDialog() async {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -399,12 +413,14 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                 height: 4,
                 margin: const EdgeInsets.only(top: 8),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6),
+                  color: isDark
+                      ? const Color(0xFF48484A)
+                      : const Color(0xFFD1D1D6),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Title
               Text(
                 l10n.addQuickNote,
@@ -415,7 +431,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Options
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -495,11 +511,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 20,
-              ),
+              child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -519,7 +531,9 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
                     subtitle,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                      color: isDark
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF6D6D70),
                     ),
                   ),
                 ],
@@ -546,12 +560,10 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         maxHeight: 1024,
         imageQuality: 80,
       );
-      
-      
+
       if (image != null) {
         await _showImageNoteDialog(image.path);
-      } else {
-      }
+      } else {}
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -574,12 +586,10 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
         maxHeight: 1024,
         imageQuality: 80,
       );
-      
-      
+
       if (image != null) {
         await _showImageNoteDialog(image.path);
-      } else {
-      }
+      } else {}
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -595,7 +605,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   Future<void> _showImageNoteDialog(String imagePath) async {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
-    
+
     final result = await showDialog<String>(
       context: context,
       builder: (context) => IOSDialog(
@@ -626,7 +636,12 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                hintText: l10n.examplePhotoNote(Provider.of<ThemeProvider>(context, listen: false).currency.symbol),
+                hintText: l10n.examplePhotoNote(
+                  Provider.of<ThemeProvider>(
+                    context,
+                    listen: false,
+                  ).currency.symbol,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Color(0xFFE5E5EA)),
@@ -664,14 +679,13 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   Future<void> _addImageNote(String content, String imagePath) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      
       await QuickNoteService.addQuickNote(
         content: content,
         type: 'image',
         imagePath: imagePath,
       );
       await _loadPendingNotes();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -695,7 +709,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   Future<void> _showAddNoteDialog() async {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
-    
+
     final result = await showDialog<String>(
       context: context,
       builder: (context) => IOSDialog(
@@ -715,7 +729,12 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                hintText: l10n.exampleExpenseNote(Provider.of<ThemeProvider>(context, listen: false).currency.symbol),
+                hintText: l10n.exampleExpenseNote(
+                  Provider.of<ThemeProvider>(
+                    context,
+                    listen: false,
+                  ).currency.symbol,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Color(0xFFE5E5EA)),
@@ -756,12 +775,9 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
   Future<void> _addNote(String content) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      await QuickNoteService.addQuickNote(
-        content: content,
-        type: 'text',
-      );
+      await QuickNoteService.addQuickNote(content: content, type: 'text');
       await _loadPendingNotes();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -787,7 +803,7 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
     try {
       await QuickNoteService.deleteQuickNote(note.id);
       await _loadPendingNotes();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -807,4 +823,4 @@ class _QuickNotesCardState extends State<QuickNotesCard> {
       }
     }
   }
-} 
+}

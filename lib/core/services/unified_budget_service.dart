@@ -24,7 +24,7 @@ class UnifiedBudgetService {
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final budgetData = {
           ...data,
           'id': doc.id, // Override any existing id with doc.id
@@ -38,17 +38,20 @@ class UnifiedBudgetService {
   }
 
   /// Get budgets for specific month/year
-  static Future<List<BudgetModel>> getBudgetsForMonth(int month, int year) async {
+  static Future<List<BudgetModel>> getBudgetsForMonth(
+    int month,
+    int year,
+  ) async {
     try {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
 
       // Get all budgets and filter in memory to avoid index issues
       final allBudgets = await getAllBudgets();
-      
-      return allBudgets.where((budget) => 
-        budget.month == month && budget.year == year
-      ).toList();
+
+      return allBudgets
+          .where((budget) => budget.month == month && budget.year == year)
+          .toList();
     } catch (e) {
       debugPrint('Error fetching budgets for month: $e');
       rethrow;
@@ -66,10 +69,7 @@ class UnifiedBudgetService {
       if (!doc.exists) return null;
 
       final data = doc.data() as Map<String, dynamic>;
-      final budgetData = {
-        ...data,
-        'id': doc.id,
-      };
+      final budgetData = {...data, 'id': doc.id};
       return BudgetModel.fromJson(budgetData);
     } catch (e) {
       debugPrint('Error fetching budget: $e');
@@ -136,10 +136,7 @@ class UnifiedBudgetService {
       await FirebaseFirestoreService.updateDocument(
         collectionName: _collectionName,
         docId: budgetId,
-        data: {
-          'is_active': false,
-          'updated_at': FieldValue.serverTimestamp(),
-        },
+        data: {'is_active': false, 'updated_at': FieldValue.serverTimestamp()},
       );
 
       return true;
@@ -165,31 +162,33 @@ class UnifiedBudgetService {
       // Get all transactions for user and filter in memory to avoid index issues
       final snapshot = await FirebaseFirestoreService.getDocuments(
         collectionName: 'transactions',
-        query: FirebaseFirestoreService.getCollection('transactions')
-            .where('user_id', isEqualTo: userId),
+        query: FirebaseFirestoreService.getCollection(
+          'transactions',
+        ).where('user_id', isEqualTo: userId),
       );
 
       double totalSpent = 0.0;
       for (final doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        
+        final data = doc.data();
+
         // Filter in memory
         final transactionCategoryId = data['category_id'] as String?;
         final transactionType = data['type'] as String?;
         final transactionDateField = data['transaction_date'];
-        
-        if (transactionCategoryId == categoryId && 
-            transactionType == 'expense' && 
+
+        if (transactionCategoryId == categoryId &&
+            transactionType == 'expense' &&
             transactionDateField != null) {
-          
           DateTime? date;
           if (transactionDateField is Timestamp) {
             date = transactionDateField.toDate();
           } else if (transactionDateField is String) {
             date = DateTime.tryParse(transactionDateField);
           }
-          
-          if (date != null && date.isAfter(startOfMonth) && date.isBefore(endOfMonth)) {
+
+          if (date != null &&
+              date.isAfter(startOfMonth) &&
+              date.isBefore(endOfMonth)) {
             final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
             totalSpent += amount;
           }
@@ -208,10 +207,10 @@ class UnifiedBudgetService {
     try {
       // Get all budgets and filter in memory to avoid index issues
       final allBudgets = await getAllBudgets();
-      final budgets = allBudgets.where((budget) => 
-        budget.month == month && budget.year == year
-      ).toList();
-      
+      final budgets = allBudgets
+          .where((budget) => budget.month == month && budget.year == year)
+          .toList();
+
       for (final budget in budgets) {
         final spentAmount = await calculateSpentAmount(
           categoryId: budget.categoryId,
@@ -222,8 +221,7 @@ class UnifiedBudgetService {
         if (spentAmount != budget.spentAmount) {
           final updatedBudget = budget.copyWith(spentAmount: spentAmount);
           await updateBudget(budgetId: budget.id, budget: updatedBudget);
-        } else {
-        }
+        } else {}
       }
     } catch (e) {
       debugPrint('Error updating spent amounts: $e');
@@ -231,7 +229,10 @@ class UnifiedBudgetService {
   }
 
   /// Update budget category ID to match transaction category ID
-  static Future<void> updateBudgetCategoryId(String oldCategoryId, String newCategoryId) async {
+  static Future<void> updateBudgetCategoryId(
+    String oldCategoryId,
+    String newCategoryId,
+  ) async {
     try {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
@@ -239,21 +240,24 @@ class UnifiedBudgetService {
       final budgets = await getAllBudgets();
       final budgetToUpdate = budgets.firstWhere(
         (budget) => budget.categoryId == oldCategoryId,
-        orElse: () => throw Exception('Budget not found with category ID: $oldCategoryId'),
+        orElse: () => throw Exception(
+          'Budget not found with category ID: $oldCategoryId',
+        ),
       );
 
       final updatedBudget = budgetToUpdate.copyWith(categoryId: newCategoryId);
       await updateBudget(budgetId: budgetToUpdate.id, budget: updatedBudget);
-      
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Get budget statistics for a month
-  static Future<Map<String, dynamic>> getBudgetStatsForMonth(int month, int year) async {
+  static Future<Map<String, dynamic>> getBudgetStatsForMonth(
+    int month,
+    int year,
+  ) async {
     try {
       final budgets = await getBudgetsForMonth(month, year);
-      
+
       double totalBudgetLimit = 0.0;
       double totalSpent = 0.0;
       int overBudgetCount = 0;
@@ -262,7 +266,7 @@ class UnifiedBudgetService {
       for (final budget in budgets) {
         totalBudgetLimit += budget.monthlyLimit;
         totalSpent += budget.spentAmount;
-        
+
         if (budget.spentAmount > budget.monthlyLimit) {
           overBudgetCount++;
         } else if (budget.spentAmount >= budget.monthlyLimit * 0.8) {
@@ -277,7 +281,9 @@ class UnifiedBudgetService {
         'overBudgetCount': overBudgetCount,
         'nearBudgetCount': nearBudgetCount,
         'budgetCount': budgets.length,
-        'averageSpentPercentage': totalBudgetLimit > 0 ? (totalSpent / totalBudgetLimit) * 100 : 0.0,
+        'averageSpentPercentage': totalBudgetLimit > 0
+            ? (totalSpent / totalBudgetLimit) * 100
+            : 0.0,
       };
     } catch (e) {
       debugPrint('Error calculating budget stats: $e');

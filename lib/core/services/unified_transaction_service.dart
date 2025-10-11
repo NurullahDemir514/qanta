@@ -22,11 +22,11 @@ class UnifiedTransactionService {
         query: FirebaseFirestoreService.getCollection(_collectionName)
             .where('user_id', isEqualTo: userId)
             .orderBy('transaction_date', descending: true)
-            .limit(10)
+            .limit(10),
       );
 
       for (int i = 0; i < snapshot.docs.length; i++) {
-        final data = snapshot.docs[i].data() as Map<String, dynamic>;
+        final data = snapshot.docs[i].data();
         debugPrint('   ${i + 1}. ID: ${snapshot.docs[i].id}');
         debugPrint('      source_account_id: ${data['source_account_id']}');
         debugPrint('      type: ${data['type']}');
@@ -47,27 +47,24 @@ class UnifiedTransactionService {
     try {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
-      
-      // 🔥 DEBUG: Transaction loading
-      debugPrint('🔥 UnifiedTransactionService.getAllTransactions() - Loading transactions');
+
 
       final snapshot = await FirebaseFirestoreService.getDocuments(
         collectionName: _collectionName,
         query: FirebaseFirestoreService.getCollection(_collectionName)
             .where('user_id', isEqualTo: userId)
             .orderBy('transaction_date', descending: true)
-            .limit(limit)
+            .limit(limit),
       );
 
-      debugPrint('   Found ${snapshot.docs.length} transactions in Firebase');
-      
+
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final transactionData = {
           ...data,
           'id': doc.id, // Override any existing id with doc.id
         };
-        
+
         // Add joined data if available
         if (data['category_name'] != null) {
           transactionData['category_name'] = data['category_name'];
@@ -84,7 +81,7 @@ class UnifiedTransactionService {
         if (data['target_account_type'] != null) {
           transactionData['target_account_type'] = data['target_account_type'];
         }
-        
+
         return TransactionWithDetailsV2.fromJson(transactionData);
       }).toList();
     } catch (e) {
@@ -109,11 +106,11 @@ class UnifiedTransactionService {
             .where('user_id', isEqualTo: userId)
             .where('type', isEqualTo: type.value)
             .orderBy('transaction_date', descending: true)
-            .limit(limit)
+            .limit(limit),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         return TransactionWithDetailsV2.fromJson({
           ...data,
           'id': doc.id, // Override any existing id with doc.id
@@ -141,11 +138,11 @@ class UnifiedTransactionService {
             .where('user_id', isEqualTo: userId)
             .where('source_account_id', isEqualTo: accountId)
             .orderBy('transaction_date', descending: true)
-            .limit(limit)
+            .limit(limit),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         return TransactionWithDetailsV2.fromJson({
           ...data,
           'id': doc.id, // Override any existing id with doc.id
@@ -174,11 +171,11 @@ class UnifiedTransactionService {
             .where('transaction_date', isGreaterThanOrEqualTo: startDate)
             .where('transaction_date', isLessThanOrEqualTo: endDate)
             .orderBy('transaction_date', descending: true)
-            .limit(limit)
+            .limit(limit),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         return TransactionWithDetailsV2.fromJson({
           ...data,
           'id': doc.id, // Override any existing id with doc.id
@@ -191,7 +188,9 @@ class UnifiedTransactionService {
   }
 
   /// Add new transaction
-  static Future<String> addTransaction(TransactionWithDetailsV2 transaction) async {
+  static Future<String> addTransaction(
+    TransactionWithDetailsV2 transaction,
+  ) async {
     try {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
@@ -202,14 +201,18 @@ class UnifiedTransactionService {
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       };
-      
+
       // 🔥 FIREBASE DEBUG - What data is being sent?
       debugPrint('   user_id: ${transactionData['user_id']}');
       debugPrint('   type: ${transactionData['type']}');
       debugPrint('   amount: ${transactionData['amount']}');
       debugPrint('   description: ${transactionData['description']}');
-      debugPrint('   source_account_id: ${transactionData['source_account_id']}');
-      debugPrint('   target_account_id: ${transactionData['target_account_id']}');
+      debugPrint(
+        '   source_account_id: ${transactionData['source_account_id']}',
+      );
+      debugPrint(
+        '   target_account_id: ${transactionData['target_account_id']}',
+      );
       debugPrint('   category_id: ${transactionData['category_id']}');
 
       final docRef = await FirebaseFirestoreService.addDocument(
@@ -265,7 +268,6 @@ class UnifiedTransactionService {
   /// Delete transaction
   static Future<bool> deleteTransaction(String transactionId) async {
     try {
-      
       // Get transaction to reverse balance changes
       final transaction = await getTransactionById(transactionId);
       if (transaction != null) {
@@ -284,7 +286,9 @@ class UnifiedTransactionService {
   }
 
   /// Get transaction by ID
-  static Future<TransactionWithDetailsV2?> getTransactionById(String transactionId) async {
+  static Future<TransactionWithDetailsV2?> getTransactionById(
+    String transactionId,
+  ) async {
     try {
       final doc = await FirebaseFirestoreService.getDocumentSnapshot(
         collectionName: _collectionName,
@@ -294,10 +298,7 @@ class UnifiedTransactionService {
       if (!doc.exists) return null;
 
       final data = doc.data() as Map<String, dynamic>;
-      return TransactionWithDetailsV2.fromJson({
-        'id': doc.id,
-        ...data,
-      });
+      return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
     } catch (e) {
       debugPrint('Error fetching transaction: $e');
       rethrow;
@@ -310,16 +311,15 @@ class UnifiedTransactionService {
   }) {
     return FirebaseFirestoreService.getDocumentsStream(
       collectionName: _collectionName,
-      query: FirebaseFirestoreService.getCollection(_collectionName)
-          .orderBy('transaction_date', descending: true)
-          .limit(limit),
-    ).map((snapshot) => snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return TransactionWithDetailsV2.fromJson({
-        'id': doc.id,
-        ...data,
-      });
-    }).toList());
+      query: FirebaseFirestoreService.getCollection(
+        _collectionName,
+      ).orderBy('transaction_date', descending: true).limit(limit),
+    ).map(
+      (snapshot) => snapshot.docs.map((doc) {
+        final data = doc.data();
+        return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
+      }).toList(),
+    );
   }
 
   /// Get transactions by account stream
@@ -333,13 +333,12 @@ class UnifiedTransactionService {
           .where('account_id', isEqualTo: accountId)
           .orderBy('transaction_date', descending: true)
           .limit(limit),
-    ).map((snapshot) => snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return TransactionWithDetailsV2.fromJson({
-        'id': doc.id,
-        ...data,
-      });
-    }).toList());
+    ).map(
+      (snapshot) => snapshot.docs.map((doc) {
+        final data = doc.data();
+        return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
+      }).toList(),
+    );
   }
 
   /// Get total income for date range
@@ -351,18 +350,22 @@ class UnifiedTransactionService {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
 
-      Query query = FirebaseFirestoreService.getCollection(_collectionName)
-          .where('type', isEqualTo: TransactionType.income.value);
+      Query query = FirebaseFirestoreService.getCollection(
+        _collectionName,
+      ).where('type', isEqualTo: TransactionType.income.value);
 
       if (startDate != null) {
-        query = query.where('transaction_date', isGreaterThanOrEqualTo: startDate);
+        query = query.where(
+          'transaction_date',
+          isGreaterThanOrEqualTo: startDate,
+        );
       }
       if (endDate != null) {
         query = query.where('transaction_date', isLessThanOrEqualTo: endDate);
       }
 
       final snapshot = await query.get();
-      
+
       double total = 0.0;
       for (final doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
@@ -383,18 +386,22 @@ class UnifiedTransactionService {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
 
-      Query query = FirebaseFirestoreService.getCollection(_collectionName)
-          .where('type', isEqualTo: TransactionType.expense.value);
+      Query query = FirebaseFirestoreService.getCollection(
+        _collectionName,
+      ).where('type', isEqualTo: TransactionType.expense.value);
 
       if (startDate != null) {
-        query = query.where('transaction_date', isGreaterThanOrEqualTo: startDate);
+        query = query.where(
+          'transaction_date',
+          isGreaterThanOrEqualTo: startDate,
+        );
       }
       if (endDate != null) {
         query = query.where('transaction_date', isLessThanOrEqualTo: endDate);
       }
 
       final snapshot = await query.get();
-      
+
       double total = 0.0;
       for (final doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
@@ -407,9 +414,13 @@ class UnifiedTransactionService {
   }
 
   /// Update account balance based on transaction
-  static Future<void> _updateAccountBalance(TransactionWithDetailsV2 transaction) async {
+  static Future<void> _updateAccountBalance(
+    TransactionWithDetailsV2 transaction,
+  ) async {
     try {
-      final account = await UnifiedAccountService.getAccountById(transaction.sourceAccountId);
+      final account = await UnifiedAccountService.getAccountById(
+        transaction.sourceAccountId,
+      );
       if (account == null) return;
 
       double balanceChange = 0.0;
@@ -435,12 +446,44 @@ class UnifiedTransactionService {
           }
           break;
         case TransactionType.transfer:
-          // Transfer: only affect non-credit accounts
+          // Transfer: affect source account
           if (account.type != AccountType.credit) {
             balanceChange = -absoluteAmount;
           }
-          // Credit cards are not affected by transfers
-          break;
+
+          // Update source account
+          if (balanceChange != 0.0) {
+            await UnifiedAccountService.incrementBalance(
+              accountId: transaction.sourceAccountId,
+              amount: balanceChange,
+            );
+          }
+
+          // Also update target account for transfers
+          if (transaction.targetAccountId != null) {
+            final targetAccount = await UnifiedAccountService.getAccountById(
+              transaction.targetAccountId!,
+            );
+            if (targetAccount != null) {
+              double targetBalanceChange = 0.0;
+
+              if (targetAccount.type == AccountType.credit) {
+                // Credit card: decrease debt (payment to credit card)
+                targetBalanceChange = -absoluteAmount;
+              } else {
+                // Debit/Cash: increase balance
+                targetBalanceChange = absoluteAmount;
+              }
+
+              if (targetBalanceChange != 0.0) {
+                await UnifiedAccountService.incrementBalance(
+                  accountId: transaction.targetAccountId!,
+                  amount: targetBalanceChange,
+                );
+              }
+            }
+          }
+          return; // Early return after handling transfer
         case TransactionType.stock:
           // Stock transactions affect cash accounts
           if (account.type == AccountType.cash) {
@@ -449,9 +492,9 @@ class UnifiedTransactionService {
           break;
       }
 
-      // Only update if there's a change and it's not a credit card transfer
-      if (balanceChange != 0.0 && !(transaction.type == TransactionType.transfer && account.type == AccountType.credit)) {
-        await UnifiedAccountService.addToBalance(
+      // Only update if there's a change (for non-transfer transactions)
+      if (balanceChange != 0.0) {
+        await UnifiedAccountService.incrementBalance(
           accountId: transaction.sourceAccountId,
           amount: balanceChange,
         );
@@ -462,10 +505,27 @@ class UnifiedTransactionService {
   }
 
   /// Reverse account balance changes
-  static Future<void> _reverseAccountBalance(TransactionWithDetailsV2 transaction) async {
+  static Future<void> _reverseAccountBalance(
+    TransactionWithDetailsV2 transaction,
+  ) async {
     try {
-      final account = await UnifiedAccountService.getAccountById(transaction.sourceAccountId);
-      if (account == null) return;
+      debugPrint('🔄 _reverseAccountBalance çağrıldı');
+      debugPrint('   Transaction ID: ${transaction.id}');
+      debugPrint('   Transaction Type: ${transaction.type.value}');
+      debugPrint('   Amount: ${transaction.amount}');
+
+      // Force server read to avoid stale cache
+      final account = await UnifiedAccountService.getAccountById(
+        transaction.sourceAccountId,
+        forceServerRead: true,
+      );
+      if (account == null) {
+        debugPrint('   ⚠️ Account bulunamadı: ${transaction.sourceAccountId}');
+        return;
+      }
+
+      debugPrint('   Account: ${account.name} (${account.type.value})');
+      debugPrint('   Mevcut Balance: ${account.balance}');
 
       double balanceChange = 0.0;
       final absoluteAmount = transaction.amount.abs(); // Mutlak değer kullan
@@ -484,18 +544,54 @@ class UnifiedTransactionService {
           if (account.type == AccountType.credit) {
             // Credit card: decrease debt (reverse expense effect)
             balanceChange = -absoluteAmount;
+            debugPrint('   💳 Credit Card Expense Reversal');
+            debugPrint('   Balance Change: $balanceChange');
           } else {
             // Debit/Cash: increase balance (reverse expense effect)
             balanceChange = absoluteAmount;
           }
           break;
         case TransactionType.transfer:
-          // Transfer: only affect non-credit accounts
+          // Transfer: reverse source account
           if (account.type != AccountType.credit) {
             balanceChange = absoluteAmount;
           }
-          // Credit cards are not affected by transfers
-          break;
+
+          // Reverse source account
+          if (balanceChange != 0.0) {
+            await UnifiedAccountService.incrementBalance(
+              accountId: transaction.sourceAccountId,
+              amount: balanceChange,
+            );
+          }
+
+          // Also reverse target account for transfers
+          if (transaction.targetAccountId != null) {
+            // Force server read to avoid stale cache
+            final targetAccount = await UnifiedAccountService.getAccountById(
+              transaction.targetAccountId!,
+              forceServerRead: true,
+            );
+            if (targetAccount != null) {
+              double targetBalanceChange = 0.0;
+
+              if (targetAccount.type == AccountType.credit) {
+                // Credit card: increase debt (reverse payment)
+                targetBalanceChange = absoluteAmount;
+              } else {
+                // Debit/Cash: decrease balance (reverse transfer)
+                targetBalanceChange = -absoluteAmount;
+              }
+
+              if (targetBalanceChange != 0.0) {
+                await UnifiedAccountService.incrementBalance(
+                  accountId: transaction.targetAccountId!,
+                  amount: targetBalanceChange,
+                );
+              }
+            }
+          }
+          return; // Early return after handling transfer reversal
         case TransactionType.stock:
           // Stock transactions affect cash accounts (reverse the amount)
           if (account.type == AccountType.cash) {
@@ -504,9 +600,9 @@ class UnifiedTransactionService {
           break;
       }
 
-      // Only update if there's a change and it's not a credit card transfer
-      if (balanceChange != 0.0 && !(transaction.type == TransactionType.transfer && account.type == AccountType.credit)) {
-        await UnifiedAccountService.addToBalance(
+      // Only update if there's a change (for non-transfer transactions)
+      if (balanceChange != 0.0) {
+        await UnifiedAccountService.incrementBalance(
           accountId: transaction.sourceAccountId,
           amount: balanceChange,
         );
@@ -518,7 +614,7 @@ class UnifiedTransactionService {
 
   /// Get credit card transactions
   static Future<List<TransactionWithDetailsV2>> getCreditCardTransactions({
-required String creditCardId,
+    required String creditCardId,
     int limit = 50,
     int offset = 0,
   }) async {
@@ -535,30 +631,28 @@ required String creditCardId,
             .where('user_id', isEqualTo: userId)
             .where('source_account_id', isEqualTo: creditCardId)
             .orderBy('transaction_date', descending: true)
-            .limit(limit)
+            .limit(limit),
       );
-
 
       // Debug: List first few transactions to see source_account_id
       if (snapshot.docs.isNotEmpty) {
         for (int i = 0; i < snapshot.docs.length && i < 5; i++) {
-          final data = snapshot.docs[i].data() as Map<String, dynamic>;
+          final data = snapshot.docs[i].data();
           debugPrint('   ${i + 1}. ID: ${snapshot.docs[i].id}');
           debugPrint('      source_account_id: ${data['source_account_id']}');
           debugPrint('      amount: ${data['amount']}');
           debugPrint('      description: ${data['description']}');
           debugPrint('      ---');
         }
-      } else {
-      }
+      } else {}
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final transactionData = {
           ...data,
           'id': doc.id, // Override any existing id with doc.id
         };
-        
+
         // Add joined data if available
         if (data['category_name'] != null) {
           transactionData['category_name'] = data['category_name'];
@@ -575,7 +669,7 @@ required String creditCardId,
         if (data['target_account_type'] != null) {
           transactionData['target_account_type'] = data['target_account_type'];
         }
-        
+
         return TransactionWithDetailsV2.fromJson(transactionData);
       }).toList();
     } catch (e) {
@@ -600,16 +694,16 @@ required String creditCardId,
             .where('user_id', isEqualTo: userId)
             .where('source_account_id', isEqualTo: debitCardId)
             .orderBy('transaction_date', descending: true)
-            .limit(limit)
+            .limit(limit),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final transactionData = {
           ...data,
           'id': doc.id, // Override any existing id with doc.id
         };
-        
+
         // Add joined data if available
         if (data['category_name'] != null) {
           transactionData['category_name'] = data['category_name'];
@@ -626,7 +720,7 @@ required String creditCardId,
         if (data['target_account_type'] != null) {
           transactionData['target_account_type'] = data['target_account_type'];
         }
-        
+
         return TransactionWithDetailsV2.fromJson(transactionData);
       }).toList();
     } catch (e) {
@@ -651,16 +745,16 @@ required String creditCardId,
             .where('user_id', isEqualTo: userId)
             .where('source_account_id', isEqualTo: cashAccountId)
             .orderBy('transaction_date', descending: true)
-            .limit(limit)
+            .limit(limit),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final transactionData = {
           ...data,
           'id': doc.id, // Override any existing id with doc.id
         };
-        
+
         // Add joined data if available
         if (data['category_name'] != null) {
           transactionData['category_name'] = data['category_name'];
@@ -677,7 +771,7 @@ required String creditCardId,
         if (data['target_account_type'] != null) {
           transactionData['target_account_type'] = data['target_account_type'];
         }
-        
+
         return TransactionWithDetailsV2.fromJson(transactionData);
       }).toList();
     } catch (e) {

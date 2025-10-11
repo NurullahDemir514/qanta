@@ -82,7 +82,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingDescription =>
-      'Take control of your finances with Qanta. Track expenses, manage budgets, and grow your wealth with smart insights.';
+      'Your personal finance app. Track expenses, manage cards, monitor stocks, and set budgets.';
 
   @override
   String get welcomeSubtitle => 'Take control of your finances today!';
@@ -243,7 +243,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetUsed => 'Used';
 
   @override
-  String get remaining => 'left';
+  String get remaining => 'Remaining:';
 
   @override
   String get installment => 'Installment';
@@ -652,9 +652,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String errorOccurred(String error) {
-    return 'Error: $error';
-  }
+  String get errorOccurred => 'An error occurred';
 
   @override
   String get enterAmount => 'Enter Amount';
@@ -1044,6 +1042,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialAnalysisDesc => 'Analyze your spending habits';
 
   @override
+  String get cardManagementTitle => 'Card Management';
+
+  @override
+  String get cardManagementDesc =>
+      'Manage credit cards, debit cards and cash accounts';
+
+  @override
+  String get stockTrackingTitle => 'Stock Tracking';
+
+  @override
+  String get stockTrackingDesc => 'Track your stock portfolio and investments';
+
+  @override
+  String get budgetManagementTitle => 'Budget Management';
+
+  @override
+  String get budgetManagementDesc =>
+      'Set budgets and track your spending limits';
+
+  @override
+  String get aiInsightsTitle => 'AI Insights';
+
+  @override
+  String get aiInsightsDesc =>
+      'Get smart financial recommendations and insights';
+
+  @override
+  String get expenseTrackingDescShort =>
+      'Record and categorize your daily expenses with detailed tracking';
+
+  @override
+  String get cardManagementDescShort =>
+      'Manage credit cards, debit cards and cash accounts in one place';
+
+  @override
+  String get stockTrackingDescShort =>
+      'Monitor your stock portfolio with real-time prices and performance';
+
+  @override
+  String get financialAnalysisDescShort =>
+      'Analyze spending patterns and financial trends';
+
+  @override
+  String get budgetManagementDescShort =>
+      'Set monthly budgets and track your spending limits';
+
+  @override
+  String get aiInsightsDescShort =>
+      'Get personalized financial recommendations and insights';
+
+  @override
   String get languageSelectionTitle => 'Language Selection';
 
   @override
@@ -1153,7 +1202,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get merchant => 'Merchant';
 
   @override
-  String get installmentInfo => 'Installment Info';
+  String installmentInfo(int current, int total) {
+    return '$current/$total Installments';
+  }
 
   @override
   String get availableLimit => 'Available Limit';
@@ -1354,7 +1405,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreCategories => 'more categories';
 
   @override
-  String get netWorth => 'Net Worth';
+  String get netWorth => 'Total Assets';
 
   @override
   String get positive => 'Positive';
@@ -1646,7 +1697,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get twoDaysAgo => '2 days ago';
 
   @override
-  String get perMonth => '/month';
+  String get perMonth => '/ month';
 
   @override
   String get net => 'Net';
@@ -2538,9 +2589,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allNotifications => 'All Notifications';
 
   @override
-  String pendingNotes(int count) {
-    return '$count pending notes';
-  }
+  String get pendingNotes => 'Pending';
 
   @override
   String get addQuickNote => 'Add Quick Note';
@@ -2640,6 +2689,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stockChip => 'Stock';
+
+  @override
+  String get dailyPerformance => 'Daily Performance';
+
+  @override
+  String get daily => 'Daily';
+
+  @override
+  String get noStocksTracked => 'No stocks tracked yet';
+
+  @override
+  String get stockDataLoading => 'Loading stock data...';
+
+  @override
+  String get addStocksInstruction => 'Go to Stocks tab to add stocks';
+
+  @override
+  String get addStocks => 'Add Stocks';
+
+  @override
+  String get noPosition => 'No Position';
+
+  @override
+  String get topGainersDescription => 'Stocks with highest gains today';
+
+  @override
+  String get marketOpen => 'Market Open';
+
+  @override
+  String get marketClosed => 'Market Closed';
+
+  @override
+  String get intradayChange => 'Intraday Change';
+
+  @override
+  String get previousClose => 'Previous Close';
+
+  @override
+  String get loadingStocks => 'Loading stock data...';
+
+  @override
+  String get noStockData => 'No stock data available';
 
   @override
   String get stockSale => 'Stock Sale';
@@ -2954,4 +3045,279 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get returnLabel => 'Return';
+
+  @override
+  String get quickNotesTitle => 'Quick Notes';
+
+  @override
+  String pendingNotesCount(int count) {
+    return '$count pending notes';
+  }
+
+  @override
+  String get quickAddNote => 'Quick Add Note';
+
+  @override
+  String get addNoteHint => 'e.g. 50₺ grocery shopping';
+
+  @override
+  String get voiceButton => 'Voice';
+
+  @override
+  String get stopButton => 'Stop';
+
+  @override
+  String get photoButton => 'Photo';
+
+  @override
+  String get addButton => 'Add';
+
+  @override
+  String get processedNotes => 'Processed';
+
+  @override
+  String get pendingNotesTitle => 'Pending Notes';
+
+  @override
+  String get processedNotesTitle => 'Processed Notes';
+
+  @override
+  String get noPendingNotes =>
+      'No pending notes yet\nAdd notes quickly from the field above';
+
+  @override
+  String get noProcessedNotes => 'No notes converted to transactions yet';
+
+  @override
+  String get noteStatusPending => 'Pending';
+
+  @override
+  String get noteStatusProcessed => 'Processed';
+
+  @override
+  String get convertToExpense => 'Expense';
+
+  @override
+  String get convertToIncome => 'Income';
+
+  @override
+  String get deleteNote => 'Delete';
+
+  @override
+  String noteAddedSuccess(String content) {
+    return 'Note added: $content';
+  }
+
+  @override
+  String get noteConvertedSuccess =>
+      'Note successfully converted to transaction';
+
+  @override
+  String get noteDeletedSuccess => 'Note deleted';
+
+  @override
+  String get timeNow => 'Now';
+
+  @override
+  String timeMinutesAgo(int minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String timeHoursAgo(int hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String timeDaysAgo(int days) {
+    return '$days days ago';
+  }
+
+  @override
+  String get cutOff => 'Cut-off';
+
+  @override
+  String get paid => 'Paid';
+
+  @override
+  String get overdue => 'Overdue';
+
+  @override
+  String get daysLeft => 'days left';
+
+  @override
+  String get noTransactionsInStatement => 'No transactions in this statement';
+
+  @override
+  String get loadingStatements => 'Loading statements...';
+
+  @override
+  String get loadMore => 'Load More';
+
+  @override
+  String get loadingMore => 'Loading...';
+
+  @override
+  String get currentStatement => 'Current Statement';
+
+  @override
+  String get pastStatements => 'Past Statements';
+
+  @override
+  String get futureStatements => 'Future Statements';
+
+  @override
+  String get statements => 'Statements';
+
+  @override
+  String get garantiBBVA => 'Garanti BBVA';
+
+  @override
+  String get isBankasi => 'İş Bankası';
+
+  @override
+  String get akbank => 'Akbank';
+
+  @override
+  String get ziraatBankasi => 'Ziraat Bankası';
+
+  @override
+  String get vakifBank => 'VakıfBank';
+
+  @override
+  String get yapiKredi => 'Yapı Kredi';
+
+  @override
+  String get kuveytTurk => 'Kuveyt Türk';
+
+  @override
+  String get albarakaTurk => 'Albaraka Türk';
+
+  @override
+  String get qnbFinansbank => 'QNB Finansbank';
+
+  @override
+  String get enpara => 'Enpara.com';
+
+  @override
+  String get papara => 'Papara';
+
+  @override
+  String get turkiyeFinans => 'Türkiye Finans';
+
+  @override
+  String get teb => 'TEB';
+
+  @override
+  String get hsbcTurkiye => 'HSBC Türkiye';
+
+  @override
+  String get ingTurkiye => 'ING Türkiye';
+
+  @override
+  String get denizBank => 'DenizBank';
+
+  @override
+  String get anadoluBank => 'AnadoluBank';
+
+  @override
+  String get halkBank => 'Halkbank';
+
+  @override
+  String get qantaBank => 'Qanta Bank';
+
+  @override
+  String get statementOperations => 'Statement Operations';
+
+  @override
+  String get downloadPdf => 'Download PDF';
+
+  @override
+  String get downloadPdfSubtitle => 'Download statement as PDF';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get shareSubtitle => 'Share statement';
+
+  @override
+  String get markAsUnpaid => 'Mark as Unpaid';
+
+  @override
+  String get markAsUnpaidSubtitle => 'Change payment status of this statement';
+
+  @override
+  String get statementMarkedAsUnpaid => 'Statement marked as unpaid';
+
+  @override
+  String get errorMarkingStatement => 'Error occurred while marking statement';
+
+  @override
+  String get pdfExportComingSoon => 'PDF export feature coming soon';
+
+  @override
+  String get noStatementsYet => 'No statements yet';
+
+  @override
+  String get statementsWillAppearAfterUsage =>
+      'Statements will appear here after card usage';
+
+  @override
+  String installmentCount(int count) {
+    return '$count Installments';
+  }
+
+  @override
+  String get limitManagement => 'Limit Management';
+
+  @override
+  String get pleaseEnterCategoryAndLimit =>
+      'Please enter category name and set limit';
+
+  @override
+  String get enterValidLimit => 'Enter a valid limit';
+
+  @override
+  String get limitSavedSuccessfully => 'Limit saved successfully';
+
+  @override
+  String get noLimitsSetYet => 'No limits set yet';
+
+  @override
+  String get setMonthlySpendingLimits =>
+      'Set monthly spending limits for categories\nto control your budget';
+
+  @override
+  String get monthlyLimit => 'Monthly Limit:';
+
+  @override
+  String get exceeded => 'Exceeded';
+
+  @override
+  String get limitExceeded => 'Limit Exceeded!';
+
+  @override
+  String get spent => 'spent';
+
+  @override
+  String get spentAmount => 'Spent:';
+
+  @override
+  String get limitAmountHint => '2,000';
+
+  @override
+  String get addNewLimit => 'Add New Limit';
+
+  @override
+  String get monthlyLimitLabel => 'Monthly Limit';
+
+  @override
+  String get limitAmountPlaceholder => '0.00';
+
+  @override
+  String get saveLimit => 'Save Limit';
+
+  @override
+  String get limit => 'Limit';
 }

@@ -16,6 +16,7 @@ class StockSummaryStep extends StatefulWidget {
   final double price;
   final StockTransactionType transactionType;
   final List<double>? historicalData;
+  final Function(double)? onCommissionRateChanged;
   
   const StockSummaryStep({
     super.key,
@@ -25,6 +26,7 @@ class StockSummaryStep extends StatefulWidget {
     required this.price,
     required this.transactionType,
     this.historicalData,
+    this.onCommissionRateChanged,
   });
 
   @override
@@ -32,7 +34,7 @@ class StockSummaryStep extends StatefulWidget {
 }
 
 class _StockSummaryStepState extends State<StockSummaryStep> {
-  double _commissionRate = 0.001; // %0.1 varsayılan komisyon
+  double _commissionRate = 0.0; // %0 varsayılan komisyon
   late AppLocalizations l10n;
 
   @override
@@ -169,42 +171,101 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                   
                   const SizedBox(height: 16),
                   
-                  // Komisyon ayarı
-                  Row(
-                    children: [
-                      Text(
-                        l10n.commissionRate,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.white70 : Colors.grey[600],
-                        ),
+                  // Komisyon ayarı - Kompakt ve zarif tasarım
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        width: 0.5,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Slider(
-                          value: _commissionRate,
-                          min: 0.0001, // %0.01
-                          max: 0.01, // %1
-                          divisions: 99,
-                          onChanged: (value) {
-                            setState(() {
-                              _commissionRate = value;
-                            });
-                          },
-                          activeColor: const Color(0xFF007AFF),
-                          inactiveColor: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    ),
+                    child: Column(
+                      children: [
+                        // Başlık ve değer - tek satır
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              l10n.commissionRate,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: isDark ? Colors.white70 : Colors.grey[700],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF007AFF),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '${(_commissionRate * 100).toStringAsFixed(1)}%',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        '${(_commissionRate * 100).toStringAsFixed(2)}%',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black,
+                        
+                        const SizedBox(height: 12),
+                        
+                        // Slider - kompakt
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            activeTrackColor: const Color(0xFF007AFF),
+                            inactiveTrackColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                            thumbColor: Colors.white,
+                            overlayColor: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                            trackHeight: 4,
+                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                          ),
+                          child: Slider(
+                            value: _commissionRate,
+                            min: 0.0, // %0
+                            max: 0.1, // %10
+                            divisions: 10,
+                            onChanged: (value) {
+                              setState(() {
+                                _commissionRate = value;
+                              });
+                              // Parent'a komisyon oranını bildir
+                              widget.onCommissionRateChanged?.call(value);
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                        
+                        // Değer aralığı - tek satırda
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '0%',
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: isDark ? Colors.white54 : Colors.grey[400],
+                              ),
+                            ),
+                            Text(
+                              '10%',
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: isDark ? Colors.white54 : Colors.grey[400],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   
                   _buildSummaryRow(l10n.commission, '${CurrencyUtils.formatAmountWithoutSymbol(commission, currency)}$currencySymbol'),

@@ -41,14 +41,20 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
   void initState() {
     super.initState();
     
-    // Provider referansını sakla
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Provider referansını sakla ve verileri yükle
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         _unifiedProviderV2 = UnifiedProviderV2.instance;
         
         // Provider listener'ı ekle
         if (_providerListener != null) {
           _unifiedProviderV2!.addListener(_providerListener!);
+        }
+
+        // Verileri yükle
+        // Veriler zaten splash screen'de yükleniyor
+        if (mounted) {
+          setState(() {});
         }
       }
     });
@@ -148,7 +154,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
     
     CardDetailBottomSheet.show(
       context,
-      creditCard['cardName'] ?? AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta'),
+      creditCard['cardName'] ?? AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!),
       widget.l10n.credit,
       creditCard['formattedCardNumber'] ?? '**** **** **** ****',
       creditCard['availableLimit']?.toDouble() ?? 0.0,
@@ -171,14 +177,14 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          creditCard['cardName'] ?? AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta'),
+          creditCard['cardName'] ?? AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!),
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
         ),
         message: Text(
-          'Kredi Kartı',
+          AppLocalizations.of(context)!.creditCard,
           style: GoogleFonts.inter(
             fontSize: 14,
             color: CupertinoColors.secondaryLabel,
@@ -290,7 +296,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
           ),
         ),
         message: Text(
-          '${creditCard['cardName'] ?? AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta')} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.',
+          '${creditCard['cardName'] ?? AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!)} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.',
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -332,7 +338,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
   void _showStatements(creditCard) {
     HapticFeedback.lightImpact();
     
-    context.push('/credit-card-statements?cardId=${creditCard['id']}&cardName=${Uri.encodeComponent(creditCard['cardName'] ?? 'Kredi Kartı')}&bankName=${Uri.encodeComponent(AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta'))}&statementDay=${creditCard['statementDate'] ?? 15}&dueDay=${creditCard['dueDate'] ?? ''}');
+    context.push('/credit-card-statements?cardId=${creditCard['id']}&cardName=${Uri.encodeComponent(creditCard['cardName'] ?? AppLocalizations.of(context)!.creditCard)}&bankName=${Uri.encodeComponent(AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!))}&statementDay=${creditCard['statementDate'] ?? 15}&dueDay=${creditCard['dueDate'] ?? ''}');
   }
 
   void _editCard(creditCard) {
@@ -519,7 +525,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
                               height: 180, // Banka kartı ile aynı yükseklik
                               child: CreditCardWidget(
                                 cardType: 'credit',
-                                cardTypeLabel: AppConstants.getBankName(creditCard['bankCode'] ?? 'qanta'),
+                                cardTypeLabel: AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!),
                                 cardNumber: creditCard['formattedCardNumber'] ?? '**** **** **** ****',
                                 balance: creditCard['availableLimit']?.toDouble() ?? 0.0,
                                 bankCode: creditCard['bankCode'] ?? 'qanta',
@@ -574,11 +580,14 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: CardTransactionSection(
+                        key: ValueKey(unifiedProviderV2.creditCards.isNotEmpty 
+                            ? unifiedProviderV2.creditCards[_currentPage.clamp(0, (unifiedProviderV2.creditCards.length - 1).clamp(0, 999))]['id']
+                            : 'empty'),
                         cardId: unifiedProviderV2.creditCards.isNotEmpty 
                             ? unifiedProviderV2.creditCards[_currentPage.clamp(0, (unifiedProviderV2.creditCards.length - 1).clamp(0, 999))]['id']
                             : '',
                         cardName: unifiedProviderV2.creditCards.isNotEmpty 
-                            ? unifiedProviderV2.creditCards[_currentPage.clamp(0, (unifiedProviderV2.creditCards.length - 1).clamp(0, 999))]['cardName'] ?? 'Kredi Kartı'
+                            ? unifiedProviderV2.creditCards[_currentPage.clamp(0, (unifiedProviderV2.creditCards.length - 1).clamp(0, 999))]['cardName'] ?? AppLocalizations.of(context)!.creditCard
                             : '',
                       ),
                     ),

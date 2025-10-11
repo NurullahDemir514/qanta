@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/theme_provider.dart';
-import '../../../../shared/utils/currency_utils.dart';
 
 /// Hisse fiyat ve miktar hesap makinesi step'i
 class StockCalculatorStep extends StatefulWidget {
@@ -14,7 +13,7 @@ class StockCalculatorStep extends StatefulWidget {
   final String? priceError;
   final VoidCallback? onChanged;
   final String currencySymbol;
-  
+
   const StockCalculatorStep({
     super.key,
     required this.quantityController,
@@ -65,7 +64,9 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
           _quantityDisplay = number;
           _quantityWaitingForOperand = false;
         } else {
-          _quantityDisplay = _quantityDisplay == '0' ? number : _quantityDisplay + number;
+          _quantityDisplay = _quantityDisplay == '0'
+              ? number
+              : _quantityDisplay + number;
         }
         widget.quantityController.text = _quantityDisplay;
       } else {
@@ -73,7 +74,9 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
           _priceDisplay = number;
           _priceWaitingForOperand = false;
         } else {
-          _priceDisplay = _priceDisplay == '0' ? number : _priceDisplay + number;
+          _priceDisplay = _priceDisplay == '0'
+              ? number
+              : _priceDisplay + number;
         }
         widget.priceController.text = _priceDisplay;
       }
@@ -86,7 +89,11 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
     setState(() {
       if (_isQuantityMode) {
         if (_quantityOperation.isNotEmpty && !_quantityWaitingForOperand) {
-          _quantityDisplay = _performOperation(_quantityPreviousValue, double.parse(_quantityDisplay), _quantityOperation).toString();
+          _quantityDisplay = _performOperation(
+            _quantityPreviousValue,
+            double.parse(_quantityDisplay),
+            _quantityOperation,
+          ).toString();
           widget.quantityController.text = _quantityDisplay;
         }
         _quantityPreviousValue = double.parse(_quantityDisplay);
@@ -94,7 +101,11 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
         _quantityWaitingForOperand = true;
       } else {
         if (_priceOperation.isNotEmpty && !_priceWaitingForOperand) {
-          _priceDisplay = _performOperation(_pricePreviousValue, double.parse(_priceDisplay), _priceOperation).toString();
+          _priceDisplay = _performOperation(
+            _pricePreviousValue,
+            double.parse(_priceDisplay),
+            _priceOperation,
+          ).toString();
           widget.priceController.text = _priceDisplay;
         }
         _pricePreviousValue = double.parse(_priceDisplay);
@@ -125,14 +136,22 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
     setState(() {
       if (_isQuantityMode) {
         if (_quantityOperation.isNotEmpty) {
-          _quantityDisplay = _performOperation(_quantityPreviousValue, double.parse(_quantityDisplay), _quantityOperation).toString();
+          _quantityDisplay = _performOperation(
+            _quantityPreviousValue,
+            double.parse(_quantityDisplay),
+            _quantityOperation,
+          ).toString();
           widget.quantityController.text = _quantityDisplay;
           _quantityOperation = '';
           _quantityWaitingForOperand = true;
         }
       } else {
         if (_priceOperation.isNotEmpty) {
-          _priceDisplay = _performOperation(_pricePreviousValue, double.parse(_priceDisplay), _priceOperation).toString();
+          _priceDisplay = _performOperation(
+            _pricePreviousValue,
+            double.parse(_priceDisplay),
+            _priceOperation,
+          ).toString();
           widget.priceController.text = _priceDisplay;
           _priceOperation = '';
           _priceWaitingForOperand = true;
@@ -167,7 +186,10 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
     setState(() {
       if (_isQuantityMode) {
         if (_quantityDisplay.length > 1) {
-          _quantityDisplay = _quantityDisplay.substring(0, _quantityDisplay.length - 1);
+          _quantityDisplay = _quantityDisplay.substring(
+            0,
+            _quantityDisplay.length - 1,
+          );
         } else {
           _quantityDisplay = '0';
         }
@@ -203,11 +225,11 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
     final quantity = double.tryParse(_quantityDisplay) ?? 0;
     final price = double.tryParse(_priceDisplay) ?? 0;
     final total = quantity * price;
-    
+
     if (total == 0) {
       return '0 ₺';
     }
-    
+
     return '${total.toStringAsFixed(2)} ₺';
   }
 
@@ -232,9 +254,9 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: isDark 
-                        ? const Color(0xFF8E8E93)
-                        : const Color(0xFF6D6D70),
+                      color: isDark
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF6D6D70),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -242,16 +264,27 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                     onTap: () => setState(() => _isQuantityMode = true),
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
-                        color: _isQuantityMode 
+                        color: _isQuantityMode
                             ? (isDark ? const Color(0xFF1C1C1E) : Colors.white)
-                            : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7)),
+                            : (isDark
+                                  ? const Color(0xFF2C2C2E)
+                                  : const Color(0xFFF2F2F7)),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: _isQuantityMode 
-                              ? (widget.quantityError != null ? const Color(0xFFFF3B30) : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)))
-                              : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)),
+                          color: _isQuantityMode
+                              ? (widget.quantityError != null
+                                    ? const Color(0xFFFF3B30)
+                                    : (isDark
+                                          ? const Color(0xFF48484A)
+                                          : const Color(0xFFD1D1D6)))
+                              : (isDark
+                                    ? const Color(0xFF48484A)
+                                    : const Color(0xFFD1D1D6)),
                           width: _isQuantityMode ? 1.0 : 0.5,
                         ),
                       ),
@@ -264,9 +297,9 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                               style: GoogleFonts.inter(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w400,
-                                color: isDark 
-                                  ? const Color(0xFF8E8E93)
-                                  : const Color(0xFF6D6D70),
+                                color: isDark
+                                    ? const Color(0xFF8E8E93)
+                                    : const Color(0xFF6D6D70),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -276,9 +309,11 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: _isQuantityMode 
+                              color: _isQuantityMode
                                   ? (isDark ? Colors.white : Colors.black)
-                                  : (isDark ? Colors.white70 : Colors.grey[600]),
+                                  : (isDark
+                                        ? Colors.white70
+                                        : Colors.grey[600]),
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -300,9 +335,9 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                 ],
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Fiyat Girişi
             Expanded(
               child: Column(
@@ -313,9 +348,9 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: isDark 
-                        ? const Color(0xFF8E8E93)
-                        : const Color(0xFF6D6D70),
+                      color: isDark
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF6D6D70),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -323,16 +358,27 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                     onTap: () => setState(() => _isQuantityMode = false),
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
-                        color: !_isQuantityMode 
+                        color: !_isQuantityMode
                             ? (isDark ? const Color(0xFF1C1C1E) : Colors.white)
-                            : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7)),
+                            : (isDark
+                                  ? const Color(0xFF2C2C2E)
+                                  : const Color(0xFFF2F2F7)),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: !_isQuantityMode 
-                              ? (widget.priceError != null ? const Color(0xFFFF3B30) : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)))
-                              : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)),
+                          color: !_isQuantityMode
+                              ? (widget.priceError != null
+                                    ? const Color(0xFFFF3B30)
+                                    : (isDark
+                                          ? const Color(0xFF48484A)
+                                          : const Color(0xFFD1D1D6)))
+                              : (isDark
+                                    ? const Color(0xFF48484A)
+                                    : const Color(0xFFD1D1D6)),
                           width: !_isQuantityMode ? 1.0 : 0.5,
                         ),
                       ),
@@ -345,9 +391,9 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                               style: GoogleFonts.inter(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w400,
-                                color: isDark 
-                                  ? const Color(0xFF8E8E93)
-                                  : const Color(0xFF6D6D70),
+                                color: isDark
+                                    ? const Color(0xFF8E8E93)
+                                    : const Color(0xFF6D6D70),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -357,9 +403,11 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: !_isQuantityMode 
+                              color: !_isQuantityMode
                                   ? (isDark ? Colors.white : Colors.black)
-                                  : (isDark ? Colors.white70 : Colors.grey[600]),
+                                  : (isDark
+                                        ? Colors.white70
+                                        : Colors.grey[600]),
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -406,9 +454,9 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: isDark 
-                    ? const Color(0xFF8E8E93)
-                    : const Color(0xFF6D6D70),
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF6D6D70),
                 ),
               ),
               Text(
@@ -433,9 +481,7 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
             color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDark 
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFE5E5EA),
+              color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
               width: 0.5,
             ),
           ),
@@ -446,45 +492,65 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                 children: [
                   _buildButton('C', _onClearPressed, isOperator: true),
                   _buildButton('⌫', _onBackspacePressed, isOperator: true),
-                  _buildButton('%', () => _onOperationPressed('%'), isOperator: true),
-                  _buildButton('÷', () => _onOperationPressed('÷'), isOperator: true),
+                  _buildButton(
+                    '%',
+                    () => _onOperationPressed('%'),
+                    isOperator: true,
+                  ),
+                  _buildButton(
+                    '÷',
+                    () => _onOperationPressed('÷'),
+                    isOperator: true,
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Row 2: 7, 8, 9, ×
               Row(
                 children: [
                   _buildButton('7', () => _onNumberPressed('7')),
                   _buildButton('8', () => _onNumberPressed('8')),
                   _buildButton('9', () => _onNumberPressed('9')),
-                  _buildButton('×', () => _onOperationPressed('×'), isOperator: true),
+                  _buildButton(
+                    '×',
+                    () => _onOperationPressed('×'),
+                    isOperator: true,
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Row 3: 4, 5, 6, -
               Row(
                 children: [
                   _buildButton('4', () => _onNumberPressed('4')),
                   _buildButton('5', () => _onNumberPressed('5')),
                   _buildButton('6', () => _onNumberPressed('6')),
-                  _buildButton('-', () => _onOperationPressed('-'), isOperator: true),
+                  _buildButton(
+                    '-',
+                    () => _onOperationPressed('-'),
+                    isOperator: true,
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Row 4: 1, 2, 3, +
               Row(
                 children: [
                   _buildButton('1', () => _onNumberPressed('1')),
                   _buildButton('2', () => _onNumberPressed('2')),
                   _buildButton('3', () => _onNumberPressed('3')),
-                  _buildButton('+', () => _onOperationPressed('+'), isOperator: true),
+                  _buildButton(
+                    '+',
+                    () => _onOperationPressed('+'),
+                    isOperator: true,
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Row 5: 0, ., =
               Row(
                 children: [
@@ -500,31 +566,33 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
     );
   }
 
-  Widget _buildButton(String text, VoidCallback onPressed, {bool isOperator = false, int flex = 1}) {
+  Widget _buildButton(
+    String text,
+    VoidCallback onPressed, {
+    bool isOperator = false,
+    int flex = 1,
+  }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Expanded(
       flex: flex,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Material(
           color: isOperator
-              ? isDark 
-                  ? const Color(0xFF2C2C2E)
-                  : const Color(0xFFE5E5EA)
+              ? isDark
+                    ? const Color(0xFF2C2C2E)
+                    : const Color(0xFFE5E5EA)
               : isDark
-                  ? const Color(0xFF1C1C1E)
-                  : const Color(0xFFF2F2F7),
+              ? const Color(0xFF1C1C1E)
+              : const Color(0xFFF2F2F7),
           borderRadius: BorderRadius.circular(8),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: isDark 
-                ? Border.all(
-                    color: const Color(0xFF38383A),
-                    width: 0.5,
-                  )
-                : null,
+              border: isDark
+                  ? Border.all(color: const Color(0xFF38383A), width: 0.5)
+                  : null,
             ),
             child: InkWell(
               onTap: onPressed,
@@ -538,8 +606,12 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: isOperator
-                        ? isDark ? Colors.white : Colors.black
-                        : isDark ? Colors.white : Colors.black,
+                        ? isDark
+                              ? Colors.white
+                              : Colors.black
+                        : isDark
+                        ? Colors.white
+                        : Colors.black,
                   ),
                 ),
               ),

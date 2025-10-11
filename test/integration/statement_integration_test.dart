@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:qanta/core/services/statement_service.dart';
 import 'package:qanta/shared/models/statement_period.dart';
 import 'package:qanta/shared/models/statement_summary.dart';
 import 'package:qanta/shared/utils/date_utils.dart';
@@ -23,11 +22,24 @@ void main() {
         // Act
         final periods = <StatementPeriod>[];
         for (int i = 0; i < 6; i++) {
-          final periodDate = DateTime(referenceDate.year, referenceDate.month + i, 1);
+          final periodDate = DateTime(
+            referenceDate.year,
+            referenceDate.month + i,
+            1,
+          );
           final period = StatementPeriod(
-            startDate: DateUtils.getStatementPeriodStart(statementDay, referenceDate: periodDate),
-            endDate: DateUtils.getStatementPeriodEnd(statementDay, referenceDate: periodDate),
-            dueDate: DateUtils.getStatementDueDate(statementDay, referenceDate: periodDate),
+            startDate: DateUtils.getStatementPeriodStart(
+              statementDay,
+              referenceDate: periodDate,
+            ),
+            endDate: DateUtils.getStatementPeriodEnd(
+              statementDay,
+              referenceDate: periodDate,
+            ),
+            dueDate: DateUtils.getStatementDueDate(
+              statementDay,
+              referenceDate: periodDate,
+            ),
             statementDay: statementDay,
             isPaid: false,
           );
@@ -36,21 +48,30 @@ void main() {
 
         // Assert
         expect(periods.length, equals(6));
-        
+
         // Check October 2025
         expect(periods[0].startDate, equals(DateTime(2025, 10, 1)));
         expect(periods[0].endDate, equals(DateTime(2025, 10, 31)));
-        expect(periods[0].dueDate, equals(DateTime(2025, 11, 25))); // 15 days after period end
-        
+        expect(
+          periods[0].dueDate,
+          equals(DateTime(2025, 11, 25)),
+        ); // 15 days after period end
+
         // Check November 2025
         expect(periods[1].startDate, equals(DateTime(2025, 11, 1)));
         expect(periods[1].endDate, equals(DateTime(2025, 11, 30)));
-        expect(periods[1].dueDate, equals(DateTime(2025, 12, 25))); // 15 days after period end
-        
+        expect(
+          periods[1].dueDate,
+          equals(DateTime(2025, 12, 25)),
+        ); // 15 days after period end
+
         // Check December 2025
         expect(periods[2].startDate, equals(DateTime(2025, 12, 1)));
         expect(periods[2].endDate, equals(DateTime(2025, 12, 31)));
-        expect(periods[2].dueDate, equals(DateTime(2026, 1, 25))); // 15 days after period end
+        expect(
+          periods[2].dueDate,
+          equals(DateTime(2026, 1, 25)),
+        ); // 15 days after period end
       });
 
       test('should handle year transition correctly', () {
@@ -61,11 +82,24 @@ void main() {
         // Act
         final periods = <StatementPeriod>[];
         for (int i = 0; i < 3; i++) {
-          final periodDate = DateTime(referenceDate.year, referenceDate.month + i, 1);
+          final periodDate = DateTime(
+            referenceDate.year,
+            referenceDate.month + i,
+            1,
+          );
           final period = StatementPeriod(
-            startDate: DateUtils.getStatementPeriodStart(statementDay, referenceDate: periodDate),
-            endDate: DateUtils.getStatementPeriodEnd(statementDay, referenceDate: periodDate),
-            dueDate: DateUtils.getStatementDueDate(statementDay, referenceDate: periodDate),
+            startDate: DateUtils.getStatementPeriodStart(
+              statementDay,
+              referenceDate: periodDate,
+            ),
+            endDate: DateUtils.getStatementPeriodEnd(
+              statementDay,
+              referenceDate: periodDate,
+            ),
+            dueDate: DateUtils.getStatementDueDate(
+              statementDay,
+              referenceDate: periodDate,
+            ),
             statementDay: statementDay,
             isPaid: false,
           );
@@ -74,21 +108,30 @@ void main() {
 
         // Assert
         expect(periods.length, equals(3));
-        
+
         // Check December 2025
         expect(periods[0].startDate, equals(DateTime(2025, 12, 1)));
         expect(periods[0].endDate, equals(DateTime(2025, 12, 31)));
-        expect(periods[0].dueDate, equals(DateTime(2026, 1, 25))); // 15 days after period end
-        
+        expect(
+          periods[0].dueDate,
+          equals(DateTime(2026, 1, 25)),
+        ); // 15 days after period end
+
         // Check January 2026
         expect(periods[1].startDate, equals(DateTime(2026, 1, 1)));
         expect(periods[1].endDate, equals(DateTime(2026, 1, 31)));
-        expect(periods[1].dueDate, equals(DateTime(2026, 2, 25))); // 15 days after period end
-        
+        expect(
+          periods[1].dueDate,
+          equals(DateTime(2026, 2, 25)),
+        ); // 15 days after period end
+
         // Check February 2026
         expect(periods[2].startDate, equals(DateTime(2026, 2, 1)));
         expect(periods[2].endDate, equals(DateTime(2026, 2, 28)));
-        expect(periods[2].dueDate, equals(DateTime(2026, 3, 25))); // 15 days after period end
+        expect(
+          periods[2].dueDate,
+          equals(DateTime(2026, 3, 25)),
+        ); // 15 days after period end
       });
     });
 
@@ -178,7 +221,7 @@ void main() {
         for (final date in testDates) {
           final iso8601 = DateUtils.toIso8601(date);
           final parsed = DateUtils.fromFirebase(iso8601);
-          
+
           // Note: Timezone conversion may affect the exact values
           expect(parsed.year, greaterThanOrEqualTo(date.year - 1));
           expect(parsed.year, lessThanOrEqualTo(date.year + 1));
@@ -226,17 +269,32 @@ void main() {
 
         // Act
         final period = StatementPeriod(
-          startDate: DateUtils.getStatementPeriodStart(statementDay, referenceDate: leapYearDate),
-          endDate: DateUtils.getStatementPeriodEnd(statementDay, referenceDate: leapYearDate),
-          dueDate: DateUtils.getStatementDueDate(statementDay, referenceDate: leapYearDate),
+          startDate: DateUtils.getStatementPeriodStart(
+            statementDay,
+            referenceDate: leapYearDate,
+          ),
+          endDate: DateUtils.getStatementPeriodEnd(
+            statementDay,
+            referenceDate: leapYearDate,
+          ),
+          dueDate: DateUtils.getStatementDueDate(
+            statementDay,
+            referenceDate: leapYearDate,
+          ),
           statementDay: statementDay,
           isPaid: false,
         );
 
         // Assert
         expect(period.startDate, equals(DateTime(2024, 2, 1)));
-        expect(period.endDate, equals(DateTime(2024, 2, 29))); // Leap year has 29 days in February
-        expect(period.dueDate, equals(DateTime(2024, 3, 25))); // 15 days after period end
+        expect(
+          period.endDate,
+          equals(DateTime(2024, 2, 29)),
+        ); // Leap year has 29 days in February
+        expect(
+          period.dueDate,
+          equals(DateTime(2024, 3, 25)),
+        ); // 15 days after period end
       });
 
       test('should handle month boundaries correctly', () {
@@ -246,17 +304,35 @@ void main() {
 
         // Act
         final period = StatementPeriod(
-          startDate: DateUtils.getStatementPeriodStart(statementDay, referenceDate: testDate),
-          endDate: DateUtils.getStatementPeriodEnd(statementDay, referenceDate: testDate),
-          dueDate: DateUtils.getStatementDueDate(statementDay, referenceDate: testDate),
+          startDate: DateUtils.getStatementPeriodStart(
+            statementDay,
+            referenceDate: testDate,
+          ),
+          endDate: DateUtils.getStatementPeriodEnd(
+            statementDay,
+            referenceDate: testDate,
+          ),
+          dueDate: DateUtils.getStatementDueDate(
+            statementDay,
+            referenceDate: testDate,
+          ),
           statementDay: statementDay,
           isPaid: false,
         );
 
         // Assert
-        expect(period.startDate, equals(DateTime(2024, 12, 31))); // Previous month
-        expect(period.endDate, equals(DateTime(2025, 1, 30))); // January 30th (statement day 31)
-        expect(period.dueDate, equals(DateTime(2025, 2, 24))); // 15 days after period end
+        expect(
+          period.startDate,
+          equals(DateTime(2024, 12, 31)),
+        ); // Previous month
+        expect(
+          period.endDate,
+          equals(DateTime(2025, 1, 30)),
+        ); // January 30th (statement day 31)
+        expect(
+          period.dueDate,
+          equals(DateTime(2025, 2, 24)),
+        ); // 15 days after period end
       });
 
       test('should handle very large amounts correctly', () {

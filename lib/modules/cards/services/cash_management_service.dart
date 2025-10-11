@@ -7,18 +7,17 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/account_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../widgets/management_option.dart';
-import '../../../shared/widgets/ios_dialog.dart';
 import '../../transactions/widgets/forms/calculator_input_field.dart';
 
 class CashManagementService {
   static void showCashManagementBottomSheet(
-    BuildContext context, 
-    bool isDark, 
+    BuildContext context,
+    bool isDark,
     double cashBalance,
     Function(double) onCashAdded,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -29,9 +28,7 @@ class CashManagementService {
         maxChildSize: 0.95,
         builder: (context, scrollController) => Container(
           decoration: BoxDecoration(
-            color: isDark 
-              ? const Color(0xFF1C1C1E)
-              : Colors.white,
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -42,13 +39,13 @@ class CashManagementService {
                 width: 36,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: isDark 
-                    ? const Color(0xFF48484A)
-                    : const Color(0xFFD1D1D6),
+                  color: isDark
+                      ? const Color(0xFF48484A)
+                      : const Color(0xFFD1D1D6),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
-              
+
               Expanded(
                 child: ListView(
                   controller: scrollController,
@@ -63,22 +60,22 @@ class CashManagementService {
                         color: isDark ? Colors.white : Colors.black,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 8),
-                    
+
                     // Subtitle
                     Text(
                       '${l10n.cashBalance}: ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(cashBalance)}',
                       style: GoogleFonts.inter(
                         fontSize: 16,
-                        color: isDark 
-                          ? const Color(0xFF8E8E93)
-                          : const Color(0xFF6D6D70),
+                        color: isDark
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // Cash Management Options
                     ManagementOption(
                       icon: Icons.account_balance_wallet_outlined,
@@ -88,12 +85,16 @@ class CashManagementService {
                       isDark: isDark,
                       onTap: () {
                         Navigator.pop(context);
-                        _showUpdateBalanceDialog(context, cashBalance, onCashAdded);
+                        _showUpdateBalanceDialog(
+                          context,
+                          cashBalance,
+                          onCashAdded,
+                        );
                       },
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     ManagementOption(
                       icon: Icons.history_outlined,
                       title: l10n.addCashHistory,
@@ -102,7 +103,7 @@ class CashManagementService {
                       isDark: isDark,
                       onTap: () => _showOption(context, l10n.addCashHistory),
                     ),
-                    
+
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -126,14 +127,16 @@ class CashManagementService {
   }
 
   static void _showUpdateBalanceDialog(
-    BuildContext context, 
-    double currentBalance, 
+    BuildContext context,
+    double currentBalance,
     Function(double) onBalanceUpdated,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController(text: currentBalance.toStringAsFixed(0));
+    final controller = TextEditingController(
+      text: currentBalance.toStringAsFixed(0),
+    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -154,11 +157,13 @@ class CashManagementService {
                 width: 36,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D1D6),
+                  color: isDark
+                      ? const Color(0xFF3A3A3C)
+                      : const Color(0xFFD1D1D6),
                   borderRadius: BorderRadius.circular(2.5),
                 ),
               ),
-              
+
               // Header
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -177,14 +182,16 @@ class CashManagementService {
                       l10n.updateCashBalanceMessage,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                        color: isDark
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-              
+
               // Calculator
               Expanded(
                 child: Padding(
@@ -197,7 +204,7 @@ class CashManagementService {
                   ),
                 ),
               ),
-              
+
               // Buttons
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -209,7 +216,9 @@ class CashManagementService {
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           side: BorderSide(
-                            color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D1D6),
+                            color: isDark
+                                ? const Color(0xFF3A3A3C)
+                                : const Color(0xFFD1D1D6),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -232,38 +241,53 @@ class CashManagementService {
                           final newBalance = double.tryParse(controller.text);
                           if (newBalance != null && newBalance >= 0) {
                             Navigator.of(context).pop();
-                            
+
                             try {
                               // Use v2 provider to update cash account
-                              final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-                              
+                              final providerV2 = Provider.of<UnifiedProviderV2>(
+                                context,
+                                listen: false,
+                              );
+
                               // Get cash accounts
-                              final cashAccounts = providerV2.accounts.where((a) => a.type == AccountType.cash).toList();
-                              
+                              final cashAccounts = providerV2.accounts
+                                  .where((a) => a.type == AccountType.cash)
+                                  .toList();
+
                               if (cashAccounts.isNotEmpty) {
                                 // Update existing cash account
                                 final cashAccount = cashAccounts.first;
-                                await providerV2.updateAccountBalance(cashAccount.id, newBalance);
+                                await providerV2.updateAccountBalance(
+                                  cashAccount.id,
+                                  newBalance,
+                                );
                               } else {
                                 // This should not happen as _ensureDefaultCashAccount should create one
                                 // But if it does, create one manually
-                                debugPrint('CashManagementService - No cash account found, creating one');
+                                debugPrint(
+                                  'CashManagementService - No cash account found, creating one',
+                                );
                                 await providerV2.createAccount(
                                   type: AccountType.cash,
                                   name: 'Nakit',
                                   balance: newBalance,
                                 );
                               }
-                              
+
                               onBalanceUpdated(newBalance);
-                              
+
                               // Show success message
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(l10n.cashBalanceUpdated(
-                                      Provider.of<ThemeProvider>(context, listen: false).formatAmount(newBalance)
-                                    )),
+                                    content: Text(
+                                      l10n.cashBalanceUpdated(
+                                        Provider.of<ThemeProvider>(
+                                          context,
+                                          listen: false,
+                                        ).formatAmount(newBalance),
+                                      ),
+                                    ),
                                     backgroundColor: const Color(0xFF34C759),
                                   ),
                                 );
@@ -338,42 +362,42 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
 
     // Sadece rakam ve nokta kabul et
     String newText = newValue.text.replaceAll(RegExp(r'[^\d.]'), '');
-    
+
     // Birden fazla nokta varsa sadece ilkini tut
     List<String> parts = newText.split('.');
     if (parts.length > 2) {
       newText = '${parts[0]}.${parts.sublist(1).join('')}';
     }
-    
+
     // Ondalık kısmı 2 hanede sınırla
     if (parts.length == 2 && parts[1].length > 2) {
       newText = '${parts[0]}.${parts[1].substring(0, 2)}';
     }
-    
+
     // Binlik ayırıcı ekle
     if (parts.isNotEmpty) {
       String integerPart = parts[0];
       String formattedInteger = _addThousandsSeparator(integerPart);
-      
+
       if (parts.length == 2) {
         newText = '$formattedInteger.${parts[1]}';
       } else {
         newText = formattedInteger;
       }
     }
-    
+
     return TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(offset: newText.length),
     );
   }
-  
+
   String _addThousandsSeparator(String value) {
     if (value.length <= 3) return value;
-    
+
     String result = '';
     int count = 0;
-    
+
     for (int i = value.length - 1; i >= 0; i--) {
       if (count == 3) {
         result = ',$result';
@@ -382,7 +406,7 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
       result = value[i] + result;
       count++;
     }
-    
+
     return result;
   }
-} 
+}

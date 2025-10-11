@@ -8,17 +8,17 @@ class InstallmentInfo {
   final int totalInstallments;
   final double monthlyAmount;
   final double totalAmount;
-  
+
   const InstallmentInfo({
     required this.currentInstallment,
     required this.totalInstallments,
     required this.monthlyAmount,
     required this.totalAmount,
   });
-  
+
   /// Returns formatted installment text (e.g., "2/4 Taksit")
   String get displayText => '$currentInstallment/$totalInstallments Taksit';
-  
+
   /// Returns progress as percentage (0.0 to 1.0)
   double get progress => currentInstallment / totalInstallments;
 }
@@ -63,24 +63,24 @@ class TransactionModelV2 {
   final double amount;
   final String description;
   final DateTime transactionDate;
-  
+
   // References
   final String? categoryId;
   final String sourceAccountId;
   final String? targetAccountId; // for transfers
   final String? installmentId;
-  
+
   // Additional fields
   final bool isRecurring;
   final String? notes;
   final bool isPaid; // Payment status for statement tracking
-  
+
   // Stock transaction specific fields
   final String? stockSymbol;
   final String? stockName;
   final double? stockQuantity;
   final double? stockPrice;
-  
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -158,8 +158,12 @@ class TransactionModelV2 {
       isPaid: json['is_paid'] as bool? ?? false,
       stockSymbol: json['stock_symbol'] as String?,
       stockName: json['stock_name'] as String?,
-      stockQuantity: json['stock_quantity'] != null ? (json['stock_quantity'] as num).toDouble() : null,
-      stockPrice: json['stock_price'] != null ? (json['stock_price'] as num).toDouble() : null,
+      stockQuantity: json['stock_quantity'] != null
+          ? (json['stock_quantity'] as num).toDouble()
+          : null,
+      stockPrice: json['stock_price'] != null
+          ? (json['stock_price'] as num).toDouble()
+          : null,
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
     );
@@ -171,7 +175,7 @@ class TransactionModelV2 {
   }
 
   /// Convert to JSON with consistent date formatting
-  /// 
+  ///
   /// **Updated:** Uses DateUtils for consistent Firebase storage
   Map<String, dynamic> toJson() {
     return {
@@ -267,12 +271,17 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
   final String? categoryIcon;
   final String? categoryColor;
   final int? installmentCount;
+  @override
   final bool isInstallment; // Flag to identify installment transactions
-  
+
   // Stock transaction specific fields
+  @override
   final String? stockSymbol;
+  @override
   final String? stockName;
+  @override
   final double? stockQuantity;
+  @override
   final double? stockPrice;
 
   const TransactionWithDetailsV2({
@@ -314,7 +323,9 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
       type: TransactionType.fromString(json['type'] as String),
       amount: (json['amount'] as num).toDouble(),
       description: json['description'] as String,
-      transactionDate: TransactionModelV2._parseDateTime(json['transaction_date']),
+      transactionDate: TransactionModelV2._parseDateTime(
+        json['transaction_date'],
+      ),
       categoryId: json['category_id'] as String?,
       sourceAccountId: json['source_account_id'] as String,
       targetAccountId: json['target_account_id'] as String?,
@@ -335,8 +346,12 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
       isInstallment: json['is_installment'] as bool? ?? false,
       stockSymbol: json['stock_symbol'] as String?,
       stockName: json['stock_name'] as String?,
-      stockQuantity: json['stock_quantity'] != null ? (json['stock_quantity'] as num).toDouble() : null,
-      stockPrice: json['stock_price'] != null ? (json['stock_price'] as num).toDouble() : null,
+      stockQuantity: json['stock_quantity'] != null
+          ? (json['stock_quantity'] as num).toDouble()
+          : null,
+      stockPrice: json['stock_price'] != null
+          ? (json['stock_price'] as num).toDouble()
+          : null,
     );
   }
 
@@ -351,7 +366,7 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
   /// Returns the original user-entered description without any system modifications
   /// This is the core business data that should be displayed to users
   String get originalDescription => description;
-  
+
   /// Returns the transaction type as a localized string
   String get typeDisplayName {
     switch (type) {
@@ -371,10 +386,18 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
     switch (type) {
       case TransactionType.expense:
         // For expenses: show category name as title
-        return categoryName ?? description;
+        if (categoryName != null) {
+          return categoryName!;
+        }
+        // If no category name, clean description from installment info
+        return _cleanDescriptionFromInstallmentInfo(description);
       case TransactionType.income:
         // For income: show category name as title
-        return categoryName ?? description;
+        if (categoryName != null) {
+          return categoryName!;
+        }
+        // If no category name, clean description from installment info
+        return _cleanDescriptionFromInstallmentInfo(description);
       case TransactionType.transfer:
         // For transfers: show description as title
         return description;
@@ -386,6 +409,15 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
         }
         return description;
     }
+  }
+
+  /// Clean description from installment info for display
+  String _cleanDescriptionFromInstallmentInfo(String desc) {
+    // Remove installment patterns like "(3 taksit)" or "(1/3)"
+    return desc
+        .replaceAll(RegExp(r'\s*\(\d+ taksit\)'), '')
+        .replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '')
+        .trim();
   }
 
   /// Display subtitle for UI (formatted based on transaction type)
@@ -411,10 +443,10 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
         return accountName;
     }
   }
-  
+
   /// Check if this is a stock transaction
   bool get isStockTransaction => type == TransactionType.stock;
-  
+
   /// Returns installment information if this is an installment transaction
   /// This should be fetched from the installment relationship, not parsed from description
   InstallmentInfo? get installmentInfo {
@@ -423,7 +455,6 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
     // fetch installment details from the related InstallmentTransactionModel
     return null;
   }
-
 
   /// Returns a user-friendly installment display string
   String getInstallmentDisplayText() {
@@ -441,13 +472,15 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
 
   /// Returns a user-friendly time display string
   String get displayTime {
-    if (transactionDate == null) return '';
-    
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
-    final transactionDay = DateTime(transactionDate!.year, transactionDate!.month, transactionDate!.day);
-    
+    final transactionDay = DateTime(
+      transactionDate.year,
+      transactionDate.month,
+      transactionDate.day,
+    );
+
     if (transactionDay == today) {
       return 'Today';
     } else if (transactionDay == yesterday) {
@@ -456,10 +489,10 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
       // Simple date format: 8 Sep or 8/9 format
       try {
         final formatter = DateFormat('d MMM');
-        return formatter.format(transactionDate!);
+        return formatter.format(transactionDate);
       } catch (e) {
         // Fallback: simple format
-        return '${transactionDate!.day}/${transactionDate!.month}';
+        return '${transactionDate.day}/${transactionDate.month}';
       }
     }
   }
@@ -480,5 +513,4 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
       'is_installment': isInstallment,
     };
   }
-
-} 
+}

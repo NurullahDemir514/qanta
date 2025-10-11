@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/transaction_model_v2.dart';
-import '../../../shared/models/category_model.dart';
+import '../../../shared/models/unified_category_model.dart';
 import '../models/statistics_model.dart';
 
 class StatisticsProvider extends ChangeNotifier {
   final UnifiedProviderV2 _unifiedProvider;
-  
+
   StatisticsData? _statistics;
   bool _isLoading = false;
   String? _error;
@@ -26,14 +26,22 @@ class StatisticsProvider extends ChangeNotifier {
 
     try {
       final dateRange = _getDateRangeForPeriod(period);
-      final transactions = _getTransactionsInRange(dateRange.start, dateRange.end);
-      
+      final transactions = _getTransactionsInRange(
+        dateRange.start,
+        dateRange.end,
+      );
+
       if (transactions.isEmpty) {
         _statistics = StatisticsData.empty(period);
       } else {
-        _statistics = _calculateStatistics(period, transactions, dateRange.start, dateRange.end);
+        _statistics = _calculateStatistics(
+          period,
+          transactions,
+          dateRange.start,
+          dateRange.end,
+        );
       }
-      
+
       notifyListeners();
     } catch (e) {
       _setError('İstatistikler yüklenirken bir hata oluştu: ${e.toString()}');
@@ -44,11 +52,16 @@ class StatisticsProvider extends ChangeNotifier {
   }
 
   // Get transactions within a date range
-  List<TransactionWithDetailsV2> _getTransactionsInRange(DateTime startDate, DateTime endDate) {
+  List<TransactionWithDetailsV2> _getTransactionsInRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) {
     return _unifiedProvider.transactions.where((transaction) {
       final transactionDate = transaction.transactionDate;
-      return transactionDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-             transactionDate.isBefore(endDate.add(const Duration(days: 1)));
+      return transactionDate.isAfter(
+            startDate.subtract(const Duration(days: 1)),
+          ) &&
+          transactionDate.isBefore(endDate.add(const Duration(days: 1)));
     }).toList();
   }
 
@@ -60,25 +73,46 @@ class StatisticsProvider extends ChangeNotifier {
     DateTime endDate,
   ) {
     // Separate income and expense transactions
-    final incomeTransactions = transactions.where((t) => t.signedAmount > 0).toList();
-    final expenseTransactions = transactions.where((t) => t.signedAmount < 0).toList();
+    final incomeTransactions = transactions
+        .where((t) => t.signedAmount > 0)
+        .toList();
+    final expenseTransactions = transactions
+        .where((t) => t.signedAmount < 0)
+        .toList();
 
     // Calculate totals
-    final totalIncome = incomeTransactions.fold<double>(0, (sum, t) => sum + t.amount);
-    final totalExpenses = expenseTransactions.fold<double>(0, (sum, t) => sum + t.amount);
+    final totalIncome = incomeTransactions.fold<double>(
+      0,
+      (sum, t) => sum + t.amount,
+    );
+    final totalExpenses = expenseTransactions.fold<double>(
+      0,
+      (sum, t) => sum + t.amount,
+    );
     final netBalance = totalIncome - totalExpenses;
 
     // Calculate spending statistics
     final expenseAmounts = expenseTransactions.map((t) => t.amount).toList();
-    final averageSpending = expenseAmounts.isEmpty ? 0.0 : expenseAmounts.reduce((a, b) => a + b) / expenseAmounts.length;
-    final highestSpending = expenseAmounts.isEmpty ? 0.0 : expenseAmounts.reduce((a, b) => a > b ? a : b);
-    final lowestSpending = expenseAmounts.isEmpty ? 0.0 : expenseAmounts.reduce((a, b) => a < b ? a : b);
+    final averageSpending = expenseAmounts.isEmpty
+        ? 0.0
+        : expenseAmounts.reduce((a, b) => a + b) / expenseAmounts.length;
+    final highestSpending = expenseAmounts.isEmpty
+        ? 0.0
+        : expenseAmounts.reduce((a, b) => a > b ? a : b);
+    final lowestSpending = expenseAmounts.isEmpty
+        ? 0.0
+        : expenseAmounts.reduce((a, b) => a < b ? a : b);
 
     // Calculate savings rate
-    final savingsRate = totalIncome == 0 ? 0.0 : (netBalance / totalIncome) * 100;
+    final savingsRate = totalIncome == 0
+        ? 0.0
+        : (netBalance / totalIncome) * 100;
 
     // Calculate category breakdown
-    final categoryBreakdown = _calculateCategoryBreakdown(expenseTransactions, totalExpenses);
+    final categoryBreakdown = _calculateCategoryBreakdown(
+      expenseTransactions,
+      totalExpenses,
+    );
 
     // Calculate monthly trends
     final monthlyTrends = _calculateMonthlyTrends(transactions, period);
@@ -119,42 +153,55 @@ class StatisticsProvider extends ChangeNotifier {
     for (final entry in categoryGroups.entries) {
       final categoryId = entry.key;
       final categoryTransactions = entry.value;
-      final categoryAmount = categoryTransactions.fold<double>(0, (sum, t) => sum + (t as TransactionWithDetailsV2).amount);
+      final categoryAmount = categoryTransactions.fold<double>(
+        0,
+        (sum, t) => sum + (t).amount,
+      );
       final percentage = (categoryAmount / totalExpenses) * 100;
 
       // Get category info
       final category = _getCategoryInfo(categoryId);
-      
-      categoryStats.add(CategoryStatistic(
-        categoryId: categoryId,
-        categoryName: category.name,
-        categoryIcon: category.icon,
-        amount: categoryAmount,
-        percentage: percentage,
-        transactionCount: categoryTransactions.length,
-      ));
+
+      categoryStats.add(
+        CategoryStatistic(
+          categoryId: categoryId,
+          categoryName: category.name,
+          categoryIcon: category.icon,
+          amount: categoryAmount,
+          percentage: percentage,
+          transactionCount: categoryTransactions.length,
+        ),
+      );
     }
 
     // Sort by amount (highest first)
     categoryStats.sort((a, b) => b.amount.compareTo(a.amount));
-    
+
     return categoryStats;
   }
 
   // Get category information
   ({String name, String icon}) _getCategoryInfo(String categoryId) {
-    final category = _unifiedProvider.categories
-        .cast<CategoryModel>()
-        .firstWhere((c) => c.id == categoryId, orElse: () => CategoryModel(
-          id: '', 
-          name: 'Unknown', 
-          icon: '💰',
-          type: CategoryType.expense,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ));
-    
-    return (name: category.name, icon: category.icon ?? '💰');
+    try {
+      final category = _unifiedProvider.categories.firstWhere(
+        (c) => c.id == categoryId,
+        orElse: () => UnifiedCategoryModel(
+          id: '',
+          name: 'Unknown',
+          displayName: 'Unknown',
+          description: 'Unknown category',
+          iconName: 'money',
+          colorHex: '#FF6B6B',
+          sortOrder: 999,
+          categoryType: CategoryType.expense,
+        ),
+      );
+
+      return (name: category.displayName, icon: category.iconName);
+    } catch (e) {
+      debugPrint('❌ Error getting category info: $e');
+      return (name: 'Unknown', icon: 'money');
+    }
   }
 
   // Calculate monthly trends
@@ -167,7 +214,8 @@ class StatisticsProvider extends ChangeNotifier {
     // Group transactions by month
     final Map<String, List<TransactionWithDetailsV2>> monthlyGroups = {};
     for (final transaction in transactions) {
-      final monthYear = '${transaction.transactionDate.year}-${transaction.transactionDate.month.toString().padLeft(2, '0')}';
+      final monthYear =
+          '${transaction.transactionDate.year}-${transaction.transactionDate.month.toString().padLeft(2, '0')}';
       monthlyGroups.putIfAbsent(monthYear, () => []).add(transaction);
     }
 
@@ -176,23 +224,29 @@ class StatisticsProvider extends ChangeNotifier {
     for (final entry in monthlyGroups.entries) {
       final monthYear = entry.key;
       final monthTransactions = entry.value;
-      
-      final income = monthTransactions.where((t) => (t as TransactionWithDetailsV2).signedAmount > 0).fold<double>(0, (sum, t) => sum + (t as TransactionWithDetailsV2).amount);
-      final expenses = monthTransactions.where((t) => (t as TransactionWithDetailsV2).signedAmount < 0).fold<double>(0, (sum, t) => sum + (t as TransactionWithDetailsV2).amount);
+
+      final income = monthTransactions
+          .where((t) => (t).signedAmount > 0)
+          .fold<double>(0, (sum, t) => sum + (t).amount);
+      final expenses = monthTransactions
+          .where((t) => (t).signedAmount < 0)
+          .fold<double>(0, (sum, t) => sum + (t).amount);
       final netBalance = income - expenses;
-      
-      trends.add(MonthlyTrend(
-        monthYear: monthYear,
-        income: income,
-        expenses: expenses,
-        netBalance: netBalance,
-        transactionCount: monthTransactions.length,
-      ));
+
+      trends.add(
+        MonthlyTrend(
+          monthYear: monthYear,
+          income: income,
+          expenses: expenses,
+          netBalance: netBalance,
+          transactionCount: monthTransactions.length,
+        ),
+      );
     }
 
     // Sort by month (most recent first)
     trends.sort((a, b) => b.monthYear.compareTo(a.monthYear));
-    
+
     return trends;
   }
 
@@ -246,9 +300,4 @@ class StatisticsProvider extends ChangeNotifier {
   void _clearError() {
     _error = null;
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-} 
+}

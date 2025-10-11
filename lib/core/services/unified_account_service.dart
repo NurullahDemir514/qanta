@@ -10,26 +10,31 @@ class UnifiedAccountService {
   static const String _collectionName = 'accounts';
 
   /// Get all accounts for current user
-  static Future<List<AccountModel>> getAllAccounts() async {
+  static Future<List<AccountModel>> getAllAccounts({
+    bool forceServerRead = false,
+  }) async {
     try {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
 
-      final snapshot = await FirebaseFirestoreService.getDocuments(
-        collectionName: _collectionName,
-        query: FirebaseFirestoreService.getCollection(_collectionName)
-            .where('is_active', isEqualTo: true),
-      );
+      final query = FirebaseFirestoreService.getCollection(
+        _collectionName,
+      ).where('is_active', isEqualTo: true);
+
+      // Force server read if needed (to avoid stale cache)
+      final snapshot = forceServerRead
+          ? await query.get(const GetOptions(source: Source.server))
+          : await query.get();
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        
+        final data = doc.data();
+
         // Ensure id is set correctly - use doc.id as the primary id
         final accountData = {
           ...data,
           'id': doc.id, // This should override any existing id in data
         };
-        
+
         return AccountModel.fromJson(accountData);
       }).toList();
     } catch (e) {
@@ -53,11 +58,8 @@ class UnifiedAccountService {
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return AccountModel.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return AccountModel.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching accounts by type: $e');
@@ -66,20 +68,25 @@ class UnifiedAccountService {
   }
 
   /// Get account by ID
-  static Future<AccountModel?> getAccountById(String accountId) async {
+  static Future<AccountModel?> getAccountById(
+    String accountId, {
+    bool forceServerRead = false,
+  }) async {
     try {
-      final doc = await FirebaseFirestoreService.getDocumentSnapshot(
-        collectionName: _collectionName,
-        docId: accountId,
+      final DocumentReference docRef = FirebaseFirestoreService.getDocument(
+        _collectionName,
+        accountId,
       );
+
+      // Force server read if needed (to avoid stale cache)
+      final doc = forceServerRead
+          ? await docRef.get(const GetOptions(source: Source.server))
+          : await docRef.get();
 
       if (!doc.exists) return null;
 
       final data = doc.data() as Map<String, dynamic>;
-      return AccountModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
+      return AccountModel.fromJson({'id': doc.id, ...data});
     } catch (e) {
       debugPrint('Error fetching account: $e');
       rethrow;
@@ -149,7 +156,9 @@ class UnifiedAccountService {
         // For credit cards, balance represents debt
         // newBalance should not exceed credit limit
         if (newBalance > account.creditLimit!) {
-          throw Exception('Kredi limiti aşıldı. Mevcut limit: ${account.creditLimit}, İstenen tutar: $newBalance');
+          throw Exception(
+            'Kredi limiti aşıldı. Mevcut limit: ${account.creditLimit}, İstenen tutar: $newBalance',
+          );
         }
       }
 
@@ -168,6 +177,43 @@ class UnifiedAccountService {
     }
   }
 
+  /// Increment account balance atomically (prevents race conditions)
+  static Future<void> incrementBalance({
+    required String accountId,
+    required double amount,
+  }) async {
+    try {
+      debugPrint('💰 incrementBalance (ATOMIC): Account ID: $accountId');
+      debugPrint('   Increment Amount: $amount');
+
+      // Get account before update to verify
+      final accountBefore = await getAccountById(accountId);
+      debugPrint(
+        '   📊 ÖNCE - ${accountBefore?.name}: Balance = ${accountBefore?.balance}',
+      );
+
+      // Use FieldValue.increment for atomic update
+      await FirebaseFirestoreService.updateDocument(
+        collectionName: _collectionName,
+        docId: accountId,
+        data: {
+          'balance': FieldValue.increment(amount),
+          'updated_at': FieldValue.serverTimestamp(),
+        },
+      );
+
+      // Get account after update to verify
+      final accountAfter = await getAccountById(accountId);
+      debugPrint(
+        '   📊 SONRA - ${accountAfter?.name}: Balance = ${accountAfter?.balance}',
+      );
+      debugPrint('   ✅ Atomic increment başarılı');
+    } catch (e) {
+      debugPrint('   ❌ Atomic increment hatası: $e');
+      rethrow;
+    }
+  }
+
   /// Add amount to account balance
   static Future<void> addToBalance({
     required String accountId,
@@ -177,9 +223,13 @@ class UnifiedAccountService {
       final account = await getAccountById(accountId);
       if (account == null) throw Exception('Hesap bulunamadı');
 
+      debugPrint('💰 addToBalance: ${account.name} (${account.type.value})');
+      debugPrint('   Mevcut Balance: ${account.balance}');
+      debugPrint('   Eklenecek Amount: $amount');
       final newBalance = account.balance + amount;
+      debugPrint('   Yeni Balance: $newBalance');
+
       await updateBalance(accountId: accountId, newBalance: newBalance);
-      
     } catch (e) {
       rethrow;
     }
@@ -196,7 +246,6 @@ class UnifiedAccountService {
 
       final newBalance = account.balance - amount;
       await updateBalance(accountId: accountId, newBalance: newBalance);
-      
     } catch (e) {
       rethrow;
     }
@@ -208,10 +257,7 @@ class UnifiedAccountService {
       await FirebaseFirestoreService.updateDocument(
         collectionName: _collectionName,
         docId: accountId,
-        data: {
-          'is_active': false,
-          'updated_at': FieldValue.serverTimestamp(),
-        },
+        data: {'is_active': false, 'updated_at': FieldValue.serverTimestamp()},
       );
       return true;
     } catch (e) {
@@ -226,13 +272,12 @@ class UnifiedAccountService {
       query: FirebaseFirestoreService.getCollection(_collectionName)
           .where('is_active', isEqualTo: true)
           .orderBy('created_at', descending: true),
-    ).map((snapshot) => snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return AccountModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
-    }).toList());
+    ).map(
+      (snapshot) => snapshot.docs.map((doc) {
+        final data = doc.data();
+        return AccountModel.fromJson({'id': doc.id, ...data});
+      }).toList(),
+    );
   }
 
   /// Get accounts by type stream
@@ -243,13 +288,12 @@ class UnifiedAccountService {
           .where('type', isEqualTo: type.value)
           .where('is_active', isEqualTo: true)
           .orderBy('created_at', descending: true),
-    ).map((snapshot) => snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return AccountModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
-    }).toList());
+    ).map(
+      (snapshot) => snapshot.docs.map((doc) {
+        final data = doc.data();
+        return AccountModel.fromJson({'id': doc.id, ...data});
+      }).toList(),
+    );
   }
 
   /// Get total balance for all accounts
@@ -299,7 +343,7 @@ class UnifiedAccountService {
     try {
       final totalLimit = await getTotalCreditLimit();
       final usedCredit = await getTotalUsedCredit();
-      
+
       if (totalLimit == 0) return 0.0;
       return (usedCredit / totalLimit) * 100;
     } catch (e) {

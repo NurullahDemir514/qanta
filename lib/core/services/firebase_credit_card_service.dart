@@ -19,11 +19,8 @@ class FirebaseCreditCardService {
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return CreditCardModel.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return CreditCardModel.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching credit cards: $e');
@@ -42,10 +39,7 @@ class FirebaseCreditCardService {
       if (!doc.exists) return null;
 
       final data = doc.data() as Map<String, dynamic>;
-      return CreditCardModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
+      return CreditCardModel.fromJson({'id': doc.id, ...data});
     } catch (e) {
       debugPrint('Error fetching credit card: $e');
       rethrow;
@@ -101,13 +95,12 @@ class FirebaseCreditCardService {
       query: FirebaseFirestoreService.getCollection(_collectionName)
           .where('is_active', isEqualTo: true)
           .orderBy('created_at', descending: true),
-    ).map((snapshot) => snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return CreditCardModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
-    }).toList());
+    ).map(
+      (snapshot) => snapshot.docs.map((doc) {
+        final data = doc.data();
+        return CreditCardModel.fromJson({'id': doc.id, ...data});
+      }).toList(),
+    );
   }
 
   /// Update credit card balance
@@ -168,7 +161,7 @@ class FirebaseCreditCardService {
     try {
       final totalLimit = await getTotalCreditLimit();
       final totalBalance = await getTotalCurrentBalance();
-      
+
       if (totalLimit == 0) return 0.0;
       return (totalBalance / totalLimit) * 100;
     } catch (e) {
@@ -197,7 +190,7 @@ class FirebaseCreditCardService {
     try {
       final now = DateTime.now();
       final nextWeek = now.add(const Duration(days: 7));
-      
+
       final cards = await getCreditCards();
       return cards.where((card) {
         final paymentDate = card.paymentDate;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -11,8 +12,7 @@ import '../../core/services/profile_image_service.dart';
 import '../../core/services/quick_note_notification_service.dart';
 import '../../core/providers/unified_provider_v2.dart';
 import '../../core/providers/profile_provider.dart';
-import '../../shared/models/account_model.dart';
-import '../../shared/models/transaction_model_v2.dart';
+import '../../modules/stocks/providers/stock_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/utils/currency_utils.dart';
 import '../../shared/widgets/app_page_scaffold.dart';
@@ -51,8 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _ensureBucketExists() async {
     try {
       await ProfileImageService.instance.ensureBucketExists();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> _showImageSourceActionSheet() async {
@@ -72,6 +71,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
               ),
             ),
           ),
@@ -85,6 +87,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : Colors.black,
               ),
             ),
           ),
@@ -110,7 +115,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
           child: Text(
             AppLocalizations.of(context)!.cancel,
-            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+            style: GoogleFonts.inter(
+              fontSize: 20, 
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white 
+                  : Colors.black,
+            ),
           ),
         ),
       ),
@@ -121,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       debugPrint('📸 ProfileScreen._pickImage() - Starting image picker');
       debugPrint('📸 Source: $source');
-      
+
       final XFile? image = await _picker.pickImage(
         source: source,
         maxWidth: 512,
@@ -139,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         final imageFile = File(image.path);
         debugPrint('📸 File created: ${imageFile.path}');
-        
+
         final newImageUrl = await ProfileImageService.instance
             .uploadProfileImage(imageFile.path);
 
@@ -156,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             listen: false,
           );
           await profileProvider.updateProfileImage(newImageUrl);
-          
+
           debugPrint('📸 ProfileProvider updated successfully');
         }
       } else {
@@ -165,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       debugPrint('❌ ProfileScreen._pickImage() error: $e');
       debugPrint('❌ Stack trace: ${StackTrace.current}');
-      
+
       if (mounted) {
         setState(() {
           _isUploadingImage = false;
@@ -173,7 +184,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.photoUploadError(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.photoUploadError(e.toString()),
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -210,7 +223,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.photoDeleteError(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.photoDeleteError(e.toString()),
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -222,12 +237,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Focus'u temizle ve klavyeyi kapat
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).unfocus();
     });
-    
+
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
         final userName = profileProvider.userName ?? l10n.defaultUserName;
@@ -246,11 +261,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final double containerWidth = constraints.maxWidth * 1;
-                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    final isDark =
+                        Theme.of(context).brightness == Brightness.dark;
                     return Container(
                       width: containerWidth,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
+                        color: isDark
+                            ? const Color(0xFF000000)
+                            : const Color(0xFFFAFAFA),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,16 +290,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 builder: (context, themeProvider, child) {
                                   return ProfileItem(
                                     icon: themeProvider.isDarkMode
-                                        ? Icons.light_mode_outlined
-                                        : Icons.dark_mode_outlined,
+                                        ? Icons.dark_mode_outlined
+                                        : Icons.light_mode_outlined,
                                     title: l10n.theme,
                                     subtitle: themeProvider.isDarkMode
                                         ? l10n.darkMode
                                         : l10n.lightMode,
-                                    onTap: () => _showThemePicker(
-                                      context,
-                                      themeProvider,
-                                      l10n,
+                                    onTap: null, // Switch ile kontrol edilecek
+                                    trailing: Switch(
+                                      value: themeProvider.isDarkMode,
+                                      onChanged: (value) {
+                                        themeProvider.toggleTheme();
+                                      },
                                     ),
                                   );
                                 },
@@ -326,9 +346,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   final isEnabled = snapshot.data ?? false;
                                   return ProfileItem(
                                     icon: Icons.edit_note_outlined,
-                                    title: AppLocalizations.of(context)!.quickNotes,
-                                    subtitle:
-                                        AppLocalizations.of(context)!.quickNotesSubtitle,
+                                    title: AppLocalizations.of(
+                                      context,
+                                    )!.quickNotes,
+                                    subtitle: AppLocalizations.of(
+                                      context,
+                                    )!.quickNotesSubtitle,
                                     trailing: Switch(
                                       value: isEnabled,
                                       onChanged: (value) async {
@@ -344,8 +367,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             SnackBar(
                                               content: Text(
                                                 value
-                                                    ? AppLocalizations.of(context)!.quickNotesNotificationEnabled
-                                                    : AppLocalizations.of(context)!.quickNotesNotificationDisabled,
+                                                    ? AppLocalizations.of(
+                                                        context,
+                                                      )!.quickNotesNotificationEnabled
+                                                    : AppLocalizations.of(
+                                                        context,
+                                                      )!.quickNotesNotificationDisabled,
                                               ),
                                               backgroundColor: value
                                                   ? Colors.green
@@ -361,10 +388,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           ).showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                                AppLocalizations.of(context)!.notificationPermissionRequired,
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.notificationPermissionRequired,
                                               ),
                                               backgroundColor: Colors.red,
-                                              duration: const Duration(seconds: 3),
+                                              duration: const Duration(
+                                                seconds: 3,
+                                              ),
                                             ),
                                           );
                                         }
@@ -432,7 +463,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               ProfileItem(
                                 icon: Icons.help_outline,
-                                title: AppLocalizations.of(context)!.frequentlyAskedQuestions,
+                                title: AppLocalizations.of(
+                                  context,
+                                )!.frequentlyAskedQuestions,
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -665,68 +698,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.pop(context);
                 },
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showThemePicker(
-    BuildContext context,
-    ThemeProvider themeProvider,
-    AppLocalizations l10n,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.theme,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ListTile(
-              leading: const Icon(Icons.light_mode_outlined),
-              title: Text(
-                l10n.lightMode,
-                style: GoogleFonts.inter(fontSize: 16),
-              ),
-              trailing: !themeProvider.isDarkMode
-                  ? const Icon(Icons.check, color: Color(0xFF6D6D70))
-                  : null,
-              onTap: () {
-                if (themeProvider.isDarkMode) {
-                  themeProvider.toggleTheme();
-                }
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.dark_mode_outlined),
-              title: Text(
-                l10n.darkMode,
-                style: GoogleFonts.inter(fontSize: 16),
-              ),
-              trailing: themeProvider.isDarkMode
-                  ? const Icon(Icons.check, color: Color(0xFF6D6D70))
-                  : null,
-              onTap: () {
-                if (!themeProvider.isDarkMode) {
-                  themeProvider.toggleTheme();
-                }
-                Navigator.pop(context);
-              },
             ),
             const SizedBox(height: 20),
           ],

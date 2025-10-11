@@ -13,6 +13,7 @@ Qanta is a modern personal finance mobile application built with Flutter, focusi
 - **Fonts**: Google Fonts (Inter)
 - **Localization**: flutter_localizations (Turkish/English)
 - **Theme**: Light/Dark mode with SharedPreferences
+- **Responsive Design**: flutter_screenutil
 
 ## Color Palette
 - **Primary**: Sophisticated Grey (#6D6D70) - Main brand color
@@ -46,6 +47,50 @@ lib/
 └── routes/            # Navigation configuration
 ```
 
+## SOLID Principles (MANDATORY)
+
+### Single Responsibility Principle (SRP)
+- Each class/widget must have only ONE reason to change
+- Separate concerns: UI, business logic, data access
+- Create focused, single-purpose classes
+- Example: `TransactionFormWidget` only handles form UI, not data validation
+
+### Open/Closed Principle (OCP)
+- Open for extension, closed for modification
+- Use abstract classes and interfaces
+- Implement strategy pattern for different behaviors
+- Example: `PaymentMethodStrategy` interface for different payment types
+
+### Liskov Substitution Principle (LSP)
+- Subclasses must be substitutable for their base classes
+- Maintain contracts and behavior consistency
+- Use proper inheritance hierarchies
+- Example: All `TransactionType` implementations must behave consistently
+
+### Interface Segregation Principle (ISP)
+- Create small, focused interfaces
+- Clients should not depend on unused methods
+- Split large interfaces into smaller ones
+- Example: `IReadable` and `IWritable` instead of one large `IDataAccess`
+
+### Dependency Inversion Principle (DIP)
+- Depend on abstractions, not concretions
+- Use dependency injection
+- Invert dependencies through interfaces
+- Example: `IStockService` interface instead of direct `YandexFinanceApiService`
+
+## Clean Architecture Guidelines
+
+### Layer Separation
+- **Presentation Layer**: UI widgets, pages, providers
+- **Domain Layer**: Business logic, entities, use cases
+- **Data Layer**: Repositories, data sources, models
+
+### Dependency Rule
+- Dependencies point inward only
+- Outer layers can depend on inner layers
+- Inner layers must not know about outer layers
+
 ## Coding Standards
 
 ### Dart/Flutter Best Practices
@@ -55,6 +100,7 @@ lib/
 - Follow Dart naming conventions (camelCase for variables, PascalCase for classes)
 - Always use `super.key` for widget constructors
 - Use `late` keyword appropriately for non-nullable variables
+- Implement proper null safety
 
 ### Widget Guidelines
 - Create reusable widgets in `shared/widgets/`
@@ -62,6 +108,8 @@ lib/
 - Implement proper `dispose()` methods for controllers and streams
 - Use `Builder` widgets to access context when needed
 - Prefer composition over inheritance
+- Keep widgets under 200 lines
+- Extract complex widgets into separate files
 
 ### State Management
 - Use Provider for global state (theme, user data)
@@ -69,32 +117,36 @@ lib/
 - Create separate providers for different concerns
 - Use `Consumer` and `Selector` widgets appropriately
 - Implement proper error handling in providers
+- Follow MVVM pattern with providers
 
 ### Navigation
 - Use GoRouter for all navigation
 - Define routes in `routes/app_router.dart`
 - Use named routes instead of direct navigation
 - Implement proper route guards for authentication
+- Use type-safe navigation with extra parameters
 
 ### Styling & Theming
 - Use Material 3 design system
-- Follow the established color scheme (Grey #6D6D70 primary, Mint #34D399 secondary)
+- Follow the established color scheme
 - Use Google Fonts Inter throughout the app
-- Implement responsive design with MediaQuery
+- Implement responsive design with flutter_screenutil
 - Use Theme.of(context) for colors and text styles
 - Support both light and dark themes
+- Use consistent spacing and sizing
 
 ### Localization
 - Add all user-facing strings to ARB files
 - Use descriptive keys for localization
 - Support Turkish and English languages
 - Use AppLocalizations.of(context) for translations
+- Never hardcode strings in UI
 
 ### File Naming
 - Use snake_case for file names
 - Use descriptive names that reflect functionality
 - Group related files in appropriate modules
-- Use suffixes: `_page.dart`, `_widget.dart`, `_provider.dart`, `_model.dart`
+- Use suffixes: `_page.dart`, `_widget.dart`, `_provider.dart`, `_model.dart`, `_service.dart`
 
 ### Code Organization
 - Keep files under 300 lines when possible
@@ -102,6 +154,7 @@ lib/
 - Use barrel exports (index.dart) for modules
 - Group imports: Flutter, packages, relative imports
 - Use meaningful comments for complex logic
+- Follow single responsibility per file
 
 ### Error Handling
 - Implement try-catch blocks for async operations
@@ -109,6 +162,7 @@ lib/
 - Log errors appropriately (debugPrint in development)
 - Handle network connectivity issues
 - Validate user inputs
+- Use Result<T> pattern for error handling
 
 ### Performance
 - Use `const` widgets to reduce rebuilds
@@ -116,6 +170,8 @@ lib/
 - Optimize images and assets
 - Use `ListView.builder` for large lists
 - Avoid unnecessary rebuilds with proper state management
+- Use `RepaintBoundary` for complex widgets
+- Implement proper caching strategies
 
 ### Security
 - Never commit API keys or sensitive data
@@ -123,6 +179,7 @@ lib/
 - Implement proper input validation
 - Follow Supabase security best practices
 - Use secure storage for sensitive data
+- Implement proper authentication flows
 
 ### Testing
 - Write unit tests for business logic
@@ -130,20 +187,23 @@ lib/
 - Use meaningful test descriptions
 - Mock external dependencies
 - Aim for good test coverage
+- Test error scenarios
 
 ## Finance App Specific Guidelines
 
 ### Data Models
-- Create models for: User, Transaction, Card, Budget, Category
+- Create models for: User, Transaction, Card, Budget, Category, QuickNote
 - Use proper data validation
 - Implement serialization methods (toJson/fromJson)
 - Use enums for transaction types, categories
+- Implement proper equality and hashCode
 
 ### Financial Calculations
 - Use `Decimal` or `BigDecimal` for precise calculations
 - Handle currency formatting properly
 - Implement proper rounding for financial values
 - Support multiple currencies
+- Validate financial inputs
 
 ### UI/UX for Finance
 - Use clear visual hierarchy for financial data
@@ -151,6 +211,7 @@ lib/
 - Show confirmation dialogs for important actions
 - Use appropriate icons for financial concepts
 - Implement pull-to-refresh for data updates
+- Use consistent number formatting
 
 ### Security for Finance
 - Implement biometric authentication
@@ -158,6 +219,7 @@ lib/
 - Implement session timeouts
 - Add transaction confirmation steps
 - Log financial operations for audit
+- Encrypt sensitive data
 
 ## AI Integration Guidelines
 - Use clear prompts for AI financial insights
@@ -165,6 +227,7 @@ lib/
 - Show loading states during AI processing
 - Cache AI responses when appropriate
 - Provide fallback content when AI is unavailable
+- Implement proper rate limiting
 
 ## Git Workflow
 - Use conventional commits (feat:, fix:, docs:, etc.)
@@ -172,6 +235,7 @@ lib/
 - Write descriptive commit messages
 - Keep commits atomic and focused
 - Use pull requests for code review
+- Follow semantic versioning
 
 ## Dependencies Management
 - Keep dependencies up to date
@@ -179,6 +243,7 @@ lib/
 - Document why each dependency is needed
 - Prefer official packages over third-party when possible
 - Regular security audits of dependencies
+- Use dependency injection
 
 ## Documentation
 - Document complex business logic
@@ -186,8 +251,11 @@ lib/
 - Document API integrations
 - Maintain changelog for releases
 - Document deployment procedures
+- Use dartdoc for public APIs
 
 ## Code Review Checklist
+- [ ] Follows SOLID principles
+- [ ] Follows Clean Architecture
 - [ ] Follows Dart/Flutter best practices
 - [ ] Proper error handling implemented
 - [ ] Localization strings added
@@ -198,5 +266,23 @@ lib/
 - [ ] Documentation updated
 - [ ] No hardcoded values
 - [ ] Proper null safety
+- [ ] Responsive design implemented
+- [ ] Accessibility considerations
 
-Remember: Focus on creating a secure, user-friendly, and performant personal finance application that helps users manage their money effectively. 
+## Quick Notes Specific Rules
+- Use bottom sheet for note creation
+- Implement proper image handling
+- Support text and image notes
+- Implement smart analysis for transaction conversion
+- Use proper state management for note operations
+- Implement proper error handling for media operations
+
+## Stock Management Rules
+- Implement proper real-time price updates
+- Use proper error handling for API calls
+- Implement offline support
+- Use proper caching strategies
+- Implement proper loading states
+- Handle market hours properly
+
+Remember: Focus on creating a secure, user-friendly, and performant personal finance application that follows SOLID principles and Clean Architecture patterns. Every line of code should be maintainable, testable, and follow these guidelines.

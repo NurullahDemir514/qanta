@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
@@ -29,6 +28,14 @@ class CardTransactionSection extends StatefulWidget {
 }
 
 class _CardTransactionSectionState extends State<CardTransactionSection> {
+  // Paging state
+  static const int _pageSize = 10;
+  int _currentPage = 0;
+  bool _isLoadingMore = false;
+  bool _hasMoreData = true;
+  List<v2.TransactionWithDetailsV2> _allTransactions = [];
+  List<v2.TransactionWithDetailsV2> _displayedTransactions = [];
+
   @override
   void initState() {
     super.initState();
@@ -55,11 +62,73 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           await provider.getDebitCardTransactions(debitCardId: widget.cardId);
           break;
         case AccountType.cash:
-          await provider.getCashAccountTransactions(cashAccountId: widget.cardId);
+          await provider.getCashAccountTransactions(
+            cashAccountId: widget.cardId,
+          );
           break;
       }
+      
+      // Load all transactions and setup paging
+      _setupPaging(provider);
     } catch (e) {
       debugPrint('Error loading card transactions: $e');
+    }
+  }
+
+  /// Setup paging with all transactions
+  void _setupPaging(UnifiedProviderV2 provider) {
+    final allTransactions = provider.getTransactionsByAccount(widget.cardId);
+    
+    setState(() {
+      _allTransactions = allTransactions;
+      _currentPage = 0;
+      _hasMoreData = allTransactions.length > _pageSize;
+      _displayedTransactions = allTransactions.take(_pageSize).toList();
+    });
+  }
+
+  /// Check if two transaction lists are equal
+  bool _areTransactionListsEqual(
+    List<v2.TransactionWithDetailsV2> list1,
+    List<v2.TransactionWithDetailsV2> list2,
+  ) {
+    if (list1.length != list2.length) return false;
+    
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i].id != list2[i].id) return false;
+    }
+    
+    return true;
+  }
+
+  /// Load more transactions
+  Future<void> _loadMoreTransactions() async {
+    if (_isLoadingMore || !_hasMoreData) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    // Simulate loading delay
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final startIndex = (_currentPage + 1) * _pageSize;
+    final endIndex = (startIndex + _pageSize).clamp(0, _allTransactions.length);
+    
+    if (startIndex < _allTransactions.length) {
+      final newTransactions = _allTransactions.sublist(startIndex, endIndex);
+      
+      setState(() {
+        _displayedTransactions.addAll(newTransactions);
+        _currentPage++;
+        _hasMoreData = endIndex < _allTransactions.length;
+        _isLoadingMore = false;
+      });
+    } else {
+      setState(() {
+        _hasMoreData = false;
+        _isLoadingMore = false;
+      });
     }
   }
 
@@ -69,52 +138,136 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
 
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
-    
-        
         // Use v2 provider data - filter transactions by account
         final account = providerV2.getAccountById(widget.cardId);
         if (account == null) {
           return _buildEmptyState(isDark);
         }
+
+        // ✅ REAL-TIME UPDATE: Update transactions when provider changes
+        final currentTransactions = providerV2.getTransactionsByAccount(widget.cardId);
         
-        final v2Transactions = providerV2.getTransactionsByAccount(widget.cardId);
-        final isLoadingV2 = providerV2.isLoadingTransactions;
-        
-        // V2 Content
-        // Loading skeleton kaldırıldı - normal UI göster
-        // if (isLoadingV2 && v2Transactions.isEmpty) {
-        //   return TransactionDesignSystem.buildLoadingSkeleton(
-        //     isDark: isDark,
-        //     itemCount: 3,
-        //   );
-        // } else 
-        if (v2Transactions.isEmpty) {
+        // Check if transactions have changed
+        if (_allTransactions.length != currentTransactions.length ||
+            !_areTransactionListsEqual(_allTransactions, currentTransactions)) {
+          // Update transactions and reset paging
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _setupPaging(providerV2);
+          });
+        }
+
+        // Use displayed transactions for paging
+        if (_displayedTransactions.isEmpty) {
           return _buildEmptyState(isDark);
         } else {
           // Use TransactionDesignSystem.buildTransactionList for consistent design
-          final transactionWidgets = v2Transactions.asMap().entries.map((entry) {
+          final transactionWidgets = _displayedTransactions.asMap().entries.map((
+            entry,
+          ) {
             final index = entry.key;
             final transaction = entry.value;
-            
+
             return _buildV2TransactionWidget(
               context,
-              transaction, 
+              transaction,
               isDark,
               isFirst: index == 0,
-              isLast: index == v2Transactions.length - 1,
+              isLast: index == _displayedTransactions.length - 1,
             );
           }).toList();
-          
-          return TransactionDesignSystem.buildTransactionList(
-            transactions: transactionWidgets,
-            isDark: isDark,
-            emptyTitle: AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
-            emptyDescription: AppLocalizations.of(context)?.noTransactionsForThisCard ?? 'No transactions found for this card',
-            emptyIcon: Icons.receipt_long_outlined,
-            context: context,
+
+          return Column(
+            children: [
+              TransactionDesignSystem.buildTransactionList(
+                transactions: transactionWidgets,
+                isDark: isDark,
+                emptyTitle:
+                    AppLocalizations.of(context)?.noTransactionsYet ??
+                    'No transactions yet',
+                emptyDescription:
+                    AppLocalizations.of(context)?.noTransactionsForThisCard ??
+                    'No transactions found for this card',
+                emptyIcon: Icons.receipt_long_outlined,
+                context: context,
+              ),
+              
+              // Load more button or bottom spacing
+              if (_hasMoreData || _isLoadingMore) ...[
+                const SizedBox(height: 16),
+                _buildLoadMoreButton(isDark),
+                const SizedBox(height: 90),
+              ] else ...[
+                const SizedBox(height: 140),
+              ],
+            ],
           );
         }
       },
+    );
+  }
+
+  Widget _buildLoadMoreButton(bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: _isLoadingMore ? null : _loadMoreTransactions,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isDark 
+                ? const Color(0xFF2C2C2E) 
+                : const Color(0xFFF2F2F7),
+            foregroundColor: isDark ? Colors.white : Colors.black,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: _isLoadingMore
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      AppLocalizations.of(context)?.loadingMore ?? 'Loading...',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.expand_more,
+                      size: 20,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      AppLocalizations.of(context)?.loadMore ?? 'Load More',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 
@@ -140,7 +293,8 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           ),
           const SizedBox(height: 16),
           Text(
-            AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
+            AppLocalizations.of(context)?.noTransactionsYet ??
+                'No transactions yet',
             style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -149,7 +303,8 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           ),
           const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context)?.noTransactionsForThisCard ?? 'No transactions found for this card',
+            AppLocalizations.of(context)?.noTransactionsForThisCard ??
+                'No transactions found for this card',
             style: GoogleFonts.inter(
               fontSize: 14,
               color: const Color(0xFF8E8E93),
@@ -164,7 +319,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
   /// Build individual transaction widget for V2 provider
   Widget _buildV2TransactionWidget(
     BuildContext context,
-    v2.TransactionWithDetailsV2 transaction, 
+    v2.TransactionWithDetailsV2 transaction,
     bool isDark, {
     bool isFirst = false,
     bool isLast = false,
@@ -182,29 +337,42 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
         transactionType = TransactionType.transfer;
         break;
       case v2.TransactionType.stock:
-        transactionType = TransactionType.income; // Treat stock as income for display
+        transactionType =
+            TransactionType.income; // Treat stock as income for display
         break;
     }
 
     // Get category info from provider
     final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-    final category = transaction.categoryId != null 
+    final category = transaction.categoryId != null
         ? providerV2.getCategoryById(transaction.categoryId!)
         : null;
 
     // FALLBACK: Check if description contains installment pattern like (1/4) or (3 taksit)
-    final hasInstallmentPattern = RegExp(r'\(\d+/\d+\)').hasMatch(transaction.description);
-    final hasInstallmentText = RegExp(r'\(\d+ taksit\)').hasMatch(transaction.description);
-    final isActualInstallment = transaction.isInstallment || hasInstallmentPattern || hasInstallmentText;
+    final hasInstallmentPattern = RegExp(
+      r'\(\d+/\d+\)',
+    ).hasMatch(transaction.description);
+    final hasInstallmentText = RegExp(
+      r'\(\d+ taksit\)',
+    ).hasMatch(transaction.description);
+    final isActualInstallment =
+        transaction.isInstallment ||
+        hasInstallmentPattern ||
+        hasInstallmentText;
 
-    // Build title - sadece description göster (kategori adı gereksiz)
-    String title = transaction.categoryName ?? transaction.description;
+    // Build title - use displayTitle for consistency with recent transactions
+    String title = transaction.displayTitle;
     // Taksitli ise taksit bilgisini ekleme, sadece InstallmentExpandableCard'da gösterilecek
     String installmentText = '';
     int? effectiveInstallmentCount = transaction.installmentCount;
     int currentInstallment = 1;
-    if ((transaction.installmentCount == null || transaction.installmentCount! < 1) && transaction.installmentId != null) {
-      final info = Provider.of<UnifiedProviderV2>(context, listen: false).getInstallmentInfo(transaction.installmentId);
+    if ((transaction.installmentCount == null ||
+            transaction.installmentCount! < 1) &&
+        transaction.installmentId != null) {
+      final info = Provider.of<UnifiedProviderV2>(
+        context,
+        listen: false,
+      ).getInstallmentInfo(transaction.installmentId);
       if (info != null) {
         effectiveInstallmentCount = info['totalInstallments'];
         currentInstallment = info['currentInstallment'] ?? 1;
@@ -215,7 +383,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     } else if (effectiveInstallmentCount == 1) {
       installmentText = AppLocalizations.of(context)?.cash ?? 'Cash';
     }
-    
+
     // Card name - centralized logic
     final cardName = TransactionDesignSystem.formatCardName(
       cardName: widget.cardName,
@@ -226,8 +394,15 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     );
 
     // Format amount with dynamic currency
-    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
-    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
+    final currencySymbol = Provider.of<ThemeProvider>(
+      context,
+      listen: false,
+    ).currency.symbol;
+    final amount = TransactionDesignSystem.formatAmount(
+      transaction.amount,
+      transactionType,
+      currencySymbol: currencySymbol,
+    );
 
     // Use displayTime from transaction model (dynamic date formatting)
     final time = transaction.displayTime;
@@ -239,23 +414,30 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       int? totalInstallments;
       double? totalAmount;
       double? monthlyAmount;
-      
+
       // Parse "(3 taksit)" pattern
-      final installmentMatch = RegExp(r'\((\d+) taksit\)').firstMatch(transaction.description);
+      final installmentMatch = RegExp(
+        r'\((\d+) taksit\)',
+      ).firstMatch(transaction.description);
       if (installmentMatch != null) {
         totalInstallments = int.tryParse(installmentMatch.group(1)!);
         totalAmount = transaction.amount; // This is the total amount
-        monthlyAmount = totalAmount / (totalInstallments ?? 1); // Calculate monthly amount
-        cleanTitle = transaction.description.replaceAll(RegExp(r'\s*\(\d+ taksit\)'), '').trim();
-        
+        monthlyAmount =
+            totalAmount / (totalInstallments ?? 1); // Calculate monthly amount
+        cleanTitle = transaction.description
+            .replaceAll(RegExp(r'\s*\(\d+ taksit\)'), '')
+            .trim();
       }
-      
-      
+
       return InstallmentExpandableCard(
         installmentId: transaction.installmentId,
-        title: transaction.categoryName ?? transaction.description, // Kategori adı
+        title: transaction.displayTitle, // Use displayTitle for consistency
         subtitle: cardName, // Banka adı
-        amount: TransactionDesignSystem.formatAmount(totalAmount ?? transaction.amount, transactionType, currencySymbol: currencySymbol),
+        amount: TransactionDesignSystem.formatAmount(
+          totalAmount ?? transaction.amount,
+          transactionType,
+          currencySymbol: currencySymbol,
+        ),
         time: time,
         type: transactionType,
         categoryIcon: transaction.categoryName ?? category?.iconName,
@@ -277,12 +459,14 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
 
     // Get category icon using CategoryIconService - prioritize category name
     IconData? categoryIcon;
-    
+
     // First try category name (more reliable than database icon field)
     if (transaction.categoryName != null) {
-      categoryIcon = CategoryIconService.getIcon(transaction.categoryName!.toLowerCase());
-    } 
-    
+      categoryIcon = CategoryIconService.getIcon(
+        transaction.categoryName!.toLowerCase(),
+      );
+    }
+
     // Only fallback to category.icon if category name lookup failed
     if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
       if (category?.icon != null && category!.icon != 'category') {
@@ -292,24 +476,29 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
 
     // Get category color using CategoryIconService - prioritize centralized colors
     Color? categoryColor;
-    
+
     // First try to get color from centralized map using category name or icon
     if (transaction.categoryName != null) {
       // Try category name first (e.g., "market", "yemek", etc.)
       categoryColor = CategoryIconService.getColorFromMap(
         transaction.categoryName!.toLowerCase(),
-        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
+        categoryType: transactionType == TransactionType.income
+            ? 'income'
+            : 'expense',
       );
     } else if (category?.icon != null) {
       // Try icon name (e.g., "restaurant", "car", etc.)
       categoryColor = CategoryIconService.getColorFromMap(
         category!.iconName,
-        categoryType: transactionType == TransactionType.income ? 'income' : 'expense',
+        categoryType: transactionType == TransactionType.income
+            ? 'income'
+            : 'expense',
       );
     }
-    
+
     // If no centralized color found, fall back to hex color from database
-    if (categoryColor == null || categoryColor == CategoryIconService.getColorFromMap('default')) {
+    if (categoryColor == null ||
+        categoryColor == CategoryIconService.getColorFromMap('default')) {
       if (category?.color != null) {
         categoryColor = CategoryIconService.getColor(category!.colorHex);
       } else if (category?.icon != null) {
@@ -325,6 +514,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
 
     // Regular transaction - use Firebase integrated design system
     return TransactionDesignSystem.buildTransactionItemFromV2(
+      context: context,
       transaction: transaction,
       isDark: isDark,
       time: time,
@@ -340,7 +530,10 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
   }
 
   /// Show delete action sheet for V2 transactions
-  void _showV2DeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
+  void _showV2DeleteActionSheet(
+    BuildContext context,
+    v2.TransactionWithDetailsV2 transaction,
+  ) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -353,7 +546,9 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           ),
         ),
         message: Text(
-          AppLocalizations.of(context)!.deleteTransactionConfirm(transaction.description),
+          AppLocalizations.of(
+            context,
+          )!.deleteTransactionConfirm(transaction.description),
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -382,10 +577,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           },
           child: Text(
             AppLocalizations.of(context)!.cancel,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -393,15 +585,20 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
   }
 
   /// Delete V2 transaction
-  Future<void> _deleteV2Transaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) async {
+  Future<void> _deleteV2Transaction(
+    BuildContext context,
+    v2.TransactionWithDetailsV2 transaction,
+  ) async {
     try {
       // Check if this is a stock transaction
       if (transaction.isStockTransaction) {
-        
         // Use StockProvider for stock transactions
-        final stockProvider = Provider.of<StockProvider>(context, listen: false);
+        final stockProvider = Provider.of<StockProvider>(
+          context,
+          listen: false,
+        );
         await stockProvider.deleteStockTransaction(transaction.id);
-        
+
         // Başarı mesajı göster
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -413,28 +610,40 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           );
         }
       } else {
-        // Regular transaction - use UnifiedProviderV2
-        final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-        await providerV2.deleteTransaction(transaction.id);
+        // ✅ OPTIMISTIC UI UPDATE: Regular transaction - use UnifiedProviderV2
+        final providerV2 = Provider.of<UnifiedProviderV2>(
+          context,
+          listen: false,
+        );
         
+        // UnifiedProviderV2.deleteTransaction() zaten optimistic update yapıyor
+        final success = await providerV2.deleteTransaction(transaction.id);
+
         // Başarı mesajı göster
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.transactionDeleted),
-              backgroundColor: Colors.green,
+              content: Text(
+                success 
+                  ? AppLocalizations.of(context)!.transactionDeleted
+                  : 'Silme işlemi başarısız',
+              ),
+              backgroundColor: success ? Colors.green : Colors.red,
               duration: const Duration(seconds: 2),
             ),
           );
         }
       }
-      
     } catch (e) {
       // Hata mesajı göster
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.transactionDeleteError(e.toString())),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              )!.transactionDeleteError(e.toString()),
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -443,9 +652,12 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     }
   }
 
-
   /// Show installment delete action sheet
-  void _showInstallmentDeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction, Map<String, int?>? installmentInfo) {
+  void _showInstallmentDeleteActionSheet(
+    BuildContext context,
+    v2.TransactionWithDetailsV2 transaction,
+    Map<String, int?>? installmentInfo,
+  ) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -458,7 +670,9 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           ),
         ),
         message: Text(
-          AppLocalizations.of(context)!.deleteInstallmentTransactionConfirm(transaction.description),
+          AppLocalizations.of(
+            context,
+          )!.deleteInstallmentTransactionConfirm(transaction.description),
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -487,10 +701,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
           },
           child: Text(
             AppLocalizations.of(context)!.cancel,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -498,32 +709,36 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
   }
 
   /// Delete installment transaction
-  Future<void> _deleteInstallmentTransaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) async {
+  Future<void> _deleteInstallmentTransaction(
+    BuildContext context,
+    v2.TransactionWithDetailsV2 transaction,
+  ) async {
     try {
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-
 
       // Use enhanced installment deletion that refunds total amount
       await providerV2.deleteInstallmentTransaction(transaction.id);
 
-      
-
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.installmentTransactionDeleted),
+            content: Text(
+              AppLocalizations.of(context)!.installmentTransactionDeleted,
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
         );
       }
     } catch (e) {
-      
-      
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.transactionDeleteError(e.toString())),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              )!.transactionDeleteError(e.toString()),
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -531,4 +746,4 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       }
     }
   }
-} 
+}

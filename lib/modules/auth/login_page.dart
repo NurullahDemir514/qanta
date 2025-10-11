@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/services/firebase_auth_service.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/qanta_logo.dart';
 import '../../core/services/reminder_service.dart';
+import '../../core/firebase_client.dart';
+import '../../core/providers/unified_provider_v2.dart';
+import '../../modules/stocks/providers/stock_provider.dart';
+import '../../core/providers/profile_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,6 +35,95 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  Future<void> _preloadUserData() async {
+    try {
+      // 🚀 V2 PROVIDER: Modern unified data loading with cache
+      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+
+      // StockProvider'ı set et (eğer henüz set edilmemişse)
+      if (!providerV2.hasStockProvider) {
+        final stockProvider = Provider.of<StockProvider>(
+          context,
+          listen: false,
+        );
+        providerV2.setStockProvider(stockProvider);
+      }
+
+      // Cache'li veri yükleme (10 dakika cache süresi)
+      // Kritik verileri paralel yükle
+      await Future.wait([
+        providerV2.loadAllData(forceRefresh: false),
+        // Hisse pozisyonlarını ayrı yükle
+        _loadStockPositionsAsync(providerV2),
+        // Profil verilerini yükle
+        _loadProfileDataAsync(),
+      ]);
+
+      // Hisse verilerini yükle ve fiyatları güncelle
+      try {
+        final stockProvider = Provider.of<StockProvider>(
+          context,
+          listen: false,
+        );
+        final userId = FirebaseManager.currentUser?.uid;
+
+        if (userId != null) {
+          // Önce kullanıcının hisselerini yükle (daha hızlı)
+          await stockProvider
+              .loadWatchedStocks(userId)
+              .timeout(
+                const Duration(seconds: 2),
+                onTimeout: () {
+                  debugPrint('⚠️ Hisse yükleme timeout');
+                },
+              );
+
+          // Eğer hisse varsa fiyatları güncelle (daha hızlı)
+          if (stockProvider.watchedStocks.isNotEmpty) {
+            await stockProvider.updateRealTimePricesSilently().timeout(
+              const Duration(seconds: 3), // Daha hızlı
+              onTimeout: () {
+                // Hisse fiyat güncelleme timeout - sessizce devam et
+              },
+            );
+          } else {
+            debugPrint('ℹ️ Kullanıcının takip ettiği hisse yok');
+          }
+        }
+      } catch (e) {
+        // Hisse verileri yüklenemezse devam et
+        debugPrint('❌ Hisse verileri yüklenemedi: $e');
+      }
+
+      // Real-time listeners'ı kur
+      providerV2.setupRealTimeListeners();
+    } catch (e) {
+      // Kritik veri yükleme hatası olsa bile home'a git, orada tekrar denenecek
+      debugPrint('❌ Veri ön yükleme hatası: $e');
+    }
+  }
+
+  /// Hisse pozisyonlarını asenkron yükle
+  Future<void> _loadStockPositionsAsync(UnifiedProviderV2 providerV2) async {
+    try {
+      await providerV2.loadStockPositions();
+      debugPrint('✅ Hisse pozisyonları ön yüklendi');
+    } catch (e) {
+      debugPrint('⚠️ Hisse pozisyonları yüklenemedi: $e');
+    }
+  }
+
+  /// Profil verilerini asenkron yükle
+  Future<void> _loadProfileDataAsync() async {
+    try {
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      await profileProvider.refresh();
+      debugPrint('✅ Profil verileri ön yüklendi');
+    } catch (e) {
+      debugPrint('⚠️ Profil verileri yüklenemedi: $e');
+    }
+  }
+
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -43,7 +137,13 @@ class _LoginPageState extends State<LoginPage> {
 
       if (credential.user != null && mounted) {
         await ReminderService.clearAllRemindersForCurrentUser();
-        context.go('/home');
+
+        // Kullanıcı verilerini önceden yükle
+        await _preloadUserData();
+
+        if (mounted) {
+          context.go('/home');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -82,48 +182,51 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: 24.w.clamp(20.w, 32.w), 
+              vertical: 16.h.clamp(12.h, 24.h),
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 const QantaLogo.large(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 Align(
                   alignment: Alignment.center,
                   child: Text(
                     l10n.login,
                     style: GoogleFonts.inter(
-                      fontSize: 32,
+                      fontSize: 28.sp.clamp(20.sp, 32.sp),
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Align(
                   alignment: Alignment.center,
                   child: Text(
                     l10n.loginSubtitle,
                     style: GoogleFonts.inter(
-                      fontSize: 16,
+                      fontSize: 14.sp.clamp(12.sp, 16.sp),
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(20.w.clamp(16.w, 28.w)),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? theme.colorScheme.surfaceVariant
+                        ? theme.colorScheme.surfaceContainerHighest
                         : Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(20.r.clamp(16.r, 24.r)),
                     boxShadow: [
                       BoxShadow(
                         color: theme.shadowColor.withOpacity(0.08),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
+                        blurRadius: 20.r.clamp(16.r, 28.r),
+                        offset: Offset(0, 6.h.clamp(4.h, 10.h)),
                       ),
                     ],
                   ),
@@ -174,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 12.h),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
@@ -229,28 +332,28 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 16.h),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              padding: EdgeInsets.symmetric(vertical: 14.h),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(14.r),
                               ),
                               backgroundColor: theme.colorScheme.primary,
                               foregroundColor: theme.colorScheme.onPrimary,
                               textStyle: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                fontSize: 16.sp.clamp(14.sp, 18.sp),
                               ),
                               elevation: 0,
                             ),
                             onPressed: _isLoading ? null : _signIn,
                             child: _isLoading
-                                ? const SizedBox(
-                                    height: 22,
-                                    width: 22,
+                                ? SizedBox(
+                                    height: 20.h,
+                                    width: 20.w,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                     ),
@@ -258,7 +361,7 @@ class _LoginPageState extends State<LoginPage> {
                                 : Text(l10n.login),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 10.h),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(

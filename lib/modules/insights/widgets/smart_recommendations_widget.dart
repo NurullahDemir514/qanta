@@ -17,7 +17,8 @@ class SmartRecommendationsWidget extends StatefulWidget {
   });
 
   @override
-  State<SmartRecommendationsWidget> createState() => _SmartRecommendationsWidgetState();
+  State<SmartRecommendationsWidget> createState() =>
+      _SmartRecommendationsWidgetState();
 }
 
 class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
@@ -58,7 +59,7 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
   @override
   Widget build(BuildContext context) {
     final visibleRecs = _visibleRecommendations;
-    
+
     if (visibleRecs.isEmpty) {
       return _buildEmptyState(context);
     }
@@ -114,7 +115,9 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
                   'Finansal hedeflerinize ulaşmanız için öneriler',
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -125,8 +128,11 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
     );
   }
 
-  Widget _buildRecommendationsCarousel(BuildContext context, List<SmartRecommendation> recommendations) {
-    return Container(
+  Widget _buildRecommendationsCarousel(
+    BuildContext context,
+    List<SmartRecommendation> recommendations,
+  ) {
+    return SizedBox(
       height: 180,
       child: PageView.builder(
         controller: _pageController,
@@ -146,7 +152,10 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
     );
   }
 
-  Widget _buildRecommendationCard(BuildContext context, SmartRecommendation recommendation) {
+  Widget _buildRecommendationCard(
+    BuildContext context,
+    SmartRecommendation recommendation,
+  ) {
     return Dismissible(
       key: Key(recommendation.id),
       direction: DismissDirection.endToStart,
@@ -157,18 +166,14 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
           color: const Color(0xFFFF6B6B).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(
-          Icons.close,
-          color: Color(0xFFFF6B6B),
-          size: 24,
-        ),
+        child: const Icon(Icons.close, color: Color(0xFFFF6B6B), size: 24),
       ),
       onDismissed: (direction) {
         setState(() {
           _dismissedIds.add(recommendation.id);
         });
         widget.onRecommendationDismiss?.call(recommendation);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Öneri kapatıldı'),
@@ -234,9 +239,14 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
                         if (recommendation.category.isNotEmpty) ...[
                           const SizedBox(height: 2),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: recommendation.color.withValues(alpha: 0.1),
+                              color: recommendation.color.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -261,7 +271,9 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   height: 1.4,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -271,7 +283,10 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
                 children: [
                   if (recommendation.potentialSavings > 0) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF00FFB3).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -300,7 +315,10 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
                   ],
                   if (recommendation.actionable) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: recommendation.color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -331,7 +349,9 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
                     _getTimeAgoText(recommendation.generatedAt),
                     style: GoogleFonts.inter(
                       fontSize: 10,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -346,7 +366,7 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
   Widget _buildPriorityBadge(RecommendationPriority priority) {
     Color color;
     String text;
-    
+
     switch (priority) {
       case RecommendationPriority.high:
         color = const Color(0xFFFF6B6B);
@@ -391,8 +411,8 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
             color: index == _currentPage
-              ? const Color(0xFF4ECDC4)
-              : const Color(0xFF8E8E93).withValues(alpha: 0.3),
+                ? const Color(0xFF4ECDC4)
+                : const Color(0xFF8E8E93).withValues(alpha: 0.3),
             shape: BoxShape.circle,
           ),
         ),
@@ -415,7 +435,9 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
           Icon(
             Icons.lightbulb_outline,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
@@ -431,7 +453,9 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
             'Daha fazla işlem yaptıkça size özel öneriler sunacağız.',
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -456,4 +480,4 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
   }
 }
 
-// SmartRecommendation sınıfı statistics_screen.dart'ta tanımlandı 
+// SmartRecommendation sınıfı statistics_screen.dart'ta tanımlandı

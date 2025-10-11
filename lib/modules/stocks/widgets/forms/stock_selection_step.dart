@@ -11,7 +11,7 @@ import '../../../../l10n/app_localizations.dart';
 class StockSelectionStep extends StatefulWidget {
   final Stock? selectedStock;
   final Function(Stock) onStockSelected;
-  
+
   const StockSelectionStep({
     super.key,
     this.selectedStock,
@@ -30,7 +30,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
   bool _isSearching = false;
   Timer? _debounceTimer;
   late AppLocalizations l10n;
-  Map<String, List<Stock>> _searchCache = {};
+  final Map<String, List<Stock>> _searchCache = {};
 
   @override
   void initState() {
@@ -56,7 +56,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
 
   Future<void> _loadStocks() async {
     if (_isLoading) return; // Zaten yükleniyorsa tekrar başlatma
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -67,7 +67,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
       final userId = FirebaseAuthService.currentUserId;
       if (userId != null) {
         await stockProvider.loadWatchedStocks(userId);
-        
+
         if (mounted) {
           setState(() {
             _filteredStocks = stockProvider.watchedStocks;
@@ -127,28 +127,33 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
         // Arama sonuçları için gerçek fiyat verilerini çek
         final symbols = searchResults.map((stock) {
           // Türk hisseleri için .IS uzantısı ekle
-          if ((stock.exchange == 'BIST' || stock.exchange == 'IST' || stock.currency == 'TRY') && !stock.symbol.endsWith('.IS')) {
+          if ((stock.exchange == 'BIST' ||
+                  stock.exchange == 'IST' ||
+                  stock.currency == 'TRY') &&
+              !stock.symbol.endsWith('.IS')) {
             return '${stock.symbol}.IS';
           }
           return stock.symbol;
         }).toList();
 
         final realTimePrices = await stockProvider.getRealTimePrices(symbols);
-        
+
         // Arama sonuçlarını gerçek fiyat verileri ile güncelle
         final updatedResults = searchResults.map((searchStock) {
           final realTimeStock = realTimePrices.firstWhere(
-            (rt) => rt.symbol == searchStock.symbol || 
-                    (rt.symbol.endsWith('.IS') && rt.symbol.replaceAll('.IS', '') == searchStock.symbol),
+            (rt) =>
+                rt.symbol == searchStock.symbol ||
+                (rt.symbol.endsWith('.IS') &&
+                    rt.symbol.replaceAll('.IS', '') == searchStock.symbol),
             orElse: () => searchStock,
           );
-          
+
           return realTimeStock;
         }).toList();
 
         // Cache'e kaydet
         _searchCache[query] = updatedResults;
-        
+
         setState(() {
           _searchResults = updatedResults;
           _isSearching = false;
@@ -171,7 +176,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Column(
       children: [
         // Arama çubuğu
@@ -193,29 +198,30 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                color: isDark
+                    ? const Color(0xFF38383A)
+                    : const Color(0xFFE5E5EA),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                color: isDark
+                    ? const Color(0xFF38383A)
+                    : const Color(0xFFE5E5EA),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF007AFF),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFF007AFF), width: 2),
             ),
             filled: true,
             fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Hisse listesi
         SizedBox(
           height: 600, // Sabit yükseklik ver
@@ -249,33 +255,33 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
           ),
         );
       }
-      
+
       if (_searchResults.isEmpty) {
         return _buildNoResultsState(isDark);
       }
-      
+
       return ListView.builder(
         itemCount: _searchResults.length,
         itemBuilder: (context, index) {
           final stock = _searchResults[index];
           final isSelected = widget.selectedStock?.symbol == stock.symbol;
-          
+
           return _buildSearchResultItem(stock, isSelected, isDark);
         },
       );
     }
-    
+
     // Arama yapılmıyorsa mevcut hisseleri göster
     if (_filteredStocks.isEmpty) {
       return _buildEmptyState(isDark);
     }
-    
+
     return ListView.builder(
       itemCount: _filteredStocks.length,
       itemBuilder: (context, index) {
         final stock = _filteredStocks[index];
         final isSelected = widget.selectedStock?.symbol == stock.symbol;
-        
+
         return _buildStockItem(stock, isSelected, isDark);
       },
     );
@@ -352,10 +358,10 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
     if (userId == null) return;
 
     final stockProvider = Provider.of<StockProvider>(context, listen: false);
-    
+
     try {
       await stockProvider.addWatchedStock(userId, stock);
-      
+
       if (mounted) {
         // Hisse eklendikten sonra seç
         widget.onStockSelected(stock);
@@ -377,7 +383,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: isSelected 
+        color: isSelected
             ? (isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE8F4FD))
             : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
         borderRadius: BorderRadius.circular(16),
@@ -389,9 +395,11 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isSelected 
+                color: isSelected
                     ? (isDark ? Colors.white54 : const Color(0xFF007AFF))
-                    : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
+                    : (isDark
+                          ? const Color(0xFF38383A)
+                          : const Color(0xFFE5E5EA)),
                 width: isSelected ? 2.5 : 1,
               ),
             ),
@@ -416,7 +424,10 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.blue.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
@@ -445,7 +456,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
                     ],
                   ),
                 ),
-                
+
                 // Fiyat bilgileri
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -460,9 +471,12 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: stock.isPositive 
+                        color: stock.isPositive
                             ? Colors.green.withOpacity(0.1)
                             : Colors.red.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -490,7 +504,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: isSelected 
+        color: isSelected
             ? (isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE8F4FD))
             : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
         borderRadius: BorderRadius.circular(16),
@@ -502,9 +516,11 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isSelected 
+                color: isSelected
                     ? (isDark ? Colors.white54 : const Color(0xFF007AFF))
-                    : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
+                    : (isDark
+                          ? const Color(0xFF38383A)
+                          : const Color(0xFFE5E5EA)),
                 width: isSelected ? 2.5 : 1,
               ),
             ),
@@ -538,7 +554,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
                     ],
                   ),
                 ),
-                
+
                 // Fiyat bilgileri
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -553,9 +569,12 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: stock.isPositive 
+                        color: stock.isPositive
                             ? Colors.green.withOpacity(0.1)
                             : Colors.red.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),

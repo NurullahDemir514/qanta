@@ -96,7 +96,7 @@
   "@balance": {
     "description": "Account balance"
   },
-  "onboardingDescription": "Take control of your finances with Qanta. Track expenses, manage budgets, and grow your wealth with smart insights.",
+  "onboardingDescription": "Your personal finance app. Track expenses, manage cards, monitor stocks, and set budgets.",
   "@onboardingDescription": {
     "description": "Onboarding screen description text"
   },
@@ -1424,6 +1424,62 @@
   "@financialAnalysisDesc": {
     "description": "Financial analysis feature description"
   },
+  "cardManagementTitle": "Card Management",
+  "@cardManagementTitle": {
+    "description": "Card management feature title"
+  },
+  "cardManagementDesc": "Manage credit cards, debit cards and cash accounts",
+  "@cardManagementDesc": {
+    "description": "Card management feature description"
+  },
+  "stockTrackingTitle": "Stock Tracking",
+  "@stockTrackingTitle": {
+    "description": "Stock tracking feature title"
+  },
+  "stockTrackingDesc": "Track your stock portfolio and investments",
+  "@stockTrackingDesc": {
+    "description": "Stock tracking feature description"
+  },
+  "budgetManagementTitle": "Budget Management",
+  "@budgetManagementTitle": {
+    "description": "Budget management feature title"
+  },
+  "budgetManagementDesc": "Set budgets and track your spending limits",
+  "@budgetManagementDesc": {
+    "description": "Budget management feature description"
+  },
+  "aiInsightsTitle": "AI Insights",
+  "@aiInsightsTitle": {
+    "description": "AI insights feature title"
+  },
+  "aiInsightsDesc": "Get smart financial recommendations and insights",
+  "@aiInsightsDesc": {
+    "description": "AI insights feature description"
+  },
+  "expenseTrackingDescShort": "Record and categorize your daily expenses with detailed tracking",
+  "@expenseTrackingDescShort": {
+    "description": "Short expense tracking description"
+  },
+  "cardManagementDescShort": "Manage credit cards, debit cards and cash accounts in one place",
+  "@cardManagementDescShort": {
+    "description": "Short card management description"
+  },
+  "stockTrackingDescShort": "Monitor your stock portfolio with real-time prices and performance",
+  "@stockTrackingDescShort": {
+    "description": "Short stock tracking description"
+  },
+  "financialAnalysisDescShort": "Analyze spending patterns and financial trends",
+  "@financialAnalysisDescShort": {
+    "description": "Short financial analysis description"
+  },
+  "budgetManagementDescShort": "Set monthly budgets and track your spending limits",
+  "@budgetManagementDescShort": {
+    "description": "Short budget management description"
+  },
+  "aiInsightsDescShort": "Get personalized financial recommendations and insights",
+  "@aiInsightsDescShort": {
+    "description": "Short AI insights description"
+  },
   "languageSelectionTitle": "Language Selection",
   "@languageSelectionTitle": {
     "description": "Language selection page title"
@@ -1772,7 +1828,7 @@
   "needsImprovement": "Needs Improvement",
   "dailyAverage": "Daily Average",
   "moreCategories": "more categories",
-  "netWorth": "Net Worth",
+  "netWorth": "Total Assets",
   "positive": "Positive",
   "negative": "Negative",
   "totalAssets": "Total Assets",
@@ -4035,6 +4091,62 @@
   "@stockChip": {
     "description": "Stock transaction chip label"
   },
+  "dailyPerformance": "Daily Performance",
+  "@dailyPerformance": {
+    "description": "Daily performance section title"
+  },
+  "daily": "Daily",
+  "@daily": {
+    "description": "Daily label for stock performance"
+  },
+  "noStocksTracked": "No stocks tracked yet",
+  "@noStocksTracked": {
+    "description": "Message when user has no stocks tracked"
+  },
+  "stockDataLoading": "Loading stock data...",
+  "@stockDataLoading": {
+    "description": "Message when stock data is loading"
+  },
+  "addStocksInstruction": "Go to Stocks tab to add stocks",
+  "@addStocksInstruction": {
+    "description": "Instruction to add stocks"
+  },
+  "addStocks": "Add Stocks",
+  "@addStocks": {
+    "description": "Add stocks button text"
+  },
+  "noPosition": "No Position",
+  "@noPosition": {
+    "description": "Message when there is no stock position"
+  },
+  "topGainersDescription": "Stocks with highest gains today",
+  "@topGainersDescription": {
+    "description": "Top gainers section description"
+  },
+  "marketOpen": "Market Open",
+  "@marketOpen": {
+    "description": "Market is open status"
+  },
+  "marketClosed": "Market Closed",
+  "@marketClosed": {
+    "description": "Market is closed status"
+  },
+  "intradayChange": "Intraday Change",
+  "@intradayChange": {
+    "description": "Intraday change label"
+  },
+  "previousClose": "Previous Close",
+  "@previousClose": {
+    "description": "Previous close price label"
+  },
+  "loadingStocks": "Loading stock data...",
+  "@loadingStocks": {
+    "description": "Loading stocks data message"
+  },
+  "noStockData": "No stock data available",
+  "@noStockData": {
+    "description": "No stock data available message"
+  },
   "stockSale": "Sale",
   "@stockSale": {
     "description": "Stock sale action"
@@ -4933,5 +5045,435 @@
   "returnLabel": "Return",
   "@returnLabel": {
     "description": "Return label"
+  },
+  "quickNotesTitle": "Quick Notes",
+  "@quickNotesTitle": {
+    "description": "Quick notes page title"
+  },
+  "pendingNotesCount": "{count} pending notes",
+  "@pendingNotesCount": {
+    "description": "Pending notes count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quickAddNote": "Quick Add Note",
+  "@quickAddNote": {
+    "description": "Quick add note section title"
+  },
+  "addNoteHint": "e.g. 50₺ grocery shopping",
+  "@addNoteHint": {
+    "description": "Add note input hint"
+  },
+  "voiceButton": "Voice",
+  "@voiceButton": {
+    "description": "Voice recording button"
+  },
+  "stopButton": "Stop",
+  "@stopButton": {
+    "description": "Stop recording button"
+  },
+  "photoButton": "Photo",
+  "@photoButton": {
+    "description": "Photo capture button"
+  },
+  "addButton": "Add",
+  "@addButton": {
+    "description": "Add note button"
+  },
+  "pendingNotes": "Pending",
+  "@pendingNotes": {
+    "description": "Pending notes tab"
+  },
+  "processedNotes": "Processed",
+  "@processedNotes": {
+    "description": "Processed notes tab"
+  },
+  "pendingNotesTitle": "Pending Notes",
+  "@pendingNotesTitle": {
+    "description": "Pending notes section title"
+  },
+  "processedNotesTitle": "Processed Notes",
+  "@processedNotesTitle": {
+    "description": "Processed notes section title"
+  },
+  "noPendingNotes": "No pending notes yet\nAdd notes quickly from the field above",
+  "@noPendingNotes": {
+    "description": "Empty state for pending notes"
+  },
+  "noProcessedNotes": "No notes converted to transactions yet",
+  "@noProcessedNotes": {
+    "description": "Empty state for processed notes"
+  },
+  "noteStatusPending": "Pending",
+  "@noteStatusPending": {
+    "description": "Note status pending"
+  },
+  "noteStatusProcessed": "Processed",
+  "@noteStatusProcessed": {
+    "description": "Note status processed"
+  },
+  "convertToExpense": "Expense",
+  "@convertToExpense": {
+    "description": "Convert to expense button"
+  },
+  "convertToIncome": "Income",
+  "@convertToIncome": {
+    "description": "Convert to income button"
+  },
+  "deleteNote": "Delete",
+  "@deleteNote": {
+    "description": "Delete note button"
+  },
+  "noteAddedSuccess": "Note added: {content}",
+  "@noteAddedSuccess": {
+    "description": "Note added success message",
+    "placeholders": {
+      "content": {
+        "type": "String"
+      }
+    }
+  },
+  "noteConvertedSuccess": "Note successfully converted to transaction",
+  "@noteConvertedSuccess": {
+    "description": "Note converted success message"
+  },
+  "noteDeletedSuccess": "Note deleted",
+  "@noteDeletedSuccess": {
+    "description": "Note deleted success message"
+  },
+  "timeNow": "Now",
+  "@timeNow": {
+    "description": "Time now"
+  },
+  "timeMinutesAgo": "{minutes} min ago",
+  "@timeMinutesAgo": {
+    "description": "Time minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{hours} hours ago",
+  "@timeHoursAgo": {
+    "description": "Time hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{days} days ago",
+  "@timeDaysAgo": {
+    "description": "Time days ago",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "lastPayment": "Last Payment",
+  "@lastPayment": {
+    "description": "Last payment date label"
+  },
+  "transactions": "Transactions",
+  "@transactions": {
+    "description": "Transaction count label"
+  },
+  "cutOff": "Cut-off",
+  "@cutOff": {
+    "description": "Cut-off date label"
+  },
+  "paid": "Paid",
+  "@paid": {
+    "description": "Payment status - paid"
+  },
+  "overdue": "Overdue",
+  "@overdue": {
+    "description": "Payment status - overdue"
+  },
+  "daysLeft": "days left",
+  "@daysLeft": {
+    "description": "Days left until due date"
+  },
+  "noTransactionsInStatement": "No transactions in this statement",
+  "@noTransactionsInStatement": {
+    "description": "No transactions in statement message"
+  },
+  "tryAgain": "Try Again",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+  "loadingStatements": "Loading statements...",
+  "@loadingStatements": {
+    "description": "Loading statements message"
+  },
+  "loadMore": "Load More",
+  "@loadMore": {
+    "description": "Load more button text"
+  },
+  "loadingMore": "Loading...",
+  "@loadingMore": {
+    "description": "Loading more items message"
+  },
+  "currentStatement": "Current Statement",
+  "@currentStatement": {
+    "description": "Current statement section header"
+  },
+  "pastStatements": "Past Statements",
+  "@pastStatements": {
+    "description": "Past statements section header"
+  },
+  "futureStatements": "Future Statements",
+  "@futureStatements": {
+    "description": "Future statements section header"
+  },
+  "statements": "Statements",
+  "@statements": {
+    "description": "Statements page title"
+  },
+  "garantiBBVA": "Garanti BBVA",
+  "@garantiBBVA": {
+    "description": "Garanti BBVA bank name"
+  },
+  "isBankasi": "İş Bankası",
+  "@isBankasi": {
+    "description": "İş Bankası bank name"
+  },
+  "akbank": "Akbank",
+  "@akbank": {
+    "description": "Akbank bank name"
+  },
+  "ziraatBankasi": "Ziraat Bankası",
+  "@ziraatBankasi": {
+    "description": "Ziraat Bankası bank name"
+  },
+  "vakifBank": "VakıfBank",
+  "@vakifBank": {
+    "description": "VakıfBank bank name"
+  },
+  "yapiKredi": "Yapı Kredi",
+  "@yapiKredi": {
+    "description": "Yapı Kredi bank name"
+  },
+  "kuveytTurk": "Kuveyt Türk",
+  "@kuveytTurk": {
+    "description": "Kuveyt Türk bank name"
+  },
+  "albarakaTurk": "Albaraka Türk",
+  "@albarakaTurk": {
+    "description": "Albaraka Türk bank name"
+  },
+  "qnbFinansbank": "QNB Finansbank",
+  "@qnbFinansbank": {
+    "description": "QNB Finansbank bank name"
+  },
+  "enpara": "Enpara.com",
+  "@enpara": {
+    "description": "Enpara.com bank name"
+  },
+  "papara": "Papara",
+  "@papara": {
+    "description": "Papara bank name"
+  },
+  "turkiyeFinans": "Türkiye Finans",
+  "@turkiyeFinans": {
+    "description": "Türkiye Finans bank name"
+  },
+  "teb": "TEB",
+  "@teb": {
+    "description": "TEB bank name"
+  },
+  "hsbcTurkiye": "HSBC Türkiye",
+  "@hsbcTurkiye": {
+    "description": "HSBC Türkiye bank name"
+  },
+  "ingTurkiye": "ING Türkiye",
+  "@ingTurkiye": {
+    "description": "ING Türkiye bank name"
+  },
+  "denizBank": "DenizBank",
+  "@denizBank": {
+    "description": "DenizBank bank name"
+  },
+  "anadoluBank": "AnadoluBank",
+  "@anadoluBank": {
+    "description": "AnadoluBank bank name"
+  },
+  "halkBank": "Halkbank",
+  "@halkBank": {
+    "description": "Halkbank bank name"
+  },
+  "qantaBank": "Qanta Bank",
+  "@qantaBank": {
+    "description": "Qanta Bank fallback name"
+  },
+  "statementOperations": "Statement Operations",
+  "@statementOperations": {
+    "description": "Statement operations modal title"
+  },
+  "downloadPdf": "Download PDF",
+  "@downloadPdf": {
+    "description": "Download PDF action"
+  },
+  "downloadPdfSubtitle": "Download statement as PDF",
+  "@downloadPdfSubtitle": {
+    "description": "Download PDF action subtitle"
+  },
+  "share": "Share",
+  "@share": {
+    "description": "Share action"
+  },
+  "shareSubtitle": "Share statement",
+  "@shareSubtitle": {
+    "description": "Share action subtitle"
+  },
+  "markAsUnpaid": "Mark as Unpaid",
+  "@markAsUnpaid": {
+    "description": "Mark as unpaid action"
+  },
+  "markAsUnpaidSubtitle": "Change payment status of this statement",
+  "@markAsUnpaidSubtitle": {
+    "description": "Mark as unpaid action subtitle"
+  },
+  "statementMarkedAsUnpaid": "Statement marked as unpaid",
+  "@statementMarkedAsUnpaid": {
+    "description": "Statement marked as unpaid success message"
+  },
+  "errorMarkingStatement": "Error occurred while marking statement",
+  "@errorMarkingStatement": {
+    "description": "Error marking statement message"
+  },
+  "errorOccurred": "An error occurred",
+  "@errorOccurred": {
+    "description": "Generic error message"
+  },
+  "pdfExportComingSoon": "PDF export feature coming soon",
+  "@pdfExportComingSoon": {
+    "description": "PDF export coming soon message"
+  },
+  "shareFeatureComingSoon": "Share feature coming soon",
+  "@shareFeatureComingSoon": {
+    "description": "Share feature coming soon message"
+  },
+  "noStatementsYet": "No statements yet",
+  "@noStatementsYet": {
+    "description": "No statements yet message"
+  },
+  "statementsWillAppearAfterUsage": "Statements will appear here after card usage",
+  "@statementsWillAppearAfterUsage": {
+    "description": "Statements will appear after card usage message"
+  },
+  "installment": "Installment",
+  "@installment": {
+    "description": "Installment word"
+  },
+  "installmentCount": "{count} Installments",
+  "@installmentCount": {
+    "description": "Installment count format",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "installmentInfo": "{current}/{total} Installments",
+  "@installmentInfo": {
+    "description": "Installment info format",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "limitManagement": "Limit Management",
+  "@limitManagement": {
+    "description": "Limit management page title"
+  },
+  "back": "Back",
+  "@back": {
+    "description": "Back button tooltip"
+  },
+  "pleaseEnterCategoryAndLimit": "Please enter category name and set limit",
+  "@pleaseEnterCategoryAndLimit": {
+    "description": "Error message when category or limit is missing"
+  },
+  "enterValidLimit": "Enter a valid limit",
+  "@enterValidLimit": {
+    "description": "Error message for invalid limit"
+  },
+  "limitSavedSuccessfully": "Limit saved successfully",
+  "@limitSavedSuccessfully": {
+    "description": "Success message when limit is saved"
+  },
+  "noLimitsSetYet": "No limits set yet",
+  "@noLimitsSetYet": {
+    "description": "Empty state message when no limits are set"
+  },
+  "setMonthlySpendingLimits": "Set monthly spending limits for categories\nto control your budget",
+  "@setMonthlySpendingLimits": {
+    "description": "Empty state description for setting limits"
+  },
+  "monthlyLimit": "Monthly Limit:",
+  "@monthlyLimit": {
+    "description": "Monthly limit label"
+  },
+  "exceeded": "Exceeded",
+  "@exceeded": {
+    "description": "Exceeded status badge"
+  },
+  "limitExceeded": "Limit Exceeded!",
+  "@limitExceeded": {
+    "description": "Limit exceeded message"
+  },
+  "remaining": "Remaining:",
+  "@remaining": {
+    "description": "Remaining amount label"
+  },
+  "spent": "spent",
+  "@spent": {
+    "description": "Spent percentage suffix"
+  },
+  "spentAmount": "Spent:",
+  "@spentAmount": {
+    "description": "Spent amount label"
+  },
+  "perMonth": "/ month",
+  "@perMonth": {
+    "description": "Per month suffix"
+  },
+  "limitAmountHint": "2,000",
+  "@limitAmountHint": {
+    "description": "Hint text for limit amount input"
+  },
+  "addNewLimit": "Add New Limit",
+  "@addNewLimit": {
+    "description": "Add new limit bottom sheet title"
+  },
+  "selectCategory": "Select Category",
+  "@selectCategory": {
+    "description": "Select category label"
+  },
+  "monthlyLimitLabel": "Monthly Limit",
+  "@monthlyLimitLabel": {
+    "description": "Monthly limit label"
+  },
+  "limitAmountPlaceholder": "0.00",
+  "@limitAmountPlaceholder": {
+    "description": "Placeholder for limit amount input"
+  },
+  "saveLimit": "Save Limit",
+  "@saveLimit": {
+    "description": "Save limit button text"
+  },
+  "limit": "Limit",
+  "@limit": {
+    "description": "Limit label"
   }
 } 

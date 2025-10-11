@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 import '../../../core/constants/app_constants.dart';
 
 class CreditCardModel {
@@ -16,10 +15,11 @@ class CreditCardModel {
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
-  
+
   // Computed properties
   double get currentBalance => totalDebt;
-  DateTime get paymentDate => DateTime(DateTime.now().year, DateTime.now().month, dueDate);
+  DateTime get paymentDate =>
+      DateTime(DateTime.now().year, DateTime.now().month, dueDate);
 
   CreditCardModel({
     required this.id,
@@ -39,6 +39,10 @@ class CreditCardModel {
 
   // Banka adını al
   String get bankName => AppConstants.getBankName(bankCode);
+
+  // Localized banka adını al
+  String getLocalizedBankName(dynamic l10n) =>
+      AppConstants.getLocalizedBankName(bankCode, l10n);
 
   // Banka rengini al
   Color get bankColor => AppConstants.getBankAccentColor(bankCode);
@@ -60,7 +64,7 @@ class CreditCardModel {
     final now = DateTime.now();
     var statementMonth = now.month;
     var statementYear = now.year;
-    
+
     // Eğer bu ayın ekstre günü geçtiyse, gelecek aya geç
     if (now.day > statementDate) {
       statementMonth++;
@@ -69,7 +73,7 @@ class CreditCardModel {
         statementYear++;
       }
     }
-    
+
     return DateTime(statementYear, statementMonth, statementDate);
   }
 
@@ -78,36 +82,48 @@ class CreditCardModel {
     final now = DateTime.now();
     final currentMonth = now.month;
     final currentYear = now.year;
-    
+
     // Bu ayın ekstre tarihini hesapla
-    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDate);
-    
+    DateTime currentStatementDate = DateTime(
+      currentYear,
+      currentMonth,
+      statementDate,
+    );
+
     // Bu ayın son ödeme tarihini hesapla
-    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    DateTime currentDueDate = currentStatementDate.add(
+      const Duration(days: 10),
+    );
     // İlk hafta içi günü bul
-    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+    while (currentDueDate.weekday > 5) {
+      // 6=Cumartesi, 7=Pazar
       currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
-    
+
     // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini döndür
     if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
       return currentDueDate;
     }
-    
+
     // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
     DateTime nextStatementDate;
     if (currentMonth == 12) {
       nextStatementDate = DateTime(currentYear + 1, 1, statementDate);
     } else {
-      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDate);
+      nextStatementDate = DateTime(
+        currentYear,
+        currentMonth + 1,
+        statementDate,
+      );
     }
-    
+
     // Gelecek ayın son ödeme tarihini hesapla
     DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
-    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+    while (nextDueDate.weekday > 5) {
+      // 6=Cumartesi, 7=Pazar
       nextDueDate = nextDueDate.add(const Duration(days: 1));
     }
-    
+
     return nextDueDate;
   }
 
@@ -124,7 +140,7 @@ class CreditCardModel {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       bankCode: json['bank_code'] as String,
-      cardName: json['card_name'] as String? ?? 'Kredi Kartı',
+      cardName: json['card_name'] as String? ?? 'Credit Card',
       lastFourDigits: json['card_number_last_four'] as String,
       creditLimit: (json['credit_limit'] as num).toDouble(),
       availableLimit: (json['available_limit'] as num).toDouble(),
@@ -218,4 +234,4 @@ class CreditCardModel {
 
   @override
   int get hashCode => id.hashCode;
-} 
+}

@@ -191,7 +191,13 @@ class AppPageScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
-      body: content,
+      body: SafeArea(
+        top: false, // SliverAppBar kendi padding'ini yönetir
+        bottom: true,
+        left: false,
+        right: false,
+        child: content,
+      ),
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation ?? FloatingActionButtonLocation.endFloat,
     );

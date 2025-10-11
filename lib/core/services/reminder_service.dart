@@ -177,7 +177,7 @@ class ReminderService {
             final reminderData =
                 jsonDecode(reminderDataString) as Map<String, dynamic>;
 
-            if (reminderData != null && !reminderData['isShown']) {
+            if (!reminderData['isShown']) {
               final reminderDate = DateTime.parse(reminderData['reminderDate']);
               final dueDate = DateTime.parse(reminderData['dueDate']);
 
@@ -208,7 +208,7 @@ class ReminderService {
               }
             } else {
               debugPrint(
-                '🔔 Skipping reminder: isShown=${reminderData?['isShown']}, data exists=${reminderData != null}',
+                '🔔 Skipping reminder: isShown=${reminderData['isShown']}, data exists=${reminderData != null}',
               );
             }
           } catch (e) {

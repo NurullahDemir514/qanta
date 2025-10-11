@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:ui';
-import 'package:provider/provider.dart';
 import '../../../shared/models/stock_models.dart';
 import '../../../shared/utils/currency_utils.dart';
-import '../../../core/services/firebase_auth_service.dart';
-import '../screens/stock_transaction_form_screen.dart';
-import '../providers/stock_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import 'mini_chart_widget.dart';
 
@@ -15,7 +10,7 @@ class ExpandableStockCard extends StatefulWidget {
   final Stock stock;
   final StockPosition? position;
   final VoidCallback? onTap;
-  
+
   const ExpandableStockCard({
     super.key,
     required this.stock,
@@ -28,12 +23,11 @@ class ExpandableStockCard extends StatefulWidget {
 }
 
 class _ExpandableStockCardState extends State<ExpandableStockCard> {
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Material(
@@ -43,15 +37,9 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: isDark 
-                  ? [
-                      const Color(0xFF1C1C1E),
-                      const Color(0xFF2C2C2E),
-                    ]
-                  : [
-                      Colors.white,
-                      const Color(0xFFFAFAFA),
-                    ],
+              colors: isDark
+                  ? [const Color(0xFF1C1C1E), const Color(0xFF2C2C2E)]
+                  : [Colors.white, const Color(0xFFFAFAFA)],
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
@@ -60,7 +48,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
             ),
             boxShadow: [
               BoxShadow(
-                color: isDark 
+                color: isDark
                     ? Colors.black.withOpacity(0.3)
                     : Colors.black.withOpacity(0.06),
                 blurRadius: 8,
@@ -78,7 +66,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
     final position = widget.position;
     final isProfit = position != null && position.profitLoss > 0;
     final isLoss = position != null && position.profitLoss < 0;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -90,7 +78,11 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                 width: 4,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: isProfit ? Colors.green : isLoss ? Colors.red : Colors.grey,
+                  color: isProfit
+                      ? Colors.green
+                      : isLoss
+                      ? Colors.red
+                      : Colors.grey,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -113,15 +105,22 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                       builder: (context) {
                         final positionData = widget.position?.historicalData;
                         final stockData = widget.stock.historicalData;
-                        final hasData = positionData != null || stockData != null;
-                        
-                        
+                        final hasData =
+                            positionData != null || stockData != null;
+
                         if (hasData) {
+                          final chartData = positionData ?? stockData!;
+                          // 30 günlük veriye göre renklendirme: ilk değer vs son değer
+                          final isPositive =
+                              chartData.isNotEmpty &&
+                              chartData.length > 1 &&
+                              chartData.last >= chartData.first;
+
                           return MiniChartWidget(
-                            data: positionData ?? stockData!,
+                            data: chartData,
                             width: 70,
                             height: 10,
-                            isPositive: widget.stock.changePercent >= 0,
+                            isPositive: isPositive,
                             isDark: isDark,
                           );
                         } else {
@@ -129,7 +128,9 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                             width: 70,
                             height: 10,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[800] : Colors.grey[300],
+                              color: isDark
+                                  ? Colors.grey[800]
+                                  : Colors.grey[300],
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Center(
@@ -137,7 +138,9 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                                 'No data',
                                 style: TextStyle(
                                   fontSize: 6,
-                                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                  color: isDark
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600],
                                 ),
                               ),
                             ),
@@ -151,12 +154,19 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
               // Adet sayısı - Sağ üstte
               if (widget.position != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8F9FA),
+                    color: isDark
+                        ? const Color(0xFF2C2C2E)
+                        : const Color(0xFFF8F9FA),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF48484A) : const Color(0xFFE5E5EA),
+                      color: isDark
+                          ? const Color(0xFF48484A)
+                          : const Color(0xFFE5E5EA),
                       width: 1,
                     ),
                   ),
@@ -171,9 +181,9 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Ana bilgiler - 4'lü grid
           if (position != null)
             Row(
@@ -182,11 +192,12 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         l10n.cost,
                         style: GoogleFonts.inter(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: isDark ? Colors.white60 : Colors.grey[600],
                         ),
@@ -195,50 +206,60 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                       Text(
                         '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(widget.position!.averagePrice, isUSD: widget.stock.currency == 'USD')}',
                         style: GoogleFonts.inter(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: isDark ? Colors.white : Colors.black,
                         ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                
+
                 // 2. Güncel Fiyat
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         l10n.currentPrice,
                         style: GoogleFonts.inter(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: isDark ? Colors.white60 : Colors.grey[600],
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        widget.stock.currentPrice > 0.0 ? widget.stock.displayPrice : '₺0,00',
+                        widget.stock.currentPrice > 0.0
+                            ? widget.stock.displayPrice
+                            : '₺0,00',
                         style: GoogleFonts.inter(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: isDark ? Colors.white : Colors.black,
                         ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                
+
                 // 3. Mevcut Değer
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         l10n.currentValue,
                         style: GoogleFonts.inter(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: isDark ? Colors.white60 : Colors.grey[600],
                         ),
@@ -247,24 +268,28 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                       Text(
                         '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(widget.position!.currentValue, isUSD: widget.stock.currency == 'USD')}',
                         style: GoogleFonts.inter(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: isDark ? Colors.white : Colors.black,
                         ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                
+
                 // 4. Kar/Zarar
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         l10n.profitLoss,
                         style: GoogleFonts.inter(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: isDark ? Colors.white60 : Colors.grey[600],
                         ),
@@ -273,12 +298,17 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                       Text(
                         '${widget.position!.profitLoss >= 0 ? '+' : ''}${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(widget.position!.profitLoss, isUSD: widget.stock.currency == 'USD')}',
                         style: GoogleFonts.inter(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: isProfit ? Colors.green : isLoss ? Colors.red : Colors.grey,
-                        ).copyWith(
-                          fontFeatures: [FontFeature.superscripts()],
+                          color: isProfit
+                              ? const Color(0xFF4CAF50)
+                              : isLoss
+                              ? const Color(0xFFFF4C4C)
+                              : Colors.grey,
                         ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -290,28 +320,21 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
     );
   }
 
-
   Widget _buildPortfolioInfo(bool isDark, AppLocalizations l10n) {
     final position = widget.position!;
     final isProfit = position.profitLoss > 0;
     final isLoss = position.profitLoss < 0;
     final currentValue = position.totalQuantity * widget.stock.currentPrice;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isDark 
-              ? [
-                  const Color(0xFF1A1A1C),
-                  const Color(0xFF2A2A2C),
-                ]
-              : [
-                  Colors.white,
-                  const Color(0xFFFAFBFC),
-                ],
+          colors: isDark
+              ? [const Color(0xFF1A1A1C), const Color(0xFF2A2A2C)]
+              : [Colors.white, const Color(0xFFFAFBFC)],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
@@ -320,7 +343,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
         ),
         boxShadow: [
           BoxShadow(
-            color: isDark 
+            color: isDark
                 ? Colors.black.withOpacity(0.3)
                 : Colors.black.withOpacity(0.05),
             blurRadius: 12,
@@ -337,7 +360,11 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                 width: 4,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: isProfit ? Colors.green : isLoss ? Colors.red : Colors.grey,
+                  color: isProfit
+                      ? Colors.green
+                      : isLoss
+                      ? Colors.red
+                      : Colors.grey,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -369,20 +396,23 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
               ),
               // Kar/Zarar yüzdesi - Vurgulu
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: isProfit 
+                  color: isProfit
                       ? Colors.green.withOpacity(0.1)
-                      : isLoss 
-                          ? Colors.red.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.1),
+                      : isLoss
+                      ? Colors.red.withOpacity(0.1)
+                      : Colors.grey.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isProfit 
+                    color: isProfit
                         ? Colors.green.withOpacity(0.3)
-                        : isLoss 
-                            ? Colors.red.withOpacity(0.3)
-                            : Colors.grey.withOpacity(0.3),
+                        : isLoss
+                        ? Colors.red.withOpacity(0.3)
+                        : Colors.grey.withOpacity(0.3),
                     width: 1,
                   ),
                 ),
@@ -391,16 +421,20 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isProfit ? Colors.green : isLoss ? Colors.red : Colors.grey,
+                    color: isProfit
+                        ? Colors.green
+                        : isLoss
+                        ? Colors.red
+                        : Colors.grey,
                     letterSpacing: -0.2,
                   ),
                 ),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Ana değerler - 3'lü grid
           Row(
             children: [
@@ -408,7 +442,8 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
               Expanded(
                 child: _buildValueCard(
                   label: l10n.cost,
-                  value: '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.averagePrice, isUSD: widget.stock.currency == 'USD')}',
+                  value:
+                      '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.averagePrice, isUSD: widget.stock.currency == 'USD')}',
                   isDark: isDark,
                 ),
               ),
@@ -417,7 +452,8 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
               Expanded(
                 child: _buildValueCard(
                   label: 'Güncel Değer',
-                  value: '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(currentValue, isUSD: widget.stock.currency == 'USD')}',
+                  value:
+                      '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(currentValue, isUSD: widget.stock.currency == 'USD')}',
                   isDark: isDark,
                 ),
               ),
@@ -426,9 +462,14 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
               Expanded(
                 child: _buildValueCard(
                   label: 'Kar/Zarar',
-                  value: '${position.profitLoss >= 0 ? '+' : ''}${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.profitLoss, isUSD: widget.stock.currency == 'USD')}',
+                  value:
+                      '${position.profitLoss >= 0 ? '+' : ''}${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.profitLoss, isUSD: widget.stock.currency == 'USD')}',
                   isDark: isDark,
-                  valueColor: isProfit ? Colors.green : isLoss ? Colors.red : Colors.grey,
+                  valueColor: isProfit
+                      ? Colors.green
+                      : isLoss
+                      ? Colors.red
+                      : Colors.grey,
                 ),
               ),
             ],
@@ -437,7 +478,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
       ),
     );
   }
-  
+
   Widget _buildValueCard({
     required String label,
     required String value,
@@ -483,8 +524,6 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
       ),
     );
   }
-
-
 
   // Utility methods
   String _formatNumber(double number, {required bool isUSD}) {

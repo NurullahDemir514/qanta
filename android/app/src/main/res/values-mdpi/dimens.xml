@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Medium density screens (mdpi) -->
+    <dimen name="screen_density_factor">1.0</dimen>
+    <dimen name="text_scale_factor">1.0</dimen>
+    <dimen name="layout_margin_small">8dp</dimen>
+    <dimen name="layout_margin_normal">16dp</dimen>
+    <dimen name="layout_margin_large">24dp</dimen>
+</resources>

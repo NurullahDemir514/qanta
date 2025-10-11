@@ -4,7 +4,6 @@ import java.io.FileInputStream
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -23,7 +22,6 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
-    // --- SIGNING CONFIG ---
     val keystorePropertiesFile = rootProject.file("key.properties")
     val keystoreProperties = Properties()
     if (keystorePropertiesFile.exists()) {
@@ -40,14 +38,19 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.qanta"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        targetSdk = 35
+        versionCode = 8
+        versionName = "1.0.0"
+        multiDexEnabled = true
+        vectorDrawables.useSupportLibrary = true
+        
+        // Screen compatibility settings
+        resConfigs("tr", "en") // Only include Turkish and English resources
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -59,9 +62,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
         getByName("debug") {
             signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
     }
 }
@@ -72,4 +80,5 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("androidx.multidex:multidex:2.0.1")
 }

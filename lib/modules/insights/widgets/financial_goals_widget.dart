@@ -132,9 +132,9 @@ class _FinancialGoalsWidgetState extends State<FinancialGoalsWidget>
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Goals List
           if (widget.goals.isEmpty)
             _buildEmptyState()
@@ -147,11 +147,14 @@ class _FinancialGoalsWidgetState extends State<FinancialGoalsWidget>
                 child: AnimatedBuilder(
                   animation: _progressAnimations[index],
                   builder: (context, child) {
-                    return _buildGoalCard(goal, _progressAnimations[index].value);
+                    return _buildGoalCard(
+                      goal,
+                      _progressAnimations[index].value,
+                    );
                   },
                 ),
               );
-            }).toList(),
+            }),
         ],
       ),
     );
@@ -212,14 +215,22 @@ class _FinancialGoalsWidgetState extends State<FinancialGoalsWidget>
 
   Widget _buildGoalCard(FinancialGoal goal, double animationValue) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
-    final formatter = NumberFormat.currency(locale: currency.locale, symbol: currency.symbol);
-    final progress = goal.targetAmount > 0 ? goal.currentAmount / goal.targetAmount : 0.0;
+    final currency = Provider.of<ThemeProvider>(
+      context,
+      listen: false,
+    ).currency;
+    final formatter = NumberFormat.currency(
+      locale: currency.locale,
+      symbol: currency.symbol,
+    );
+    final progress = goal.targetAmount > 0
+        ? goal.currentAmount / goal.targetAmount
+        : 0.0;
     final animatedProgress = progress * animationValue;
-    
+
     final daysRemaining = goal.targetDate.difference(DateTime.now()).inDays;
     final isOverdue = daysRemaining < 0;
-    
+
     return GestureDetector(
       onTap: () => widget.onGoalTap?.call(goal),
       child: Container(
@@ -301,9 +312,9 @@ class _FinancialGoalsWidgetState extends State<FinancialGoalsWidget>
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Progress Bar
             Container(
               height: 6,
@@ -322,9 +333,9 @@ class _FinancialGoalsWidgetState extends State<FinancialGoalsWidget>
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Amount Info
             Row(
               children: [
@@ -345,7 +356,10 @@ class _FinancialGoalsWidgetState extends State<FinancialGoalsWidget>
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: goal.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -367,7 +381,11 @@ class _FinancialGoalsWidgetState extends State<FinancialGoalsWidget>
     );
   }
 
-  String _getGoalStatusText(FinancialGoal goal, double progress, bool isOverdue) {
+  String _getGoalStatusText(
+    FinancialGoal goal,
+    double progress,
+    bool isOverdue,
+  ) {
     if (progress >= 1.0) return 'Tamamlandı';
     if (isOverdue) return 'Gecikmiş';
     if (progress >= 0.8) return 'Neredeyse bitti';
@@ -435,4 +453,4 @@ enum GoalCategory {
   travel,
   education,
   other,
-} 
+}

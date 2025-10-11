@@ -6,33 +6,34 @@ import '../../shared/models/debit_card_model.dart';
 import '../../shared/models/cash_account.dart';
 import '../../shared/models/transaction_model.dart';
 import '../../shared/models/insufficient_funds_exception.dart';
-import '../../shared/widgets/insufficient_funds_dialog.dart';
 import '../services/credit_card_service.dart';
 import '../services/debit_card_service.dart';
 import '../services/cash_account_service.dart';
 import '../services/transaction_service.dart';
-import '../services/installment_service.dart';
-import '../services/firebase_auth_service.dart';
+import '../services/unified_cache_manager.dart';
+import '../services/cache_strategy_config.dart';
 import '../events/transaction_events.dart';
 import 'dart:async';
-import 'dart:developer';
 
 class UnifiedCardProvider extends ChangeNotifier {
   // Kart listeleri
   List<CreditCardModel> _creditCards = [];
   List<DebitCardModel> _debitCards = [];
   CashAccount? _cashAccount;
-  
+
   // İşlem listesi
   List<TransactionModel> _transactions = [];
-  
+
   // Loading states
   bool _isLoading = false;
   bool _isLoadingTransactions = false;
-  
+
   // Error states
   String? _error;
-  
+
+  // Unified Cache System
+  late UnifiedCacheManager _cacheManager;
+
   // Event subscription
   StreamSubscription<TransactionEvent>? _eventSubscription;
 
@@ -53,17 +54,25 @@ class UnifiedCardProvider extends ChangeNotifier {
   String? get error => _error;
 
   UnifiedCardProvider() {
+    _initializeCacheManager();
     _initializeEventListeners();
+  }
+
+  /// Initialize cache manager
+  Future<void> _initializeCacheManager() async {
+    _cacheManager = UnifiedCacheManager.instance;
+    await _cacheManager.initialize();
   }
 
   /// Event listener'ları başlat
   void _initializeEventListeners() {
-    _eventSubscription = transactionEvents.stream.listen(_handleTransactionEvent);
+    _eventSubscription = transactionEvents.stream.listen(
+      _handleTransactionEvent,
+    );
   }
 
   /// Transaction event'lerini handle et
   void _handleTransactionEvent(TransactionEvent event) {
-    
     switch (event.runtimeType) {
       case TransactionAdded:
         _handleTransactionAdded(event as TransactionAdded);
@@ -78,7 +87,9 @@ class UnifiedCardProvider extends ChangeNotifier {
         _handleBalanceUpdated(event as BalanceUpdated);
         break;
       case InstallmentTransactionAdded:
-        _handleInstallmentTransactionAdded(event as InstallmentTransactionAdded);
+        _handleInstallmentTransactionAdded(
+          event as InstallmentTransactionAdded,
+        );
         break;
     }
   }
@@ -87,28 +98,29 @@ class UnifiedCardProvider extends ChangeNotifier {
   void _handleTransactionAdded(TransactionAdded event) {
     // Transaction listesinin başına ekle
     _transactions.insert(0, event.transaction);
-    
+
     // Limit kontrolü (son 50 işlem)
     if (_transactions.length > 50) {
       _transactions = _transactions.take(50).toList();
     }
-    
+
     notifyListeners();
   }
 
   /// Transaction silme event'ini handle et
   void _handleTransactionDeleted(TransactionDeleted event) {
-    
     // Transaction'ı listeden kaldır
     _transactions.removeWhere((t) => t.id == event.transactionId);
-    
+
     // ✅ BalanceUpdated event'leri bakiyeleri güncelleyecek, refresh'e gerek yok
     notifyListeners();
   }
 
   /// Transaction güncelleme event'ini handle et
   void _handleTransactionUpdated(TransactionUpdated event) {
-    final index = _transactions.indexWhere((t) => t.id == event.newTransaction.id);
+    final index = _transactions.indexWhere(
+      (t) => t.id == event.newTransaction.id,
+    );
     if (index != -1) {
       _transactions[index] = event.newTransaction;
       notifyListeners();
@@ -117,7 +129,6 @@ class UnifiedCardProvider extends ChangeNotifier {
 
   /// Bakiye güncelleme event'ini handle et
   void _handleBalanceUpdated(BalanceUpdated event) {
-    
     switch (event.cardType) {
       case CardType.credit:
         _updateCreditCardBalance(event.cardId, event.changeAmount);
@@ -136,7 +147,7 @@ class UnifiedCardProvider extends ChangeNotifier {
   void _handleInstallmentTransactionAdded(InstallmentTransactionAdded event) {
     // İlk taksit otomatik ödenir, bu transaction'ı listeye ekle
     // Bu event'ten sonra TransactionAdded event'i de gelecek
-    
+
     // 🔥 YENİ: Taksitli işlem için bakiye güncellemesi
     // Toplam tutarı kredi kartı borcuna ekle (RPC zaten yapmış olabilir ama emin olmak için)
     _updateCreditCardBalance(event.creditCardId, event.totalAmount);
@@ -149,40 +160,48 @@ class UnifiedCardProvider extends ChangeNotifier {
     if (index != -1) {
       final currentCard = _creditCards[index];
       // Kredi kartı limit aşımına izin ver - sadece negatif borcu engelle
-      final newTotalDebt = (currentCard.totalDebt + changeAmount).clamp(0.0, double.infinity);
-      
+      final newTotalDebt = (currentCard.totalDebt + changeAmount).clamp(
+        0.0,
+        double.infinity,
+      );
+
       // Yeni kullanılabilir limiti hesapla
-      final newAvailableLimit = (currentCard.creditLimit - newTotalDebt).clamp(0.0, currentCard.creditLimit);
-      
+      final newAvailableLimit = (currentCard.creditLimit - newTotalDebt).clamp(
+        0.0,
+        currentCard.creditLimit,
+      );
+
       _creditCards[index] = currentCard.copyWith(
         totalDebt: newTotalDebt,
         availableLimit: newAvailableLimit,
       );
-      
-      
+
       // Limit aşımı uyarısı
-      if (newTotalDebt > currentCard.creditLimit) {
-      }
+      if (newTotalDebt > currentCard.creditLimit) {}
     }
   }
 
   void _updateDebitCardBalance(String cardId, double changeAmount) {
-    
     final index = _debitCards.indexWhere((card) => card.id == cardId);
     if (index != -1) {
       final currentCard = _debitCards[index];
-      
-      final newBalance = (currentCard.balance + changeAmount).clamp(0.0, double.infinity);
-      
+
+      final newBalance = (currentCard.balance + changeAmount).clamp(
+        0.0,
+        double.infinity,
+      );
+
       _debitCards[index] = currentCard.copyWith(balance: newBalance);
-    } else {
-    }
+    } else {}
   }
 
   void _updateCashAccountBalance(double changeAmount) {
     if (_cashAccount != null) {
       final currentBalance = _cashAccount!.balance;
-      final newBalance = (currentBalance + changeAmount).clamp(0.0, double.infinity);
+      final newBalance = (currentBalance + changeAmount).clamp(
+        0.0,
+        double.infinity,
+      );
       _cashAccount = _cashAccount!.copyWith(balance: newBalance);
     }
   }
@@ -190,7 +209,7 @@ class UnifiedCardProvider extends ChangeNotifier {
   // Tüm kartları birleşik liste olarak al
   List<Map<String, dynamic>> get allCards {
     final List<Map<String, dynamic>> cards = [];
-    
+
     // Kredi kartları
     for (final card in _creditCards) {
       cards.add({
@@ -209,7 +228,7 @@ class UnifiedCardProvider extends ChangeNotifier {
         'color': '#007AFF', // Kredi kartı için mavi
       });
     }
-    
+
     // Banka kartları
     for (final card in _debitCards) {
       cards.add({
@@ -226,7 +245,7 @@ class UnifiedCardProvider extends ChangeNotifier {
         'color': '#34C759', // Banka kartı için yeşil
       });
     }
-    
+
     // Nakit hesabı
     if (_cashAccount != null) {
       cards.add({
@@ -243,7 +262,7 @@ class UnifiedCardProvider extends ChangeNotifier {
         'color': '#FF9500', // Nakit için turuncu
       });
     }
-    
+
     return cards;
   }
 
@@ -251,31 +270,29 @@ class UnifiedCardProvider extends ChangeNotifier {
   Future<void> loadAllData() async {
     _setLoading(true);
     _setError(null);
-    
+
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       // ⚡ PHASE 1: Kritik veriler (kartlar) - Paralel yükleme
       final cardLoadingFutures = [
         loadCreditCards(),
-        loadDebitCards(), 
+        loadDebitCards(),
         loadCashAccount(),
       ];
-      
+
       // ⚡ PHASE 2: İşlemler - Kartlarla paralel başlat
-      final transactionFuture = loadRecentTransactions(limit: 20); // Daha az işlem
-      
+      final transactionFuture = loadRecentTransactions(
+        limit: 20,
+      ); // Daha az işlem
+
       // Tüm işlemleri paralel çalıştır
-      await Future.wait([
-        ...cardLoadingFutures,
-        transactionFuture,
-      ]);
-      
+      await Future.wait([...cardLoadingFutures, transactionFuture]);
+
       // Verileri cache'e kaydet
       await saveToCache();
-      
+
       stopwatch.stop();
-      
     } catch (e) {
       stopwatch.stop();
       _setError('Veriler yüklenirken hata oluştu: $e');
@@ -288,9 +305,9 @@ class UnifiedCardProvider extends ChangeNotifier {
   Future<void> loadEssentialData() async {
     _setLoading(true);
     _setError(null);
-    
+
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       // Sadece kartları yükle, işlemleri sonra lazy load et
       await Future.wait([
@@ -298,12 +315,11 @@ class UnifiedCardProvider extends ChangeNotifier {
         loadDebitCards(),
         loadCashAccount(),
       ]);
-      
+
       stopwatch.stop();
-      
+
       // İşlemleri arka planda yükle
       _loadTransactionsInBackground();
-      
     } catch (e) {
       stopwatch.stop();
       _setError('Temel veriler yüklenirken hata oluştu: $e');
@@ -316,8 +332,7 @@ class UnifiedCardProvider extends ChangeNotifier {
   Future<void> _loadTransactionsInBackground() async {
     try {
       await loadRecentTransactions(limit: 50);
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   // Kredi kartlarını yükle
@@ -356,9 +371,11 @@ class UnifiedCardProvider extends ChangeNotifier {
   // Son işlemleri yükle
   Future<void> loadRecentTransactions({int limit = 50}) async {
     _setLoadingTransactions(true);
-    
+
     try {
-      _transactions = await TransactionService.getUserTransactions(limit: limit);
+      _transactions = await TransactionService.getUserTransactions(
+        limit: limit,
+      );
       notifyListeners();
     } catch (e) {
       _setError('İşlemler yüklenirken hata oluştu: $e');
@@ -368,10 +385,15 @@ class UnifiedCardProvider extends ChangeNotifier {
   }
 
   // Belirli bir kartın işlemlerini yükle
-  Future<List<TransactionModel>> getCardTransactions(String cardId, CardType cardType) async {
+  Future<List<TransactionModel>> getCardTransactions(
+    String cardId,
+    CardType cardType,
+  ) async {
     try {
       // TODO: Implement with Firebase
-      debugPrint('TransactionService.getCardTransactions() - Firebase implementation needed');
+      debugPrint(
+        'TransactionService.getCardTransactions() - Firebase implementation needed',
+      );
       return <TransactionModel>[];
     } catch (e) {
       throw Exception('Kart işlemleri yüklenirken hata oluştu: $e');
@@ -436,12 +458,17 @@ class UnifiedCardProvider extends ChangeNotifier {
       TransactionModel? createdTransaction;
 
       // 🔄 ENTEGRASYON: Taksit kontrolü ile uygun servisi kullan
-      if (installmentCount > 1 && creditCardId != null && type == TransactionType.expense) {
+      if (installmentCount > 1 &&
+          creditCardId != null &&
+          type == TransactionType.expense) {
         // Yeni taksit sistemi kullan
         // TODO: Implement with Firebase
-        debugPrint('InstallmentService.createInstallmentTransaction() - Firebase implementation needed');
-        final installmentTransactionId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
-        
+        debugPrint(
+          'InstallmentService.createInstallmentTransaction() - Firebase implementation needed',
+        );
+        final installmentTransactionId =
+            'temp_${DateTime.now().millisecondsSinceEpoch}';
+
         // Taksitli işlem event'i emit et
         transactionEvents.emitInstallmentTransactionAdded(
           installmentTransactionId: installmentTransactionId,
@@ -450,26 +477,28 @@ class UnifiedCardProvider extends ChangeNotifier {
           installmentCount: installmentCount,
           description: description,
         );
-        
+
         // 🔥 YENİ: İlk taksit için normal transaction da oluştur
         // Bu sayede işlem listesinde hemen görünür
         final monthlyAmount = amount / installmentCount;
         // TODO: Implement with Firebase
-        debugPrint('TransactionService.createTransaction() - Firebase implementation needed');
-        final firstInstallmentTransaction = 'temp_${DateTime.now().millisecondsSinceEpoch}';
-        
-        
+        debugPrint(
+          'TransactionService.createTransaction() - Firebase implementation needed',
+        );
+        final firstInstallmentTransaction =
+            'temp_${DateTime.now().millisecondsSinceEpoch}';
       } else {
         // Mevcut sistem kullan
         // TODO: Implement with Firebase
-        debugPrint('TransactionService.createTransaction() - Firebase implementation needed');
+        debugPrint(
+          'TransactionService.createTransaction() - Firebase implementation needed',
+        );
         createdTransaction = null; // Placeholder
-        
+
         // ✅ Event emit etmeye gerek yok - TransactionService.createTransaction() zaten ediyor
       }
 
       // ✅ ARTIK loadAllData() çağırmıyoruz - event system otomatik günceller
-      
     } on InsufficientFundsException {
       // InsufficientFundsException'ı rethrow et ki UI katmanında dialog gösterilebilsin
       rethrow;
@@ -493,9 +522,11 @@ class UnifiedCardProvider extends ChangeNotifier {
   }) async {
     try {
       // TODO: Implement with Firebase
-      debugPrint('CreditCardService.addCreditCard() - Firebase implementation needed');
+      debugPrint(
+        'CreditCardService.addCreditCard() - Firebase implementation needed',
+      );
       // await CreditCardService.addCreditCard(...);
-      
+
       await loadCreditCards();
     } catch (e) {
       debugPrint('Kredi kartı eklenirken hata: $e');
@@ -512,9 +543,11 @@ class UnifiedCardProvider extends ChangeNotifier {
   }) async {
     try {
       // TODO: Implement with Firebase
-      debugPrint('DebitCardService.createDebitCard() - Firebase implementation needed');
+      debugPrint(
+        'DebitCardService.createDebitCard() - Firebase implementation needed',
+      );
       // await DebitCardService.createDebitCard(...);
-      
+
       await loadDebitCards();
     } catch (e) {
       debugPrint('Banka kartı eklenirken hata: $e');
@@ -530,9 +563,11 @@ class UnifiedCardProvider extends ChangeNotifier {
   }) async {
     try {
       // TODO: Implement with Firebase
-      debugPrint('CashAccountService.createCashAccount() - Firebase implementation needed');
+      debugPrint(
+        'CashAccountService.createCashAccount() - Firebase implementation needed',
+      );
       // await CashAccountService.createCashAccount(...);
-      
+
       await loadCashAccount();
     } catch (e) {
       throw Exception('Nakit hesabı oluşturulurken hata oluştu: $e');
@@ -567,10 +602,9 @@ class UnifiedCardProvider extends ChangeNotifier {
     try {
       // Silme işlemini gerçekleştir - TransactionService zaten event emit eder
       await TransactionService.deleteTransaction(transactionId);
-      
+
       // ✅ Event emit etmeye gerek yok - TransactionService.deleteTransaction() zaten ediyor
       // ✅ loadAllData() çağırmıyoruz - event system otomatik günceller
-      
     } catch (e) {
       throw Exception('İşlem silinirken hata oluştu: $e');
     }
@@ -583,7 +617,9 @@ class UnifiedCardProvider extends ChangeNotifier {
   }) async {
     try {
       // TODO: Implement with Firebase
-      debugPrint('TransactionService.getTransactionStats() - Firebase implementation needed');
+      debugPrint(
+        'TransactionService.getTransactionStats() - Firebase implementation needed',
+      );
       return <String, double>{};
     } catch (e) {
       throw Exception('İstatistikler alınırken hata oluştu: $e');
@@ -597,7 +633,9 @@ class UnifiedCardProvider extends ChangeNotifier {
   }) async {
     try {
       // TODO: Implement with Firebase
-      debugPrint('TransactionService.getCategoryExpenses() - Firebase implementation needed');
+      debugPrint(
+        'TransactionService.getCategoryExpenses() - Firebase implementation needed',
+      );
       return <String, double>{};
     } catch (e) {
       debugPrint('Kategori harcamaları alınırken hata: $e');
@@ -608,33 +646,30 @@ class UnifiedCardProvider extends ChangeNotifier {
   // Son işlemleri getir
   Future<List<TransactionModel>> getRecentTransactions({int limit = 10}) async {
     try {
-      return await TransactionService.getUserTransactions(
-        limit: limit,
-      );
+      return await TransactionService.getUserTransactions(limit: limit);
     } catch (e) {
       throw Exception('Son işlemler alınırken hata oluştu: $e');
     }
   }
 
-  
   Future<List<dynamic>> getAllCards() async {
     final List<dynamic> cards = [];
-    
+
     // Kredi kartları
     for (final card in _creditCards) {
       cards.add(card);
     }
-    
+
     // Banka kartları
     for (final card in _debitCards) {
       cards.add(card);
     }
-    
+
     // Nakit hesabı
     if (_cashAccount != null) {
       cards.add(_cashAccount!);
     }
-    
+
     return cards;
   }
 
@@ -687,22 +722,22 @@ class UnifiedCardProvider extends ChangeNotifier {
   // Toplam bakiye hesapla
   double get totalBalance {
     double total = 0.0;
-    
+
     // Banka kartları bakiyesi (pozitif)
     for (final card in _debitCards) {
       total += card.balance;
     }
-    
+
     // Nakit hesabı bakiyesi (pozitif)
     if (_cashAccount != null) {
       total += _cashAccount!.balance;
     }
-    
+
     // Kredi kartları borcu (negatif)
     for (final card in _creditCards) {
       total -= card.totalDebt;
     }
-    
+
     return total;
   }
 
@@ -711,12 +746,14 @@ class UnifiedCardProvider extends ChangeNotifier {
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
     final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-    
+
     return _transactions
-        .where((transaction) => 
-            transaction.type == TransactionType.income &&
-            transaction.transactionDate.isAfter(startOfMonth) &&
-            transaction.transactionDate.isBefore(endOfMonth))
+        .where(
+          (transaction) =>
+              transaction.type == TransactionType.income &&
+              transaction.transactionDate.isAfter(startOfMonth) &&
+              transaction.transactionDate.isBefore(endOfMonth),
+        )
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
   }
 
@@ -725,12 +762,14 @@ class UnifiedCardProvider extends ChangeNotifier {
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
     final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-    
+
     return _transactions
-        .where((transaction) => 
-            transaction.type == TransactionType.expense &&
-            transaction.transactionDate.isAfter(startOfMonth) &&
-            transaction.transactionDate.isBefore(endOfMonth))
+        .where(
+          (transaction) =>
+              transaction.type == TransactionType.expense &&
+              transaction.transactionDate.isAfter(startOfMonth) &&
+              transaction.transactionDate.isBefore(endOfMonth),
+        )
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
   }
 
@@ -740,32 +779,36 @@ class UnifiedCardProvider extends ChangeNotifier {
     final thisMonthStart = DateTime(now.year, now.month, 1);
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
     final lastMonthEnd = DateTime(now.year, now.month, 0, 23, 59, 59);
-    
+
     // Bu ay net değişim (gelir - gider)
     final thisMonthNet = thisMonthIncome - thisMonthExpense;
-    
+
     // Geçen ay net değişim
     final lastMonthIncome = _transactions
-        .where((transaction) => 
-            transaction.type == TransactionType.income &&
-            transaction.transactionDate.isAfter(lastMonthStart) &&
-            transaction.transactionDate.isBefore(lastMonthEnd))
+        .where(
+          (transaction) =>
+              transaction.type == TransactionType.income &&
+              transaction.transactionDate.isAfter(lastMonthStart) &&
+              transaction.transactionDate.isBefore(lastMonthEnd),
+        )
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
-    
+
     final lastMonthExpense = _transactions
-        .where((transaction) => 
-            transaction.type == TransactionType.expense &&
-            transaction.transactionDate.isAfter(lastMonthStart) &&
-            transaction.transactionDate.isBefore(lastMonthEnd))
+        .where(
+          (transaction) =>
+              transaction.type == TransactionType.expense &&
+              transaction.transactionDate.isAfter(lastMonthStart) &&
+              transaction.transactionDate.isBefore(lastMonthEnd),
+        )
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
-    
+
     final lastMonthNet = lastMonthIncome - lastMonthExpense;
-    
+
     // Yüzde hesapla
     if (lastMonthNet == 0) {
       return thisMonthNet > 0 ? 100.0 : 0.0;
     }
-    
+
     return ((thisMonthNet - lastMonthNet) / lastMonthNet.abs()) * 100;
   }
 
@@ -776,116 +819,125 @@ class UnifiedCardProvider extends ChangeNotifier {
   }
 
   // 💾 CACHE METHODS
-  
-  // Cache'den verileri yükle (instant loading)
+
+  // Cache'den verileri yükle (unified cache system)
   Future<bool> loadFromCache() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastUpdate = prefs.getString(_cacheKeyLastUpdate);
+      // Credit cards cache
+      final cachedCreditCards = await _cacheManager.get<List<CreditCardModel>>(
+        CacheStrategyConfig.getCacheKeyForType('credit_cards'),
+        type: CacheStrategyConfig.getPolicy('credit_cards').type,
+      );
       
-      if (lastUpdate == null) {
-        return false;
+      if (cachedCreditCards != null) {
+        _creditCards = cachedCreditCards;
       }
+
+      // Debit cards cache
+      final cachedDebitCards = await _cacheManager.get<List<DebitCardModel>>(
+        CacheStrategyConfig.getCacheKeyForType('debit_cards'),
+        type: CacheStrategyConfig.getPolicy('debit_cards').type,
+      );
       
-      final cacheTime = DateTime.parse(lastUpdate);
-      final now = DateTime.now();
-      final cacheAge = now.difference(cacheTime).inMinutes;
-      
-      // Cache 30 dakikadan eskiyse kullanma
-      if (cacheAge > 30) {
-        return false;
+      if (cachedDebitCards != null) {
+        _debitCards = cachedDebitCards;
       }
+
+      // Cash account cache
+      final cachedCashAccount = await _cacheManager.get<CashAccount>(
+        CacheStrategyConfig.getCacheKeyForType('cash_account'),
+        type: CacheStrategyConfig.getPolicy('cash_account').type,
+      );
       
-      
-      // Credit cards
-      final creditCardsJson = prefs.getString(_cacheKeyCreditCards);
-      if (creditCardsJson != null) {
-        final List<dynamic> creditCardsList = json.decode(creditCardsJson);
-        _creditCards = creditCardsList.map((json) => CreditCardModel.fromJson(json)).toList();
+      if (cachedCashAccount != null) {
+        _cashAccount = cachedCashAccount;
       }
+
+      // Transactions cache
+      final cachedTransactions = await _cacheManager.get<List<TransactionModel>>(
+        CacheStrategyConfig.getCacheKeyForType('card_transactions'),
+        type: CacheStrategyConfig.getPolicy('card_transactions').type,
+      );
       
-      // Debit cards
-      final debitCardsJson = prefs.getString(_cacheKeyDebitCards);
-      if (debitCardsJson != null) {
-        final List<dynamic> debitCardsList = json.decode(debitCardsJson);
-        _debitCards = debitCardsList.map((json) => DebitCardModel.fromJson(json)).toList();
+      if (cachedTransactions != null) {
+        _transactions = cachedTransactions;
       }
-      
-      // Cash account
-      final cashAccountJson = prefs.getString(_cacheKeyCashAccount);
-      if (cashAccountJson != null) {
-        _cashAccount = CashAccount.fromJson(json.decode(cashAccountJson));
-      }
-      
-      // Transactions
-      final transactionsJson = prefs.getString(_cacheKeyTransactions);
-      if (transactionsJson != null) {
-        final List<dynamic> transactionsList = json.decode(transactionsJson);
-        _transactions = transactionsList.map((json) => TransactionModel.fromJson(json)).toList();
-      }
-      
+
       notifyListeners();
       return true;
-      
     } catch (e) {
+      debugPrint('❌ Error loading from unified cache: $e');
       return false;
     }
   }
-  
-  // Verileri cache'e kaydet
+
+  // Verileri unified cache'e kaydet
   Future<void> saveToCache() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      
-      // Credit cards
-      final creditCardsJson = json.encode(_creditCards.map((card) => card.toJson()).toList());
-      await prefs.setString(_cacheKeyCreditCards, creditCardsJson);
-      
-      // Debit cards
-      final debitCardsJson = json.encode(_debitCards.map((card) => card.toJson()).toList());
-      await prefs.setString(_cacheKeyDebitCards, debitCardsJson);
-      
-      // Cash account
+      // Credit cards cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('credit_cards'),
+        _creditCards,
+        ttl: CacheStrategyConfig.getPolicy('credit_cards').ttl,
+        type: CacheStrategyConfig.getPolicy('credit_cards').type,
+        compress: CacheStrategyConfig.getPolicy('credit_cards').compress,
+      );
+
+      // Debit cards cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('debit_cards'),
+        _debitCards,
+        ttl: CacheStrategyConfig.getPolicy('debit_cards').ttl,
+        type: CacheStrategyConfig.getPolicy('debit_cards').type,
+        compress: CacheStrategyConfig.getPolicy('debit_cards').compress,
+      );
+
+      // Cash account cache
       if (_cashAccount != null) {
-        final cashAccountJson = json.encode(_cashAccount!.toJson());
-        await prefs.setString(_cacheKeyCashAccount, cashAccountJson);
+        await _cacheManager.set(
+          CacheStrategyConfig.getCacheKeyForType('cash_account'),
+          _cashAccount!,
+          ttl: CacheStrategyConfig.getPolicy('cash_account').ttl,
+          type: CacheStrategyConfig.getPolicy('cash_account').type,
+          compress: CacheStrategyConfig.getPolicy('cash_account').compress,
+        );
       }
-      
-      // Transactions
-      final transactionsJson = json.encode(_transactions.map((transaction) => transaction.toJson()).toList());
-      await prefs.setString(_cacheKeyTransactions, transactionsJson);
-      
-      // Last update time
-      await prefs.setString(_cacheKeyLastUpdate, DateTime.now().toIso8601String());
-      
-      
+
+      // Transactions cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('card_transactions'),
+        _transactions,
+        ttl: CacheStrategyConfig.getPolicy('card_transactions').ttl,
+        type: CacheStrategyConfig.getPolicy('card_transactions').type,
+        compress: CacheStrategyConfig.getPolicy('card_transactions').compress,
+      );
+
+      debugPrint('✅ Card data saved to unified cache system');
     } catch (e) {
+      debugPrint('❌ Error saving card data to cache: $e');
     }
   }
-  
+
   // Cache'i temizle
   Future<void> clearCache() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_cacheKeyCreditCards);
-      await prefs.remove(_cacheKeyDebitCards);
-      await prefs.remove(_cacheKeyCashAccount);
-      await prefs.remove(_cacheKeyTransactions);
-      await prefs.remove(_cacheKeyLastUpdate);
+      await _cacheManager.clearAll();
+      debugPrint('✅ Card cache cleared successfully');
     } catch (e) {
+      debugPrint('❌ Error clearing card cache: $e');
     }
   }
 
   // Hızlı başlangıç: Cache + Background refresh
   Future<void> loadWithCacheStrategy() async {
     final stopwatch = Stopwatch()..start();
-    
+
     // 1. Önce cache'den yükle (instant)
     final cacheLoaded = await loadFromCache();
-    
+
     if (cacheLoaded) {
       stopwatch.stop();
-      
+
       // 2. Arka planda fresh data yükle
       _refreshDataInBackground();
     } else {
@@ -893,24 +945,21 @@ class UnifiedCardProvider extends ChangeNotifier {
       await loadEssentialData();
     }
   }
-  
+
   // Arka planda fresh data yükle
   Future<void> _refreshDataInBackground() async {
     try {
-      
       // Fresh data yükle
       await Future.wait([
         loadCreditCards(),
         loadDebitCards(),
         loadCashAccount(),
       ]);
-      
+
       await loadRecentTransactions(limit: 50);
-      
+
       // Yeni veriyi cache'e kaydet
       await saveToCache();
-      
-    } catch (e) {
-    }
+    } catch (e) {}
   }
-} 
+}

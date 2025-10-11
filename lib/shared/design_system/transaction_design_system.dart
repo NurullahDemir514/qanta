@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import '../services/category_icon_service.dart';
 import '../utils/currency_utils.dart';
 import '../../l10n/app_localizations.dart';
-import '../../core/theme/theme_provider.dart';
 import '../models/transaction_model_v2.dart';
 
 /// **QANTA Transaction Design System**
-/// 
+///
 /// Bu dosya tüm transaction UI bileşenlerinin tasarım standartlarını,
 /// renklerini, boyutlarını ve davranışlarını tek bir yerden yönetir.
-/// 
+///
 /// **Kullanım:**
 /// ```dart
 /// import '../shared/design_system/transaction_design_system.dart';
-/// 
+///
 /// // Transaction item kullanımı
 /// TransactionDesignSystem.buildTransactionItem(
 ///   title: 'Kahve',
@@ -29,12 +27,12 @@ import '../models/transaction_model_v2.dart';
 
 class TransactionDesignSystem {
   // ==================== DESIGN TOKENS ====================
-  
+
   /// Transaction Icon Specifications
   static const double iconContainerSize = 40.0;
   static const double iconSize = 20.0;
   static const double iconBorderRadius = 10.0;
-  
+
   /// Typography Specifications
   static const double titleFontSize = 15.0;
   static const FontWeight titleFontWeight = FontWeight.w500;
@@ -42,40 +40,45 @@ class TransactionDesignSystem {
   static const FontWeight subtitleFontWeight = FontWeight.w400;
   static const double amountFontSize = 15.0;
   static const FontWeight amountFontWeight = FontWeight.w600;
-  
+
   /// Spacing Specifications
-  static const double horizontalPadding = 16.0;
-  static const double verticalPadding = 12.0;
+  static const double horizontalPadding = 8.0;
+  static const double verticalPadding = 8.0;
   static const double iconContentSpacing = 12.0;
   static const double titleSubtitleSpacing = 2.0;
-  
+
   /// Container Specifications
   static const double containerBorderRadius = 12.0;
   static const double containerBorderWidth = 0.5;
-  
+
   /// Animation Specifications
   static const Duration tapAnimationDuration = Duration(milliseconds: 150);
-  static const Duration longPressAnimationDuration = Duration(milliseconds: 200);
-  
+  static const Duration longPressAnimationDuration = Duration(
+    milliseconds: 200,
+  );
+
   // ==================== NUMBER FORMATTING ====================
-  
+
   /// Turkish number formatter with thousand separators
-  static final NumberFormat _turkishNumberFormat = NumberFormat('#,##0.00', 'tr_TR');
-  
+  static final NumberFormat _turkishNumberFormat = NumberFormat(
+    '#,##0.00',
+    'tr_TR',
+  );
+
   /// Format number with Turkish thousand separators (dots)
   static String formatNumber(double number) {
     return _turkishNumberFormat.format(number).replaceAll(',', '.');
   }
-  
+
   /// Shorten long account names for better display
   static String shortenAccountName(String accountName, {int maxLength = 15}) {
     if (accountName.length <= maxLength) {
       return accountName;
     }
-    
+
     // Clean up common patterns like "Bank - Bank Card Name"
     String cleanedName = accountName;
-    
+
     // Remove patterns like "Akbank - Akbank Kredi Kartı" -> "Akbank Kredi Kartı"
     final duplicatePattern = RegExp(r'^([^-]+)\s*-\s*\1\s*(.*)$');
     final duplicateMatch = duplicatePattern.firstMatch(cleanedName);
@@ -84,7 +87,7 @@ class TransactionDesignSystem {
       final cardName = duplicateMatch.group(2)!.trim();
       cleanedName = '$bankName $cardName';
     }
-    
+
     // Common bank name replacements for shorter display
     final bankReplacements = {
       'Türkiye İş Bankası': 'İş Bankası',
@@ -101,7 +104,7 @@ class TransactionDesignSystem {
       'Türk Ekonomi Bankası': 'TEB',
       'Şekerbank': 'Şekerbank',
     };
-    
+
     // Try bank name replacements first
     for (final entry in bankReplacements.entries) {
       if (cleanedName.contains(entry.key)) {
@@ -111,29 +114,33 @@ class TransactionDesignSystem {
         }
       }
     }
-    
+
     // If still too long, truncate with ellipsis
     return '${cleanedName.substring(0, maxLength - 1)}…';
   }
-  
+
   /// Format transfer subtitle with shortened account names
-  static String formatTransferSubtitle(String sourceAccount, String targetAccount, {int maxLength = 12}) {
+  static String formatTransferSubtitle(
+    String sourceAccount,
+    String targetAccount, {
+    int maxLength = 12,
+  }) {
     final shortSource = shortenAccountName(sourceAccount, maxLength: maxLength);
     final shortTarget = shortenAccountName(targetAccount, maxLength: maxLength);
     return '$shortSource → $shortTarget';
   }
-  
+
   /// **CENTRALIZED CARD NAME LOGIC**
-  /// 
+  ///
   /// This method centralizes the card name formatting logic used across
   /// all transaction display components (CardTransactionSection, RecentTransactionsSection, TransactionsScreen).
-  /// 
+  ///
   /// Parameters:
   /// - [cardName]: The base card name (from widget.cardName or transaction.sourceAccountName)
   /// - [transactionType]: The type of transaction (expense, income, transfer)
   /// - [sourceAccountName]: Source account name for transfers
   /// - [targetAccountName]: Target account name for transfers
-  /// 
+  ///
   /// Returns formatted card name based on transaction type.
   static String formatCardName({
     required String cardName,
@@ -143,45 +150,54 @@ class TransactionDesignSystem {
     BuildContext? context,
   }) {
     if (transactionType == 'transfer') {
-      final sourceAccount = sourceAccountName ?? (context != null ? AppLocalizations.of(context)?.account : null) ?? 'Account';
-      final targetAccount = targetAccountName ?? (context != null ? AppLocalizations.of(context)?.account : null) ?? 'Account';
+      final sourceAccount =
+          sourceAccountName ??
+          (context != null ? AppLocalizations.of(context)?.account : null) ??
+          'Account';
+      final targetAccount =
+          targetAccountName ??
+          (context != null ? AppLocalizations.of(context)?.account : null) ??
+          'Account';
       return formatTransferSubtitle(sourceAccount, targetAccount);
     } else {
       // Shorten regular card names
       return shortenAccountName(cardName);
     }
   }
-  
+
   // ==================== COLOR SYSTEM ====================
-  
+
   /// **CENTRALIZED COLOR SYSTEM**
-  /// 
+  ///
   /// All colors now managed through CategoryIconService for consistency.
   /// This eliminates duplicate color definitions and ensures uniform
   /// color usage across the entire application.
-  
+
   /// Transaction Type Colors - delegated to CategoryIconService
-  static Color get incomeColor => CategoryIconService.getColorFromMap('income_default');
-  static Color get expenseColor => CategoryIconService.getColorFromMap('expense_default');
-  static Color get transferColor => CategoryIconService.getColorFromMap('transfer_default');
-  
+  static Color get incomeColor =>
+      CategoryIconService.getColorFromMap('income_default');
+  static Color get expenseColor =>
+      CategoryIconService.getColorFromMap('expense_default');
+  static Color get transferColor =>
+      CategoryIconService.getColorFromMap('transfer_default');
+
   /// Theme Colors
   static Color getContainerColor(bool isDark) {
     return isDark ? const Color(0xFF1C1C1E) : Colors.white;
   }
-  
+
   static Color getBorderColor(bool isDark) {
     return isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA);
   }
-  
+
   static Color getTitleColor(bool isDark) {
     return isDark ? Colors.white : Colors.black;
   }
-  
+
   static Color getSubtitleColor(bool isDark) {
     return isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70);
   }
-  
+
   static Color getAmountColor(TransactionType type, bool isDark) {
     switch (type) {
       case TransactionType.income:
@@ -192,9 +208,9 @@ class TransactionDesignSystem {
         return transferColor;
     }
   }
-  
+
   // ==================== ICON SYSTEM ====================
-  
+
   /// Get transaction type icon
   static IconData getTransactionTypeIcon(TransactionType type) {
     switch (type) {
@@ -206,17 +222,17 @@ class TransactionDesignSystem {
         return Icons.swap_horiz_rounded;
     }
   }
-  
+
   /// Get category icon from icon name - delegated to CategoryIconService
   static IconData getCategoryIcon(String iconName) {
     return CategoryIconService.getIcon(iconName);
   }
-  
+
   /// Get category color from hex string - delegated to CategoryIconService
   static Color getCategoryColor(String colorHex) {
     return CategoryIconService.getColor(colorHex);
   }
-  
+
   /// Get transaction icon and color using centralized system
   static TransactionIconData getTransactionIconData({
     required TransactionType type,
@@ -227,7 +243,7 @@ class TransactionDesignSystem {
   }) {
     IconData icon;
     Color iconColor;
-    
+
     // Prioritize direct IconData/Color parameters (new system)
     if (categoryIconData != null) {
       icon = categoryIconData;
@@ -242,14 +258,14 @@ class TransactionDesignSystem {
       icon = getTransactionTypeIcon(type);
       iconColor = _getDefaultColorForType(type);
     }
-    
+
     return TransactionIconData(
       icon: icon,
       iconColor: iconColor,
       backgroundColor: Colors.grey.withValues(alpha: 0.1),
     );
   }
-  
+
   static Color _getDefaultColorForType(TransactionType type) {
     switch (type) {
       case TransactionType.income:
@@ -260,14 +276,19 @@ class TransactionDesignSystem {
         return const Color(0xFF007AFF); // Mavi - Transfer
     }
   }
-  
+
   // ==================== TEXT FORMATTING ====================
-  
+
   /// Format transaction amount
-  static String formatAmount(double amount, TransactionType type, {String? currencySymbol}) {
+  static String formatAmount(
+    double amount,
+    TransactionType type, {
+    String? currencySymbol,
+  }) {
     final formattedAmount = formatNumber(amount.abs());
-    final symbol = currencySymbol ?? Currency.TRY.symbol; // Fallback to TRY symbol
-    
+    final symbol =
+        currencySymbol ?? Currency.TRY.symbol; // Fallback to TRY symbol
+
     switch (type) {
       case TransactionType.income:
         return '+$formattedAmount$symbol';
@@ -277,20 +298,23 @@ class TransactionDesignSystem {
         return '$formattedAmount$symbol';
     }
   }
-  
-  
+
   /// Add installment info to title
-  static String addInstallmentInfo(String title, int? currentInstallment, int? installmentCount) {
-    if (currentInstallment != null && installmentCount != null && installmentCount > 1) {
+  static String addInstallmentInfo(
+    String title,
+    int? currentInstallment,
+    int? installmentCount,
+  ) {
+    if (currentInstallment != null &&
+        installmentCount != null &&
+        installmentCount > 1) {
       return '$title ($currentInstallment/$installmentCount)';
     }
     return title;
   }
-  
-  
-  
+
   // ==================== MAIN COMPONENTS ====================
-  
+
   /// Build standard transaction item
   static Widget buildTransactionItem({
     required String title,
@@ -313,20 +337,20 @@ class TransactionDesignSystem {
   }) {
     IconData icon;
     Color iconColor;
-    
+
     if (categoryIconData != null) {
       icon = categoryIconData;
       iconColor = categoryColorData ?? _getDefaultColorForType(type);
     } else if (categoryIcon != null) {
       icon = getCategoryIcon(categoryIcon);
-      iconColor = categoryColor != null 
+      iconColor = categoryColor != null
           ? getCategoryColor(categoryColor)
           : _getDefaultColorForType(type);
     } else {
       icon = getTransactionTypeIcon(type);
       iconColor = _getDefaultColorForType(type);
     }
-    
+
     return TransactionItem(
       title: title,
       subtitle: subtitle,
@@ -346,7 +370,7 @@ class TransactionDesignSystem {
       isPaid: isPaid,
     );
   }
-  
+
   /// Build transaction list container
   static Widget buildTransactionList({
     required List<Widget> transactions,
@@ -358,30 +382,34 @@ class TransactionDesignSystem {
   }) {
     if (transactions.isEmpty) {
       return TransactionEmptyState(
-        title: emptyTitle ?? (context != null ? AppLocalizations.of(context)?.noTransactionsYet : null) ?? 'No transactions yet',
-        description: emptyDescription ?? (context != null ? AppLocalizations.of(context)?.addFirstTransaction : null) ?? 'Add your first transaction to get started',
+        title:
+            emptyTitle ??
+            (context != null
+                ? AppLocalizations.of(context)?.noTransactionsYet
+                : null) ??
+            'No transactions yet',
+        description:
+            emptyDescription ??
+            (context != null
+                ? AppLocalizations.of(context)?.addFirstTransaction
+                : null) ??
+            'Add your first transaction to get started',
         icon: emptyIcon ?? Icons.receipt_long_outlined,
         isDark: isDark,
       );
     }
-    
-    return TransactionListContainer(
-      transactions: transactions,
-      isDark: isDark,
-    );
+
+    return TransactionListContainer(transactions: transactions, isDark: isDark);
   }
-  
+
   /// Build loading skeleton
   static Widget buildLoadingSkeleton({
     required bool isDark,
     int itemCount = 3,
   }) {
-    return TransactionLoadingSkeleton(
-      isDark: isDark,
-      itemCount: itemCount,
-    );
+    return TransactionLoadingSkeleton(isDark: isDark, itemCount: itemCount);
   }
-  
+
   /// Build transaction item with specific icon override
   static Widget buildTransactionItemWithIcon({
     required String title,
@@ -406,7 +434,8 @@ class TransactionDesignSystem {
       time: time,
       icon: specificIcon ?? Icons.receipt_outlined,
       iconColor: specificIconColor ?? const Color(0xFF6B7280),
-      backgroundColor: specificBackgroundColor ?? Colors.grey.withValues(alpha: 0.1),
+      backgroundColor:
+          specificBackgroundColor ?? Colors.grey.withValues(alpha: 0.1),
       amountColor: specificAmountColor ?? getTitleColor(isDark),
       isDark: isDark,
       onTap: onTap,
@@ -421,6 +450,7 @@ class TransactionDesignSystem {
   static Widget buildTransactionItemFromV2({
     required dynamic transaction, // TransactionWithDetailsV2
     required bool isDark,
+    required BuildContext context,
     String? time,
     IconData? categoryIconData,
     Color? categoryColorData,
@@ -446,7 +476,8 @@ class TransactionDesignSystem {
         transactionType = TransactionType.transfer;
         break;
       case 'stock':
-        transactionType = TransactionType.income; // Stock transactions show as income for display
+        transactionType = TransactionType
+            .income; // Stock transactions show as income for display
         break;
       default:
         transactionType = TransactionType.expense;
@@ -461,16 +492,19 @@ class TransactionDesignSystem {
     // Handle installment transactions
     String displayTitle = transaction.displayTitle;
     String displaySubtitle = transaction.displaySubtitle;
-    
+
     // Check if this is a credit card installment transaction
     bool isCreditCardInstallment = false;
     if (isInstallment && totalInstallments != null) {
       // Add installment indicator to title
-      displayTitle = '${transaction.displayTitle} ($totalInstallments Taksit)';
+      displayTitle =
+          '${transaction.displayTitle} (${AppLocalizations.of(context)?.installmentCount(totalInstallments) ?? '$totalInstallments Taksit'})';
       isCreditCardInstallment = true;
     } else {
       // Check if transaction description contains installment pattern
-      final hasInstallmentPattern = RegExp(r'\(\d+ taksit\)').hasMatch(transaction.description ?? '');
+      final hasInstallmentPattern = RegExp(
+        r'\(\d+ taksit\)',
+      ).hasMatch(transaction.description ?? '');
       isCreditCardInstallment = hasInstallmentPattern;
     }
 
@@ -508,17 +542,13 @@ class TransactionDesignSystem {
 
 // ==================== DATA CLASSES ====================
 
-enum TransactionType {
-  income,
-  expense,
-  transfer,
-}
+enum TransactionType { income, expense, transfer }
 
 class TransactionIconData {
   final IconData icon;
   final Color iconColor;
   final Color backgroundColor;
-  
+
   const TransactionIconData({
     required this.icon,
     required this.iconColor,
@@ -571,8 +601,12 @@ class TransactionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        top: isFirst ? TransactionDesignSystem.verticalPadding + 4 : TransactionDesignSystem.verticalPadding,
-        bottom: isLast ? TransactionDesignSystem.verticalPadding + 4 : TransactionDesignSystem.verticalPadding,
+        top: isFirst
+            ? TransactionDesignSystem.verticalPadding + 4
+            : TransactionDesignSystem.verticalPadding,
+        bottom: isLast
+            ? TransactionDesignSystem.verticalPadding + 4
+            : TransactionDesignSystem.verticalPadding,
         left: TransactionDesignSystem.horizontalPadding,
         right: TransactionDesignSystem.horizontalPadding,
       ),
@@ -588,24 +622,26 @@ class TransactionItem extends StatelessWidget {
               height: TransactionDesignSystem.iconContainerSize,
               decoration: BoxDecoration(
                 color: Colors.grey.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(TransactionDesignSystem.iconBorderRadius),
+                borderRadius: BorderRadius.circular(
+                  TransactionDesignSystem.iconBorderRadius,
+                ),
               ),
               child: Stack(
                 children: [
                   // Main icon
                   Center(
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: TransactionDesignSystem.iconSize,
+                    child: Icon(
+                      icon,
+                      color: iconColor,
+                      size: TransactionDesignSystem.iconSize,
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             SizedBox(width: TransactionDesignSystem.iconContentSpacing),
-            
+
             // Content
             Expanded(
               child: Column(
@@ -622,7 +658,9 @@ class TransactionItem extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: TransactionDesignSystem.titleFontSize,
                             fontWeight: TransactionDesignSystem.titleFontWeight,
-                            color: TransactionDesignSystem.getTitleColor(isDark),
+                            color: TransactionDesignSystem.getTitleColor(
+                              isDark,
+                            ),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -632,17 +670,25 @@ class TransactionItem extends StatelessWidget {
                         SizedBox(width: 6),
                         // Taksitli chip
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.orange.shade800 : Colors.orange.shade100,
+                            color: isDark
+                                ? Colors.orange.shade800
+                                : Colors.orange.shade100,
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: isDark ? Colors.orange.shade600 : Colors.orange.shade300,
+                              color: isDark
+                                  ? Colors.orange.shade600
+                                  : Colors.orange.shade300,
                               width: 0.5,
                             ),
                           ),
                           child: Text(
-                            AppLocalizations.of(context)?.installment ?? 'Installment',
+                            AppLocalizations.of(context)?.installment ??
+                                'Installment',
                             style: GoogleFonts.inter(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
@@ -655,12 +701,19 @@ class TransactionItem extends StatelessWidget {
                         SizedBox(width: 6),
                         // Stock chip
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.blue.shade800 : Colors.blue.shade100,
+                            color: isDark
+                                ? Colors.blue.shade800
+                                : Colors.blue.shade100,
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: isDark ? Colors.blue.shade600 : Colors.blue.shade300,
+                              color: isDark
+                                  ? Colors.blue.shade600
+                                  : Colors.blue.shade300,
                               width: 0.5,
                             ),
                           ),
@@ -676,7 +729,9 @@ class TransactionItem extends StatelessWidget {
                       ],
                     ],
                   ),
-                  SizedBox(height: TransactionDesignSystem.titleSubtitleSpacing),
+                  SizedBox(
+                    height: TransactionDesignSystem.titleSubtitleSpacing,
+                  ),
                   Text(
                     time != null ? '$subtitle • $time' : subtitle,
                     style: GoogleFonts.inter(
@@ -690,7 +745,7 @@ class TransactionItem extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Amount
             Text(
               amount,
@@ -723,7 +778,9 @@ class TransactionListContainer extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: TransactionDesignSystem.getContainerColor(isDark),
-        borderRadius: BorderRadius.circular(TransactionDesignSystem.containerBorderRadius),
+        borderRadius: BorderRadius.circular(
+          TransactionDesignSystem.containerBorderRadius,
+        ),
         border: Border.all(
           color: TransactionDesignSystem.getBorderColor(isDark),
           width: TransactionDesignSystem.containerBorderWidth,
@@ -735,7 +792,12 @@ class TransactionListContainer extends StatelessWidget {
             transactions[i],
             if (i < transactions.length - 1)
               Padding(
-                padding: EdgeInsets.only(left: TransactionDesignSystem.horizontalPadding + TransactionDesignSystem.iconContainerSize + TransactionDesignSystem.iconContentSpacing),
+                padding: EdgeInsets.only(
+                  left:
+                      TransactionDesignSystem.horizontalPadding +
+                      TransactionDesignSystem.iconContainerSize +
+                      TransactionDesignSystem.iconContentSpacing,
+                ),
                 child: Container(
                   height: 0.5,
                   color: TransactionDesignSystem.getBorderColor(isDark),
@@ -776,7 +838,9 @@ class TransactionEmptyState extends StatelessWidget {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: TransactionDesignSystem.getSubtitleColor(isDark).withValues(alpha: 0.1),
+                color: TransactionDesignSystem.getSubtitleColor(
+                  isDark,
+                ).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -827,7 +891,9 @@ class TransactionLoadingSkeleton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: TransactionDesignSystem.getContainerColor(isDark),
-        borderRadius: BorderRadius.circular(TransactionDesignSystem.containerBorderRadius),
+        borderRadius: BorderRadius.circular(
+          TransactionDesignSystem.containerBorderRadius,
+        ),
         border: Border.all(
           color: TransactionDesignSystem.getBorderColor(isDark),
           width: TransactionDesignSystem.containerBorderWidth,
@@ -835,59 +901,72 @@ class TransactionLoadingSkeleton extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
-        children: List.generate(itemCount, (index) => Padding(
-          padding: EdgeInsets.only(bottom: index < itemCount - 1 ? 12 : 0),
-          child: Row(
-            children: [
-              // Icon skeleton
-              Container(
-                width: TransactionDesignSystem.iconContainerSize,
-                height: TransactionDesignSystem.iconContainerSize,
-                decoration: BoxDecoration(
-                  color: TransactionDesignSystem.getTitleColor(isDark).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(TransactionDesignSystem.iconBorderRadius),
-                ),
-              ),
-              SizedBox(width: TransactionDesignSystem.iconContentSpacing),
-              
-              // Content skeleton
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: TransactionDesignSystem.getTitleColor(isDark).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+        children: List.generate(
+          itemCount,
+          (index) => Padding(
+            padding: EdgeInsets.only(bottom: index < itemCount - 1 ? 12 : 0),
+            child: Row(
+              children: [
+                // Icon skeleton
+                Container(
+                  width: TransactionDesignSystem.iconContainerSize,
+                  height: TransactionDesignSystem.iconContainerSize,
+                  decoration: BoxDecoration(
+                    color: TransactionDesignSystem.getTitleColor(
+                      isDark,
+                    ).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(
+                      TransactionDesignSystem.iconBorderRadius,
                     ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: 100,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: TransactionDesignSystem.getTitleColor(isDark).withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                SizedBox(width: TransactionDesignSystem.iconContentSpacing),
+
+                // Content skeleton
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: TransactionDesignSystem.getTitleColor(
+                            isDark,
+                          ).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Container(
+                        width: 100,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: TransactionDesignSystem.getTitleColor(
+                            isDark,
+                          ).withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              
-              // Amount skeleton
-              Container(
-                width: 60,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: TransactionDesignSystem.getTitleColor(isDark).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
+
+                // Amount skeleton
+                Container(
+                  width: 60,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: TransactionDesignSystem.getTitleColor(
+                      isDark,
+                    ).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        )),
+        ),
       ),
     );
   }
@@ -954,27 +1033,30 @@ class _StockExpandableCardState extends State<StockExpandableCard>
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
     final transaction = widget.transaction;
-    
+
     // Format amount
-    final amount = TransactionDesignSystem.formatAmount(transaction.amount, TransactionType.income);
+    final amount = TransactionDesignSystem.formatAmount(
+      transaction.amount,
+      TransactionType.income,
+    );
     final time = transaction.displayTime;
-    
+
     // Get account name
     final accountName = transaction.sourceAccountName ?? 'Hesap';
-    
+
     // Get stock details
     final stockSymbol = transaction.stockSymbol ?? '';
     final stockName = transaction.stockName ?? '';
     final stockQuantity = transaction.stockQuantity;
     final stockPrice = transaction.stockPrice;
-    
+
     // Determine action
     final l10n = AppLocalizations.of(context)!;
     final action = transaction.amount > 0 ? l10n.stockSale : l10n.stockPurchase;
     final actionColor = transaction.amount > 0 ? Colors.green : Colors.red;
-    
-    // Choose icon based on action (sale/purchase)
-    final stockIcon = transaction.amount > 0 ? Icons.show_chart : Icons.bar_chart;
+
+    // Choose icon based on action (sale/purchase) - both use bar_chart
+    final stockIcon = Icons.bar_chart;
 
     // Use neutral background but colored icon for stock transactions
     final iconData = TransactionIconData(
@@ -985,8 +1067,12 @@ class _StockExpandableCardState extends State<StockExpandableCard>
 
     return Padding(
       padding: EdgeInsets.only(
-        top: widget.isFirst ? TransactionDesignSystem.verticalPadding + 4 : TransactionDesignSystem.verticalPadding,
-        bottom: widget.isLast ? TransactionDesignSystem.verticalPadding + 4 : TransactionDesignSystem.verticalPadding,
+        top: widget.isFirst
+            ? TransactionDesignSystem.verticalPadding + 4
+            : TransactionDesignSystem.verticalPadding,
+        bottom: widget.isLast
+            ? TransactionDesignSystem.verticalPadding + 4
+            : TransactionDesignSystem.verticalPadding,
         left: TransactionDesignSystem.horizontalPadding,
         right: TransactionDesignSystem.horizontalPadding,
       ),
@@ -1005,7 +1091,9 @@ class _StockExpandableCardState extends State<StockExpandableCard>
                   height: TransactionDesignSystem.iconContainerSize,
                   decoration: BoxDecoration(
                     color: iconData.backgroundColor,
-                    borderRadius: BorderRadius.circular(TransactionDesignSystem.iconBorderRadius),
+                    borderRadius: BorderRadius.circular(
+                      TransactionDesignSystem.iconBorderRadius,
+                    ),
                   ),
                   child: Center(
                     child: Icon(
@@ -1015,9 +1103,9 @@ class _StockExpandableCardState extends State<StockExpandableCard>
                     ),
                   ),
                 ),
-                
+
                 SizedBox(width: TransactionDesignSystem.iconContentSpacing),
-                
+
                 // Content
                 Expanded(
                   child: Column(
@@ -1027,51 +1115,66 @@ class _StockExpandableCardState extends State<StockExpandableCard>
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Title
+                          // Title - sadece hisse sembolü
                           Flexible(
                             child: Text(
-                              '$action $stockSymbol',
+                              stockSymbol,
                               style: GoogleFonts.inter(
                                 fontSize: TransactionDesignSystem.titleFontSize,
-                                fontWeight: TransactionDesignSystem.titleFontWeight,
-                                color: TransactionDesignSystem.getTitleColor(isDark),
+                                fontWeight:
+                                    TransactionDesignSystem.titleFontWeight,
+                                color: TransactionDesignSystem.getTitleColor(
+                                  isDark,
+                                ),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 6),
-                           // Investment badge
-                           Container(
-                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                             decoration: BoxDecoration(
-                               color: isDark ? Colors.blue.shade800 : Colors.blue.shade100,
-                               borderRadius: BorderRadius.circular(6),
-                               border: Border.all(
-                                 color: isDark ? Colors.blue.shade600 : Colors.blue.shade300,
-                                 width: 0.5,
-                               ),
-                             ),
-                             child: Text(
-                               AppLocalizations.of(context)?.stockChip ?? 'Stock',
-                               style: GoogleFonts.inter(
-                                 fontSize: 9,
-                                 fontWeight: FontWeight.w600,
-                                 color: isDark ? Colors.white : Colors.black,
-                               ),
-                             ),
-                           ),
+                          // Investment badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.blue.shade800
+                                  : Colors.blue.shade100,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.blue.shade600
+                                    : Colors.blue.shade300,
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)?.stockChip ??
+                                  'Stock',
+                              style: GoogleFonts.inter(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                      
-                      SizedBox(height: TransactionDesignSystem.titleSubtitleSpacing),
-                      
+
+                      SizedBox(
+                        height: TransactionDesignSystem.titleSubtitleSpacing,
+                      ),
+
                       // Subtitle
                       Text(
                         time != null ? '$accountName • $time' : accountName,
                         style: GoogleFonts.inter(
                           fontSize: TransactionDesignSystem.subtitleFontSize,
-                          color: TransactionDesignSystem.getSubtitleColor(isDark),
+                          color: TransactionDesignSystem.getSubtitleColor(
+                            isDark,
+                          ),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1079,7 +1182,7 @@ class _StockExpandableCardState extends State<StockExpandableCard>
                     ],
                   ),
                 ),
-                
+
                 // Amount and expand arrow
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1094,7 +1197,8 @@ class _StockExpandableCardState extends State<StockExpandableCard>
                             amount,
                             style: GoogleFonts.inter(
                               fontSize: TransactionDesignSystem.amountFontSize,
-                              fontWeight: TransactionDesignSystem.amountFontWeight,
+                              fontWeight:
+                                  TransactionDesignSystem.amountFontWeight,
                               color: actionColor,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -1106,24 +1210,23 @@ class _StockExpandableCardState extends State<StockExpandableCard>
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w400,
-                                color: TransactionDesignSystem.getSubtitleColor(isDark),
+                                color: TransactionDesignSystem.getSubtitleColor(
+                                  isDark,
+                                ),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                         ],
                       ),
-                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-          
+
           // Expandable stock details
-          SizeTransition(
-            sizeFactor: _animation,
-            child: _buildStockDetails(),
-          ),
+          SizeTransition(sizeFactor: _animation, child: _buildStockDetails()),
         ],
       ),
     );
@@ -1147,14 +1250,26 @@ class _StockExpandableCardState extends State<StockExpandableCard>
             const SizedBox(height: 8),
           ],
           if (stockQuantity != null) ...[
-            _buildDetailRow(l10n.quantity, '${stockQuantity.toStringAsFixed(0)} ${l10n.pieces}', isDark),
+            _buildDetailRow(
+              l10n.quantity,
+              '${stockQuantity.toStringAsFixed(0)} ${l10n.pieces}',
+              isDark,
+            ),
             const SizedBox(height: 8),
           ],
           if (stockPrice != null) ...[
-            _buildDetailRow(l10n.price, '${stockPrice.toStringAsFixed(2)} ₺', isDark),
+            _buildDetailRow(
+              l10n.price,
+              '${stockPrice.toStringAsFixed(2)} ₺',
+              isDark,
+            ),
             const SizedBox(height: 8),
           ],
-          _buildDetailRow(l10n.total, '${totalAmount.toStringAsFixed(2)} ₺', isDark),
+          _buildDetailRow(
+            l10n.total,
+            '${totalAmount.toStringAsFixed(2)} ₺',
+            isDark,
+          ),
         ],
       ),
     );
@@ -1194,4 +1309,4 @@ class _StockExpandableCardState extends State<StockExpandableCard>
       ],
     );
   }
-} 
+}

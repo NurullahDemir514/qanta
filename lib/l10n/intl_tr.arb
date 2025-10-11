@@ -96,7 +96,7 @@
   "@balance": {
     "description": "Account balance"
   },
-  "onboardingDescription": "Qanta ile paranızı daha iyi yönetin. Harcamalarınızı takip edin, bütçe yapın ve akıllı önerilerle birikimlerinizi artırın.",
+  "onboardingDescription": "Kişisel finans uygulamanız. Harcamaları takip edin, kartları yönetin, hisseleri izleyin ve bütçe belirleyin.",
   "@onboardingDescription": {
     "description": "Onboarding screen description text"
   },
@@ -1352,6 +1352,62 @@
   "@financialAnalysisDesc": {
     "description": "Financial analysis feature description"
   },
+  "cardManagementTitle": "Kart Yönetimi",
+  "@cardManagementTitle": {
+    "description": "Card management feature title"
+  },
+  "cardManagementDesc": "Kredi kartları, banka kartları ve nakit hesapları yönetin",
+  "@cardManagementDesc": {
+    "description": "Card management feature description"
+  },
+  "stockTrackingTitle": "Hisse Takibi",
+  "@stockTrackingTitle": {
+    "description": "Stock tracking feature title"
+  },
+  "stockTrackingDesc": "Hisse portföyünüzü ve yatırımlarınızı takip edin",
+  "@stockTrackingDesc": {
+    "description": "Stock tracking feature description"
+  },
+  "budgetManagementTitle": "Bütçe Yönetimi",
+  "@budgetManagementTitle": {
+    "description": "Budget management feature title"
+  },
+  "budgetManagementDesc": "Bütçe belirleyin ve harcama limitlerinizi takip edin",
+  "@budgetManagementDesc": {
+    "description": "Budget management feature description"
+  },
+  "aiInsightsTitle": "AI Önerileri",
+  "@aiInsightsTitle": {
+    "description": "AI insights feature title"
+  },
+  "aiInsightsDesc": "Akıllı finansal öneriler ve analizler alın",
+  "@aiInsightsDesc": {
+    "description": "AI insights feature description"
+  },
+  "expenseTrackingDescShort": "Günlük harcamalarınızı detaylı takiple kaydedin ve kategorilere ayırın",
+  "@expenseTrackingDescShort": {
+    "description": "Short expense tracking description"
+  },
+  "cardManagementDescShort": "Kredi kartları, banka kartları ve nakit hesapları tek yerde yönetin",
+  "@cardManagementDescShort": {
+    "description": "Short card management description"
+  },
+  "stockTrackingDescShort": "Hisse portföyünüzü gerçek zamanlı fiyatlarla takip edin",
+  "@stockTrackingDescShort": {
+    "description": "Short stock tracking description"
+  },
+  "financialAnalysisDescShort": "Harcama alışkanlıklarınızı ve finansal trendleri analiz edin",
+  "@financialAnalysisDescShort": {
+    "description": "Short financial analysis description"
+  },
+  "budgetManagementDescShort": "Aylık bütçeler belirleyin ve harcama limitlerinizi takip edin",
+  "@budgetManagementDescShort": {
+    "description": "Short budget management description"
+  },
+  "aiInsightsDescShort": "Kişiselleştirilmiş finansal öneriler ve analizler alın",
+  "@aiInsightsDescShort": {
+    "description": "Short AI insights description"
+  },
   "languageSelectionTitle": "Dil Seçimi",
   "@languageSelectionTitle": {
     "description": "Language selection page title"
@@ -1792,7 +1848,7 @@
   "needsImprovement": "Geliştirilmeli",
   "dailyAverage": "Günlük Ortalama",
   "moreCategories": "daha fazla kategori",
-  "netWorth": "Net Değer",
+  "netWorth": "Toplam Varlık",
   "positive": "Pozitif",
   "negative": "Negatif",
   "totalAssets": "Toplam Varlık",
@@ -1808,7 +1864,7 @@
   "@gallery": {
     "description": "Gallery option for image picker"
   },
-  "deletePhoto": "Fotoğrafı Sil",
+  "deletePhoto": "Profili Kaldır",
   "@deletePhoto": {
     "description": "Delete photo option"
   },
@@ -3943,6 +3999,62 @@
   "@stockChip": {
     "description": "Stock transaction chip label"
   },
+  "dailyPerformance": "Günlük Performans",
+  "@dailyPerformance": {
+    "description": "Daily performance section title"
+  },
+  "daily": "Günlük",
+  "@daily": {
+    "description": "Daily label for stock performance"
+  },
+  "noStocksTracked": "Henüz hisse takip etmiyorsunuz",
+  "@noStocksTracked": {
+    "description": "Message when user has no stocks tracked"
+  },
+  "stockDataLoading": "Hisse verileri yükleniyor...",
+  "@stockDataLoading": {
+    "description": "Message when stock data is loading"
+  },
+  "addStocksInstruction": "Hisse eklemek için Hisse sekmesine gidin",
+  "@addStocksInstruction": {
+    "description": "Instruction to add stocks"
+  },
+  "addStocks": "Hisse Ekle",
+  "@addStocks": {
+    "description": "Add stocks button text"
+  },
+  "noPosition": "Pozisyon Yok",
+  "@noPosition": {
+    "description": "Message when there is no stock position"
+  },
+  "topGainersDescription": "Gün içinde en çok değerlenen hisseler",
+  "@topGainersDescription": {
+    "description": "Top gainers section description"
+  },
+  "marketOpen": "Piyasa Açık",
+  "@marketOpen": {
+    "description": "Market is open status"
+  },
+  "marketClosed": "Piyasa Kapalı",
+  "@marketClosed": {
+    "description": "Market is closed status"
+  },
+  "intradayChange": "Gün İçi Değişim",
+  "@intradayChange": {
+    "description": "Intraday change label"
+  },
+  "previousClose": "Önceki Kapanış",
+  "@previousClose": {
+    "description": "Previous close price label"
+  },
+  "loadingStocks": "Hisse verileri yükleniyor...",
+  "@loadingStocks": {
+    "description": "Loading stocks data message"
+  },
+  "noStockData": "Hisse verisi bulunamadı",
+  "@noStockData": {
+    "description": "No stock data available message"
+  },
   "stockSale": "Satış",
   "@stockSale": {
     "description": "Stock sale action"
@@ -4107,10 +4219,6 @@
   "moreCategories": "kategori daha",
   "@moreCategories": {
     "description": "More categories text"
-  },
-  "transactions": "İşlemler",
-  "@transactions": {
-    "description": "Transactions count"
   },
   "noTransactionsInCategory": "Bu kategoride hareket bulunamadı",
   "@noTransactionsInCategory": {
@@ -4841,5 +4949,547 @@
   "returnLabel": "Getiri",
   "@returnLabel": {
     "description": "Return label"
+  },
+  "quickNotesTitle": "Hızlı Notlar",
+  "@quickNotesTitle": {
+    "description": "Quick notes page title"
+  },
+  "pendingNotesCount": "{count} bekleyen not",
+  "@pendingNotesCount": {
+    "description": "Pending notes count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quickAddNote": "Hızlı Not Ekle",
+  "@quickAddNote": {
+    "description": "Quick add note section title"
+  },
+  "addNoteHint": "Örn: 50₺ market alışverişi",
+  "@addNoteHint": {
+    "description": "Add note input hint"
+  },
+  "voiceButton": "Ses",
+  "@voiceButton": {
+    "description": "Voice recording button"
+  },
+  "stopButton": "Durdur",
+  "@stopButton": {
+    "description": "Stop recording button"
+  },
+  "photoButton": "Fotoğraf",
+  "@photoButton": {
+    "description": "Photo capture button"
+  },
+  "addButton": "Ekle",
+  "@addButton": {
+    "description": "Add note button"
+  },
+  "pendingNotes": "Bekleyen",
+  "@pendingNotes": {
+    "description": "Pending notes tab"
+  },
+  "processedNotes": "İşlenen",
+  "@processedNotes": {
+    "description": "Processed notes tab"
+  },
+  "pendingNotesTitle": "Bekleyen Notlar",
+  "@pendingNotesTitle": {
+    "description": "Pending notes section title"
+  },
+  "processedNotesTitle": "İşleme Dönüştürülen Notlar",
+  "@processedNotesTitle": {
+    "description": "Processed notes section title"
+  },
+  "noPendingNotes": "Henüz bekleyen not yok\nYukarıdaki alandan hızlıca not ekleyin",
+  "@noPendingNotes": {
+    "description": "Empty state for pending notes"
+  },
+  "noProcessedNotes": "Henüz işleme dönüştürülmüş not yok",
+  "@noProcessedNotes": {
+    "description": "Empty state for processed notes"
+  },
+  "noteStatusPending": "Bekliyor",
+  "@noteStatusPending": {
+    "description": "Note status pending"
+  },
+  "noteStatusProcessed": "İşlendi",
+  "@noteStatusProcessed": {
+    "description": "Note status processed"
+  },
+  "convertToExpense": "Harcama",
+  "@convertToExpense": {
+    "description": "Convert to expense button"
+  },
+  "convertToIncome": "Gelir",
+  "@convertToIncome": {
+    "description": "Convert to income button"
+  },
+  "deleteNote": "Sil",
+  "@deleteNote": {
+    "description": "Delete note button"
+  },
+  "noteAddedSuccess": "Not eklendi: {content}",
+  "@noteAddedSuccess": {
+    "description": "Note added success message",
+    "placeholders": {
+      "content": {
+        "type": "String"
+      }
+    }
+  },
+  "noteConvertedSuccess": "Not başarıyla işleme dönüştürüldü",
+  "@noteConvertedSuccess": {
+    "description": "Note converted success message"
+  },
+  "noteDeletedSuccess": "Not silindi",
+  "@noteDeletedSuccess": {
+    "description": "Note deleted success message"
+  },
+  "timeNow": "Şimdi",
+  "@timeNow": {
+    "description": "Time now"
+  },
+  "timeMinutesAgo": "{minutes} dk önce",
+  "@timeMinutesAgo": {
+    "description": "Time minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{hours} saat önce",
+  "@timeHoursAgo": {
+    "description": "Time hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{days} gün önce",
+  "@timeDaysAgo": {
+    "description": "Time days ago",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "lastPayment": "Son Ödeme",
+  "@lastPayment": {
+    "description": "Last payment date label"
+  },
+  "cutOff": "Kesim",
+  "@cutOff": {
+    "description": "Cut-off date label"
+  },
+  "paid": "Ödendi",
+  "@paid": {
+    "description": "Payment status - paid"
+  },
+  "overdue": "Vadesi geçti",
+  "@overdue": {
+    "description": "Payment status - overdue"
+  },
+  "daysLeft": "gün kaldı",
+  "@daysLeft": {
+    "description": "Days left until due date"
+  },
+  "noTransactionsInStatement": "Bu ekstrede işlem bulunmuyor",
+  "@noTransactionsInStatement": {
+    "description": "No transactions in statement message"
+  },
+  "tryAgain": "Tekrar Dene",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+  "loadingStatements": "Ekstreler yükleniyor...",
+  "@loadingStatements": {
+    "description": "Loading statements message"
+  },
+  "loadMore": "Daha Fazla Göster",
+  "@loadMore": {
+    "description": "Load more button text"
+  },
+  "loadingMore": "Yükleniyor...",
+  "@loadingMore": {
+    "description": "Loading more items message"
+  },
+  "currentStatement": "Dönem İçi Ekstre",
+  "@currentStatement": {
+    "description": "Current statement section header"
+  },
+  "pastStatements": "Geçmiş Ekstreler",
+  "@pastStatements": {
+    "description": "Past statements section header"
+  },
+  "futureStatements": "Gelecek Ekstreler",
+  "@futureStatements": {
+    "description": "Future statements section header"
+  },
+  "statements": "Ekstreler",
+  "@statements": {
+    "description": "Statements page title"
+  },
+  "garantiBBVA": "Garanti BBVA",
+  "@garantiBBVA": {
+    "description": "Garanti BBVA bank name"
+  },
+  "isBankasi": "İş Bankası",
+  "@isBankasi": {
+    "description": "İş Bankası bank name"
+  },
+  "akbank": "Akbank",
+  "@akbank": {
+    "description": "Akbank bank name"
+  },
+  "ziraatBankasi": "Ziraat Bankası",
+  "@ziraatBankasi": {
+    "description": "Ziraat Bankası bank name"
+  },
+  "vakifBank": "VakıfBank",
+  "@vakifBank": {
+    "description": "VakıfBank bank name"
+  },
+  "yapiKredi": "Yapı Kredi",
+  "@yapiKredi": {
+    "description": "Yapı Kredi bank name"
+  },
+  "kuveytTurk": "Kuveyt Türk",
+  "@kuveytTurk": {
+    "description": "Kuveyt Türk bank name"
+  },
+  "albarakaTurk": "Albaraka Türk",
+  "@albarakaTurk": {
+    "description": "Albaraka Türk bank name"
+  },
+  "qnbFinansbank": "QNB Finansbank",
+  "@qnbFinansbank": {
+    "description": "QNB Finansbank bank name"
+  },
+  "enpara": "Enpara.com",
+  "@enpara": {
+    "description": "Enpara.com bank name"
+  },
+  "papara": "Papara",
+  "@papara": {
+    "description": "Papara bank name"
+  },
+  "turkiyeFinans": "Türkiye Finans",
+  "@turkiyeFinans": {
+    "description": "Türkiye Finans bank name"
+  },
+  "teb": "TEB",
+  "@teb": {
+    "description": "TEB bank name"
+  },
+  "hsbcTurkiye": "HSBC Türkiye",
+  "@hsbcTurkiye": {
+    "description": "HSBC Türkiye bank name"
+  },
+  "ingTurkiye": "ING Türkiye",
+  "@ingTurkiye": {
+    "description": "ING Türkiye bank name"
+  },
+  "denizBank": "DenizBank",
+  "@denizBank": {
+    "description": "DenizBank bank name"
+  },
+  "anadoluBank": "AnadoluBank",
+  "@anadoluBank": {
+    "description": "AnadoluBank bank name"
+  },
+  "halkBank": "Halkbank",
+  "@halkBank": {
+    "description": "Halkbank bank name"
+  },
+  "qantaBank": "Qanta Bank",
+  "@qantaBank": {
+    "description": "Qanta Bank fallback name"
+  },
+  "statementOperations": "Ekstre İşlemleri",
+  "@statementOperations": {
+    "description": "Statement operations modal title"
+  },
+  "downloadPdf": "PDF İndir",
+  "@downloadPdf": {
+    "description": "Download PDF action"
+  },
+  "downloadPdfSubtitle": "Ekstreyi PDF olarak indir",
+  "@downloadPdfSubtitle": {
+    "description": "Download PDF action subtitle"
+  },
+  "share": "Paylaş",
+  "@share": {
+    "description": "Share action"
+  },
+  "shareSubtitle": "Ekstreyi paylaş",
+  "@shareSubtitle": {
+    "description": "Share action subtitle"
+  },
+  "markAsUnpaid": "Ödenmedi Olarak İşaretle",
+  "@markAsUnpaid": {
+    "description": "Mark as unpaid action"
+  },
+  "markAsUnpaidSubtitle": "Bu ekstrenin ödeme durumunu değiştir",
+  "@markAsUnpaidSubtitle": {
+    "description": "Mark as unpaid action subtitle"
+  },
+  "statementMarkedAsUnpaid": "Ekstre ödenmedi olarak işaretlendi",
+  "@statementMarkedAsUnpaid": {
+    "description": "Statement marked as unpaid success message"
+  },
+  "errorMarkingStatement": "Ekstre işaretlenirken hata oluştu",
+  "@errorMarkingStatement": {
+    "description": "Error marking statement message"
+  },
+  "errorOccurred": "Bir hata oluştu",
+  "@errorOccurred": {
+    "description": "Generic error message"
+  },
+  "pdfExportComingSoon": "PDF export özelliği yakında eklenecek",
+  "@pdfExportComingSoon": {
+    "description": "PDF export coming soon message"
+  },
+  "shareFeatureComingSoon": "Paylaşma özelliği yakında eklenecek",
+  "@shareFeatureComingSoon": {
+    "description": "Share feature coming soon message"
+  },
+  "noStatementsYet": "Henüz ekstre bulunmuyor",
+  "@noStatementsYet": {
+    "description": "No statements yet message"
+  },
+  "statementsWillAppearAfterUsage": "Kart kullanımından sonra ekstreler burada görünecek",
+  "@statementsWillAppearAfterUsage": {
+    "description": "Statements will appear after card usage message"
+  },
+  "installment": "Taksit",
+  "@installment": {
+    "description": "Installment word"
+  },
+  "installmentCount": "{count} Taksit",
+  "@installmentCount": {
+    "description": "Installment count format",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "installmentInfo": "{current}/{total} Taksit",
+  "@installmentInfo": {
+    "description": "Installment info format",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "limitManagement": "Limit Yönetimi",
+  "@limitManagement": {
+    "description": "Limit management page title"
+  },
+  "back": "Geri",
+  "@back": {
+    "description": "Back button tooltip"
+  },
+  "pleaseEnterCategoryAndLimit": "Lütfen kategori adı girin ve limit belirleyin",
+  "@pleaseEnterCategoryAndLimit": {
+    "description": "Error message when category or limit is missing"
+  },
+  "enterValidLimit": "Geçerli bir limit girin",
+  "@enterValidLimit": {
+    "description": "Error message for invalid limit"
+  },
+  "limitSavedSuccessfully": "Limit başarıyla kaydedildi",
+  "@limitSavedSuccessfully": {
+    "description": "Success message when limit is saved"
+  },
+  "noLimitsSetYet": "Henüz limit belirlenmemiş",
+  "@noLimitsSetYet": {
+    "description": "Empty state message when no limits are set"
+  },
+  "setMonthlySpendingLimits": "Kategoriler için aylık harcama limiti\nbelirleyerek limitinizi kontrol edin",
+  "@setMonthlySpendingLimits": {
+    "description": "Empty state description for setting limits"
+  },
+  "monthlyLimit": "Aylık Limit:",
+  "@monthlyLimit": {
+    "description": "Monthly limit label"
+  },
+  "exceeded": "Aşıldı",
+  "@exceeded": {
+    "description": "Exceeded status badge"
+  },
+  "limitExceeded": "Limit Aşıldı!",
+  "@limitExceeded": {
+    "description": "Limit exceeded message"
+  },
+  "remaining": "Kalan:",
+  "@remaining": {
+    "description": "Remaining amount label"
+  },
+  "spent": "harcandı",
+  "@spent": {
+    "description": "Spent percentage suffix"
+  },
+  "spentAmount": "Harcanan:",
+  "@spentAmount": {
+    "description": "Spent amount label"
+  },
+  "perMonth": "/ ay",
+  "@perMonth": {
+    "description": "Per month suffix"
+  },
+  "limitAmountHint": "2.000",
+  "@limitAmountHint": {
+    "description": "Hint text for limit amount input"
+  },
+  "addNewLimit": "Yeni Limit Ekle",
+  "@addNewLimit": {
+    "description": "Add new limit bottom sheet title"
+  },
+  "selectCategory": "Kategori Seçin",
+  "@selectCategory": {
+    "description": "Select category label"
+  },
+  "monthlyLimitLabel": "Aylık Limit",
+  "@monthlyLimitLabel": {
+    "description": "Monthly limit label"
+  },
+  "limitAmountPlaceholder": "0,00",
+  "@limitAmountPlaceholder": {
+    "description": "Placeholder for limit amount input"
+  },
+  "saveLimit": "Limiti Kaydet",
+  "@saveLimit": {
+    "description": "Save limit button text"
+  },
+  "firstDay": "1.",
+  "@firstDay": {
+    "description": "First day of month"
+  },
+  "secondDay": "2.",
+  "@secondDay": {
+    "description": "Second day of month"
+  },
+  "thirdDay": "3.",
+  "@thirdDay": {
+    "description": "Third day of month"
+  },
+  "fourthDay": "4.",
+  "@fourthDay": {
+    "description": "Fourth day of month"
+  },
+  "fifthDay": "5.",
+  "@fifthDay": {
+    "description": "Fifth day of month"
+  },
+  "sixthDay": "6.",
+  "@sixthDay": {
+    "description": "Sixth day of month"
+  },
+  "seventhDay": "7.",
+  "@seventhDay": {
+    "description": "Seventh day of month"
+  },
+  "eighthDay": "8.",
+  "@eighthDay": {
+    "description": "Eighth day of month"
+  },
+  "ninthDay": "9.",
+  "@ninthDay": {
+    "description": "Ninth day of month"
+  },
+  "tenthDay": "10.",
+  "@tenthDay": {
+    "description": "Tenth day of month"
+  },
+  "eleventhDay": "11.",
+  "@eleventhDay": {
+    "description": "Eleventh day of month"
+  },
+  "twelfthDay": "12.",
+  "@twelfthDay": {
+    "description": "Twelfth day of month"
+  },
+  "thirteenthDay": "13.",
+  "@thirteenthDay": {
+    "description": "Thirteenth day of month"
+  },
+  "fourteenthDay": "14.",
+  "@fourteenthDay": {
+    "description": "Fourteenth day of month"
+  },
+  "fifteenthDay": "15.",
+  "@fifteenthDay": {
+    "description": "Fifteenth day of month"
+  },
+  "sixteenthDay": "16.",
+  "@sixteenthDay": {
+    "description": "Sixteenth day of month"
+  },
+  "seventeenthDay": "17.",
+  "@seventeenthDay": {
+    "description": "Seventeenth day of month"
+  },
+  "eighteenthDay": "18.",
+  "@eighteenthDay": {
+    "description": "Eighteenth day of month"
+  },
+  "nineteenthDay": "19.",
+  "@nineteenthDay": {
+    "description": "Nineteenth day of month"
+  },
+  "twentiethDay": "20.",
+  "@twentiethDay": {
+    "description": "Twentieth day of month"
+  },
+  "twentyFirstDay": "21.",
+  "@twentyFirstDay": {
+    "description": "Twenty-first day of month"
+  },
+  "twentySecondDay": "22.",
+  "@twentySecondDay": {
+    "description": "Twenty-second day of month"
+  },
+  "twentyThirdDay": "23.",
+  "@twentyThirdDay": {
+    "description": "Twenty-third day of month"
+  },
+  "twentyFourthDay": "24.",
+  "@twentyFourthDay": {
+    "description": "Twenty-fourth day of month"
+  },
+  "twentyFifthDay": "25.",
+  "@twentyFifthDay": {
+    "description": "Twenty-fifth day of month"
+  },
+  "twentySixthDay": "26.",
+  "@twentySixthDay": {
+    "description": "Twenty-sixth day of month"
+  },
+  "twentySeventhDay": "27.",
+  "@twentySeventhDay": {
+    "description": "Twenty-seventh day of month"
+  },
+  "twentyEighthDay": "28.",
+  "@twentyEighthDay": {
+    "description": "Twenty-eighth day of month"
+  },
+  "day": "gün",
+  "@day": {
+    "description": "Day suffix"
+  },
+  "limit": "Limit",
+  "@limit": {
+    "description": "Limit label"
   }
 } 

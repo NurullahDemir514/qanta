@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen density independent dimensions -->
+    <dimen name="screen_density_factor">1.0</dimen>
+    <dimen name="min_screen_width">320dp</dimen>
+    <dimen name="max_screen_width">840dp</dimen>
+    
+    <!-- Text scaling factors -->
+    <dimen name="text_scale_factor_small">0.85</dimen>
+    <dimen name="text_scale_factor_normal">1.0</dimen>
+    <dimen name="text_scale_factor_large">1.15</dimen>
+    <dimen name="text_scale_factor_xlarge">1.3</dimen>
+    
+    <!-- Layout margins and padding -->
+    <dimen name="layout_margin_small">8dp</dimen>
+    <dimen name="layout_margin_normal">16dp</dimen>
+    <dimen name="layout_margin_large">24dp</dimen>
+    
+    <!-- Card dimensions -->
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+</resources>

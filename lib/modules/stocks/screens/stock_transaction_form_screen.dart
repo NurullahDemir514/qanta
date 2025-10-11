@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/models/stock_models.dart';
@@ -18,7 +16,7 @@ import '../widgets/forms/stock_summary_step.dart';
 class StockTransactionFormScreen extends StatefulWidget {
   final StockTransactionType transactionType;
   final Stock? stock;
-  
+
   const StockTransactionFormScreen({
     super.key,
     required this.transactionType,
@@ -26,20 +24,23 @@ class StockTransactionFormScreen extends StatefulWidget {
   });
 
   @override
-  State<StockTransactionFormScreen> createState() => _StockTransactionFormScreenState();
+  State<StockTransactionFormScreen> createState() =>
+      _StockTransactionFormScreenState();
 }
 
-class _StockTransactionFormScreenState extends State<StockTransactionFormScreen> {
+class _StockTransactionFormScreenState
+    extends State<StockTransactionFormScreen> {
   final _pageController = PageController();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
-  
+
   Stock? _selectedStock;
   AccountModel? _selectedAccount;
   double _quantity = 0.0;
   double _price = 0.0;
+  double _commissionRate = 0.0; // %0 varsayılan komisyon
   List<double>? _historicalData;
-  
+
   String? _quantityError;
   String? _priceError;
   bool _isLoading = false;
@@ -87,24 +88,29 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
 
   Future<void> _loadHistoricalData() async {
     if (_selectedStock == null) return;
-    
+
     try {
       final stockProvider = Provider.of<StockProvider>(context, listen: false);
-      await stockProvider.loadHistoricalData(_selectedStock!.symbol, days: 30, forceReload: true);
-      
+      await stockProvider.loadHistoricalData(
+        _selectedStock!.symbol,
+        days: 30,
+        forceReload: true,
+      );
+
       // Geçmiş veriyi al
-      final historicalData = stockProvider.getHistoricalData(_selectedStock!.symbol);
-      
+      final historicalData = stockProvider.getHistoricalData(
+        _selectedStock!.symbol,
+      );
+
       if (mounted) {
         setState(() {
           _historicalData = historicalData;
         });
       }
-      
+
       // Not: loadHistoricalData zaten notifyListeners() çağırıyor
       // Bu sayede stocks screen'deki hisse kartları otomatik güncellenir
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   List<String> _getStepTitles() => [
@@ -153,7 +159,7 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
           return false;
         }
         return true;
-        
+
       case 1: // Hesap seçimi
         if (_selectedAccount == null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -165,13 +171,13 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
           return false;
         }
         return true;
-        
+
       case 2: // Miktar ve Fiyat
         final quantity = double.tryParse(_quantityController.text);
         final price = double.tryParse(_priceController.text);
-        
+
         bool isValid = true;
-        
+
         if (quantity == null || quantity <= 0) {
           setState(() {
             _quantityError = l10n.enterValidQuantity;
@@ -183,7 +189,7 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
             _quantityError = null;
           });
         }
-        
+
         if (price == null || price <= 0) {
           setState(() {
             _priceError = l10n.enterValidPrice;
@@ -195,9 +201,9 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
             _priceError = null;
           });
         }
-        
+
         return isValid;
-        
+
       default:
         return true;
     }
@@ -205,7 +211,7 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
 
   Future<void> _executeTransaction() async {
     if (!_validateCurrentStep()) return;
-    
+
     if (_selectedStock == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -226,8 +232,9 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
         throw Exception(l10n.userSessionNotFound);
       }
 
-      final totalAmount = _quantity * _price;
-      final commission = totalAmount * 0.001; // %0.1 komisyon
+      final baseAmount = _quantity * _price;
+      final commission = baseAmount * _commissionRate;
+      final totalAmount = baseAmount + commission; // Komisyon dahil toplam tutar
 
       final transaction = StockTransaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -251,17 +258,14 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
       if (_selectedStock != null) {
         await _loadHistoricalData();
       }
-      
+
       if (mounted) {
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Hata: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -276,9 +280,11 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return BaseTransactionForm(
-      title: widget.transactionType == StockTransactionType.buy ? l10n.stockPurchase : l10n.stockSale,
+      title: widget.transactionType == StockTransactionType.buy
+          ? l10n.stockPurchase
+          : l10n.stockSale,
       stepTitles: _getStepTitles(),
       currentStep: _currentStep,
       pageController: _pageController,
@@ -287,7 +293,9 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
       onNext: _goToNextStep,
       onBack: _goToPreviousStep,
       onSave: _executeTransaction,
-      saveButtonText: widget.transactionType == StockTransactionType.buy ? l10n.executePurchase : l10n.executeSale,
+      saveButtonText: widget.transactionType == StockTransactionType.buy
+          ? l10n.executePurchase
+          : l10n.executeSale,
       steps: [
         // Step 1: Hisse seçimi
         BaseFormStep(
@@ -303,7 +311,7 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
             },
           ),
         ),
-        
+
         // Step 2: Hesap seçimi
         BaseFormStep(
           title: _getStepTitles()[1],
@@ -317,7 +325,7 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
             },
           ),
         ),
-        
+
         // Step 3: Miktar ve Fiyat (Hesap Makinesi)
         BaseFormStep(
           title: _getStepTitles()[2],
@@ -339,7 +347,7 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
             },
           ),
         ),
-        
+
         // Step 4: Özet
         BaseFormStep(
           title: _getStepTitles()[3],
@@ -351,10 +359,13 @@ class _StockTransactionFormScreenState extends State<StockTransactionFormScreen>
                   price: _price,
                   transactionType: widget.transactionType,
                   historicalData: _historicalData,
+                  onCommissionRateChanged: (rate) {
+                    setState(() {
+                      _commissionRate = rate;
+                    });
+                  },
                 )
-              : Center(
-                  child: Text(l10n.noStockSelected),
-                ),
+              : Center(child: Text(l10n.noStockSelected)),
         ),
       ],
     );

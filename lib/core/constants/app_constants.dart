@@ -759,6 +759,50 @@ class AppConstants {
     return design?['name'] ?? 'Qanta Bank';
   }
 
+  /// Get localized bank name
+  static String getLocalizedBankName(String bankCode, dynamic l10n) {
+    switch (bankCode.toLowerCase()) {
+      case 'garanti':
+        return l10n.garantiBBVA;
+      case 'isbank':
+        return l10n.isBankasi;
+      case 'akbank':
+        return l10n.akbank;
+      case 'ziraat':
+        return l10n.ziraatBankasi;
+      case 'vakifbank':
+        return l10n.vakifBank;
+      case 'yapikredi':
+        return l10n.yapiKredi;
+      case 'kuveytturk':
+        return l10n.kuveytTurk;
+      case 'albaraka':
+        return l10n.albarakaTurk;
+      case 'qnb':
+        return l10n.qnbFinansbank;
+      case 'enpara':
+        return l10n.enpara;
+      case 'papara':
+        return l10n.papara;
+      case 'turkiyefinans':
+        return l10n.turkiyeFinans;
+      case 'teb':
+        return l10n.teb;
+      case 'hsbcturkiye':
+        return l10n.hsbcTurkiye;
+      case 'ing':
+        return l10n.ingTurkiye;
+      case 'denizbank':
+        return l10n.denizBank;
+      case 'anadolubank':
+        return l10n.anadoluBank;
+      case 'halkbank':
+        return l10n.halkBank;
+      default:
+        return l10n.qantaBank;
+    }
+  }
+
   // Get all available banks
   static List<String> getAvailableBanks() {
     return bankDesigns.keys.toList();

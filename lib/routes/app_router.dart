@@ -104,7 +104,9 @@ class AppRouter {
         name: 'home',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
-          child: const MainScreen(),
+          child: MainScreen(
+            initialIndex: int.tryParse(state.uri.queryParameters['tab'] ?? '0') ?? 0,
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
@@ -242,7 +244,7 @@ class AppRouter {
         name: 'quick-notes',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
-          child: const QuickNotesPage(),
+          child: const QuickNotesPageNew(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
@@ -263,51 +265,59 @@ class AppRouter {
       GoRoute(
         path: '/income-form',
         name: 'income-form',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: IncomeFormScreen(
-            initialDescription: state.uri.queryParameters['description'],
-            initialDate: state.uri.queryParameters['date'] != null 
-                ? DateTime.fromMillisecondsSinceEpoch(int.parse(state.uri.queryParameters['date']!))
-                : null,
-            initialAmount: state.uri.queryParameters['amount'] != null
-                ? double.tryParse(state.uri.queryParameters['amount']!)
-                : null,
-            initialCategoryId: state.uri.queryParameters['category'],
-          ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 1.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOut;
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: IncomeFormScreen(
+              initialDescription: extra?['initialDescription'] ?? state.uri.queryParameters['description'],
+              initialDate: extra?['initialDate'] ?? (state.uri.queryParameters['date'] != null 
+                  ? DateTime.fromMillisecondsSinceEpoch(int.parse(state.uri.queryParameters['date']!))
+                  : null),
+              initialAmount: extra?['initialAmount'] ?? (state.uri.queryParameters['amount'] != null
+                  ? double.tryParse(state.uri.queryParameters['amount']!)
+                  : null),
+              initialCategoryId: extra?['initialCategoryId'] ?? state.uri.queryParameters['category'],
+              initialPaymentMethodId: extra?['initialPaymentMethodId'],
+              initialStep: extra?['initialStep'] ?? 0,
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
 
-            var tween = Tween(begin: begin, end: end).chain(
-              CurveTween(curve: curve),
-            );
+              var tween = Tween(begin: begin, end: end).chain(
+                CurveTween(curve: curve),
+              );
 
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 400),
-        ),
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 400),
+          );
+        },
       ),
       GoRoute(
         path: '/expense-form',
         name: 'expense-form',
         pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
           return CustomTransitionPage(
             key: state.pageKey,
             child: ExpenseFormScreen(
               key: ValueKey('expense-form-${DateTime.now().millisecondsSinceEpoch}'),
-              initialDescription: state.uri.queryParameters['description'],
-              initialDate: state.uri.queryParameters['date'] != null 
+              initialDescription: extra?['initialDescription'] ?? state.uri.queryParameters['description'],
+              initialDate: extra?['initialDate'] ?? (state.uri.queryParameters['date'] != null 
                   ? DateTime.fromMillisecondsSinceEpoch(int.parse(state.uri.queryParameters['date']!))
-                  : null,
-              initialAmount: state.uri.queryParameters['amount'] != null
+                  : null),
+              initialAmount: extra?['initialAmount'] ?? (state.uri.queryParameters['amount'] != null
                   ? double.tryParse(state.uri.queryParameters['amount']!)
-                  : null,
-              initialCategoryId: state.uri.queryParameters['category'],
+                  : null),
+              initialCategoryId: extra?['initialCategoryId'] ?? state.uri.queryParameters['category'],
+              initialPaymentMethodId: extra?['initialPaymentMethodId'],
+              initialStep: extra?['initialStep'] ?? 0,
             ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               const begin = Offset(0.0, 1.0);

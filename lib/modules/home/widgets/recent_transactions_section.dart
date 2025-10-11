@@ -259,6 +259,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
 
     // Regular transaction - use Firebase integrated design system
     return TransactionDesignSystem.buildTransactionItemFromV2(
+      context: context,
       transaction: transaction,
       isDark: isDark,
       time: time,

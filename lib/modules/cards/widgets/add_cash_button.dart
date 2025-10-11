@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
-import '../../../core/theme/theme_provider.dart';
 import '../../../l10n/app_localizations.dart';
 
 class AddCashButton extends StatelessWidget {
@@ -18,31 +15,26 @@ class AddCashButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Container(
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-        color: isDark 
-          ? const Color(0xFF1C1C1E)
-          : Colors.white,
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.2)
-              : Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 1),
             spreadRadius: 0,
           ),
         ],
-        border: isDark 
-          ? Border.all(
-              color: const Color(0xFF38383A),
-              width: 0.5,
-            )
-          : null,
+        border: isDark
+            ? Border.all(color: const Color(0xFF38383A), width: 0.5)
+            : null,
       ),
       child: Material(
         color: Colors.transparent,
@@ -56,16 +48,16 @@ class AddCashButton extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: isDark 
-                    ? const Color(0xFF8E8E93).withValues(alpha: 0.2)
-                    : const Color(0xFF6D6D70).withValues(alpha: 0.1),
+                  color: isDark
+                      ? const Color(0xFF8E8E93).withValues(alpha: 0.2)
+                      : const Color(0xFF6D6D70).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
                   Icons.account_balance_wallet_outlined,
-                  color: isDark 
-                    ? const Color(0xFF8E8E93)
-                    : const Color(0xFF6D6D70),
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF6D6D70),
                   size: 16,
                 ),
               ),
@@ -75,9 +67,7 @@ class AddCashButton extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: isDark 
-                    ? Colors.white
-                    : const Color(0xFF6D6D70),
+                  color: isDark ? Colors.white : const Color(0xFF6D6D70),
                 ),
               ),
             ],
@@ -87,8 +77,11 @@ class AddCashButton extends StatelessWidget {
     );
   }
 
-  void _showUpdateBalanceDialog(BuildContext context, Function(double) onCashAdded) {
+  void _showUpdateBalanceDialog(
+    BuildContext context,
+    Function(double) onCashAdded,
+  ) {
     // Bu butonu kaldıracağız çünkü bottom sheet'te zaten var
     // Şimdilik boş bırakıyoruz
   }
-} 
+}

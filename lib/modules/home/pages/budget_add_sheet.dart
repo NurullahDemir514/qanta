@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
-import '../../../core/services/budget_service.dart';
-import '../../../core/services/firebase_auth_service.dart';
-import '../../../core/services/unified_category_service.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../shared/services/category_icon_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
-import '../../../shared/models/unified_category_model.dart';
 import '../../../l10n/app_localizations.dart';
 
 class BudgetAddSheet extends StatefulWidget {
@@ -32,7 +28,9 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
   List<String> _getActiveExpenseCategories(BuildContext context) {
     final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
     return provider.expenseCategories
-        .where((cat) => true) // UnifiedCategoryModel doesn't have isActive, all are active
+        .where(
+          (cat) => true,
+        ) // UnifiedCategoryModel doesn't have isActive, all are active
         .map((cat) => cat.displayName.trim())
         .toSet()
         .toList();
@@ -42,7 +40,11 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
     final tags = _getActiveExpenseCategories(context);
     if (_categoryController.text.isEmpty) return tags;
     return tags
-        .where((tag) => tag.toLowerCase().contains(_categoryController.text.toLowerCase()))
+        .where(
+          (tag) => tag.toLowerCase().contains(
+            _categoryController.text.toLowerCase(),
+          ),
+        )
         .toList();
   }
 
@@ -57,17 +59,15 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
     try {
       // Find the actual category ID from the provider
       final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
-      
+
       final matchedCategory = provider.expenseCategories.firstWhere(
         (cat) => cat.displayName.trim() == categoryName,
         orElse: () => provider.expenseCategories.first,
       );
-      
+
       setState(() {
         _selectedCategoryId = matchedCategory.id;
       });
-      
     } catch (e) {
       setState(() {
         _selectedCategoryId = categoryName.toLowerCase().replaceAll(' ', '_');
@@ -87,20 +87,20 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
         setState(() => _isSaving = false);
         return;
       }
-      
+
       await provider.createBudget(
         categoryId: _selectedCategoryId!,
         categoryName: _selectedCategoryName!,
         monthlyLimit: limit,
       );
-      
+
       _limitController.clear();
       setState(() {
         _selectedCategoryId = null;
         _selectedCategoryName = null;
         _isSaving = false;
       });
-      
+
       if (widget.onReload != null) await widget.onReload!();
       if (context.mounted) {
         Navigator.pop(context);
@@ -109,9 +109,9 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
     } catch (e) {
       setState(() => _isSaving = false);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)!.errorOccurred}: $e')));
       }
     }
   }
@@ -178,7 +178,9 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
+                    color: (isDark
+                        ? const Color(0xFF38383A)
+                        : const Color(0xFFE5E5EA)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -189,7 +191,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Yeni Limit Ekle',
+                  AppLocalizations.of(context)!.addNewLimit,
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -200,7 +202,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Kategori Seçin',
+              AppLocalizations.of(context)!.selectCategory,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -217,31 +219,39 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                 color: isDark ? Colors.white : Colors.black,
               ),
               decoration: InputDecoration(
-                hintText: 'market, yemek, ulaşım...',
+                hintText: AppLocalizations.of(context)!.categoryHint,
                 hintStyle: GoogleFonts.inter(
-                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF6D6D70),
                 ),
                 filled: true,
-                fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                fillColor: isDark
+                    ? const Color(0xFF2C2C2E)
+                    : const Color(0xFFF2F2F7),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    color: isDark
+                        ? const Color(0xFF38383A)
+                        : const Color(0xFFE5E5EA),
                     width: 1.2,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    color: isDark
+                        ? const Color(0xFF38383A)
+                        : const Color(0xFFE5E5EA),
                     width: 1.2,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF4CAF50) : const Color(0xFF6D6D70),
-                    width: 2,
+                    color: AppConstants.errorColor,
+                    width: 1,
                   ),
                 ),
               ),
@@ -263,7 +273,9 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: suggestions.map((tag) {
-                    final isSelected = _categoryController.text.trim().toLowerCase() == tag.toLowerCase();
+                    final isSelected =
+                        _categoryController.text.trim().toLowerCase() ==
+                        tag.toLowerCase();
                     final icon = CategoryIconService.getIcon(tag.toLowerCase());
                     final color = const Color(0xFFFF4C4C);
                     return Padding(
@@ -285,8 +297,12 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                             borderRadius: BorderRadius.circular(12),
                             onTap: () async {
                               _selectCategory(tag);
-                              await Future.delayed(const Duration(milliseconds: 50));
-                              FocusScope.of(context).requestFocus(_limitFocusNode);
+                              await Future.delayed(
+                                const Duration(milliseconds: 50),
+                              );
+                              FocusScope.of(
+                                context,
+                              ).requestFocus(_limitFocusNode);
                             },
                             splashColor: color.withOpacity(0.18),
                             highlightColor: color.withOpacity(0.08),
@@ -295,30 +311,36 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                               builder: (context, setChipState) {
                                 bool isPressed = false;
                                 return Listener(
-                                  onPointerDown: (_) => setChipState(() => isPressed = true),
-                                  onPointerUp: (_) => setChipState(() => isPressed = false),
-                                  onPointerCancel: (_) => setChipState(() => isPressed = false),
+                                  onPointerDown: (_) =>
+                                      setChipState(() => isPressed = true),
+                                  onPointerUp: (_) =>
+                                      setChipState(() => isPressed = false),
+                                  onPointerCancel: (_) =>
+                                      setChipState(() => isPressed = false),
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 100),
                                     curve: Curves.easeInOut,
-                                    color: isPressed ? color.withOpacity(0.08) : Colors.transparent,
+                                    color: isPressed
+                                        ? color.withOpacity(0.08)
+                                        : Colors.transparent,
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Icon(
-                                            icon,
-                                            color: color,
-                                            size: 18,
-                                          ),
+                                          Icon(icon, color: color, size: 18),
                                           const SizedBox(width: 7),
                                           Text(
                                             tag,
                                             style: GoogleFonts.inter(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w600,
-                                              color: isDark ? Colors.white : color,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : color,
                                               letterSpacing: -0.2,
                                             ),
                                           ),
@@ -339,7 +361,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
             ],
             const SizedBox(height: 20),
             Text(
-              'Aylık Limit',
+              AppLocalizations.of(context)!.monthlyLimitLabel,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -357,30 +379,40 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                 color: isDark ? Colors.white : Colors.black,
               ),
               decoration: InputDecoration(
-                hintText: '0,00',
+                hintText: AppLocalizations.of(context)!.limitAmountPlaceholder,
                 hintStyle: GoogleFonts.inter(
-                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF6D6D70),
                 ),
                 filled: true,
-                fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                fillColor: isDark
+                    ? const Color(0xFF2C2C2E)
+                    : const Color(0xFFF2F2F7),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    color: isDark
+                        ? const Color(0xFF38383A)
+                        : const Color(0xFFE5E5EA),
                     width: 1.2,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    color: isDark
+                        ? const Color(0xFF38383A)
+                        : const Color(0xFFE5E5EA),
                     width: 1.2,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    color: isDark
+                        ? const Color(0xFF38383A)
+                        : const Color(0xFFE5E5EA),
                     width: 2,
                   ),
                 ),
@@ -426,8 +458,12 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                     onPressed: _canSave() ? _saveBudget : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _canSave()
-                          ? (isDark ? const Color(0xFF38383A) : const Color(0xFF6D6D70))
-                          : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
+                          ? (isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFF6D6D70))
+                          : (isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA)),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -445,7 +481,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                             ),
                           )
                         : Text(
-                            'Limiti Kaydet',
+                            AppLocalizations.of(context)!.saveLimit,
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -461,4 +497,4 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
       ),
     );
   }
-} 
+}

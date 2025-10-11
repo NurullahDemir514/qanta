@@ -148,7 +148,7 @@ class TransactionDetailModal extends StatelessWidget {
                           transaction.installmentInfo != null)
                         _buildDetailRow(
                           isDark: isDark,
-                          label: l10n.installmentInfo,
+                          label: l10n.installmentInfo(transaction.currentInstallment ?? 1, transaction.installmentCount ?? 1),
                           value: transaction.installmentInfo!,
                         ),
                       if (transaction.card.cardType == CardType.credit)

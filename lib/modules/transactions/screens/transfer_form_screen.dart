@@ -1,23 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
-import '../../../shared/models/account_model.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
-import '../../../shared/widgets/insufficient_funds_dialog.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../models/payment_method.dart';
-import '../models/transfer_model.dart';
 import '../widgets/forms/base_transaction_form.dart';
 import '../widgets/forms/calculator_input_field.dart';
 import '../widgets/forms/transfer_account_selector.dart';
-import '../widgets/forms/transaction_summary.dart';
 import '../widgets/forms/description_field.dart';
 import '../widgets/forms/date_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/foundation.dart';
 
 class TransferFormScreen extends StatefulWidget {
   const TransferFormScreen({super.key});
@@ -30,11 +24,11 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _pageController = PageController();
-  
+
   PaymentMethod? _fromAccount;
   PaymentMethod? _toAccount;
   DateTime _selectedDate = DateTime.now();
-  
+
   String? _amountError;
   String? _fromAccountError;
   String? _toAccountError;
@@ -46,8 +40,13 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     super.initState();
     // Hesapları yükle
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final cardProvider = Provider.of<UnifiedProviderV2>(context, listen: false);
-      if (cardProvider.creditCards.isEmpty && cardProvider.debitCards.isEmpty && cardProvider.cashAccount == null) {
+      final cardProvider = Provider.of<UnifiedProviderV2>(
+        context,
+        listen: false,
+      );
+      if (cardProvider.creditCards.isEmpty &&
+          cardProvider.debitCards.isEmpty &&
+          cardProvider.cashAccount == null) {
         cardProvider.loadAllData();
       }
     });
@@ -61,7 +60,10 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   ];
 
   String _formatCurrency(double amount) {
-    return Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount);
+    return Provider.of<ThemeProvider>(
+      context,
+      listen: false,
+    ).formatAmount(amount);
   }
 
   @override
@@ -76,7 +78,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return BaseTransactionForm(
       title: l10n.transferType,
       stepTitles: _getStepTitles(l10n),
@@ -102,7 +104,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
             },
           ),
         ),
-        
+
         // Step 2: From Account
         BaseFormStep(
           title: l10n.fromWhichAccount,
@@ -123,7 +125,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
             isSourceSelection: true,
           ),
         ),
-        
+
         // Step 3: To Account
         BaseFormStep(
           title: l10n.toWhichAccount,
@@ -144,15 +146,15 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
             isSourceSelection: false,
           ),
         ),
-        
+
         // Step 4: Summary and Details
         BaseFormStep(
           title: l10n.details,
           content: Column(
             children: [
               // Transfer Preview Card
-              if (_amountController.text.isNotEmpty && 
-                  _fromAccount != null && 
+              if (_amountController.text.isNotEmpty &&
+                  _fromAccount != null &&
                   _toAccount != null)
                 Container(
                   padding: const EdgeInsets.all(20),
@@ -160,7 +162,9 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                     color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
+                      color: isDark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(0xFFE5E5EA),
                       width: 1,
                     ),
                   ),
@@ -182,12 +186,14 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                         l10n.transferType,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                          color: isDark
+                              ? const Color(0xFF8E8E93)
+                              : const Color(0xFF6D6D70),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Transfer Flow
                       Row(
                         children: [
@@ -196,18 +202,23 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: _fromAccount!.isCash 
-                                    ? const Color(0xFF34C759).withValues(alpha: 0.1)
-                                    : (_fromAccount!.card?.color ?? const Color(0xFF8E8E93)).withValues(alpha: 0.1),
+                                color: _fromAccount!.isCash
+                                    ? const Color(
+                                        0xFF34C759,
+                                      ).withValues(alpha: 0.1)
+                                    : (_fromAccount!.card?.color ??
+                                              const Color(0xFF8E8E93))
+                                          .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Column(
                                 children: [
                                   Icon(
                                     _fromAccount!.type.icon,
-                                    color: _fromAccount!.isCash 
+                                    color: _fromAccount!.isCash
                                         ? const Color(0xFF34C759)
-                                        : _fromAccount!.card?.color ?? const Color(0xFF8E8E93),
+                                        : _fromAccount!.card?.color ??
+                                              const Color(0xFF8E8E93),
                                     size: 24,
                                   ),
                                   const SizedBox(height: 8),
@@ -216,7 +227,9 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black,
                                     ),
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
@@ -226,34 +239,41 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                               ),
                             ),
                           ),
-                          
+
                           // Arrow
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Icon(
                               Icons.arrow_forward_rounded,
-                              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                              color: isDark
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
                               size: 24,
                             ),
                           ),
-                          
+
                           // To Account
                           Expanded(
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: _toAccount!.isCash 
-                                    ? const Color(0xFF34C759).withValues(alpha: 0.1)
-                                    : (_toAccount!.card?.color ?? const Color(0xFF8E8E93)).withValues(alpha: 0.1),
+                                color: _toAccount!.isCash
+                                    ? const Color(
+                                        0xFF34C759,
+                                      ).withValues(alpha: 0.1)
+                                    : (_toAccount!.card?.color ??
+                                              const Color(0xFF8E8E93))
+                                          .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Column(
                                 children: [
                                   Icon(
                                     _toAccount!.type.icon,
-                                    color: _toAccount!.isCash 
+                                    color: _toAccount!.isCash
                                         ? const Color(0xFF34C759)
-                                        : _toAccount!.card?.color ?? const Color(0xFF8E8E93),
+                                        : _toAccount!.card?.color ??
+                                              const Color(0xFF8E8E93),
                                     size: 24,
                                   ),
                                   const SizedBox(height: 8),
@@ -262,7 +282,9 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black,
                                     ),
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
@@ -277,13 +299,11 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                     ],
                   ),
                 ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Additional Details
-              DescriptionField(
-                controller: _descriptionController,
-              ),
+              DescriptionField(controller: _descriptionController),
               const SizedBox(height: 16),
               DateSelector(
                 selectedDate: _selectedDate,
@@ -301,15 +321,15 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   }
 
   /// Validates current step and advances to next step if valid
-  /// 
+  ///
   /// **Validation Logic by Step:**
-  /// 
+  ///
   /// **Step 0 (Amount):**
   /// - Checks if amount is entered and > 0
-  /// 
+  ///
   /// **Step 1 (Source Account):**
   /// - Ensures source account is selected
-  /// 
+  ///
   /// **Step 2 (Target Account):**
   /// - Ensures target account is selected
   /// - Validates source ≠ target
@@ -320,18 +340,18 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   ///   - Calculates current debt = creditLimit - availableLimit
   ///   - If transferAmount > currentDebt → shows overpayment warning
   ///   - User can choose to continue or cancel
-  /// 
+  ///
   /// **Credit Card Overpayment Logic:**
   /// ```
   /// Example:
-        /// Credit Limit: 10,000₺
-      /// Available Limit: 7,000₺
-      /// Current Debt: 3,000₺ (10,000 - 7,000)
-      /// Transfer Amount: 5,000₺
-      /// Overpayment: 2,000₺ (5,000 - 3,000)
-      /// Result: Card will have 2,000₺ positive balance
+  /// Credit Limit: 10,000₺
+  /// Available Limit: 7,000₺
+  /// Current Debt: 3,000₺ (10,000 - 7,000)
+  /// Transfer Amount: 5,000₺
+  /// Overpayment: 2,000₺ (5,000 - 3,000)
+  /// Result: Card will have 2,000₺ positive balance
   /// ```
-  /// 
+  ///
   /// **Error Handling:**
   /// - Sets appropriate error messages in state
   /// - Prevents navigation if validation fails
@@ -343,14 +363,20 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       case 0: // Amount
         if (_amountController.text.isEmpty) {
           setState(() {
-            _amountError = AppLocalizations.of(context)?.pleaseEnterAmount ?? 'Please enter an amount';
+            _amountError =
+                AppLocalizations.of(context)?.pleaseEnterAmount ??
+                'Please enter an amount';
           });
           isValid = false;
         } else {
-          final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
+          final amount = double.tryParse(
+            _amountController.text.replaceAll(',', '.'),
+          );
           if (amount == null || amount <= 0) {
             setState(() {
-              _amountError = AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
+              _amountError =
+                  AppLocalizations.of(context)?.pleaseEnterValidAmount ??
+                  'Please enter a valid amount';
             });
             isValid = false;
           }
@@ -359,7 +385,9 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       case 1: // From Account
         if (_fromAccount == null) {
           setState(() {
-            _fromAccountError = AppLocalizations.of(context)?.pleaseSelectSourceAccount ?? 'Please select source account';
+            _fromAccountError =
+                AppLocalizations.of(context)?.pleaseSelectSourceAccount ??
+                'Please select source account';
           });
           isValid = false;
         }
@@ -367,23 +395,29 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       case 2: // To Account
         if (_toAccount == null) {
           setState(() {
-            _toAccountError = AppLocalizations.of(context)?.pleaseSelectTargetAccount ?? 'Please select target account';
+            _toAccountError =
+                AppLocalizations.of(context)?.pleaseSelectTargetAccount ??
+                'Please select target account';
           });
           isValid = false;
         } else if (_fromAccount == _toAccount) {
           setState(() {
-            _toAccountError = AppLocalizations.of(context)?.sourceAndTargetSame ?? 'Source and target account cannot be the same';
+            _toAccountError =
+                AppLocalizations.of(context)?.sourceAndTargetSame ??
+                'Source and target account cannot be the same';
           });
           isValid = false;
         } else {
           // Bakiye kontrolü yap
-          final amount = double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0;
+          final amount =
+              double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0;
           if (amount > 0 && _fromAccount != null) {
             // Nakit hesap için bakiye kontrolü
             if (_fromAccount!.isCash && _fromAccount!.cashAccount != null) {
               if (_fromAccount!.cashAccount!.balance < amount) {
                 setState(() {
-                  _toAccountError = 'Yetersiz bakiye. Mevcut: ${_formatCurrency(_fromAccount!.cashAccount!.balance)}';
+                  _toAccountError =
+                      'Yetersiz bakiye. Mevcut: ${_formatCurrency(_fromAccount!.cashAccount!.balance)}';
                 });
                 isValid = false;
               }
@@ -393,15 +427,20 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
               final cardTypeString = _fromAccount!.card!.type.toString();
               if (cardTypeString.contains('debit')) {
                 // Banka kartı bakiye kontrolü
-                final cardProvider = Provider.of<UnifiedProviderV2>(context, listen: false);
+                final cardProvider = Provider.of<UnifiedProviderV2>(
+                  context,
+                  listen: false,
+                );
                 try {
                   final debitCard = cardProvider.debitCards.firstWhere(
                     (card) => card['id'] == _fromAccount!.card!.id,
                   );
-                  final balance = (debitCard['balance'] as num?)?.toDouble() ?? 0.0;
+                  final balance =
+                      (debitCard['balance'] as num?)?.toDouble() ?? 0.0;
                   if (balance < amount) {
                     setState(() {
-                      _toAccountError = 'Yetersiz bakiye. Mevcut: ${_formatCurrency(balance)}';
+                      _toAccountError =
+                          'Yetersiz bakiye. Mevcut: ${_formatCurrency(balance)}';
                     });
                     isValid = false;
                   }
@@ -411,27 +450,37 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
               }
             }
           }
-          
+
           // Kredi kartı fazla ödeme kontrolü (hedef hesap için)
           if (isValid && _toAccount!.isCard && _toAccount!.card != null) {
             final cardTypeString = _toAccount!.card!.type.toString();
             if (cardTypeString.contains('credit')) {
-              final cardProvider = Provider.of<UnifiedProviderV2>(context, listen: false);
+              final cardProvider = Provider.of<UnifiedProviderV2>(
+                context,
+                listen: false,
+              );
               try {
                 final creditCard = cardProvider.creditCards.firstWhere(
                   (card) => card['id'] == _toAccount!.card!.id,
                 );
-                
+
                 // Calculate current debt and check for overpayment
-                final availableLimit = creditCard['availableLimit']?.toDouble() ?? 0.0;
-                final creditLimit = creditCard['creditLimit']?.toDouble() ?? 0.0;
+                final availableLimit =
+                    creditCard['availableLimit']?.toDouble() ?? 0.0;
+                final creditLimit =
+                    creditCard['creditLimit']?.toDouble() ?? 0.0;
                 final currentDebt = creditLimit - availableLimit;
-                
+
                 // If transfer amount is greater than current debt, show overpayment warning
                 if (amount > currentDebt) {
                   final overpaymentAmount = amount - currentDebt;
                   // Show warning but allow user to continue
-                  _showOverpaymentWarning(amount, currentDebt, overpaymentAmount, creditCard['cardName']);
+                  _showOverpaymentWarning(
+                    amount,
+                    currentDebt,
+                    overpaymentAmount,
+                    creditCard['cardName'],
+                  );
                   return; // Don't auto-advance, let user decide
                 }
               } catch (e) {
@@ -467,7 +516,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   }
 
   /// Saves the transfer transaction using v2 provider system
-  /// 
+  ///
   /// **Process Flow:**
   /// 1. Validates required data (accounts, amount)
   /// 2. Extracts account IDs from PaymentMethod objects
@@ -475,28 +524,28 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   /// 4. Detects and reports credit card overpayment
   /// 5. Shows success/error messages
   /// 6. Navigates back on success
-  /// 
+  ///
   /// **Account ID Resolution:**
   /// - Cash accounts: uses cashAccount.id
   /// - Card accounts: uses card.id
   /// - Throws exception if IDs cannot be resolved
-  /// 
+  ///
   /// **Overpayment Detection (Post-Transfer):**
   /// After successful transfer, checks if target is credit card:
   /// - Recalculates current debt = creditLimit - availableLimit
   /// - If transferAmount > originalDebt → overpayment occurred
   /// - Shows enhanced success message with overpayment details
-  /// 
+  ///
   /// **Error Handling:**
   /// - Network errors: Shows error snackbar
   /// - Validation errors: Prevents save operation
   /// - Account resolution errors: Shows specific error message
-  /// 
+  ///
   /// **State Management:**
   /// - Sets loading state during operation
   /// - Clears loading state in finally block
   /// - Updates UI via mounted check
-  /// 
+  ///
   /// **CHANGELOG:**
   /// v2.1.0: Fixed overpayment calculation logic
   /// v2.0.0: Migrated to UnifiedProviderV2.createTransaction()
@@ -512,45 +561,50 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
 
     try {
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
+
       // Get source and target account IDs
       String? sourceAccountId;
       String? targetAccountId;
-      
+
       // Determine source account ID
       if (_fromAccount!.isCash) {
         sourceAccountId = _fromAccount!.cashAccount?.id;
       } else if (_fromAccount!.isCard && _fromAccount!.card != null) {
         sourceAccountId = _fromAccount!.card!.id;
       }
-      
+
       // Determine target account ID
       if (_toAccount!.isCash) {
         targetAccountId = _toAccount!.cashAccount?.id;
       } else if (_toAccount!.isCard && _toAccount!.card != null) {
         targetAccountId = _toAccount!.card!.id;
       }
-      
+
       if (sourceAccountId == null || targetAccountId == null) {
-        throw Exception(AppLocalizations.of(context)?.accountInfoNotFound ?? 'Account information could not be retrieved');
+        throw Exception(
+          AppLocalizations.of(context)?.accountInfoNotFound ??
+              'Account information could not be retrieved',
+        );
       }
-      
+
       // Create transfer using v2 system
       await providerV2.createTransaction(
         type: v2.TransactionType.transfer,
         amount: amount,
-        description: _descriptionController.text.isEmpty ? (AppLocalizations.of(context)?.transfer ?? 'Transfer') : _descriptionController.text,
+        description: _descriptionController.text.isEmpty
+            ? (AppLocalizations.of(context)?.transfer ?? 'Transfer')
+            : _descriptionController.text,
         sourceAccountId: sourceAccountId,
         targetAccountId: targetAccountId,
         transactionDate: _selectedDate,
       );
-      
+
       if (mounted) {
         // Check for overpayment after transfer
         bool isOverpayment = false;
         String? cardName;
         double overpaymentAmount = 0;
-        
+
         if (_toAccount!.isCard && _toAccount!.card != null) {
           final cardTypeString = _toAccount!.card!.type.toString();
           if (cardTypeString.contains('credit')) {
@@ -558,12 +612,13 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
               final creditCard = providerV2.creditCards.firstWhere(
                 (card) => card['id'] == targetAccountId,
               );
-              
+
               // Calculate current debt and check for overpayment
-              final availableLimit = creditCard['availableLimit']?.toDouble() ?? 0.0;
+              final availableLimit =
+                  creditCard['availableLimit']?.toDouble() ?? 0.0;
               final creditLimit = creditCard['creditLimit']?.toDouble() ?? 0.0;
               final currentDebt = creditLimit - availableLimit;
-              
+
               // If transfer amount is greater than current debt, it's overpayment
               if (amount > currentDebt) {
                 isOverpayment = true;
@@ -580,9 +635,9 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isOverpayment 
-                ? 'Transfer tamamlandı! $cardName kartına ${_formatCurrency(overpaymentAmount)} fazla ödeme yapıldı.'
-                : 'Transfer başarıyla tamamlandı: ${_formatCurrency(amount)}',
+              isOverpayment
+                  ? 'Transfer tamamlandı! $cardName kartına ${_formatCurrency(overpaymentAmount)} fazla ödeme yapıldı.'
+                  : 'Transfer başarıyla tamamlandı: ${_formatCurrency(amount)}',
             ),
             backgroundColor: const Color(0xFF34C759),
             duration: Duration(seconds: isOverpayment ? 4 : 2),
@@ -606,12 +661,17 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     }
   }
 
-  void _showOverpaymentWarning(double amount, double currentDebt, double overpaymentAmount, String cardName) {
+  void _showOverpaymentWarning(
+    double amount,
+    double currentDebt,
+    double overpaymentAmount,
+    String cardName,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        
+
         return AlertDialog(
           backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           shape: RoundedRectangleBorder(
@@ -653,16 +713,20 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                 'Bu transfer $cardName kartına fazla ödeme yapacak.',
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF6D6D70),
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Transfer detayları
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF8F8F8),
+                  color: isDark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFF8F8F8),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -732,14 +796,16 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               Text(
                 '💡 Fazla ödeme kartınızda pozitif bakiye oluşturacak. Bu tutar sonraki harcamalarınızda kullanılabilir.',
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF6D6D70),
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -755,7 +821,9 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF6D6D70),
                 ),
               ),
             ),
@@ -764,14 +832,14 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                 Navigator.of(context).pop();
                 // Transfer işlemini devam ettir
                 if (_currentStep < 3) {
-      setState(() {
+                  setState(() {
                     _currentStep++;
-      });
+                  });
                   _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF9500),
@@ -793,4 +861,4 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       },
     );
   }
-} 
+}

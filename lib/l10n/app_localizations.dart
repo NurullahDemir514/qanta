@@ -245,7 +245,7 @@ abstract class AppLocalizations {
   /// Onboarding screen description text
   ///
   /// In en, this message translates to:
-  /// **'Take control of your finances with Qanta. Track expenses, manage budgets, and grow your wealth with smart insights.'**
+  /// **'Your personal finance app. Track expenses, manage cards, monitor stocks, and set budgets.'**
   String get onboardingDescription;
 
   /// Welcome subtitle on home screen
@@ -545,10 +545,10 @@ abstract class AppLocalizations {
   /// Remaining amount label
   ///
   /// In en, this message translates to:
-  /// **'left'**
+  /// **'Remaining:'**
   String get remaining;
 
-  /// Installment
+  /// Installment word
   ///
   /// In en, this message translates to:
   /// **'Installment'**
@@ -800,7 +800,7 @@ abstract class AppLocalizations {
   /// **'Biometric Authentication'**
   String get biometricAuth;
 
-  /// Transactions count
+  /// Transaction count label
   ///
   /// In en, this message translates to:
   /// **'Transactions'**
@@ -1340,11 +1340,11 @@ abstract class AppLocalizations {
   /// **'Expense saved: {amount}'**
   String expenseSaved(String amount);
 
-  /// Error occurred message
+  /// Generic error message
   ///
   /// In en, this message translates to:
-  /// **'Error: {error}'**
-  String errorOccurred(String error);
+  /// **'An error occurred'**
+  String get errorOccurred;
 
   /// Enter amount step title
   ///
@@ -1352,7 +1352,7 @@ abstract class AppLocalizations {
   /// **'Enter Amount'**
   String get enterAmount;
 
-  /// Select category step title
+  /// Select category label
   ///
   /// In en, this message translates to:
   /// **'Select Category'**
@@ -2108,6 +2108,90 @@ abstract class AppLocalizations {
   /// **'Analyze your spending habits'**
   String get financialAnalysisDesc;
 
+  /// Card management feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Card Management'**
+  String get cardManagementTitle;
+
+  /// Card management feature description
+  ///
+  /// In en, this message translates to:
+  /// **'Manage credit cards, debit cards and cash accounts'**
+  String get cardManagementDesc;
+
+  /// Stock tracking feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Tracking'**
+  String get stockTrackingTitle;
+
+  /// Stock tracking feature description
+  ///
+  /// In en, this message translates to:
+  /// **'Track your stock portfolio and investments'**
+  String get stockTrackingDesc;
+
+  /// Budget management feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Management'**
+  String get budgetManagementTitle;
+
+  /// Budget management feature description
+  ///
+  /// In en, this message translates to:
+  /// **'Set budgets and track your spending limits'**
+  String get budgetManagementDesc;
+
+  /// AI insights feature title
+  ///
+  /// In en, this message translates to:
+  /// **'AI Insights'**
+  String get aiInsightsTitle;
+
+  /// AI insights feature description
+  ///
+  /// In en, this message translates to:
+  /// **'Get smart financial recommendations and insights'**
+  String get aiInsightsDesc;
+
+  /// Short expense tracking description
+  ///
+  /// In en, this message translates to:
+  /// **'Record and categorize your daily expenses with detailed tracking'**
+  String get expenseTrackingDescShort;
+
+  /// Short card management description
+  ///
+  /// In en, this message translates to:
+  /// **'Manage credit cards, debit cards and cash accounts in one place'**
+  String get cardManagementDescShort;
+
+  /// Short stock tracking description
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor your stock portfolio with real-time prices and performance'**
+  String get stockTrackingDescShort;
+
+  /// Short financial analysis description
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze spending patterns and financial trends'**
+  String get financialAnalysisDescShort;
+
+  /// Short budget management description
+  ///
+  /// In en, this message translates to:
+  /// **'Set monthly budgets and track your spending limits'**
+  String get budgetManagementDescShort;
+
+  /// Short AI insights description
+  ///
+  /// In en, this message translates to:
+  /// **'Get personalized financial recommendations and insights'**
+  String get aiInsightsDescShort;
+
   /// Language selection page title
   ///
   /// In en, this message translates to:
@@ -2174,7 +2258,7 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get exitCancel;
 
-  /// Back button text
+  /// Back button tooltip
   ///
   /// In en, this message translates to:
   /// **'Back'**
@@ -2312,11 +2396,11 @@ abstract class AppLocalizations {
   /// **'Merchant'**
   String get merchant;
 
-  /// No description provided for @installmentInfo.
+  /// Installment info format
   ///
   /// In en, this message translates to:
-  /// **'Installment Info'**
-  String get installmentInfo;
+  /// **'{current}/{total} Installments'**
+  String installmentInfo(int current, int total);
 
   /// Available credit limit label
   ///
@@ -2480,7 +2564,7 @@ abstract class AppLocalizations {
   /// **'Connection problem occurred'**
   String get connectionError;
 
-  /// Try again button
+  /// Try again button text
   ///
   /// In en, this message translates to:
   /// **'Try Again'**
@@ -2711,7 +2795,7 @@ abstract class AppLocalizations {
   /// No description provided for @netWorth.
   ///
   /// In en, this message translates to:
-  /// **'Net Worth'**
+  /// **'Total Assets'**
   String get netWorth;
 
   /// No description provided for @positive.
@@ -3212,10 +3296,10 @@ abstract class AppLocalizations {
   /// **'2 days ago'**
   String get twoDaysAgo;
 
-  /// Per month indicator
+  /// Per month suffix
   ///
   /// In en, this message translates to:
-  /// **'/month'**
+  /// **'/ month'**
   String get perMonth;
 
   /// Net balance label
@@ -4874,11 +4958,11 @@ abstract class AppLocalizations {
   /// **'All Notifications'**
   String get allNotifications;
 
-  /// Pending notes count
+  /// Pending notes tab
   ///
   /// In en, this message translates to:
-  /// **'{count} pending notes'**
-  String pendingNotes(int count);
+  /// **'Pending'**
+  String get pendingNotes;
 
   /// Add quick note title
   ///
@@ -5041,6 +5125,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stock'**
   String get stockChip;
+
+  /// Daily performance section title
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Performance'**
+  String get dailyPerformance;
+
+  /// Daily label for stock performance
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get daily;
+
+  /// Message when user has no stocks tracked
+  ///
+  /// In en, this message translates to:
+  /// **'No stocks tracked yet'**
+  String get noStocksTracked;
+
+  /// Message when stock data is loading
+  ///
+  /// In en, this message translates to:
+  /// **'Loading stock data...'**
+  String get stockDataLoading;
+
+  /// Instruction to add stocks
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Stocks tab to add stocks'**
+  String get addStocksInstruction;
+
+  /// Add stocks button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add Stocks'**
+  String get addStocks;
+
+  /// Message when there is no stock position
+  ///
+  /// In en, this message translates to:
+  /// **'No Position'**
+  String get noPosition;
+
+  /// Top gainers section description
+  ///
+  /// In en, this message translates to:
+  /// **'Stocks with highest gains today'**
+  String get topGainersDescription;
+
+  /// Market is open status
+  ///
+  /// In en, this message translates to:
+  /// **'Market Open'**
+  String get marketOpen;
+
+  /// Market is closed status
+  ///
+  /// In en, this message translates to:
+  /// **'Market Closed'**
+  String get marketClosed;
+
+  /// Intraday change label
+  ///
+  /// In en, this message translates to:
+  /// **'Intraday Change'**
+  String get intradayChange;
+
+  /// Previous close price label
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Close'**
+  String get previousClose;
+
+  /// Loading stocks data message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading stock data...'**
+  String get loadingStocks;
+
+  /// No stock data available message
+  ///
+  /// In en, this message translates to:
+  /// **'No stock data available'**
+  String get noStockData;
 
   /// Stock sale title
   ///
@@ -5617,6 +5785,522 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Return'**
   String get returnLabel;
+
+  /// Quick notes page title
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Notes'**
+  String get quickNotesTitle;
+
+  /// Pending notes count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending notes'**
+  String pendingNotesCount(int count);
+
+  /// Quick add note section title
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add Note'**
+  String get quickAddNote;
+
+  /// Add note input hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 50₺ grocery shopping'**
+  String get addNoteHint;
+
+  /// Voice recording button
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get voiceButton;
+
+  /// Stop recording button
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stopButton;
+
+  /// Photo capture button
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get photoButton;
+
+  /// Add note button
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addButton;
+
+  /// Processed notes tab
+  ///
+  /// In en, this message translates to:
+  /// **'Processed'**
+  String get processedNotes;
+
+  /// Pending notes section title
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Notes'**
+  String get pendingNotesTitle;
+
+  /// Processed notes section title
+  ///
+  /// In en, this message translates to:
+  /// **'Processed Notes'**
+  String get processedNotesTitle;
+
+  /// Empty state for pending notes
+  ///
+  /// In en, this message translates to:
+  /// **'No pending notes yet\nAdd notes quickly from the field above'**
+  String get noPendingNotes;
+
+  /// Empty state for processed notes
+  ///
+  /// In en, this message translates to:
+  /// **'No notes converted to transactions yet'**
+  String get noProcessedNotes;
+
+  /// Note status pending
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get noteStatusPending;
+
+  /// Note status processed
+  ///
+  /// In en, this message translates to:
+  /// **'Processed'**
+  String get noteStatusProcessed;
+
+  /// Convert to expense button
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get convertToExpense;
+
+  /// Convert to income button
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get convertToIncome;
+
+  /// Delete note button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteNote;
+
+  /// Note added success message
+  ///
+  /// In en, this message translates to:
+  /// **'Note added: {content}'**
+  String noteAddedSuccess(String content);
+
+  /// Note converted success message
+  ///
+  /// In en, this message translates to:
+  /// **'Note successfully converted to transaction'**
+  String get noteConvertedSuccess;
+
+  /// Note deleted success message
+  ///
+  /// In en, this message translates to:
+  /// **'Note deleted'**
+  String get noteDeletedSuccess;
+
+  /// Time now
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get timeNow;
+
+  /// Time minutes ago
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min ago'**
+  String timeMinutesAgo(int minutes);
+
+  /// Time hours ago
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours ago'**
+  String timeHoursAgo(int hours);
+
+  /// Time days ago
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days ago'**
+  String timeDaysAgo(int days);
+
+  /// Cut-off date label
+  ///
+  /// In en, this message translates to:
+  /// **'Cut-off'**
+  String get cutOff;
+
+  /// Payment status - paid
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paid;
+
+  /// Payment status - overdue
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get overdue;
+
+  /// Days left until due date
+  ///
+  /// In en, this message translates to:
+  /// **'days left'**
+  String get daysLeft;
+
+  /// No transactions in statement message
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions in this statement'**
+  String get noTransactionsInStatement;
+
+  /// Loading statements message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading statements...'**
+  String get loadingStatements;
+
+  /// Load more button text
+  ///
+  /// In en, this message translates to:
+  /// **'Load More'**
+  String get loadMore;
+
+  /// Loading more items message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loadingMore;
+
+  /// Current statement section header
+  ///
+  /// In en, this message translates to:
+  /// **'Current Statement'**
+  String get currentStatement;
+
+  /// Past statements section header
+  ///
+  /// In en, this message translates to:
+  /// **'Past Statements'**
+  String get pastStatements;
+
+  /// Future statements section header
+  ///
+  /// In en, this message translates to:
+  /// **'Future Statements'**
+  String get futureStatements;
+
+  /// Statements page title
+  ///
+  /// In en, this message translates to:
+  /// **'Statements'**
+  String get statements;
+
+  /// Garanti BBVA bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Garanti BBVA'**
+  String get garantiBBVA;
+
+  /// İş Bankası bank name
+  ///
+  /// In en, this message translates to:
+  /// **'İş Bankası'**
+  String get isBankasi;
+
+  /// Akbank bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Akbank'**
+  String get akbank;
+
+  /// Ziraat Bankası bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Ziraat Bankası'**
+  String get ziraatBankasi;
+
+  /// VakıfBank bank name
+  ///
+  /// In en, this message translates to:
+  /// **'VakıfBank'**
+  String get vakifBank;
+
+  /// Yapı Kredi bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Yapı Kredi'**
+  String get yapiKredi;
+
+  /// Kuveyt Türk bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Kuveyt Türk'**
+  String get kuveytTurk;
+
+  /// Albaraka Türk bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Albaraka Türk'**
+  String get albarakaTurk;
+
+  /// QNB Finansbank bank name
+  ///
+  /// In en, this message translates to:
+  /// **'QNB Finansbank'**
+  String get qnbFinansbank;
+
+  /// Enpara.com bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Enpara.com'**
+  String get enpara;
+
+  /// Papara bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Papara'**
+  String get papara;
+
+  /// Türkiye Finans bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Türkiye Finans'**
+  String get turkiyeFinans;
+
+  /// TEB bank name
+  ///
+  /// In en, this message translates to:
+  /// **'TEB'**
+  String get teb;
+
+  /// HSBC Türkiye bank name
+  ///
+  /// In en, this message translates to:
+  /// **'HSBC Türkiye'**
+  String get hsbcTurkiye;
+
+  /// ING Türkiye bank name
+  ///
+  /// In en, this message translates to:
+  /// **'ING Türkiye'**
+  String get ingTurkiye;
+
+  /// DenizBank bank name
+  ///
+  /// In en, this message translates to:
+  /// **'DenizBank'**
+  String get denizBank;
+
+  /// AnadoluBank bank name
+  ///
+  /// In en, this message translates to:
+  /// **'AnadoluBank'**
+  String get anadoluBank;
+
+  /// Halkbank bank name
+  ///
+  /// In en, this message translates to:
+  /// **'Halkbank'**
+  String get halkBank;
+
+  /// Qanta Bank fallback name
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta Bank'**
+  String get qantaBank;
+
+  /// Statement operations modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Statement Operations'**
+  String get statementOperations;
+
+  /// Download PDF action
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF'**
+  String get downloadPdf;
+
+  /// Download PDF action subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Download statement as PDF'**
+  String get downloadPdfSubtitle;
+
+  /// Share action
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// Share action subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Share statement'**
+  String get shareSubtitle;
+
+  /// Mark as unpaid action
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Unpaid'**
+  String get markAsUnpaid;
+
+  /// Mark as unpaid action subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Change payment status of this statement'**
+  String get markAsUnpaidSubtitle;
+
+  /// Statement marked as unpaid success message
+  ///
+  /// In en, this message translates to:
+  /// **'Statement marked as unpaid'**
+  String get statementMarkedAsUnpaid;
+
+  /// Error marking statement message
+  ///
+  /// In en, this message translates to:
+  /// **'Error occurred while marking statement'**
+  String get errorMarkingStatement;
+
+  /// PDF export coming soon message
+  ///
+  /// In en, this message translates to:
+  /// **'PDF export feature coming soon'**
+  String get pdfExportComingSoon;
+
+  /// No statements yet message
+  ///
+  /// In en, this message translates to:
+  /// **'No statements yet'**
+  String get noStatementsYet;
+
+  /// Statements will appear after card usage message
+  ///
+  /// In en, this message translates to:
+  /// **'Statements will appear here after card usage'**
+  String get statementsWillAppearAfterUsage;
+
+  /// Installment count format
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Installments'**
+  String installmentCount(int count);
+
+  /// Limit management page title
+  ///
+  /// In en, this message translates to:
+  /// **'Limit Management'**
+  String get limitManagement;
+
+  /// Error message when category or limit is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter category name and set limit'**
+  String get pleaseEnterCategoryAndLimit;
+
+  /// Error message for invalid limit
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid limit'**
+  String get enterValidLimit;
+
+  /// Success message when limit is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Limit saved successfully'**
+  String get limitSavedSuccessfully;
+
+  /// Empty state message when no limits are set
+  ///
+  /// In en, this message translates to:
+  /// **'No limits set yet'**
+  String get noLimitsSetYet;
+
+  /// Empty state description for setting limits
+  ///
+  /// In en, this message translates to:
+  /// **'Set monthly spending limits for categories\nto control your budget'**
+  String get setMonthlySpendingLimits;
+
+  /// Monthly limit label
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Limit:'**
+  String get monthlyLimit;
+
+  /// Exceeded status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Exceeded'**
+  String get exceeded;
+
+  /// Limit exceeded message
+  ///
+  /// In en, this message translates to:
+  /// **'Limit Exceeded!'**
+  String get limitExceeded;
+
+  /// Spent percentage suffix
+  ///
+  /// In en, this message translates to:
+  /// **'spent'**
+  String get spent;
+
+  /// Spent amount label
+  ///
+  /// In en, this message translates to:
+  /// **'Spent:'**
+  String get spentAmount;
+
+  /// Hint text for limit amount input
+  ///
+  /// In en, this message translates to:
+  /// **'2,000'**
+  String get limitAmountHint;
+
+  /// Add new limit bottom sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Limit'**
+  String get addNewLimit;
+
+  /// Monthly limit label
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Limit'**
+  String get monthlyLimitLabel;
+
+  /// Placeholder for limit amount input
+  ///
+  /// In en, this message translates to:
+  /// **'0.00'**
+  String get limitAmountPlaceholder;
+
+  /// Save limit button text
+  ///
+  /// In en, this message translates to:
+  /// **'Save Limit'**
+  String get saveLimit;
+
+  /// Limit label
+  ///
+  /// In en, this message translates to:
+  /// **'Limit'**
+  String get limit;
 }
 
 class _AppLocalizationsDelegate

@@ -60,7 +60,9 @@ class AccountModel {
       case AccountType.credit:
         // For credit cards, available = credit limit - current balance (debt)
         // Note: balance is positive for debt, negative for overpayment
-        return (creditLimit ?? 0.0) - balance;
+        final limit = creditLimit ?? 0.0;
+        final rawAvailable = limit - balance;
+        return rawAvailable.clamp(0.0, limit);
       case AccountType.debit:
       case AccountType.cash:
         // For debit/cash, available = current balance

@@ -24,11 +24,8 @@ class FirebaseDebitCardService {
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return DebitCardModel.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return DebitCardModel.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching debit cards: $e');
@@ -47,10 +44,7 @@ class FirebaseDebitCardService {
       if (!doc.exists) return null;
 
       final data = doc.data() as Map<String, dynamic>;
-      return DebitCardModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
+      return DebitCardModel.fromJson({'id': doc.id, ...data});
     } catch (e) {
       debugPrint('Error fetching debit card: $e');
       rethrow;
@@ -65,10 +59,7 @@ class FirebaseDebitCardService {
 
       final docRef = await FirebaseFirestoreService.addDocument(
         collectionName: _collectionName,
-        data: {
-          ...card.toJson(),
-          'user_id': userId,
-        },
+        data: {...card.toJson(), 'user_id': userId},
       );
       return docRef.id;
     } catch (e) {
@@ -113,13 +104,12 @@ class FirebaseDebitCardService {
           .where('user_id', isEqualTo: FirebaseAuthService.currentUserId)
           .where('is_active', isEqualTo: true)
           .orderBy('created_at', descending: true),
-    ).map((snapshot) => snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return DebitCardModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
-    }).toList());
+    ).map(
+      (snapshot) => snapshot.docs.map((doc) {
+        final data = doc.data();
+        return DebitCardModel.fromJson({'id': doc.id, ...data});
+      }).toList(),
+    );
   }
 
   /// Update debit card balance

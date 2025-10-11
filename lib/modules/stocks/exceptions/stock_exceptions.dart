@@ -1,12 +1,13 @@
 /// Hisse modülü için özel exception sınıfları
+library;
 
 /// Hisse repository exception'ı
 class StockRepositoryException implements Exception {
   final String message;
   final String? code;
-  
+
   const StockRepositoryException(this.message, [this.code]);
-  
+
   @override
   String toString() => 'StockRepositoryException: $message';
 }
@@ -16,9 +17,9 @@ class StockApiException implements Exception {
   final String message;
   final String? code;
   final int? statusCode;
-  
+
   const StockApiException(this.message, [this.code, this.statusCode]);
-  
+
   @override
   String toString() => 'StockApiException: $message';
 }
@@ -27,9 +28,9 @@ class StockApiException implements Exception {
 class StockTransactionException implements Exception {
   final String message;
   final String? code;
-  
+
   const StockTransactionException(this.message, [this.code]);
-  
+
   @override
   String toString() => 'StockTransactionException: $message';
 }
@@ -38,9 +39,9 @@ class StockTransactionException implements Exception {
 class StockValidationException implements Exception {
   final String message;
   final String? field;
-  
+
   const StockValidationException(this.message, [this.field]);
-  
+
   @override
   String toString() => 'StockValidationException: $message';
 }
@@ -48,23 +49,24 @@ class StockValidationException implements Exception {
 /// Hisse bulunamadı exception'ı
 class StockNotFoundException implements Exception {
   final String symbol;
-  
+
   const StockNotFoundException(this.symbol);
-  
+
   @override
-  String toString() => 'StockNotFoundException: Stock with symbol $symbol not found';
+  String toString() =>
+      'StockNotFoundException: Stock with symbol $symbol not found';
 }
 
 /// Yetersiz bakiye exception'ı
 class InsufficientBalanceException implements Exception {
   final double requiredAmount;
   final double availableAmount;
-  
+
   const InsufficientBalanceException(this.requiredAmount, this.availableAmount);
-  
+
   @override
-  String toString() => 
-    'InsufficientBalanceException: Required $requiredAmount, available $availableAmount';
+  String toString() =>
+      'InsufficientBalanceException: Required $requiredAmount, available $availableAmount';
 }
 
 /// Yetersiz hisse miktarı exception'ı
@@ -72,14 +74,14 @@ class InsufficientStockQuantityException implements Exception {
   final String symbol;
   final double requiredQuantity;
   final double availableQuantity;
-  
+
   const InsufficientStockQuantityException(
-    this.symbol, 
-    this.requiredQuantity, 
+    this.symbol,
+    this.requiredQuantity,
     this.availableQuantity,
   );
-  
+
   @override
-  String toString() => 
-    'InsufficientStockQuantityException: Required $requiredQuantity $symbol, available $availableQuantity';
+  String toString() =>
+      'InsufficientStockQuantityException: Required $requiredQuantity $symbol, available $availableQuantity';
 }

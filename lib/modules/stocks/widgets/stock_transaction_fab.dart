@@ -71,6 +71,7 @@ class _StockTransactionFabState extends State<StockTransactionFab> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     // Responsive değerler
     final fabSize = FabPositioning.getFabSize(context);
     final iconSize = FabPositioning.getIconSize(context);

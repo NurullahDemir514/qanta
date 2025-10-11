@@ -80,11 +80,11 @@ class _MiniChartPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    // Renk belirleme
+    // Renk belirleme - tema renklerini kullan
     if (isPositive) {
-      paint.color = Colors.green;
+      paint.color = const Color(0xFF4CAF50); // AppColors.success
     } else {
-      paint.color = Colors.red;
+      paint.color = const Color(0xFFFF4C4C); // AppColors.error
     }
 
     // Veri normalizasyonu
@@ -136,8 +136,8 @@ class _MiniChartPainter extends CustomPainter {
         Offset(0, 0),
         Offset(0, size.height),
         [
-          (isPositive ? Colors.green : Colors.red).withOpacity(0.3),  // Daha görünür
-          (isPositive ? Colors.green : Colors.red).withOpacity(0.0),
+          (isPositive ? const Color(0xFF4CAF50) : const Color(0xFFFF4C4C)).withOpacity(0.3),  // Tema renkleri
+          (isPositive ? const Color(0xFF4CAF50) : const Color(0xFFFF4C4C)).withOpacity(0.0),
         ],
       );
 

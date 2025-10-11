@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import '../../shared/models/account_model.dart';
 import '../../shared/models/transaction_model_v2.dart';
 import 'firebase_auth_service.dart';
@@ -10,29 +9,26 @@ import 'unified_transaction_service.dart';
 /// Migration Service
 /// Handles migration from old structure to new unified structure
 class MigrationService {
-  
   /// Migrate all user data to new structure
   static Future<void> migrateUserData() async {
     try {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
 
-
       // 1. Migrate credit cards
       await _migrateCreditCards(userId);
-      
+
       // 2. Migrate debit cards
       await _migrateDebitCards(userId);
-      
+
       // 3. Migrate cash accounts
       await _migrateCashAccounts(userId);
-      
+
       // 4. Migrate transactions
       await _migrateTransactions(userId);
-      
+
       // 5. Migrate categories
       await _migrateCategories(userId);
-
     } catch (e) {
       rethrow;
     }
@@ -41,7 +37,6 @@ class MigrationService {
   /// Migrate credit cards from old structure to new accounts collection
   static Future<void> _migrateCreditCards(String userId) async {
     try {
-
       // Get old credit cards
       final oldCardsSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -51,7 +46,7 @@ class MigrationService {
 
       for (final doc in oldCardsSnapshot.docs) {
         final data = doc.data();
-        
+
         // Convert to new AccountModel
         final account = AccountModel(
           id: doc.id,
@@ -64,14 +59,15 @@ class MigrationService {
           statementDay: data['statement_day'] as int?,
           dueDay: data['due_day'] as int?,
           isActive: data['is_active'] ?? true,
-          createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          updatedAt: (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          createdAt:
+              (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          updatedAt:
+              (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
         );
 
         // Add to new accounts collection
         await UnifiedAccountService.addAccount(account);
       }
-
     } catch (e) {
       rethrow;
     }
@@ -80,7 +76,6 @@ class MigrationService {
   /// Migrate debit cards from old structure to new accounts collection
   static Future<void> _migrateDebitCards(String userId) async {
     try {
-
       // Get old debit cards
       final oldCardsSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -90,7 +85,7 @@ class MigrationService {
 
       for (final doc in oldCardsSnapshot.docs) {
         final data = doc.data();
-        
+
         // Convert to new AccountModel
         final account = AccountModel(
           id: doc.id,
@@ -100,14 +95,15 @@ class MigrationService {
           bankName: data['bank_name'],
           balance: (data['balance'] as num?)?.toDouble() ?? 0.0,
           isActive: data['is_active'] ?? true,
-          createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          updatedAt: (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          createdAt:
+              (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          updatedAt:
+              (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
         );
 
         // Add to new accounts collection
         await UnifiedAccountService.addAccount(account);
       }
-
     } catch (e) {
       rethrow;
     }
@@ -116,7 +112,6 @@ class MigrationService {
   /// Migrate cash accounts from old structure to new accounts collection
   static Future<void> _migrateCashAccounts(String userId) async {
     try {
-
       // Get old cash accounts
       final oldAccountsSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -126,7 +121,7 @@ class MigrationService {
 
       for (final doc in oldAccountsSnapshot.docs) {
         final data = doc.data();
-        
+
         // Convert to new AccountModel
         final account = AccountModel(
           id: doc.id,
@@ -135,14 +130,15 @@ class MigrationService {
           name: data['name'] ?? 'Cash Account',
           balance: (data['balance'] as num?)?.toDouble() ?? 0.0,
           isActive: data['is_active'] ?? true,
-          createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          updatedAt: (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          createdAt:
+              (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          updatedAt:
+              (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
         );
 
         // Add to new accounts collection
         await UnifiedAccountService.addAccount(account);
       }
-
     } catch (e) {
       rethrow;
     }
@@ -151,7 +147,6 @@ class MigrationService {
   /// Migrate transactions from old structure to new transactions collection
   static Future<void> _migrateTransactions(String userId) async {
     try {
-
       // Get old transactions
       final oldTransactionsSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -161,7 +156,7 @@ class MigrationService {
 
       for (final doc in oldTransactionsSnapshot.docs) {
         final data = doc.data();
-        
+
         // Convert to new TransactionWithDetailsV2
         final transaction = TransactionWithDetailsV2(
           id: doc.id,
@@ -172,19 +167,22 @@ class MigrationService {
           description: data['description'] ?? '',
           categoryId: data['category_id'],
           categoryName: data['category_name'],
-          transactionDate: (data['transaction_date'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          transactionDate:
+              (data['transaction_date'] as Timestamp?)?.toDate() ??
+              DateTime.now(),
           isPaid: data['is_paid'] ?? true,
           installmentId: data['installment_id'],
           installmentNumber: data['installment_number'] as int?,
           totalInstallments: data['total_installments'] as int?,
-          createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          updatedAt: (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          createdAt:
+              (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          updatedAt:
+              (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
         );
 
         // Add to new transactions collection
         await UnifiedTransactionService.addTransaction(transaction);
       }
-
     } catch (e) {
       rethrow;
     }
@@ -193,7 +191,6 @@ class MigrationService {
   /// Migrate categories from old structure to new categories collection
   static Future<void> _migrateCategories(String userId) async {
     try {
-
       // Get old categories
       final oldCategoriesSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -203,7 +200,7 @@ class MigrationService {
 
       for (final doc in oldCategoriesSnapshot.docs) {
         final data = doc.data();
-        
+
         // Convert to new category structure
         final categoryData = {
           'id': doc.id,
@@ -216,8 +213,10 @@ class MigrationService {
           'is_system': data['is_system'] ?? false,
           'is_active': data['is_active'] ?? true,
           'sort_order': data['sort_order'] ?? 0,
-          'created_at': (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          'updated_at': (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          'created_at':
+              (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          'updated_at':
+              (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
         };
 
         // Add to new categories collection
@@ -226,7 +225,6 @@ class MigrationService {
           data: categoryData,
         );
       }
-
     } catch (e) {
       rethrow;
     }
@@ -284,9 +282,9 @@ class MigrationService {
           .get();
 
       // If old structure has data, migration is needed
-      return oldCreditCards.docs.isNotEmpty || 
-             oldDebitCards.docs.isNotEmpty || 
-             oldCashAccounts.docs.isNotEmpty;
+      return oldCreditCards.docs.isNotEmpty ||
+          oldDebitCards.docs.isNotEmpty ||
+          oldCashAccounts.docs.isNotEmpty;
     } catch (e) {
       return false;
     }
@@ -298,14 +296,12 @@ class MigrationService {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
 
-
       // Delete old collections
       await _deleteCollection('users/$userId/credit_cards');
       await _deleteCollection('users/$userId/debit_cards');
       await _deleteCollection('users/$userId/cash_accounts');
       await _deleteCollection('users/$userId/transactions');
       await _deleteCollection('users/$userId/categories');
-
     } catch (e) {
       rethrow;
     }
@@ -316,12 +312,12 @@ class MigrationService {
     try {
       final collection = FirebaseFirestore.instance.collection(collectionPath);
       final batch = FirebaseFirestore.instance.batch();
-      
+
       final snapshot = await collection.get();
       for (final doc in snapshot.docs) {
         batch.delete(doc.reference);
       }
-      
+
       await batch.commit();
     } catch (e) {
       rethrow;

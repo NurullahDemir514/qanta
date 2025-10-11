@@ -6,7 +6,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../shared/models/credit_card_model.dart';
 import '../../../shared/utils/currency_utils.dart';
 
 class EditCreditCardForm extends StatefulWidget {
@@ -119,36 +118,48 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
     final now = DateTime.now();
     final currentMonth = now.month;
     final currentYear = now.year;
-    
+
     // Bu ayın ekstre tarihini hesapla
-    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDate);
-    
+    DateTime currentStatementDate = DateTime(
+      currentYear,
+      currentMonth,
+      statementDate,
+    );
+
     // Bu ayın son ödeme tarihini hesapla
-    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    DateTime currentDueDate = currentStatementDate.add(
+      const Duration(days: 10),
+    );
     // İlk hafta içi günü bul
-    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+    while (currentDueDate.weekday > 5) {
+      // 6=Cumartesi, 7=Pazar
       currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
-    
+
     // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme gününü döndür
     if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
       return currentDueDate.day;
     }
-    
+
     // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
     DateTime nextStatementDate;
     if (currentMonth == 12) {
       nextStatementDate = DateTime(currentYear + 1, 1, statementDate);
     } else {
-      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDate);
+      nextStatementDate = DateTime(
+        currentYear,
+        currentMonth + 1,
+        statementDate,
+      );
     }
-    
+
     // Gelecek ayın son ödeme tarihini hesapla
     DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
-    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+    while (nextDueDate.weekday > 5) {
+      // 6=Cumartesi, 7=Pazar
       nextDueDate = nextDueDate.add(const Duration(days: 1));
     }
-    
+
     return nextDueDate.day;
   }
 
@@ -159,7 +170,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
   Future<void> _submitForm() async {
     _validateForm();
 
-    if (_selectedBankCode == null || 
+    if (_selectedBankCode == null ||
         _creditLimitController.text.trim().isEmpty) {
       return;
     }
@@ -170,16 +181,19 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
 
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
-      
-      final creditLimit = double.tryParse(_creditLimitController.text.replaceAll(',', '')) ?? 0.0;
-      final totalDebt = _totalDebtController.text.trim().isEmpty 
-          ? 0.0 
-          : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+
+      final creditLimit =
+          double.tryParse(_creditLimitController.text.replaceAll(',', '')) ??
+          0.0;
+      final totalDebt = _totalDebtController.text.trim().isEmpty
+          ? 0.0
+          : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ??
+                0.0;
 
       final success = await unifiedProvider.updateAccount(
         accountId: cardId,
-        name: _cardNameController.text.trim().isEmpty 
-            ? null 
+        name: _cardNameController.text.trim().isEmpty
+            ? null
             : _cardNameController.text.trim(),
         bankName: _selectedBankCode,
         balance: totalDebt, // Mevcut borç pozitif olarak kaydedilir
@@ -210,7 +224,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
 
         // Callback çağır
         widget.onSuccess?.call();
-        
+
         // Modal'ı kapat
         Navigator.of(context).pop();
       }
@@ -316,7 +330,9 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                   onPressed: () => Navigator.of(context).pop(),
                   icon: Icon(
                     Icons.close,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -334,7 +350,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                   children: [
                     // Banka Seçimi
                     Text(
-                      'Banka',
+                      AppLocalizations.of(context)!.bank,
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -344,23 +360,34 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        color: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                          color: isDark
+                              ? const Color(0xFF38383A)
+                              : const Color(0xFFE5E5EA),
                         ),
                       ),
                       child: DropdownButtonFormField<String>(
                         value: _selectedBankCode,
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           hintText: 'Banka seçin',
                           hintStyle: GoogleFonts.inter(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
-                        dropdownColor: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                        dropdownColor: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : Colors.white,
                         items: AppConstants.getAvailableBanks().map((bankCode) {
                           return DropdownMenuItem(
                             value: bankCode,
@@ -403,17 +430,23 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                       decoration: InputDecoration(
                         hintText: 'Örn: İş Kartım, Alışveriş Kartı',
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        fillColor: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -443,10 +476,14 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        color: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                          color: isDark
+                              ? const Color(0xFF38383A)
+                              : const Color(0xFFE5E5EA),
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -459,7 +496,9 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                           style: GoogleFonts.inter(
@@ -467,8 +506,12 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                             fontWeight: FontWeight.w500,
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
-                          dropdownColor: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-                          items: List.generate(28, (index) => index + 1).map((int item) {
+                          dropdownColor: isDark
+                              ? const Color(0xFF2C2C2E)
+                              : Colors.white,
+                          items: List.generate(28, (index) => index + 1).map((
+                            int item,
+                          ) {
                             return DropdownMenuItem<int>(
                               value: item,
                               child: Text('$item'),
@@ -501,23 +544,27 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                     TextFormField(
                       controller: _creditLimitController,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
                         hintText: '50000',
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        fillColor: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -535,7 +582,9 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                         if (value == null || value.trim().isEmpty) {
                           return 'Kredi limiti gerekli';
                         }
-                        final amount = double.tryParse(value.replaceAll(',', ''));
+                        final amount = double.tryParse(
+                          value.replaceAll(',', ''),
+                        );
                         if (amount == null || amount <= 0) {
                           return 'Geçerli bir tutar girin';
                         }
@@ -561,23 +610,27 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                     TextFormField(
                       controller: _totalDebtController,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
                         hintText: '0',
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        fillColor: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -615,7 +668,9 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Text(
@@ -638,4 +693,4 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
       ),
     );
   }
-} 
+}

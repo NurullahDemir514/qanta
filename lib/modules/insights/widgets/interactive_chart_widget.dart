@@ -103,7 +103,9 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
             widget.subtitle,
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -145,14 +147,14 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive 
-            ? const Color(0xFF00FFB3).withValues(alpha: 0.1)
-            : Colors.transparent,
+          color: isActive
+              ? const Color(0xFF00FFB3).withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive 
-              ? const Color(0xFF00FFB3)
-              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+            color: isActive
+                ? const Color(0xFF00FFB3)
+                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
@@ -161,9 +163,11 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
             Icon(
               icon,
               size: 16,
-              color: isActive 
-                ? const Color(0xFF00FFB3)
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: isActive
+                  ? const Color(0xFF00FFB3)
+                  : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 6),
             Text(
@@ -171,9 +175,11 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isActive 
-                  ? const Color(0xFF00FFB3)
-                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: isActive
+                    ? const Color(0xFF00FFB3)
+                    : Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -186,7 +192,7 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        return Container(
+        return SizedBox(
           height: 200,
           child: CustomPaint(
             size: const Size(double.infinity, 200),
@@ -201,7 +207,8 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
                 setState(() {
                   _selectedIndex = _selectedIndex == index ? null : index;
                 });
-                if (widget.onDataPointTap != null && index < widget.data.length) {
+                if (widget.onDataPointTap != null &&
+                    index < widget.data.length) {
                   widget.onDataPointTap!(widget.data[index]);
                 }
               },
@@ -214,10 +221,13 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
 
   Widget _buildDataPointDetails(BuildContext context) {
     final data = widget.data[_selectedIndex!];
-    final previousData = _selectedIndex! > 0 ? widget.data[_selectedIndex! - 1] : null;
+    final previousData = _selectedIndex! > 0
+        ? widget.data[_selectedIndex! - 1]
+        : null;
     final change = previousData != null ? data.value - previousData.value : 0;
-    final changePercent = previousData != null && previousData.value != 0 
-      ? (change / previousData.value * 100) : 0;
+    final changePercent = previousData != null && previousData.value != 0
+        ? (change / previousData.value * 100)
+        : 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -243,7 +253,10 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
                 ),
               ),
               Text(
-                '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(data.value)}',
+                Provider.of<ThemeProvider>(
+                  context,
+                  listen: false,
+                ).formatAmount(data.value),
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -259,15 +272,19 @@ class _InteractiveChartWidgetState extends State<InteractiveChartWidget>
                 Icon(
                   change >= 0 ? Icons.trending_up : Icons.trending_down,
                   size: 16,
-                  color: change >= 0 ? const Color(0xFF00FFB3) : const Color(0xFFFF6B6B),
+                  color: change >= 0
+                      ? const Color(0xFF00FFB3)
+                      : const Color(0xFFFF6B6B),
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${change >= 0 ? '+' : ''}${Provider.of<ThemeProvider>(context, listen: false).formatAmount(change)} (%${changePercent.toStringAsFixed(1)})',
+                  '${change >= 0 ? '+' : ''}${Provider.of<ThemeProvider>(context, listen: false).formatAmount(change.toDouble())} (%${changePercent.toStringAsFixed(1)})',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: change >= 0 ? const Color(0xFF00FFB3) : const Color(0xFFFF6B6B),
+                    color: change >= 0
+                        ? const Color(0xFF00FFB3)
+                        : const Color(0xFFFF6B6B),
                   ),
                 ),
               ],
@@ -316,7 +333,7 @@ class ChartPainter extends CustomPainter {
     final maxValue = data.map((d) => d.value).reduce(math.max);
     final minValue = data.map((d) => d.value).reduce(math.min);
     final valueRange = maxValue - minValue;
-    
+
     // Add padding to prevent clipping
     final paddedMax = maxValue + (valueRange * 0.1);
     final paddedMin = minValue - (valueRange * 0.1);
@@ -326,8 +343,12 @@ class ChartPainter extends CustomPainter {
     final points = <Offset>[];
     for (int i = 0; i < data.length; i++) {
       final x = (i / (data.length - 1)) * size.width;
-      final y = size.height - ((data[i].value - paddedMin) / paddedRange) * size.height;
-      points.add(Offset(x, y * animationValue + size.height * (1 - animationValue)));
+      final y =
+          size.height -
+          ((data[i].value - paddedMin) / paddedRange) * size.height;
+      points.add(
+        Offset(x, y * animationValue + size.height * (1 - animationValue)),
+      );
     }
 
     // Draw chart based on type
@@ -357,7 +378,13 @@ class ChartPainter extends CustomPainter {
     _drawDataPoints(canvas, points, paint);
   }
 
-  void _drawLineChart(Canvas canvas, Size size, List<Offset> points, Paint paint, Paint fillPaint) {
+  void _drawLineChart(
+    Canvas canvas,
+    Size size,
+    List<Offset> points,
+    Paint paint,
+    Paint fillPaint,
+  ) {
     if (points.length < 2) return;
 
     final path = Path();
@@ -379,13 +406,23 @@ class ChartPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  void _drawBarChart(Canvas canvas, Size size, Paint paint, Paint fillPaint, double paddedMin, double paddedRange) {
+  void _drawBarChart(
+    Canvas canvas,
+    Size size,
+    Paint paint,
+    Paint fillPaint,
+    double paddedMin,
+    double paddedRange,
+  ) {
     final barWidth = size.width / data.length * 0.6;
     final spacing = size.width / data.length * 0.4;
 
     for (int i = 0; i < data.length; i++) {
       final x = i * (size.width / data.length) + spacing / 2;
-      final height = ((data[i].value - paddedMin) / paddedRange) * size.height * animationValue;
+      final height =
+          ((data[i].value - paddedMin) / paddedRange) *
+          size.height *
+          animationValue;
       final y = size.height - height;
 
       final rect = Rect.fromLTWH(x, y, barWidth, height);
@@ -400,7 +437,13 @@ class ChartPainter extends CustomPainter {
     }
   }
 
-  void _drawAreaChart(Canvas canvas, Size size, List<Offset> points, Paint paint, Paint fillPaint) {
+  void _drawAreaChart(
+    Canvas canvas,
+    Size size,
+    List<Offset> points,
+    Paint paint,
+    Paint fillPaint,
+  ) {
     if (points.length < 2) return;
 
     final path = Path();
@@ -415,7 +458,7 @@ class ChartPainter extends CustomPainter {
     path.close();
 
     canvas.drawPath(path, fillPaint);
-    
+
     // Draw line on top
     final linePath = Path();
     linePath.moveTo(points.first.dx, points.first.dy);
@@ -425,7 +468,12 @@ class ChartPainter extends CustomPainter {
     canvas.drawPath(linePath, paint);
   }
 
-  void _drawTrendLine(Canvas canvas, Size size, List<Offset> points, Paint paint) {
+  void _drawTrendLine(
+    Canvas canvas,
+    Size size,
+    List<Offset> points,
+    Paint paint,
+  ) {
     if (points.length < 2) return;
 
     // Calculate linear regression
@@ -458,7 +506,13 @@ class ChartPainter extends CustomPainter {
     canvas.drawPath(path, trendPaint);
   }
 
-  void _drawComparisonData(Canvas canvas, Size size, Paint paint, double paddedMin, double paddedRange) {
+  void _drawComparisonData(
+    Canvas canvas,
+    Size size,
+    Paint paint,
+    double paddedMin,
+    double paddedRange,
+  ) {
     // Draw previous period data as ghost bars/line
     final comparisonPaint = Paint()
       ..color = const Color(0xFF8E8E93).withValues(alpha: 0.3)
@@ -473,7 +527,7 @@ class ChartPainter extends CustomPainter {
     for (int i = 0; i < points.length; i++) {
       final point = points[i];
       final isSelected = selectedIndex == i;
-      
+
       // Draw point
       final pointPaint = Paint()
         ..color = isSelected ? const Color(0xFF00FFB3) : Colors.white
@@ -519,8 +573,4 @@ class ChartData {
   });
 }
 
-enum ChartType {
-  line,
-  bar,
-  area,
-} 
+enum ChartType { line, bar, area }

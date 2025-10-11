@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- High density screens (hdpi) -->
+    <dimen name="screen_density_factor">1.5</dimen>
+    <dimen name="text_scale_factor">1.1</dimen>
+    <dimen name="layout_margin_small">12dp</dimen>
+    <dimen name="layout_margin_normal">24dp</dimen>
+    <dimen name="layout_margin_large">36dp</dimen>
+</resources>

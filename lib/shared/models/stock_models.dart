@@ -16,6 +16,8 @@ class Stock {
   final double? dayHigh;        // Günün en yüksek fiyatı
   final double? dayLow;         // Günün en düşük fiyatı
   final double? volume;         // İşlem hacmi
+  final double? openPrice;      // Günün açılış fiyatı
+  final double? previousClose;  // Önceki gün kapanış fiyatı
   final List<double>? historicalData; // Geçmiş veri (mini grafik için)
   
   const Stock({
@@ -32,6 +34,8 @@ class Stock {
     this.dayHigh,
     this.dayLow,
     this.volume,
+    this.openPrice,
+    this.previousClose,
     this.historicalData,
   });
   
@@ -52,6 +56,8 @@ class Stock {
       dayHigh: json['dayHigh'] != null ? (json['dayHigh'] as num).toDouble() : null,
       dayLow: json['dayLow'] != null ? (json['dayLow'] as num).toDouble() : null,
       volume: json['volume'] != null ? (json['volume'] as num).toDouble() : null,
+      openPrice: json['openPrice'] != null ? (json['openPrice'] as num).toDouble() : null,
+      previousClose: json['previousClose'] != null ? (json['previousClose'] as num).toDouble() : null,
       historicalData: json['historicalData'] != null 
           ? List<double>.from(json['historicalData'].map((x) => (x as num).toDouble()))
           : null,
@@ -73,6 +79,8 @@ class Stock {
       'dayHigh': dayHigh,
       'dayLow': dayLow,
       'volume': volume,
+      'openPrice': openPrice,
+      'previousClose': previousClose,
       'historicalData': historicalData,
     };
   }

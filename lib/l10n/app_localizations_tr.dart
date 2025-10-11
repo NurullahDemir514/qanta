@@ -82,7 +82,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get onboardingDescription =>
-      'Qanta ile paranızı daha iyi yönetin. Harcamalarınızı takip edin, bütçe yapın ve akıllı önerilerle birikimlerinizi artırın.';
+      'Kişisel finans uygulamanız. Harcamaları takip edin, kartları yönetin, hisseleri izleyin ve bütçe belirleyin.';
 
   @override
   String get welcomeSubtitle => 'Paranızı bugün daha iyi yönetmeye başlayın!';
@@ -245,7 +245,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get budgetUsed => 'Kullanıldı';
 
   @override
-  String get remaining => 'kaldı';
+  String get remaining => 'Kalan:';
 
   @override
   String get installment => 'Taksit';
@@ -655,9 +655,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String errorOccurred(String error) {
-    return 'Hata: $error';
-  }
+  String get errorOccurred => 'Bir hata oluştu';
 
   @override
   String get enterAmount => 'Tutar Girin';
@@ -1047,6 +1045,57 @@ class AppLocalizationsTr extends AppLocalizations {
   String get financialAnalysisDesc => 'Harcama alışkanlıklarınızı analiz edin';
 
   @override
+  String get cardManagementTitle => 'Kart Yönetimi';
+
+  @override
+  String get cardManagementDesc =>
+      'Kredi kartları, banka kartları ve nakit hesapları yönetin';
+
+  @override
+  String get stockTrackingTitle => 'Hisse Takibi';
+
+  @override
+  String get stockTrackingDesc =>
+      'Hisse portföyünüzü ve yatırımlarınızı takip edin';
+
+  @override
+  String get budgetManagementTitle => 'Bütçe Yönetimi';
+
+  @override
+  String get budgetManagementDesc =>
+      'Bütçe belirleyin ve harcama limitlerinizi takip edin';
+
+  @override
+  String get aiInsightsTitle => 'AI Önerileri';
+
+  @override
+  String get aiInsightsDesc => 'Akıllı finansal öneriler ve analizler alın';
+
+  @override
+  String get expenseTrackingDescShort =>
+      'Günlük harcamalarınızı detaylı takiple kaydedin ve kategorilere ayırın';
+
+  @override
+  String get cardManagementDescShort =>
+      'Kredi kartları, banka kartları ve nakit hesapları tek yerde yönetin';
+
+  @override
+  String get stockTrackingDescShort =>
+      'Hisse portföyünüzü gerçek zamanlı fiyatlarla takip edin';
+
+  @override
+  String get financialAnalysisDescShort =>
+      'Harcama alışkanlıklarınızı ve finansal trendleri analiz edin';
+
+  @override
+  String get budgetManagementDescShort =>
+      'Aylık bütçeler belirleyin ve harcama limitlerinizi takip edin';
+
+  @override
+  String get aiInsightsDescShort =>
+      'Kişiselleştirilmiş finansal öneriler ve analizler alın';
+
+  @override
   String get languageSelectionTitle => 'Dil Seçimi';
 
   @override
@@ -1158,7 +1207,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get merchant => 'İşyeri';
 
   @override
-  String get installmentInfo => 'Taksit Bilgisi';
+  String installmentInfo(int current, int total) {
+    return '$current/$total Taksit';
+  }
 
   @override
   String get availableLimit => 'Kullanılabilir Limit';
@@ -1359,7 +1410,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get moreCategories => 'kategori daha';
 
   @override
-  String get netWorth => 'Net Değer';
+  String get netWorth => 'Toplam Varlık';
 
   @override
   String get positive => 'Pozitif';
@@ -1389,7 +1440,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get gallery => 'Galeri';
 
   @override
-  String get deletePhoto => 'Fotoğrafı Sil';
+  String get deletePhoto => 'Profili Kaldır';
 
   @override
   String photoUploadError(String error) {
@@ -1648,7 +1699,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get twoDaysAgo => '2 gün önce';
 
   @override
-  String get perMonth => '/ay';
+  String get perMonth => '/ ay';
 
   @override
   String get net => 'Net';
@@ -2288,88 +2339,88 @@ class AppLocalizationsTr extends AppLocalizations {
   String get day => 'gün';
 
   @override
-  String get firstDay => '1st';
+  String get firstDay => '1.';
 
   @override
-  String get secondDay => '2nd';
+  String get secondDay => '2.';
 
   @override
-  String get thirdDay => '3rd';
+  String get thirdDay => '3.';
 
   @override
-  String get fourthDay => '4th';
+  String get fourthDay => '4.';
 
   @override
-  String get fifthDay => '5th';
+  String get fifthDay => '5.';
 
   @override
-  String get sixthDay => '6th';
+  String get sixthDay => '6.';
 
   @override
-  String get seventhDay => '7th';
+  String get seventhDay => '7.';
 
   @override
-  String get eighthDay => '8th';
+  String get eighthDay => '8.';
 
   @override
-  String get ninthDay => '9th';
+  String get ninthDay => '9.';
 
   @override
-  String get tenthDay => '10th';
+  String get tenthDay => '10.';
 
   @override
-  String get eleventhDay => '11th';
+  String get eleventhDay => '11.';
 
   @override
-  String get twelfthDay => '12th';
+  String get twelfthDay => '12.';
 
   @override
-  String get thirteenthDay => '13th';
+  String get thirteenthDay => '13.';
 
   @override
-  String get fourteenthDay => '14th';
+  String get fourteenthDay => '14.';
 
   @override
-  String get fifteenthDay => '15th';
+  String get fifteenthDay => '15.';
 
   @override
-  String get sixteenthDay => '16th';
+  String get sixteenthDay => '16.';
 
   @override
-  String get seventeenthDay => '17th';
+  String get seventeenthDay => '17.';
 
   @override
-  String get eighteenthDay => '18th';
+  String get eighteenthDay => '18.';
 
   @override
-  String get nineteenthDay => '19th';
+  String get nineteenthDay => '19.';
 
   @override
-  String get twentiethDay => '20th';
+  String get twentiethDay => '20.';
 
   @override
-  String get twentyFirstDay => '21st';
+  String get twentyFirstDay => '21.';
 
   @override
-  String get twentySecondDay => '22nd';
+  String get twentySecondDay => '22.';
 
   @override
-  String get twentyThirdDay => '23rd';
+  String get twentyThirdDay => '23.';
 
   @override
-  String get twentyFourthDay => '24th';
+  String get twentyFourthDay => '24.';
 
   @override
-  String get twentyFifthDay => '25th';
+  String get twentyFifthDay => '25.';
 
   @override
-  String get twentySixthDay => '26th';
+  String get twentySixthDay => '26.';
 
   @override
-  String get twentySeventhDay => '27th';
+  String get twentySeventhDay => '27.';
 
   @override
-  String get twentyEighthDay => '28th';
+  String get twentyEighthDay => '28.';
 
   @override
   String get selectCardType => 'Kart Türü Seçin';
@@ -2537,9 +2588,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get allNotifications => 'Tüm Bildirimler';
 
   @override
-  String pendingNotes(int count) {
-    return '$count bekleyen not';
-  }
+  String get pendingNotes => 'Bekleyen';
 
   @override
   String get addQuickNote => 'Hızlı Not Ekle';
@@ -2639,6 +2688,48 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get stockChip => 'Hisse';
+
+  @override
+  String get dailyPerformance => 'Günlük Performans';
+
+  @override
+  String get daily => 'Günlük';
+
+  @override
+  String get noStocksTracked => 'Henüz hisse takip etmiyorsunuz';
+
+  @override
+  String get stockDataLoading => 'Hisse verileri yükleniyor...';
+
+  @override
+  String get addStocksInstruction => 'Hisse eklemek için Hisse sekmesine gidin';
+
+  @override
+  String get addStocks => 'Hisse Ekle';
+
+  @override
+  String get noPosition => 'Pozisyon Yok';
+
+  @override
+  String get topGainersDescription => 'Gün içinde en çok değerlenen hisseler';
+
+  @override
+  String get marketOpen => 'Piyasa Açık';
+
+  @override
+  String get marketClosed => 'Piyasa Kapalı';
+
+  @override
+  String get intradayChange => 'Gün İçi Değişim';
+
+  @override
+  String get previousClose => 'Önceki Kapanış';
+
+  @override
+  String get loadingStocks => 'Hisse verileri yükleniyor...';
+
+  @override
+  String get noStockData => 'Hisse verisi bulunamadı';
 
   @override
   String get stockSale => 'Hisse Satış';
@@ -2950,4 +3041,278 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get returnLabel => 'Getiri';
+
+  @override
+  String get quickNotesTitle => 'Hızlı Notlar';
+
+  @override
+  String pendingNotesCount(int count) {
+    return '$count bekleyen not';
+  }
+
+  @override
+  String get quickAddNote => 'Hızlı Not Ekle';
+
+  @override
+  String get addNoteHint => 'Örn: 50₺ market alışverişi';
+
+  @override
+  String get voiceButton => 'Ses';
+
+  @override
+  String get stopButton => 'Durdur';
+
+  @override
+  String get photoButton => 'Fotoğraf';
+
+  @override
+  String get addButton => 'Ekle';
+
+  @override
+  String get processedNotes => 'İşlenen';
+
+  @override
+  String get pendingNotesTitle => 'Bekleyen Notlar';
+
+  @override
+  String get processedNotesTitle => 'İşleme Dönüştürülen Notlar';
+
+  @override
+  String get noPendingNotes =>
+      'Henüz bekleyen not yok\nYukarıdaki alandan hızlıca not ekleyin';
+
+  @override
+  String get noProcessedNotes => 'Henüz işleme dönüştürülmüş not yok';
+
+  @override
+  String get noteStatusPending => 'Bekliyor';
+
+  @override
+  String get noteStatusProcessed => 'İşlendi';
+
+  @override
+  String get convertToExpense => 'Harcama';
+
+  @override
+  String get convertToIncome => 'Gelir';
+
+  @override
+  String get deleteNote => 'Sil';
+
+  @override
+  String noteAddedSuccess(String content) {
+    return 'Not eklendi: $content';
+  }
+
+  @override
+  String get noteConvertedSuccess => 'Not başarıyla işleme dönüştürüldü';
+
+  @override
+  String get noteDeletedSuccess => 'Not silindi';
+
+  @override
+  String get timeNow => 'Şimdi';
+
+  @override
+  String timeMinutesAgo(int minutes) {
+    return '$minutes dk önce';
+  }
+
+  @override
+  String timeHoursAgo(int hours) {
+    return '$hours saat önce';
+  }
+
+  @override
+  String timeDaysAgo(int days) {
+    return '$days gün önce';
+  }
+
+  @override
+  String get cutOff => 'Kesim';
+
+  @override
+  String get paid => 'Ödendi';
+
+  @override
+  String get overdue => 'Vadesi geçti';
+
+  @override
+  String get daysLeft => 'gün kaldı';
+
+  @override
+  String get noTransactionsInStatement => 'Bu ekstrede işlem bulunmuyor';
+
+  @override
+  String get loadingStatements => 'Ekstreler yükleniyor...';
+
+  @override
+  String get loadMore => 'Daha Fazla Göster';
+
+  @override
+  String get loadingMore => 'Yükleniyor...';
+
+  @override
+  String get currentStatement => 'Dönem İçi Ekstre';
+
+  @override
+  String get pastStatements => 'Geçmiş Ekstreler';
+
+  @override
+  String get futureStatements => 'Gelecek Ekstreler';
+
+  @override
+  String get statements => 'Ekstreler';
+
+  @override
+  String get garantiBBVA => 'Garanti BBVA';
+
+  @override
+  String get isBankasi => 'İş Bankası';
+
+  @override
+  String get akbank => 'Akbank';
+
+  @override
+  String get ziraatBankasi => 'Ziraat Bankası';
+
+  @override
+  String get vakifBank => 'VakıfBank';
+
+  @override
+  String get yapiKredi => 'Yapı Kredi';
+
+  @override
+  String get kuveytTurk => 'Kuveyt Türk';
+
+  @override
+  String get albarakaTurk => 'Albaraka Türk';
+
+  @override
+  String get qnbFinansbank => 'QNB Finansbank';
+
+  @override
+  String get enpara => 'Enpara.com';
+
+  @override
+  String get papara => 'Papara';
+
+  @override
+  String get turkiyeFinans => 'Türkiye Finans';
+
+  @override
+  String get teb => 'TEB';
+
+  @override
+  String get hsbcTurkiye => 'HSBC Türkiye';
+
+  @override
+  String get ingTurkiye => 'ING Türkiye';
+
+  @override
+  String get denizBank => 'DenizBank';
+
+  @override
+  String get anadoluBank => 'AnadoluBank';
+
+  @override
+  String get halkBank => 'Halkbank';
+
+  @override
+  String get qantaBank => 'Qanta Bank';
+
+  @override
+  String get statementOperations => 'Ekstre İşlemleri';
+
+  @override
+  String get downloadPdf => 'PDF İndir';
+
+  @override
+  String get downloadPdfSubtitle => 'Ekstreyi PDF olarak indir';
+
+  @override
+  String get share => 'Paylaş';
+
+  @override
+  String get shareSubtitle => 'Ekstreyi paylaş';
+
+  @override
+  String get markAsUnpaid => 'Ödenmedi Olarak İşaretle';
+
+  @override
+  String get markAsUnpaidSubtitle => 'Bu ekstrenin ödeme durumunu değiştir';
+
+  @override
+  String get statementMarkedAsUnpaid => 'Ekstre ödenmedi olarak işaretlendi';
+
+  @override
+  String get errorMarkingStatement => 'Ekstre işaretlenirken hata oluştu';
+
+  @override
+  String get pdfExportComingSoon => 'PDF export özelliği yakında eklenecek';
+
+  @override
+  String get noStatementsYet => 'Henüz ekstre bulunmuyor';
+
+  @override
+  String get statementsWillAppearAfterUsage =>
+      'Kart kullanımından sonra ekstreler burada görünecek';
+
+  @override
+  String installmentCount(int count) {
+    return '$count Taksit';
+  }
+
+  @override
+  String get limitManagement => 'Limit Yönetimi';
+
+  @override
+  String get pleaseEnterCategoryAndLimit =>
+      'Lütfen kategori adı girin ve limit belirleyin';
+
+  @override
+  String get enterValidLimit => 'Geçerli bir limit girin';
+
+  @override
+  String get limitSavedSuccessfully => 'Limit başarıyla kaydedildi';
+
+  @override
+  String get noLimitsSetYet => 'Henüz limit belirlenmemiş';
+
+  @override
+  String get setMonthlySpendingLimits =>
+      'Kategoriler için aylık harcama limiti\nbelirleyerek limitinizi kontrol edin';
+
+  @override
+  String get monthlyLimit => 'Aylık Limit:';
+
+  @override
+  String get exceeded => 'Aşıldı';
+
+  @override
+  String get limitExceeded => 'Limit Aşıldı!';
+
+  @override
+  String get spent => 'harcandı';
+
+  @override
+  String get spentAmount => 'Harcanan:';
+
+  @override
+  String get limitAmountHint => '2.000';
+
+  @override
+  String get addNewLimit => 'Yeni Limit Ekle';
+
+  @override
+  String get monthlyLimitLabel => 'Aylık Limit';
+
+  @override
+  String get limitAmountPlaceholder => '0,00';
+
+  @override
+  String get saveLimit => 'Limiti Kaydet';
+
+  @override
+  String get limit => 'Limit';
 }

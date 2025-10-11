@@ -22,7 +22,7 @@ class UnifiedCategoryService {
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final categoryData = {
           ...data,
           'id': doc.id, // Override any existing id with doc.id
@@ -94,10 +94,7 @@ class UnifiedCategoryService {
       await FirebaseFirestoreService.updateDocument(
         collectionName: _collectionName,
         docId: categoryId,
-        data: {
-          'is_active': false,
-          'updated_at': DateTime.now(),
-        },
+        data: {'is_active': false, 'updated_at': DateTime.now()},
       );
 
       return true;

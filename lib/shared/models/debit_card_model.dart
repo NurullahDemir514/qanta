@@ -27,6 +27,9 @@ class DebitCardModel {
 
   // Banka adını al
   String get bankName => AppConstants.getBankName(bankCode);
+  
+  // Localized banka adını al
+  String getLocalizedBankName(dynamic l10n) => AppConstants.getLocalizedBankName(bankCode, l10n);
 
   // Banka renklerini al
   List<Color> get gradientColors => AppConstants.getBankGradientColors(bankCode);

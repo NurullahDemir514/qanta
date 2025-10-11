@@ -10,26 +10,20 @@ import '../widgets/edit_debit_card_form.dart';
 import '../widgets/card_transaction_section.dart';
 import '../../home/bottom_sheets/card_detail_bottom_sheet.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../shared/models/account_model.dart';
 import '../../../core/events/card_events.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../shared/design_system/transaction_design_system.dart';
-import '../../../shared/models/transaction_model.dart';
-import '../widgets/add_debit_card_form.dart';
 
 class DebitCardsTab extends StatefulWidget {
   final AppLocalizations l10n;
 
-  const DebitCardsTab({
-    super.key,
-    required this.l10n
-  });
+  const DebitCardsTab({super.key, required this.l10n});
 
   @override
   State<DebitCardsTab> createState() => _DebitCardsTabState();
 }
 
-class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveClientMixin {
+class _DebitCardsTabState extends State<DebitCardsTab>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
   final PageController _pageController = PageController(
@@ -42,22 +36,28 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
   @override
   void initState() {
     super.initState();
-    
+
     // Card event listener'larını başlat
     _setupCardEventListeners();
-    
-    // Provider referansını sakla
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+    // Provider referansını sakla ve verileri yükle
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         _unifiedProviderV2 = UnifiedProviderV2.instance;
-        
+
         // Provider listener'ı ekle
         if (_providerListener != null) {
           _unifiedProviderV2!.addListener(_providerListener!);
         }
+
+        // Verileri yükle
+        // Veriler zaten splash screen'de yükleniyor
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
-    
+
     // Sayfa değişikliklerini dinle
     _pageController.addListener(() {
       if (!mounted) return;
@@ -68,7 +68,7 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
         });
       }
     });
-    
+
     // Provider listener'ı hazırla (henüz ekleme)
     _providerListener = () {
       if (!mounted) {
@@ -101,17 +101,17 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
         // Yeni kart eklendi - sayfa güncellenmesi provider listener'ı ile halledilecek
       }
     });
-    
+
     cardEvents.listen<DebitCardUpdated>((event) {
       if (mounted) {
         // Kart güncellendi - provider listener'ı ile halledilecek
       }
     });
-    
+
     cardEvents.listen<DebitCardDeleted>((event) {
       if (mounted) {
         // Kart silindi - sayfa güncellenmesi provider listener'ı ile halledilecek
-        
+
         // Eğer silinen kart şu anki sayfadaysa, sayfa pozisyonunu ayarla
         final provider = _unifiedProviderV2;
         if (provider != null && provider.debitCards.isNotEmpty) {
@@ -133,13 +133,13 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
         }
       }
     });
-    
+
     cardEvents.listen<DebitCardBalanceUpdated>((event) {
       if (mounted) {
         // Bakiye güncellendi - provider listener'ı ile halledilecek
       }
     });
-    
+
     // Test event emit et (listener'ların çalışıp çalışmadığını kontrol etmek için)
     Future.delayed(Duration(seconds: 2), () {
       // Test için sahte bir event emit et
@@ -160,13 +160,26 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
     super.dispose();
   }
 
-  void _showCardDetail(BuildContext context, card, ThemeProvider themeProvider, bool isDark) {
-    final gradientColors = AppConstants.getBankGradientColors(card['bankCode'] ?? 'qanta');
-    final accentColor = AppConstants.getBankAccentColor(card['bankCode'] ?? 'qanta');
-    
+  void _showCardDetail(
+    BuildContext context,
+    card,
+    ThemeProvider themeProvider,
+    bool isDark,
+  ) {
+    final gradientColors = AppConstants.getBankGradientColors(
+      card['bankCode'] ?? 'qanta',
+    );
+    final accentColor = AppConstants.getBankAccentColor(
+      card['bankCode'] ?? 'qanta',
+    );
+
     CardDetailBottomSheet.show(
       context,
-      card['cardName'] ?? AppConstants.getBankName(card['bankCode'] ?? 'qanta'),
+      card['cardName'] ??
+          AppConstants.getLocalizedBankName(
+            card['bankCode'] ?? 'qanta',
+            AppLocalizations.of(context)!,
+          ),
       widget.l10n.debit,
       card['maskedCardNumber'] ?? '**** **** **** ****',
       card['balance']?.toDouble() ?? 0.0,
@@ -179,19 +192,20 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
 
   void _showCardActions(BuildContext context, card) {
     HapticFeedback.mediumImpact();
-    
+
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          card['cardName'] ?? AppConstants.getBankName(card['bankCode'] ?? 'qanta'),
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          card['cardName'] ??
+              AppConstants.getLocalizedBankName(
+                card['bankCode'] ?? 'qanta',
+                AppLocalizations.of(context)!,
+              ),
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         message: Text(
-          'Banka Kartı',
+          AppLocalizations.of(context)!.debitCard,
           style: GoogleFonts.inter(
             fontSize: 14,
             color: CupertinoColors.secondaryLabel,
@@ -278,7 +292,7 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
           ),
         ),
         message: Text(
-          '${card['cardName'] ?? AppConstants.getBankName(card['bankCode'] ?? 'qanta')} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.',
+          '${card['cardName'] ?? AppConstants.getLocalizedBankName(card['bankCode'] ?? 'qanta', AppLocalizations.of(context)!)} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.',
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -307,10 +321,7 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
           },
           child: Text(
             AppLocalizations.of(context)?.cancel ?? 'Cancel',
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -319,7 +330,7 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
 
   void _editCard(card) {
     HapticFeedback.lightImpact();
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -340,15 +351,14 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
 
   void _deleteCard(card) async {
     HapticFeedback.heavyImpact();
-    
+
     try {
-      
       if (card['id'] == null || card['id'].toString().isEmpty) {
         return;
       }
-      
+
       final success = await _unifiedProviderV2!.deleteDebitCard(card['id']);
-      
+
       // Başarı snackbarı kaldırıldı
       // if (success && mounted) {
       //   ScaffoldMessenger.of(context).showSnackBar(
@@ -407,7 +417,9 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
                 Icon(
                   Icons.error_outline,
                   size: 64,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.6),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -420,7 +432,9 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
                 Text(
                   unifiedProviderV2.error!,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.6),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -440,13 +454,14 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
             ),
           );
         }
-    
+
         return Consumer<ThemeProvider>(
           builder: (context, themeProvider, child) {
             final isDark = Theme.of(context).brightness == Brightness.dark;
-            
+
             return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(), // Transaction list'in arkadan kayabilmesi için
+              physics:
+                  const BouncingScrollPhysics(), // Transaction list'in arkadan kayabilmesi için
               child: Column(
                 children: [
                   // Banka kartları veya Empty State
@@ -462,14 +477,25 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: GestureDetector(
-                              onTap: () => _showCardDetail(context, card, themeProvider, isDark),
-                              onLongPress: () => _showCardActions(context, card),
+                              onTap: () => _showCardDetail(
+                                context,
+                                card,
+                                themeProvider,
+                                isDark,
+                              ),
+                              onLongPress: () =>
+                                  _showCardActions(context, card),
                               child: SizedBox(
                                 width: double.infinity,
                                 height: 180, // Kredi kartı ile aynı yükseklik
                                 child: DebitCardWidget(
                                   card: card,
-                                  onTap: () => _showCardDetail(context, card, themeProvider, isDark),
+                                  onTap: () => _showCardDetail(
+                                    context,
+                                    card,
+                                    themeProvider,
+                                    isDark,
+                                  ),
                                 ),
                               ),
                             ),
@@ -478,74 +504,116 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
                       ),
                     ),
 
-                  const SizedBox(height: 20),
-                  
-                  // Sayfa göstergesi (dots)
-                  if (unifiedProviderV2.debitCards.length > 1)
-                    Center(
-                      child: SizedBox(
-                        height: 8,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: unifiedProviderV2.debitCards.length,
-                          itemBuilder: (context, index) {
-                            final isActive = index == _currentPage;
-                            final isDark = Theme.of(context).brightness == Brightness.dark;
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              width: isActive ? 24 : 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: isActive 
-                                  ? (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70)) // iOS System Gray
-                                  : (isDark ? const Color(0xFF48484A) : const Color(0xFFAEAEB2)), // iOS System Gray 4/5
-                              ),
-                            );
-                          },
+                    const SizedBox(height: 20),
+
+                    // Sayfa göstergesi (dots)
+                    if (unifiedProviderV2.debitCards.length > 1)
+                      Center(
+                        child: SizedBox(
+                          height: 8,
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: unifiedProviderV2.debitCards.length,
+                            itemBuilder: (context, index) {
+                              final isActive = index == _currentPage;
+                              final isDark =
+                                  Theme.of(context).brightness ==
+                                  Brightness.dark;
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                width: isActive ? 24 : 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  color: isActive
+                                      ? (isDark
+                                            ? const Color(0xFF8E8E93)
+                                            : const Color(
+                                                0xFF6D6D70,
+                                              )) // iOS System Gray
+                                      : (isDark
+                                            ? const Color(0xFF48484A)
+                                            : const Color(
+                                                0xFFAEAEB2,
+                                              )), // iOS System Gray 4/5
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                  
+
                     const SizedBox(height: 30), // CashTab ile aynı spacing
-                  
-                  // Aktif kartın son işlemleri
-                  if (unifiedProviderV2.debitCards.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: CardTransactionSection(
-                        cardId: unifiedProviderV2.debitCards[_currentPage.clamp(0, (unifiedProviderV2.debitCards.length - 1).clamp(0, 999))]['id'],
-                        cardName: unifiedProviderV2.debitCards[_currentPage.clamp(0, (unifiedProviderV2.debitCards.length - 1).clamp(0, 999))]['cardName'],
+                    // Aktif kartın son işlemleri
+                    if (unifiedProviderV2.debitCards.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: CardTransactionSection(
+                          key: ValueKey(unifiedProviderV2.debitCards[_currentPage.clamp(
+                                0,
+                                (unifiedProviderV2.debitCards.length - 1).clamp(
+                                  0,
+                                  999,
+                                ),
+                              )]['id']),
+                          cardId:
+                              unifiedProviderV2.debitCards[_currentPage.clamp(
+                                0,
+                                (unifiedProviderV2.debitCards.length - 1).clamp(
+                                  0,
+                                  999,
+                                ),
+                              )]['id'],
+                          cardName:
+                              unifiedProviderV2.debitCards[_currentPage.clamp(
+                                0,
+                                (unifiedProviderV2.debitCards.length - 1).clamp(
+                                  0,
+                                  999,
+                                ),
+                              )]['cardName'],
+                        ),
                       ),
-                    ),
                   ] else ...[
                     // Kart yoksa empty state - kart alanının yerine
-                    const SizedBox(height: 60), // Üstten boşluk (CashTab ile aynı)
+                    const SizedBox(
+                      height: 60,
+                    ), // Üstten boşluk (CashTab ile aynı)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Column(
                         children: [
                           Icon(
-                              Icons.credit_card_outlined,
+                            Icons.credit_card_outlined,
                             size: 80,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.3),
                           ),
                           const SizedBox(height: 24),
                           Text(
                             'Banka Kartı Yok',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withOpacity(0.8),
+                                ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Banka kartı eklemek için + butonuna dokunun',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withOpacity(0.5),
+                                ),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -562,4 +630,4 @@ class _DebitCardsTabState extends State<DebitCardsTab> with AutomaticKeepAliveCl
       },
     );
   }
-} 
+}

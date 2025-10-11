@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ import '../../core/services/quick_note_notification_service.dart';
 import '../../core/providers/unified_card_provider.dart';
 import '../../core/providers/unified_provider_v2.dart';
 import '../../l10n/app_localizations.dart';
+import '../stocks/providers/stock_provider.dart';
 import '../../shared/widgets/app_page_scaffold.dart';
 import '../../shared/widgets/profile_avatar.dart';
 import '../profile/profile_screen.dart';
@@ -24,15 +26,18 @@ import 'widgets/budget_overview_card.dart';
 import 'widgets/cards_section.dart';
 import 'widgets/recent_transactions_section.dart';
 import 'widgets/quick_notes_card.dart';
-import 'widgets/notifications_section.dart';
+import 'widgets/top_gainers_section.dart';
 import 'utils/greeting_utils.dart';
 import '../../core/providers/profile_provider.dart';
 import '../../shared/widgets/quick_note_dialog.dart';
 import '../../shared/widgets/reminder_checker.dart';
+import '../../modules/advertisement/services/google_ads_real_banner_service.dart';
+import '../../modules/advertisement/config/advertisement_config.dart' as config;
+import '../../modules/advertisement/models/advertisement_models.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
-  
+
   const MainScreen({super.key, this.initialIndex = 0});
 
   @override
@@ -57,7 +62,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       body: Stack(
         children: [
@@ -72,13 +77,9 @@ class _MainScreenState extends State<MainScreen> {
               const StocksScreen(),
             ],
           ),
-          MainTabBar(
-            currentIndex: _currentIndex,
-            onTabChanged: _onTabChanged,
-          ),
+          MainTabBar(currentIndex: _currentIndex, onTabChanged: _onTabChanged),
           if (_currentIndex != 2 && _currentIndex != 5) const TransactionFab(),
-          if (_currentIndex == 2)
-            AddCardFab(currentTabIndex: _currentIndex),
+          if (_currentIndex == 2) AddCardFab(currentTabIndex: _currentIndex),
         ],
       ),
     );
@@ -88,7 +89,7 @@ class _MainScreenState extends State<MainScreen> {
     // This method can be removed now as we're using the actual StatisticsScreen
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
@@ -115,11 +116,7 @@ class _MainScreenState extends State<MainScreen> {
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(
-                icon,
-                size: 40,
-                color: color,
-              ),
+              child: Icon(icon, size: 40, color: color),
             ),
             const SizedBox(height: 16),
             Text(
@@ -135,9 +132,9 @@ class _MainScreenState extends State<MainScreen> {
               l10n.comingSoon,
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: isDark 
-                  ? const Color(0xFF8E8E93)
-                  : const Color(0xFF6D6D70),
+                color: isDark
+                    ? const Color(0xFF8E8E93)
+                    : const Color(0xFF6D6D70),
               ),
             ),
           ],
@@ -155,93 +152,117 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late GoogleAdsRealBannerService _budgetBannerService;
+
   @override
   void initState() {
     super.initState();
+    
+    // Bütçe kartından sonraki banner reklam service'ini başlat
+    _budgetBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.testBanner4.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: true,
+    );
+    
+    // İkinci reklamı hemen yükle
+    _budgetBannerService.loadAd();
+    
     // Initialize providers
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Data already loaded in splash screen, no need to reload
       // Set context for notification service
       QuickNoteNotificationService.setContext(context);
+      
+      debugPrint('🏠 HomeScreen.initState() - Data loading completed');
     });
+  }
+
+  @override
+  void dispose() {
+    _budgetBannerService.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
         final fullName = profileProvider.userName ?? l10n.defaultUserName;
         final firstName = GreetingUtils.getFirstName(fullName);
         final profileImageUrl = profileProvider.profileImageUrl;
-        
+
         return Stack(
           children: [
             AppPageScaffold(
-          title: l10n.greetingHello(firstName),
-          subtitle: GreetingUtils.getGreetingByTime(l10n),
-          titleFontSize: 18,
-          subtitleFontSize: 14,
-          bottomPadding: 125,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: ProfileAvatar(
-                imageUrl: profileImageUrl,
-                userName: fullName,
-                size: 44,
-                showBorder: true,
-                onTap: () {
-                  _navigateToProfile(context);
-                },
-              ),
-            ),
-          ],
-          onRefresh: () async {
-            // Refresh profile data
-            await profileProvider.refresh();
-            
-            // Refresh with V2 provider
-            try {
-              if (!mounted) return;
-              final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-              await providerV2.refresh();
-            } catch (e) {
-            }
-          },
-          body: SliverToBoxAdapter(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double containerWidth = constraints.maxWidth * 1;
-                    return Container(
-                      width: containerWidth,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const BalanceOverviewCard(),
-                          const SizedBox(height: 24),
-                          const NotificationsSection(),
-                          const SizedBox(height: 24),
-                          const BudgetOverviewCard(),
-                          const SizedBox(height: 24),
-                          const CardsSection(),
-                          const SizedBox(height: 24),
-                          const RecentTransactionsSection(),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    );
-                  },
+              title: l10n.greetingHello(firstName),
+              subtitle: GreetingUtils.getGreetingByTime(l10n),
+              titleFontSize: 20, // Daha büyük başlık
+              subtitleFontSize: 13, // Daha küçük alt başlık
+              bottomPadding: 125,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: ProfileAvatar(
+                    imageUrl: profileImageUrl,
+                    userName: fullName,
+                    size: 44,
+                    showBorder: true,
+                    onTap: () {
+                      _navigateToProfile(context);
+                    },
+                  ),
+                ),
+              ],
+              body: SliverToBoxAdapter(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final double containerWidth = constraints.maxWidth * 1;
+                        return SizedBox(
+                          width: containerWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const BalanceOverviewCard(),
+                              // TopGainersSection - Kendi içinde reactive
+                              const Column(
+                                children: [
+                                  SizedBox(height: 20),
+                                  TopGainersSection(),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              const BudgetOverviewCard(),
+                              // Banner reklam - Bütçe kartından sonra (sadece yüklendiyse göster)
+                              if (_budgetBannerService.isLoaded && _budgetBannerService.bannerWidget != null) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                                  height: 50,
+                                  child: _budgetBannerService.bannerWidget!,
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              if (!_budgetBannerService.isLoaded || _budgetBannerService.bannerWidget == null)
+                                const SizedBox(height: 20),
+                              const CardsSection(),
+                              const SizedBox(height: 20),
+                              const RecentTransactionsSection(),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-            ),
-
           ],
         );
       },
@@ -255,10 +276,8 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Navigate to profile screen
   void _navigateToProfile(BuildContext context) {
     // Navigate directly to profile screen
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const ProfileScreen(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const ProfileScreen()));
   }
-} 
+}

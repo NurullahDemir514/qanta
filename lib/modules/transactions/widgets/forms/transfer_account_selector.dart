@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../../models/payment_method.dart';
 import '../../models/card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/providers/unified_provider_v2.dart';
-import '../../../../shared/utils/currency_utils.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/models/account_model.dart';
 import '../../../../shared/models/cash_account.dart';
@@ -32,58 +30,72 @@ class TransferAccountSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Consumer<UnifiedProviderV2>(
       builder: (context, cardProvider, child) {
         // Veritabanından hesapları çek
         final availableAccounts = <PaymentMethod>[];
-        
+
         // Nakit hesabı ekle
         final cashAccounts = cardProvider.cashAccounts;
         if (cashAccounts.isNotEmpty) {
           // Use the first cash account (or you could show all)
           final cashAccount = cashAccounts.first;
-          availableAccounts.add(PaymentMethod(
-            type: PaymentMethodType.cash,
-            cashAccount: _convertAccountToCashAccount(cashAccount),
-          ));
+          availableAccounts.add(
+            PaymentMethod(
+              type: PaymentMethodType.cash,
+              cashAccount: _convertAccountToCashAccount(cashAccount),
+            ),
+          );
         }
-        
+
         // Kredi kartlarını ekle - SADECE HEDEF HESAP İÇİN
         // Kredi kartından transfer yapılamaz, sadece kredi kartına transfer yapılabilir
-        if (!isSourceSelection) { // Hedef hesap seçimi ise kredi kartlarını göster
+        if (!isSourceSelection) {
+          // Hedef hesap seçimi ise kredi kartlarını göster
           for (final creditCardData in cardProvider.creditCards) {
-            availableAccounts.add(PaymentMethod(
-              type: PaymentMethodType.card,
-              card: PaymentCard(
-                id: creditCardData['id'],
-                name: creditCardData['cardName'] ?? 'Kredi Kartı',
-                number: creditCardData['formattedCardNumber'] ?? '**** **** **** ****',
-                type: CardType.credit,
-                bankName: creditCardData['bankName'] ?? '',
-                color: Colors.blue, // Default color
-                expiryDate: '',
+            availableAccounts.add(
+              PaymentMethod(
+                type: PaymentMethodType.card,
+                card: PaymentCard(
+                  id: creditCardData['id'],
+                  name:
+                      creditCardData['cardName'] ??
+                      AppLocalizations.of(context)!.creditCard,
+                  number:
+                      creditCardData['formattedCardNumber'] ??
+                      '**** **** **** ****',
+                  type: CardType.credit,
+                  bankName: creditCardData['bankName'] ?? '',
+                  color: Colors.blue, // Default color
+                  expiryDate: '',
+                ),
               ),
-            ));
+            );
           }
         }
-        
+
         // Banka kartlarını ekle
         for (final debitCardData in cardProvider.debitCards) {
-          availableAccounts.add(PaymentMethod(
-            type: PaymentMethodType.card,
-            card: PaymentCard(
-              id: debitCardData['id'],
-              name: debitCardData['cardName'] ?? 'Banka Kartı',
-              number: debitCardData['maskedCardNumber'] ?? '**** **** **** ****',
-              type: CardType.debit,
-              bankName: debitCardData['bankName'] ?? '',
-              color: Colors.green, // Default color
-              expiryDate: '',
+          availableAccounts.add(
+            PaymentMethod(
+              type: PaymentMethodType.card,
+              card: PaymentCard(
+                id: debitCardData['id'],
+                name:
+                    debitCardData['cardName'] ??
+                    AppLocalizations.of(context)!.debitCard,
+                number:
+                    debitCardData['maskedCardNumber'] ?? '**** **** **** ****',
+                type: CardType.debit,
+                bankName: debitCardData['bankName'] ?? '',
+                color: Colors.green, // Default color
+                expiryDate: '',
+              ),
             ),
-          ));
+          );
         }
-        
+
         // Hariç tutulacak hesabı filtrele
         final filteredAccounts = availableAccounts
             .where((account) => account != excludeAccount)
@@ -105,7 +117,9 @@ class TransferAccountSelector extends StatelessWidget {
                 Icon(
                   Icons.account_balance_wallet_outlined,
                   size: 48,
-                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF6D6D70),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -113,7 +127,9 @@ class TransferAccountSelector extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                    color: isDark
+                        ? const Color(0xFF8E8E93)
+                        : const Color(0xFF6D6D70),
                   ),
                 ),
               ],
@@ -126,7 +142,7 @@ class TransferAccountSelector extends StatelessWidget {
             // Hesap seçenekleri
             ...filteredAccounts.map((account) {
               final isSelected = selectedAccount == account;
-              
+
               if (account.isCash) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -161,7 +177,7 @@ class TransferAccountSelector extends StatelessWidget {
               }
               return const SizedBox.shrink();
             }),
-            
+
             // Error Text
             if (errorText != null) ...[
               const SizedBox(height: 12),
@@ -192,17 +208,17 @@ class TransferAccountSelector extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       decoration: BoxDecoration(
-        color: isSelected 
-          ? color.withOpacity(0.1)
-          : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
+        color: isSelected
+            ? color.withOpacity(0.1)
+            : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSelected 
-            ? color
-            : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)),
+          color: isSelected
+              ? color
+              : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)),
           width: isSelected ? 1.5 : 0.33,
         ),
       ),
@@ -223,15 +239,11 @@ class TransferAccountSelector extends StatelessWidget {
                     color: color.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: color, size: 20),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Text Content
                 Expanded(
                   child: Column(
@@ -242,9 +254,9 @@ class TransferAccountSelector extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: isSelected 
-                            ? color
-                            : (isDark ? Colors.white : Colors.black),
+                          color: isSelected
+                              ? color
+                              : (isDark ? Colors.white : Colors.black),
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -256,22 +268,25 @@ class TransferAccountSelector extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: isDark 
-                                ? const Color(0xFF8E8E93)
-                                : const Color(0xFF6D6D70),
+                              color: isDark
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
                               letterSpacing: -0.1,
                             ),
                           ),
                           if (balance != null) ...[
                             const Spacer(),
                             Text(
-                              Provider.of<ThemeProvider>(context, listen: false).formatAmount(balance),
+                              Provider.of<ThemeProvider>(
+                                context,
+                                listen: false,
+                              ).formatAmount(balance),
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: isDark 
-                                  ? const Color(0xFF8E8E93)
-                                  : const Color(0xFF6D6D70),
+                                color: isDark
+                                    ? const Color(0xFF8E8E93)
+                                    : const Color(0xFF6D6D70),
                                 letterSpacing: -0.1,
                               ),
                             ),
@@ -297,17 +312,17 @@ class TransferAccountSelector extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       decoration: BoxDecoration(
-        color: isSelected 
-          ? card.color.withOpacity(0.1)
-          : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
+        color: isSelected
+            ? card.color.withOpacity(0.1)
+            : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSelected 
-            ? card.color
-            : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)),
+          color: isSelected
+              ? card.color
+              : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)),
           width: isSelected ? 1.5 : 0.33,
         ),
       ),
@@ -334,9 +349,9 @@ class TransferAccountSelector extends StatelessWidget {
                     size: 20,
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Card Info
                 Expanded(
                   child: Column(
@@ -347,9 +362,9 @@ class TransferAccountSelector extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: isSelected 
-                            ? card.color
-                            : (isDark ? Colors.white : Colors.black),
+                          color: isSelected
+                              ? card.color
+                              : (isDark ? Colors.white : Colors.black),
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -361,9 +376,9 @@ class TransferAccountSelector extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: isDark 
-                                ? const Color(0xFF8E8E93)
-                                : const Color(0xFF6D6D70),
+                              color: isDark
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
                               letterSpacing: -0.1,
                             ),
                           ),
@@ -374,9 +389,9 @@ class TransferAccountSelector extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: isDark 
-                                ? const Color(0xFF8E8E93)
-                                : const Color(0xFF6D6D70),
+                              color: isDark
+                                  ? const Color(0xFF8E8E93)
+                                  : const Color(0xFF6D6D70),
                               letterSpacing: -0.1,
                             ),
                           ),
@@ -393,11 +408,15 @@ class TransferAccountSelector extends StatelessWidget {
     );
   }
 
-  String _getCardBalanceText(PaymentCard card, UnifiedProviderV2 cardProvider, BuildContext context) {
+  String _getCardBalanceText(
+    PaymentCard card,
+    UnifiedProviderV2 cardProvider,
+    BuildContext context,
+  ) {
     try {
       // Kart tipine göre bakiye bilgisi al
       final cardTypeString = card.type.toString();
-      
+
       if (cardTypeString.contains('credit')) {
         // Kredi kartı için kullanılabilir limit
         final creditCard = cardProvider.creditCards.firstWhere(
@@ -409,7 +428,10 @@ class TransferAccountSelector extends StatelessWidget {
         final debitCard = cardProvider.debitCards.firstWhere(
           (c) => c['id'] == card.id,
         );
-        return Provider.of<ThemeProvider>(context, listen: false).formatAmount(debitCard['balance']);
+        return Provider.of<ThemeProvider>(
+          context,
+          listen: false,
+        ).formatAmount(debitCard['balance']);
       }
     } catch (e) {
       // Kart bulunamazsa boş string döndür
@@ -429,4 +451,4 @@ class TransferAccountSelector extends StatelessWidget {
       updatedAt: account.updatedAt,
     );
   }
-} 
+}

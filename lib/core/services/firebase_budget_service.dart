@@ -13,16 +13,14 @@ class FirebaseBudgetService {
     try {
       final snapshot = await FirebaseFirestoreService.getDocuments(
         collectionName: _collectionName,
-        query: FirebaseFirestoreService.getCollection(_collectionName)
-            .orderBy('created_at', descending: true),
+        query: FirebaseFirestoreService.getCollection(
+          _collectionName,
+        ).orderBy('created_at', descending: true),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return BudgetModel.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return BudgetModel.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching budgets: $e');
@@ -41,10 +39,7 @@ class FirebaseBudgetService {
       if (!doc.exists) return null;
 
       final data = doc.data() as Map<String, dynamic>;
-      return BudgetModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
+      return BudgetModel.fromJson({'id': doc.id, ...data});
     } catch (e) {
       debugPrint('Error fetching budget: $e');
       rethrow;
@@ -96,15 +91,15 @@ class FirebaseBudgetService {
   static Stream<List<BudgetModel>> getBudgetsStream() {
     return FirebaseFirestoreService.getDocumentsStream(
       collectionName: _collectionName,
-      query: FirebaseFirestoreService.getCollection(_collectionName)
-          .orderBy('created_at', descending: true),
-    ).map((snapshot) => snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return BudgetModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
-    }).toList());
+      query: FirebaseFirestoreService.getCollection(
+        _collectionName,
+      ).orderBy('created_at', descending: true),
+    ).map(
+      (snapshot) => snapshot.docs.map((doc) {
+        final data = doc.data();
+        return BudgetModel.fromJson({'id': doc.id, ...data});
+      }).toList(),
+    );
   }
 
   /// Get budgets for specific month and year
@@ -118,17 +113,14 @@ class FirebaseBudgetService {
 
       final snapshot = await FirebaseFirestoreService.getDocuments(
         collectionName: _collectionName,
-        query: FirebaseFirestoreService.getCollection(_collectionName)
-            .where('month', isEqualTo: month)
-            .where('year', isEqualTo: year),
+        query: FirebaseFirestoreService.getCollection(
+          _collectionName,
+        ).where('month', isEqualTo: month).where('year', isEqualTo: year),
       );
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return BudgetModel.fromJson({
-          'id': doc.id,
-          ...data,
-        });
+        final data = doc.data();
+        return BudgetModel.fromJson({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       debugPrint('Error fetching budgets for month: $e');
@@ -155,11 +147,8 @@ class FirebaseBudgetService {
       if (snapshot.docs.isEmpty) return null;
 
       final doc = snapshot.docs.first;
-      final data = doc.data() as Map<String, dynamic>;
-      return BudgetModel.fromJson({
-        'id': doc.id,
-        ...data,
-      });
+      final data = doc.data();
+      return BudgetModel.fromJson({'id': doc.id, ...data});
     } catch (e) {
       debugPrint('Error fetching budget by category: $e');
       rethrow;
@@ -192,7 +181,7 @@ class FirebaseBudgetService {
   }) async {
     try {
       final budgets = await getBudgetsForMonth(year: year, month: month);
-      
+
       double totalBudget = 0;
       double totalSpent = 0;
       int budgetCount = budgets.length;
@@ -212,7 +201,9 @@ class FirebaseBudgetService {
         'remaining': totalBudget - totalSpent,
         'budgetCount': budgetCount,
         'exceededBudgets': exceededBudgets,
-        'utilizationPercentage': totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0,
+        'utilizationPercentage': totalBudget > 0
+            ? (totalSpent / totalBudget) * 100
+            : 0,
       };
     } catch (e) {
       debugPrint('Error getting budget summary: $e');
@@ -239,7 +230,9 @@ class FirebaseBudgetService {
   static Future<List<BudgetModel>> getExceededBudgets() async {
     try {
       final budgets = await getBudgets();
-      return budgets.where((budget) => budget.spentAmount > budget.amount).toList();
+      return budgets
+          .where((budget) => budget.spentAmount > budget.amount)
+          .toList();
     } catch (e) {
       debugPrint('Error getting exceeded budgets: $e');
       return [];

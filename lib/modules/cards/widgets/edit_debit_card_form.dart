@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../shared/models/debit_card_model.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 
@@ -14,11 +12,7 @@ class EditDebitCardForm extends StatefulWidget {
   final dynamic debitCard; // Can be DebitCardModel or Map
   final VoidCallback? onSuccess;
 
-  const EditDebitCardForm({
-    super.key,
-    required this.debitCard,
-    this.onSuccess,
-  });
+  const EditDebitCardForm({super.key, required this.debitCard, this.onSuccess});
 
   @override
   State<EditDebitCardForm> createState() => _EditDebitCardFormState();
@@ -91,8 +85,7 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
   Future<void> _submitForm() async {
     _validateForm();
 
-    if (_selectedBankCode == null || 
-        _balanceController.text.trim().isEmpty) {
+    if (_selectedBankCode == null || _balanceController.text.trim().isEmpty) {
       return;
     }
 
@@ -102,13 +95,14 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
 
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
-      
-      final balance = double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0;
+
+      final balance =
+          double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0;
 
       final updatedAccount = await unifiedProvider.updateAccount(
         accountId: cardId,
-        name: _cardNameController.text.trim().isEmpty 
-            ? null 
+        name: _cardNameController.text.trim().isEmpty
+            ? null
             : _cardNameController.text.trim(),
         bankName: _selectedBankCode,
         balance: balance,
@@ -136,7 +130,7 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
 
         // Callback çağır
         widget.onSuccess?.call();
-        
+
         // Modal'ı kapat
         Navigator.of(context).pop();
       }
@@ -242,7 +236,9 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                   onPressed: () => Navigator.of(context).pop(),
                   icon: Icon(
                     Icons.close,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -260,7 +256,7 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                   children: [
                     // Banka Seçimi
                     Text(
-                      'Banka',
+                      AppLocalizations.of(context)!.bank,
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -270,23 +266,34 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        color: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                          color: isDark
+                              ? const Color(0xFF38383A)
+                              : const Color(0xFFE5E5EA),
                         ),
                       ),
                       child: DropdownButtonFormField<String>(
                         value: _selectedBankCode,
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           hintText: 'Banka seçin',
                           hintStyle: GoogleFonts.inter(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
-                        dropdownColor: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                        dropdownColor: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : Colors.white,
                         items: AppConstants.getAvailableBanks().map((bankCode) {
                           return DropdownMenuItem(
                             value: bankCode,
@@ -329,17 +336,23 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                       decoration: InputDecoration(
                         hintText: 'Örn: Vadesiz Hesap, Ana Kart',
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        fillColor: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -372,22 +385,30 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _balanceController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [ThousandsSeparatorInputFormatter()],
                       decoration: InputDecoration(
                         hintText: '0,00',
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                        fillColor: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF2F2F7),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                            color: isDark
+                                ? const Color(0xFF38383A)
+                                : const Color(0xFFE5E5EA),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -405,7 +426,9 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                         if (value == null || value.trim().isEmpty) {
                           return 'Bakiye gerekli';
                         }
-                        final amount = double.tryParse(value.replaceAll(',', ''));
+                        final amount = double.tryParse(
+                          value.replaceAll(',', ''),
+                        );
                         if (amount == null || amount < 0) {
                           return 'Geçerli bir tutar girin';
                         }
@@ -435,7 +458,9 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Text(
@@ -458,4 +483,4 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
       ),
     );
   }
-} 
+}

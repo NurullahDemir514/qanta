@@ -28,7 +28,7 @@ class StatementSummary {
   });
 
   /// Create from JSON with safe date parsing
-  /// 
+  ///
   /// **Updated:** Uses DateUtils for consistent Firebase date handling
   factory StatementSummary.fromJson(Map<String, dynamic> json) {
     return StatementSummary(
@@ -40,15 +40,20 @@ class StatementSummary {
       remainingAmount: (json['remaining_amount'] as num).toDouble(),
       transactionCount: json['transaction_count'] as int,
       upcomingInstallments: (json['upcoming_installments'] as List<dynamic>)
-          .map((item) => UpcomingInstallment.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                UpcomingInstallment.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
       isPaid: json['is_paid'] as bool? ?? false,
-      paidAt: json['paid_at'] != null ? DateUtils.fromFirebase(json['paid_at']) : null,
+      paidAt: json['paid_at'] != null
+          ? DateUtils.fromFirebase(json['paid_at'])
+          : null,
     );
   }
 
   /// Convert to JSON with consistent date formatting
-  /// 
+  ///
   /// **Updated:** Uses DateUtils for consistent Firebase storage
   Map<String, dynamic> toJson() {
     return {
@@ -59,7 +64,9 @@ class StatementSummary {
       'paid_amount': paidAmount,
       'remaining_amount': remainingAmount,
       'transaction_count': transactionCount,
-      'upcoming_installments': upcomingInstallments.map((item) => item.toJson()).toList(),
+      'upcoming_installments': upcomingInstallments
+          .map((item) => item.toJson())
+          .toList(),
       'is_paid': isPaid,
       'paid_at': paidAt != null ? DateUtils.toIso8601(paidAt!) : null,
     };
@@ -140,6 +147,7 @@ class UpcomingInstallment {
   final String description;
   final double amount;
   final DateTime dueDate;
+  final DateTime? startDate; // Transaction date when it was made
   final int installmentNumber;
   final int totalInstallments;
   final bool isPaid;
@@ -152,6 +160,7 @@ class UpcomingInstallment {
     required this.description,
     required this.amount,
     required this.dueDate,
+    this.startDate, // Optional for backward compatibility
     required this.installmentNumber,
     required this.totalInstallments,
     this.isPaid = false,
@@ -161,7 +170,7 @@ class UpcomingInstallment {
   });
 
   /// Create from JSON with safe date parsing
-  /// 
+  ///
   /// **Updated:** Uses DateUtils for consistent Firebase date handling
   factory UpcomingInstallment.fromJson(Map<String, dynamic> json) {
     return UpcomingInstallment(
@@ -169,6 +178,9 @@ class UpcomingInstallment {
       description: json['description'] as String,
       amount: (json['amount'] as num).toDouble(),
       dueDate: DateUtils.fromFirebase(json['due_date']),
+      startDate: json['start_date'] != null 
+          ? DateUtils.fromFirebase(json['start_date'])
+          : null,
       installmentNumber: json['installment_number'] as int,
       totalInstallments: json['total_installments'] as int,
       isPaid: json['is_paid'] as bool? ?? false,
@@ -179,7 +191,7 @@ class UpcomingInstallment {
   }
 
   /// Convert to JSON with consistent date formatting
-  /// 
+  ///
   /// **Updated:** Uses DateUtils for consistent Firebase storage
   Map<String, dynamic> toJson() {
     return {
@@ -187,6 +199,7 @@ class UpcomingInstallment {
       'description': description,
       'amount': amount,
       'due_date': DateUtils.toIso8601(dueDate),
+      'start_date': startDate != null ? DateUtils.toIso8601(startDate!) : null,
       'installment_number': installmentNumber,
       'total_installments': totalInstallments,
       'is_paid': isPaid,
@@ -201,22 +214,27 @@ class UpcomingInstallment {
     return '$installmentNumber/$totalInstallments Taksit';
   }
 
+  /// Get localized installment display text
+  String getLocalizedDisplayText(dynamic l10n) {
+    return '$installmentNumber/$totalInstallments ${l10n.installment}';
+  }
+
   /// Check if this installment is overdue
-  /// 
+  ///
   /// **Updated:** Uses DateUtils for consistent date comparison
   bool get isOverdue {
     return !isPaid && DateUtils.isOverdue(dueDate);
   }
 
   /// Check if this installment is due soon
-  /// 
+  ///
   /// **New:** Consistent with other date utilities
   bool get isDueSoon {
     return !isPaid && DateUtils.isDueSoon(dueDate);
   }
 
   /// Get days until due date
-  /// 
+  ///
   /// **New:** Consistent date calculation
   int get daysUntilDue {
     return DateUtils.getDaysUntilDue(dueDate);
@@ -226,7 +244,11 @@ class UpcomingInstallment {
   String get displayTitle => categoryName ?? description;
 
   /// Get display subtitle
-  String get displaySubtitle => '${installmentNumber}/${totalInstallments} Taksit';
+  String get displaySubtitle => '$installmentNumber/$totalInstallments Taksit';
+
+  /// Get localized display subtitle
+  String getLocalizedDisplaySubtitle(dynamic l10n) =>
+      '$installmentNumber/$totalInstallments ${l10n.installment}';
 
   @override
   String toString() {

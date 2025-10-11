@@ -5,11 +5,12 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/account_model.dart';
 import '../../../core/events/card_events.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../shared/design_system/transaction_design_system.dart';
-import '../../../shared/models/transaction_model.dart';
 import '../widgets/cash_balance_card.dart';
 import '../widgets/card_transaction_section.dart';
 import '../services/cash_management_service.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
+import '../../advertisement/config/advertisement_config.dart' as config;
+import '../../advertisement/models/advertisement_models.dart';
 
 class CashTab extends StatefulWidget {
   const CashTab({super.key});
@@ -19,15 +20,46 @@ class CashTab extends StatefulWidget {
 }
 
 class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
+  late GoogleAdsRealBannerService _cashBannerService;
+  
   @override
   bool get wantKeepAlive => true;
+  
   @override
   void initState() {
     super.initState();
     // 🔔 Cash account event listener'ını kur
     _setupCashEventListeners();
+    
+    // Cash tab banner reklamını başlat
+    _cashBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.testBanner2.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: true,
+    );
+    
+    debugPrint('🔄 CASH TAB Banner reklam yükleniyor...');
+    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.testBanner2.bannerAdUnitId}');
+    debugPrint('🧪 Test Mode: true');
+    debugPrint('📍 Konum: Kartlarım - Cash Tab');
+    
+    // Verileri yükle
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        final provider = UnifiedProviderV2.instance;
+        // Veriler zaten splash screen'de yükleniyor
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
+    
+    // Cash tab reklamını 10 saniye geciktir
+    Future.delayed(const Duration(seconds: 10), () {
+      _cashBannerService.loadAd();
+    });
   }
-  
+
   void _setupCashEventListeners() {
     cardEvents.listen<CashAccountUpdated>((event) {
       if (mounted) {
@@ -38,17 +70,25 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
   }
 
   @override
+  void dispose() {
+    _cashBannerService.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context); // AutomaticKeepAliveClientMixin için gerekli
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Consumer2<ThemeProvider, UnifiedProviderV2>(
       builder: (context, themeProvider, providerV2, child) {
         // Get cash accounts from v2 provider
-        final cashAccounts = providerV2.accounts.where((a) => a.type == AccountType.cash).toList();
+        final cashAccounts = providerV2.accounts
+            .where((a) => a.type == AccountType.cash)
+            .toList();
         final hasCashAccount = cashAccounts.isNotEmpty;
         final cashBalance = hasCashAccount ? cashAccounts.first.balance : 0.0;
-        
+
         // Loading durumunda normal UI göster
         // if (providerV2.isLoading) {
         //   return _buildLoadingSkeleton(themeProvider);
@@ -91,10 +131,20 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
                 ),
               ),
 
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 20),
-              ),
-              
+              // Banner reklam - Cash kartından sonra (sadece yüklendiyse göster)
+              if (_cashBannerService.isLoaded && _cashBannerService.bannerWidget != null) ...[
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                SliverToBoxAdapter(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 50,
+                    child: _cashBannerService.bannerWidget!,
+                  ),
+                ),
+              ],
+
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
               // Cash Transactions Section
               SliverToBoxAdapter(
                 child: Padding(
@@ -108,7 +158,9 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
             ] else ...[
               // Empty state - cash account yoksa (çok nadir durum)
               const SliverToBoxAdapter(
-                child: SizedBox(height: 60), // Üstten boşluk (diğer tab'larla aynı)
+                child: SizedBox(
+                  height: 60,
+                ), // Üstten boşluk (diğer tab'larla aynı)
               ),
               SliverToBoxAdapter(
                 child: Padding(
@@ -118,21 +170,27 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
                       Icon(
                         Icons.account_balance_wallet_outlined,
                         size: 80,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.3),
                       ),
                       const SizedBox(height: 24),
                       Text(
                         'Nakit Hesabı Yok',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.8),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Nakit hesabınız bulunamadı',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.6),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -146,7 +204,6 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
       },
     );
   }
-
 
   Widget _buildErrorState(UnifiedProviderV2 providerV2, AppLocalizations l10n) {
     return Center(
@@ -183,4 +240,4 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
-} 
+}

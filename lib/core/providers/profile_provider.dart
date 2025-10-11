@@ -23,18 +23,37 @@ class ProfileProvider extends ChangeNotifier {
   Future<void> _loadProfileData() async {
     try {
       final user = FirebaseAuthService.currentUser;
+      debugPrint('👤 ProfileProvider._loadProfileData() - Loading profile data:');
+      debugPrint('   User: ${user?.email}');
+      debugPrint('   User ID: ${user?.uid}');
+      
       if (user != null) {
         _userName = user.displayName;
         _userEmail = user.email;
-        
+
         // Load cached profile image URL
+        debugPrint('🖼️ Loading cached profile image...');
         await ProfileImageService.instance.loadCachedImageUrl();
-        _profileImageUrl = ProfileImageService.instance.getProfileImageUrl();
+        _profileImageUrl = await ProfileImageService.instance.getProfileImageUrl();
         
+        // If no cached image, try to load from SharedPreferences
+        if (_profileImageUrl == null) {
+          debugPrint('🔄 No cached image found, checking SharedPreferences...');
+          await ProfileImageService.instance.loadCachedImageUrl();
+          _profileImageUrl = await ProfileImageService.instance.getProfileImageUrl();
+        }
+        
+        debugPrint('✅ Profile data loaded:');
+        debugPrint('   Name: $_userName');
+        debugPrint('   Email: $_userEmail');
+        debugPrint('   Profile Image URL: $_profileImageUrl');
+
         notifyListeners();
+      } else {
+        debugPrint('❌ No user found - cannot load profile data');
       }
     } catch (e) {
-      debugPrint('Error loading profile data: $e');
+      debugPrint('❌ Error loading profile data: $e');
     }
   }
 
@@ -51,7 +70,6 @@ class ProfileProvider extends ChangeNotifier {
 
     try {
       await _loadProfileData();
-    } catch (e) {
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -73,15 +91,15 @@ class ProfileProvider extends ChangeNotifier {
   /// Profil verilerini temizle (logout)
   Future<void> clearProfile() async {
     try {
-      // Clear profile image cache
+      // Clear profile image memory cache only (keep SharedPreferences)
       await ProfileImageService.instance.clearCache();
-      
+
       // Clear image cache
       await ImageCacheService.instance.clearCache();
     } catch (e) {
       debugPrint('Error clearing profile image cache: $e');
     }
-    
+
     _profileImageUrl = null;
     _userName = null;
     _userEmail = null;

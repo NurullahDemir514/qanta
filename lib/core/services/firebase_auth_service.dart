@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import '../firebase_client.dart';
 
 /// Firebase Authentication Service
@@ -90,7 +89,7 @@ class FirebaseAuthService {
       if (user == null) {
         throw Exception('No user is currently signed in');
       }
-      
+
       await user.updatePassword(newPassword);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -114,7 +113,6 @@ class FirebaseAuthService {
       if (photoURL != null) {
         await user.updatePhotoURL(photoURL);
       }
-      
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
@@ -140,7 +138,6 @@ class FirebaseAuthService {
       );
 
       await user.reauthenticateWithCredential(credential);
-      
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
@@ -164,7 +161,9 @@ class FirebaseAuthService {
       case 'user-disabled':
         return Exception('Bu hesap devre dışı bırakılmış.');
       case 'too-many-requests':
-        return Exception('Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.');
+        return Exception(
+          'Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.',
+        );
       case 'operation-not-allowed':
         return Exception('Bu işlem şu anda izin verilmiyor.');
       default:

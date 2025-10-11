@@ -8,19 +8,18 @@ import '../../../shared/widgets/app_page_scaffold.dart';
 import '../../../shared/widgets/animated_empty_state.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../core/providers/unified_provider_v2.dart';
-import '../../../core/services/transaction_service_v2.dart' as service;
 import '../widgets/transaction_search_bar.dart';
 import '../widgets/transaction_time_period_selector.dart';
 import '../widgets/transaction_combined_filters.dart';
 import '../widgets/transaction_sort_selector.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
-import '../../../shared/widgets/ios_transaction_list.dart';
-import '../../../shared/utils/currency_utils.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../shared/models/payment_card_model.dart' as pcm;
 import '../../stocks/providers/stock_provider.dart';
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
+import '../../advertisement/config/advertisement_config.dart' as config;
+import '../../advertisement/models/advertisement_models.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -34,7 +33,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   final _scrollController = ScrollController();
   final _numberFormat = NumberFormat('#,##0', 'tr_TR'); // Türkçe binlik ayıraç
   late AppLocalizations l10n;
-  
+  late GoogleAdsRealBannerService _transactionsBannerService;
+
   // Filter state using V2 transaction types
   v2.TransactionType? _selectedFilter;
   TimePeriod _selectedTimePeriod = TimePeriod.all;
@@ -45,6 +45,23 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void initState() {
     super.initState();
     // V2 provider will handle data loading automatically
+    
+    // İşlemler sayfası banner reklamını başlat
+    _transactionsBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.testBanner1.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: true,
+    );
+    
+    debugPrint('🔄 İŞLEMLER SAYFASI Banner reklam yükleniyor...');
+    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.testBanner1.bannerAdUnitId}');
+    debugPrint('🧪 Test Mode: true');
+    debugPrint('📍 Konum: İşlemler sayfası - Gelir/Gider kartı altı');
+    
+    // İşlemler sayfası reklamını 5 saniye geciktir
+    Future.delayed(const Duration(seconds: 5), () {
+      _transactionsBannerService.loadAd();
+    });
   }
 
   @override
@@ -57,59 +74,84 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _transactionsBannerService.dispose();
     super.dispose();
   }
 
-  String _getTransactionSubtitle(List<v2.TransactionWithDetailsV2> transactions, AppLocalizations l10n) {
+  String _getTransactionSubtitle(
+    List<v2.TransactionWithDetailsV2> transactions,
+    AppLocalizations l10n,
+  ) {
     if (transactions.isEmpty) {
       return l10n.noTransactionsFound;
     }
-    
+
     // Gider işlemlerini filtrele (yatırım işlemleri hariç)
-    final expenseTransactions = transactions.where((t) => t.signedAmount < 0 && !t.isStockTransaction).toList();
-    
+    final expenseTransactions = transactions
+        .where((t) => t.signedAmount < 0 && !t.isStockTransaction)
+        .toList();
+
     if (expenseTransactions.isEmpty) {
       return l10n.noExpenseTransactions;
     }
-    
+
     // Toplam gider tutarı
-    final totalExpense = expenseTransactions.fold<double>(0, (sum, t) => sum + t.amount);
-    
+    final totalExpense = expenseTransactions.fold<double>(
+      0,
+      (sum, t) => sum + t.amount,
+    );
+
     // Günlük ortalama hesapla
     final now = DateTime.now();
-    final firstTransactionDate = expenseTransactions.map((t) => t.transactionDate).reduce((a, b) => a.isBefore(b) ? a : b);
+    final firstTransactionDate = expenseTransactions
+        .map((t) => t.transactionDate)
+        .reduce((a, b) => a.isBefore(b) ? a : b);
     final daysDiff = now.difference(firstTransactionDate).inDays + 1;
     final dailyAverage = totalExpense / daysDiff;
-    
+
     return '${l10n.dailyAverageExpense}: ${NumberFormat.currency(locale: 'tr_TR', symbol: '₺').format(dailyAverage)}';
   }
 
-  List<v2.TransactionWithDetailsV2> _getFilteredTransactions(List<v2.TransactionWithDetailsV2> transactions) {
+  List<v2.TransactionWithDetailsV2> _getFilteredTransactions(
+    List<v2.TransactionWithDetailsV2> transactions,
+  ) {
     var filtered = transactions;
-    
+
     // Apply type filter
     if (_selectedFilter != null) {
       filtered = filtered.where((t) => t.type == _selectedFilter).toList();
     }
-    
+
     // Apply time period filter
     final dateRange = _selectedTimePeriod.getDateRange();
     if (dateRange != null) {
       filtered = filtered.where((t) {
         final transactionDate = t.transactionDate;
-        return transactionDate.isAfter(dateRange.start.subtract(const Duration(seconds: 1))) &&
-               transactionDate.isBefore(dateRange.end.add(const Duration(seconds: 1)));
+        return transactionDate.isAfter(
+              dateRange.start.subtract(const Duration(seconds: 1)),
+            ) &&
+            transactionDate.isBefore(
+              dateRange.end.add(const Duration(seconds: 1)),
+            );
       }).toList();
     }
-    
+
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((t) => 
-        t.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        (t.categoryName?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)
-      ).toList();
+      filtered = filtered
+          .where(
+            (t) =>
+                t.description.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
+                (t.categoryName?.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ??
+                    false),
+          )
+          .toList();
     }
-    
+
     // Apply sorting
     switch (_selectedSortType) {
       case SortType.dateNewest:
@@ -125,10 +167,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         filtered.sort((a, b) => a.amount.compareTo(b.amount));
         break;
       case SortType.alphabetical:
-        filtered.sort((a, b) => a.description.toLowerCase().compareTo(b.description.toLowerCase()));
+        filtered.sort(
+          (a, b) => a.description.toLowerCase().compareTo(
+            b.description.toLowerCase(),
+          ),
+        );
         break;
     }
-    
+
     return filtered;
   }
 
@@ -165,8 +211,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-    final filteredTransactions = _getFilteredTransactions(Provider.of<UnifiedProviderV2>(context).transactions);
-    
+    final filteredTransactions = _getFilteredTransactions(
+      Provider.of<UnifiedProviderV2>(context).transactions,
+    );
+
     return AppPageScaffold(
       title: l10n.transactions,
       subtitle: _getTransactionSubtitle(filteredTransactions, l10n),
@@ -174,9 +222,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       subtitleFontSize: 12,
       bodyTopPadding: 0, // Stats kartını filtrelerden hemen sonra başlat
       searchBar: TransactionSearchBar(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-              ),
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+      ),
       filters: TransactionCombinedFilters(
         selectedTransactionType: _selectedFilter,
         selectedTimePeriod: _selectedTimePeriod,
@@ -191,9 +239,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
   }
 
-  Widget _buildBody(List<v2.TransactionWithDetailsV2> transactions, AppLocalizations l10n, bool isDark) {
-
-
+  Widget _buildBody(
+    List<v2.TransactionWithDetailsV2> transactions,
+    AppLocalizations l10n,
+    bool isDark,
+  ) {
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
         // Loading skeleton kaldırıldı - normal UI göster
@@ -211,43 +261,59 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
         // Empty state
         if (transactions.isEmpty) {
-      return SliverFillRemaining(
-              child: _buildEmptyState(l10n, isDark),
-      );
-    }
+          return SliverFillRemaining(child: _buildEmptyState(l10n, isDark));
+        }
 
         // Transaction list with quick stats
-    return SliverToBoxAdapter(
-      child: Column(
-        children: [
-          // Quick stats card
-          _buildQuickStatsCard(transactions, isDark),
-          const SizedBox(height: 16),
-          
-          // Transaction list
-          if (transactions.isNotEmpty) ...[
-            TransactionDesignSystem.buildTransactionList(
-              transactions: _buildTransactionWidgets(transactions, isDark),
-              isDark: isDark,
-              emptyTitle: AppLocalizations.of(context)?.noTransactionsYet ?? 'No transactions yet',
-              emptyDescription: AppLocalizations.of(context)?.addFirstTransaction ?? 'Add your first transaction to get started',
-              emptyIcon: Icons.receipt_long_outlined,
-              context: context,
-            ),
-          ],
-        ],
-      ),
-    );
+        return SliverToBoxAdapter(
+          child: Column(
+            children: [
+              // Quick stats card
+              _buildQuickStatsCard(transactions, isDark),
+              
+              // Banner reklam - Gelir/Gider kartından sonra (sadece yüklendiyse göster)
+              if (_transactionsBannerService.isLoaded && _transactionsBannerService.bannerWidget != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  height: 50,
+                  child: _transactionsBannerService.bannerWidget!,
+                ),
+              ],
+              
+              const SizedBox(height: 16),
+
+              // Transaction list
+              if (transactions.isNotEmpty) ...[
+                TransactionDesignSystem.buildTransactionList(
+                  transactions: _buildTransactionWidgets(transactions, isDark),
+                  isDark: isDark,
+                  emptyTitle:
+                      AppLocalizations.of(context)?.noTransactionsYet ??
+                      'No transactions yet',
+                  emptyDescription:
+                      AppLocalizations.of(context)?.addFirstTransaction ??
+                      'Add your first transaction to get started',
+                  emptyIcon: Icons.receipt_long_outlined,
+                  context: context,
+                ),
+              ],
+            ],
+          ),
+        );
       },
     );
   }
 
-  Widget _buildQuickStatsCard(List<v2.TransactionWithDetailsV2> transactions, bool isDark) {
+  Widget _buildQuickStatsCard(
+    List<v2.TransactionWithDetailsV2> transactions,
+    bool isDark,
+  ) {
     // Calculate stats
     double totalIncome = 0;
     double totalExpenses = 0;
     int transactionCount = transactions.length;
-    
+
     for (final transaction in transactions) {
       if (transaction.type == v2.TransactionType.income) {
         totalIncome += transaction.amount;
@@ -255,9 +321,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         totalExpenses += transaction.amount;
       }
     }
-    
+
     final netAmount = totalIncome - totalExpenses;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -275,13 +341,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               isDark: isDark,
             ),
           ),
-          
+
           Container(
             width: 1,
             height: 40,
             color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
           ),
-          
+
           // Expenses
           Expanded(
             child: _buildStatItem(
@@ -291,19 +357,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               isDark: isDark,
             ),
           ),
-          
+
           Container(
             width: 1,
             height: 40,
             color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
           ),
-          
+
           // Net
           Expanded(
             child: _buildStatItem(
               title: AppLocalizations.of(context)?.net ?? 'Net',
               amount: netAmount,
-              color: netAmount >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+              color: netAmount >= 0
+                  ? const Color(0xFF10B981)
+                  : const Color(0xFFEF4444),
               isDark: isDark,
             ),
           ),
@@ -318,6 +386,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     required Color color,
     required bool isDark,
   }) {
+    // Gelir sayısı için yeşil renk kullan
+    final amountColor = title.toLowerCase().contains('gelir') || title.toLowerCase().contains('income')
+        ? const Color(0xFF4CAF50) // Yeşil renk
+        : color;
+    
     return Column(
       children: [
         Text(
@@ -325,16 +398,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+            color: isDark ? Colors.white : const Color(0xFF6D6D70),
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount),
+          Provider.of<ThemeProvider>(
+            context,
+            listen: false,
+          ).formatAmount(amount),
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: color,
+            color: amountColor,
           ),
         ),
       ],
@@ -350,11 +426,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
   }
 
-  List<Widget> _buildTransactionWidgets(List<v2.TransactionWithDetailsV2> transactions, bool isDark) {
-    return transactions.map((transaction) => _buildTransactionWidget(transaction, isDark)).toList();
+  List<Widget> _buildTransactionWidgets(
+    List<v2.TransactionWithDetailsV2> transactions,
+    bool isDark,
+  ) {
+    return transactions
+        .map((transaction) => _buildTransactionWidget(transaction, isDark))
+        .toList();
   }
 
-  Widget _buildTransactionWidget(v2.TransactionWithDetailsV2 transaction, bool isDark) {
+  Widget _buildTransactionWidget(
+    v2.TransactionWithDetailsV2 transaction,
+    bool isDark,
+  ) {
     // Convert V2 transaction type to design system type
     TransactionType transactionType;
     switch (transaction.type) {
@@ -368,24 +452,27 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         transactionType = TransactionType.transfer;
         break;
       case v2.TransactionType.stock:
-        transactionType = TransactionType.income; // Treat stock as income for display
+        transactionType =
+            TransactionType.income; // Treat stock as income for display
         break;
     }
 
     // Get category info from provider
     final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-    final category = transaction.categoryId != null 
+    final category = transaction.categoryId != null
         ? providerV2.getCategoryById(transaction.categoryId!)
         : null;
 
     // Get category icon using CategoryIconService - prioritize category name
     IconData? categoryIcon;
-    
+
     // First try category name (more reliable than database icon field)
     if (transaction.categoryName != null) {
-      categoryIcon = CategoryIconService.getIcon(transaction.categoryName!.toLowerCase());
-    } 
-    
+      categoryIcon = CategoryIconService.getIcon(
+        transaction.categoryName!.toLowerCase(),
+      );
+    }
+
     // Only fallback to category.icon if category name lookup failed
     if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
       if (category?.icon != null && category!.icon != 'category') {
@@ -397,8 +484,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     // This ensures all income transactions are green, all expense transactions are red
 
     // FALLBACK: Check if description contains installment pattern like (1/4)
-    final hasInstallmentPattern = RegExp(r'\(\d+/\d+\)').hasMatch(transaction.description);
-    final isActualInstallment = transaction.isInstallment || hasInstallmentPattern;
+    final hasInstallmentPattern = RegExp(
+      r'\(\d+/\d+\)',
+    ).hasMatch(transaction.description);
+    final isActualInstallment =
+        transaction.isInstallment || hasInstallmentPattern;
 
     // Build title - sadece description göster (kategori adı gereksiz)
     String title = transaction.categoryName ?? transaction.description;
@@ -406,15 +496,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     String installmentText = '';
     int? effectiveInstallmentCount = transaction.installmentCount;
     int currentInstallment = 1;
-    if ((transaction.installmentCount == null || transaction.installmentCount! < 1) && transaction.installmentId != null) {
-      final info = Provider.of<UnifiedProviderV2>(context, listen: false).getInstallmentInfo(transaction.installmentId);
+    if ((transaction.installmentCount == null ||
+            transaction.installmentCount! < 1) &&
+        transaction.installmentId != null) {
+      final info = Provider.of<UnifiedProviderV2>(
+        context,
+        listen: false,
+      ).getInstallmentInfo(transaction.installmentId);
       if (info != null) {
         effectiveInstallmentCount = info['totalInstallments'];
         currentInstallment = info['currentInstallment'] ?? 1;
       }
     }
     if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
-      installmentText = '$effectiveInstallmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
+      installmentText =
+          '$effectiveInstallmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
     } else if (effectiveInstallmentCount == 1) {
       installmentText = AppLocalizations.of(context)?.cash ?? 'Cash';
     }
@@ -423,15 +519,25 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
 
     // Format amount with dynamic currency
-    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
-    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
+    final currencySymbol = Provider.of<ThemeProvider>(
+      context,
+      listen: false,
+    ).currency.symbol;
+    final amount = TransactionDesignSystem.formatAmount(
+      transaction.amount,
+      transactionType,
+      currencySymbol: currencySymbol,
+    );
 
     // Use displayTime from transaction model (dynamic date formatting)
     final time = transaction.displayTime;
 
     // Card name - centralized logic
     final cardName = TransactionDesignSystem.formatCardName(
-      cardName: transaction.sourceAccountName ?? AppLocalizations.of(context)?.account ?? 'Account',
+      cardName:
+          transaction.sourceAccountName ??
+          AppLocalizations.of(context)?.account ??
+          'Account',
       transactionType: transactionType.name,
       sourceAccountName: transaction.sourceAccountName,
       targetAccountName: transaction.targetAccountName,
@@ -443,7 +549,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       // Extract installment info from pattern if available
       Map<String, int?>? installmentInfo;
       if (hasInstallmentPattern) {
-        final match = RegExp(r'\((\d+)/(\d+)\)').firstMatch(transaction.description);
+        final match = RegExp(
+          r'\((\d+)/(\d+)\)',
+        ).firstMatch(transaction.description);
         if (match != null) {
           installmentInfo = {
             'currentInstallment': int.tryParse(match.group(1)!),
@@ -451,23 +559,35 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           };
         }
       }
-      
+
       // Get installment count for title
       final totalInstallments = installmentInfo?['totalInstallments'];
-      final installmentSuffix = totalInstallments != null ? ' ($totalInstallments Taksit)' : ' (Taksitli)';
-      
+      final installmentSuffix = totalInstallments != null
+          ? ' ($totalInstallments Taksit)'
+          : ' (Taksitli)';
+
       // Remove installment pattern from title for cleaner display
-      final cleanTitle = transaction.categoryName ?? transaction.description.replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '').replaceAll(AppLocalizations.of(context)?.installment ?? 'Installment', '').trim();
+      final cleanTitle =
+          transaction.categoryName ??
+          transaction.description
+              .replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '')
+              .replaceAll(
+                AppLocalizations.of(context)?.installment ?? 'Installment',
+                '',
+              )
+              .trim();
       final displayText = installmentText;
-      
+
       // Parse installment info
       int? installmentCount = effectiveInstallmentCount;
       double? installmentTotalAmount = transaction.amount;
-      double? installmentMonthlyAmount = installmentTotalAmount / (installmentCount ?? 1);
-      
+      double? installmentMonthlyAmount =
+          installmentTotalAmount / (installmentCount ?? 1);
+
       return InstallmentExpandableCard(
         installmentId: transaction.installmentId,
-        title: transaction.categoryName ?? transaction.description, // Kategori adı
+        title:
+            transaction.categoryName ?? transaction.description, // Kategori adı
         subtitle: cardName, // Banka adı
         amount: amount,
         time: time,
@@ -487,9 +607,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         },
       );
     }
-    
+
     // Regular transaction - use Firebase integrated design system
     return TransactionDesignSystem.buildTransactionItemFromV2(
+      context: context,
       transaction: transaction,
       isDark: isDark,
       time: time,
@@ -510,7 +631,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   /// Show delete dialog for regular transactions
-  void _showTransactionDeleteDialog(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
+  void _showTransactionDeleteDialog(
+    BuildContext context,
+    v2.TransactionWithDetailsV2 transaction,
+  ) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -552,19 +676,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           },
           child: Text(
             AppLocalizations.of(context)?.cancel ?? 'Cancel',
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
       ),
     );
   }
 
-
   /// Show delete dialog for installment transactions
-  void _showInstallmentDeleteDialog(BuildContext context, v2.TransactionWithDetailsV2 transaction, Map<String, int?>? installmentInfo) {
+  void _showInstallmentDeleteDialog(
+    BuildContext context,
+    v2.TransactionWithDetailsV2 transaction,
+    Map<String, int?>? installmentInfo,
+  ) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -606,10 +730,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           },
           child: Text(
             AppLocalizations.of(context)?.cancel ?? 'Cancel',
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -619,76 +740,93 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   /// Delete regular transaction
   void _deleteTransaction(v2.TransactionWithDetailsV2 transaction) {
     final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-    
+
     // Check if this is a stock transaction
     if (transaction.isStockTransaction) {
-      
       // 1. OPTIMISTIC UI UPDATE - Önce UI'yi anında güncelle (net değer ve kartlar dahil)
       providerV2.removeStockTransactionOptimistically(
-        transaction.id, 
-        transaction.amount, 
-        transaction.sourceAccountId
+        transaction.id,
+        transaction.amount,
+        transaction.sourceAccountId,
       );
-      
+
       // 2. Use StockProvider for stock transactions
       final stockProvider = Provider.of<StockProvider>(context, listen: false);
-      
-      stockProvider.deleteStockTransaction(transaction.id).then((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted'),
-              backgroundColor: const Color(0xFF34C759),
-              duration: const Duration(seconds: 1),
-            ),
-          );
-        }
-      }).catchError((e) {
-        
-        // Hata durumunda UI'yi geri yükle
-        providerV2.refreshTransactions();
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${l10n.errorDeletingTransaction}: $e'),
-              backgroundColor: const Color(0xFFEF4444),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      });
+
+      stockProvider
+          .deleteStockTransaction(transaction.id)
+          .then((_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context)?.transactionDeleted ??
+                        'Transaction deleted',
+                  ),
+                  backgroundColor: const Color(0xFF34C759),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            }
+          })
+          .catchError((e) {
+            // Hata durumunda UI'yi geri yükle
+            providerV2.refreshTransactions();
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${l10n.errorDeletingTransaction}: $e'),
+                  backgroundColor: const Color(0xFFEF4444),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          });
     } else {
       // Regular transaction - use UnifiedProviderV2
-      providerV2.deleteTransaction(transaction.id).then((success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(success ? (AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted') : (AppLocalizations.of(context)?.deleteFailed ?? 'Delete failed')),
-              backgroundColor: success ? const Color(0xFF34C759) : Colors.red,
-              duration: const Duration(seconds: 1),
-            ),
-          );
-        }
-      }).catchError((e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${l10n.errorDeletingTransaction}: $e'),
-              backgroundColor: const Color(0xFFEF4444),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      });
+      providerV2
+          .deleteTransaction(transaction.id)
+          .then((success) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    success
+                        ? (AppLocalizations.of(context)?.transactionDeleted ??
+                              'Transaction deleted')
+                        : (AppLocalizations.of(context)?.deleteFailed ??
+                              'Delete failed'),
+                  ),
+                  backgroundColor: success
+                      ? const Color(0xFF34C759)
+                      : Colors.red,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            }
+          })
+          .catchError((e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${l10n.errorDeletingTransaction}: $e'),
+                  backgroundColor: const Color(0xFFEF4444),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          });
     }
   }
 
   /// Delete installment transaction
-  Future<void> _deleteInstallmentTransaction(v2.TransactionWithDetailsV2 transaction) async {
+  Future<void> _deleteInstallmentTransaction(
+    v2.TransactionWithDetailsV2 transaction,
+  ) async {
     try {
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
+
       // Show loading indicator
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -698,14 +836,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
         );
       }
-      
+
       // Delete installment transaction using provider
-      final success = await providerV2.deleteInstallmentTransaction(transaction.id);
-      
+      final success = await providerV2.deleteInstallmentTransaction(
+        transaction.id,
+      );
+
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)?.installmentTransactionDeleted ?? 'Installment transaction deleted'),
+            content: Text(
+              AppLocalizations.of(context)?.installmentTransactionDeleted ??
+                  'Installment transaction deleted',
+            ),
             backgroundColor: const Color(0xFF34C759),
             duration: const Duration(seconds: 2),
           ),
@@ -723,4 +866,4 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       }
     }
   }
-} 
+}

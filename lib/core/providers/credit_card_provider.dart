@@ -1,15 +1,13 @@
 import 'package:flutter/foundation.dart';
 import '../../shared/models/credit_card_model.dart';
-import '../../shared/models/transaction_model.dart';
-import '../services/credit_card_service.dart';
-import '../events/card_events.dart';
 import '../events/transaction_events.dart';
 import 'dart:async';
 
 class CreditCardProvider extends ChangeNotifier {
   static CreditCardProvider? _instance;
-  static CreditCardProvider get instance => _instance ??= CreditCardProvider._();
-  
+  static CreditCardProvider get instance =>
+      _instance ??= CreditCardProvider._();
+
   CreditCardProvider._() {
     _initializeTransactionEventListeners();
   }
@@ -17,7 +15,7 @@ class CreditCardProvider extends ChangeNotifier {
   List<CreditCardModel> _creditCards = [];
   bool _isLoading = false;
   String? _error;
-  
+
   // Event subscription
   StreamSubscription<TransactionEvent>? _transactionEventSubscription;
 
@@ -29,16 +27,20 @@ class CreditCardProvider extends ChangeNotifier {
   int get cardCount => _creditCards.length;
 
   // Toplam borç
-  double get totalDebt => _creditCards.fold(0.0, (sum, card) => sum + card.totalDebt);
+  double get totalDebt =>
+      _creditCards.fold(0.0, (sum, card) => sum + card.totalDebt);
 
   // Toplam limit
-  double get totalLimit => _creditCards.fold(0.0, (sum, card) => sum + card.creditLimit);
+  double get totalLimit =>
+      _creditCards.fold(0.0, (sum, card) => sum + card.creditLimit);
 
   // Toplam kullanılabilir limit
-  double get totalAvailableLimit => _creditCards.fold(0.0, (sum, card) => sum + card.availableLimit);
+  double get totalAvailableLimit =>
+      _creditCards.fold(0.0, (sum, card) => sum + card.availableLimit);
 
   // Aktif kartlar
-  List<CreditCardModel> get activeCards => _creditCards.where((card) => card.isActive).toList();
+  List<CreditCardModel> get activeCards =>
+      _creditCards.where((card) => card.isActive).toList();
 
   // Yaklaşan ödeme tarihleri
   List<CreditCardModel> get upcomingPayments {
@@ -46,8 +48,7 @@ class CreditCardProvider extends ChangeNotifier {
     return _creditCards.where((card) {
       final daysUntilDue = card.daysUntilDue;
       return daysUntilDue >= 0 && daysUntilDue <= 30;
-    }).toList()
-      ..sort((a, b) => a.daysUntilDue.compareTo(b.daysUntilDue));
+    }).toList()..sort((a, b) => a.daysUntilDue.compareTo(b.daysUntilDue));
   }
 
   // Kredi kartlarını yükle
@@ -159,10 +160,7 @@ class CreditCardProvider extends ChangeNotifier {
   }
 
   // Kredi kartı ödemesi yap (borç azaltma)
-  Future<bool> payDebt({
-    required String cardId,
-    required double amount,
-  }) async {
+  Future<bool> payDebt({required String cardId, required double amount}) async {
     try {
       // Legacy functionality disabled
       return false;
@@ -234,12 +232,16 @@ class CreditCardProvider extends ChangeNotifier {
 
   /// Transaction event listener'larını başlat
   void _initializeTransactionEventListeners() {
-    _transactionEventSubscription = transactionEvents.stream.listen(_handleTransactionEvent);
+    _transactionEventSubscription = transactionEvents.stream.listen(
+      _handleTransactionEvent,
+    );
   }
 
   /// Transaction event'lerini handle et
   void _handleTransactionEvent(TransactionEvent event) {
-    if (event is TransactionAdded || event is TransactionDeleted || event is TransactionUpdated) {
+    if (event is TransactionAdded ||
+        event is TransactionDeleted ||
+        event is TransactionUpdated) {
       // Kredi kartı ile ilgili işlem varsa bakiyeyi güncelle
       if (mounted) {
         loadCreditCards();
@@ -248,4 +250,4 @@ class CreditCardProvider extends ChangeNotifier {
   }
 
   bool get mounted => hasListeners;
-} 
+}

@@ -10,8 +10,6 @@ import '../screens/income_form_screen.dart';
 import '../screens/transfer_form_screen.dart';
 import '../../home/pages/quick_notes_page.dart';
 import '../../stocks/screens/stocks_screen.dart';
-import '../../stocks/screens/stock_transaction_form_screen.dart';
-import '../../../shared/models/stock_models.dart';
 
 class TransactionFab extends StatefulWidget {
   const TransactionFab({super.key});
@@ -32,36 +30,30 @@ class _TransactionFabState extends State<TransactionFab> {
 
   void _onTransactionTypeSelected(TransactionType type) {
     HapticFeedback.selectionClick();
-    
+
     // Önce FAB'ı kapat
     setState(() {
       _isExpanded = false;
     });
-    
+
     // Form'u aç
     switch (type) {
       case TransactionType.income:
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const IncomeFormScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const IncomeFormScreen()),
         );
         break;
       case TransactionType.expense:
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const ExpenseFormScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const ExpenseFormScreen()),
         );
         break;
       case TransactionType.transfer:
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const TransferFormScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const TransferFormScreen()),
         );
         break;
     }
@@ -69,52 +61,46 @@ class _TransactionFabState extends State<TransactionFab> {
 
   void _onQuickNoteSelected() {
     HapticFeedback.selectionClick();
-    
+
     // Önce FAB'ı kapat
     setState(() {
       _isExpanded = false;
     });
-    
+
     // Hızlı Not sayfasını aç
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const QuickNotesPage(),
-      ),
+      MaterialPageRoute(builder: (context) => const QuickNotesPageNew()),
     );
   }
 
   void _onStockSelected() {
     HapticFeedback.selectionClick();
-    
+
     // Önce FAB'ı kapat
     setState(() {
       _isExpanded = false;
     });
-    
+
     // Hisse ekranını aç
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const StocksScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const StocksScreen()),
     );
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     // Responsive değerler - Navbar'ın hemen üstünde
     final rightPosition = FabPositioning.getRightPosition(context);
     final bottomPosition = FabPositioning.getBottomPosition(context);
     final fabSize = FabPositioning.getFabSize(context);
     final iconSize = FabPositioning.getIconSize(context);
     final speedDialSpacing = FabPositioning.getSpeedDialSpacing(context);
-    
+
     return Positioned(
       right: rightPosition,
       bottom: bottomPosition,
@@ -124,50 +110,45 @@ class _TransactionFabState extends State<TransactionFab> {
         children: [
           // Speed Dial Options
           if (_isExpanded) ...[
-            
             // Quick Note Option
-            _buildQuickNoteOption(
-              context: context,
-              isDark: isDark,
-            ),
-            
+            _buildQuickNoteOption(context: context, isDark: isDark),
+
             SizedBox(height: speedDialSpacing),
-            
+
             // Transfer Option
             _buildSpeedDialOption(
               context: context,
               transactionType: TransactionType.transfer,
               isDark: isDark,
             ),
-            
+
             SizedBox(height: speedDialSpacing),
-            
+
             // Expense Option
             _buildSpeedDialOption(
               context: context,
               transactionType: TransactionType.expense,
               isDark: isDark,
             ),
-            
+
             SizedBox(height: speedDialSpacing),
-            
+
             // Income Option
             _buildSpeedDialOption(
               context: context,
               transactionType: TransactionType.income,
               isDark: isDark,
             ),
-            
+
             SizedBox(height: speedDialSpacing + 4),
           ],
-          
+
           // Main FAB
           _buildMainFab(context, l10n, isDark, fabSize, iconSize),
         ],
       ),
     );
   }
-
 
   Widget _buildQuickNoteOption({
     required BuildContext context,
@@ -180,11 +161,15 @@ class _TransactionFabState extends State<TransactionFab> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF232326).withOpacity(0.92) : Colors.white.withOpacity(0.92),
+            color: isDark
+                ? const Color(0xFF232326).withOpacity(0.92)
+                : Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.06),
+                color: isDark
+                    ? Colors.black.withOpacity(0.18)
+                    : Colors.black.withOpacity(0.06),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -213,10 +198,14 @@ class _TransactionFabState extends State<TransactionFab> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+                color: isDark
+                    ? const Color(0xFF232326).withOpacity(0.85)
+                    : Colors.white.withOpacity(0.85),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                  color: isDark
+                      ? const Color(0xFF38383A)
+                      : const Color(0xFFE5E5EA),
                   width: 1,
                 ),
               ),
@@ -240,13 +229,13 @@ class _TransactionFabState extends State<TransactionFab> {
     final iconData = transactionType == TransactionType.income
         ? Icons.arrow_downward_rounded
         : transactionType == TransactionType.expense
-            ? Icons.arrow_upward_rounded
-            : Icons.compare_arrows_rounded;
+        ? Icons.arrow_upward_rounded
+        : Icons.compare_arrows_rounded;
     final label = transactionType == TransactionType.income
         ? (AppLocalizations.of(context)?.income ?? 'Income')
         : transactionType == TransactionType.expense
-            ? (AppLocalizations.of(context)?.expense ?? 'Expense')
-            : (AppLocalizations.of(context)?.transfer ?? 'Transfer');
+        ? (AppLocalizations.of(context)?.expense ?? 'Expense')
+        : (AppLocalizations.of(context)?.transfer ?? 'Transfer');
     // Her seçenek için düz renkler
     Color color;
     switch (transactionType) {
@@ -266,11 +255,15 @@ class _TransactionFabState extends State<TransactionFab> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF232326).withOpacity(0.92) : Colors.white.withOpacity(0.92),
+            color: isDark
+                ? const Color(0xFF232326).withOpacity(0.92)
+                : Colors.white.withOpacity(0.92),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.06),
+                color: isDark
+                    ? Colors.black.withOpacity(0.18)
+                    : Colors.black.withOpacity(0.06),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -299,10 +292,14 @@ class _TransactionFabState extends State<TransactionFab> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+                color: isDark
+                    ? const Color(0xFF232326).withOpacity(0.85)
+                    : Colors.white.withOpacity(0.85),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                  color: isDark
+                      ? const Color(0xFF38383A)
+                      : const Color(0xFFE5E5EA),
                   width: 1,
                 ),
               ),
@@ -318,7 +315,13 @@ class _TransactionFabState extends State<TransactionFab> {
     );
   }
 
-  Widget _buildMainFab(BuildContext context, AppLocalizations l10n, bool isDark, double fabSize, double iconSize) {
+  Widget _buildMainFab(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isDark,
+    double fabSize,
+    double iconSize,
+  ) {
     return GestureDetector(
       onTap: _toggleFab,
       child: AnimatedScale(
@@ -333,17 +336,23 @@ class _TransactionFabState extends State<TransactionFab> {
               width: fabSize,
               height: fabSize,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF232326).withOpacity(0.85) : Colors.white.withOpacity(0.85),
+                color: isDark
+                    ? const Color(0xFF232326).withOpacity(0.85)
+                    : Colors.white.withOpacity(0.85),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.08),
+                    color: isDark
+                        ? Colors.black.withOpacity(0.18)
+                        : Colors.black.withOpacity(0.08),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
                 ],
                 border: Border.all(
-                  color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                  color: isDark
+                      ? const Color(0xFF38383A)
+                      : const Color(0xFFE5E5EA),
                   width: 1.2,
                 ),
               ),
@@ -358,4 +367,4 @@ class _TransactionFabState extends State<TransactionFab> {
       ),
     );
   }
-} 
+}

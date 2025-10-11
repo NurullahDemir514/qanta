@@ -2,19 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/services/statement_service.dart';
-import '../../../core/services/transaction_service_v2.dart';
-import '../../../shared/models/transaction_model_v2.dart';
-import '../../../shared/models/statement_summary.dart';
-import 'tabs/active_statement_tab.dart';
-import 'tabs/past_statements_tab.dart';
-import 'tabs/future_statements_tab.dart';
+import 'unified_statements_widget.dart';
 import '../../../core/providers/statement_provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../l10n/app_localizations.dart';
 
 class CreditCardStatementsScreen extends StatefulWidget {
   final String cardId;
@@ -33,29 +26,33 @@ class CreditCardStatementsScreen extends StatefulWidget {
   });
 
   @override
-  State<CreditCardStatementsScreen> createState() => _CreditCardStatementsScreenState();
+  State<CreditCardStatementsScreen> createState() =>
+      _CreditCardStatementsScreenState();
 }
 
-class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
-    with TickerProviderStateMixin {
-  late TabController _tabController;
+class _CreditCardStatementsScreenState
+    extends State<CreditCardStatementsScreen> {
   StreamSubscription? _transactionSubscription;
-  late final ValueNotifier<bool?> optimisticPaidNotifier;
-  
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    optimisticPaidNotifier = ValueNotifier<bool?>(null);
     Future.microtask(() {
       final statementProvider = StatementProvider.instance;
-      final unifiedProvider = Provider.of<UnifiedProviderV2>(context, listen: false);
-      
+      final unifiedProvider = Provider.of<UnifiedProviderV2>(
+        context,
+        listen: false,
+      );
+
       // Set UnifiedProviderV2 reference
       statementProvider.setUnifiedProvider(unifiedProvider);
-      
+
       // Load statements
-      statementProvider.loadStatements(widget.cardId, widget.statementDay, dueDay: widget.dueDay);
+      statementProvider.loadStatements(
+        widget.cardId,
+        widget.statementDay,
+        dueDay: widget.dueDay,
+      );
     });
     _setupTransactionListener();
   }
@@ -67,9 +64,7 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
 
   @override
   void dispose() {
-    _tabController.dispose();
     _transactionSubscription?.cancel();
-    optimisticPaidNotifier.dispose();
     super.dispose();
   }
 
@@ -77,20 +72,18 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final statementProvider = StatementProvider.instance;
-    final isLoading = statementProvider.isLoading;
     final error = statementProvider.error;
-    final currentStatement = statementProvider.currentStatement;
-    final previousStatement = statementProvider.previousStatement;
-    final futureStatements = statementProvider.futureStatements;
-    final paid = optimisticPaidNotifier.value ?? currentStatement?.isPaid ?? false;
-    final hasAnyData = currentStatement != null || previousStatement != null || futureStatements.isNotEmpty;
-    final isInitialLoading = !hasAnyData && error == null;
+
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return Scaffold(
-          backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8F9FA),
+          backgroundColor: isDark
+              ? const Color(0xFF000000)
+              : const Color(0xFFF8F9FA),
           appBar: AppBar(
-            backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF8F9FA),
+            backgroundColor: isDark
+                ? const Color(0xFF000000)
+                : const Color(0xFFF8F9FA),
             elevation: 0,
             leading: IconButton(
               icon: Icon(
@@ -104,7 +97,7 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ekstreler',
+                  AppLocalizations.of(context)!.statements,
                   style: GoogleFonts.inter(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -116,60 +109,21 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                    color: isDark
+                        ? const Color(0xFF8E8E93)
+                        : const Color(0xFF6D6D70),
                   ),
                 ),
-              ],
-            ),
-            bottom: TabBar(
-              controller: _tabController,
-              isScrollable: false,
-              indicatorSize: TabBarIndicatorSize.label,
-              indicator: const BoxDecoration(),
-              indicatorColor: Colors.transparent,
-              dividerColor: Colors.transparent,
-              labelColor: isDark ? Colors.white : const Color(0xFF1C1C1E),
-              unselectedLabelColor: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
-              labelStyle: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-              unselectedLabelStyle: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-              ),
-              tabs: const [
-                Tab(text: 'Dönem İçi'),
-                Tab(text: 'Son Ekstre'),
-                Tab(text: 'Bekleyen Ekstre'),
               ],
             ),
           ),
           body: error != null
               ? _buildErrorState(error)
-              : TabBarView(
-                      controller: _tabController,
-                      children: [
-                        ActiveStatementTab(
-                          currentStatement: currentStatement,
-                          cardId: widget.cardId,
-                          statementDay: widget.statementDay,
-                        ),
-                        PastStatementsTab(
-                          pastStatements: StatementProvider.instance.pastStatements,
-                          cardId: widget.cardId,
-                          statementDay: widget.statementDay,
-                          onStatementTap: (StatementSummary statement) {
-                            _showStatementDetail(statement);
-                          },
-                        ),
-                        FutureStatementsTab(
-                          futureStatements: futureStatements,
-                          cardId: widget.cardId,
-                          statementDay: widget.statementDay,
-                        ),
-                      ],
-                    ),
+              : UnifiedStatementsWidget(
+                  cardId: widget.cardId,
+                  statementDay: widget.statementDay,
+                  dueDay: widget.dueDay,
+                ),
         );
       },
     );
@@ -202,15 +156,19 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
               error ?? '',
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                StatementProvider.instance
-                    .loadStatements(widget.cardId, widget.statementDay);
+                StatementProvider.instance.loadStatements(
+                  widget.cardId,
+                  widget.statementDay,
+                );
               },
               child: Text('Tekrar Dene'),
             ),
@@ -219,11 +177,4 @@ class _CreditCardStatementsScreenState extends State<CreditCardStatementsScreen>
       ),
     );
   }
-
-  void _showStatementDetail(StatementSummary statement) {
-    debugPrint('[STATEMENT] _showStatementDetail: $statement');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${statement.period.periodText} ekstre detayı')),
-    );
-  }
-} 
+}

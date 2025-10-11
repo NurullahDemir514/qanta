@@ -17,18 +17,15 @@ class FirebaseCashAccountService {
 
       final snapshot = await FirebaseFirestoreService.getDocuments(
         collectionName: _collectionName,
-        query: FirebaseFirestoreService.getCollection(_collectionName)
-            .where('user_id', isEqualTo: userId)
-            .limit(1),
+        query: FirebaseFirestoreService.getCollection(
+          _collectionName,
+        ).where('user_id', isEqualTo: userId).limit(1),
       );
 
       if (snapshot.docs.isEmpty) return null;
 
-      final data = snapshot.docs.first.data() as Map<String, dynamic>;
-      return CashAccount.fromJson({
-        'id': snapshot.docs.first.id,
-        ...data,
-      });
+      final data = snapshot.docs.first.data();
+      return CashAccount.fromJson({'id': snapshot.docs.first.id, ...data});
     } catch (e) {
       debugPrint('Error getting cash account: $e');
       rethrow;
@@ -49,7 +46,7 @@ class FirebaseCashAccountService {
 
       // Check if account exists
       final existingAccount = await getUserCashAccount();
-      
+
       if (existingAccount != null) {
         // Update existing account
         await FirebaseFirestoreService.updateDocument(
@@ -107,17 +104,14 @@ class FirebaseCashAccountService {
   static Stream<CashAccount?> getCashAccountStream() {
     return FirebaseFirestoreService.getDocumentsStream(
       collectionName: _collectionName,
-      query: FirebaseFirestoreService.getCollection(_collectionName)
-          .where('user_id', isEqualTo: FirebaseAuthService.currentUserId)
-          .limit(1),
+      query: FirebaseFirestoreService.getCollection(
+        _collectionName,
+      ).where('user_id', isEqualTo: FirebaseAuthService.currentUserId).limit(1),
     ).map((snapshot) {
       if (snapshot.docs.isEmpty) return null;
-      
-      final data = snapshot.docs.first.data() as Map<String, dynamic>;
-      return CashAccount.fromJson({
-        'id': snapshot.docs.first.id,
-        ...data,
-      });
+
+      final data = snapshot.docs.first.data();
+      return CashAccount.fromJson({'id': snapshot.docs.first.id, ...data});
     });
   }
 

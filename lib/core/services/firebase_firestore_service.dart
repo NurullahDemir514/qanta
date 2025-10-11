@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import '../firebase_client.dart';
 
 /// Firebase Firestore Service
@@ -11,12 +10,17 @@ class FirebaseFirestoreService {
   static String? get _currentUserId => FirebaseManager.currentUserId;
 
   /// Get collection reference with user-specific path
-  static CollectionReference<Map<String, dynamic>> getCollection(String collectionName) {
+  static CollectionReference<Map<String, dynamic>> getCollection(
+    String collectionName,
+  ) {
     final userId = _currentUserId;
     if (userId == null) {
       throw Exception('User must be authenticated to access Firestore');
     }
-    return _firestore.collection('users').doc(userId).collection(collectionName);
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection(collectionName);
   }
 
   /// Get document reference with user-specific path
@@ -25,16 +29,27 @@ class FirebaseFirestoreService {
     if (userId == null) {
       throw Exception('User must be authenticated to access Firestore');
     }
-    return _firestore.collection('users').doc(userId).collection(collectionName).doc(docId);
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection(collectionName)
+        .doc(docId);
   }
 
   /// Get document reference with user-specific path (private method)
-  static DocumentReference _getUserDocument(String collectionName, String docId) {
+  static DocumentReference _getUserDocument(
+    String collectionName,
+    String docId,
+  ) {
     final userId = _currentUserId;
     if (userId == null) {
       throw Exception('User must be authenticated to access Firestore');
     }
-    return _firestore.collection('users').doc(userId).collection(collectionName).doc(docId);
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection(collectionName)
+        .doc(docId);
   }
 
   /// Add document to user-specific collection
@@ -78,10 +93,10 @@ class FirebaseFirestoreService {
     required Map<String, dynamic> data,
   }) async {
     try {
-      await getDocument(collectionName, docId).update({
-        ...data,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      await getDocument(
+        collectionName,
+        docId,
+      ).update({...data, 'updatedAt': FieldValue.serverTimestamp()});
     } catch (e) {
       rethrow;
     }
@@ -121,19 +136,19 @@ class FirebaseFirestoreService {
   }) async {
     try {
       Query<Map<String, dynamic>> baseQuery = getCollection(collectionName);
-      
+
       if (query != null) {
         baseQuery = query;
       }
-      
+
       if (limit != null) {
         baseQuery = baseQuery.limit(limit);
       }
-      
+
       if (startAfter != null) {
         baseQuery = baseQuery.startAfterDocument(startAfter);
       }
-      
+
       final snapshot = await baseQuery.get();
       return snapshot;
     } catch (e) {
@@ -149,15 +164,15 @@ class FirebaseFirestoreService {
   }) {
     try {
       Query<Map<String, dynamic>> baseQuery = getCollection(collectionName);
-      
+
       if (query != null) {
         baseQuery = query;
       }
-      
+
       if (limit != null) {
         baseQuery = baseQuery.limit(limit);
       }
-      
+
       return baseQuery.snapshots();
     } catch (e) {
       rethrow;
@@ -180,13 +195,13 @@ class FirebaseFirestoreService {
   static Future<void> batchWrite(List<Map<String, dynamic>> operations) async {
     try {
       final batch = _firestore.batch();
-      
+
       for (final operation in operations) {
         final type = operation['type'] as String;
         final collectionName = operation['collection'] as String;
         final docId = operation['docId'] as String?;
         final data = operation['data'] as Map<String, dynamic>?;
-        
+
         switch (type) {
           case 'set':
             if (docId != null && data != null) {
@@ -211,7 +226,7 @@ class FirebaseFirestoreService {
             break;
         }
       }
-      
+
       await batch.commit();
     } catch (e) {
       rethrow;

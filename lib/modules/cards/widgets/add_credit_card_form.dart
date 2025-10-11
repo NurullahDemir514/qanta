@@ -13,10 +13,7 @@ import '../../../core/constants/app_constants.dart';
 class AddCreditCardForm extends StatefulWidget {
   final VoidCallback? onSuccess;
 
-  const AddCreditCardForm({
-    super.key,
-    this.onSuccess,
-  });
+  const AddCreditCardForm({super.key, this.onSuccess});
 
   @override
   State<AddCreditCardForm> createState() => _AddCreditCardFormState();
@@ -32,7 +29,8 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
   String? _selectedBankCode;
   int _statementDate = 1;
   List<String> _filteredBanks = [];
-  
+  bool _isDebtMode = true; // true = borç, false = kullanılabilir limit
+
   bool _isLoading = false;
 
   @override
@@ -55,12 +53,10 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
       if (query.isEmpty) {
         _filteredBanks = AppConstants.getAvailableBanks();
       } else {
-        _filteredBanks = AppConstants.getAvailableBanks()
-            .where((bankCode) {
-              final bankName = AppConstants.getBankName(bankCode).toLowerCase();
-              return bankName.contains(query.toLowerCase());
-            })
-            .toList();
+        _filteredBanks = AppConstants.getAvailableBanks().where((bankCode) {
+          final bankName = AppConstants.getBankName(bankCode).toLowerCase();
+          return bankName.contains(query.toLowerCase());
+        }).toList();
       }
     });
   }
@@ -70,7 +66,8 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
       _selectedBankCode = bankCode;
       // Auto-generate card name when bank is selected
       final bankName = AppConstants.getBankName(bankCode);
-      _cardNameController.text = '$bankName ${AppLocalizations.of(context)?.creditCard ?? 'Credit Card'}';
+      _cardNameController.text =
+          '$bankName ${AppLocalizations.of(context)?.creditCard ?? 'Credit Card'}';
     });
   }
 
@@ -78,36 +75,48 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
     final now = DateTime.now();
     final currentMonth = now.month;
     final currentYear = now.year;
-    
+
     // Bu ayın ekstre tarihini hesapla
-    DateTime currentStatementDate = DateTime(currentYear, currentMonth, statementDate);
-    
+    DateTime currentStatementDate = DateTime(
+      currentYear,
+      currentMonth,
+      statementDate,
+    );
+
     // Bu ayın son ödeme tarihini hesapla
-    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    DateTime currentDueDate = currentStatementDate.add(
+      const Duration(days: 10),
+    );
     // İlk hafta içi günü bul
-    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+    while (currentDueDate.weekday > 5) {
+      // 6=Cumartesi, 7=Pazar
       currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
-    
+
     // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme gününü döndür
     if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
       return currentDueDate.day;
     }
-    
+
     // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
     DateTime nextStatementDate;
-      if (currentMonth == 12) {
+    if (currentMonth == 12) {
       nextStatementDate = DateTime(currentYear + 1, 1, statementDate);
-      } else {
-      nextStatementDate = DateTime(currentYear, currentMonth + 1, statementDate);
+    } else {
+      nextStatementDate = DateTime(
+        currentYear,
+        currentMonth + 1,
+        statementDate,
+      );
     }
-    
+
     // Gelecek ayın son ödeme tarihini hesapla
     DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
-    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+    while (nextDueDate.weekday > 5) {
+      // 6=Cumartesi, 7=Pazar
       nextDueDate = nextDueDate.add(const Duration(days: 1));
     }
-    
+
     return nextDueDate.day;
   }
 
@@ -122,11 +131,25 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
+
+      final creditLimit =
+          double.tryParse(_creditLimitController.text.replaceAll(',', '')) ??
+          0.0;
       
-      final creditLimit = double.tryParse(_creditLimitController.text.replaceAll(',', '')) ?? 0.0;
-      final totalDebt = _totalDebtController.text.trim().isEmpty 
-          ? 0.0 
-          : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+      // Toggle'a göre hesaplama
+      double totalDebt;
+      if (_isDebtMode) {
+        // Borç modu: Girilen değer borç
+        totalDebt = _totalDebtController.text.trim().isEmpty
+            ? 0.0
+            : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+      } else {
+        // Limit modu: Girilen değer kullanılabilir limit, borç = kredi limiti - kullanılabilir limit
+        final availableLimit = _totalDebtController.text.trim().isEmpty
+            ? 0.0
+            : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+        totalDebt = creditLimit - availableLimit;
+      }
 
       final success = await unifiedProvider.createAccount(
         type: AccountType.credit,
@@ -138,7 +161,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
         dueDay: _calculateDueDate(_statementDate),
       );
 
-      if (success != null && mounted) {
+      if (mounted) {
         widget.onSuccess?.call();
         Navigator.of(context).pop();
       }
@@ -197,11 +220,12 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
           // Header
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Text(
-                  AppLocalizations.of(context)?.addCreditCard ?? 'Add Credit Card',
+                  AppLocalizations.of(context)?.addCreditCard ??
+                      'Add Credit Card',
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -213,7 +237,9 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                   onPressed: () => Navigator.of(context).pop(),
                   icon: Icon(
                     Icons.close,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -223,7 +249,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
           // Form
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -238,10 +264,10 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _buildBankGrid(),
-                    
-                    const SizedBox(height: 24),
+
+                    const SizedBox(height: 16),
 
                     // Kart adı
                     Text(
@@ -252,76 +278,198 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     _buildTextField(
                       controller: _cardNameController,
-                      hintText: AppLocalizations.of(context)?.cardNameExample ?? 'E.g: VakıfBank Credit Card',
+                      hintText:
+                          AppLocalizations.of(context)?.cardNameExample ??
+                          'E.g: VakıfBank Credit Card',
                       prefixIcon: Icons.credit_card,
+                      textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return AppLocalizations.of(context)?.cardNameRequired ?? 'Card name is required';
+                          return AppLocalizations.of(
+                                context,
+                              )?.cardNameRequired ??
+                              'Card name is required';
                         }
                         return null;
                       },
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
                     // Kredi limiti
                     Text(
-                      AppLocalizations.of(context)?.creditLimit ?? 'Credit Limit',
+                      AppLocalizations.of(context)?.creditLimit ??
+                          'Credit Limit',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     _buildTextField(
                       controller: _creditLimitController,
                       hintText: '15.000',
                       prefixIcon: Icons.account_balance_wallet,
-                      suffixText: context.watch<ThemeProvider>().currency.symbol,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      suffixText: context
+                          .watch<ThemeProvider>()
+                          .currency
+                          .symbol,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [ThousandsSeparatorInputFormatter()],
+                      textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return AppLocalizations.of(context)?.creditLimitRequired ?? 'Credit limit is required';
+                          return AppLocalizations.of(
+                                context,
+                              )?.creditLimitRequired ??
+                              'Credit limit is required';
                         }
-                        final amount = double.tryParse(value.replaceAll(',', ''));
+                        final amount = double.tryParse(
+                          value.replaceAll(',', ''),
+                        );
                         if (amount == null || amount <= 0) {
-                          return AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
+                          return AppLocalizations.of(
+                                context,
+                              )?.pleaseEnterValidAmount ??
+                              'Please enter a valid amount';
                         }
                         return null;
                       },
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                    // Mevcut borç
-                    Text(
-                      AppLocalizations.of(context)?.currentDebtOptional ?? 'Current Debt (Optional)',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                    // Mevcut borç / Kullanılabilir limit toggle
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _isDebtMode 
+                            ? (AppLocalizations.of(context)?.currentDebt ?? 'Current Debt')
+                            : (AppLocalizations.of(context)?.availableLimit ?? 'Available Limit'),
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: isDark
+                                ? const Color(0xFF1C1C1E)
+                                : const Color(0xFFF2F2F7),
+                            border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF3A3A3C)
+                                  : const Color(0xFFE5E5EA),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Borç Button
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isDebtMode = true;
+                                  });
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: _isDebtMode
+                                        ? const Color(0xFF007AFF)
+                                        : Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    AppLocalizations.of(context)?.debt ?? 'Debt',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                      color: _isDebtMode
+                                          ? Colors.white
+                                          : isDark
+                                              ? Colors.white.withValues(alpha: 0.6)
+                                              : const Color(0xFF6D6D70),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Limit Button
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isDebtMode = false;
+                                  });
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: !_isDebtMode
+                                        ? const Color(0xFF007AFF)
+                                        : Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    AppLocalizations.of(context)?.limit ?? 'Limit',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                      color: !_isDebtMode
+                                          ? Colors.white
+                                          : isDark
+                                              ? Colors.white.withValues(alpha: 0.6)
+                                              : const Color(0xFF6D6D70),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     _buildTextField(
                       controller: _totalDebtController,
                       hintText: '0',
-                      prefixIcon: Icons.receipt_long,
-                      suffixText: Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      prefixIcon: _isDebtMode ? Icons.receipt_long : Icons.account_balance_wallet,
+                      suffixText: Provider.of<ThemeProvider>(
+                        context,
+                        listen: false,
+                      ).currency.symbol,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [ThousandsSeparatorInputFormatter()],
+                      textInputAction: TextInputAction.done,
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
                     // Ekstre günü
                     Text(
-                      AppLocalizations.of(context)?.statementDay ?? 'Statement Day',
+                      AppLocalizations.of(context)?.statementDay ??
+                          'Statement Day',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -329,10 +477,10 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    _buildStatementDateDropdown(isDark),
+                    _buildHorizontalStatementDateSelector(isDark),
 
                     // Son ödeme tarihi preview
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -355,7 +503,9 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                           Text(
@@ -370,7 +520,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 20),
 
                     // Submit button
                     Container(
@@ -407,7 +557,10 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                           onTap: _isLoading ? null : _submitForm,
                           borderRadius: BorderRadius.circular(16),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
                             child: Center(
                               child: _isLoading
                                   ? SizedBox(
@@ -415,7 +568,12 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withValues(alpha: 0.9)),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white.withValues(
+                                                alpha: 0.9,
+                                              ),
+                                            ),
                                       ),
                                     )
                                   : Row(
@@ -428,7 +586,10 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          AppLocalizations.of(context)?.addCreditCard ?? 'Add Credit Card',
+                                          AppLocalizations.of(
+                                                context,
+                                              )?.addCreditCard ??
+                                              'Add Credit Card',
                                           style: GoogleFonts.inter(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,
@@ -458,7 +619,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
   Widget _buildBankGrid() {
     final l10n = AppLocalizations.of(context)!;
     final banks = _filteredBanks;
-    
+
     return Column(
       children: [
         // Arama kutusu
@@ -502,11 +663,14 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                   width: 2,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
         ),
-        
+
         // Banka listesi
         SizedBox(
           height: 80,
@@ -528,28 +692,34 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                   itemBuilder: (context, index) {
                     final bankCode = banks[index];
                     final bankName = AppConstants.getBankName(bankCode);
-                    final accentColor = AppConstants.getBankAccentColor(bankCode);
+                    final accentColor = AppConstants.getBankAccentColor(
+                      bankCode,
+                    );
                     final isSelected = _selectedBankCode == bankCode;
-                    
+
                     return Container(
                       width: 100,
-                      margin: EdgeInsets.only(right: index == banks.length - 1 ? 0 : 12),
+                      margin: EdgeInsets.only(
+                        right: index == banks.length - 1 ? 0 : 12,
+                      ),
                       child: GestureDetector(
                         onTap: () => _onBankSelected(bankCode),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isSelected 
+                            color: isSelected
                                 ? accentColor.withValues(alpha: 0.1)
-                                : (Theme.of(context).brightness == Brightness.dark 
-                                    ? const Color(0xFF2C2C2E) 
-                                    : const Color(0xFFF2F2F7)),
+                                : (Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFF2C2C2E)
+                                      : const Color(0xFFF2F2F7)),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected 
+                              color: isSelected
                                   ? accentColor
-                                  : (Theme.of(context).brightness == Brightness.dark 
-                                      ? const Color(0xFF38383A) 
-                                      : const Color(0xFFE5E5EA)),
+                                  : (Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFF38383A)
+                                        : const Color(0xFFE5E5EA)),
                               width: isSelected ? 2 : 1,
                             ),
                           ),
@@ -561,7 +731,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: isSelected 
+                                  color: isSelected
                                       ? accentColor
                                       : Theme.of(context).colorScheme.onSurface,
                                 ),
@@ -589,14 +759,16 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
+    TextInputAction? textInputAction,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       validator: validator,
+      textInputAction: textInputAction,
       style: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w500,
@@ -635,22 +807,72 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Color(0xFF6D6D70),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFF6D6D70), width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Color(0xFFFF3B30),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFFFF3B30), width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
+      ),
+    );
+  }
+
+  Widget _buildHorizontalStatementDateSelector(bool isDark) {
+    return SizedBox(
+      height: 50,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 28,
+        itemBuilder: (context, index) {
+          final day = index + 1;
+          final isSelected = _statementDate == day;
+          
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _statementDate = day;
+              });
+            },
+            child: Container(
+              margin: EdgeInsets.only(
+                right: index < 27 ? 8 : 0,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? const Color(0xFF007AFF)
+                    : isDark 
+                        ? const Color(0xFF2C2C2E)
+                        : const Color(0xFFF2F2F7),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF007AFF)
+                      : isDark 
+                          ? const Color(0xFF3A3A3C)
+                          : const Color(0xFFE5E5EA),
+                  width: 1,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  _getDayText(day),
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -693,37 +915,66 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
   String _getDayText(int day) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     switch (day) {
-      case 1: return l10n.firstDay;
-      case 2: return l10n.secondDay;
-      case 3: return l10n.thirdDay;
-      case 4: return l10n.fourthDay;
-      case 5: return l10n.fifthDay;
-      case 6: return l10n.sixthDay;
-      case 7: return l10n.seventhDay;
-      case 8: return l10n.eighthDay;
-      case 9: return l10n.ninthDay;
-      case 10: return l10n.tenthDay;
-      case 11: return l10n.eleventhDay;
-      case 12: return l10n.twelfthDay;
-      case 13: return l10n.thirteenthDay;
-      case 14: return l10n.fourteenthDay;
-      case 15: return l10n.fifteenthDay;
-      case 16: return l10n.sixteenthDay;
-      case 17: return l10n.seventeenthDay;
-      case 18: return l10n.eighteenthDay;
-      case 19: return l10n.nineteenthDay;
-      case 20: return l10n.twentiethDay;
-      case 21: return l10n.twentyFirstDay;
-      case 22: return l10n.twentySecondDay;
-      case 23: return l10n.twentyThirdDay;
-      case 24: return l10n.twentyFourthDay;
-      case 25: return l10n.twentyFifthDay;
-      case 26: return l10n.twentySixthDay;
-      case 27: return l10n.twentySeventhDay;
-      case 28: return l10n.twentyEighthDay;
-      default: return '${day}. ${l10n.day}';
+      case 1:
+        return l10n.firstDay.replaceAll('.', '');
+      case 2:
+        return l10n.secondDay.replaceAll('.', '');
+      case 3:
+        return l10n.thirdDay.replaceAll('.', '');
+      case 4:
+        return l10n.fourthDay.replaceAll('.', '');
+      case 5:
+        return l10n.fifthDay.replaceAll('.', '');
+      case 6:
+        return l10n.sixthDay.replaceAll('.', '');
+      case 7:
+        return l10n.seventhDay.replaceAll('.', '');
+      case 8:
+        return l10n.eighthDay.replaceAll('.', '');
+      case 9:
+        return l10n.ninthDay.replaceAll('.', '');
+      case 10:
+        return l10n.tenthDay.replaceAll('.', '');
+      case 11:
+        return l10n.eleventhDay.replaceAll('.', '');
+      case 12:
+        return l10n.twelfthDay.replaceAll('.', '');
+      case 13:
+        return l10n.thirteenthDay.replaceAll('.', '');
+      case 14:
+        return l10n.fourteenthDay.replaceAll('.', '');
+      case 15:
+        return l10n.fifteenthDay.replaceAll('.', '');
+      case 16:
+        return l10n.sixteenthDay.replaceAll('.', '');
+      case 17:
+        return l10n.seventeenthDay.replaceAll('.', '');
+      case 18:
+        return l10n.eighteenthDay.replaceAll('.', '');
+      case 19:
+        return l10n.nineteenthDay.replaceAll('.', '');
+      case 20:
+        return l10n.twentiethDay.replaceAll('.', '');
+      case 21:
+        return l10n.twentyFirstDay.replaceAll('.', '');
+      case 22:
+        return l10n.twentySecondDay.replaceAll('.', '');
+      case 23:
+        return l10n.twentyThirdDay.replaceAll('.', '');
+      case 24:
+        return l10n.twentyFourthDay.replaceAll('.', '');
+      case 25:
+        return l10n.twentyFifthDay.replaceAll('.', '');
+      case 26:
+        return l10n.twentySixthDay.replaceAll('.', '');
+      case 27:
+        return l10n.twentySeventhDay.replaceAll('.', '');
+      case 28:
+        return l10n.twentyEighthDay.replaceAll('.', '');
+      default:
+        return '$day ${l10n.day}';
     }
   }
 
@@ -731,43 +982,66 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
     final now = DateTime.now();
     final currentMonth = now.month;
     final currentYear = now.year;
-    
+
     // Bu ayın ekstre tarihini hesapla
-    DateTime currentStatementDate = DateTime(currentYear, currentMonth, _statementDate);
-    
+    DateTime currentStatementDate = DateTime(
+      currentYear,
+      currentMonth,
+      _statementDate,
+    );
+
     // Bu ayın son ödeme tarihini hesapla
-    DateTime currentDueDate = currentStatementDate.add(const Duration(days: 10));
+    DateTime currentDueDate = currentStatementDate.add(
+      const Duration(days: 10),
+    );
     // İlk hafta içi günü bul
-    while (currentDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+    while (currentDueDate.weekday > 5) {
+      // 6=Cumartesi, 7=Pazar
       currentDueDate = currentDueDate.add(const Duration(days: 1));
     }
-    
+
     // Localized ay isimleri
     final l10n = AppLocalizations.of(context)!;
     final monthNames = [
-      '', l10n.january, l10n.february, l10n.march, l10n.april, l10n.may, l10n.june,
-      l10n.july, l10n.august, l10n.september, l10n.october, l10n.november, l10n.december
+      '',
+      l10n.january,
+      l10n.february,
+      l10n.march,
+      l10n.april,
+      l10n.may,
+      l10n.june,
+      l10n.july,
+      l10n.august,
+      l10n.september,
+      l10n.october,
+      l10n.november,
+      l10n.december,
     ];
-    
+
     // Eğer bu ayın son ödeme tarihi henüz geçmemişse, bu ayın son ödeme tarihini göster
     if (currentDueDate.isAfter(now) || currentDueDate.isAtSameMomentAs(now)) {
       return '${currentDueDate.day} ${monthNames[currentDueDate.month]}';
     }
-    
+
     // Eğer bu ayın son ödeme tarihi geçmişse, gelecek ayın hesaplamasını yap
     DateTime nextStatementDate;
     if (currentMonth == 12) {
       nextStatementDate = DateTime(currentYear + 1, 1, _statementDate);
     } else {
-      nextStatementDate = DateTime(currentYear, currentMonth + 1, _statementDate);
+      nextStatementDate = DateTime(
+        currentYear,
+        currentMonth + 1,
+        _statementDate,
+      );
     }
-    
+
     // Gelecek ayın son ödeme tarihini hesapla
     DateTime nextDueDate = nextStatementDate.add(const Duration(days: 10));
-    while (nextDueDate.weekday > 5) { // 6=Cumartesi, 7=Pazar
+    while (nextDueDate.weekday > 5) {
+      // 6=Cumartesi, 7=Pazar
       nextDueDate = nextDueDate.add(const Duration(days: 1));
     }
-    
+
     return '${nextDueDate.day} ${monthNames[nextDueDate.month]}';
   }
-} 
+}

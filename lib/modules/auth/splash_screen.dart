@@ -4,9 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/firebase_client.dart';
 import '../../core/theme/theme_provider.dart';
-import '../../core/providers/unified_card_provider.dart';
 import '../../core/providers/unified_provider_v2.dart';
+import '../../core/providers/profile_provider.dart';
 import '../../modules/stocks/providers/stock_provider.dart';
+import '../../modules/insights/providers/statistics_provider.dart';
+import '../../modules/insights/models/statistics_model.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/qanta_logo.dart';
 import '../../core/constants/app_constants.dart';
@@ -31,16 +33,17 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Fade animation for smooth entrance
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
-    
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
     // Scale animation for logo
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 1000),
@@ -49,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
     );
-    
+
     // Pulse animation for very subtle breathing effect
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 3000),
@@ -58,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen>
     _pulseAnimation = Tween<double>(begin: 0.98, end: 1.02).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-    
+
     _startAnimations();
   }
 
@@ -67,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeController.forward();
     _scaleController.forward();
     _pulseController.repeat(reverse: true);
-    
+
     // Wait for initial animations to complete
     await Future.delayed(const Duration(milliseconds: 1200));
     await _checkAuthAndNavigate();
@@ -103,7 +106,6 @@ class _SplashScreenState extends State<SplashScreen>
       );
 
       if (isLoggedIn && currentUser != null) {
-
         // Kullanıcı giriş yapmışsa verilerini önceden yükle
         _updateLoadingText('Veriler yükleniyor...');
         await _preloadUserData();
@@ -127,35 +129,64 @@ class _SplashScreenState extends State<SplashScreen>
 
       // StockProvider'ı set et (eğer henüz set edilmemişse)
       if (!providerV2.hasStockProvider) {
-        final stockProvider = Provider.of<StockProvider>(context, listen: false);
+        final stockProvider = Provider.of<StockProvider>(
+          context,
+          listen: false,
+        );
         providerV2.setStockProvider(stockProvider);
       }
 
-      // Cache'li veri yükleme (10 dakika cache süresi)
+      // Cache'li veri yükleme - Hisse verileri için her zaman güncel
       _updateLoadingText('Veriler yükleniyor...');
-      
-      // Kritik verileri paralel yükle
+
+      // Kritik verileri paralel yükle - Hisse verileri için forceRefresh: true
       await Future.wait([
-        providerV2.loadAllData(forceRefresh: false),
+        providerV2.loadAllData(forceRefresh: true),
         // Hisse pozisyonlarını ayrı yükle
         _loadStockPositionsAsync(providerV2),
+        // Profil verilerini yükle
+        _loadProfileDataAsync(),
+        // Günlük performans verilerini paralel yükle
+        _loadDailyPerformanceDataAsync(providerV2),
       ]);
 
-      // Hisse fiyatlarını güncelle (net worth için kritik)
-      _updateLoadingText('Hisse fiyatları güncelleniyor...');
+      // Hisse verilerini yükle ve fiyatları güncelle
+      _updateLoadingText('Hisse verileri yükleniyor...');
       try {
-        final stockProvider = Provider.of<StockProvider>(context, listen: false);
-        if (stockProvider.watchedStocks.isNotEmpty) {
-          // Timer bağlı güncellemeyi bekle (maksimum 8 saniye)
-          await stockProvider.updateRealTimePrices().timeout(
-            const Duration(seconds: 8),
-            onTimeout: () {
-              // Timeout durumunda sessizce devam et
-            },
-          );
+        final stockProvider = Provider.of<StockProvider>(
+          context,
+          listen: false,
+        );
+        final userId = FirebaseManager.currentUser?.uid;
+
+        if (userId != null) {
+          // Önce kullanıcının hisselerini yükle (daha hızlı)
+          await stockProvider
+              .loadWatchedStocks(userId)
+              .timeout(
+                const Duration(seconds: 2),
+                onTimeout: () {
+                  debugPrint('⚠️ Hisse yükleme timeout');
+                },
+              );
+
+          // Eğer hisse varsa fiyatları güncelle - Her zaman güncel veriler
+          if (stockProvider.watchedStocks.isNotEmpty) {
+            _updateLoadingText('Hisse fiyatları güncelleniyor...');
+            // Force refresh ile her zaman güncel fiyatları al
+            await stockProvider.updateRealTimePrices(forceRefresh: true).timeout(
+              const Duration(seconds: 8), // Daha kısa timeout - 5 saniye API + 3 saniye buffer
+              onTimeout: () {
+                debugPrint('⚠️ Hisse fiyat güncelleme timeout (8 san) - cache verileri kullanılacak');
+              },
+            );
+          } else {
+            debugPrint('ℹ️ Kullanıcının takip ettiği hisse yok');
+          }
         }
       } catch (e) {
         // Hisse verileri yüklenemezse devam et
+        debugPrint('❌ Hisse verileri yüklenemedi: $e');
       }
 
       // Real-time listeners'ı kur
@@ -164,7 +195,6 @@ class _SplashScreenState extends State<SplashScreen>
 
       _updateLoadingText('Hazırlanıyor...');
       // Son gecikme kaldırıldı - hemen geç
-
     } catch (e) {
       // Kritik veri yükleme hatası olsa bile home'a git, orada tekrar denenecek
     }
@@ -176,6 +206,31 @@ class _SplashScreenState extends State<SplashScreen>
       await providerV2.loadStockPositions();
     } catch (e) {
       // Hisse verileri yüklenemezse sessizce devam et
+    }
+  }
+
+  /// Profil verilerini asenkron yükle
+  Future<void> _loadProfileDataAsync() async {
+    try {
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      await profileProvider.refresh();
+      debugPrint('✅ Profil verileri ön yüklendi');
+    } catch (e) {
+      debugPrint('⚠️ Profil verileri yüklenemedi: $e');
+    }
+  }
+
+  /// Günlük performans verilerini asenkron yükle
+  Future<void> _loadDailyPerformanceDataAsync(UnifiedProviderV2 providerV2) async {
+    try {
+      // Sadece veriler yüklendiyse istatistik yükle
+      if (providerV2.isDataLoaded && providerV2.transactions.isNotEmpty) {
+        // Global StatisticsProvider kullan
+        final statisticsProvider = Provider.of<StatisticsProvider>(context, listen: false);
+        await statisticsProvider.loadStatistics(TimePeriod.thisMonth);
+      }
+    } catch (e) {
+      debugPrint('⚠️ Günlük performans verileri yüklenemedi: $e');
     }
   }
 
@@ -191,7 +246,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0A0A0A) : Colors.white,
       body: Container(
@@ -250,7 +305,9 @@ class _SplashScreenState extends State<SplashScreen>
                           fontSize: 32,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.5,
-                          color: isDark ? Colors.white : AppConstants.primaryColor,
+                          color: isDark
+                              ? Colors.white
+                              : AppConstants.primaryColor,
                         ),
                         textAlign: TextAlign.center,
                       ),

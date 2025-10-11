@@ -272,6 +272,7 @@ class _AddCardFabState extends State<AddCardFab>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     // Responsive değerler - Navbar'ın hemen üstünde
     final rightPosition = FabPositioning.getRightPosition(context);
     final bottomPosition = FabPositioning.getBottomPosition(context);
@@ -304,7 +305,7 @@ class _AddCardFabState extends State<AddCardFab>
               isDark: isDark,
               icon: Icons.credit_card_rounded,
               label: l10n.creditCard,
-              color: const Color(0xFF22C55E), // Yeşil - Transaction FAB ile aynı
+              color: const Color(0xFFE74C3C), // Red
               onTap: () => _onCardTypeSelected('credit'),
             ),
             
