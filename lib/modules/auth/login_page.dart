@@ -124,8 +124,48 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    // Klavyeyi kapat
+    FocusScope.of(context).unfocus();
+
+    setState(() => _isLoading = true);
+
+    try {
+      final credential = await FirebaseAuthService.signInWithGoogle();
+
+      if (credential.user != null && mounted) {
+        await ReminderService.clearAllRemindersForCurrentUser();
+
+        // Kullanıcı verilerini önceden yükle
+        await _preloadUserData();
+
+        if (mounted) {
+          context.go('/home');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        String errorMessage = '${l10n.googleSignInError}: ${e.toString()}';
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Klavyeyi kapat
+    FocusScope.of(context).unfocus();
 
     setState(() => _isLoading = true);
 
@@ -378,6 +418,73 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                // Divider with "veya" text
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: theme.colorScheme.outline.withOpacity(0.3),
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Text(
+                        l10n.or,
+                        style: GoogleFonts.inter(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: theme.colorScheme.outline.withOpacity(0.3),
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24.h),
+                // Google Sign-In Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _signInWithGoogle,
+                    icon: Image.asset(
+                      'assets/images/google_logo.png',
+                      height: 20.h,
+                      width: 20.w,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.login,
+                          size: 20.sp,
+                          color: theme.colorScheme.onSurface,
+                        );
+                      },
+                    ),
+                    label: Text(
+                      l10n.signInWithGoogle,
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.sp.clamp(14.sp, 18.sp),
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                      side: BorderSide(
+                        color: theme.colorScheme.outline.withOpacity(0.3),
+                        width: 1,
+                      ),
+                      foregroundColor: theme.colorScheme.onSurface,
+                      backgroundColor: theme.colorScheme.surface,
                     ),
                   ),
                 ),

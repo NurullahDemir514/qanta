@@ -5475,5 +5475,29 @@
   "limit": "Limit",
   "@limit": {
     "description": "Limit label"
+  },
+  "signInWithGoogle": "Sign in with Google",
+  "@signInWithGoogle": {
+    "description": "Google sign-in button text"
+  },
+  "signUpWithGoogle": "Sign up with Google",
+  "@signUpWithGoogle": {
+    "description": "Google sign-up button text"
+  },
+  "googleSignInError": "Google sign-in error",
+  "@googleSignInError": {
+    "description": "Google sign-in error message"
+  },
+  "googleSignUpError": "Google sign-up error",
+  "@googleSignUpError": {
+    "description": "Google sign-up error message"
+  },
+  "googleSignUpSuccess": "Successfully signed up with Google!",
+  "@googleSignUpSuccess": {
+    "description": "Google sign-up success message"
+  },
+  "or": "or",
+  "@or": {
+    "description": "Or separator text"
   }
 } 

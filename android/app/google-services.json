@@ -12,7 +12,28 @@
           "package_name": "com.qanta"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "982050181554-b2mmn135vtscnt3ipmc69qtl5k6609mb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.qanta",
+            "certificate_hash": "c82ad23222def9e87d2c67f60f0782d0ff4cfa17"
+          }
+        },
+        {
+          "client_id": "982050181554-qi32ag3sibipg1qj7k9mmrh8gjjbap88.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.qanta",
+            "certificate_hash": "508f89c26c2c6ee3b9f47e5ea7a8ed2fbe74c967"
+          }
+        },
+        {
+          "client_id": "982050181554-lg65lqhjfma45apablnnte7ag3un8pnh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAWae10cgw8ZyE4Xnf6PfEq7yWlhZ0KSZs"
@@ -20,9 +41,15 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "982050181554-lg65lqhjfma45apablnnte7ag3un8pnh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-8222217303967306~5324874321"
     }
   ],
   "configuration_version": "1"

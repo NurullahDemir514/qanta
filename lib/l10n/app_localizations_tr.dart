@@ -3315,4 +3315,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get limit => 'Limit';
+
+  @override
+  String get signInWithGoogle => 'Google ile Giriş Yap';
+
+  @override
+  String get signUpWithGoogle => 'Google ile Kayıt Ol';
+
+  @override
+  String get googleSignInError => 'Google ile giriş hatası';
+
+  @override
+  String get googleSignUpError => 'Google ile kayıt hatası';
+
+  @override
+  String get googleSignUpSuccess => 'Google ile başarıyla kayıt oldunuz!';
+
+  @override
+  String get or => 'veya';
 }

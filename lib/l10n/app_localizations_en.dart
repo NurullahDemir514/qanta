@@ -3320,4 +3320,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get limit => 'Limit';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get signUpWithGoogle => 'Sign up with Google';
+
+  @override
+  String get googleSignInError => 'Google sign-in error';
+
+  @override
+  String get googleSignUpError => 'Google sign-up error';
+
+  @override
+  String get googleSignUpSuccess => 'Successfully signed up with Google!';
+
+  @override
+  String get or => 'or';
 }

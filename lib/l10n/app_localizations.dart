@@ -6301,6 +6301,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Limit'**
   String get limit;
+
+  /// Google sign-in button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get signInWithGoogle;
+
+  /// Google sign-up button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up with Google'**
+  String get signUpWithGoogle;
+
+  /// Google sign-in error message
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in error'**
+  String get googleSignInError;
+
+  /// Google sign-up error message
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-up error'**
+  String get googleSignUpError;
+
+  /// Google sign-up success message
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully signed up with Google!'**
+  String get googleSignUpSuccess;
+
+  /// Or separator text
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get or;
 }
 
 class _AppLocalizationsDelegate

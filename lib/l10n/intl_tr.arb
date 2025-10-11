@@ -5491,5 +5491,29 @@
   "limit": "Limit",
   "@limit": {
     "description": "Limit label"
+  },
+  "signInWithGoogle": "Google ile Giriş Yap",
+  "@signInWithGoogle": {
+    "description": "Google sign-in button text"
+  },
+  "signUpWithGoogle": "Google ile Kayıt Ol",
+  "@signUpWithGoogle": {
+    "description": "Google sign-up button text"
+  },
+  "googleSignInError": "Google ile giriş hatası",
+  "@googleSignInError": {
+    "description": "Google sign-in error message"
+  },
+  "googleSignUpError": "Google ile kayıt hatası",
+  "@googleSignUpError": {
+    "description": "Google sign-up error message"
+  },
+  "googleSignUpSuccess": "Google ile başarıyla kayıt oldunuz!",
+  "@googleSignUpSuccess": {
+    "description": "Google sign-up success message"
+  },
+  "or": "veya",
+  "@or": {
+    "description": "Or separator text"
   }
 } 

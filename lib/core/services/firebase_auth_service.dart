@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../firebase_client.dart';
 
 /// Firebase Authentication Service
@@ -62,10 +63,54 @@ class FirebaseAuthService {
     }
   }
 
+  /// Sign in with Google
+  static Future<UserCredential> signInWithGoogle() async {
+    try {
+      // Configure Google Sign-In
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+        clientId: '982050181554-lg65lqhjfma45apablnnte7ag3un8pnh.apps.googleusercontent.com',
+      );
+      
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        throw Exception('Google sign-in was cancelled by user');
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credential
+      final userCredential = await _auth.signInWithCredential(credential);
+      
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      // More detailed error handling
+      if (e.toString().contains('ApiException: 10')) {
+        throw Exception('Google Sign-In konfigürasyon hatası. Firebase Console\'da SHA-1 fingerprint\'ini kontrol edin.');
+      }
+      rethrow;
+    }
+  }
+
   /// Sign out
   static Future<void> signOut() async {
     try {
+      // Sign out from Firebase
       await _auth.signOut();
+      
+      // Sign out from Google
+      await GoogleSignIn().signOut();
     } catch (e) {
       rethrow;
     }
