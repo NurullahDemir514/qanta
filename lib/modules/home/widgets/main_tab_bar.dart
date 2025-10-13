@@ -223,7 +223,7 @@ class _TabItem extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                         ),
                       ),

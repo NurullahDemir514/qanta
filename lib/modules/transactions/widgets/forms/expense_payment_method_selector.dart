@@ -289,7 +289,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                     
                     final cashMethod = PaymentMethod(
                       type: PaymentMethodType.cash,
-                      cashAccount: _convertAccountToCashAccount(cashAccount),
+                      cashAccount: _convertAccountToCashAccount(cashAccount, context),
                     );
                     widget.onPaymentMethodSelected(cashMethod);
                   },
@@ -445,7 +445,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                                         ),
                                       ),
                                       child: Text(
-                                        installmentCount == 1 ? (AppLocalizations.of(context)?.cash ?? 'Cash') : '$installmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}',
+                                        installmentCount == 1 ? (AppLocalizations.of(context)?.cash ?? 'NAKİT') : '$installmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}',
                                         style: GoogleFonts.inter(
                                           fontSize: MediaQuery.of(context).size.width > 600 ? 15 : 13,
                                           fontWeight: FontWeight.w500,
@@ -781,11 +781,13 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
     );
   }
   
-  CashAccount _convertAccountToCashAccount(AccountModel account) {
+  CashAccount _convertAccountToCashAccount(AccountModel account, BuildContext context) {
     return CashAccount(
       id: account.id,
       userId: account.userId,
-      name: account.name,
+      name: account.name == 'CASH_WALLET' 
+          ? (AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap')
+          : account.name,
       balance: account.balance,
       currency: 'TRY', // Default currency
       createdAt: account.createdAt,

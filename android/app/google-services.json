@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "982050181554-rmmu0uv498gl23dc5d193av5j888ak6v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.qanta",
+            "certificate_hash": "3e8d6758fb28df0e9a6c7ff039616c2a91a8eb02"
+          }
+        },
+        {
           "client_id": "982050181554-lg65lqhjfma45apablnnte7ag3un8pnh.apps.googleusercontent.com",
           "client_type": 3
         }

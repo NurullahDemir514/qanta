@@ -68,11 +68,33 @@ class DateUtils {
     // ISO8601 String
     if (value is String) {
       try {
-        return DateTime.parse(value);
+        final parsed = DateTime.parse(value);
+        // Timezone bilgisini kaldır, sadece tarih ve saat bilgisini kullan
+        return DateTime(
+          parsed.year,
+          parsed.month,
+          parsed.day,
+          parsed.hour,
+          parsed.minute,
+          parsed.second,
+          parsed.millisecond,
+          parsed.microsecond,
+        );
       } catch (e) {
         // Try alternative formats
         try {
-          return _isoFormat.parse(value);
+          final parsed = _isoFormat.parse(value);
+          // Timezone bilgisini kaldır, sadece tarih ve saat bilgisini kullan
+          return DateTime(
+            parsed.year,
+            parsed.month,
+            parsed.day,
+            parsed.hour,
+            parsed.minute,
+            parsed.second,
+            parsed.millisecond,
+            parsed.microsecond,
+          );
         } catch (e2) {
           return fallback;
         }
@@ -100,6 +122,7 @@ class DateUtils {
 
   /// **DateTime to ISO8601 string for JSON serialization**
   ///
+  /// This method preserves the local date/time without converting to UTC.
   /// Use this for API calls or when you need string representation.
   ///
   /// **Usage:**
@@ -109,7 +132,18 @@ class DateUtils {
   /// };
   /// ```
   static String toIso8601(DateTime dateTime) {
-    return dateTime.toUtc().toIso8601String();
+    // Timezone bilgisini kaldır, sadece tarih ve saat bilgisini kullan
+    final localDate = DateTime(
+      dateTime.year,
+      dateTime.month,
+      dateTime.day,
+      dateTime.hour,
+      dateTime.minute,
+      dateTime.second,
+      dateTime.millisecond,
+      dateTime.microsecond,
+    );
+    return localDate.toIso8601String();
   }
 
   // ===============================

@@ -194,6 +194,78 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
                         ),
                         textAlign: TextAlign.center,
                       ),
+                      const SizedBox(height: 32),
+                      // Şık nakit hesabı oluşturma butonu
+                      Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: Theme.of(context).brightness == Brightness.dark
+                                ? [
+                                    const Color(0xFF1C1C1E),
+                                    const Color(0xFF2C2C2E),
+                                  ]
+                                : [
+                                    Colors.white,
+                                    const Color(0xFFF8F8F8),
+                                  ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? const Color(0xFF48484A)
+                                : const Color(0xFFE5E5EA),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.black.withOpacity(0.3)
+                                  : Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              // Nakit hesabı oluşturma işlemi
+                              providerV2.createCashAccount();
+                            },
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_circle_outline,
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? const Color(0xFF8E8E93)
+                                        : const Color(0xFF6D6D70),
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Nakit Hesabı Oluştur',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? const Color(0xFF8E8E93)
+                                          : const Color(0xFF6D6D70),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

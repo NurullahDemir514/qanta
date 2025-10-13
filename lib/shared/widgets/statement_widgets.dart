@@ -706,6 +706,7 @@ class StatementTransactionsList extends StatelessWidget {
           isFirst: isFirst,
           isLast: isLast,
           isPaid: installment.isPaid,
+          isInstallment: true,
         ),
         if (!isLast) _buildDivider(),
       ],

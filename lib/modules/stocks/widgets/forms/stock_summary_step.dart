@@ -7,6 +7,7 @@ import '../../../../shared/utils/currency_utils.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../mini_chart_widget.dart';
+import '../../../transactions/widgets/forms/date_selector.dart';
 
 /// Hisse işlem özet step'i
 class StockSummaryStep extends StatefulWidget {
@@ -17,6 +18,8 @@ class StockSummaryStep extends StatefulWidget {
   final StockTransactionType transactionType;
   final List<double>? historicalData;
   final Function(double)? onCommissionRateChanged;
+  final DateTime selectedDate;
+  final Function(DateTime)? onDateChanged;
   
   const StockSummaryStep({
     super.key,
@@ -27,6 +30,8 @@ class StockSummaryStep extends StatefulWidget {
     required this.transactionType,
     this.historicalData,
     this.onCommissionRateChanged,
+    required this.selectedDate,
+    this.onDateChanged,
   });
 
   @override
@@ -35,12 +40,26 @@ class StockSummaryStep extends StatefulWidget {
 
 class _StockSummaryStepState extends State<StockSummaryStep> {
   double _commissionRate = 0.0; // %0 varsayılan komisyon
+  late TextEditingController _commissionController;
   late AppLocalizations l10n;
+
+  @override
+  void initState() {
+    super.initState();
+    _commissionController = TextEditingController(text: '0.0');
+  }
+
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     l10n = AppLocalizations.of(context)!;
+  }
+
+  @override
+  void dispose() {
+    _commissionController.dispose();
+    super.dispose();
   }
 
   @override
@@ -60,10 +79,10 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
           children: [
             // Hisse bilgileri kartı
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
                   width: 1,
@@ -75,26 +94,6 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                   // Hisse bilgileri
                   Row(
                     children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: widget.transactionType == StockTransactionType.buy 
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          widget.transactionType == StockTransactionType.buy 
-                              ? Icons.trending_up
-                              : Icons.trending_down,
-                          color: widget.transactionType == StockTransactionType.buy 
-                              ? Colors.green
-                              : Colors.red,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,16 +101,16 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                             Text(
                               _cleanStockName(widget.stock.symbol),
                               style: GoogleFonts.inter(
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w700,
                                 color: isDark ? Colors.white : Colors.black,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             Text(
                               widget.stock.name,
                               style: GoogleFonts.inter(
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: isDark ? Colors.white70 : Colors.grey[600],
                               ),
                             ),
@@ -124,25 +123,25 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                           Text(
                             '${CurrencyUtils.formatAmountWithoutSymbol(widget.stock.currentPrice, currency)}$currencySymbol',
                             style: GoogleFonts.inter(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: isDark ? Colors.white : Colors.black,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           // Mini grafik
                           if (widget.historicalData != null && widget.historicalData!.isNotEmpty)
                             MiniChartWidget(
                               data: widget.historicalData!,
-                              width: 80,
-                              height: 20,
+                              width: 70,
+                              height: 18,
                               isPositive: widget.stock.changePercent >= 0,
                               isDark: isDark,
                             )
                           else
                             Container(
-                              width: 80,
-                              height: 20,
+                              width: 70,
+                              height: 18,
                               decoration: BoxDecoration(
                                 color: isDark ? Colors.grey[800] : Colors.grey[300],
                                 borderRadius: BorderRadius.circular(4),
@@ -151,7 +150,7 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                                 child: Text(
                                   'Grafik yükleniyor...',
                                   style: GoogleFonts.inter(
-                                    fontSize: 8,
+                                    fontSize: 7,
                                     color: isDark ? Colors.grey[400] : Colors.grey[600],
                                   ),
                                 ),
@@ -162,18 +161,18 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                     ],
                   ),
                   
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                   
                   // İşlem detayları
                   _buildSummaryRow(l10n.quantity, '${widget.quantity.toStringAsFixed(2)} ${l10n.pieces}'),
                   _buildSummaryRow(l10n.price, '${CurrencyUtils.formatAmountWithoutSymbol(widget.price, currency)}$currencySymbol'),
                   _buildSummaryRow(l10n.total, '${CurrencyUtils.formatAmountWithoutSymbol(totalAmount, currency)}$currencySymbol'),
                   
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   
                   // Komisyon ayarı - Kompakt ve zarif tasarım
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
@@ -214,55 +213,83 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                           ],
                         ),
                         
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         
-                        // Slider - kompakt
-                        SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            activeTrackColor: const Color(0xFF007AFF),
-                            inactiveTrackColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
-                            thumbColor: Colors.white,
-                            overlayColor: const Color(0xFF007AFF).withValues(alpha: 0.1),
-                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                            trackHeight: 4,
-                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                        // Komisyon oranı girişi
+                        TextField(
+                          controller: _commissionController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : Colors.black,
                           ),
-                          child: Slider(
-                            value: _commissionRate,
-                            min: 0.0, // %0
-                            max: 0.1, // %10
-                            divisions: 10,
-                            onChanged: (value) {
-                              setState(() {
-                                _commissionRate = value;
-                              });
-                              // Parent'a komisyon oranını bildir
-                              widget.onCommissionRateChanged?.call(value);
-                            },
+                          decoration: InputDecoration(
+                            hintText: '0.0',
+                            hintStyle: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: isDark ? Colors.white54 : Colors.grey[400],
+                            ),
+                            suffixText: '%',
+                            suffixStyle: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white70 : Colors.grey[600],
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF007AFF),
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           ),
+                          onChanged: (value) {
+                            // Sadece sayı ve nokta kabul et
+                            final cleanValue = value.replaceAll(RegExp(r'[^0-9.]'), '');
+                            
+                            // Birden fazla nokta kontrolü
+                            final dotCount = cleanValue.split('.').length - 1;
+                            if (dotCount > 1) {
+                              _commissionController.text = cleanValue.substring(0, cleanValue.lastIndexOf('.'));
+                              _commissionController.selection = TextSelection.fromPosition(
+                                TextPosition(offset: _commissionController.text.length),
+                              );
+                              return;
+                            }
+                            
+                            final parsedValue = double.tryParse(cleanValue) ?? 0.0;
+                            _commissionRate = parsedValue / 100.0; // Yüzde olarak sakla
+                            
+                            setState(() {});
+                            widget.onCommissionRateChanged?.call(_commissionRate);
+                          },
                         ),
                         
-                        // Değer aralığı - tek satırda
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '0%',
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w400,
-                                color: isDark ? Colors.white54 : Colors.grey[400],
-                              ),
-                            ),
-                            Text(
-                              '10%',
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w400,
-                                color: isDark ? Colors.white54 : Colors.grey[400],
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 8),
+                        
+                        // Bilgi metni
+                        Text(
+                          'Komisyon oranını yüzde olarak girin',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: isDark ? Colors.white54 : Colors.grey[500],
+                          ),
                         ),
                       ],
                     ),
@@ -270,11 +297,11 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                   
                   _buildSummaryRow(l10n.commission, '${CurrencyUtils.formatAmountWithoutSymbol(commission, currency)}$currencySymbol'),
                   
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   
                   // Final tutar
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: widget.transactionType == StockTransactionType.buy 
                           ? Colors.green.withOpacity(0.1)
@@ -316,12 +343,12 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
               ),
             ),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             
             // Hesap bilgisi
             if (widget.account != null)
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -349,7 +376,9 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                             ),
                           ),
                           Text(
-                            widget.account!.name,
+                            widget.account!.name == 'CASH_WALLET'
+                                ? (AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap')
+                                : widget.account!.name,
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -370,6 +399,16 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                   ],
                 ),
               ),
+            
+            const SizedBox(height: 16),
+            
+            // Tarih seçici
+            DateSelector(
+              selectedDate: widget.selectedDate,
+              onDateSelected: (date) {
+                widget.onDateChanged?.call(date);
+              },
+            ),
             
           ],
         );

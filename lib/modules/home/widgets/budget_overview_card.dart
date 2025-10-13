@@ -31,19 +31,21 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
   /// Calculate budget stats from current budgets
   List<BudgetCategoryStats> _calculateBudgetStats(List<BudgetModel> budgets) {
     return budgets.map((budget) {
-      final percentage = budget.monthlyLimit > 0
-          ? (budget.spentAmount / budget.monthlyLimit) * 100
+      final percentage = budget.limit > 0
+          ? (budget.spentAmount / budget.limit) * 100
           : 0.0;
-      final isOverBudget = budget.spentAmount > budget.monthlyLimit;
+      final isOverBudget = budget.spentAmount > budget.limit;
 
       return BudgetCategoryStats(
         categoryId: budget.categoryId,
         categoryName: budget.categoryName,
-        monthlyLimit: budget.monthlyLimit,
+        limit: budget.limit,
+        period: budget.period,
         currentSpent: budget.spentAmount,
         transactionCount: 0, // Will be calculated separately if needed
         percentage: percentage,
         isOverBudget: isOverBudget,
+        isRecurring: budget.isRecurring,
       );
     }).toList();
   }
@@ -212,7 +214,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                   style: GoogleFonts.inter(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? Colors.white : Colors.black,
+                    color: isDark ? Colors.white : const Color(0xFF1C1C1E),
                   ),
                 ),
                 GestureDetector(
@@ -233,7 +235,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
 
             // Horizontal scroll cards
             SizedBox(
-              height: 85.h,
+              height: 90.h, // Increased height
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.zero,
@@ -259,117 +261,164 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
     int totalCount,
   ) {
     return Container(
-      width: 170.w,
-      height: 85.h,
-      margin: EdgeInsets.only(right: index == (totalCount - 1) ? 0 : 8.w),
+      width: 180.w,
+      height: 100.h, // Increased height
+      margin: EdgeInsets.only(right: index == (totalCount - 1) ? 0 : 12.w),
       child: Card(
         elevation: 0,
         color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(16.r),
           side: BorderSide(
             color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
             width: 1.w,
           ),
         ),
-        child: Padding(
-          padding: EdgeInsets.all(12.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Category name and icon
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 24.w,
-                    height: 24.w,
-                    decoration: BoxDecoration(
-                      color: _getCategoryColor(
-                        stat.categoryName,
-                      ).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(5.r),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.r),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                _getCategoryColor(stat.categoryName).withOpacity(0.05),
+                Colors.transparent,
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(10.w), // Reduced padding
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Category name and icon with period badge
+                Row(
+                  children: [
+                    Container(
+                      width: 24.w, // Reduced size
+                      height: 24.w, // Reduced size
+                      decoration: BoxDecoration(
+                        color: _getCategoryColor(stat.categoryName).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6.r), // Reduced radius
+                      ),
+                      child: Icon(
+                        _getCategoryIcon(stat.categoryName),
+                        size: 12.w, // Reduced icon size
+                        color: _getCategoryColor(stat.categoryName),
+                      ),
                     ),
-                    child: Icon(
-                      _getCategoryIcon(stat.categoryName),
-                      size: 12.w,
-                      color: _getCategoryColor(stat.categoryName),
+                    SizedBox(width: 6.w), // Reduced spacing
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              stat.categoryName,
+                              style: GoogleFonts.inter(
+                                fontSize: 13.sp, // Increased font size
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(left: 4.w), // Responsive margin
+                                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h), // Responsive padding
+                                decoration: BoxDecoration(
+                                  color: _getCategoryColor(stat.categoryName).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(3.r), // Reduced radius
+                                ),
+                                child: Text(
+                                  stat.periodDisplayName,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11.sp, // Increased font size
+                                    fontWeight: FontWeight.w500,
+                                    color: _getCategoryColor(stat.categoryName),
+                                  ),
+                                ),
+                              ),
+                              if (stat.isRecurring) ...[
+                                SizedBox(width: 3.w),
+                                Container(
+                                  padding: EdgeInsets.all(2.w),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(2.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.repeat,
+                                    size: 10.w,
+                                    color: const Color(0xFF6D6D70),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 6.w),
-                  Expanded(
-                    child: Text(
-                      stat.categoryName,
+                  ],
+                ),
+
+                // Progress bar with percentage
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 2.5.h, // Responsive height
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF2C2C2E)
+                              : const Color(0xFFE5E5EA),
+                          borderRadius: BorderRadius.circular(1.5.r), // Responsive radius
+                        ),
+                        child: FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: stat.progressPercentage.clamp(0.0, 1.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: stat.isOverBudget
+                                  ? const Color(0xFFFF453A)
+                                  : const Color(0xFF34C759),
+                              borderRadius: BorderRadius.circular(1.5.r), // Responsive radius
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 6.w), // Responsive spacing
+                    Text(
+                      '${stat.percentage.toStringAsFixed(0)}%',
                       style: GoogleFonts.inter(
-                        fontSize: 14.sp,
+                        fontSize: 11.sp, // Increased font size
                         fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : Colors.black,
+                        color: stat.isOverBudget
+                            ? const Color(0xFFFF453A)
+                            : const Color(0xFF34C759),
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 2.h),
-
-              // Progress bar
-              Container(
-                height: 3.h,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFE5E5EA),
-                  borderRadius: BorderRadius.circular(2.r),
+                  ],
                 ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: stat.progressPercentage.clamp(0.0, 1.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: stat.isOverBudget
-                          ? const Color(0xFFFF453A)
-                          : const Color(0xFF34C759),
-                      borderRadius: BorderRadius.circular(2.r),
-                    ),
+
+
+                // Amount info
+                Text(
+                  '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.currentSpent)} / ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.limit)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp, // Increased font size
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-
-              SizedBox(height: 1.h),
-
-              // Amount info
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.currentSpent)} / ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.monthlyLimit)}',
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    '${stat.percentage.toStringAsFixed(0)}%',
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: stat.isOverBudget
-                          ? const Color(0xFFFF453A)
-                          : const Color(0xFF34C759),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

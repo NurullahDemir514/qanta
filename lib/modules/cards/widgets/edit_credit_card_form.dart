@@ -7,6 +7,7 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/utils/currency_utils.dart';
+import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 
 class EditCreditCardForm extends StatefulWidget {
   final dynamic creditCard; // Can be CreditCardModel or Map
@@ -32,6 +33,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
   int _statementDate = 1;
   int _dueDate = 1;
   bool _isLoading = false;
+  bool _isDebtMode = true; // true = borç, false = kullanılabilir limit
 
   // Helper methods to extract data from either CreditCardModel or Map
   String get cardId {
@@ -97,10 +99,15 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
   }
 
   void _initializeForm() {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     _selectedBankCode = bankCode;
     _cardNameController.text = cardName ?? '';
-    _creditLimitController.text = creditLimit.toStringAsFixed(0);
-    _totalDebtController.text = totalDebt.toStringAsFixed(0);
+    _creditLimitController.text = CurrencyUtils.formatAmountWithoutSymbol(creditLimit, themeProvider.currency);
+    
+    // Initialize debt mode and set appropriate initial value
+    _isDebtMode = true; // Default to debt mode
+    _totalDebtController.text = CurrencyUtils.formatAmountWithoutSymbol(totalDebt, themeProvider.currency);
+    
     _statementDate = statementDate;
     _dueDate = dueDate;
   }
@@ -167,6 +174,27 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
     _formKey.currentState?.validate();
   }
 
+  void _onToggleChanged(bool isDebtMode) {
+    setState(() {
+      _isDebtMode = isDebtMode;
+      
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      
+      // Convert the current value based on the new mode
+      final currentValue = double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+      final creditLimitValue = double.tryParse(_creditLimitController.text.replaceAll(',', '')) ?? 0.0;
+      
+      if (isDebtMode) {
+        // Switching to debt mode: current value is debt
+        _totalDebtController.text = CurrencyUtils.formatAmountWithoutSymbol(currentValue, themeProvider.currency);
+      } else {
+        // Switching to limit mode: current value becomes available limit
+        final availableLimit = creditLimitValue - currentValue;
+        _totalDebtController.text = CurrencyUtils.formatAmountWithoutSymbol(availableLimit, themeProvider.currency);
+      }
+    });
+  }
+
   Future<void> _submitForm() async {
     _validateForm();
 
@@ -181,14 +209,26 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
 
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
       final creditLimit =
           double.tryParse(_creditLimitController.text.replaceAll(',', '')) ??
           0.0;
-      final totalDebt = _totalDebtController.text.trim().isEmpty
-          ? 0.0
-          : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ??
-                0.0;
+      
+      // Toggle'a göre hesaplama
+      double totalDebt;
+      if (_isDebtMode) {
+        // Borç modu: Girilen değer borç
+        totalDebt = _totalDebtController.text.trim().isEmpty
+            ? 0.0
+            : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+      } else {
+        // Limit modu: Girilen değer kullanılabilir limit, borç = kredi limiti - kullanılabilir limit
+        final availableLimit = _totalDebtController.text.trim().isEmpty
+            ? 0.0
+            : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+        totalDebt = creditLimit - availableLimit;
+      }
 
       final success = await unifiedProvider.updateAccount(
         accountId: cardId,
@@ -203,11 +243,14 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
       );
 
       if (success != null && mounted) {
+        // Provider'ı refresh et
+        await unifiedProvider.refresh();
+        
         // Başarılı mesajı göster
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Kredi kartı başarıyla güncellendi',
+              AppLocalizations.of(context)?.creditCardUpdatedSuccessfully ?? 'Credit card updated successfully',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -233,7 +276,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Güncelleme sırasında hata oluştu: $e',
+              AppLocalizations.of(context)?.updateErrorOccurred(e.toString()) ?? 'An error occurred during update: $e',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -260,31 +303,31 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
   String _getMonthName(int month) {
     switch (month) {
       case 1:
-        return 'Ocak';
+        return AppLocalizations.of(context)?.january ?? 'January';
       case 2:
-        return 'Şubat';
+        return AppLocalizations.of(context)?.february ?? 'February';
       case 3:
-        return 'Mart';
+        return AppLocalizations.of(context)?.march ?? 'March';
       case 4:
-        return 'Nisan';
+        return AppLocalizations.of(context)?.april ?? 'April';
       case 5:
-        return 'Mayıs';
+        return AppLocalizations.of(context)?.may ?? 'May';
       case 6:
-        return 'Haziran';
+        return AppLocalizations.of(context)?.june ?? 'June';
       case 7:
-        return 'Temmuz';
+        return AppLocalizations.of(context)?.july ?? 'July';
       case 8:
-        return 'Ağustos';
+        return AppLocalizations.of(context)?.august ?? 'August';
       case 9:
-        return 'Eylül';
+        return AppLocalizations.of(context)?.september ?? 'September';
       case 10:
-        return 'Ekim';
+        return AppLocalizations.of(context)?.october ?? 'October';
       case 11:
-        return 'Kasım';
+        return AppLocalizations.of(context)?.november ?? 'November';
       case 12:
-        return 'Aralık';
+        return AppLocalizations.of(context)?.december ?? 'December';
       default:
-        throw Exception('Geçersiz ay');
+        throw Exception(AppLocalizations.of(context)?.invalidMonth ?? 'Invalid month');
     }
   }
 
@@ -318,7 +361,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
             child: Row(
               children: [
                 Text(
-                  'Kredi Kartını Düzenle',
+                  AppLocalizations.of(context)?.editCreditCard ?? 'Edit Credit Card',
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -378,7 +421,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                             horizontal: 16,
                             vertical: 12,
                           ),
-                          hintText: 'Banka seçin',
+                          hintText: AppLocalizations.of(context)?.selectBank ?? 'Select bank',
                           hintStyle: GoogleFonts.inter(
                             color: Theme.of(
                               context,
@@ -406,7 +449,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Lütfen bir banka seçin';
+                            return AppLocalizations.of(context)?.pleaseSelectBank ?? 'Please select a bank';
                           }
                           return null;
                         },
@@ -417,7 +460,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
 
                     // Kart Adı
                     Text(
-                      'Kart Adı (Opsiyonel)',
+                      AppLocalizations.of(context)?.cardNameOptional ?? 'Card Name (Optional)',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -428,7 +471,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                     TextFormField(
                       controller: _cardNameController,
                       decoration: InputDecoration(
-                        hintText: 'Örn: İş Kartım, Alışveriş Kartı',
+                        hintText: AppLocalizations.of(context)?.cardNameExample ?? 'E.g: My Work Card, Shopping Card',
                         filled: true,
                         fillColor: isDark
                             ? const Color(0xFF2C2C2E)
@@ -466,7 +509,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
 
                     // Ekstre Günü
                     Text(
-                      'Ekstre Günü',
+                      AppLocalizations.of(context)?.statementDayLabel ?? 'Statement Day',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -492,7 +535,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                           value: _statementDate,
                           isExpanded: true,
                           hint: Text(
-                            'Ekstre günü seçin',
+                            AppLocalizations.of(context)?.selectStatementDay ?? 'Select statement day',
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
@@ -530,7 +573,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
 
                     // Kredi Limiti
                     Text(
-                      'Kredi Limiti (${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})',
+                      AppLocalizations.of(context)?.creditLimit ?? 'Credit Limit',
                       style: CurrencyUtils.getCurrencyTextStyle(
                         baseStyle: GoogleFonts.inter(
                           fontSize: 16,
@@ -543,10 +586,16 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _creditLimitController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [ThousandsSeparatorInputFormatter()],
                       decoration: InputDecoration(
                         hintText: '50000',
+                        suffixText: Provider.of<ThemeProvider>(
+                          context,
+                          listen: false,
+                        ).currency.symbol,
                         filled: true,
                         fillColor: isDark
                             ? const Color(0xFF2C2C2E)
@@ -580,13 +629,13 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Kredi limiti gerekli';
+                          return AppLocalizations.of(context)?.creditLimitRequired ?? 'Credit limit is required';
                         }
                         final amount = double.tryParse(
                           value.replaceAll(',', ''),
                         );
                         if (amount == null || amount <= 0) {
-                          return 'Geçerli bir tutar girin';
+                          return AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
                         }
                         return null;
                       },
@@ -594,25 +643,114 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
 
                     const SizedBox(height: 20),
 
-                    // Toplam Borç
-                    Text(
-                      'Toplam Borç (${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})',
-                      style: CurrencyUtils.getCurrencyTextStyle(
-                        baseStyle: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
+                    // Mevcut borç / Kullanılabilir limit toggle
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _isDebtMode 
+                            ? (AppLocalizations.of(context)?.currentDebt ?? 'Current Debt')
+                            : (AppLocalizations.of(context)?.availableLimit ?? 'Available Limit'),
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
-                        currency: Currency.TRY,
-                      ),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: isDark
+                                ? const Color(0xFF1C1C1E)
+                                : const Color(0xFFF2F2F7),
+                            border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF3A3A3C)
+                                  : const Color(0xFFE5E5EA),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Borç Button
+                              GestureDetector(
+                                onTap: () => _onToggleChanged(true),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: _isDebtMode
+                                        ? const Color(0xFF007AFF)
+                                        : Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    AppLocalizations.of(context)?.debt ?? 'Debt',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                      color: _isDebtMode
+                                          ? Colors.white
+                                          : isDark
+                                              ? Colors.white.withValues(alpha: 0.6)
+                                              : const Color(0xFF6D6D70),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Limit Button
+                              GestureDetector(
+                                onTap: () => _onToggleChanged(false),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: !_isDebtMode
+                                        ? const Color(0xFF007AFF)
+                                        : Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    AppLocalizations.of(context)?.limit ?? 'Limit',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                      color: !_isDebtMode
+                                          ? Colors.white
+                                          : isDark
+                                              ? Colors.white.withValues(alpha: 0.6)
+                                              : const Color(0xFF6D6D70),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     TextFormField(
                       controller: _totalDebtController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [ThousandsSeparatorInputFormatter()],
                       decoration: InputDecoration(
-                        hintText: '0',
+                        hintText: _isDebtMode ? '0' : '0',
+                        suffixText: Provider.of<ThemeProvider>(
+                          context,
+                          listen: false,
+                        ).currency.symbol,
                         filled: true,
                         fillColor: isDark
                             ? const Color(0xFF2C2C2E)
@@ -674,7 +812,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                                 ),
                               )
                             : Text(
-                                'Güncelle',
+                                AppLocalizations.of(context)?.update ?? 'Update',
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,

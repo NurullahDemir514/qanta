@@ -6,16 +6,19 @@ import '../../../../shared/models/stock_models.dart';
 import '../../providers/stock_provider.dart';
 import '../../../../core/services/firebase_auth_service.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/theme/theme_provider.dart';
 
 /// Hisse seçim step'i
 class StockSelectionStep extends StatefulWidget {
   final Stock? selectedStock;
   final Function(Stock) onStockSelected;
+  final StockTransactionType? transactionType;
 
   const StockSelectionStep({
     super.key,
     this.selectedStock,
     required this.onStockSelected,
+    this.transactionType,
   });
 
   @override
@@ -501,100 +504,155 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
   }
 
   Widget _buildStockItem(Stock stock, bool isSelected, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: isSelected
-            ? (isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE8F4FD))
-            : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: () => widget.onStockSelected(stock),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+    return Consumer<StockProvider>(
+      builder: (context, stockProvider, child) {
+        // Satış işlemi için pozisyon bilgisini al
+        final userId = FirebaseAuthService.currentUserId;
+        StockPosition? position;
+        if (widget.transactionType == StockTransactionType.sell && userId != null) {
+          try {
+            position = stockProvider.stockPositions.firstWhere(
+              (pos) => pos.stockSymbol == stock.symbol,
+            );
+          } catch (e) {
+            position = null;
+          }
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Material(
+            color: isSelected
+                ? (isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE8F4FD))
+                : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              onTap: () => widget.onStockSelected(stock),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected
-                    ? (isDark ? Colors.white54 : const Color(0xFF007AFF))
-                    : (isDark
-                          ? const Color(0xFF38383A)
-                          : const Color(0xFFE5E5EA)),
-                width: isSelected ? 2.5 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                // Hisse bilgileri
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        stock.symbol,
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _cleanStockName(stock.name),
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: isDark ? Colors.white70 : Colors.grey[600],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? (isDark ? Colors.white54 : const Color(0xFF007AFF))
+                        : (isDark
+                              ? const Color(0xFF38383A)
+                              : const Color(0xFFE5E5EA)),
+                    width: isSelected ? 2 : 1,
                   ),
                 ),
-
-                // Fiyat bilgileri
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                child: Column(
                   children: [
-                    Text(
-                      stock.displayPrice,
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: stock.isPositive
-                            ? Colors.green.withOpacity(0.1)
-                            : Colors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        stock.displayChangePercent,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: stock.isPositive ? Colors.green : Colors.red,
+                    Row(
+                      children: [
+                        // Hisse bilgileri
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                stock.symbol,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? Colors.white : Colors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _cleanStockName(stock.name),
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: isDark ? Colors.white70 : Colors.grey[600],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+
+                        // Fiyat bilgileri
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  stock.displayPrice,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: stock.isPositive
+                                        ? Colors.green.withOpacity(0.1)
+                                        : Colors.red.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    stock.displayChangePercent,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: stock.isPositive ? Colors.green : Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            // Pozisyon bilgisi (sadece satış işlemi için)
+                            if (widget.transactionType == StockTransactionType.sell && position != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isDark 
+                                      ? Colors.grey[800]!.withOpacity(0.3)
+                                      : Colors.grey[200]!.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: isDark 
+                                        ? Colors.grey[600]!.withOpacity(0.3)
+                                        : Colors.grey[400]!.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${position.totalQuantity.toStringAsFixed(0)} lot',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

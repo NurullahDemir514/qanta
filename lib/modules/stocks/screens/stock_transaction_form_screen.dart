@@ -6,6 +6,8 @@ import '../../../shared/models/account_model.dart';
 import '../providers/stock_provider.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/providers/unified_provider_v2.dart';
+import '../../../shared/utils/currency_utils.dart';
 import '../../transactions/widgets/forms/base_transaction_form.dart';
 import '../widgets/forms/stock_selection_step.dart';
 import '../widgets/forms/stock_account_step.dart';
@@ -40,6 +42,7 @@ class _StockTransactionFormScreenState
   double _price = 0.0;
   double _commissionRate = 0.0; // %0 varsayılan komisyon
   List<double>? _historicalData;
+  DateTime _selectedDate = DateTime.now(); // Tarih seçimi için
 
   String? _quantityError;
   String? _priceError;
@@ -146,6 +149,33 @@ class _StockTransactionFormScreenState
     }
   }
 
+  /// Validates current step and advances to next step if valid
+  ///
+  /// **Validation Logic by Step:**
+  ///
+  /// **Step 0 (Stock Selection):**
+  /// - Checks if stock is selected
+  ///
+  /// **Step 1 (Account Selection):**
+  /// - Ensures account is selected
+  ///
+  /// **Step 2 (Quantity & Price):**
+  /// - Validates quantity > 0
+  /// - Validates price > 0
+  /// - **Balance Validation for Purchase:**
+  ///   - Cash accounts: balance ≥ total amount (including commission)
+  ///   - Debit cards: balance ≥ total amount (including commission)
+  ///   - Credit cards: available limit ≥ total amount (including commission)
+  /// - **Quantity Validation for Sale:**
+  ///   - Checks if user has enough stock quantity to sell
+  ///
+  /// **Step 3 (Summary):**
+  /// - Final validation before execution
+  ///
+  /// **Error Handling:**
+  /// - Sets appropriate error messages in state
+  /// - Prevents navigation if validation fails
+  /// - Shows detailed error messages for insufficient balance/quantity
   bool _validateCurrentStep() {
     switch (_currentStep) {
       case 0: // Hisse seçimi
@@ -178,6 +208,7 @@ class _StockTransactionFormScreenState
 
         bool isValid = true;
 
+        // Validate quantity
         if (quantity == null || quantity <= 0) {
           setState(() {
             _quantityError = l10n.enterValidQuantity;
@@ -190,6 +221,7 @@ class _StockTransactionFormScreenState
           });
         }
 
+        // Validate price
         if (price == null || price <= 0) {
           setState(() {
             _priceError = l10n.enterValidPrice;
@@ -202,11 +234,153 @@ class _StockTransactionFormScreenState
           });
         }
 
+        // If basic validation passed, check balance/quantity
+        if (isValid && _selectedAccount != null) {
+          final baseAmount = quantity! * price!;
+          final commission = baseAmount * _commissionRate;
+          final totalAmount = baseAmount + commission;
+
+          if (widget.transactionType == StockTransactionType.buy) {
+            // Balance validation for purchase
+            String? balanceError = _validatePurchaseBalance(totalAmount);
+            if (balanceError != null) {
+              setState(() {
+                _quantityError = balanceError;
+              });
+              isValid = false;
+            }
+          } else {
+            // Quantity validation for sale
+            String? quantityError = _validateSaleQuantity(quantity);
+            if (quantityError != null) {
+              setState(() {
+                _quantityError = quantityError;
+              });
+              isValid = false;
+            }
+          }
+        }
+
         return isValid;
+
+      case 3: // Özet - Final validation
+        if (_selectedStock == null || _selectedAccount == null) {
+          return false;
+        }
+
+        // Final balance/quantity check before execution
+        final baseAmount = _quantity * _price;
+        final commission = baseAmount * _commissionRate;
+        final totalAmount = baseAmount + commission;
+
+        if (widget.transactionType == StockTransactionType.buy) {
+          final balanceError = _validatePurchaseBalance(totalAmount);
+          if (balanceError != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(balanceError),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return false;
+          }
+        } else {
+          final quantityError = _validateSaleQuantity(_quantity);
+          if (quantityError != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(quantityError),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return false;
+          }
+        }
+
+        return true;
 
       default:
         return true;
     }
+  }
+
+  /// Validates if account has sufficient balance for stock purchase
+  /// 
+  /// **Balance Validation Logic:**
+  /// - Cash accounts: balance ≥ total amount (including commission)
+  /// - Debit cards: balance ≥ total amount (including commission)  
+  /// - Credit cards: available limit ≥ total amount (including commission)
+  /// 
+  /// Returns error message if insufficient balance, null if sufficient
+  String? _validatePurchaseBalance(double totalAmount) {
+    if (_selectedAccount == null) return null;
+
+    final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+    final account = provider.getAccountById(_selectedAccount!.id);
+    
+    if (account == null) return null;
+
+    switch (account.type) {
+      case AccountType.cash:
+        if (account.balance < totalAmount) {
+          return l10n.stockPurchaseInsufficientBalance(_formatCurrency(account.balance));
+        }
+        break;
+      case AccountType.debit:
+        if (account.balance < totalAmount) {
+          return l10n.stockPurchaseInsufficientBalance(_formatCurrency(account.balance));
+        }
+        break;
+      case AccountType.credit:
+        final availableLimit = account.availableAmount;
+        if (availableLimit < totalAmount) {
+          return l10n.stockPurchaseInsufficientBalance(_formatCurrency(availableLimit));
+        }
+        break;
+    }
+
+    return null; // Sufficient balance
+  }
+
+  /// Validates if user has sufficient stock quantity for sale
+  /// 
+  /// **Quantity Validation Logic:**
+  /// - Checks user's current stock holdings
+  /// - Ensures sale quantity ≤ available quantity
+  /// 
+  /// Returns error message if insufficient quantity, null if sufficient
+  String? _validateSaleQuantity(double saleQuantity) {
+    if (_selectedStock == null) return null;
+
+    final provider = Provider.of<StockProvider>(context, listen: false);
+    final stockPositions = provider.stockPositions;
+    
+    // Find user's current holding for this stock
+    try {
+      final userPosition = stockPositions.firstWhere(
+        (position) => position.stockSymbol == _selectedStock!.symbol,
+      );
+
+      if (userPosition.totalQuantity < saleQuantity) {
+        return l10n.stockSaleInsufficientQuantity(_formatQuantity(userPosition.totalQuantity));
+      }
+    } catch (e) {
+      // Stock not found in positions
+      return l10n.stockSaleInsufficientQuantity(_formatQuantity(0.0));
+    }
+
+    return null; // Sufficient quantity
+  }
+
+  /// Formats currency amount for display
+  String _formatCurrency(double amount) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    return CurrencyUtils.formatAmount(amount, themeProvider.currency);
+  }
+
+  /// Formats quantity for display
+  String _formatQuantity(double quantity) {
+    return quantity.toStringAsFixed(0);
   }
 
   Future<void> _executeTransaction() async {
@@ -245,7 +419,7 @@ class _StockTransactionFormScreenState
         price: _price,
         totalAmount: totalAmount,
         commission: commission,
-        transactionDate: DateTime.now(),
+        transactionDate: _selectedDate,
         notes: null,
         userId: userId,
         accountId: _selectedAccount?.id ?? '',
@@ -302,6 +476,7 @@ class _StockTransactionFormScreenState
           title: _getStepTitles()[0],
           content: StockSelectionStep(
             selectedStock: _selectedStock,
+            transactionType: widget.transactionType,
             onStockSelected: (Stock stock) {
               setState(() {
                 _selectedStock = stock;
@@ -359,9 +534,15 @@ class _StockTransactionFormScreenState
                   price: _price,
                   transactionType: widget.transactionType,
                   historicalData: _historicalData,
+                  selectedDate: _selectedDate,
                   onCommissionRateChanged: (rate) {
                     setState(() {
                       _commissionRate = rate;
+                    });
+                  },
+                  onDateChanged: (date) {
+                    setState(() {
+                      _selectedDate = date;
                     });
                   },
                 )

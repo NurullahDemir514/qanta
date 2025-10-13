@@ -77,7 +77,7 @@ class AccountSelector extends StatelessWidget {
     return [
       PaymentCard(
         id: 'cash',
-        name: AppLocalizations.of(context)?.cash ?? 'Cash',
+        name: AppLocalizations.of(context)?.cash ?? 'NAKİT',
         type: CardType.debit,
         number: '0000000000000000',
         expiryDate: '',
@@ -181,7 +181,11 @@ class AccountSelector extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    account.id == 'cash' ? l10n.cash : account.name,
+                    account.id == 'cash' 
+                        ? l10n.cash 
+                        : (account.name == 'CASH_WALLET' 
+                            ? (AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap')
+                            : account.name),
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

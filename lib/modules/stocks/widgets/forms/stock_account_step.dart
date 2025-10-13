@@ -39,19 +39,24 @@ class _StockAccountStepState extends State<StockAccountStep> {
     
     return Consumer<UnifiedProviderV2>(
       builder: (context, provider, child) {
-        // Tüm aktif hesapları göster
+        // Tüm aktif hesapları al
         final allAccounts = provider.accounts
             .where((account) => account.isActive)
+            .toList();
+            
+        // Sadece nakit ve banka kartlarını göster (kredi kartlarını hariç tut)
+        final filteredAccounts = allAccounts
+            .where((account) => account.type != AccountType.credit)
             .toList();
 
         return Column(
           children: [
 
             // Hesap listesi
-            if (allAccounts.isEmpty)
+            if (filteredAccounts.isEmpty)
               _buildEmptyState(isDark)
             else
-              ...allAccounts.map((account) {
+              ...filteredAccounts.map((account) {
                 final isSelected = widget.selectedAccount?.id == account.id;
                 
                 return Padding(
@@ -119,98 +124,123 @@ class _StockAccountStepState extends State<StockAccountStep> {
     required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
     final color = _getAccountColor(account.type);
+    final isDisabled = false; // Hisse formunda disabled state yok
     
-    return Container(
-      decoration: BoxDecoration(
-        color: isSelected 
-          ? color.withOpacity(0.1)
-          : (isDark ? const Color(0xFF1C1C1E) : Colors.white),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSelected 
-            ? color
-            : (isDark ? const Color(0xFF48484A) : const Color(0xFFD1D1D6)),
-          width: isSelected ? 1.5 : 0.33,
+    return GestureDetector(
+      onTap: isDisabled ? null : onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDisabled
+            ? (isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF2F2F7))
+            : isSelected
+              ? color.withOpacity(0.1)
+              : (isDark 
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFF8F8F8)),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDisabled
+              ? (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA))
+              : isSelected
+                ? color
+                : (isDark 
+                    ? const Color(0xFF38383A)
+                    : const Color(0xFFE8E8E8)),
+            width: isSelected ? 1.5 : 0.5,
+          ),
         ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Icon
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isDisabled
+                  ? (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA))
+                  : isSelected 
+                    ? color 
+                    : color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                account.type == AccountType.cash
+                  ? Icons.payments_rounded 
+                  : Icons.credit_card_rounded,
+                size: 16,
+                color: isDisabled
+                  ? (isDark ? const Color(0xFF48484A) : const Color(0xFF8E8E93))
+                  : isSelected 
+                    ? Colors.white 
+                    : color,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    account.type == AccountType.cash
+                        ? l10n.cash 
+                        : (account.name == 'CASH_WALLET' 
+                            ? (AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap')
+                            : account.name),
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isDisabled
+                        ? (isDark ? const Color(0xFF48484A) : const Color(0xFF8E8E93))
+                        : isSelected
+                          ? color
+                          : (isDark ? Colors.white : Colors.black),
+                      letterSpacing: -0.2,
+                    ),
                   ),
-                  child: Icon(
-                    _getAccountIcon(account.type),
-                    color: color,
-                    size: 20,
-                  ),
-                ),
-                
-                const SizedBox(width: 12),
-                
-                // Text Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 2),
+                  Row(
                     children: [
                       Text(
-                        account.name,
+                        account.type == AccountType.cash
+                          ? l10n.cashAccount
+                          : account.type == AccountType.credit 
+                            ? l10n.creditCard
+                            : l10n.debitCard,
                         style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: isSelected 
-                            ? color
-                            : (isDark ? Colors.white : Colors.black),
-                          letterSpacing: -0.2,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: isDisabled
+                            ? (isDark ? const Color(0xFF48484A) : const Color(0xFF8E8E93))
+                            : (isDark 
+                                ? const Color(0xFF8E8E93)
+                                : const Color(0xFF6D6D70)),
+                          letterSpacing: -0.1,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Text(
-                            _getAccountTypeName(account.type),
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: isDark 
+                      const Spacer(),
+                      Text(
+                        CurrencyUtils.formatAmount(account.balance, Currency.TRY),
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: isDisabled
+                            ? (isDark ? const Color(0xFF48484A) : const Color(0xFF8E8E93))
+                            : (isDark 
                                 ? const Color(0xFF8E8E93)
-                                : const Color(0xFF6D6D70),
-                              letterSpacing: -0.1,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            CurrencyUtils.formatAmount(account.balance, Currency.TRY),
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: isDark 
-                                ? const Color(0xFF8E8E93)
-                                : const Color(0xFF6D6D70),
-                              letterSpacing: -0.1,
-                            ),
-                          ),
-                        ],
+                                : const Color(0xFF6D6D70)),
+                          letterSpacing: -0.1,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -219,26 +249,26 @@ class _StockAccountStepState extends State<StockAccountStep> {
   IconData _getAccountIcon(AccountType type) {
     switch (type) {
       case AccountType.cash:
-        return Icons.account_balance_wallet;
+        return Icons.payments_rounded;
       case AccountType.credit:
-        return Icons.credit_card;
+        return Icons.credit_card_rounded;
       case AccountType.debit:
-        return Icons.account_balance;
+        return Icons.account_balance_rounded;
       default:
-        return Icons.account_balance_wallet;
+        return Icons.account_balance_wallet_rounded;
     }
   }
   
   Color _getAccountColor(AccountType type) {
     switch (type) {
       case AccountType.cash:
-        return const Color(0xFF4CAF50); // Yeşil
+        return const Color(0xFF34C759); // iOS Green
       case AccountType.credit:
-        return const Color(0xFFFF9800); // Turuncu
+        return const Color(0xFFFF9500); // iOS Orange
       case AccountType.debit:
-        return const Color(0xFF2196F3); // Mavi
+        return const Color(0xFF007AFF); // iOS Blue
       default:
-        return const Color(0xFF6D6D70); // Gri
+        return const Color(0xFF6D6D70); // iOS Gray
     }
   }
   

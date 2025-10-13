@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/models/stock_models.dart';
+import '../../../shared/models/transaction_model_v2.dart' as txn;
 import '../../../shared/utils/currency_utils.dart';
+import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/providers/unified_provider_v2.dart';
 import 'mini_chart_widget.dart';
 
 /// Açılır-kapanır hisse kartı widget'ı
@@ -22,7 +26,42 @@ class ExpandableStockCard extends StatefulWidget {
   State<ExpandableStockCard> createState() => _ExpandableStockCardState();
 }
 
-class _ExpandableStockCardState extends State<ExpandableStockCard> {
+class _ExpandableStockCardState extends State<ExpandableStockCard> 
+    with SingleTickerProviderStateMixin {
+  bool _isExpanded = false;
+  late AnimationController _animationController;
+  late Animation<double> _expandAnimation;
+  double? _previousPrice;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousPrice = widget.stock.currentPrice;
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(ExpandableStockCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Fiyat değiştiğinde önceki fiyatı güncelle
+    if (oldWidget.stock.currentPrice != widget.stock.currentPrice) {
+      _previousPrice = oldWidget.stock.currentPrice;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -56,10 +95,48 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
               ),
             ],
           ),
-          child: _buildCompactView(isDark, l10n),
+          child: Column(
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                    if (_isExpanded) {
+                      _animationController.forward();
+                    } else {
+                      _animationController.reverse();
+                    }
+                  });
+                },
+                child: _buildCompactView(isDark, l10n),
+              ),
+              SizeTransition(
+                sizeFactor: _expandAnimation,
+                child: _buildExpandedView(isDark, l10n),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Color _getPriceColor(bool isDark) {
+    if (_previousPrice == null) {
+      return isDark ? Colors.white : Colors.black;
+    }
+    
+    final currentPrice = widget.stock.currentPrice;
+    final previousPrice = _previousPrice!;
+    
+    if (currentPrice > previousPrice) {
+      return Colors.green;
+    } else if (currentPrice < previousPrice) {
+      return Colors.red;
+    } else {
+      return isDark ? Colors.white : Colors.black;
+    }
   }
 
   Widget _buildCompactView(bool isDark, AppLocalizations l10n) {
@@ -68,7 +145,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
     final isLoss = position != null && position.profitLoss < 0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(15),
       child: Column(
         children: [
           // Header - Hisse adı, mini grafik ve adet sayısı
@@ -86,14 +163,14 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Row(
                   children: [
                     Text(
                       _cleanStockName(widget.stock.symbol),
                       style: GoogleFonts.inter(
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w700,
                         color: isDark ? Colors.white : Colors.black,
                         letterSpacing: -0.3,
@@ -151,173 +228,421 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                   ],
                 ),
               ),
-              // Adet sayısı - Sağ üstte
+              // Adet sayısı ve güncel fiyat - Sağ üstte
               if (widget.position != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF2C2C2E)
-                        : const Color(0xFFF8F9FA),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF48484A)
-                          : const Color(0xFFE5E5EA),
-                      width: 1,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Lot bilgisi
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF48484A)
+                              : const Color(0xFFE5E5EA),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        '${widget.position!.totalQuantity.toStringAsFixed(0)} ${l10n.pieces}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    '${widget.position!.totalQuantity.toStringAsFixed(0)} ${l10n.pieces}',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : Colors.black,
+                    const SizedBox(width: 8),
+                    // Güncel fiyat ve yüzde kar/zarar - Başlıksız
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF48484A)
+                              : const Color(0xFFE5E5EA),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            widget.stock.currentPrice > 0.0
+                                ? widget.stock.displayPrice
+                                : '₺0,00',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: _getPriceColor(isDark),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            position != null && position.profitLossPercent != 0
+                                ? '${position.profitLossPercent > 0 ? '+' : ''}${position.profitLossPercent.toStringAsFixed(1)}%'
+                                : '0.0%',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: position != null && position.profitLossPercent > 0
+                                  ? Colors.green
+                                  : position != null && position.profitLossPercent < 0
+                                      ? Colors.red
+                                      : isDark ? Colors.white60 : Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
             ],
           ),
 
-          const SizedBox(height: 12),
 
-          // Ana bilgiler - 4'lü grid
-          if (position != null)
-            Row(
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpandedView(bool isDark, AppLocalizations l10n) {
+    final position = widget.position;
+    
+    if (position == null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          'Hisse pozisyonu bulunamadı',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            color: isDark ? Colors.white60 : Colors.grey[600],
+          ),
+        ),
+      );
+    }
+
+    return Consumer<UnifiedProviderV2>(
+      builder: (context, provider, child) {
+        // Bu hisse ile ilgili transaction'ları filtrele
+        final stockTransactions = provider.transactions.where((transaction) {
+          return transaction.type == txn.TransactionType.stock &&
+                 transaction.stockSymbol == widget.stock.symbol;
+        }).toList();
+
+        // Tarihe göre sırala (en yeni üstte)
+        stockTransactions.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [const Color(0xFF1C1C1E), const Color(0xFF2C2C2E)]
+                  : [Colors.white, const Color(0xFFFAFAFA)],
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+            ),
+            border: Border.all(
+              color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Ana bilgiler - 3'lü grid
+              Row(
+                children: [
+                  // 1. Maliyet
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.cost,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white60 : Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.averagePrice, isUSD: widget.stock.currency == 'USD')}',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 2. Mevcut Değer
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.currentValue,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white60 : Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.currentValue, isUSD: widget.stock.currency == 'USD')}',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 3. Kar/Zarar
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.profitLoss,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white60 : Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${position.profitLoss >= 0 ? '+' : ''}${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.profitLoss, isUSD: widget.stock.currency == 'USD')}',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: position.profitLoss >= 0
+                                ? const Color(0xFF4CAF50)
+                                : position.profitLoss < 0
+                                ? const Color(0xFFFF4C4C)
+                                : Colors.grey,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Transaction listesi
+              if (stockTransactions.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.history,
+                          size: 32,
+                          color: isDark ? Colors.white30 : Colors.grey[400],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Henüz işlem bulunmuyor',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            color: isDark ? Colors.white60 : Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                ...stockTransactions.map((transaction) {
+                  final isBuy = transaction.amount < 0; // Negatif amount = alış
+                  final quantity = transaction.stockQuantity ?? 0.0;
+                  final price = transaction.stockPrice ?? 0.0;
+                  final totalAmount = quantity * price;
+                  
+                  // Mevcut fiyata göre kar/zarar hesapla
+                  final currentPrice = widget.stock.currentPrice;
+                  final profitLoss = isBuy 
+                      ? (currentPrice - price) * quantity  // Alış için: (mevcut - alış) × miktar
+                      : (price - currentPrice) * quantity; // Satış için: (satış - mevcut) × miktar
+                  final profitLossPercent = isBuy
+                      ? ((currentPrice - price) / price) * 100  // Alış için: ((mevcut - alış) / alış) × 100
+                      : ((price - currentPrice) / currentPrice) * 100; // Satış için: ((satış - mevcut) / mevcut) × 100
+                  
+                  return Column(
+                    children: [
+                      _buildTransactionItem(
+                        context: context,
+                        isDark: isDark,
+                        l10n: l10n,
+                        type: isBuy ? l10n.buy : l10n.sell,
+                        quantity: quantity.toStringAsFixed(0),
+                        price: '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(price, isUSD: widget.stock.currency == 'USD')}',
+                        totalAmount: '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(totalAmount, isUSD: widget.stock.currency == 'USD')}',
+                        profitLoss: '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(profitLoss, isUSD: widget.stock.currency == 'USD')}',
+                        profitLossPercent: '${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent.toStringAsFixed(1)}%',
+                        date: TransactionDesignSystem.localizeDisplayTime(
+                          _getRawTransactionDate(transaction.transactionDate),
+                          context,
+                        ),
+                        isBuy: isBuy,
+                        isProfit: profitLoss >= 0,
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                  );
+                }).toList(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTransactionItem({
+    required BuildContext context,
+    required bool isDark,
+    required AppLocalizations l10n,
+    required String type,
+    required String quantity,
+    required String price,
+    required String totalAmount,
+    required String profitLoss,
+    required String profitLossPercent,
+    required String date,
+    required bool isBuy,
+    required bool isProfit,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isDark ? const Color(0xFF48484A) : const Color(0xFFE5E5EA),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Transaction type icon - Stock specific icons
+          Icon(
+            Icons.bar_chart,
+            size: 14,
+            color: isBuy ? Colors.red : Colors.green,
+          ),
+          
+          const SizedBox(width: 8),
+          
+          // Transaction details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Maliyet
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.cost,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.white60 : Colors.grey[600],
-                        ),
+                Row(
+                  children: [
+                    Text(
+                      type,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(widget.position!.averagePrice, isUSD: widget.stock.currency == 'USD')}',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      date,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white60 : Colors.grey[600],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-
-                // 2. Güncel Fiyat
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.currentPrice,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.white60 : Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.stock.currentPrice > 0.0
-                            ? widget.stock.displayPrice
-                            : '₺0,00',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // 3. Mevcut Değer
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.currentValue,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.white60 : Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(widget.position!.currentValue, isUSD: widget.stock.currency == 'USD')}',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // 4. Kar/Zarar
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.profitLoss,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.white60 : Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${widget.position!.profitLoss >= 0 ? '+' : ''}${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(widget.position!.profitLoss, isUSD: widget.stock.currency == 'USD')}',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: isProfit
-                              ? const Color(0xFF4CAF50)
-                              : isLoss
-                              ? const Color(0xFFFF4C4C)
-                              : Colors.grey,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                Text(
+                  '$price × $quantity lot = $totalAmount',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white60 : Colors.grey[600],
                   ),
                 ),
               ],
             ),
+          ),
+          
+          // Profit/Loss
+          Text(
+            '$profitLoss ($profitLossPercent)',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isProfit ? Colors.green : Colors.red,
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  String _getRawTransactionDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    
+    final transactionDay = DateTime(date.year, date.month, date.day);
+    
+    if (transactionDay == today) {
+      return 'TODAY';
+    } else if (transactionDay == yesterday) {
+      return 'YESTERDAY';
+    } else {
+      // Format: DD/MM (same as transaction displayTime)
+      return '${date.day}/${date.month}';
+    }
   }
 
   Widget _buildPortfolioInfo(bool isDark, AppLocalizations l10n) {
@@ -383,13 +708,43 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      '${position.totalQuantity.toStringAsFixed(0)} ${l10n.pieces}',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.white60 : Colors.grey[600],
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '${position.totalQuantity.toStringAsFixed(0)} ${l10n.pieces}',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white60 : Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.stock.currentPrice > 0.0
+                              ? widget.stock.displayPrice
+                              : '₺0,00',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white60 : Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          position.profitLossPercent != 0
+                              ? '${position.profitLossPercent > 0 ? '+' : ''}${position.profitLossPercent.toStringAsFixed(1)}%'
+                              : '0.0%',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: position.profitLossPercent > 0
+                                ? Colors.green
+                                : position.profitLossPercent < 0
+                                    ? Colors.red
+                                    : isDark ? Colors.white60 : Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -548,4 +903,5 @@ class _ExpandableStockCardState extends State<ExpandableStockCard> {
         .replaceAll(RegExp(r'\.T$', caseSensitive: false), '')
         .trim();
   }
+
 }

@@ -54,7 +54,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get password => 'Şifre';
 
   @override
-  String get fullName => 'Adınız';
+  String get fullName => 'Adın';
 
   @override
   String get signUp => 'Kayıt Ol';
@@ -142,14 +142,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get confirmPassword => 'Şifreyi Onayla';
 
   @override
-  String get loginSubtitle => 'Hesabınıza giriş yapın';
+  String get loginSubtitle => 'Hesabına giriş yap';
 
   @override
   String get createAccount => 'Hesap Oluştur';
 
   @override
-  String get registerSubtitle =>
-      'Qanta\'ya katılın ve paranızı yönetmeye başlayın';
+  String get registerSubtitle => 'Qanta\'ya katıl ve paranı yönetmeye başla';
 
   @override
   String get pageNotFound => 'Sayfa bulunamadı';
@@ -161,10 +160,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get goHome => 'Ana Sayfaya Git';
 
   @override
-  String get alreadyHaveAccount => 'Zaten hesabınız var mı?';
+  String get alreadyHaveAccount => 'Zaten hesabın var mı?';
 
   @override
-  String get dontHaveAccount => 'Hesabınız yok mu?';
+  String get dontHaveAccount => 'Hesabın yok mu?';
 
   @override
   String get loginError => 'Giriş hatası';
@@ -325,10 +324,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Hangi para birimini kullanmak istiyorsunuz?';
 
   @override
-  String get debit => 'BANKA';
+  String get debit => 'Banka Kartı Ekle';
 
   @override
-  String get credit => 'KREDİ';
+  String get credit => 'Kredi Kartı Ekle';
 
   @override
   String get profile => 'Profil';
@@ -1024,13 +1023,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get totalAmount => 'Toplam Tutar';
 
   @override
-  String get onboardingFeaturesTitle => 'Qanta ile Neler Yapabilirsiniz?';
+  String get onboardingFeaturesTitle => 'Qanta ile Neler Yapabilirsin?';
 
   @override
   String get expenseTrackingTitle => 'Harcama Takibi';
 
   @override
-  String get expenseTrackingDesc => 'Günlük harcamalarınızı kolayca takip edin';
+  String get expenseTrackingDesc => 'Günlük harcamalarını kolayca takip et';
 
   @override
   String get smartSavingsTitle => 'Akıllı Birikim';
@@ -1073,7 +1072,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get expenseTrackingDescShort =>
-      'Günlük harcamalarınızı detaylı takiple kaydedin ve kategorilere ayırın';
+      'Günlük harcamalarını detaylı takiple kaydet ve kategorilere ayır';
 
   @override
   String get cardManagementDescShort =>
@@ -1413,6 +1412,23 @@ class AppLocalizationsTr extends AppLocalizations {
   String get netWorth => 'Toplam Varlık';
 
   @override
+  String get welcomeToQanta => 'Qanta\'ya Hoş Geldin!';
+
+  @override
+  String get startYourFinancialJourney =>
+      'Finansal yolculuğuna başlamak için ilk adımı at';
+
+  @override
+  String get addFirstIncome => 'İlk Geliri Ekle';
+
+  @override
+  String get addCard => 'Kart Ekle';
+
+  @override
+  String get tipTrackYourExpenses =>
+      'Giderlerini takip ederek finansal hedeflerine ulaş';
+
+  @override
   String get positive => 'Pozitif';
 
   @override
@@ -1741,6 +1757,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get transaction => 'İşlem';
 
   @override
+  String get noTransactionsForThisDay => 'Bu gün için işlem bulunmuyor';
+
+  @override
+  String get cashWallet => 'Nakit Hesap';
+
+  @override
   String get bankName => 'Qanta';
 
   @override
@@ -1798,8 +1820,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noNotesYet => 'Henüz not yok';
 
   @override
-  String get addExpenseIncomeNotes =>
-      'Gider veya gelir notlarınızı buraya ekleyin';
+  String get addExpenseIncomeNotes => 'Gider veya gelir notlarını buraya ekle';
 
   @override
   String get justNow => 'Az önce';
@@ -1934,7 +1955,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get lowestToHighest => 'Düşükten Yükseğe';
 
   @override
-  String get alphabetical => 'Alfabetik';
+  String get alphabetical => 'A-Z';
 
   @override
   String get more => 'Daha Fazla';
@@ -2037,7 +2058,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get collectedInformationContent =>
-      'Qanta uygulaması, size daha iyi hizmet verebilmek için aşağıdaki bilgileri toplar:\n\n• Hesap bilgileri (e-posta, ad-soyad)\n• Finansal işlem verileri (gelir, gider, transfer kayıtları)\n• Kart ve hesap bilgileri\n• Bütçe ve kategori tercihleri\n• Uygulama kullanım istatistikleri';
+      'Qanta uygulaması, sana daha iyi hizmet verebilmek için aşağıdaki bilgileri toplar:\n\n• Hesap bilgileri (e-posta, ad-soyad)\n• Finansal işlem verileri (gelir, gider, transfer kayıtları)\n• Kart ve hesap bilgileri\n• Bütçe ve kategori tercihleri\n• Uygulama kullanım istatistikleri';
 
   @override
   String get informationUsage => 'Bilgilerin Kullanımı';
@@ -2051,7 +2072,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get dataSecurityContent =>
-      'Verilerinizin güvenliği bizim için önceliktir:\n\n• Tüm veriler şifreli olarak saklanır\n• Güvenli sunucularda barındırılır\n• Düzenli güvenlik güncellemeleri yapılır\n• Yetkisiz erişimlere karşı korunur\n• Endüstri standartlarına uygun güvenlik önlemleri alınır';
+      'Verilerinin güvenliği benim için önceliktir:\n\n• Tüm veriler şifreli olarak saklanır\n• Güvenli sunucularda barındırılır\n• Düzenli güvenlik güncellemeleri yapılır\n• Yetkisiz erişimlere karşı korunur\n• Endüstri standartlarına uygun güvenlik önlemleri alınır';
 
   @override
   String get dataSharing => 'Veri Paylaşımı';
@@ -2065,7 +2086,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get userRightsContent =>
-      'KVKK kapsamında sahip olduğunuz haklar:\n\n• Kişisel verilerinizin işlenip işlenmediğini öğrenme\n• Verilerinize erişim talep etme\n• Yanlış bilgilerin düzeltilmesini isteme\n• Verilerin silinmesini talep etme\n• Hesabınızı tamamen kapatma';
+      'KVKK kapsamında sahip olduğun haklar:\n\n• Kişisel verilerinin işlenip işlenmediğini öğrenme\n• Verilerine erişim talep etme\n• Yanlış bilgilerin düzeltilmesini isteme\n• Verilerin silinmesini talep etme\n• Hesabını tamamen kapatma';
 
   @override
   String get contact => 'İletişim';
@@ -2095,14 +2116,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get forgotPasswordAnswer =>
-      'Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak e-posta adresinize şifre sıfırlama bağlantısı gönderebilirsiniz.';
+      'Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak e-posta adresine şifre sıfırlama bağlantısı gönderebilirsin.';
 
   @override
   String get howToDeleteAccount => 'Hesabımı nasıl silebilirim?';
 
   @override
   String get howToDeleteAccountAnswer =>
-      'Profil sayfasından çıkış yapabilir veya destek ekibimizle iletişime geçerek hesabınızın tamamen silinmesini talep edebilirsiniz.';
+      'Profil sayfasından çıkış yapabilir veya destek ekibimizle iletişime geçerek hesabının tamamen silinmesini talep edebilirsin.';
 
   @override
   String get isAppFree => 'Uygulama ücretsiz mi?';
@@ -2149,7 +2170,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get userResponsibilitiesContent =>
-      'Kullanıcı olarak aşağıdaki sorumluluklarınız bulunmaktadır:\n\n• Hesap bilgilerinizi güvenli tutmak\n• Şifrenizi kimseyle paylaşmamak\n• Finansal verilerinizin doğruluğunu sağlamak\n• Uygulama kurallarına uymak\n• Güvenlik ihlallerini bildirmek';
+      'Kullanıcı olarak aşağıdaki sorumlulukların bulunmaktadır:\n\n• Hesap bilgilerini güvenli tutmak\n• Şifreni kimseyle paylaşmamak\n• Finansal verilerinin doğruluğunu sağlamak\n• Uygulama kurallarına uymak\n• Güvenlik ihlallerini bildirmek';
 
   @override
   String get serviceLimitations => 'Hizmet Sınırlamaları';
@@ -2220,7 +2241,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get howToChangePasswordAnswer =>
-      'Profil sayfasında \"Güvenlik\" bölümünden \"Şifre Değiştir\" seçeneğini kullanabilirsiniz.';
+      'Profil sayfasında \"Güvenlik\" bölümünden \"Şifre Değiştir\" seçeneğini kullanabilirsin.';
 
   @override
   String get whichCardTypesSupported =>
@@ -2235,21 +2256,21 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get howDoesInstallmentTrackingWorkAnswer =>
-      'Taksitli alışverişlerinizi ekleyebilir, aylık ödemelerinizi otomatik olarak takip edebilirsiniz. Sistem size hatırlatmalar gönderir.';
+      'Taksitli alışverişlerini ekleyebilir, aylık ödemelerini otomatik olarak takip edebilirsin. Sistem sana hatırlatmalar gönderir.';
 
   @override
   String get howToUseBudgetManagement => 'Bütçe yönetimi nasıl kullanılır?';
 
   @override
   String get howToUseBudgetManagementAnswer =>
-      'Kategoriler için aylık limitler belirleyebilir, harcamalarınızı takip edebilir ve limit aşımlarında uyarı alabilirsiniz.';
+      'Kategoriler için aylık limitler belirleyebilir, harcamalarını takip edebilir ve limit aşımlarında uyarı alabilirsin.';
 
   @override
   String get whatIsQuickNotesFeature => 'Hızlı notlar özelliği nedir?';
 
   @override
   String get whatIsQuickNotesFeatureAnswer =>
-      'Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarınızı kategorize edebilirsiniz.';
+      'Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarını kategorize edebilirsin.';
 
   @override
   String get appCrashingWhatToDo => 'Uygulama çöküyor, ne yapmalıyım?';
@@ -2278,14 +2299,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get howToContactSupportAnswer =>
-      'Profil sayfasından \"Destek & İletişim\" bölümünü kullanabilir veya support@qanta.app adresine e-posta gönderebilirsiniz.';
+      'Profil sayfasından \"Destek & İletişim\" bölümünü kullanabilir veya support@qanta.app adresine e-posta gönderebilirsin.';
 
   @override
   String get haveSuggestionWhereToSend => 'Önerim var, nereye iletebilirim?';
 
   @override
   String get haveSuggestionWhereToSendAnswer =>
-      'Önerilerinizi support@qanta.app adresine gönderebilirsiniz. Tüm geri bildirimler değerlendirilir ve uygulamayı geliştirmek için kullanılır.';
+      'Önerilerini support@qanta.app adresine gönderebilirsin. Tüm geri bildirimler değerlendirilir ve uygulamayı geliştirmek için kullanılır.';
 
   @override
   String get lastMonthChange => 'Geçen aya göre';
@@ -2300,7 +2321,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noAccountsYet => 'Henüz hesap eklenmemiş';
 
   @override
-  String get addFirstAccount => 'İlk hesabınızı ekleyerek başlayın';
+  String get addFirstAccount => 'İlk hesabını ekleyerek başla';
 
   @override
   String get currentDebt => 'Mevcut Borç';
@@ -2309,7 +2330,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get totalLimit => 'Toplam Limit';
 
   @override
-  String get cashWallet => 'Nakit Cüzdan';
+  String stockPurchaseInsufficientBalance(String balance) {
+    return 'Hisse alımı için yetersiz bakiye. Mevcut: $balance';
+  }
+
+  @override
+  String stockSaleInsufficientQuantity(String quantity) {
+    return 'Yetersiz hisse miktarı. Mevcut: $quantity lot';
+  }
 
   @override
   String get searchBanks => 'Banka ara...';
@@ -2321,7 +2349,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addCreditCard => 'Kredi Kartı Ekle';
 
   @override
-  String get cardNameExample => 'Örn: VakıfBank Kredi Kartı';
+  String get cardNameExample => 'Örn: İş Kartım, Alışveriş Kartı';
 
   @override
   String get currentDebtOptional => 'Mevcut Borç (Opsiyonel)';
@@ -2426,10 +2454,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get selectCardType => 'Kart Türü Seçin';
 
   @override
-  String get addDebitCardDescription => 'Vadesiz hesap kartı ekleyin';
+  String get addDebitCardDescription =>
+      'Harcamalarınızı takip etmek için banka kartı ekleyin';
 
   @override
-  String get addCreditCardDescription => 'Kredi kartı bilgilerinizi ekleyin';
+  String get addCreditCardDescription =>
+      'Kredinizi yönetmek için kredi kartı ekleyin';
 
   @override
   String get searchStocks => 'Hisse Ara';
@@ -2534,16 +2564,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get addFirstCardDescription =>
-      'İlk kartınızı eklemek için Kartlarım sayfasına gidin';
+      'İlk kartını eklemek için Kartlarım sayfasına git';
 
   @override
   String deleteTransactionConfirmation(String description) {
-    return '$description işlemini silmek istediğinizden emin misiniz?';
+    return '$description işlemini silmek istediğinden emin misin?';
   }
 
   @override
   String deleteInstallmentConfirmation(String description) {
-    return '$description işlemini silmek istediğinizden emin misiniz? Tüm taksitler iade edilecektir.';
+    return '$description işlemini silmek istediğinden emin misin? Tüm taksitler iade edilecektir.';
   }
 
   @override
@@ -2595,7 +2625,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get addQuickNoteDescription =>
-      'Harcama veya gelir notunuzu yazın. Daha sonra işlem olarak ekleyebilirsiniz.';
+      'Harcama veya gelir notunu yaz. Daha sonra işlem olarak ekleyebilirsin.';
 
   @override
   String exampleExpenseNote(String currency) {
@@ -2696,13 +2726,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get daily => 'Günlük';
 
   @override
-  String get noStocksTracked => 'Henüz hisse takip etmiyorsunuz';
+  String get noStocksTracked => 'Henüz hisse takip etmiyorsun';
 
   @override
   String get stockDataLoading => 'Hisse verileri yükleniyor...';
 
   @override
-  String get addStocksInstruction => 'Hisse eklemek için Hisse sekmesine gidin';
+  String get addStocksInstruction => 'Hisse eklemek için Hisse sekmesine git';
 
   @override
   String get addStocks => 'Hisse Ekle';
@@ -2747,7 +2777,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get total => 'Toplam';
 
   @override
-  String get pieces => 'adet';
+  String get pieces => 'lot';
 
   @override
   String totalTransactionsCount(int count) {
@@ -2834,7 +2864,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get change => 'Değişim';
 
   @override
-  String get stable => 'Sabit';
+  String get stable => 'Stabil';
 
   @override
   String get stockTrading => 'Hisse Alış/Satış';
@@ -2992,6 +3022,39 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get portfolioOverview => 'Portföy Özeti';
+
+  @override
+  String get myPortfolio => 'Portföyüm';
+
+  @override
+  String get neutral => 'Nötr';
+
+  @override
+  String get profit => 'Kar';
+
+  @override
+  String get loss => 'Zarar';
+
+  @override
+  String get filterBy => 'Filtrele';
+
+  @override
+  String get gainers => 'Yükselen';
+
+  @override
+  String get losers => 'Düşen';
+
+  @override
+  String get portfolioRatio => 'Ağırlık';
+
+  @override
+  String get insufficientBalance => 'Yetersiz Bakiye';
+
+  @override
+  String get addMoneyToAccount => 'Hisse almak için hesabınıza para ekleyin';
+
+  @override
+  String get addMoney => 'Para Ekle';
 
   @override
   String get totalValue => 'Toplam Değer';
@@ -3293,6 +3356,49 @@ class AppLocalizationsTr extends AppLocalizations {
   String get limitExceeded => 'Limit Aşıldı!';
 
   @override
+  String get creditCardLimitInsufficient => 'Kredi kartı limiti yetersiz';
+
+  @override
+  String creditCardLimitInsufficientWithAmount(String amount) {
+    return 'Kredi kartı limiti yetersiz. Kalan limit: $amount';
+  }
+
+  @override
+  String get creditCardLimitInsufficientTitle => 'Kredi Kartı Limiti Yetersiz';
+
+  @override
+  String get creditCardLimitInsufficientMessage =>
+      'Kredi kartı limitiniz bu işlem için yeterli değil. Lütfen daha düşük bir tutar girin veya kartınızın borcunu ödeyin.';
+
+  @override
+  String get debitCardBalanceInsufficientTitle =>
+      'Banka Kartı Bakiyesi Yetersiz';
+
+  @override
+  String get debitCardBalanceInsufficientMessage =>
+      'Banka kartı bakiyeniz bu işlem için yeterli değil. Lütfen daha düşük bir tutar girin veya kartınıza para yatırın.';
+
+  @override
+  String cashBalanceInsufficientWithAmount(String amount) {
+    return 'Nakit bakiyesi yetersiz. Mevcut: $amount';
+  }
+
+  @override
+  String debitCardBalanceInsufficientWithAmount(String amount) {
+    return 'Banka kartı bakiyesi yetersiz. Mevcut: $amount';
+  }
+
+  @override
+  String get cashBalanceInsufficientTitle => 'Nakit Bakiyesi Yetersiz';
+
+  @override
+  String get cashBalanceInsufficientMessage =>
+      'Nakit bakiyeniz bu işlem için yeterli değil. Lütfen daha düşük bir tutar girin.';
+
+  @override
+  String get insufficientBalanceTitle => 'Yetersiz Bakiye';
+
+  @override
   String get spent => 'harcandı';
 
   @override
@@ -3333,4 +3439,84 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get or => 'veya';
+
+  @override
+  String get addFirstNoteInstruction =>
+      'İlk notunu eklemek için + butonuna dokun';
+
+  @override
+  String get addExpenseIncomeNoteInstruction =>
+      'Harcama veya gelir notunu yaz. Daha sonra işlem olarak ekleyebilirsin.';
+
+  @override
+  String get stockTransactionCannotDelete => 'Hisse işlemleri silinemez';
+
+  @override
+  String get stockTransactionDeleteWarning =>
+      'Hisse işlemini silmek yerine satış işlemi yapın';
+
+  @override
+  String get editCreditCard => 'Kredi Kartını Düzenle';
+
+  @override
+  String get selectBank => 'Banka seçin';
+
+  @override
+  String get pleaseSelectBank => 'Lütfen bir banka seçin';
+
+  @override
+  String get cardNameOptional => 'Kart Adı';
+
+  @override
+  String get statementDayLabel => 'Ekstre Günü';
+
+  @override
+  String get selectStatementDay => 'Ekstre günü seçin';
+
+  @override
+  String get creditCardUpdatedSuccessfully =>
+      'Kredi kartı başarıyla güncellendi';
+
+  @override
+  String updateErrorOccurred(String error) {
+    return 'Güncelleme sırasında hata oluştu: $error';
+  }
+
+  @override
+  String get invalidMonth => 'Geçersiz ay';
+
+  @override
+  String get addCardDescription =>
+      'Finanslarınızı yönetmeye başlamak için ilk kartınızı ekleyin';
+
+  @override
+  String get budgetManagementDescription =>
+      'Harcama limitlerinizi takip edin ve kategorilere göre haftalık, aylık ve yıllık bütçelerinizi yönetin';
+
+  @override
+  String get dark => 'KARANLIK';
+
+  @override
+  String get light => 'AYDINLIK';
+
+  @override
+  String get on => 'AÇIK';
+
+  @override
+  String get off => 'KAPALI';
+
+  @override
+  String get last7Days => 'Son 7 gün';
+
+  @override
+  String get last30Days => 'Son 30 gün';
+
+  @override
+  String get bankCard => 'Banka Kartı';
+
+  @override
+  String get noStocksMatchFilter => 'Mevcut filtreye uygun hisse bulunamadı';
+
+  @override
+  String get tryDifferentFilter => 'Farklı bir filtre seçmeyi deneyin';
 }

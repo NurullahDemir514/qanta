@@ -358,9 +358,24 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
   /// Display name for the account involved
   String get accountDisplayName {
     if (isTransfer) {
-      return '$sourceAccountName → $targetAccountName';
+      // Use first and second word of account names for transfers
+      final sourceAccount = _getFirstTwoWords(_localizeAccountName(sourceAccountName ?? 'Account'));
+      final targetAccount = _getFirstTwoWords(_localizeAccountName(targetAccountName ?? 'Account'));
+      
+      return '$sourceAccount → $targetAccount';
     }
-    return sourceAccountName ?? 'Unknown Account';
+    return _localizeAccountName(sourceAccountName ?? 'Unknown Account');
+  }
+
+  /// Get first and second word from account name
+  String _getFirstTwoWords(String accountName) {
+    final words = accountName.trim().split(RegExp(r'\s+'));
+    if (words.length >= 2) {
+      return '${words[0]} ${words[1]}';
+    } else if (words.length == 1) {
+      return words[0];
+    }
+    return accountName;
   }
 
   /// Returns the original user-entered description without any system modifications
@@ -425,23 +440,33 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
     switch (type) {
       case TransactionType.expense:
         // For expenses: show account name as subtitle
-        return sourceAccountName ?? 'Account';
+        return _localizeAccountName(sourceAccountName ?? 'Account');
       case TransactionType.income:
         // For income: show account name as subtitle
-        return sourceAccountName ?? 'Account';
+        return _localizeAccountName(sourceAccountName ?? 'Account');
       case TransactionType.transfer:
-        // For transfers: show source → target as subtitle
-        final sourceAccount = sourceAccountName ?? 'Account';
-        final targetAccount = targetAccountName ?? 'Account';
+        // For transfers: show first and second word of account names
+        final sourceAccount = _getFirstTwoWords(_localizeAccountName(sourceAccountName ?? 'Account'));
+        final targetAccount = _getFirstTwoWords(_localizeAccountName(targetAccountName ?? 'Account'));
+        
         return '$sourceAccount → $targetAccount';
       case TransactionType.stock:
         // For stocks: show account name and stock details as subtitle
-        final accountName = sourceAccountName ?? 'Account';
+        final accountName = _localizeAccountName(sourceAccountName ?? 'Account');
         if (stockQuantity != null && stockPrice != null) {
           return '$accountName • ${stockQuantity!.toStringAsFixed(0)} adet @ ${stockPrice!.toStringAsFixed(2)} ₺';
         }
         return accountName;
     }
+  }
+
+  /// Localize account name for display
+  String _localizeAccountName(String accountName) {
+    if (accountName == 'CASH_WALLET') {
+      // Return localized cash wallet name
+      return 'Nakit Hesap'; // Default Turkish, will be overridden by UI components with context
+    }
+    return accountName;
   }
 
   /// Check if this is a stock transaction
@@ -472,9 +497,13 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
 
   /// Returns a user-friendly time display string
   String get displayTime {
+    // Bu metod artık localization kullanmıyor çünkü context yok
+    // Caller'lar kendi localization'larını kullanmalı
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
+    
+    // Timezone bilgisini kaldır, sadece tarih kısmını kullan
     final transactionDay = DateTime(
       transactionDate.year,
       transactionDate.month,
@@ -482,18 +511,12 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
     );
 
     if (transactionDay == today) {
-      return 'Today';
+      return 'TODAY'; // Placeholder - caller should localize
     } else if (transactionDay == yesterday) {
-      return 'Yesterday';
+      return 'YESTERDAY'; // Placeholder - caller should localize
     } else {
-      // Simple date format: 8 Sep or 8/9 format
-      try {
-        final formatter = DateFormat('d MMM');
-        return formatter.format(transactionDate);
-      } catch (e) {
-        // Fallback: simple format
-        return '${transactionDate.day}/${transactionDate.month}';
-      }
+      // Raw date format - caller should format with proper locale
+      return '${transactionDate.day}/${transactionDate.month}';
     }
   }
 

@@ -586,10 +586,11 @@ class _QuickNotesPageNewState extends State<QuickNotesPageNew>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return AppPageScaffold(
-      title: 'Hızlı Notlar',
-      subtitle: 'Düşüncelerini kaydet',
+      title: l10n.quickNotesTitle,
+      subtitle: l10n.quickNotesSubtitle,
       onRefresh: _loadNotes,
       body: SliverToBoxAdapter(
         child: Column(
@@ -652,7 +653,7 @@ class _QuickNotesPageNewState extends State<QuickNotesPageNew>
           ),
           const SizedBox(height: 8),
           Text(
-            'İlk notunuzu eklemek için + butonuna dokunun',
+            AppLocalizations.of(context)!.addFirstNoteInstruction,
             style: GoogleFonts.inter(
               fontSize: 14,
               color: isDark ? Colors.white54 : Colors.grey[600],
@@ -922,13 +923,15 @@ class _QuickNotesPageNewState extends State<QuickNotesPageNew>
   }
 
   Widget _buildFloatingActionButton(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return FloatingActionButton.extended(
       onPressed: _startQuickCapture,
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       icon: const Icon(Icons.add),
       label: Text(
-        'Hızlı Not',
+        l10n.addQuickNote,
         style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
       ),
     );

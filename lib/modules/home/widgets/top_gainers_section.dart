@@ -240,7 +240,7 @@ class _TopGainersSectionState extends State<TopGainersSection> {
 
   Widget _buildStocksList(List<Stock> stocks, List<StockPosition> positions, bool isDark, AppLocalizations l10n) {
     return SizedBox(
-      height: 90.h, // Sabit yükseklik geri eklendi
+      height: 93.h, // Sabit yükseklik geri eklendi
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: stocks.length,
@@ -261,6 +261,7 @@ class _TopGainersSectionState extends State<TopGainersSection> {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
     double totalProfitLoss = 0.0;
+    double totalCost = 0.0;
 
     for (final stock in allStocks) {
       try {
@@ -274,10 +275,19 @@ class _TopGainersSectionState extends State<TopGainersSection> {
               (stock.changePercent / 100) * position.averagePrice;
           final dailyProfitLoss = dailyChangeAmount * position.totalQuantity;
           totalProfitLoss += dailyProfitLoss;
+          
+          // Toplam maliyet hesaplama (yüzde hesaplaması için)
+          totalCost += position.totalCost;
         }
       } catch (e) {
         // Pozisyon bulunamadı, atla
       }
+    }
+
+    // Toplam yüzde hesaplama
+    double totalPercent = 0.0;
+    if (totalCost > 0) {
+      totalPercent = (totalProfitLoss / totalCost) * 100;
     }
 
     final isPositive = totalProfitLoss >= 0;
@@ -291,13 +301,27 @@ class _TopGainersSectionState extends State<TopGainersSection> {
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8.r),
       ),
-      child: Text(
-        '${isPositive ? '+' : ''}${themeProvider.formatAmount(totalProfitLoss)}',
-        style: GoogleFonts.inter(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${isPositive ? '+' : ''}${themeProvider.formatAmount(totalProfitLoss)}',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            '(${isPositive ? '+' : ''}${totalPercent.abs().toStringAsFixed(1)}%)',
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -374,7 +398,9 @@ class _TopGainersSectionState extends State<TopGainersSection> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child:                   Text(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 4.w),
+                  child: Text(
                     stock.symbol,
                     style: GoogleFonts.inter(
                       fontSize: 13.sp,
@@ -383,13 +409,48 @@ class _TopGainersSectionState extends State<TopGainersSection> {
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
+                ),
               ),
-              Text(
-                themeProvider.formatAmount(stock.currentPrice),
-                style: GoogleFonts.inter(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white : Colors.black,
+              // Current price with opening price and arrow
+              Padding(
+                padding: EdgeInsets.only(right: 4.w),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Opening price with arrow (if available)
+                    if (stock.openPrice != null) ...[
+                      Text(
+                        themeProvider.formatAmount(stock.openPrice!),
+                        style: GoogleFonts.inter(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600,
+                          color: isDark 
+                              ? const Color(0xFF8E8E93) 
+                              : const Color(0xFF6D6D70),
+                        ),
+                      ),
+                      SizedBox(width: 2.w),
+                      Icon(
+                        stock.currentPrice >= stock.openPrice! 
+                            ? Icons.arrow_upward 
+                            : Icons.arrow_downward,
+                        size: 10.sp,
+                        color: stock.currentPrice >= stock.openPrice! 
+                            ? const Color(0xFF4CAF50) 
+                            : const Color(0xFFFF4C4C),
+                      ),
+                      SizedBox(width: 4.w),
+                    ],
+                    // Current price
+                    Text(
+                      themeProvider.formatAmount(stock.currentPrice),
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -410,7 +471,7 @@ class _TopGainersSectionState extends State<TopGainersSection> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    l10n.daily,
+                    l10n.today,
                     style: GoogleFonts.inter(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w800,
@@ -492,6 +553,7 @@ class _TopGainersSectionState extends State<TopGainersSection> {
                 ],
               ),
             ),
+            
           ] else ...[
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
@@ -645,15 +707,7 @@ class _TopGainersSectionState extends State<TopGainersSection> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(8),
                     onTap: () {
-                      // Navigate to stock transaction form (buy)
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const StockTransactionFormScreen(
-                            transactionType: StockTransactionType.buy,
-                          ),
-                        ),
-                      );
+                      _checkBalanceAndNavigate(context);
                     },
                     child: Center(
                       child: Row(
@@ -722,6 +776,106 @@ class _TopGainersSectionState extends State<TopGainersSection> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _checkBalanceAndNavigate(BuildContext context) {
+    final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Debit kart bakiyesi kontrolü
+    double totalDebitBalance = 0.0;
+    for (final card in provider.debitCards) {
+      totalDebitBalance += card['balance'] ?? 0.0;
+    }
+    
+    // Kredi kartı kullanılabilir limit kontrolü
+    double totalCreditLimit = 0.0;
+    for (final card in provider.creditCards) {
+      totalCreditLimit += card['availableLimit'] ?? 0.0;
+    }
+    
+    // Nakit bakiyesi kontrolü
+    double totalCashBalance = 0.0;
+    for (final cash in provider.cashAccounts) {
+      totalCashBalance += cash.balance;
+    }
+    
+    // Toplam kullanılabilir para (sadece nakit + debit bakiye)
+    double totalAvailableBalance = totalCashBalance + totalDebitBalance;
+    
+    if (totalAvailableBalance <= 0) {
+      // Toplam kullanılabilir para sıfır ise uyarı göster
+      _showInsufficientBalanceSnackBar(context, l10n);
+      return;
+    }
+    
+    // Bakiye varsa hisse al ekranını aç
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const StockTransactionFormScreen(
+          transactionType: StockTransactionType.buy,
+        ),
+      ),
+    );
+  }
+
+  void _showInsufficientBalanceSnackBar(BuildContext context, AppLocalizations l10n) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.insufficientBalance,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.addMoneyToAccount,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFFFF4C4C),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        action: SnackBarAction(
+          label: l10n.addMoney,
+          textColor: Colors.white,
+          onPressed: () {
+            // Para ekleme sayfasına yönlendir
+            context.go('/cards');
+          },
+        ),
       ),
     );
   }

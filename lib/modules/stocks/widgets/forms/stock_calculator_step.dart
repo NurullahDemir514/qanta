@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/theme_provider.dart';
+import '../../../../shared/utils/currency_utils.dart';
 
 /// Hisse fiyat ve miktar hesap makinesi step'i
 class StockCalculatorStep extends StatefulWidget {
@@ -226,11 +227,11 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
     final price = double.tryParse(_priceDisplay) ?? 0;
     final total = quantity * price;
 
-    if (total == 0) {
-      return '0 ₺';
-    }
+    // Get currency from theme provider
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final currency = themeProvider.currency;
 
-    return '${total.toStringAsFixed(2)} ₺';
+    return CurrencyUtils.formatAmount(total, currency);
   }
 
   @override
@@ -321,17 +322,6 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                       ),
                     ),
                   ),
-                  if (widget.quantityError != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      widget.quantityError!,
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFFFF3B30),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -415,22 +405,50 @@ class _StockCalculatorStepState extends State<StockCalculatorStep> {
                       ),
                     ),
                   ),
-                  if (widget.priceError != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      widget.priceError!,
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFFFF3B30),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
           ],
         ),
+
+        // Validation error messages - centralized below inputs
+        if (widget.quantityError != null || widget.priceError != null) ...[
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isDark 
+                ? const Color(0xFF2C1B1B) 
+                : const Color(0xFFFFF5F5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFFFF3B30).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.warning_rounded,
+                  size: 16,
+                  color: const Color(0xFFFF3B30),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.quantityError ?? widget.priceError ?? '',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFFFF3B30),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
 
         const SizedBox(height: 12),
 

@@ -6,7 +6,13 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+    // If text is empty, allow it
     if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    // If user is deleting everything (selection covers entire text), allow it
+    if (newValue.text.isEmpty && oldValue.text.isNotEmpty) {
       return newValue;
     }
 
@@ -50,35 +56,47 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
       formattedText += '.';
     }
     
-    // Calculate cursor position
+    // Optimized cursor position calculation
     int cursorPosition = formattedText.length;
-    if (newValue.selection.baseOffset < newValue.text.length) {
-      // Try to maintain relative cursor position
+    
+    // Quick optimization: if text is empty, cursor at start
+    if (formattedText.isEmpty) {
+      cursorPosition = 0;
+    } else if (newValue.text.length < oldValue.text.length) {
+      // Optimized deletion handling - most common case
       int originalCursorPos = newValue.selection.baseOffset;
-      int commasBeforeCursor = 0;
       
-      // Count commas before the original cursor position
-      for (int i = 0; i < originalCursorPos && i < newValue.text.length; i++) {
-        if (newValue.text[i] == ',') {
-          commasBeforeCursor++;
+      // Fast path: if deleting from end, cursor stays at end
+      if (originalCursorPos >= oldValue.text.length) {
+        cursorPosition = formattedText.length;
+      } else {
+        // Count meaningful characters (digits + decimal) before cursor
+        int meaningfulChars = 0;
+        for (int i = 0; i < originalCursorPos && i < oldValue.text.length; i++) {
+          if (oldValue.text[i].contains(RegExp(r'[\d.]'))) {
+            meaningfulChars++;
+          }
         }
-      }
-      
-      // Adjust cursor position based on new comma count
-      int newCommasBeforeCursor = 0;
-      int adjustedPos = originalCursorPos - commasBeforeCursor;
-      
-      for (int i = 0; i < formattedText.length && newCommasBeforeCursor + adjustedPos >= 0; i++) {
-        if (formattedText[i] == ',') {
-          newCommasBeforeCursor++;
-        } else {
-          adjustedPos--;
-          if (adjustedPos < 0) {
-            cursorPosition = i + 1;
-            break;
+        
+        // Find position in new text
+        int currentMeaningfulChars = 0;
+        for (int i = 0; i < formattedText.length; i++) {
+          if (formattedText[i].contains(RegExp(r'[\d.]'))) {
+            currentMeaningfulChars++;
+            if (currentMeaningfulChars >= meaningfulChars) {
+              cursorPosition = i + 1;
+              break;
+            }
           }
         }
       }
+    } else if (newValue.text.length > oldValue.text.length) {
+      // Optimized insertion handling
+      int originalCursorPos = newValue.selection.baseOffset;
+      int oldCommas = oldValue.text.substring(0, originalCursorPos.clamp(0, oldValue.text.length)).split(',').length - 1;
+      int newCommas = formattedText.substring(0, originalCursorPos.clamp(0, formattedText.length)).split(',').length - 1;
+      
+      cursorPosition = originalCursorPos + (newCommas - oldCommas);
     }
     
     return TextEditingValue(
@@ -88,4 +106,4 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
       ),
     );
   }
-} 
+}

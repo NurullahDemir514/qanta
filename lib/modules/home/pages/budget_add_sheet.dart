@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../shared/services/category_icon_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/models/budget_model.dart';
 
 class BudgetAddSheet extends StatefulWidget {
   final VoidCallback? onBudgetSaved;
@@ -20,10 +21,11 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
   final TextEditingController _categoryController = TextEditingController();
   final FocusNode _categoryFocusNode = FocusNode();
   final FocusNode _limitFocusNode = FocusNode();
-  bool _showSuggestions = false;
   String? _selectedCategoryId;
   String? _selectedCategoryName;
   bool _isSaving = false;
+  BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
+  bool _isRecurring = false;
 
   List<String> _getActiveExpenseCategories(BuildContext context) {
     final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
@@ -91,7 +93,9 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
       await provider.createBudget(
         categoryId: _selectedCategoryId!,
         categoryName: _selectedCategoryName!,
-        monthlyLimit: limit,
+        limit: limit,
+        period: _selectedPeriod,
+        isRecurring: _isRecurring,
       );
 
       _limitController.clear();
@@ -119,9 +123,6 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
   @override
   void initState() {
     super.initState();
-    _categoryFocusNode.addListener(() {
-      setState(() => _showSuggestions = _categoryFocusNode.hasFocus);
-    });
   }
 
   @override
@@ -139,6 +140,17 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
     await _findRealCategoryId(category);
     FocusScope.of(context).requestFocus(_limitFocusNode);
     setState(() {});
+  }
+
+  String _getPeriodDisplayName() {
+    switch (_selectedPeriod) {
+      case BudgetPeriod.weekly:
+        return 'Haftalık';
+      case BudgetPeriod.monthly:
+        return 'Aylık';
+      case BudgetPeriod.yearly:
+        return 'Yıllık';
+    }
   }
 
   @override
@@ -205,8 +217,8 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
               AppLocalizations.of(context)!.selectCategory,
               style: GoogleFonts.inter(
                 fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF8E8E93),
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : const Color(0xFF1C1C1E),
               ),
             ),
             const SizedBox(height: 8),
@@ -267,8 +279,9 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                 }
               },
             ),
-            if (_showSuggestions && suggestions.isNotEmpty) ...[
-              const SizedBox(height: 8),
+            // Always show category suggestions
+            if (suggestions.isNotEmpty) ...[
+              const SizedBox(height: 12),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -361,65 +374,288 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
             ],
             const SizedBox(height: 20),
             Text(
-              AppLocalizations.of(context)!.monthlyLimitLabel,
+              'Limit Süresi',
               style: GoogleFonts.inter(
                 fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF8E8E93),
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : const Color(0xFF1C1C1E),
               ),
             ),
             const SizedBox(height: 8),
-            TextField(
-              controller: _limitController,
-              focusNode: _limitFocusNode,
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.done,
+            Row(
+              children: BudgetPeriod.values.map((period) {
+                final isSelected = _selectedPeriod == period;
+                String periodName;
+                switch (period) {
+                  case BudgetPeriod.weekly:
+                    periodName = 'Haftalık';
+                    break;
+                  case BudgetPeriod.monthly:
+                    periodName = 'Aylık';
+                    break;
+                  case BudgetPeriod.yearly:
+                    periodName = 'Yıllık';
+                    break;
+                }
+                
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedPeriod = period),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? (isDark ? const Color(0xFF007AFF) : const Color(0xFF007AFF))
+                              : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7)),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected
+                                ? const Color(0xFF007AFF)
+                                : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
+                          ),
+                        ),
+                        child: Text(
+                          periodName,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected
+                                ? Colors.white
+                                : (isDark ? Colors.white : Colors.black),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              '${_getPeriodDisplayName()} Limit',
               style: GoogleFonts.inter(
-                fontSize: 16,
-                color: isDark ? Colors.white : Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : const Color(0xFF1C1C1E),
               ),
-              decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.limitAmountPlaceholder,
-                hintStyle: GoogleFonts.inter(
-                  color: isDark
-                      ? const Color(0xFF8E8E93)
-                      : const Color(0xFF6D6D70),
-                ),
-                filled: true,
-                fillColor: isDark
-                    ? const Color(0xFF2C2C2E)
-                    : const Color(0xFFF2F2F7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF38383A)
-                        : const Color(0xFFE5E5EA),
-                    width: 1.2,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _limitController,
+                    focusNode: _limitFocusNode,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.limitAmountPlaceholder,
+                      hintStyle: GoogleFonts.inter(
+                        color: isDark
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(0xFFF2F2F7),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF38383A)
+                              : const Color(0xFFE5E5EA),
+                          width: 1.2,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF38383A)
+                              : const Color(0xFFE5E5EA),
+                          width: 1.2,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF38383A)
+                              : const Color(0xFFE5E5EA),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    onSubmitted: (_) {
+                      FocusScope.of(context).unfocus();
+                    },
                   ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
+                const SizedBox(width: 12),
+                // Recurring toggle - segmented control design like balance card
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
                     color: isDark
-                        ? const Color(0xFF38383A)
-                        : const Color(0xFFE5E5EA),
-                    width: 1.2,
+                        ? const Color(0xFF1C1C1E)
+                        : const Color(0xFFF2F2F7),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF3A3A3C)
+                          : const Color(0xFFE5E5EA),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // OFF Button
+                      GestureDetector(
+                        onTap: () {
+                          if (_isRecurring) {
+                            setState(() {
+                              _isRecurring = false;
+                            });
+                          }
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: !_isRecurring
+                                ? const Color(0xFF6D6D70) // Gri
+                                : Colors.transparent,
+                            boxShadow: !_isRecurring
+                                ? [
+                                    BoxShadow(
+                                      color: const Color(0xFF6D6D70).withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 300),
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: !_isRecurring
+                                  ? Colors.white
+                                  : isDark
+                                      ? Colors.white.withOpacity(0.6)
+                                      : const Color(0xFF6D6D70),
+                              letterSpacing: 0.2,
+                            ),
+                            child: Text('Tek Seferlik'),
+                          ),
+                        ),
+                      ),
+                      // ON Button
+                      GestureDetector(
+                        onTap: () {
+                          if (!_isRecurring) {
+                            setState(() {
+                              _isRecurring = true;
+                            });
+                          }
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: _isRecurring
+                                ? const Color(0xFF007AFF) // Mavi
+                                : Colors.transparent,
+                            boxShadow: _isRecurring
+                                ? [
+                                    BoxShadow(
+                                      color: const Color(0xFF007AFF).withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 300),
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: _isRecurring
+                                  ? Colors.white
+                                  : isDark
+                                      ? Colors.white.withOpacity(0.6)
+                                      : const Color(0xFF6D6D70),
+                              letterSpacing: 0.2,
+                            ),
+                            child: Text('Yenile'),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF38383A)
-                        : const Color(0xFFE5E5EA),
-                    width: 2,
-                  ),
+              ],
+            ),
+            // Always show info box with dynamic content
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _isRecurring 
+                    ? const Color(0xFF007AFF).withOpacity(0.1)
+                    : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7)),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _isRecurring 
+                      ? const Color(0xFF007AFF).withOpacity(0.3)
+                      : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
                 ),
               ),
-              onSubmitted: (_) {
-                FocusScope.of(context).unfocus();
-              },
+              child: Row(
+                children: [
+                  Icon(
+                    _isRecurring ? Icons.info : Icons.info_outline,
+                    color: _isRecurring 
+                        ? const Color(0xFF007AFF)
+                        : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _isRecurring 
+                          ? 'Bu limit ${_getPeriodDisplayName().toLowerCase()} otomatik olarak yenilenecek'
+                          : 'Bu limit tek seferlik olarak oluşturulacak',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: _isRecurring 
+                            ? const Color(0xFF007AFF)
+                            : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
             Row(

@@ -7,6 +7,7 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/constants/app_constants.dart';
 import '../widgets/debit_card_widget.dart';
 import '../widgets/edit_debit_card_form.dart';
+import '../widgets/add_debit_card_form.dart';
 import '../widgets/card_transaction_section.dart';
 import '../../home/bottom_sheets/card_detail_bottom_sheet.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -335,17 +336,27 @@ class _DebitCardsTabState extends State<DebitCardsTab>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => EditDebitCardForm(
-          debitCard: card,
-          onSuccess: () {
-            // Kartlar yeniden yüklenecek (provider otomatik günceller)
-          },
-        ),
-      ),
+      builder: (context) {
+        final mediaQuery = MediaQuery.of(context);
+        final keyboardHeight = mediaQuery.viewInsets.bottom;
+        final screenHeight = mediaQuery.size.height;
+        
+        // Klavye açıkken daha yüksek başlangıç boyutu
+        final initialSize = keyboardHeight > 0 ? 0.85 : 0.6;
+        final minSize = keyboardHeight > 0 ? 0.7 : 0.5;
+        
+        return DraggableScrollableSheet(
+          initialChildSize: initialSize,
+          minChildSize: minSize,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) => EditDebitCardForm(
+            debitCard: card,
+            onSuccess: () {
+              // Kartlar yeniden yüklenecek (provider otomatik günceller)
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -607,7 +618,7 @@ class _DebitCardsTabState extends State<DebitCardsTab>
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Banka kartı eklemek için + butonuna dokunun',
+                            widget.l10n.addDebitCardDescription,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   color: Theme.of(
@@ -615,6 +626,92 @@ class _DebitCardsTabState extends State<DebitCardsTab>
                                   ).colorScheme.onSurface.withOpacity(0.5),
                                 ),
                             textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 32),
+                          // Şık kart ekleme butonu
+                          Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: isDark
+                                    ? [
+                                        const Color(0xFF1C1C1E),
+                                        const Color(0xFF2C2C2E),
+                                      ]
+                                    : [
+                                        Colors.white,
+                                        const Color(0xFFF8F8F8),
+                                      ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF48484A)
+                                    : const Color(0xFFE5E5EA),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: isDark
+                                      ? Colors.black.withOpacity(0.3)
+                                      : Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  // Debit card form'unu aç
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (context) => DraggableScrollableSheet(
+                                      initialChildSize: 0.9,
+                                      minChildSize: 0.5,
+                                      maxChildSize: 0.95,
+                                      builder: (context, scrollController) => AddDebitCardForm(
+                                        onSuccess: () {
+                                          // Kartlar yeniden yüklenecek (provider otomatik günceller)
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.add_circle_outline,
+                                        color: isDark
+                                            ? const Color(0xFF8E8E93)
+                                            : const Color(0xFF6D6D70),
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        widget.l10n.addDebitCard,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? const Color(0xFF8E8E93)
+                                              : const Color(0xFF6D6D70),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),

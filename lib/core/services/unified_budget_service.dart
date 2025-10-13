@@ -264,12 +264,12 @@ class UnifiedBudgetService {
       int nearBudgetCount = 0; // 80% or more spent
 
       for (final budget in budgets) {
-        totalBudgetLimit += budget.monthlyLimit;
+        totalBudgetLimit += budget.limit;
         totalSpent += budget.spentAmount;
 
-        if (budget.spentAmount > budget.monthlyLimit) {
+        if (budget.spentAmount > budget.limit) {
           overBudgetCount++;
-        } else if (budget.spentAmount >= budget.monthlyLimit * 0.8) {
+        } else if (budget.spentAmount >= budget.limit * 0.8) {
           nearBudgetCount++;
         }
       }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/providers/cash_account_provider.dart';
 import '../../core/providers/debit_card_provider.dart';
@@ -189,14 +190,19 @@ class _CardsScreenState extends State<CardsScreen>
         return AnimatedBuilder(
           animation: _tabController,
           builder: (context, child) {
-            return AppPageScaffold(
-              title: l10n.myCards,
-              subtitle: _getCardsSubtitle(l10n),
-              titleFontSize: 20,
-              subtitleFontSize: 12,
-              tabBar: AppTabBar(
+            return WillPopScope(
+              onWillPop: () async {
+                context.go('/home?tab=2');
+                return false; // Pop işlemini engelle, GoRouter ile yönlendir
+              },
+              child: AppPageScaffold(
+                title: l10n.myCards,
+                subtitle: _getCardsSubtitle(l10n),
+                titleFontSize: 20,
+                subtitleFontSize: 12,
+                tabBar: AppTabBar(
                 controller: _tabController,
-                tabs: [l10n.cash, l10n.debit, l10n.credit],
+                tabs: [l10n.cash, l10n.bankCard, l10n.creditCard],
               ),
               onRefresh: () async {
                 // Tüm verileri Firebase'den yenile
@@ -221,8 +227,9 @@ class _CardsScreenState extends State<CardsScreen>
                     DebitCardsTab(l10n: l10n),
                     // Credit Cards Tab
                     CreditCardsTab(l10n: l10n),
-                  ],
-                ),
+                ],
+              ),
+            ),
               ),
             );
           },

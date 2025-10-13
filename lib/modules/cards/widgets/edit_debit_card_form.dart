@@ -66,9 +66,10 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
   }
 
   void _initializeForm() {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     _selectedBankCode = bankCode;
     _cardNameController.text = cardName ?? '';
-    _balanceController.text = balance.toStringAsFixed(0);
+    _balanceController.text = CurrencyUtils.formatAmountWithoutSymbol(balance, themeProvider.currency);
   }
 
   @override
@@ -109,6 +110,9 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
       );
 
       if (updatedAccount != null && mounted) {
+        // Provider'ı refresh et
+        await unifiedProvider.refresh();
+        
         // Başarılı mesajı göster
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -358,7 +362,7 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Color(0xFF00FFB3),
+                            color: Color(0xFF6D6D70),
                             width: 2,
                           ),
                         ),
@@ -372,14 +376,11 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
 
                     // Bakiye
                     Text(
-                      'Bakiye (${Provider.of<ThemeProvider>(context, listen: false).currency.symbol})',
-                      style: CurrencyUtils.getCurrencyTextStyle(
-                        baseStyle: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                        currency: Currency.TRY,
+                      'Bakiye',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -391,6 +392,10 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                       inputFormatters: [ThousandsSeparatorInputFormatter()],
                       decoration: InputDecoration(
                         hintText: '0,00',
+                        suffixText: Provider.of<ThemeProvider>(
+                          context,
+                          listen: false,
+                        ).currency.symbol,
                         filled: true,
                         fillColor: isDark
                             ? const Color(0xFF2C2C2E)
@@ -414,7 +419,7 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Color(0xFF00FFB3),
+                            color: Color(0xFF6D6D70),
                             width: 2,
                           ),
                         ),

@@ -269,7 +269,7 @@ class CashManagementService {
                                 );
                                 await providerV2.createAccount(
                                   type: AccountType.cash,
-                                  name: 'Nakit',
+                                  name: 'CASH_WALLET', // Generic identifier
                                   balance: newBalance,
                                 );
                               }

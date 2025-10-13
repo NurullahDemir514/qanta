@@ -44,7 +44,7 @@ class TransferAccountSelector extends StatelessWidget {
           availableAccounts.add(
             PaymentMethod(
               type: PaymentMethodType.cash,
-              cashAccount: _convertAccountToCashAccount(cashAccount),
+              cashAccount: _convertAccountToCashAccount(cashAccount, context),
             ),
           );
         }
@@ -440,11 +440,13 @@ class TransferAccountSelector extends StatelessWidget {
     return '';
   }
 
-  CashAccount _convertAccountToCashAccount(AccountModel account) {
+  CashAccount _convertAccountToCashAccount(AccountModel account, BuildContext context) {
     return CashAccount(
       id: account.id,
       userId: account.userId,
-      name: account.name,
+      name: account.name == 'CASH_WALLET' 
+          ? (AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap')
+          : account.name,
       balance: account.balance,
       currency: 'TRY', // Default currency
       createdAt: account.createdAt,

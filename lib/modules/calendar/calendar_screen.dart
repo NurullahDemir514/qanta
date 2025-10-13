@@ -26,6 +26,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   late DateTime _lastDayOfMonth;
   late int _daysInMonth;
   late int _firstWeekday;
+  
+  // Seçili gün ve işlemler için state
+  DateTime? _selectedDate;
+  List<TransactionWithDetailsV2> _selectedDayTransactions = [];
 
   @override
   void initState() {
@@ -81,6 +85,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     setState(() {
       _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
       _updateMonthData();
+      // Ay değişince seçili günü temizle
+      _selectedDate = null;
+      _selectedDayTransactions = [];
     });
   }
 
@@ -88,6 +95,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     setState(() {
       _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
       _updateMonthData();
+      // Ay değişince seçili günü temizle
+      _selectedDate = null;
+      _selectedDayTransactions = [];
     });
   }
 
@@ -97,6 +107,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final Map<String, double> dailyAmounts = {};
 
     for (final transaction in transactions) {
+      // Skip transfer transactions as they don't represent actual income/expense
+      if (transaction.type == TransactionType.transfer) {
+        continue;
+      }
+      
       final dateKey = DateFormat(
         'yyyy-MM-dd',
       ).format(transaction.transactionDate);
@@ -112,20 +127,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return dailyAmounts;
   }
 
-  void _showDayTransactions(
+  void _selectDay(
     DateTime date,
     List<TransactionWithDetailsV2> dayTransactions,
   ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _DayTransactionsBottomSheet(
-        date: date,
-        transactions: dayTransactions,
-        l10n: l10n,
-      ),
-    );
+    setState(() {
+      _selectedDate = date;
+      _selectedDayTransactions = dayTransactions;
+    });
   }
 
   @override
@@ -174,10 +183,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
               // Analysis Section
               _buildAnalysisSection(dailyAmounts, transactions, isDark),
 
-              // Calendar Grid
-              Expanded(
+              // Calendar Grid - Sabit yükseklik
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.35, // Daha küçük yükseklik
                 child: _buildCalendarGrid(dailyAmounts, transactions, isDark),
               ),
+              
+              // Seçili günün işlemleri - takvimin hemen altında
+              if (_selectedDate != null) ...[
+                const SizedBox(height: 5), // Takvim ile arasına 5px boşluk
+                _buildSelectedDayTransactions(isDark),
+              ],
             ],
           );
         },
@@ -456,24 +472,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
     bool isDark,
   ) {
     final isToday = date.isAtSameMomentAs(DateTime.now());
+    final isSelected = _selectedDate != null && 
+        date.year == _selectedDate!.year &&
+        date.month == _selectedDate!.month &&
+        date.day == _selectedDate!.day;
     final isIncome = amount > 0;
     final isExpense = amount < 0;
     final hasTransactions = dayTransactions.isNotEmpty;
 
     return GestureDetector(
-      onTap: hasTransactions
-          ? () => _showDayTransactions(date, dayTransactions)
-          : null,
+      onTap: () => _selectDay(date, dayTransactions), // Her zaman tıklanabilir
       child: Container(
         margin: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
-          color: isToday
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.15) // Seçili gün için daha belirgin arka plan
+              : isToday
               ? AppColors.primary.withValues(alpha: 0.1)
               : isDark
               ? AppColors.darkCard
               : AppColors.lightCard,
           borderRadius: BorderRadius.circular(10),
-          border: isToday
+          border: isSelected
+              ? Border.all(color: AppColors.primary, width: 1.2) // Seçili gün için daha ince border
+              : isToday
               ? Border.all(color: AppColors.primary, width: 1.5)
               : hasTransactions
               ? Border.all(
@@ -483,7 +505,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   width: 0.5,
                 )
               : null,
-          boxShadow: hasTransactions
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : hasTransactions
               ? [
                   BoxShadow(
                     color: isDark
@@ -503,8 +533,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               day.toString(),
               style: GoogleFonts.inter(
                 fontSize: 13,
-                fontWeight: isToday ? FontWeight.w700 : FontWeight.w600,
-                color: isToday
+                fontWeight: isSelected || isToday ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected
+                    ? AppColors.primary // Seçili gün için primary renk
+                    : isToday
                     ? AppColors.primary
                     : isDark
                     ? AppColors.darkText
@@ -632,6 +664,326 @@ class _CalendarScreenState extends State<CalendarScreen> {
       return '$sign₺${absAmount.toStringAsFixed(1)}';
     }
   }
+
+  String _localizeDisplayTime(String rawTime) {
+    switch (rawTime) {
+      case 'TODAY':
+        return l10n.today;
+      case 'YESTERDAY':
+        return l10n.yesterday;
+      default:
+        return rawTime; // Diğer formatlar zaten localize
+    }
+  }
+
+  Widget _buildSelectedDayTransactions(bool isDark) {
+    if (_selectedDate == null) {
+      return const SizedBox.shrink();
+    }
+    
+    // Boş gün için bilgilendirme
+    if (_selectedDayTransactions.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkCard : AppColors.lightCard,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark
+                ? AppColors.secondary.withValues(alpha: 0.2)
+                : AppColors.secondary.withValues(alpha: 0.1),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.1)
+                  : Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header - diğer widget ile aynı
+            Container(
+              padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.secondary.withValues(alpha: 0.05)
+                    : AppColors.secondary.withValues(alpha: 0.02),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${_selectedDate!.day} ${_getLocalizedMonthName(_selectedDate!.month)} ${_selectedDate!.year}',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? AppColors.darkText : AppColors.lightText,
+                        ),
+                      ),
+                      Text(
+                        l10n.noTransactionsForThisDay,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    size: 24,
+                    color: AppColors.secondary.withValues(alpha: 0.6),
+                  ),
+                ],
+              ),
+            ),
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.inbox_outlined,
+                    size: 48,
+                    color: AppColors.secondary.withValues(alpha: 0.4),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.noTransactionsForThisDay,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.secondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final totalAmount = _selectedDayTransactions.fold(
+      0.0,
+      (sum, t) => sum + t.signedAmount,
+    );
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 8), // Daha da küçük margin
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+        borderRadius: BorderRadius.circular(12), // Daha küçük border radius
+        border: Border.all(
+          color: isDark
+              ? AppColors.secondary.withValues(alpha: 0.2)
+              : AppColors.secondary.withValues(alpha: 0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 4, // Daha küçük blur
+            offset: const Offset(0, 1), // Daha küçük offset
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 6, 10, 6), // Üst ve alt padding azaltıldı
+            decoration: BoxDecoration(
+              color: isDark 
+                  ? AppColors.secondary.withValues(alpha: 0.05)
+                  : AppColors.secondary.withValues(alpha: 0.02),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${_selectedDate!.day} ${_getLocalizedMonthName(_selectedDate!.month)} ${_selectedDate!.year}',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? AppColors.darkText : AppColors.lightText,
+                      ),
+                    ),
+                    Text(
+                      '${_selectedDayTransactions.length} ${l10n.transaction}', // "işlemler" yerine "işlem"
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  Provider.of<ThemeProvider>(
+                    context,
+                    listen: false,
+                  ).formatAmount(totalAmount),
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: totalAmount >= 0 ? Colors.green : Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Transactions List
+          Container(
+            constraints: BoxConstraints(
+              maxHeight: 150, // Maksimum sabit yükseklik azaltıldı
+            ),
+            child: ListView.builder(
+              shrinkWrap: true, // İçeriğe göre küçülür, maksimuma kadar
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 8), // Üst padding azaltıldı
+              itemCount: _selectedDayTransactions.length,
+              itemBuilder: (context, index) {
+                final transaction = _selectedDayTransactions[index];
+                return _buildTransactionItemCompact(
+                  context,
+                  transaction,
+                  isDark,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionItemCompact(
+    BuildContext context,
+    TransactionWithDetailsV2 transaction,
+    bool isDark,
+  ) {
+    // Convert V2 transaction type to design system type
+    TDS.TransactionType transactionType;
+    switch (transaction.type) {
+      case TransactionType.income:
+        transactionType = TDS.TransactionType.income;
+        break;
+      case TransactionType.expense:
+        transactionType = TDS.TransactionType.expense;
+        break;
+      case TransactionType.transfer:
+        transactionType = TDS.TransactionType.transfer;
+        break;
+      case TransactionType.stock:
+        transactionType = TDS.TransactionType.income; // Treat stock as income for display
+        break;
+    }
+
+    // Get category info from provider
+    final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
+    final category = transaction.categoryId != null
+        ? providerV2.getCategoryById(transaction.categoryId!)
+        : null;
+
+    // Get category icon using CategoryIconService
+    IconData? categoryIcon;
+    if (transaction.categoryName != null) {
+      categoryIcon = CategoryIconService.getIcon(
+        transaction.categoryName!.toLowerCase(),
+      );
+    }
+
+    if (categoryIcon == null || categoryIcon == Icons.more_horiz_rounded) {
+      if (category?.icon != null && category!.icon != 'category') {
+        categoryIcon = CategoryIconService.getIcon(category.iconName);
+      }
+    }
+
+    // Use displayTime from transaction model and localize it
+    final rawTime = transaction.displayTime;
+    final time = _localizeDisplayTime(rawTime);
+
+    // Card name - centralized logic
+    final cardName = TDS.TransactionDesignSystem.formatCardName(
+      cardName: transaction.sourceAccountName ?? l10n.account,
+      transactionType: transactionType.name,
+      sourceAccountName: transaction.sourceAccountName,
+      targetAccountName: transaction.targetAccountName,
+      context: context,
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 2), // Çok daha küçük margin
+      child: TDS.TransactionDesignSystem.buildTransactionItemFromV2(
+        context: context,
+        transaction: transaction,
+        isDark: isDark,
+        time: time,
+        categoryIconData: categoryIcon,
+        onLongPress: () {
+          // Optional: Add long press functionality
+        },
+        isFirst: true,
+        isLast: true,
+      ),
+    );
+  }
+
+  IconData _getTransactionIcon(TransactionType type) {
+    switch (type) {
+      case TransactionType.income:
+        return Icons.arrow_upward;
+      case TransactionType.expense:
+        return Icons.arrow_downward;
+      case TransactionType.transfer:
+        return Icons.swap_horiz;
+      case TransactionType.stock:
+        return Icons.show_chart;
+      default:
+        return Icons.receipt_outlined;
+    }
+  }
+
+  Color _getTransactionColor(TransactionType type) {
+    switch (type) {
+      case TransactionType.income:
+        return Colors.green;
+      case TransactionType.expense:
+        return Colors.red;
+      case TransactionType.transfer:
+        return Colors.blue;
+      case TransactionType.stock:
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
 }
 
 class _DayTransactionsBottomSheet extends StatelessWidget {
@@ -673,6 +1025,17 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
         return l10n.december;
       default:
         return '';
+    }
+  }
+
+  String _localizeDisplayTime(String rawTime) {
+    switch (rawTime) {
+      case 'TODAY':
+        return l10n.today;
+      case 'YESTERDAY':
+        return l10n.yesterday;
+      default:
+        return rawTime; // Diğer formatlar zaten localize
     }
   }
 
@@ -909,8 +1272,9 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
     // Use transaction type color instead of category color
     // This ensures all income transactions are green, all expense transactions are red
 
-    // Use displayTime from transaction model
-    final time = transaction.displayTime;
+    // Use displayTime from transaction model and localize it
+    final rawTime = transaction.displayTime;
+    final time = _localizeDisplayTime(rawTime);
 
     // Card name - centralized logic
     final cardName = TDS.TransactionDesignSystem.formatCardName(

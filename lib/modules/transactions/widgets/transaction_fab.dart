@@ -154,6 +154,7 @@ class _TransactionFabState extends State<TransactionFab> {
     required BuildContext context,
     required bool isDark,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final color = isDark ? Colors.white : Colors.black; // Açık tema için siyah
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -180,7 +181,7 @@ class _TransactionFabState extends State<TransactionFab> {
             ),
           ),
           child: Text(
-            'Hızlı Not',
+            l10n.addQuickNote,
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,

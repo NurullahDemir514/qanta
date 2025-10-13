@@ -78,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
           MainTabBar(currentIndex: _currentIndex, onTabChanged: _onTabChanged),
-          if (_currentIndex != 2 && _currentIndex != 5) const TransactionFab(),
+          if (_currentIndex != 2 && _currentIndex != 4 && _currentIndex != 5) const TransactionFab(),
           if (_currentIndex == 2) AddCardFab(currentTabIndex: _currentIndex),
         ],
       ),

@@ -68,10 +68,10 @@ class _ExpenseTagSelectorState extends State<ExpenseTagSelector> {
         );
 
         return {
-          'limit': budget.monthlyLimit,
+          'limit': budget.limit,
           'spent': budget.spentAmount,
-          'remaining': budget.monthlyLimit - budget.spentAmount,
-          'percentage': budget.spentAmount / budget.monthlyLimit,
+          'remaining': budget.limit - budget.spentAmount,
+          'percentage': budget.spentAmount / budget.limit,
         };
       } catch (e) {
         // No budget found for this category
@@ -132,11 +132,11 @@ class _ExpenseTagSelectorState extends State<ExpenseTagSelector> {
     final l10n = AppLocalizations.of(context)!;
 
     return Text(
-      '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(remaining)} ${l10n.remaining}.',
+      '${l10n.remaining} ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(remaining)}',
       style: GoogleFonts.inter(
         fontSize: fontSize,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: isDark ? Colors.white : Colors.grey[900],
       ),
     );
   }

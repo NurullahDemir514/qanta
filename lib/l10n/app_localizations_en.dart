@@ -323,10 +323,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Which currency would you like to use?';
 
   @override
-  String get debit => 'DEBIT';
+  String get debit => 'Add Debit Card';
 
   @override
-  String get credit => 'CREDIT';
+  String get credit => 'Add Credit Card';
 
   @override
   String get profile => 'Profile';
@@ -1408,6 +1408,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get netWorth => 'Total Assets';
 
   @override
+  String get welcomeToQanta => 'Welcome to Qanta!';
+
+  @override
+  String get startYourFinancialJourney =>
+      'Take the first step to start your financial journey';
+
+  @override
+  String get addFirstIncome => 'Add First Income';
+
+  @override
+  String get addCard => 'Add Card';
+
+  @override
+  String get tipTrackYourExpenses =>
+      'Track your expenses to reach your financial goals';
+
+  @override
   String get positive => 'Positive';
 
   @override
@@ -1742,6 +1759,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction => 'Transaction';
 
   @override
+  String get noTransactionsForThisDay => 'No transactions for this day';
+
+  @override
+  String get cashWallet => 'Cash Wallet';
+
+  @override
   String get bankName => 'Qanta';
 
   @override
@@ -1934,7 +1957,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lowestToHighest => 'Lowest to Highest';
 
   @override
-  String get alphabetical => 'Alphabetical';
+  String get alphabetical => 'A-Z';
 
   @override
   String get more => 'More';
@@ -2310,7 +2333,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalLimit => 'Total Limit';
 
   @override
-  String get cashWallet => 'Cash Wallet';
+  String stockPurchaseInsufficientBalance(String balance) {
+    return 'Insufficient balance for stock purchase. Available: $balance';
+  }
+
+  @override
+  String stockSaleInsufficientQuantity(String quantity) {
+    return 'Insufficient stock quantity. Available: $quantity lots';
+  }
 
   @override
   String get searchBanks => 'Search banks...';
@@ -2322,7 +2352,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addCreditCard => 'Add Credit Card';
 
   @override
-  String get cardNameExample => 'E.g: VakıfBank Credit Card';
+  String get cardNameExample => 'E.g: My Work Card, Shopping Card';
 
   @override
   String get currentDebtOptional => 'Current Debt (Optional)';
@@ -2427,10 +2457,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectCardType => 'Select Card Type';
 
   @override
-  String get addDebitCardDescription => 'Add checking account card';
+  String get addDebitCardDescription =>
+      'Add a debit card to track your spending';
 
   @override
-  String get addCreditCardDescription => 'Add your credit card information';
+  String get addCreditCardDescription =>
+      'Add a credit card to manage your credit';
 
   @override
   String get searchStocks => 'Search Stocks';
@@ -2748,7 +2780,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get total => 'Total';
 
   @override
-  String get pieces => 'pieces';
+  String get pieces => 'lot';
 
   @override
   String totalTransactionsCount(int count) {
@@ -2996,6 +3028,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get portfolioOverview => 'Portfolio Overview';
+
+  @override
+  String get myPortfolio => 'My Portfolio';
+
+  @override
+  String get neutral => 'Neutral';
+
+  @override
+  String get profit => 'Profit';
+
+  @override
+  String get loss => 'Loss';
+
+  @override
+  String get filterBy => 'Filter By';
+
+  @override
+  String get gainers => 'Rising';
+
+  @override
+  String get losers => 'Falling';
+
+  @override
+  String get portfolioRatio => 'Weight';
+
+  @override
+  String get insufficientBalance => 'Insufficient Balance';
+
+  @override
+  String get addMoneyToAccount => 'Add money to your account to buy stocks';
+
+  @override
+  String get addMoney => 'Add Money';
 
   @override
   String get totalValue => 'Total Value';
@@ -3298,6 +3363,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get limitExceeded => 'Limit Exceeded!';
 
   @override
+  String get creditCardLimitInsufficient => 'Credit card limit insufficient';
+
+  @override
+  String creditCardLimitInsufficientWithAmount(String amount) {
+    return 'Credit card limit insufficient. Remaining limit: $amount';
+  }
+
+  @override
+  String get creditCardLimitInsufficientTitle =>
+      'Credit Card Limit Insufficient';
+
+  @override
+  String get creditCardLimitInsufficientMessage =>
+      'Your credit card limit is not sufficient for this transaction. Please enter a lower amount or pay off your card debt.';
+
+  @override
+  String get debitCardBalanceInsufficientTitle =>
+      'Debit Card Balance Insufficient';
+
+  @override
+  String get debitCardBalanceInsufficientMessage =>
+      'Your debit card balance is not sufficient for this transaction. Please enter a lower amount or deposit money to your card.';
+
+  @override
+  String cashBalanceInsufficientWithAmount(String amount) {
+    return 'Cash balance insufficient. Current: $amount';
+  }
+
+  @override
+  String debitCardBalanceInsufficientWithAmount(String amount) {
+    return 'Debit card balance insufficient. Current: $amount';
+  }
+
+  @override
+  String get cashBalanceInsufficientTitle => 'Cash Balance Insufficient';
+
+  @override
+  String get cashBalanceInsufficientMessage =>
+      'Your cash balance is not sufficient for this transaction. Please enter a lower amount.';
+
+  @override
+  String get insufficientBalanceTitle => 'Insufficient Balance';
+
+  @override
   String get spent => 'spent';
 
   @override
@@ -3338,4 +3447,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get or => 'or';
+
+  @override
+  String get addFirstNoteInstruction =>
+      'Tap the + button to add your first note';
+
+  @override
+  String get addExpenseIncomeNoteInstruction =>
+      'Write your expense or income note. You can add it as a transaction later.';
+
+  @override
+  String get stockTransactionCannotDelete =>
+      'Stock transactions cannot be deleted';
+
+  @override
+  String get stockTransactionDeleteWarning =>
+      'Instead of deleting, make a sell transaction';
+
+  @override
+  String get editCreditCard => 'Edit Credit Card';
+
+  @override
+  String get selectBank => 'Select bank';
+
+  @override
+  String get pleaseSelectBank => 'Please select a bank';
+
+  @override
+  String get cardNameOptional => 'Card Name';
+
+  @override
+  String get statementDayLabel => 'Statement Day';
+
+  @override
+  String get selectStatementDay => 'Select statement day';
+
+  @override
+  String get creditCardUpdatedSuccessfully =>
+      'Credit card updated successfully';
+
+  @override
+  String updateErrorOccurred(String error) {
+    return 'An error occurred during update: $error';
+  }
+
+  @override
+  String get invalidMonth => 'Invalid month';
+
+  @override
+  String get addCardDescription =>
+      'Add your first card to start managing your finances';
+
+  @override
+  String get budgetManagementDescription =>
+      'Track your spending limits and manage your weekly, monthly, and yearly budgets by category';
+
+  @override
+  String get dark => 'DARK';
+
+  @override
+  String get light => 'LIGHT';
+
+  @override
+  String get on => 'ON';
+
+  @override
+  String get off => 'OFF';
+
+  @override
+  String get last7Days => 'Last 7 days';
+
+  @override
+  String get last30Days => 'Last 30 days';
+
+  @override
+  String get bankCard => 'Bank Card';
+
+  @override
+  String get noStocksMatchFilter => 'No stocks match the current filter';
+
+  @override
+  String get tryDifferentFilter => 'Try selecting a different filter';
 }

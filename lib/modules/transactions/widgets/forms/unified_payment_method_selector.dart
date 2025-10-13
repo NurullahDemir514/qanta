@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/unified_card_provider.dart';
-import '../../../../shared/models/transaction_model.dart';
+import '../../../../shared/models/transaction_model.dart' as txn;
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/providers/unified_provider_v2.dart';
-import '../../../../shared/models/payment_card_model.dart';
+import '../../../../shared/models/payment_card_model.dart' as card;
 import '../../../../shared/design_system/transaction_design_system.dart';
 
 class UnifiedPaymentMethodSelector extends StatefulWidget {
@@ -142,9 +142,9 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
 
   List<Map<String, dynamic>> _getAvailableCards(List<Map<String, dynamic>> allCards) {
     // Gelir için sadece banka kartı ve nakit
-    if (widget.transactionType == TransactionType.income) {
+    if (widget.transactionType == txn.TransactionType.income) {
       return allCards.where((card) => 
-        card['type'] == CardType.debit || card['type'] == CardType.cash
+        card['type'] == card.CardType.debit || card['type'] == card.CardType.cash
       ).toList();
     }
     
@@ -153,10 +153,10 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
   }
 
   void _handleCardSelection(Map<String, dynamic> card) {
-    final cardType = card['type'] as CardType;
+    final cardType = card['type'] as card.CardType;
     
     // Kredi kartı ise taksit seçeneklerini göster
-    if (cardType == CardType.credit && widget.transactionType == TransactionType.expense) {
+    if (cardType == card.CardType.credit && widget.transactionType == txn.TransactionType.expense) {
       _showInstallmentOptions(card);
     } else {
       // Diğer kartlar için direkt seç
@@ -241,7 +241,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
     required AppLocalizations l10n,
     required VoidCallback onTap,
   }) {
-    final cardType = card['type'] as CardType;
+    final cardType = card['type'] as card.CardType;
     final cardName = card['name'] as String;
     final subtitle = card['subtitle'] as String;
     final balance = card['balance'] as double?;
@@ -250,15 +250,15 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
     IconData cardIcon;
     
     switch (cardType) {
-      case CardType.credit:
+      case card.CardType.credit:
         cardColor = const Color(0xFF007AFF);
         cardIcon = Icons.credit_card_rounded;
         break;
-      case CardType.debit:
+      case card.CardType.debit:
         cardColor = const Color(0xFF34C759);
         cardIcon = Icons.credit_card_rounded;
         break;
-      case CardType.cash:
+      case card.CardType.cash:
         cardColor = const Color(0xFFFF9500);
         cardIcon = Icons.payments_rounded;
         break;
@@ -337,7 +337,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: cardType == CardType.credit 
+                                color: cardType == card.CardType.credit 
                                   ? (balance > 0 ? const Color(0xFF34C759) : const Color(0xFFFF3B30))
                                   : const Color(0xFF34C759),
                                 letterSpacing: -0.1,
@@ -349,7 +349,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
                     ],
                   ),
                 ),
-                if (cardType == CardType.credit && widget.transactionType == TransactionType.expense)
+                if (cardType == card.CardType.credit && widget.transactionType == txn.TransactionType.expense)
                   Icon(
                     Icons.chevron_right_rounded,
                     color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
@@ -376,7 +376,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
     required AppLocalizations l10n,
     required VoidCallback onTap,
   }) {
-    final displayText = installments == 1 ? (AppLocalizations.of(context)?.cash ?? 'Cash') : '$installments ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
+    final displayText = installments == 1 ? (AppLocalizations.of(context)?.cash ?? 'NAKİT') : '$installments ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
     
     return Container(
       decoration: BoxDecoration(

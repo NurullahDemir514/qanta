@@ -71,7 +71,16 @@ class TransactionDesignSystem {
   }
 
   /// Shorten long account names for better display
-  static String shortenAccountName(String accountName, {int maxLength = 15}) {
+  static String shortenAccountName(String accountName, {int maxLength = 15, BuildContext? context, bool isInstallment = false}) {
+    // Taksitli işlemler için daha uzun karakter limiti
+    if (isInstallment) {
+      maxLength = 25;
+    }
+    // Localize special account names
+    if (accountName == 'CASH_WALLET' && context != null) {
+      return AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap';
+    }
+    
     if (accountName.length <= maxLength) {
       return accountName;
     }
@@ -119,15 +128,27 @@ class TransactionDesignSystem {
     return '${cleanedName.substring(0, maxLength - 1)}…';
   }
 
-  /// Format transfer subtitle with shortened account names
+  /// Format transfer subtitle with first and second word of account names
   static String formatTransferSubtitle(
     String sourceAccount,
     String targetAccount, {
-    int maxLength = 12,
+    int maxLength = 10,
+    BuildContext? context,
   }) {
-    final shortSource = shortenAccountName(sourceAccount, maxLength: maxLength);
-    final shortTarget = shortenAccountName(targetAccount, maxLength: maxLength);
+    final shortSource = _getFirstTwoWords(sourceAccount);
+    final shortTarget = _getFirstTwoWords(targetAccount);
     return '$shortSource → $shortTarget';
+  }
+
+  /// Get first and second word from account name
+  static String _getFirstTwoWords(String accountName) {
+    final words = accountName.trim().split(RegExp(r'\s+'));
+    if (words.length >= 2) {
+      return '${words[0]} ${words[1]}';
+    } else if (words.length == 1) {
+      return words[0];
+    }
+    return accountName;
   }
 
   /// **CENTRALIZED CARD NAME LOGIC**
@@ -140,6 +161,7 @@ class TransactionDesignSystem {
   /// - [transactionType]: The type of transaction (expense, income, transfer)
   /// - [sourceAccountName]: Source account name for transfers
   /// - [targetAccountName]: Target account name for transfers
+  /// - [isInstallment]: Whether this is an installment transaction (uses 25 char limit)
   ///
   /// Returns formatted card name based on transaction type.
   static String formatCardName({
@@ -148,20 +170,21 @@ class TransactionDesignSystem {
     String? sourceAccountName,
     String? targetAccountName,
     BuildContext? context,
+    bool isInstallment = false,
   }) {
     if (transactionType == 'transfer') {
       final sourceAccount =
           sourceAccountName ??
           (context != null ? AppLocalizations.of(context)?.account : null) ??
-          'Account';
+          'HESAP';
       final targetAccount =
           targetAccountName ??
           (context != null ? AppLocalizations.of(context)?.account : null) ??
-          'Account';
-      return formatTransferSubtitle(sourceAccount, targetAccount);
+          'HESAP';
+      return formatTransferSubtitle(sourceAccount, targetAccount, context: context);
     } else {
       // Shorten regular card names
-      return shortenAccountName(cardName);
+      return shortenAccountName(cardName, context: context, isInstallment: isInstallment);
     }
   }
 
@@ -315,6 +338,42 @@ class TransactionDesignSystem {
 
   // ==================== MAIN COMPONENTS ====================
 
+  /// Localize display time with proper locale formatting
+  static String localizeDisplayTime(String rawTime, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final isEnglish = locale.languageCode == 'en';
+    
+    switch (rawTime) {
+      case 'TODAY': 
+        return l10n.today;
+      case 'YESTERDAY': 
+        return l10n.yesterday;
+      default: 
+        // Raw date format like "10/10" - convert to localized format
+        if (rawTime.contains('/')) {
+          final parts = rawTime.split('/');
+          if (parts.length == 2) {
+            final day = int.tryParse(parts[0]);
+            final month = int.tryParse(parts[1]);
+            if (day != null && month != null) {
+              // Create a DateTime object for current year
+              final now = DateTime.now();
+              final date = DateTime(now.year, month, day);
+              
+              // Format with proper locale
+              final formatter = DateFormat(
+                isEnglish ? 'd MMM' : 'd MMM', 
+                isEnglish ? 'en_US' : 'tr_TR'
+              );
+              return formatter.format(date);
+            }
+          }
+        }
+        return rawTime;
+    }
+  }
+
   /// Build standard transaction item
   static Widget buildTransactionItem({
     required String title,
@@ -426,6 +485,7 @@ class TransactionDesignSystem {
     bool isFirst = false,
     bool isLast = false,
     bool isPaid = false,
+    bool isInstallment = false,
   }) {
     return TransactionItem(
       title: title,
@@ -443,6 +503,7 @@ class TransactionDesignSystem {
       isFirst: isFirst,
       isLast: isLast,
       isPaid: isPaid,
+      isInstallment: isInstallment,
     );
   }
 
@@ -492,6 +553,14 @@ class TransactionDesignSystem {
     // Handle installment transactions
     String displayTitle = transaction.displayTitle;
     String displaySubtitle = transaction.displaySubtitle;
+    
+    // Localize CASH_WALLET in subtitle
+    if (displaySubtitle.contains('CASH_WALLET')) {
+      displaySubtitle = displaySubtitle.replaceAll(
+        'CASH_WALLET', 
+        AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap'
+      );
+    }
 
     // Check if this is a credit card installment transaction
     bool isCreditCardInstallment = false;
@@ -524,7 +593,7 @@ class TransactionDesignSystem {
       title: displayTitle,
       subtitle: displaySubtitle,
       amount: amount,
-      time: displayTime,
+      time: TransactionDesignSystem.localizeDisplayTime(displayTime, context),
       type: transactionType,
       isDark: isDark,
       categoryIconData: categoryIconData,
@@ -1039,10 +1108,16 @@ class _StockExpandableCardState extends State<StockExpandableCard>
       transaction.amount,
       TransactionType.income,
     );
-    final time = transaction.displayTime;
+    final rawTime = transaction.displayTime;
+    final time = TransactionDesignSystem.localizeDisplayTime(rawTime, context);
 
     // Get account name
     final accountName = transaction.sourceAccountName ?? 'Hesap';
+    
+    // Localize CASH_WALLET
+    final localizedAccountName = accountName == 'CASH_WALLET' 
+        ? (AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap')
+        : accountName;
 
     // Get stock details
     final stockSymbol = transaction.stockSymbol ?? '';
@@ -1169,7 +1244,7 @@ class _StockExpandableCardState extends State<StockExpandableCard>
 
                       // Subtitle
                       Text(
-                        time != null ? '$accountName • $time' : accountName,
+                        time != null ? '$localizedAccountName • $time' : localizedAccountName,
                         style: GoogleFonts.inter(
                           fontSize: TransactionDesignSystem.subtitleFontSize,
                           color: TransactionDesignSystem.getSubtitleColor(

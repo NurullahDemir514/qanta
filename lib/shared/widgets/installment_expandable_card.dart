@@ -382,6 +382,8 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                             widget.isDark,
                           ),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -600,30 +602,20 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
 
   String _formatDate(DateTime date, BuildContext context) {
     final now = DateTime.now();
-    final difference = date.difference(now).inDays;
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final tomorrow = today.add(const Duration(days: 1));
+    
+    final transactionDay = DateTime(date.year, date.month, date.day);
 
-    if (difference == 0) {
+    if (transactionDay == today) {
       return AppLocalizations.of(context)?.today ?? 'Today';
-    } else if (difference == 1) {
+    } else if (transactionDay == tomorrow) {
       return AppLocalizations.of(context)?.tomorrow ?? 'Tomorrow';
     } else {
-      // Çok dilli ay isimleri (kısaltılmış)
-      final monthNames = [
-        '',
-        AppLocalizations.of(context)?.january.substring(0, 3) ?? 'Jan',
-        AppLocalizations.of(context)?.february.substring(0, 3) ?? 'Feb',
-        AppLocalizations.of(context)?.march.substring(0, 3) ?? 'Mar',
-        AppLocalizations.of(context)?.april.substring(0, 3) ?? 'Apr',
-        AppLocalizations.of(context)?.may.substring(0, 3) ?? 'May',
-        AppLocalizations.of(context)?.june.substring(0, 3) ?? 'Jun',
-        AppLocalizations.of(context)?.july.substring(0, 3) ?? 'Jul',
-        AppLocalizations.of(context)?.august.substring(0, 3) ?? 'Aug',
-        AppLocalizations.of(context)?.september.substring(0, 3) ?? 'Sep',
-        AppLocalizations.of(context)?.october.substring(0, 3) ?? 'Oct',
-        AppLocalizations.of(context)?.november.substring(0, 3) ?? 'Nov',
-        AppLocalizations.of(context)?.december.substring(0, 3) ?? 'Dec',
-      ];
-      return '${date.day} ${monthNames[date.month]}';
+      // Use TransactionDesignSystem._localizeDisplayTime for consistency
+      final rawTime = '${date.day}/${date.month}';
+      return TransactionDesignSystem.localizeDisplayTime(rawTime, context);
     }
   }
 }

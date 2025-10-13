@@ -337,7 +337,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             child: _buildStatItem(
               title: AppLocalizations.of(context)?.income ?? 'Income',
               amount: totalIncome,
-              color: const Color(0xFF10B981),
+              color: const Color(0xFF4CAF50),
               isDark: isDark,
             ),
           ),
@@ -370,7 +370,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               title: AppLocalizations.of(context)?.net ?? 'Net',
               amount: netAmount,
               color: netAmount >= 0
-                  ? const Color(0xFF10B981)
+                  ? const Color(0xFF4CAF50)
                   : const Color(0xFFEF4444),
               isDark: isDark,
             ),
@@ -512,7 +512,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       installmentText =
           '$effectiveInstallmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
     } else if (effectiveInstallmentCount == 1) {
-      installmentText = AppLocalizations.of(context)?.cash ?? 'Cash';
+      installmentText = AppLocalizations.of(context)?.cash ?? 'NAKİT';
     }
     if (installmentText.isNotEmpty) {
       title += ' [$installmentText]';
@@ -529,19 +529,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       currencySymbol: currencySymbol,
     );
 
-    // Use displayTime from transaction model (dynamic date formatting)
-    final time = transaction.displayTime;
+    // Use displayTime from transaction model and localize it
+    final rawTime = transaction.displayTime;
+    final time = _localizeDisplayTime(rawTime);
 
     // Card name - centralized logic
     final cardName = TransactionDesignSystem.formatCardName(
       cardName:
           transaction.sourceAccountName ??
           AppLocalizations.of(context)?.account ??
-          'Account',
+          'HESAP',
       transactionType: transactionType.name,
       sourceAccountName: transaction.sourceAccountName,
       targetAccountName: transaction.targetAccountName,
       context: context,
+      isInstallment: isActualInstallment,
     );
 
     // Check if this should be displayed as an installment
@@ -621,6 +623,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
   }
 
+  String _localizeDisplayTime(String rawTime) {
+    return TransactionDesignSystem.localizeDisplayTime(rawTime, context);
+  }
+
   Widget _buildEmptyState(AppLocalizations l10n, bool isDark) {
     return AnimatedEmptyState(
       icon: Icons.receipt_long_outlined,
@@ -635,6 +641,44 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     BuildContext context,
     v2.TransactionWithDetailsV2 transaction,
   ) {
+    // Hisse işlemleri için bottom sheet gösterme, direkt uyarı göster
+    if (transaction.isStockTransaction) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.stockTransactionCannotDelete,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.stockTransactionDeleteWarning,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFFF9500), // Orange warning color
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+      return;
+    }
+
+    // Normal işlemler için bottom sheet göster
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -743,46 +787,42 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     // Check if this is a stock transaction
     if (transaction.isStockTransaction) {
-      // 1. OPTIMISTIC UI UPDATE - Önce UI'yi anında güncelle (net değer ve kartlar dahil)
-      providerV2.removeStockTransactionOptimistically(
-        transaction.id,
-        transaction.amount,
-        transaction.sourceAccountId,
-      );
-
-      // 2. Use StockProvider for stock transactions
-      final stockProvider = Provider.of<StockProvider>(context, listen: false);
-
-      stockProvider
-          .deleteStockTransaction(transaction.id)
-          .then((_) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    AppLocalizations.of(context)?.transactionDeleted ??
-                        'Transaction deleted',
+      // Hisse işlemleri silinemez - uyarı göster
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.stockTransactionCannotDelete,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
-                  backgroundColor: const Color(0xFF34C759),
-                  duration: const Duration(seconds: 1),
                 ),
-              );
-            }
-          })
-          .catchError((e) {
-            // Hata durumunda UI'yi geri yükle
-            providerV2.refreshTransactions();
-
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${l10n.errorDeletingTransaction}: $e'),
-                  backgroundColor: const Color(0xFFEF4444),
-                  duration: const Duration(seconds: 2),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.stockTransactionDeleteWarning,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
                 ),
-              );
-            }
-          });
+              ],
+            ),
+            backgroundColor: const Color(0xFFFF9500), // Orange warning color
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+      return; // Silme işlemini durdur
     } else {
       // Regular transaction - use UnifiedProviderV2
       providerV2

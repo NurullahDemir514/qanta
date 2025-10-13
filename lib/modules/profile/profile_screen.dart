@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -297,11 +298,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ? l10n.darkMode
                                         : l10n.lightMode,
                                     onTap: null, // Switch ile kontrol edilecek
-                                    trailing: Switch(
+                                    trailing: _buildCustomToggle(
                                       value: themeProvider.isDarkMode,
                                       onChanged: (value) {
                                         themeProvider.toggleTheme();
                                       },
+                                      isDark: Theme.of(context).brightness == Brightness.dark,
+                                      onText: l10n.dark,
+                                      offText: l10n.light,
                                     ),
                                   );
                                 },
@@ -352,7 +356,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     subtitle: AppLocalizations.of(
                                       context,
                                     )!.quickNotesSubtitle,
-                                    trailing: Switch(
+                                    trailing: _buildCustomToggle(
                                       value: isEnabled,
                                       onChanged: (value) async {
                                         final success =
@@ -400,6 +404,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           );
                                         }
                                       },
+                                      isDark: Theme.of(context).brightness == Brightness.dark,
+                                      onText: l10n.on,
+                                      offText: l10n.off,
                                     ),
                                   );
                                 },
@@ -766,6 +773,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.push(
       context,
       CupertinoPageRoute(builder: (context) => const ChangePasswordPage()),
+    );
+  }
+
+  Widget _buildCustomToggle({
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    required bool isDark,
+    String? onText,
+    String? offText,
+  }) {
+    final onLabel = onText ?? 'ON';
+    final offLabel = offText ?? 'OFF';
+    
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: isDark
+            ? const Color(0xFF1C1C1E)
+            : const Color(0xFFF2F2F7),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF3A3A3C)
+              : const Color(0xFFE5E5EA),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // OFF Button
+          GestureDetector(
+            onTap: () {
+              if (value) {
+                HapticFeedback.lightImpact();
+                onChanged(false);
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: !value
+                    ? const Color(0xFF6D6D70) // Gri
+                    : Colors.transparent,
+                boxShadow: !value
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF6D6D70).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 300),
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: !value
+                      ? Colors.white
+                      : isDark
+                          ? Colors.white.withValues(alpha: 0.6)
+                          : const Color(0xFF6D6D70),
+                  letterSpacing: 0.2,
+                ),
+                child: Text(offLabel),
+              ),
+            ),
+          ),
+          // ON Button
+          GestureDetector(
+            onTap: () {
+              if (!value) {
+                HapticFeedback.lightImpact();
+                onChanged(true);
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: value
+                    ? const Color(0xFF22C55E) // Daha canlı yeşil
+                    : Colors.transparent,
+                boxShadow: value
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF22C55E).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 300),
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: value
+                      ? Colors.white
+                      : isDark
+                          ? Colors.white.withValues(alpha: 0.6)
+                          : const Color(0xFF6D6D70),
+                  letterSpacing: 0.2,
+                ),
+                child: Text(onLabel),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

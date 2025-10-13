@@ -484,11 +484,87 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Kredi kartı eklemek için + butonuna dokunun',
+                        widget.l10n.addCreditCardDescription,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      // Şık kart ekleme butonu
+                      Consumer<ThemeProvider>(
+                        builder: (context, themeProvider, child) {
+                          final isDark = Theme.of(context).brightness == Brightness.dark;
+                          return Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: isDark
+                                    ? [
+                                        const Color(0xFF1C1C1E),
+                                        const Color(0xFF2C2C2E),
+                                      ]
+                                    : [
+                                        Colors.white,
+                                        const Color(0xFFF8F8F8),
+                                      ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF48484A)
+                                    : const Color(0xFFE5E5EA),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: isDark
+                                      ? Colors.black.withOpacity(0.3)
+                                      : Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  _showAddCreditCardForm();
+                                },
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.add_circle_outline,
+                                        color: isDark
+                                            ? const Color(0xFF8E8E93)
+                                            : const Color(0xFF6D6D70),
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        widget.l10n.addCreditCard,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? const Color(0xFF8E8E93)
+                                              : const Color(0xFF6D6D70),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),

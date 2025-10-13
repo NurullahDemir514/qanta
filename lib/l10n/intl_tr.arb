@@ -60,7 +60,7 @@
   "@password": {
     "description": "Password field label"
   },
-  "fullName": "Adınız",
+  "fullName": "Adın",
   "@fullName": {
     "description": "Full name field label"
   },
@@ -182,7 +182,7 @@
   "@confirmPassword": {
     "description": "Confirm password field label"
   },
-  "loginSubtitle": "Hesabınıza giriş yapın",
+  "loginSubtitle": "Hesabına giriş yap",
   "@loginSubtitle": {
     "description": "Login page subtitle"
   },
@@ -190,7 +190,7 @@
   "@createAccount": {
     "description": "Create account button text"
   },
-  "registerSubtitle": "Qanta'ya katılın ve paranızı yönetmeye başlayın",
+  "registerSubtitle": "Qanta'ya katıl ve paranı yönetmeye başla",
   "@registerSubtitle": {
     "description": "Register page subtitle"
   },
@@ -206,11 +206,11 @@
   "@goHome": {
     "description": "Go to home page button"
   },
-  "alreadyHaveAccount": "Zaten hesabınız var mı?",
+  "alreadyHaveAccount": "Zaten hesabın var mı?",
   "@alreadyHaveAccount": {
     "description": "Already have account text"
   },
-  "dontHaveAccount": "Hesabınız yok mu?",
+  "dontHaveAccount": "Hesabın yok mu?",
   "@dontHaveAccount": {
     "description": "Don't have account text"
   },
@@ -424,11 +424,11 @@
   "@selectCurrencyDescription": {
     "description": "Select currency description"
   },
-  "debit": "BANKA",
+  "debit": "Banka Kartı Ekle",
   "@debit": {
     "description": "Debit card type"
   },
-  "credit": "KREDİ",
+  "credit": "Kredi Kartı Ekle",
   "@credit": {
     "description": "Credit card type"
   },
@@ -1324,7 +1324,7 @@
   "@totalAmount": {
     "description": "Total amount label"
   },
-  "onboardingFeaturesTitle": "Qanta ile Neler Yapabilirsiniz?",
+  "onboardingFeaturesTitle": "Qanta ile Neler Yapabilirsin?",
   "@onboardingFeaturesTitle": {
     "description": "Onboarding features page title"
   },
@@ -1332,7 +1332,7 @@
   "@expenseTrackingTitle": {
     "description": "Expense tracking feature title"
   },
-  "expenseTrackingDesc": "Günlük harcamalarınızı kolayca takip edin",
+  "expenseTrackingDesc": "Günlük harcamalarını kolayca takip et",
   "@expenseTrackingDesc": {
     "description": "Expense tracking feature description"
   },
@@ -1384,7 +1384,7 @@
   "@aiInsightsDesc": {
     "description": "AI insights feature description"
   },
-  "expenseTrackingDescShort": "Günlük harcamalarınızı detaylı takiple kaydedin ve kategorilere ayırın",
+  "expenseTrackingDescShort": "Günlük harcamalarını detaylı takiple kaydet ve kategorilere ayır",
   "@expenseTrackingDescShort": {
     "description": "Short expense tracking description"
   },
@@ -1849,6 +1849,26 @@
   "dailyAverage": "Günlük Ortalama",
   "moreCategories": "daha fazla kategori",
   "netWorth": "Toplam Varlık",
+  "welcomeToQanta": "Qanta'ya Hoş Geldin!",
+  "@welcomeToQanta": {
+    "description": "Welcome message for new users"
+  },
+  "startYourFinancialJourney": "Finansal yolculuğuna başlamak için ilk adımı at",
+  "@startYourFinancialJourney": {
+    "description": "Encouraging message for new users to start their financial journey"
+  },
+  "addFirstIncome": "İlk Geliri Ekle",
+  "@addFirstIncome": {
+    "description": "Button text to add first income transaction"
+  },
+  "addCard": "Kart Ekle",
+  "@addCard": {
+    "description": "Button text to add a card"
+  },
+  "tipTrackYourExpenses": "Giderlerini takip ederek finansal hedeflerine ulaş",
+  "@tipTrackYourExpenses": {
+    "description": "Tip message about tracking expenses"
+  },
   "positive": "Pozitif",
   "negative": "Negatif",
   "totalAssets": "Toplam Varlık",
@@ -2387,6 +2407,10 @@
     "description": "Cash account"
   },
   "transaction": "İşlem",
+  "noTransactionsForThisDay": "Bu gün için işlem bulunmuyor",
+  "today": "Bugün",
+  "yesterday": "Dün",
+  "cashWallet": "Nakit Hesap",
   "@transaction": {
     "description": "Transaction generic term"
   },
@@ -2550,7 +2574,7 @@
   "@noNotesYet": {
     "description": "No notes yet"
   },
-  "addExpenseIncomeNotes": "Harcama veya gelir notlarınızı buraya ekleyin",
+  "addExpenseIncomeNotes": "Harcama veya gelir notlarını buraya ekle",
   "@addExpenseIncomeNotes": {
     "description": "Add your expense or income notes here"
   },
@@ -2906,7 +2930,7 @@
   "@collectedInformation": {
     "description": "Collected Information"
   },
-  "collectedInformationContent": "Qanta uygulaması, size daha iyi hizmet verebilmek için aşağıdaki bilgileri toplar:\n\n• Hesap bilgileri (e-posta, ad-soyad)\n• Finansal işlem verileri (gelir, gider, transfer kayıtları)\n• Kart ve hesap bilgileri\n• Bütçe ve kategori tercihleri\n• Uygulama kullanım istatistikleri",
+  "collectedInformationContent": "Qanta uygulaması, sana daha iyi hizmet verebilmek için aşağıdaki bilgileri toplar:\n\n• Hesap bilgileri (e-posta, ad-soyad)\n• Finansal işlem verileri (gelir, gider, transfer kayıtları)\n• Kart ve hesap bilgileri\n• Bütçe ve kategori tercihleri\n• Uygulama kullanım istatistikleri",
   "@collectedInformationContent": {
     "description": "Collected Information Content"
   },
@@ -2922,7 +2946,7 @@
   "@dataSecurity": {
     "description": "Data Security"
   },
-  "dataSecurityContent": "Verilerinizin güvenliği bizim için önceliktir:\n\n• Tüm veriler şifreli olarak saklanır\n• Güvenli sunucularda barındırılır\n• Düzenli güvenlik güncellemeleri yapılır\n• Yetkisiz erişimlere karşı korunur\n• Endüstri standartlarına uygun güvenlik önlemleri alınır",
+  "dataSecurityContent": "Verilerinin güvenliği benim için önceliktir:\n\n• Tüm veriler şifreli olarak saklanır\n• Güvenli sunucularda barındırılır\n• Düzenli güvenlik güncellemeleri yapılır\n• Yetkisiz erişimlere karşı korunur\n• Endüstri standartlarına uygun güvenlik önlemleri alınır",
   "@dataSecurityContent": {
     "description": "Data Security Content"
   },
@@ -2938,7 +2962,7 @@
   "@userRights": {
     "description": "User Rights"
   },
-  "userRightsContent": "KVKK kapsamında sahip olduğunuz haklar:\n\n• Kişisel verilerinizin işlenip işlenmediğini öğrenme\n• Verilerinize erişim talep etme\n• Yanlış bilgilerin düzeltilmesini isteme\n• Verilerin silinmesini talep etme\n• Hesabınızı tamamen kapatma",
+  "userRightsContent": "KVKK kapsamında sahip olduğun haklar:\n\n• Kişisel verilerinin işlenip işlenmediğini öğrenme\n• Verilerine erişim talep etme\n• Yanlış bilgilerin düzeltilmesini isteme\n• Verilerin silinmesini talep etme\n• Hesabını tamamen kapatma",
   "@userRightsContent": {
     "description": "User Rights Content"
   },
@@ -2986,7 +3010,7 @@
   "@forgotPassword": {
     "description": "Forgot password"
   },
-  "forgotPasswordAnswer": "Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak şifrenizi sıfırlayabilirsiniz.",
+  "forgotPasswordAnswer": "Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak şifreni sıfırlayabilirsin.",
   "@forgotPasswordAnswer": {
     "description": "Forgot password answer"
   },
@@ -2994,7 +3018,7 @@
   "@howToDeleteAccount": {
     "description": "How to delete account"
   },
-  "howToDeleteAccountAnswer": "Profil sayfasından \"Hesap Ayarları\" > \"Hesabı Sil\" seçeneğini kullanabilirsiniz.",
+  "howToDeleteAccountAnswer": "Profil sayfasından \"Hesap Ayarları\" > \"Hesabı Sil\" seçeneğini kullanabilirsin.",
   "@howToDeleteAccountAnswer": {
     "description": "How to delete account answer"
   },
@@ -3058,7 +3082,7 @@
   "@userResponsibilities": {
     "description": "User Responsibilities"
   },
-  "userResponsibilitiesContent": "Kullanıcı olarak aşağıdaki sorumluluklarınız bulunmaktadır:\n\n• Hesap bilgilerinizi güvenli tutmak\n• Şifrenizi kimseyle paylaşmamak\n• Finansal verilerinizin doğruluğunu sağlamak\n• Uygulama kurallarına uymak\n• Güvenlik ihlallerini bildirmek",
+  "userResponsibilitiesContent": "Kullanıcı olarak aşağıdaki sorumlulukların bulunmaktadır:\n\n• Hesap bilgilerini güvenli tutmak\n• Şifreni kimseyle paylaşmamak\n• Finansal verilerinin doğruluğunu sağlamak\n• Uygulama kurallarına uymak\n• Güvenlik ihlallerini bildirmek",
   "@userResponsibilitiesContent": {
     "description": "User Responsibilities Content"
   },
@@ -3158,7 +3182,7 @@
   "@forgotPassword": {
     "description": "Forgot password"
   },
-  "forgotPasswordAnswer": "Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak e-posta adresinize şifre sıfırlama bağlantısı gönderebilirsiniz.",
+  "forgotPasswordAnswer": "Giriş ekranında \"Şifremi Unuttum\" seçeneğini kullanarak e-posta adresine şifre sıfırlama bağlantısı gönderebilirsin.",
   "@forgotPasswordAnswer": {
     "description": "Forgot password answer"
   },
@@ -3166,7 +3190,7 @@
   "@howToDeleteAccount": {
     "description": "How to delete account"
   },
-  "howToDeleteAccountAnswer": "Profil sayfasından çıkış yapabilir veya destek ekibimizle iletişime geçerek hesabınızın tamamen silinmesini talep edebilirsiniz.",
+  "howToDeleteAccountAnswer": "Profil sayfasından çıkış yapabilir veya destek ekibimizle iletişime geçerek hesabının tamamen silinmesini talep edebilirsin.",
   "@howToDeleteAccountAnswer": {
     "description": "How to delete account answer"
   },
@@ -3174,7 +3198,7 @@
   "@howToChangePassword": {
     "description": "How to change password"
   },
-  "howToChangePasswordAnswer": "Profil sayfasında \"Güvenlik\" bölümünden \"Şifre Değiştir\" seçeneğini kullanabilirsiniz.",
+  "howToChangePasswordAnswer": "Profil sayfasında \"Güvenlik\" bölümünden \"Şifre Değiştir\" seçeneğini kullanabilirsin.",
   "@howToChangePasswordAnswer": {
     "description": "How to change password answer"
   },
@@ -3190,7 +3214,7 @@
   "@howDoesInstallmentTrackingWork": {
     "description": "How does installment tracking work?"
   },
-  "howDoesInstallmentTrackingWorkAnswer": "Taksitli alışverişlerinizi ekleyebilir, aylık ödemelerinizi otomatik olarak takip edebilirsiniz. Sistem size hatırlatmalar gönderir.",
+  "howDoesInstallmentTrackingWorkAnswer": "Taksitli alışverişlerini ekleyebilir, aylık ödemelerini otomatik olarak takip edebilirsin. Sistem sana hatırlatmalar gönderir.",
   "@howDoesInstallmentTrackingWorkAnswer": {
     "description": "How does installment tracking work answer"
   },
@@ -3198,7 +3222,7 @@
   "@howToUseBudgetManagement": {
     "description": "How to use budget management?"
   },
-  "howToUseBudgetManagementAnswer": "Kategoriler için aylık limitler belirleyebilir, harcamalarınızı takip edebilir ve limit aşımlarında uyarı alabilirsiniz.",
+  "howToUseBudgetManagementAnswer": "Kategoriler için aylık limitler belirleyebilir, harcamalarını takip edebilir ve limit aşımlarında uyarı alabilirsin.",
   "@howToUseBudgetManagementAnswer": {
     "description": "How to use budget management answer"
   },
@@ -3206,7 +3230,7 @@
   "@whatIsQuickNotesFeature": {
     "description": "What is quick notes feature?"
   },
-  "whatIsQuickNotesFeatureAnswer": "Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarınızı kategorize edebilirsiniz.",
+  "whatIsQuickNotesFeatureAnswer": "Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarını kategorize edebilirsin.",
   "@whatIsQuickNotesFeatureAnswer": {
     "description": "What is quick notes feature answer"
   },
@@ -3238,7 +3262,7 @@
   "@howToContactSupport": {
     "description": "How to contact support"
   },
-  "howToContactSupportAnswer": "Profil sayfasından \"Destek & İletişim\" bölümünü kullanabilir veya support@qanta.app adresine e-posta gönderebilirsiniz.",
+  "howToContactSupportAnswer": "Profil sayfasından \"Destek & İletişim\" bölümünü kullanabilir veya support@qanta.app adresine e-posta gönderebilirsin.",
   "@howToContactSupportAnswer": {
     "description": "How to contact support answer"
   },
@@ -3246,7 +3270,7 @@
   "@haveSuggestionWhereToSend": {
     "description": "Have suggestion, where to send"
   },
-  "haveSuggestionWhereToSendAnswer": "Önerilerinizi support@qanta.app adresine gönderebilirsiniz. Tüm geri bildirimler değerlendirilir ve uygulamayı geliştirmek için kullanılır.",
+  "haveSuggestionWhereToSendAnswer": "Önerilerini support@qanta.app adresine gönderebilirsin. Tüm geri bildirimler değerlendirilir ve uygulamayı geliştirmek için kullanılır.",
   "@haveSuggestionWhereToSendAnswer": {
     "description": "Have suggestion where to send answer"
   },
@@ -3266,7 +3290,7 @@
   "@noAccountsYet": {
     "description": "No accounts yet"
   },
-  "addFirstAccount": "İlk hesabınızı ekleyerek başlayın",
+  "addFirstAccount": "İlk hesabını ekleyerek başla",
   "@addFirstAccount": {
     "description": "Add first account to get started"
   },
@@ -3278,9 +3302,27 @@
   "@totalLimit": {
     "description": "Total Limit"
   },
-  "cashWallet": "Nakit Cüzdan",
+  "cashWallet": "Nakit Hesap",
   "@cashWallet": {
     "description": "Cash Wallet"
+  },
+  "stockPurchaseInsufficientBalance": "Hisse alımı için yetersiz bakiye. Mevcut: {balance}",
+  "@stockPurchaseInsufficientBalance": {
+    "description": "Insufficient balance for stock purchase",
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "stockSaleInsufficientQuantity": "Yetersiz hisse miktarı. Mevcut: {quantity} lot",
+  "@stockSaleInsufficientQuantity": {
+    "description": "Insufficient stock quantity for sale",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
   },
   "searchBanks": "Banka ara...",
   "@searchBanks": {
@@ -3398,7 +3440,7 @@
   "@addDebitCardDescription": {
     "description": "Add checking account card"
   },
-  "addCreditCardDescription": "Kredi kartı bilgilerinizi ekleyin",
+  "addCreditCardDescription": "Kredi kartı bilgilerini ekle",
   "@addCreditCardDescription": {
     "description": "Add your credit card information"
   },
@@ -3588,7 +3630,7 @@
   "@noCardsAddedYet": {
     "description": "Message when no cards are added yet"
   },
-  "addFirstCardDescription": "İlk kartınızı eklemek için Kartlarım sayfasına gidin",
+  "addFirstCardDescription": "İlk kartını eklemek için Kartlarım sayfasına git",
   "@addFirstCardDescription": {
     "description": "Description for adding first card"
   },
@@ -3596,7 +3638,7 @@
   "@deleteTransaction": {
     "description": "Delete transaction action sheet title"
   },
-  "deleteTransactionConfirmation": "{description} işlemini silmek istediğinizden emin misiniz?",
+  "deleteTransactionConfirmation": "{description} işlemini silmek istediğinden emin misin?",
   "@deleteTransactionConfirmation": {
     "description": "Delete transaction confirmation message",
     "placeholders": {
@@ -3609,7 +3651,7 @@
   "@deleteInstallmentTransaction": {
     "description": "Delete installment transaction action sheet title"
   },
-  "deleteInstallmentConfirmation": "{description} işlemini silmek istediğinizden emin misiniz? Tüm taksitler iade edilecektir.",
+  "deleteInstallmentConfirmation": "{description} işlemini silmek istediğinden emin misin? Tüm taksitler iade edilecektir.",
   "@deleteInstallmentConfirmation": {
     "description": "Delete installment transaction confirmation message",
     "placeholders": {
@@ -3737,7 +3779,7 @@
   "@addQuickNote": {
     "description": "Add quick note title"
   },
-  "addQuickNoteDescription": "Harcama veya gelir notunuzu yazın. Daha sonra işlem olarak ekleyebilirsiniz.",
+  "addQuickNoteDescription": "Harcama veya gelir notunu yaz. Daha sonra işlem olarak ekleyebilirsin.",
   "@addQuickNoteDescription": {
     "description": "Add quick note description"
   },
@@ -3911,7 +3953,7 @@
   "@selectPhotoFromGallery": {
     "description": "Select photo from gallery description"
   },
-  "addExpenseIncomeNotes": "Gider veya gelir notlarınızı buraya ekleyin",
+  "addExpenseIncomeNotes": "Gider veya gelir notlarını buraya ekle",
   "@addExpenseIncomeNotes": {
     "description": "Add expense or income notes description"
   },
@@ -4007,7 +4049,7 @@
   "@daily": {
     "description": "Daily label for stock performance"
   },
-  "noStocksTracked": "Henüz hisse takip etmiyorsunuz",
+  "noStocksTracked": "Henüz hisse takip etmiyorsun",
   "@noStocksTracked": {
     "description": "Message when user has no stocks tracked"
   },
@@ -4015,7 +4057,7 @@
   "@stockDataLoading": {
     "description": "Message when stock data is loading"
   },
-  "addStocksInstruction": "Hisse eklemek için Hisse sekmesine gidin",
+  "addStocksInstruction": "Hisse eklemek için Hisse sekmesine git",
   "@addStocksInstruction": {
     "description": "Instruction to add stocks"
   },
@@ -4067,7 +4109,7 @@
   "@stockName": {
     "description": "Stock name label"
   },
-  "quantity": "Adet",
+  "quantity": "Lot",
   "@quantity": {
     "description": "Quantity label"
   },
@@ -4079,7 +4121,7 @@
   "@total": {
     "description": "Total amount label"
   },
-  "pieces": "adet",
+  "pieces": "lot",
   "@pieces": {
     "description": "Pieces unit"
   },
@@ -4611,7 +4653,7 @@
   "@total": {
     "description": "Total label"
   },
-  "pieces": "adet",
+  "pieces": "lot",
   "@pieces": {
     "description": "Pieces unit"
   },
@@ -4705,7 +4747,7 @@
   "@newBadge": {
     "description": "New badge"
   },
-  "pieces": "adet",
+  "pieces": "lot",
   "@pieces": {
     "description": "Pieces unit"
   },
@@ -4801,6 +4843,58 @@
   "portfolioOverview": "Portföy Özeti",
   "@portfolioOverview": {
     "description": "Portfolio overview title"
+  },
+  "myPortfolio": "Portföyüm",
+  "@myPortfolio": {
+    "description": "My portfolio title"
+  },
+  "neutral": "Nötr",
+  "@neutral": {
+    "description": "Neutral filter option"
+  },
+  "profit": "Kar",
+  "@profit": {
+    "description": "Profit filter option"
+  },
+  "loss": "Zarar",
+  "@loss": {
+    "description": "Loss filter option"
+  },
+  "filterBy": "Filtrele",
+  "@filterBy": {
+    "description": "Filter by label"
+  },
+  "gainers": "Yükselen",
+  "@gainers": {
+    "description": "Stocks with positive performance"
+  },
+  "losers": "Düşen",
+  "@losers": {
+    "description": "Stocks with negative performance"
+  },
+  "stable": "Stabil",
+  "@stable": {
+    "description": "Stocks with stable performance"
+  },
+  "alphabetical": "A-Z",
+  "@alphabetical": {
+    "description": "Alphabetical sorting filter"
+  },
+  "portfolioRatio": "Ağırlık",
+  "@portfolioRatio": {
+    "description": "Portfolio value sorting filter"
+  },
+  "insufficientBalance": "Yetersiz Bakiye",
+  "@insufficientBalance": {
+    "description": "Insufficient balance warning title"
+  },
+  "addMoneyToAccount": "Hisse almak için hesabınıza para ekleyin",
+  "@addMoneyToAccount": {
+    "description": "Insufficient balance warning message"
+  },
+  "addMoney": "Para Ekle",
+  "@addMoney": {
+    "description": "Add money button text"
   },
   "totalValue": "Toplam Değer",
   "@totalValue": {
@@ -5332,6 +5426,65 @@
   "@limitExceeded": {
     "description": "Limit exceeded message"
   },
+  "creditCardLimitInsufficient": "Kredi kartı limiti yetersiz",
+  "@creditCardLimitInsufficient": {
+    "description": "Credit card limit insufficient error message"
+  },
+  "creditCardLimitInsufficientWithAmount": "Kredi kartı limiti yetersiz. Kalan limit: {amount}",
+  "@creditCardLimitInsufficientWithAmount": {
+    "description": "Credit card limit insufficient with remaining amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "creditCardLimitInsufficientTitle": "Kredi Kartı Limiti Yetersiz",
+  "@creditCardLimitInsufficientTitle": {
+    "description": "Credit card limit insufficient dialog title"
+  },
+  "creditCardLimitInsufficientMessage": "Kredi kartı limitiniz bu işlem için yeterli değil. Lütfen daha düşük bir tutar girin veya kartınızın borcunu ödeyin.",
+  "@creditCardLimitInsufficientMessage": {
+    "description": "Credit card limit insufficient dialog message"
+  },
+  "debitCardBalanceInsufficientTitle": "Banka Kartı Bakiyesi Yetersiz",
+  "@debitCardBalanceInsufficientTitle": {
+    "description": "Debit card balance insufficient dialog title"
+  },
+  "debitCardBalanceInsufficientMessage": "Banka kartı bakiyeniz bu işlem için yeterli değil. Lütfen daha düşük bir tutar girin veya kartınıza para yatırın.",
+  "@debitCardBalanceInsufficientMessage": {
+    "description": "Debit card balance insufficient dialog message"
+  },
+  "cashBalanceInsufficientWithAmount": "Nakit bakiyesi yetersiz. Mevcut: {amount}",
+  "@cashBalanceInsufficientWithAmount": {
+    "description": "Cash balance insufficient with current amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debitCardBalanceInsufficientWithAmount": "Banka kartı bakiyesi yetersiz. Mevcut: {amount}",
+  "@debitCardBalanceInsufficientWithAmount": {
+    "description": "Debit card balance insufficient with current amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashBalanceInsufficientTitle": "Nakit Bakiyesi Yetersiz",
+  "@cashBalanceInsufficientTitle": {
+    "description": "Cash balance insufficient dialog title"
+  },
+  "cashBalanceInsufficientMessage": "Nakit bakiyeniz bu işlem için yeterli değil. Lütfen daha düşük bir tutar girin.",
+  "@cashBalanceInsufficientMessage": {
+    "description": "Cash balance insufficient dialog message"
+  },
+  "insufficientBalanceTitle": "Yetersiz Bakiye",
+  "@insufficientBalanceTitle": {
+    "description": "Generic insufficient balance dialog title"
+  },
   "remaining": "Kalan:",
   "@remaining": {
     "description": "Remaining amount label"
@@ -5515,5 +5668,194 @@
   "or": "veya",
   "@or": {
     "description": "Or separator text"
+  },
+  "addFirstNoteInstruction": "İlk notunu eklemek için + butonuna dokun",
+  "@addFirstNoteInstruction": {
+    "description": "Instruction for adding first note"
+  },
+  "addExpenseIncomeNoteInstruction": "Harcama veya gelir notunu yaz. Daha sonra işlem olarak ekleyebilirsin.",
+  "@addExpenseIncomeNoteInstruction": {
+    "description": "Instruction for adding expense or income note"
+  },
+  "stockTransactionCannotDelete": "Hisse işlemleri silinemez",
+  "@stockTransactionCannotDelete": {
+    "description": "Stock transaction cannot be deleted message"
+  },
+  "stockTransactionDeleteWarning": "Hisse işlemini silmek yerine satış işlemi yapın",
+  "@stockTransactionDeleteWarning": {
+    "description": "Stock transaction delete warning message"
+  },
+  "editCreditCard": "Kredi Kartını Düzenle",
+  "@editCreditCard": {
+    "description": "Edit credit card form title"
+  },
+  "selectBank": "Banka seçin",
+  "@selectBank": {
+    "description": "Select bank hint text"
+  },
+  "pleaseSelectBank": "Lütfen bir banka seçin",
+  "@pleaseSelectBank": {
+    "description": "Please select bank validation message"
+  },
+  "cardNameOptional": "Kart Adı",
+  "@cardNameOptional": {
+    "description": "Card name optional label"
+  },
+  "cardNameExample": "Örn: İş Kartım, Alışveriş Kartı",
+  "@cardNameExample": {
+    "description": "Card name example hint"
+  },
+  "statementDayLabel": "Ekstre Günü",
+  "@statementDayLabel": {
+    "description": "Statement day label"
+  },
+  "selectStatementDay": "Ekstre günü seçin",
+  "@selectStatementDay": {
+    "description": "Select statement day hint"
+  },
+  "creditLimitRequired": "Kredi limiti gerekli",
+  "@creditLimitRequired": {
+    "description": "Credit limit required validation"
+  },
+  "pleaseEnterValidAmount": "Geçerli bir tutar girin",
+  "@pleaseEnterValidAmount": {
+    "description": "Please enter valid amount validation"
+  },
+  "creditCardUpdatedSuccessfully": "Kredi kartı başarıyla güncellendi",
+  "@creditCardUpdatedSuccessfully": {
+    "description": "Credit card updated success message"
+  },
+  "updateErrorOccurred": "Güncelleme sırasında hata oluştu: {error}",
+  "@updateErrorOccurred": {
+    "description": "Update error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "update": "Güncelle",
+  "@update": {
+    "description": "Update button text"
+  },
+  "january": "Ocak",
+  "@january": {
+    "description": "January month name"
+  },
+  "february": "Şubat",
+  "@february": {
+    "description": "February month name"
+  },
+  "march": "Mart",
+  "@march": {
+    "description": "March month name"
+  },
+  "april": "Nisan",
+  "@april": {
+    "description": "April month name"
+  },
+  "may": "Mayıs",
+  "@may": {
+    "description": "May month name"
+  },
+  "june": "Haziran",
+  "@june": {
+    "description": "June month name"
+  },
+  "july": "Temmuz",
+  "@july": {
+    "description": "July month name"
+  },
+  "august": "Ağustos",
+  "@august": {
+    "description": "August month name"
+  },
+  "september": "Eylül",
+  "@september": {
+    "description": "September month name"
+  },
+  "october": "Ekim",
+  "@october": {
+    "description": "October month name"
+  },
+  "november": "Kasım",
+  "@november": {
+    "description": "November month name"
+  },
+  "december": "Aralık",
+  "@december": {
+    "description": "December month name"
+  },
+  "invalidMonth": "Geçersiz ay",
+  "@invalidMonth": {
+    "description": "Invalid month error"
+  },
+  "addCard": "Kart Ekle",
+  "@addCard": {
+    "description": "Add card button text"
+  },
+  "addCardDescription": "Finanslarınızı yönetmeye başlamak için ilk kartınızı ekleyin",
+  "@addCardDescription": {
+    "description": "Add card description text"
+  },
+  "addDebitCard": "Banka Kartı Ekle",
+  "@addDebitCard": {
+    "description": "Add debit card button text"
+  },
+  "addCreditCard": "Kredi Kartı Ekle",
+  "@addCreditCard": {
+    "description": "Add credit card button text"
+  },
+  "addDebitCardDescription": "Harcamalarınızı takip etmek için banka kartı ekleyin",
+  "@addDebitCardDescription": {
+    "description": "Add debit card description text"
+  },
+  "addCreditCardDescription": "Kredinizi yönetmek için kredi kartı ekleyin",
+  "@addCreditCardDescription": {
+    "description": "Add credit card description text"
+  },
+  "budgetManagementDescription": "Harcama limitlerinizi takip edin ve kategorilere göre haftalık, aylık ve yıllık bütçelerinizi yönetin",
+  "@budgetManagementDescription": {
+    "description": "Budget management page description"
+  },
+  "dark": "KARANLIK",
+  "@dark": {
+    "description": "Dark mode toggle text"
+  },
+  "light": "AYDINLIK",
+  "@light": {
+    "description": "Light mode toggle text"
+  },
+  "on": "AÇIK",
+  "@on": {
+    "description": "On toggle text"
+  },
+  "off": "KAPALI",
+  "@off": {
+    "description": "Off toggle text"
+  },
+  "last7Days": "Son 7 gün",
+  "@last7Days": {
+    "description": "Last 7 days period text"
+  },
+  "last30Days": "Son 30 gün",
+  "@last30Days": {
+    "description": "Last 30 days period text"
+  },
+  "bankCard": "Banka Kartı",
+  "@bankCard": {
+    "description": "Bank card tab name"
+  },
+  "creditCard": "Kredi Kartı",
+  "@creditCard": {
+    "description": "Credit card tab name"
+  },
+  "noStocksMatchFilter": "Mevcut filtreye uygun hisse bulunamadı",
+  "@noStocksMatchFilter": {
+    "description": "Message when no stocks match the selected filter"
+  },
+  "tryDifferentFilter": "Farklı bir filtre seçmeyi deneyin",
+  "@tryDifferentFilter": {
+    "description": "Suggestion to try different filter when no stocks match"
   }
 } 

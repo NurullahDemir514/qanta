@@ -271,6 +271,10 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     );
   }
 
+  String _localizeDisplayTime(String rawTime) {
+    return TransactionDesignSystem.localizeDisplayTime(rawTime, context);
+  }
+
   Widget _buildEmptyState(bool isDark) {
     return Padding(
       padding: const EdgeInsets.all(32),
@@ -391,6 +395,7 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       sourceAccountName: transaction.sourceAccountName,
       targetAccountName: transaction.targetAccountName,
       context: context,
+      isInstallment: isActualInstallment,
     );
 
     // Format amount with dynamic currency
@@ -404,8 +409,9 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       currencySymbol: currencySymbol,
     );
 
-    // Use displayTime from transaction model (dynamic date formatting)
-    final time = transaction.displayTime;
+    // Use displayTime from transaction model and localize it
+    final rawTime = transaction.displayTime;
+    final time = _localizeDisplayTime(rawTime);
 
     // Check if this should be displayed as an installment
     if (isActualInstallment) {
@@ -534,6 +540,44 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     BuildContext context,
     v2.TransactionWithDetailsV2 transaction,
   ) {
+    // Hisse işlemleri için bottom sheet gösterme, direkt uyarı göster
+    if (transaction.isStockTransaction) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.stockTransactionCannotDelete,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                AppLocalizations.of(context)!.stockTransactionDeleteWarning,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFFF9500), // Orange warning color
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+      return;
+    }
+
+    // Normal işlemler için bottom sheet göster
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(

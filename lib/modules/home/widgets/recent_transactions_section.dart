@@ -148,6 +148,10 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     );
   }
 
+  String _localizeDisplayTime(String rawTime) {
+    return TransactionDesignSystem.localizeDisplayTime(rawTime, context);
+  }
+
   /// Build individual transaction widget for V2 provider
   Widget _buildV2TransactionWidget(
     BuildContext context,
@@ -219,16 +223,18 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
     final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
 
-    // Use displayTime from transaction model (dynamic date formatting)
-    final time = transaction.displayTime;
+    // Use displayTime from transaction model and localize it
+    final rawTime = transaction.displayTime;
+    final time = _localizeDisplayTime(rawTime);
 
     // Card name - centralized logic
     final cardName = TransactionDesignSystem.formatCardName(
-      cardName: transaction.sourceAccountName ?? AppLocalizations.of(context)?.account ?? 'Account',
+      cardName: transaction.sourceAccountName ?? AppLocalizations.of(context)?.account ?? 'HESAP',
       transactionType: transactionType.name,
       sourceAccountName: transaction.sourceAccountName,
       targetAccountName: transaction.targetAccountName,
       context: context,
+      isInstallment: isActualInstallment,
     );
 
     // Check if this should be displayed as an installment
@@ -276,12 +282,51 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
   /// Show delete action sheet for V2 transactions
   void _showV2DeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
     final l10n = AppLocalizations.of(context)!;
+    
+    // Hisse işlemleri için bottom sheet gösterme, direkt uyarı göster
+    if (transaction.isStockTransaction) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.stockTransactionCannotDelete,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.stockTransactionDeleteWarning,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFFF9500), // Orange warning color
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+      return;
+    }
+
+    // Normal işlemler için bottom sheet göster
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
           l10n.deleteTransaction,
-                  style: GoogleFonts.inter(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF8E8E93),
@@ -289,7 +334,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
         ),
         message: Text(
           l10n.deleteTransactionConfirmation(transaction.description),
-                      style: GoogleFonts.inter(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF8E8E93),
@@ -308,9 +353,9 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
               ),
-                      ),
-                    ),
-                  ],
+            ),
+          ),
+        ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () {
             Navigator.pop(context);
@@ -334,42 +379,42 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     
     // Check if this is a stock transaction
     if (transaction.isStockTransaction) {
-      
-      // 1. OPTIMISTIC UI UPDATE - Önce UI'yi anında güncelle (net değer ve kartlar dahil)
-      providerV2.removeStockTransactionOptimistically(
-        transaction.id, 
-        transaction.amount, 
-        transaction.sourceAccountId
-      );
-      
-      // 2. Use StockProvider for stock transactions
-      final stockProvider = Provider.of<StockProvider>(context, listen: false);
-      
-      stockProvider.deleteStockTransaction(transaction.id).then((_) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)?.transactionDeleted ?? 'Transaction deleted'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 1),
+      // Hisse işlemleri silinemez - uyarı göster
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.stockTransactionCannotDelete,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.stockTransactionDeleteWarning,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
             ),
-          );
-        }
-      }).catchError((e) {
-        
-        // Hata durumunda UI'yi geri yükle
-        providerV2.refreshTransactions();
-        
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.transactionDeleteError(e.toString())),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 2),
+            backgroundColor: const Color(0xFFFF9500), // Orange warning color
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-          );
-        }
-      });
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+      return; // Silme işlemini durdur
     } else {
       // Regular transaction - use UnifiedProviderV2
       providerV2.deleteTransaction(transaction.id).then((success) {

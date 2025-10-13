@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/providers/unified_provider_v2.dart';
@@ -22,30 +23,27 @@ class BudgetManagementPage extends StatefulWidget {
 }
 
 class _BudgetManagementPageState extends State<BudgetManagementPage> {
-  final _limitController = TextEditingController();
+  final TextEditingController _limitController = TextEditingController();
   String? _selectedCategoryId;
   String? _selectedCategoryName;
+  bool _isSaving = false;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  /// Calculate budget stats from budget model
   BudgetCategoryStats _calculateBudgetStats(BudgetModel budget) {
-    final percentage = budget.monthlyLimit > 0
-        ? (budget.spentAmount / budget.monthlyLimit) * 100
+    final percentage = budget.limit > 0
+        ? (budget.spentAmount / budget.limit) * 100
         : 0.0;
-    final isOverBudget = budget.spentAmount > budget.monthlyLimit;
+    final isOverBudget = budget.spentAmount > budget.limit;
 
     return BudgetCategoryStats(
       categoryId: budget.categoryId,
       categoryName: budget.categoryName,
-      monthlyLimit: budget.monthlyLimit,
+      limit: budget.limit,
+      period: budget.period,
       currentSpent: budget.spentAmount,
       transactionCount: 0, // Will be calculated separately if needed
       percentage: percentage,
       isOverBudget: isOverBudget,
+      isRecurring: budget.isRecurring,
     );
   }
 
@@ -83,18 +81,17 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
         return;
       }
 
+      setState(() => _isSaving = true);
+
       await provider.createBudget(
         categoryId: _selectedCategoryId!,
         categoryName: _selectedCategoryName!,
-        monthlyLimit: limit,
+        limit: limit,
+        period: BudgetPeriod.monthly,
+        isRecurring: false,
       );
 
       if (mounted) {
-        _limitController.clear();
-        setState(() {
-          _selectedCategoryId = null;
-          _selectedCategoryName = null;
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.limitSavedSuccessfully)),
         );
@@ -103,86 +100,74 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${AppLocalizations.of(context)!.errorOccurred}: ${e.toString()}',
-            ),
-          ),
+          SnackBar(content: Text('${l10n.errorOccurred}: $e')),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  String _getPeriodDisplayName(BudgetPeriod period) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (period) {
+      case BudgetPeriod.weekly:
+        return l10n.weekly;
+      case BudgetPeriod.monthly:
+        return l10n.monthly;
+      case BudgetPeriod.yearly:
+        return l10n.yearly;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final l10n = AppLocalizations.of(context)!;
     return Consumer<UnifiedProviderV2>(
-      builder: (context, provider, child) {
-        final currentBudgets = provider.currentMonthBudgets;
-        final isLoading = provider.isLoadingBudgets;
+      builder: (context, providerV2, child) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final isLoading = providerV2.isLoadingBudgets;
+        final currentBudgets = providerV2.budgets;
 
         return Scaffold(
-          backgroundColor: isDark
-              ? const Color(0xFF000000)
-              : const Color(0xFFF2F2F7),
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(64),
-            child: Container(
-              color: isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7),
-              child: SafeArea(
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: AppColors.primary,
-                        size: 26,
-                      ),
-                      splashRadius: 24,
-                      tooltip: l10n.back,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          l10n.limitManagement,
-                          style: GoogleFonts.inter(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
-                ),
+          backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7),
+          appBar: AppBar(
+            backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7),
+            foregroundColor: isDark ? Colors.white : Colors.black,
+            elevation: 0,
+            title: Text(
+              AppLocalizations.of(context)!.expenseLimitTracking,
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
+            centerTitle: true,
           ),
-          body: isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF007AFF)),
-                )
-              : currentBudgets.isEmpty
-              ? _buildEmptyState(isDark)
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: currentBudgets.length,
-                  itemBuilder: (context, index) {
-                    final budget = currentBudgets[index];
-                    final stat = _calculateBudgetStats(budget);
-                    return _buildBudgetCard(
-                      stat,
-                      isDark,
-                      index,
-                      currentBudgets.length,
-                    );
-                  },
-                ),
+          body: Expanded(
+            child: isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF007AFF)),
+                  )
+                : currentBudgets.isEmpty
+                ? _buildEmptyState(isDark)
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: currentBudgets.length,
+                    itemBuilder: (context, index) {
+                      final budget = currentBudgets[index];
+                      final stat = _calculateBudgetStats(budget);
+                      return _buildBudgetCard(
+                        stat,
+                        isDark,
+                        index,
+                        currentBudgets.length,
+                      );
+                    },
+                  ),
+          ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showAddBudgetBottomSheet(context),
             backgroundColor: const Color(0xFF6D6D70),
@@ -212,33 +197,85 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   Widget _buildEmptyState(bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.account_balance_wallet_outlined,
-            size: 64,
-            color: const Color(0xFF8E8E93),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.noLimitsSetYet,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white : Colors.black,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Simple Icon
+            Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 80,
+              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.setMonthlySpendingLimits,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: const Color(0xFF8E8E93),
+            
+            const SizedBox(height: 24),
+            
+            // Title
+            Text(
+              l10n.noDataYet,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.black,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            
+            const SizedBox(height: 8),
+            
+            // Subtitle - Açıklama
+            Text(
+              l10n.budgetManagementDescription,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Simple Add Budget Button
+            Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF453A),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => _showAddBudgetBottomSheet(context),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.add_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.addNewLimit,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -288,225 +325,172 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                   ),
                 ],
               ),
-              child: Stack(
-                children: [
-                  // Watermark ikon
-                  Positioned(
-                    right: 8,
-                    bottom: 8,
-                    child: Icon(
-                      categoryIcon,
-                      size: 36,
-                      color: Colors.white.withOpacity(0.10),
-                    ),
-                  ),
-                  // Gradient overlay
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            isDark
-                                ? Colors.black.withOpacity(0.18)
-                                : Colors.white.withOpacity(0.10),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Card content
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.18),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Icon(
-                                categoryIcon,
-                                size: 18,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.18),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            categoryIcon,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 children: [
                                   Text(
                                     stat.categoryName,
                                     style: GoogleFonts.inter(
-                                      fontSize: 19,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.white,
                                       letterSpacing: -0.3,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${l10n.monthlyLimit} ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.monthlyLimit)}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white.withOpacity(0.85),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                if (isOver)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 7,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFF4C4C),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      l10n.exceeded,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                IconButton(
-                                  onPressed: () => _showDeleteDialog(stat),
-                                  icon: const Icon(
-                                    Icons.delete_outline_rounded,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                  splashRadius: 18,
-                                  tooltip: AppLocalizations.of(
-                                    context,
-                                  )!.deleteLimitTooltip,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 22),
-                        // Progress bar
-                        TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0, end: percent),
-                          duration: const Duration(milliseconds: 900),
-                          curve: Curves.easeOutCubic,
-                          builder: (context, value, child) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    final barWidth =
-                                        constraints.maxWidth *
-                                        value.clamp(0.0, 1.0);
-                                    return Container(
-                                      width: double.infinity,
-                                      height: 8,
+                                  if (stat.isRecurring) ...[
+                                    const SizedBox(width: 5),
+                                    Container(
+                                      padding: const EdgeInsets.all(1),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.13),
-                                        borderRadius: BorderRadius.circular(5),
+                                        borderRadius: BorderRadius.circular(3),
                                       ),
-                                      child: Stack(
-                                        children: [
-                                          AnimatedContainer(
-                                            duration: const Duration(
-                                              milliseconds: 900,
-                                            ),
-                                            curve: Curves.easeOutCubic,
-                                            width: barWidth,
-                                            height: 8,
-                                            decoration: BoxDecoration(
-                                              color: isOver
-                                                  ? const Color(0xFFFF4C4C)
-                                                  : Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(5),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      isOver
-                                          ? l10n.limitExceeded
-                                          : '${l10n.remaining} ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(remaining)}',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                      child: const Icon(
+                                        Icons.repeat,
+                                        size: 14,
                                         color: Colors.white,
-                                      ),
-                                    ),
-                                    Text(
-                                      '%$percentText ${l10n.spent}',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: isOver
-                                            ? const Color(0xFFFF4C4C)
-                                            : Colors.white,
                                       ),
                                     ),
                                   ],
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${_getPeriodDisplayName(stat.period)} ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.limit)}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withOpacity(0.85),
                                 ),
-                              ],
-                            );
-                          },
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 18),
-                        Row(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              '${l10n.spentAmount} ',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white.withOpacity(0.85),
+                            if (isOver)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFF4C4C),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  l10n.exceeded,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
-                            ),
-                            Text(
-                              Provider.of<ThemeProvider>(
-                                context,
-                                listen: false,
-                              ).formatAmount(spent),
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
+                            IconButton(
+                              onPressed: () => _showDeleteDialog(stat),
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
                                 color: Colors.white,
+                                size: 14,
                               ),
+                              splashRadius: 16,
+                              tooltip: AppLocalizations.of(
+                                context,
+                              )!.deleteLimitTooltip,
                             ),
                           ],
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    // Progress bar
+                    TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0, end: percent),
+                      duration: const Duration(milliseconds: 900),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, value, child) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.13),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              child: Stack(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 900),
+                                    curve: Curves.easeOutCubic,
+                                    width: MediaQuery.of(context).size.width * value.clamp(0.0, 1.0),
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: isOver
+                                          ? const Color(0xFFFF4C4C)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${Provider.of<ThemeProvider>(context, listen: false).formatAmount(spent)} / ${Provider.of<ThemeProvider>(context, listen: false).formatAmount(stat.limit)}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white.withOpacity(0.85),
+                                  ),
+                                ),
+                                Text(
+                                  '$percentText%',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isOver
+                                        ? const Color(0xFFFF4C4C)
+                                        : Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -516,49 +500,80 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   }
 
   void _showDeleteDialog(BudgetCategoryStats stat) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        titlePadding: EdgeInsets.only(
+          left: 24.w,
+          right: 24.w,
+          top: 20.h,
+          bottom: 8.h,
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 24.w,
+          vertical: 0,
+        ),
+        actionsPadding: EdgeInsets.only(
+          left: 16.w,
+          right: 16.w,
+          bottom: 16.h,
+          top: 8.h,
+        ),
         title: Text(
-          AppLocalizations.of(context)!.deleteLimit,
-          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+          l10n.deleteLimit,
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : Colors.black,
+          ),
         ),
         content: Text(
-          AppLocalizations.of(context)!.deleteLimitConfirm(stat.categoryName),
-          style: GoogleFonts.inter(fontSize: 14),
+          l10n.deleteLimitConfirm(stat.categoryName),
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: isDark ? Colors.white70 : Colors.grey[600],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              minimumSize: Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
             child: Text(
-              AppLocalizations.of(context)!.cancel,
+              l10n.cancel,
               style: GoogleFonts.inter(
-                fontSize: 16,
-                color: const Color(0xFF8E8E93),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white70 : Colors.grey[600],
               ),
             ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              // BudgetModel'i bul
-              final now = DateTime.now();
-              final provider = Provider.of<UnifiedProviderV2>(
-                context,
-                listen: false,
-              );
-              final budget = provider.currentMonthBudgets.firstWhere(
-                (b) => b.categoryId == stat.categoryId,
-                orElse: () => throw Exception('Limit bulunamadı'),
-              );
-              await _deleteBudget(budget.id);
+              await _deleteBudget(stat);
             },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF4C4C),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              minimumSize: Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
             child: Text(
-              AppLocalizations.of(context)!.delete,
+              l10n.delete,
               style: GoogleFonts.inter(
-                fontSize: 16,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFFFF3B30),
               ),
             ),
           ),
@@ -567,327 +582,29 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     );
   }
 
-  Future<void> _findRealCategoryId(String categoryName) async {
-    try {
-      // TODO: Implement with Firebase
-      debugPrint(
-        'UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed',
-      );
-      final expenseCategories = <Map<String, dynamic>>[];
-
-      // TODO: Implement with Firebase
-      debugPrint(
-        'UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed',
-      );
-      UnifiedCategoryModel? matchedCategory;
-
-      // TODO: Implement with Firebase
-      debugPrint(
-        'UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed',
-      );
-
-      // TODO: Implement with Firebase
-      debugPrint(
-        'UnifiedCategoryService.getCategoriesWithCache() - Firebase implementation needed',
-      );
-
-      setState(() {
-        if (matchedCategory != null) {
-          _selectedCategoryId = matchedCategory.id;
-        } else {
-          _selectedCategoryId = categoryName.toLowerCase().replaceAll(' ', '_');
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _selectedCategoryId = categoryName.toLowerCase().replaceAll(' ', '_');
-      });
-    }
-  }
-
-  Widget _buildAmountInput(bool isDark) {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
-        borderRadius: BorderRadius.circular(12),
-        border: _limitController.text.isNotEmpty
-            ? Border.all(
-                color: const Color(0xFF007AFF).withValues(alpha: 0.3),
-                width: 1,
-              )
-            : null,
-      ),
-      child: Row(
-        children: [
-          Text(
-            Provider.of<ThemeProvider>(context, listen: false).currency.symbol,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF007AFF),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              controller: _limitController,
-              keyboardType: TextInputType.number,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : Colors.black,
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                hintText: l10n.limitAmountHint,
-                hintStyle: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF8E8E93),
-                ),
-              ),
-              onChanged: (value) => setState(() {}),
-            ),
-          ),
-          if (_limitController.text.isNotEmpty)
-            Text(
-              l10n.perMonth,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF8E8E93),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _deleteBudget(String budgetId) async {
+  Future<void> _deleteBudget(BudgetCategoryStats stat) async {
     try {
       final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-      await provider.deleteBudget(budgetId);
+      
+      // Find the budget by categoryId
+      final budget = provider.budgets.firstWhere(
+        (b) => b.categoryId == stat.categoryId,
+        orElse: () => throw Exception('Budget not found'),
+      );
+      
+      await provider.deleteBudget(budget.id);
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.limitDeleted)),
-        );
         widget.onBudgetSaved?.call();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '${AppLocalizations.of(context)!.errorOccurred}: ${e.toString()}',
-            ),
+            content: Text('${AppLocalizations.of(context)!.errorOccurred}: Limit silinemedi'),
           ),
         );
       }
     }
-  }
-}
-
-class BudgetCategorySelector extends StatefulWidget {
-  final String? selectedCategory;
-  final Function(String) onCategorySelected;
-
-  const BudgetCategorySelector({
-    super.key,
-    this.selectedCategory,
-    required this.onCategorySelected,
-  });
-
-  @override
-  State<BudgetCategorySelector> createState() => _BudgetCategorySelectorState();
-}
-
-class _BudgetCategorySelectorState extends State<BudgetCategorySelector> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  bool _showSuggestions = false;
-
-  List<String> _getActiveExpenseCategories(BuildContext context) {
-    final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-    return provider.expenseCategories
-        .where(
-          (cat) => true,
-        ) // UnifiedCategoryModel doesn't have isActive, all are active
-        .map((cat) => cat.displayName.trim())
-        .toSet()
-        .toList();
-  }
-
-  List<String> _getFilteredSuggestions(BuildContext context) {
-    final tags = _getActiveExpenseCategories(context);
-    if (_controller.text.isEmpty) return tags;
-    return tags
-        .where(
-          (tag) => tag.toLowerCase().contains(_controller.text.toLowerCase()),
-        )
-        .toList();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.selectedCategory != null) {
-      _controller.text = widget.selectedCategory!;
-    }
-    _focusNode.addListener(() {
-      setState(() => _showSuggestions = _focusNode.hasFocus);
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  void _selectCategory(String category) {
-    _controller.text = category;
-    _focusNode.unfocus();
-    widget.onCategorySelected(category);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final l10n = AppLocalizations.of(context)!;
-    final suggestions = _getFilteredSuggestions(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _controller,
-          focusNode: _focusNode,
-          autofocus: false,
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-          decoration: InputDecoration(
-            hintText: l10n.categoryHint,
-            hintStyle: GoogleFonts.inter(
-              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
-            ),
-            filled: true,
-            fillColor: isDark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFF2F2F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFFF4C4C), width: 2),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFFF4C4C), width: 2),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFFF4C4C), width: 2),
-            ),
-          ),
-          onChanged: (value) {
-            setState(() {});
-            if (value.isNotEmpty) {
-              widget.onCategorySelected(value);
-            }
-          },
-          onSubmitted: (value) {
-            if (value.isNotEmpty) {
-              _controller.text = value;
-              widget.onCategorySelected(value);
-              _focusNode.unfocus();
-            }
-          },
-        ),
-        if (_showSuggestions && suggestions.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: suggestions.map((tag) {
-                final isSelected =
-                    _controller.text.trim().toLowerCase() == tag.toLowerCase();
-                final icon = CategoryIconService.getIcon(tag.toLowerCase());
-                final color = const Color(0xFFFF4C4C);
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeInOut,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: color,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () => _selectCategory(tag),
-                        splashColor: color.withOpacity(0.18),
-                        highlightColor: color.withOpacity(0.08),
-                        hoverColor: color.withOpacity(0.08),
-                        child: StatefulBuilder(
-                          builder: (context, setChipState) {
-                            bool isPressed = false;
-                            return Listener(
-                              onPointerDown: (_) =>
-                                  setChipState(() => isPressed = true),
-                              onPointerUp: (_) =>
-                                  setChipState(() => isPressed = false),
-                              onPointerCancel: (_) =>
-                                  setChipState(() => isPressed = false),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 100),
-                                curve: Curves.easeInOut,
-                                color: isPressed
-                                    ? color.withOpacity(0.08)
-                                    : Colors.transparent,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(icon, color: color, size: 18),
-                                      const SizedBox(width: 7),
-                                      Text(
-                                        tag,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: isDark ? Colors.white : color,
-                                          letterSpacing: -0.2,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ],
-    );
   }
 }

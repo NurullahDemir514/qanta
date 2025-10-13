@@ -352,8 +352,14 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     if (_selectedPaymentMethod == null) return '';
 
     if (_selectedPaymentMethod!.isCash) {
-      return _selectedPaymentMethod!.cashAccount?.name ??
-          (AppLocalizations.of(context)?.cash ?? 'Cash');
+      final accountName = _selectedPaymentMethod!.cashAccount?.name ?? '';
+      // Localize CASH_WALLET identifier
+      if (accountName == 'CASH_WALLET') {
+        return AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap';
+      }
+      return accountName.isNotEmpty 
+          ? accountName 
+          : (AppLocalizations.of(context)?.cash ?? 'NAKİT');
     } else if (_selectedPaymentMethod!.card != null) {
       final cardName = _selectedPaymentMethod!.card!.name;
       final installments = _selectedPaymentMethod!.installments ?? 1;
@@ -370,6 +376,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
 
   void _validateAndNextStep(int currentStep) {
     bool isValid = true;
+    final l10n = AppLocalizations.of(context)!;
 
     switch (currentStep) {
       case 0: // Amount
@@ -420,8 +427,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
             if (_selectedPaymentMethod!.isCash) {
               final balance = _selectedPaymentMethod!.cashAccount?.balance ?? 0;
               if (balance < amount) {
-                error =
-                    'Nakit bakiyesi yetersiz. Mevcut: ${_formatCurrency(balance)}';
+                error = l10n.cashBalanceInsufficientWithAmount(_formatCurrency(balance));
               }
             } else if (_selectedPaymentMethod!.card != null) {
               final provider = Provider.of<UnifiedProviderV2>(
@@ -434,14 +440,12 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
               if (account != null) {
                 if (account.type == AccountType.debit) {
                   if (account.balance < amount) {
-                    error =
-                        'Banka kartı bakiyesi yetersiz. Mevcut: ${_formatCurrency(account.balance)}';
+                    error = l10n.debitCardBalanceInsufficientWithAmount(_formatCurrency(account.balance));
                   }
                 } else if (account.type == AccountType.credit) {
                   final available = account.availableAmount;
                   if (available < amount) {
-                    error =
-                        'Kredi kartı limiti yetersiz. Kalan limit: ${_formatCurrency(available)}';
+                    error = l10n.creditCardLimitInsufficientWithAmount(_formatCurrency(available));
                   }
                 }
               }

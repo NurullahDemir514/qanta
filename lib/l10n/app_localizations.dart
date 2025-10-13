@@ -701,13 +701,13 @@ abstract class AppLocalizations {
   /// Debit card type
   ///
   /// In en, this message translates to:
-  /// **'DEBIT'**
+  /// **'Add Debit Card'**
   String get debit;
 
   /// Credit card type
   ///
   /// In en, this message translates to:
-  /// **'CREDIT'**
+  /// **'Add Credit Card'**
   String get credit;
 
   /// Profile page title
@@ -1094,7 +1094,7 @@ abstract class AppLocalizations {
   /// **'Account Breakdown'**
   String get accountBreakdown;
 
-  /// Credit card account type
+  /// Credit card tab name
   ///
   /// In en, this message translates to:
   /// **'Credit Card'**
@@ -2798,6 +2798,36 @@ abstract class AppLocalizations {
   /// **'Total Assets'**
   String get netWorth;
 
+  /// Welcome message for new users
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Qanta!'**
+  String get welcomeToQanta;
+
+  /// Encouraging message for new users to start their financial journey
+  ///
+  /// In en, this message translates to:
+  /// **'Take the first step to start your financial journey'**
+  String get startYourFinancialJourney;
+
+  /// Button text to add first income transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Add First Income'**
+  String get addFirstIncome;
+
+  /// Add card button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add Card'**
+  String get addCard;
+
+  /// Tip message about tracking expenses
+  ///
+  /// In en, this message translates to:
+  /// **'Track your expenses to reach your financial goals'**
+  String get tipTrackYourExpenses;
+
   /// No description provided for @positive.
   ///
   /// In en, this message translates to:
@@ -3314,7 +3344,7 @@ abstract class AppLocalizations {
   /// **'Please enter an amount'**
   String get pleaseEnterAmount;
 
-  /// Please enter valid amount error
+  /// Please enter valid amount validation
   ///
   /// In en, this message translates to:
   /// **'Please enter a valid amount'**
@@ -3379,6 +3409,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transaction'**
   String get transaction;
+
+  /// No description provided for @noTransactionsForThisDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions for this day'**
+  String get noTransactionsForThisDay;
+
+  /// Cash Wallet
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Wallet'**
+  String get cashWallet;
 
   /// Bank name
   ///
@@ -3548,73 +3590,73 @@ abstract class AppLocalizations {
   /// **'Sunday'**
   String get sunday;
 
-  /// January
+  /// January month name
   ///
   /// In en, this message translates to:
   /// **'January'**
   String get january;
 
-  /// February
+  /// February month name
   ///
   /// In en, this message translates to:
   /// **'February'**
   String get february;
 
-  /// March
+  /// March month name
   ///
   /// In en, this message translates to:
   /// **'March'**
   String get march;
 
-  /// April
+  /// April month name
   ///
   /// In en, this message translates to:
   /// **'April'**
   String get april;
 
-  /// May
+  /// May month name
   ///
   /// In en, this message translates to:
   /// **'May'**
   String get may;
 
-  /// June
+  /// June month name
   ///
   /// In en, this message translates to:
   /// **'June'**
   String get june;
 
-  /// July
+  /// July month name
   ///
   /// In en, this message translates to:
   /// **'July'**
   String get july;
 
-  /// August
+  /// August month name
   ///
   /// In en, this message translates to:
   /// **'August'**
   String get august;
 
-  /// September
+  /// September month name
   ///
   /// In en, this message translates to:
   /// **'September'**
   String get september;
 
-  /// October
+  /// October month name
   ///
   /// In en, this message translates to:
   /// **'October'**
   String get october;
 
-  /// November
+  /// November month name
   ///
   /// In en, this message translates to:
   /// **'November'**
   String get november;
 
-  /// December
+  /// December month name
   ///
   /// In en, this message translates to:
   /// **'December'**
@@ -3764,10 +3806,10 @@ abstract class AppLocalizations {
   /// **'Lowest to Highest'**
   String get lowestToHighest;
 
-  /// Alphabetical
+  /// Alphabetical sorting filter
   ///
   /// In en, this message translates to:
-  /// **'Alphabetical'**
+  /// **'A-Z'**
   String get alphabetical;
 
   /// More
@@ -3842,7 +3884,7 @@ abstract class AppLocalizations {
   /// **'Card name is required'**
   String get cardNameRequired;
 
-  /// Credit limit is required
+  /// Credit limit required validation
   ///
   /// In en, this message translates to:
   /// **'Credit limit is required'**
@@ -4442,11 +4484,17 @@ abstract class AppLocalizations {
   /// **'Total Limit'**
   String get totalLimit;
 
-  /// Cash Wallet
+  /// Insufficient balance for stock purchase
   ///
   /// In en, this message translates to:
-  /// **'Cash Wallet'**
-  String get cashWallet;
+  /// **'Insufficient balance for stock purchase. Available: {balance}'**
+  String stockPurchaseInsufficientBalance(String balance);
+
+  /// Insufficient stock quantity for sale
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient stock quantity. Available: {quantity} lots'**
+  String stockSaleInsufficientQuantity(String quantity);
 
   /// Search banks
   ///
@@ -4460,16 +4508,16 @@ abstract class AppLocalizations {
   /// **'No banks found'**
   String get noBanksFound;
 
-  /// Add Credit Card
+  /// Add credit card button text
   ///
   /// In en, this message translates to:
   /// **'Add Credit Card'**
   String get addCreditCard;
 
-  /// Card name example
+  /// Card name example hint
   ///
   /// In en, this message translates to:
-  /// **'E.g: VakıfBank Credit Card'**
+  /// **'E.g: My Work Card, Shopping Card'**
   String get cardNameExample;
 
   /// Current Debt (Optional)
@@ -4478,7 +4526,7 @@ abstract class AppLocalizations {
   /// **'Current Debt (Optional)'**
   String get currentDebtOptional;
 
-  /// Add Debit Card
+  /// Add debit card button text
   ///
   /// In en, this message translates to:
   /// **'Add Debit Card'**
@@ -4676,16 +4724,16 @@ abstract class AppLocalizations {
   /// **'Select Card Type'**
   String get selectCardType;
 
-  /// Add checking account card
+  /// Add debit card description text
   ///
   /// In en, this message translates to:
-  /// **'Add checking account card'**
+  /// **'Add a debit card to track your spending'**
   String get addDebitCardDescription;
 
-  /// Add your credit card information
+  /// Add credit card description text
   ///
   /// In en, this message translates to:
-  /// **'Add your credit card information'**
+  /// **'Add a credit card to manage your credit'**
   String get addCreditCardDescription;
 
   /// Search stocks button
@@ -5243,7 +5291,7 @@ abstract class AppLocalizations {
   /// Pieces unit
   ///
   /// In en, this message translates to:
-  /// **'pieces'**
+  /// **'lot'**
   String get pieces;
 
   /// Total transactions count
@@ -5390,7 +5438,7 @@ abstract class AppLocalizations {
   /// **'Change'**
   String get change;
 
-  /// Stable change indicator
+  /// Stocks with stable performance
   ///
   /// In en, this message translates to:
   /// **'Stable'**
@@ -5689,6 +5737,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Portfolio Overview'**
   String get portfolioOverview;
+
+  /// My portfolio title
+  ///
+  /// In en, this message translates to:
+  /// **'My Portfolio'**
+  String get myPortfolio;
+
+  /// Neutral filter option
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get neutral;
+
+  /// Profit filter option
+  ///
+  /// In en, this message translates to:
+  /// **'Profit'**
+  String get profit;
+
+  /// Loss filter option
+  ///
+  /// In en, this message translates to:
+  /// **'Loss'**
+  String get loss;
+
+  /// Filter by label
+  ///
+  /// In en, this message translates to:
+  /// **'Filter By'**
+  String get filterBy;
+
+  /// Stocks with positive performance
+  ///
+  /// In en, this message translates to:
+  /// **'Rising'**
+  String get gainers;
+
+  /// Stocks with negative performance
+  ///
+  /// In en, this message translates to:
+  /// **'Falling'**
+  String get losers;
+
+  /// Portfolio value sorting filter
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get portfolioRatio;
+
+  /// Insufficient balance warning title
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient Balance'**
+  String get insufficientBalance;
+
+  /// Insufficient balance warning message
+  ///
+  /// In en, this message translates to:
+  /// **'Add money to your account to buy stocks'**
+  String get addMoneyToAccount;
+
+  /// Add money button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add Money'**
+  String get addMoney;
 
   /// Total portfolio value
   ///
@@ -6254,6 +6368,72 @@ abstract class AppLocalizations {
   /// **'Limit Exceeded!'**
   String get limitExceeded;
 
+  /// Credit card limit insufficient error message
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card limit insufficient'**
+  String get creditCardLimitInsufficient;
+
+  /// Credit card limit insufficient with remaining amount
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card limit insufficient. Remaining limit: {amount}'**
+  String creditCardLimitInsufficientWithAmount(String amount);
+
+  /// Credit card limit insufficient dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card Limit Insufficient'**
+  String get creditCardLimitInsufficientTitle;
+
+  /// Credit card limit insufficient dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Your credit card limit is not sufficient for this transaction. Please enter a lower amount or pay off your card debt.'**
+  String get creditCardLimitInsufficientMessage;
+
+  /// Debit card balance insufficient dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Debit Card Balance Insufficient'**
+  String get debitCardBalanceInsufficientTitle;
+
+  /// Debit card balance insufficient dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Your debit card balance is not sufficient for this transaction. Please enter a lower amount or deposit money to your card.'**
+  String get debitCardBalanceInsufficientMessage;
+
+  /// Cash balance insufficient with current amount
+  ///
+  /// In en, this message translates to:
+  /// **'Cash balance insufficient. Current: {amount}'**
+  String cashBalanceInsufficientWithAmount(String amount);
+
+  /// Debit card balance insufficient with current amount
+  ///
+  /// In en, this message translates to:
+  /// **'Debit card balance insufficient. Current: {amount}'**
+  String debitCardBalanceInsufficientWithAmount(String amount);
+
+  /// Cash balance insufficient dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Balance Insufficient'**
+  String get cashBalanceInsufficientTitle;
+
+  /// Cash balance insufficient dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Your cash balance is not sufficient for this transaction. Please enter a lower amount.'**
+  String get cashBalanceInsufficientMessage;
+
+  /// Generic insufficient balance dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient Balance'**
+  String get insufficientBalanceTitle;
+
   /// Spent percentage suffix
   ///
   /// In en, this message translates to:
@@ -6337,6 +6517,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'or'**
   String get or;
+
+  /// Instruction for adding first note
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to add your first note'**
+  String get addFirstNoteInstruction;
+
+  /// Instruction for adding expense or income note
+  ///
+  /// In en, this message translates to:
+  /// **'Write your expense or income note. You can add it as a transaction later.'**
+  String get addExpenseIncomeNoteInstruction;
+
+  /// Stock transaction cannot be deleted message
+  ///
+  /// In en, this message translates to:
+  /// **'Stock transactions cannot be deleted'**
+  String get stockTransactionCannotDelete;
+
+  /// Stock transaction delete warning message
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of deleting, make a sell transaction'**
+  String get stockTransactionDeleteWarning;
+
+  /// Edit credit card form title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Credit Card'**
+  String get editCreditCard;
+
+  /// Select bank hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Select bank'**
+  String get selectBank;
+
+  /// Please select bank validation message
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a bank'**
+  String get pleaseSelectBank;
+
+  /// Card name optional label
+  ///
+  /// In en, this message translates to:
+  /// **'Card Name'**
+  String get cardNameOptional;
+
+  /// Statement day label
+  ///
+  /// In en, this message translates to:
+  /// **'Statement Day'**
+  String get statementDayLabel;
+
+  /// Select statement day hint
+  ///
+  /// In en, this message translates to:
+  /// **'Select statement day'**
+  String get selectStatementDay;
+
+  /// Credit card updated success message
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card updated successfully'**
+  String get creditCardUpdatedSuccessfully;
+
+  /// Update error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred during update: {error}'**
+  String updateErrorOccurred(String error);
+
+  /// Invalid month error
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid month'**
+  String get invalidMonth;
+
+  /// Add card description text
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first card to start managing your finances'**
+  String get addCardDescription;
+
+  /// Budget management page description
+  ///
+  /// In en, this message translates to:
+  /// **'Track your spending limits and manage your weekly, monthly, and yearly budgets by category'**
+  String get budgetManagementDescription;
+
+  /// Dark mode toggle text
+  ///
+  /// In en, this message translates to:
+  /// **'DARK'**
+  String get dark;
+
+  /// Light mode toggle text
+  ///
+  /// In en, this message translates to:
+  /// **'LIGHT'**
+  String get light;
+
+  /// On toggle text
+  ///
+  /// In en, this message translates to:
+  /// **'ON'**
+  String get on;
+
+  /// Off toggle text
+  ///
+  /// In en, this message translates to:
+  /// **'OFF'**
+  String get off;
+
+  /// Last 7 days period text
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get last7Days;
+
+  /// Last 30 days period text
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get last30Days;
+
+  /// Bank card tab name
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Card'**
+  String get bankCard;
+
+  /// Message when no stocks match the selected filter
+  ///
+  /// In en, this message translates to:
+  /// **'No stocks match the current filter'**
+  String get noStocksMatchFilter;
+
+  /// Suggestion to try different filter when no stocks match
+  ///
+  /// In en, this message translates to:
+  /// **'Try selecting a different filter'**
+  String get tryDifferentFilter;
 }
 
 class _AppLocalizationsDelegate

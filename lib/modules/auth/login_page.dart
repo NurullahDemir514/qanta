@@ -401,22 +401,6 @@ class _LoginPageState extends State<LoginPage> {
                                 : Text(l10n.login),
                           ),
                         ),
-                        SizedBox(height: 10.h),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              // TODO: Implement forgot password
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: theme.colorScheme.primary,
-                              textStyle: GoogleFonts.inter(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            child: Text(l10n.forgotPassword),
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -452,7 +436,7 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 24.h),
                 // Google Sign-In Button
                 SizedBox(
-                  width: double.infinity,
+                  width: MediaQuery.of(context).size.width * 0.75,
                   child: OutlinedButton.icon(
                     onPressed: _isLoading ? null : _signInWithGoogle,
                     icon: Image.asset(
@@ -523,3 +507,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

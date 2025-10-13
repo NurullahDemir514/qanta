@@ -412,11 +412,11 @@
   "@selectCurrencyDescription": {
     "description": "Select currency description"
   },
-  "debit": "DEBIT",
+  "debit": "Add Debit Card",
   "@debit": {
     "description": "Debit card type"
   },
-  "credit": "CREDIT",
+  "credit": "Add Credit Card",
   "@credit": {
     "description": "Credit card type"
   },
@@ -1829,6 +1829,26 @@
   "dailyAverage": "Daily Average",
   "moreCategories": "more categories",
   "netWorth": "Total Assets",
+  "welcomeToQanta": "Welcome to Qanta!",
+  "@welcomeToQanta": {
+    "description": "Welcome message for new users"
+  },
+  "startYourFinancialJourney": "Take the first step to start your financial journey",
+  "@startYourFinancialJourney": {
+    "description": "Encouraging message for new users to start their financial journey"
+  },
+  "addFirstIncome": "Add First Income",
+  "@addFirstIncome": {
+    "description": "Button text to add first income transaction"
+  },
+  "addCard": "Add Card",
+  "@addCard": {
+    "description": "Button text to add a card"
+  },
+  "tipTrackYourExpenses": "Track your expenses to reach your financial goals",
+  "@tipTrackYourExpenses": {
+    "description": "Tip message about tracking expenses"
+  },
   "positive": "Positive",
   "negative": "Negative",
   "totalAssets": "Total Assets",
@@ -2367,6 +2387,10 @@
     "description": "Cash account"
   },
   "transaction": "Transaction",
+  "noTransactionsForThisDay": "No transactions for this day",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "cashWallet": "Cash Wallet",
   "@transaction": {
     "description": "Transaction generic term"
   },
@@ -3261,6 +3285,24 @@
   "cashWallet": "Cash Wallet",
   "@cashWallet": {
     "description": "Cash Wallet"
+  },
+  "stockPurchaseInsufficientBalance": "Insufficient balance for stock purchase. Available: {balance}",
+  "@stockPurchaseInsufficientBalance": {
+    "description": "Insufficient balance for stock purchase",
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "stockSaleInsufficientQuantity": "Insufficient stock quantity. Available: {quantity} lots",
+  "@stockSaleInsufficientQuantity": {
+    "description": "Insufficient stock quantity for sale",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
   },
   "searchBanks": "Search banks...",
   "@searchBanks": {
@@ -4171,7 +4213,7 @@
   "@total": {
     "description": "Total amount label"
   },
-  "pieces": "pcs",
+  "pieces": "lot",
   "@pieces": {
     "description": "Pieces unit"
   },
@@ -4707,7 +4749,7 @@
   "@total": {
     "description": "Total label"
   },
-  "pieces": "pieces",
+  "pieces": "lot",
   "@pieces": {
     "description": "Pieces unit"
   },
@@ -4801,7 +4843,7 @@
   "@newBadge": {
     "description": "New badge"
   },
-  "pieces": "pieces",
+  "pieces": "lot",
   "@pieces": {
     "description": "Pieces unit"
   },
@@ -4897,6 +4939,58 @@
   "portfolioOverview": "Portfolio Overview",
   "@portfolioOverview": {
     "description": "Portfolio overview title"
+  },
+  "myPortfolio": "My Portfolio",
+  "@myPortfolio": {
+    "description": "My portfolio title"
+  },
+  "neutral": "Neutral",
+  "@neutral": {
+    "description": "Neutral filter option"
+  },
+  "profit": "Profit",
+  "@profit": {
+    "description": "Profit filter option"
+  },
+  "loss": "Loss",
+  "@loss": {
+    "description": "Loss filter option"
+  },
+  "filterBy": "Filter By",
+  "@filterBy": {
+    "description": "Filter by label"
+  },
+  "gainers": "Rising",
+  "@gainers": {
+    "description": "Stocks with positive performance"
+  },
+  "losers": "Falling",
+  "@losers": {
+    "description": "Stocks with negative performance"
+  },
+  "stable": "Stable",
+  "@stable": {
+    "description": "Stocks with stable performance"
+  },
+  "alphabetical": "A-Z",
+  "@alphabetical": {
+    "description": "Alphabetical sorting filter"
+  },
+  "portfolioRatio": "Weight",
+  "@portfolioRatio": {
+    "description": "Portfolio value sorting filter"
+  },
+  "insufficientBalance": "Insufficient Balance",
+  "@insufficientBalance": {
+    "description": "Insufficient balance warning title"
+  },
+  "addMoneyToAccount": "Add money to your account to buy stocks",
+  "@addMoneyToAccount": {
+    "description": "Insufficient balance warning message"
+  },
+  "addMoney": "Add Money",
+  "@addMoney": {
+    "description": "Add money button text"
   },
   "totalValue": "Total Value",
   "@totalValue": {
@@ -5432,6 +5526,65 @@
   "@limitExceeded": {
     "description": "Limit exceeded message"
   },
+  "creditCardLimitInsufficient": "Credit card limit insufficient",
+  "@creditCardLimitInsufficient": {
+    "description": "Credit card limit insufficient error message"
+  },
+  "creditCardLimitInsufficientWithAmount": "Credit card limit insufficient. Remaining limit: {amount}",
+  "@creditCardLimitInsufficientWithAmount": {
+    "description": "Credit card limit insufficient with remaining amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "creditCardLimitInsufficientTitle": "Credit Card Limit Insufficient",
+  "@creditCardLimitInsufficientTitle": {
+    "description": "Credit card limit insufficient dialog title"
+  },
+  "creditCardLimitInsufficientMessage": "Your credit card limit is not sufficient for this transaction. Please enter a lower amount or pay off your card debt.",
+  "@creditCardLimitInsufficientMessage": {
+    "description": "Credit card limit insufficient dialog message"
+  },
+  "debitCardBalanceInsufficientTitle": "Debit Card Balance Insufficient",
+  "@debitCardBalanceInsufficientTitle": {
+    "description": "Debit card balance insufficient dialog title"
+  },
+  "debitCardBalanceInsufficientMessage": "Your debit card balance is not sufficient for this transaction. Please enter a lower amount or deposit money to your card.",
+  "@debitCardBalanceInsufficientMessage": {
+    "description": "Debit card balance insufficient dialog message"
+  },
+  "cashBalanceInsufficientWithAmount": "Cash balance insufficient. Current: {amount}",
+  "@cashBalanceInsufficientWithAmount": {
+    "description": "Cash balance insufficient with current amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debitCardBalanceInsufficientWithAmount": "Debit card balance insufficient. Current: {amount}",
+  "@debitCardBalanceInsufficientWithAmount": {
+    "description": "Debit card balance insufficient with current amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashBalanceInsufficientTitle": "Cash Balance Insufficient",
+  "@cashBalanceInsufficientTitle": {
+    "description": "Cash balance insufficient dialog title"
+  },
+  "cashBalanceInsufficientMessage": "Your cash balance is not sufficient for this transaction. Please enter a lower amount.",
+  "@cashBalanceInsufficientMessage": {
+    "description": "Cash balance insufficient dialog message"
+  },
+  "insufficientBalanceTitle": "Insufficient Balance",
+  "@insufficientBalanceTitle": {
+    "description": "Generic insufficient balance dialog title"
+  },
   "remaining": "Remaining:",
   "@remaining": {
     "description": "Remaining amount label"
@@ -5499,5 +5652,194 @@
   "or": "or",
   "@or": {
     "description": "Or separator text"
+  },
+  "addFirstNoteInstruction": "Tap the + button to add your first note",
+  "@addFirstNoteInstruction": {
+    "description": "Instruction for adding first note"
+  },
+  "addExpenseIncomeNoteInstruction": "Write your expense or income note. You can add it as a transaction later.",
+  "@addExpenseIncomeNoteInstruction": {
+    "description": "Instruction for adding expense or income note"
+  },
+  "stockTransactionCannotDelete": "Stock transactions cannot be deleted",
+  "@stockTransactionCannotDelete": {
+    "description": "Stock transaction cannot be deleted message"
+  },
+  "stockTransactionDeleteWarning": "Instead of deleting, make a sell transaction",
+  "@stockTransactionDeleteWarning": {
+    "description": "Stock transaction delete warning message"
+  },
+  "editCreditCard": "Edit Credit Card",
+  "@editCreditCard": {
+    "description": "Edit credit card form title"
+  },
+  "selectBank": "Select bank",
+  "@selectBank": {
+    "description": "Select bank hint text"
+  },
+  "pleaseSelectBank": "Please select a bank",
+  "@pleaseSelectBank": {
+    "description": "Please select bank validation message"
+  },
+  "cardNameOptional": "Card Name",
+  "@cardNameOptional": {
+    "description": "Card name optional label"
+  },
+  "cardNameExample": "E.g: My Work Card, Shopping Card",
+  "@cardNameExample": {
+    "description": "Card name example hint"
+  },
+  "statementDayLabel": "Statement Day",
+  "@statementDayLabel": {
+    "description": "Statement day label"
+  },
+  "selectStatementDay": "Select statement day",
+  "@selectStatementDay": {
+    "description": "Select statement day hint"
+  },
+  "creditLimitRequired": "Credit limit is required",
+  "@creditLimitRequired": {
+    "description": "Credit limit required validation"
+  },
+  "pleaseEnterValidAmount": "Please enter a valid amount",
+  "@pleaseEnterValidAmount": {
+    "description": "Please enter valid amount validation"
+  },
+  "creditCardUpdatedSuccessfully": "Credit card updated successfully",
+  "@creditCardUpdatedSuccessfully": {
+    "description": "Credit card updated success message"
+  },
+  "updateErrorOccurred": "An error occurred during update: {error}",
+  "@updateErrorOccurred": {
+    "description": "Update error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Update button text"
+  },
+  "january": "January",
+  "@january": {
+    "description": "January month name"
+  },
+  "february": "February",
+  "@february": {
+    "description": "February month name"
+  },
+  "march": "March",
+  "@march": {
+    "description": "March month name"
+  },
+  "april": "April",
+  "@april": {
+    "description": "April month name"
+  },
+  "may": "May",
+  "@may": {
+    "description": "May month name"
+  },
+  "june": "June",
+  "@june": {
+    "description": "June month name"
+  },
+  "july": "July",
+  "@july": {
+    "description": "July month name"
+  },
+  "august": "August",
+  "@august": {
+    "description": "August month name"
+  },
+  "september": "September",
+  "@september": {
+    "description": "September month name"
+  },
+  "october": "October",
+  "@october": {
+    "description": "October month name"
+  },
+  "november": "November",
+  "@november": {
+    "description": "November month name"
+  },
+  "december": "December",
+  "@december": {
+    "description": "December month name"
+  },
+  "invalidMonth": "Invalid month",
+  "@invalidMonth": {
+    "description": "Invalid month error"
+  },
+  "addCard": "Add Card",
+  "@addCard": {
+    "description": "Add card button text"
+  },
+  "addCardDescription": "Add your first card to start managing your finances",
+  "@addCardDescription": {
+    "description": "Add card description text"
+  },
+  "addDebitCard": "Add Debit Card",
+  "@addDebitCard": {
+    "description": "Add debit card button text"
+  },
+  "addCreditCard": "Add Credit Card",
+  "@addCreditCard": {
+    "description": "Add credit card button text"
+  },
+  "addDebitCardDescription": "Add a debit card to track your spending",
+  "@addDebitCardDescription": {
+    "description": "Add debit card description text"
+  },
+  "addCreditCardDescription": "Add a credit card to manage your credit",
+  "@addCreditCardDescription": {
+    "description": "Add credit card description text"
+  },
+  "budgetManagementDescription": "Track your spending limits and manage your weekly, monthly, and yearly budgets by category",
+  "@budgetManagementDescription": {
+    "description": "Budget management page description"
+  },
+  "dark": "DARK",
+  "@dark": {
+    "description": "Dark mode toggle text"
+  },
+  "light": "LIGHT",
+  "@light": {
+    "description": "Light mode toggle text"
+  },
+  "on": "ON",
+  "@on": {
+    "description": "On toggle text"
+  },
+  "off": "OFF",
+  "@off": {
+    "description": "Off toggle text"
+  },
+  "last7Days": "Last 7 days",
+  "@last7Days": {
+    "description": "Last 7 days period text"
+  },
+  "last30Days": "Last 30 days",
+  "@last30Days": {
+    "description": "Last 30 days period text"
+  },
+  "bankCard": "Bank Card",
+  "@bankCard": {
+    "description": "Bank card tab name"
+  },
+  "creditCard": "Credit Card",
+  "@creditCard": {
+    "description": "Credit card tab name"
+  },
+  "noStocksMatchFilter": "No stocks match the current filter",
+  "@noStocksMatchFilter": {
+    "description": "Message when no stocks match the selected filter"
+  },
+  "tryDifferentFilter": "Try selecting a different filter",
+  "@tryDifferentFilter": {
+    "description": "Suggestion to try different filter when no stocks match"
   }
 } 

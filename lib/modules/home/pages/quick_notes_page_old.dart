@@ -1598,7 +1598,7 @@ class _QuickNotesPageState extends State<QuickNotesPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Harcama veya gelir notunuzu yazın. Daha sonra işlem olarak ekleyebilirsiniz.',
+            AppLocalizations.of(context)!.addExpenseIncomeNoteInstruction,
             style: GoogleFonts.inter(
               fontSize: 14,
               color: const Color(0xFF8E8E93),

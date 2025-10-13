@@ -85,7 +85,7 @@ class TransactionListItem extends StatelessWidget {
     if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
       installmentText = '$currentInstallment/$effectiveInstallmentCount Taksit';
     } else if (effectiveInstallmentCount == 1) {
-      installmentText = AppLocalizations.of(context)?.cash ?? 'Cash';
+      installmentText = AppLocalizations.of(context)?.cash ?? 'NAKİT';
     }
     final subtitle = installmentText.isNotEmpty ? installmentText : categoryName;
 
