@@ -648,6 +648,141 @@ class YandexFinanceApiService implements IStockApiService {
     return upperSymbol;
   }
 
+  /// Son 7 günlük değişim hesapla
+  Future<Map<String, double>> getStockChange7Days(List<String> symbols) async {
+    try {
+      final Map<String, double> changes = {};
+      
+      for (final symbol in symbols) {
+        try {
+          final yandexSymbol = _convertToYandexSymbol(symbol);
+          final response = await http.get(
+            Uri.parse(
+              'https://query1.finance.yahoo.com/v8/finance/chart/$yandexSymbol?interval=1d&range=7d',
+            ),
+            headers: {
+              'User-Agent':
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
+          );
+
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            final change = _calculatePeriodChange(data, 7);
+            changes[symbol] = change;
+          } else {
+            changes[symbol] = 0.0;
+          }
+        } catch (e) {
+          changes[symbol] = 0.0;
+        }
+      }
+      
+      return changes;
+    } catch (e) {
+      throw StockApiException(
+        'Failed to get 7-day changes: $e',
+        'CHANGE_7D_ERROR',
+      );
+    }
+  }
+
+  /// Son 30 günlük değişim hesapla
+  Future<Map<String, double>> getStockChange30Days(List<String> symbols) async {
+    try {
+      final Map<String, double> changes = {};
+      
+      for (final symbol in symbols) {
+        try {
+          final yandexSymbol = _convertToYandexSymbol(symbol);
+          final response = await http.get(
+            Uri.parse(
+              'https://query1.finance.yahoo.com/v8/finance/chart/$yandexSymbol?interval=1d&range=30d',
+            ),
+            headers: {
+              'User-Agent':
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
+          );
+
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            final change = _calculatePeriodChange(data, 30);
+            changes[symbol] = change;
+          } else {
+            changes[symbol] = 0.0;
+          }
+        } catch (e) {
+          changes[symbol] = 0.0;
+        }
+      }
+      
+      return changes;
+    } catch (e) {
+      throw StockApiException(
+        'Failed to get 30-day changes: $e',
+        'CHANGE_30D_ERROR',
+      );
+    }
+  }
+
+  /// Belirli bir periyot için değişim hesapla
+  double _calculatePeriodChange(Map<String, dynamic> data, int days) {
+    try {
+      final result = data['chart']?['result']?[0];
+      if (result == null) return 0.0;
+
+      final meta = result['meta'];
+      if (meta == null) return 0.0;
+
+      final currentPrice = meta['regularMarketPrice']?.toDouble() ?? 0.0;
+      if (currentPrice == 0.0) return 0.0;
+
+      // Timestamps ve prices al
+      final timestamps = result['timestamp'] as List<dynamic>? ?? [];
+      final indicators = result['indicators']?['quote']?[0];
+      final closes = indicators?['close'] as List<dynamic>? ?? [];
+
+      if (timestamps.isEmpty || closes.isEmpty) return 0.0;
+
+      // Son N günün verilerini al
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final daysInSeconds = days * 24 * 60 * 60;
+      final cutoffTime = now - daysInSeconds;
+
+      double? startPrice;
+      double? endPrice = currentPrice;
+
+      // Timestamps'leri kontrol et ve uygun başlangıç fiyatını bul
+      for (int i = 0; i < timestamps.length; i++) {
+        final timestamp = timestamps[i] as int? ?? 0;
+        final close = closes[i] as double?;
+        
+        if (close != null && close > 0) {
+          if (timestamp >= cutoffTime) {
+            if (startPrice == null) {
+              startPrice = close;
+            }
+          }
+        }
+      }
+
+      // Eğer başlangıç fiyatı bulunamazsa, mevcut fiyatı kullan
+      if (startPrice == null || startPrice == 0.0) {
+        startPrice = endPrice;
+      }
+
+      // Değişim yüzdesini hesapla
+      if (startPrice != null && startPrice > 0) {
+        return ((endPrice! - startPrice) / startPrice) * 100;
+      }
+
+      return 0.0;
+    } catch (e) {
+      return 0.0;
+    }
+  }
+
   List<double> _parseHistoricalData(Map<String, dynamic> data) {
     try {
       final chart = data['chart'];

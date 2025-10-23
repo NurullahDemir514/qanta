@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,7 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/services/premium_service.dart';
 import '../../../core/utils/screen_compatibility.dart';
+import '../../../shared/utils/currency_utils.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/models/transaction_model_v2.dart';
 import '../bottom_sheets/balance_detail_bottom_sheet.dart';
@@ -14,6 +17,9 @@ import '../../advertisement/config/advertisement_config.dart' as config;
 import '../../advertisement/models/advertisement_models.dart';
 import '../../cards/widgets/add_debit_card_form.dart';
 import '../../cards/widgets/add_credit_card_form.dart';
+import '../../stocks/providers/stock_provider.dart';
+import '../../../shared/models/account_model.dart';
+import '../../premium/premium_offer_screen.dart';
 
 class BalanceOverviewCard extends StatefulWidget {
   const BalanceOverviewCard({super.key});
@@ -30,24 +36,190 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
   void initState() {
     super.initState();
     _bannerService = GoogleAdsRealBannerService(
-      adUnitId: config.AdvertisementConfig.testBanner1.bannerAdUnitId,
+      adUnitId: config.AdvertisementConfig.production.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
-      isTestMode: true,
+      isTestMode: false,
     );
     
     // Debug bilgisi
     debugPrint('🔄 TOPLAM VARLIK Banner reklam yükleniyor...');
-    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.testBanner1.bannerAdUnitId}');
-    debugPrint('🧪 Test Mode: true');
+    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.production.bannerAdUnitId}');
+    debugPrint('🧪 Test Mode: false');
     debugPrint('📍 Konum: Toplam Varlık kartı altı');
     
     _bannerService.loadAd();
+    
+    // Hisse değişimlerini yükle
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadStockChanges();
+    });
+  }
+
+  /// Hisse değişimlerini yükle
+  Future<void> _loadStockChanges() async {
+    try {
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      await Future.wait([
+        stockProvider.loadStockChanges7Days(),
+        stockProvider.loadStockChanges30Days(),
+      ]);
+    } catch (e) {
+      debugPrint('❌ Error loading stock changes: $e');
+    }
   }
 
   @override
   void dispose() {
     _bannerService.dispose();
     super.dispose();
+  }
+
+  // Responsive font size calculation based on number of digits
+  double _calculateResponsiveFontSize(BuildContext context, double amount, {bool isDecimal = false}) {
+    final screenSize = ScreenCompatibility.getScreenSizeCategory(context);
+    final isSmallScreen = ScreenCompatibility.isSmallScreen(context);
+    
+    // Get the number of digits in the main part (before decimal)
+    final formatted = amount.toStringAsFixed(2);
+    final mainPart = formatted.split('.')[0];
+    final digitCount = mainPart.length;
+    
+    // Base font sizes for different screen sizes (reduced by 15%)
+    final baseAmountSize = isSmallScreen ? 24.0 : 
+                          screenSize == ScreenSizeCategory.medium ? 27.0 :
+                          screenSize == ScreenSizeCategory.large ? 30.0 : 34.0;
+    
+    final baseDecimalSize = isSmallScreen ? 14.0 :
+                           screenSize == ScreenSizeCategory.medium ? 15.0 :
+                           screenSize == ScreenSizeCategory.large ? 17.0 : 19.0;
+    
+    // Minimum font sizes to ensure readability (reduced by 15%)
+    final minAmountSize = isSmallScreen ? 14.0 : 16.0;
+    final minDecimalSize = isSmallScreen ? 9.0 : 11.0;
+    
+    // Calculate responsive size based on digit count
+    double responsiveSize;
+    if (isDecimal) {
+      // Decimal part scaling - 5 basamaktan sonra her basamakta %5 azalma
+      if (digitCount <= 5) {
+        responsiveSize = baseDecimalSize;
+      } else {
+        // 5 basamaktan sonra her basamak için %5 azalma
+        final extraDigits = digitCount - 5;
+        final reductionFactor = math.pow(0.95, extraDigits);
+        responsiveSize = baseDecimalSize * reductionFactor;
+      }
+      
+      // Apply minimum size constraint
+      responsiveSize = math.max(responsiveSize, minDecimalSize);
+    } else {
+      // Main amount scaling - 5 basamaktan sonra her basamakta %5 azalma
+      if (digitCount <= 5) {
+        responsiveSize = baseAmountSize;
+      } else {
+        // 5 basamaktan sonra her basamak için %5 azalma
+        final extraDigits = digitCount - 5;
+        final reductionFactor = math.pow(0.95, extraDigits);
+        responsiveSize = baseAmountSize * reductionFactor;
+      }
+      
+      // Apply minimum size constraint
+      responsiveSize = math.max(responsiveSize, minAmountSize);
+    }
+    
+    return ScreenCompatibility.responsiveFontSize(context, responsiveSize);
+  }
+
+  /// Hisse değişimlerini hesapla (sadece bugün)
+  Map<String, double> _calculateStockChanges(UnifiedProviderV2 provider, StockProvider stockProvider) {
+    final Map<String, double> changes = {
+      'today': 0.0,
+    };
+
+    if (!_includeInvestments || provider.stockPositions.isEmpty) {
+      return changes;
+    }
+
+    double totalTodayChange = 0.0;
+    double totalStockValue = 0.0;
+
+    for (final position in provider.stockPositions) {
+      final stockValue = position.currentValue;
+      totalStockValue += stockValue;
+
+      // Bugünkü değişim - sadece yüzde değeri
+      final todayChangePercent = stockProvider.getStockChangeToday(position.stockSymbol);
+      totalTodayChange += todayChangePercent;
+    }
+
+    if (totalStockValue > 0) {
+      // Ağırlıklı ortalama değişim yüzdesi
+      changes['today'] = (totalTodayChange / totalStockValue) * 100;
+    }
+
+    return changes;
+  }
+
+  /// Bu ayki günlük ortalama harcama hesapla (ilk işlemi referans al)
+  double _calculateMonthlyDailyAverageSpending(UnifiedProviderV2 provider) {
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+    
+    // Bu ayki giderleri hesapla
+    final monthlyExpenses = provider.transactions
+        .where((t) =>
+            t.type == TransactionType.expense &&
+            t.transactionDate.isAfter(startOfMonth) &&
+            t.transactionDate.isBefore(endOfMonth))
+        .toList();
+    
+    if (monthlyExpenses.isEmpty) return 0.0;
+    
+    final totalExpenses = monthlyExpenses.fold(0.0, (sum, t) => sum + t.amount);
+    
+    // İlk işlemi referans al
+    final firstTransaction = monthlyExpenses.reduce((a, b) => 
+        a.transactionDate.isBefore(b.transactionDate) ? a : b);
+    final firstTransactionDate = firstTransaction.transactionDate;
+    
+    // İlk işlemden bugüne kadar geçen gün sayısı
+    final daysSinceFirstTransaction = now.difference(firstTransactionDate).inDays + 1;
+    
+    // Günlük ortalama harcama (ilk işlemden itibaren)
+    return daysSinceFirstTransaction > 0 ? totalExpenses / daysSinceFirstTransaction : 0.0;
+  }
+
+  /// Genel günlük ortalama harcama hesapla (ilk işlemi referans al)
+  double _calculateGeneralDailyAverageSpending(UnifiedProviderV2 provider) {
+    final now = DateTime.now();
+    
+    // Tüm giderleri al
+    final allExpenses = provider.transactions
+        .where((t) => t.type == TransactionType.expense)
+        .toList();
+    
+    if (allExpenses.isEmpty) return 0.0;
+    
+    // İlk işlemi referans al
+    final firstTransaction = allExpenses.reduce((a, b) => 
+        a.transactionDate.isBefore(b.transactionDate) ? a : b);
+    final firstTransactionDate = firstTransaction.transactionDate;
+    
+    // İlk işlemden bugüne kadar geçen gün sayısı
+    final daysSinceFirstTransaction = now.difference(firstTransactionDate).inDays + 1;
+    
+    // Son 30 gün veya ilk işlemden itibaren, hangisi daha kısaysa
+    final referenceDays = daysSinceFirstTransaction < 30 ? daysSinceFirstTransaction : 30;
+    
+    // Son 30 günlük giderleri hesapla (veya ilk işlemden itibaren)
+    final thirtyDaysAgo = now.subtract(Duration(days: referenceDays - 1));
+    final last30DaysExpenses = allExpenses
+        .where((t) => t.transactionDate.isAfter(thirtyDaysAgo) && t.transactionDate.isBefore(now))
+        .fold(0.0, (sum, t) => sum + t.amount);
+    
+    // Genel günlük ortalama harcama
+    return referenceDays > 0 ? last30DaysExpenses / referenceDays : 0.0;
   }
 
   @override
@@ -72,35 +244,25 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
         screenSize == ScreenSizeCategory.large ? 20.0 : 22.0);
     
     final headerFontSize = ScreenCompatibility.responsiveFontSize(context,
-        screenSize == ScreenSizeCategory.small ? 12.0 :
-        screenSize == ScreenSizeCategory.medium ? 13.0 :
-        screenSize == ScreenSizeCategory.large ? 14.0 : 15.0);
-    
-    final amountFontSize = ScreenCompatibility.responsiveFontSize(context,
-        screenSize == ScreenSizeCategory.small ? 28.0 :
-        screenSize == ScreenSizeCategory.medium ? 32.0 :
-        screenSize == ScreenSizeCategory.large ? 36.0 : 40.0);
-    
-    final decimalFontSize = ScreenCompatibility.responsiveFontSize(context,
-        screenSize == ScreenSizeCategory.small ? 16.0 :
-        screenSize == ScreenSizeCategory.medium ? 18.0 :
-        screenSize == ScreenSizeCategory.large ? 20.0 : 22.0);
-    
-    final profitFontSize = ScreenCompatibility.responsiveFontSize(context,
         screenSize == ScreenSizeCategory.small ? 11.0 :
         screenSize == ScreenSizeCategory.medium ? 12.0 :
         screenSize == ScreenSizeCategory.large ? 13.0 : 14.0);
     
+    final profitFontSize = ScreenCompatibility.responsiveFontSize(context,
+        screenSize == ScreenSizeCategory.small ? 10.0 :
+        screenSize == ScreenSizeCategory.medium ? 11.0 :
+        screenSize == ScreenSizeCategory.large ? 12.0 : 13.0);
+    
     final iconSize = ScreenCompatibility.responsiveFontSize(context,
-        screenSize == ScreenSizeCategory.small ? 16.0 :
-        screenSize == ScreenSizeCategory.medium ? 17.0 :
-        screenSize == ScreenSizeCategory.large ? 18.0 : 19.0);
+        screenSize == ScreenSizeCategory.small ? 14.0 :
+        screenSize == ScreenSizeCategory.medium ? 15.0 :
+        screenSize == ScreenSizeCategory.large ? 16.0 : 17.0);
     
     final spacingSmall = ScreenCompatibility.responsiveHeight(context, 8.0);
     final spacingMedium = ScreenCompatibility.responsiveHeight(context, 16.0);
 
-    return Consumer2<ThemeProvider, UnifiedProviderV2>(
-      builder: (context, themeProvider, providerV2, child) {
+    return Consumer3<ThemeProvider, UnifiedProviderV2, StockProvider>(
+      builder: (context, themeProvider, providerV2, stockProvider, child) {
         final monthlySummary = providerV2.monthlySummary;
         final thisMonthIncome = providerV2.thisMonthIncome;
         final netAmount = monthlySummary['netAmount'] ?? 0.0;
@@ -115,6 +277,14 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
             ? (stockProfitLoss / totalStockCost) * 100
             : 0.0;
 
+        // Hisse değişimlerini hesapla
+        final stockChanges = _calculateStockChanges(providerV2, stockProvider);
+        final todayStockChange = stockChanges['today'] ?? 0.0;
+
+        // Günlük ortalama harcama hesapla
+        final monthlyDailyAverage = _calculateMonthlyDailyAverageSpending(providerV2);
+        final generalDailyAverage = _calculateGeneralDailyAverageSpending(providerV2);
+
         // Net worth hesaplaması (yatırımlar dahil/hariç)
         final baseBalance =
             providerV2.totalBalance -
@@ -125,6 +295,109 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
 
         return Column(
           children: [
+            // Premium Badge Section (Free kullanıcılar için)
+            Consumer<PremiumService>(
+              builder: (context, premiumService, child) {
+                if (premiumService.isPremium) return const SizedBox.shrink();
+                
+                return Container(
+                  margin: EdgeInsets.only(
+                    bottom: ScreenCompatibility.responsiveHeight(context, 12.0),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ScreenCompatibility.responsiveWidth(context, 16.0),
+                    vertical: ScreenCompatibility.responsiveHeight(context, 12.0),
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFFFFD700),
+                        Color(0xFFFFA500),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFFA500).withOpacity(0.25),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.workspace_premium_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.upgradeToPremiumBanner,
+                              style: GoogleFonts.inter(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                letterSpacing: 0.1,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              l10n.premiumBannerSubtitle,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                letterSpacing: 0,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PremiumOfferScreen(),
+                              fullscreenDialog: true,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            l10n.upgradeNow,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFFFFA500),
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            
             // Ana kart
             GestureDetector(
               onTap: () => BalanceDetailBottomSheet.show(context),
@@ -159,35 +432,6 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                           stops: const [0.0, 0.5, 1.0],
                         ),
                   borderRadius: BorderRadius.circular(borderRadius),
-                  boxShadow: [
-                    // Ana gölge
-                    BoxShadow(
-                      color: isDark
-                          ? Colors.black.withValues(alpha: 0.4)
-                          : const Color(0xFF007AFF).withValues(alpha: 0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                      spreadRadius: 0,
-                    ),
-                    // İç gölge efekti (üstte)
-                    BoxShadow(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.02)
-                          : Colors.white.withValues(alpha: 0.9),
-                      blurRadius: 8,
-                      offset: const Offset(0, -2),
-                      spreadRadius: -2,
-                    ),
-                    // Dış parlama
-                    BoxShadow(
-                      color: isDark
-                          ? Colors.black.withValues(alpha: 0.2)
-                          : const Color(0xFF007AFF).withValues(alpha: 0.04),
-                      blurRadius: 40,
-                      offset: const Offset(0, 12),
-                      spreadRadius: 4,
-                    ),
-                  ],
                   border: Border.all(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.05)
@@ -200,7 +444,7 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                     left: cardPadding.left,
                     right: cardPadding.right,
                     top: cardPadding.top,
-                    bottom: cardPadding.bottom - ScreenCompatibility.responsiveHeight(context, 8.0),
+                    bottom: cardPadding.bottom + ScreenCompatibility.responsiveHeight(context, 8.0),
                   ),
                   child: SingleChildScrollView(
                     child: Column(
@@ -279,7 +523,7 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                                     child: AnimatedDefaultTextStyle(
                                       duration: const Duration(milliseconds: 300),
                                       style: GoogleFonts.inter(
-                                        fontSize: 10,
+                                        fontSize: 9,
                                         fontWeight: FontWeight.w600,
                                         color: !_includeInvestments
                                             ? Colors.white
@@ -312,12 +556,12 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
                                       color: _includeInvestments
-                                          ? const Color(0xFF4CAF50) // Yeşil
+                                          ? const Color(0xFF2E7D32) // Rich Green
                                           : Colors.transparent,
                                       boxShadow: _includeInvestments
                                           ? [
                                               BoxShadow(
-                                                color: const Color(0xFF4CAF50).withOpacity(0.3),
+                                                color: const Color(0xFF2E7D32).withOpacity(0.3),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -327,7 +571,7 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                                     child: AnimatedDefaultTextStyle(
                                       duration: const Duration(milliseconds: 300),
                                       style: GoogleFonts.inter(
-                                        fontSize: 10,
+                                        fontSize: 9,
                                         fontWeight: FontWeight.w600,
                                         color: _includeInvestments
                                             ? Colors.white
@@ -375,6 +619,11 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                             mainPart = parts[0];
                             decimalPart = parts.length > 1 ? parts[1] : '00';
                           }
+                          
+                          // Calculate responsive font sizes based on the amount
+                          final amountFontSize = _calculateResponsiveFontSize(context, netWorth);
+                          final decimalFontSize = _calculateResponsiveFontSize(context, netWorth, isDecimal: true);
+                          
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -383,110 +632,162 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Expanded(
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                                      textBaseline: TextBaseline.alphabetic,
-                                      children: [
-                                        Flexible(
-                                          flex: 3,
-                                          child: Text(
-                                            '${currency.symbol}$mainPart',
+                                    child: Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: '${currency.symbol}$mainPart',
                                             style: GoogleFonts.inter(
                                               fontSize: amountFontSize,
-                                              fontWeight: FontWeight.w800, // Daha bold
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                              letterSpacing: -1.0, // Daha sıkı letter spacing
-                                              height: 1.0, // Line height optimize et
+                                              fontWeight: FontWeight.w800,
+                                              color: isDark ? Colors.white : Colors.black,
+                                              letterSpacing: -1.0,
+                                              height: 1.0,
                                             ),
                                           ),
-                                        ),
-                                        Flexible(
-                                          flex: 1,
-                                          child: Text(
-                                            currency.locale.startsWith('tr')
-                                                ? ',$decimalPart'
-                                                : '.$decimalPart',
+                                          TextSpan(
+                                            text: currency.locale.startsWith('tr') ? ',$decimalPart' : '.$decimalPart',
                                             style: GoogleFonts.inter(
                                               fontSize: decimalFontSize,
-                                              fontWeight: FontWeight.w600, // Daha bold
-                                              color: isDark
-                                                  ? Colors.white.withValues(alpha: 0.9)
-                                                  : Colors.black.withValues(alpha: 0.8),
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.8),
                                               letterSpacing: -0.3,
                                               height: 1.0,
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                   // Haftalık ve aylık değişim badge'leri - Sağda biraz aşağıda
-                                   Padding(
-                                     padding: EdgeInsets.only(
-                                       top: 6.0,
-                                       left: ScreenCompatibility.responsiveWidth(context, 8.0),
-                                     ),
-                                     child: _buildWeeklyChange(providerV2, themeProvider, isDark, l10n),
-                                   ),
-                                ],
-                              ),
-
-                              // Hisse kar/zarar bilgisi (sadece hisse varsa ve yatırımlar dahilse göster)
-                              if (totalStockValue > 0 && _includeInvestments)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: isSmallScreen ? 6 : 8,
-                                    vertical: isSmallScreen ? 2 : 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: stockProfitLoss >= 0
-                                        ? isDark
-                                            ? const Color(0xFF4CAF50).withValues(alpha: 0.15) // Daha görünür dark modda
-                                            : const Color(0xFF4CAF50).withValues(alpha: 0.1)
-                                        : isDark
-                                            ? const Color(0xFFFF3B30).withValues(alpha: 0.15) // Daha görünür dark modda
-                                            : const Color(0xFFFF3B30).withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: stockProfitLoss >= 0
-                                          ? isDark
-                                              ? const Color(0xFF4CAF50).withValues(alpha: 0.4) // Daha görünür dark modda
-                                              : const Color(0xFF4CAF50).withValues(alpha: 0.3)
-                                          : isDark
-                                              ? const Color(0xFFFF3B30).withValues(alpha: 0.4) // Daha görünür dark modda
-                                              : const Color(0xFFFF3B30).withValues(alpha: 0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Flexible(
-                                    child: Text(
-                                      stockProfitLoss >= 0
-                                          ? '+${themeProvider.formatAmount(stockProfitLoss)} (${stockProfitLossPercent.abs().toStringAsFixed(1)}%)'
-                                          : '${themeProvider.formatAmount(stockProfitLoss)} (${stockProfitLossPercent.abs().toStringAsFixed(1)}%)',
-                                      style: GoogleFonts.inter(
-                                        fontSize: profitFontSize,
-                                        fontWeight: FontWeight.w600, // Daha bold
-                                        color: stockProfitLoss >= 0
-                                            ? isDark 
-                                                ? const Color(0xFF4CAF50) // Daha parlak yeşil dark modda
-                                                : const Color(0xFF2E7D32) // Daha koyu yeşil light modda
-                                            : isDark
-                                                ? const Color(0xFFFF6B6B) // Daha parlak kırmızı dark modda
-                                                : const Color(0xFFD32F2F), // Daha koyu kırmızı light modda
-                                        letterSpacing: 0.2,
+                                          if (totalStockValue > 0 && _includeInvestments)
+                                            TextSpan(
+                                              text: ' ${_formatCompactNumber(stockProfitLoss, currency)} (${stockProfitLossPercent.abs().toStringAsFixed(1)}%)',
+                                              style: GoogleFonts.inter(
+                                                fontSize: (decimalFontSize - 2).clamp(9, 14).toDouble(),
+                                                fontWeight: FontWeight.w600,
+                                                color: stockProfitLoss >= 0
+                                                    ? const Color(0xFF4CAF50) // Material Green
+                                                    : (isDark ? const Color(0xFFFF6B6B) : const Color(0xFFD32F2F)),
+                                                letterSpacing: 0.1,
+                                              ),
+                                            ),
+                                        ],
                                       ),
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                ),
+                                  // Inline P/L moved next to amount (left cluster)
+                                  // Günlük ortalama rozetleri kaldırıldı
+                                ],
+                              ),
+
+                              // Kredi kartı borcu - sadece borç varsa göster
+                              Builder(
+                                builder: (context) {
+                                  final creditAccounts = providerV2.accounts
+                                      .where((a) => a.type == AccountType.credit)
+                                      .toList();
+                                  
+                                  // Kredi kartı yoksa gösterme
+                                  if (creditAccounts.isEmpty) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  
+                                  final totalUsed = creditAccounts
+                                      .fold<double>(0.0, (sum, a) => sum + a.usedCredit);
+                                  final totalLimit = creditAccounts
+                                      .fold<double>(0.0, (sum, a) => sum + (a.creditLimit ?? 0.0));
+                                  
+                                  // Borç yoksa gösterme
+                                  if (totalUsed <= 0) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  
+                                  // Kullanım yüzdesi hesapla
+                                  final usagePercent = totalLimit > 0 
+                                      ? (totalUsed / totalLimit * 100).clamp(0, 100)
+                                      : 0.0;
+                                  
+                                  // Renk - kullanım yüzdesine göre
+                                  Color debtColor;
+                                  if (usagePercent >= 80) {
+                                    debtColor = const Color(0xFFD32F2F); // Kırmızı - kritik
+                                  } else if (usagePercent >= 50) {
+                                    debtColor = const Color(0xFFFF9500); // Turuncu - uyarı
+                                  } else {
+                                    debtColor = const Color(0xFFFF4C4C); // Açık kırmızı - normal
+                                  }
+                                  
+                                  return Padding(
+                                    padding: EdgeInsets.only(top: isSmallScreen ? 8.0 : 12.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        // Sol taraf - Label
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.credit_card,
+                                              size: isSmallScreen ? 15 : 16,
+                                              color: debtColor,
+                                            ),
+                                            SizedBox(width: isSmallScreen ? 6 : 8),
+                                            Text(
+                                              AppLocalizations.of(context)!.creditCardDebt,
+                                              style: GoogleFonts.inter(
+                                                fontSize: isSmallScreen ? 12 : 13,
+                                                fontWeight: FontWeight.w600,
+                                                color: isDark 
+                                                    ? Colors.white.withValues(alpha: 0.8)
+                                                    : const Color(0xFF3C3C43),
+                                              ),
+                                            ),
+                                            if (creditAccounts.length > 1) ...[
+                                              SizedBox(width: 4),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 2,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: isDark
+                                                      ? Colors.white.withValues(alpha: 0.1)
+                                                      : Colors.black.withValues(alpha: 0.05),
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  AppLocalizations.of(context)!.cardCount(creditAccounts.length),
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: isDark 
+                                                        ? Colors.white.withValues(alpha: 0.5)
+                                                        : const Color(0xFF8E8E93),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                        
+                                        // Sağ taraf - Tutar
+                                        Text(
+                                          themeProvider.formatAmount(totalUsed),
+                                          style: GoogleFonts.inter(
+                                            fontSize: isSmallScreen ? 13 : 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: debtColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              // Alt hisse kar/zarar etiketi kaldırıldı (inline gösteriliyor)
                             ],
                           );
                         },
                       ),
-
-                      SizedBox(height: spacingMedium),
                     ],
                     ),
                   ),
@@ -494,20 +795,31 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
               ),
             ),
             
-            // Banner Reklam - Kartın altında (sadece yüklendiyse göster)
-            if (_bannerService.isLoaded && _bannerService.bannerWidget != null) ...[
-              SizedBox(height: spacingMedium),
-              Container(
-                margin: EdgeInsets.symmetric(
-                  horizontal: ScreenCompatibility.responsiveWidth(context,
-                      screenSize == ScreenSizeCategory.small ? 10.0 :
-                      screenSize == ScreenSizeCategory.medium ? 12.0 :
-                      screenSize == ScreenSizeCategory.large ? 14.0 : 16.0)),
-                width: double.infinity,
-                height: ScreenCompatibility.responsiveHeight(context, 50.0),
-                child: _bannerService.bannerWidget!,
-              ),
-            ],
+            // Banner Reklam - Kartın altında (Premium kullanıcılara gösterilmez)
+            Consumer<PremiumService>(
+              builder: (context, premiumService, child) {
+                if (premiumService.isPremium) return const SizedBox.shrink();
+                
+                if (_bannerService.isLoaded && _bannerService.bannerWidget != null) {
+                  return Column(
+                    children: [
+                      SizedBox(height: spacingMedium),
+                      Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: ScreenCompatibility.responsiveWidth(context,
+                              screenSize == ScreenSizeCategory.small ? 10.0 :
+                              screenSize == ScreenSizeCategory.medium ? 12.0 :
+                              screenSize == ScreenSizeCategory.large ? 14.0 : 16.0)),
+                        width: double.infinity,
+                        height: ScreenCompatibility.responsiveHeight(context, 50.0),
+                        child: _bannerService.bannerWidget!,
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
             
           ],
         );
@@ -522,24 +834,24 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
     
     // Daha kompakt responsive boyutlar
     final titleFontSize = ScreenCompatibility.responsiveFontSize(context, 
-        screenSize == ScreenSizeCategory.small ? 18.0 : 
-        screenSize == ScreenSizeCategory.medium ? 20.0 :
-        screenSize == ScreenSizeCategory.large ? 22.0 : 24.0);
+        screenSize == ScreenSizeCategory.small ? 16.0 : 
+        screenSize == ScreenSizeCategory.medium ? 18.0 :
+        screenSize == ScreenSizeCategory.large ? 20.0 : 22.0);
     
     final subtitleFontSize = ScreenCompatibility.responsiveFontSize(context,
-        screenSize == ScreenSizeCategory.small ? 13.0 :
-        screenSize == ScreenSizeCategory.medium ? 14.0 :
-        screenSize == ScreenSizeCategory.large ? 15.0 : 16.0);
-    
-    final buttonFontSize = ScreenCompatibility.responsiveFontSize(context,
         screenSize == ScreenSizeCategory.small ? 12.0 :
         screenSize == ScreenSizeCategory.medium ? 13.0 :
         screenSize == ScreenSizeCategory.large ? 14.0 : 15.0);
     
+    final buttonFontSize = ScreenCompatibility.responsiveFontSize(context,
+        screenSize == ScreenSizeCategory.small ? 11.0 :
+        screenSize == ScreenSizeCategory.medium ? 12.0 :
+        screenSize == ScreenSizeCategory.large ? 13.0 : 14.0);
+    
     final iconSize = ScreenCompatibility.responsiveFontSize(context,
-        screenSize == ScreenSizeCategory.small ? 12.0 :
-        screenSize == ScreenSizeCategory.medium ? 14.0 :
-        screenSize == ScreenSizeCategory.large ? 16.0 : 18.0);
+        screenSize == ScreenSizeCategory.small ? 11.0 :
+        screenSize == ScreenSizeCategory.medium ? 13.0 :
+        screenSize == ScreenSizeCategory.large ? 15.0 : 17.0);
     
     final spacingSmall = ScreenCompatibility.responsiveHeight(context, 4.0);
     final spacingMedium = ScreenCompatibility.responsiveHeight(context, 8.0);
@@ -646,9 +958,9 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                   l10n.tipTrackYourExpenses,
                   style: GoogleFonts.inter(
                     fontSize: ScreenCompatibility.responsiveFontSize(context,
-                        screenSize == ScreenSizeCategory.small ? 12.0 :
-                        screenSize == ScreenSizeCategory.medium ? 13.0 :
-                        screenSize == ScreenSizeCategory.large ? 14.0 : 15.0),
+                        screenSize == ScreenSizeCategory.small ? 11.0 :
+                        screenSize == ScreenSizeCategory.medium ? 12.0 :
+                        screenSize == ScreenSizeCategory.large ? 13.0 : 14.0),
                     fontWeight: FontWeight.w400,
                     color: isDark 
                         ? Colors.white.withValues(alpha: 0.8)
@@ -758,194 +1070,24 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
     );
   }
 
-  Widget _buildWeeklyChange(UnifiedProviderV2 provider, ThemeProvider themeProvider, bool isDark, AppLocalizations l10n) {
-    // Responsive boyutlar
-    final screenSize = ScreenCompatibility.getScreenSizeCategory(context);
-    final isSmallScreen = ScreenCompatibility.isSmallScreen(context);
+  /// Kompakt sayı formatı (Daily Performance ile aynı)
+  /// 5 basamak (10,000) üzeri için K, M, B kısaltması kullanır
+  String _formatCompactNumber(double value, Currency currency) {
+    final absValue = value.abs();
+    final sign = value >= 0 ? '+' : '-';
     
-    // Haftalık değişim hesaplama
-    final now = DateTime.now();
-    final weekAgo = now.subtract(const Duration(days: 7));
-    final monthAgo = now.subtract(const Duration(days: 30));
-    
-    // Bu hafta içindeki işlemler
-    final thisWeekTransactions = provider.transactions.where((transaction) {
-      return transaction.transactionDate.isAfter(weekAgo) && 
-             transaction.transactionDate.isBefore(now);
-    }).toList();
-    
-    // Bu ay içindeki işlemler
-    final thisMonthTransactions = provider.transactions.where((transaction) {
-      return transaction.transactionDate.isAfter(monthAgo) && 
-             transaction.transactionDate.isBefore(now);
-    }).toList();
-    
-    // Bu hafta gelir ve gider hesaplama
-    double thisWeekIncome = 0.0;
-    double thisWeekExpense = 0.0;
-    
-    for (final transaction in thisWeekTransactions) {
-      if (transaction.type == TransactionType.income) {
-        thisWeekIncome += transaction.amount;
-      } else if (transaction.type == TransactionType.expense) {
-        thisWeekExpense += transaction.amount;
-      }
+    // 5 basamak (10,000) üzeri için k, m, b - ondalıklı
+    if (absValue >= 1000000000) {
+      return '$sign${(absValue / 1000000000).toStringAsFixed(2)}B';
+    } else if (absValue >= 1000000) {
+      return '$sign${(absValue / 1000000).toStringAsFixed(2)}M';
+    } else if (absValue >= 10000) {
+      return '$sign${(absValue / 1000).toStringAsFixed(1)}K';
+    } else {
+      // 10K altında normal format
+      final formatted = CurrencyUtils.formatAmountWithoutSymbol(absValue, currency);
+      return '$sign$formatted';
     }
-    
-    // Bu ay gelir ve gider hesaplama
-    double thisMonthIncome = 0.0;
-    double thisMonthExpense = 0.0;
-    
-    for (final transaction in thisMonthTransactions) {
-      if (transaction.type == TransactionType.income) {
-        thisMonthIncome += transaction.amount;
-      } else if (transaction.type == TransactionType.expense) {
-        thisMonthExpense += transaction.amount;
-      }
-    }
-    
-    final weeklyChange = thisWeekIncome - thisWeekExpense;
-    final monthlyChange = thisMonthIncome - thisMonthExpense;
-    
-    // Veri yoksa widget'ı gizle
-    if (thisWeekTransactions.isEmpty && thisMonthTransactions.isEmpty) {
-      return SizedBox.shrink();
-    }
-    
-    final isWeeklyPositive = weeklyChange >= 0;
-    final isMonthlyPositive = monthlyChange >= 0;
-    
-    final weeklyColor = isWeeklyPositive
-        ? isDark 
-            ? const Color(0xFF4CAF50)
-            : const Color(0xFF2E7D32)
-        : isDark
-            ? const Color(0xFFFF6B6B)
-            : const Color(0xFFD32F2F);
-            
-    final monthlyColor = isMonthlyPositive
-        ? isDark 
-            ? const Color(0xFF4CAF50)
-            : const Color(0xFF2E7D32)
-        : isDark
-            ? const Color(0xFFFF6B6B)
-            : const Color(0xFFD32F2F);
-    
-    // Responsive font boyutları
-    final badgeFontSize = ScreenCompatibility.responsiveFontSize(context,
-        screenSize == ScreenSizeCategory.small ? 10.0 :
-        screenSize == ScreenSizeCategory.medium ? 11.0 :
-        screenSize == ScreenSizeCategory.large ? 12.0 : 13.0);
-    
-    final periodFontSize = ScreenCompatibility.responsiveFontSize(context,
-        screenSize == ScreenSizeCategory.small ? 8.0 :
-        screenSize == ScreenSizeCategory.medium ? 9.0 :
-        screenSize == ScreenSizeCategory.large ? 10.0 : 11.0);
-    
-    // Responsive padding ve spacing
-    final badgePadding = ScreenCompatibility.responsivePadding(context,
-        EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 5.0 : 6.0,
-          vertical: isSmallScreen ? 2.0 : 3.0,
-        ));
-    
-    final badgeSpacing = ScreenCompatibility.responsiveHeight(context, 
-        isSmallScreen ? 4.0 : 5.0);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Haftalık değişim
-        Container(
-          padding: badgePadding,
-          decoration: BoxDecoration(
-            color: weeklyColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(ScreenCompatibility.responsiveWidth(context, 6.0)),
-            border: Border.all(
-              color: weeklyColor.withOpacity(0.3),
-              width: 0.5,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  '${isWeeklyPositive ? '+' : ''}${themeProvider.formatAmount(weeklyChange)}',
-                  style: GoogleFonts.inter(
-                    fontSize: badgeFontSize,
-                    fontWeight: FontWeight.w600,
-                    color: weeklyColor,
-                    letterSpacing: 0.1,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              SizedBox(width: ScreenCompatibility.responsiveWidth(context, 4.0)),
-              Flexible(
-                child: Text(
-                  l10n.last7Days,
-                  style: GoogleFonts.inter(
-                    fontSize: periodFontSize,
-                    fontWeight: FontWeight.w500,
-                    color: isDark 
-                        ? Colors.white.withOpacity(0.8)
-                        : Colors.black.withOpacity(0.7),
-                    letterSpacing: 0.2,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: badgeSpacing),
-        // Aylık değişim
-        Container(
-          padding: badgePadding,
-          decoration: BoxDecoration(
-            color: monthlyColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(ScreenCompatibility.responsiveWidth(context, 6.0)),
-            border: Border.all(
-              color: monthlyColor.withOpacity(0.3),
-              width: 0.5,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  '${isMonthlyPositive ? '+' : ''}${themeProvider.formatAmount(monthlyChange)}',
-                  style: GoogleFonts.inter(
-                    fontSize: badgeFontSize,
-                    fontWeight: FontWeight.w600,
-                    color: monthlyColor,
-                    letterSpacing: 0.1,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              SizedBox(width: ScreenCompatibility.responsiveWidth(context, 4.0)),
-              Flexible(
-                child: Text(
-                  l10n.last30Days,
-                  style: GoogleFonts.inter(
-                    fontSize: periodFontSize,
-                    fontWeight: FontWeight.w500,
-                    color: isDark 
-                        ? Colors.white.withOpacity(0.8)
-                        : Colors.black.withOpacity(0.7),
-                    letterSpacing: 0.2,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
+
 }

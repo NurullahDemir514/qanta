@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../l10n/app_localizations.dart';
-import '../bottom_sheets/card_detail_bottom_sheet.dart';
 import '../../../shared/utils/currency_utils.dart';
 
 class CreditCardWidget extends StatelessWidget {
@@ -21,6 +20,8 @@ class CreditCardWidget extends StatelessWidget {
   final int? statementDate;
   final int? dueDate;
   final String? cardName;
+  final VoidCallback? onTap;
+  final VoidCallback? onStatementsPressed;
 
   const CreditCardWidget({
     super.key,
@@ -36,6 +37,8 @@ class CreditCardWidget extends StatelessWidget {
     this.statementDate,
     this.dueDate,
     this.cardName,
+    this.onTap,
+    this.onStatementsPressed,
   });
 
   @override
@@ -65,7 +68,7 @@ class CreditCardWidget extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return GestureDetector(
-          onTap: () => _showCardDetail(context, themeProvider, isDark),
+          onTap: onTap,
           child: Container(
             height: cardHeight,
             decoration: BoxDecoration(
@@ -76,7 +79,6 @@ class CreditCardWidget extends StatelessWidget {
                 stops: const [0.0, 0.5, 1.0],
               ),
               borderRadius: BorderRadius.circular(borderRadius),
-              boxShadow: AppConstants.getCardShadows(accentColor),
             ),
             child: Stack(
               children: [
@@ -100,57 +102,34 @@ class CreditCardWidget extends StatelessWidget {
                        Row(
                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                          children: [
-                           // Card name on the left
-                           Expanded(
-                             flex: 2,
-                             child: Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               children: [
-                                 Text(
-                                   l10n.cardName,
-                                   style: GoogleFonts.inter(
-                                     fontSize: isSmallScreen ? 10.sp : 11.sp,
-                                     color: Colors.white.withValues(alpha: 1.0),
-                                     letterSpacing: 0.3,
-                                   ),
-                                 ),
-                                 SizedBox(height: isSmallScreen ? 1.h : 1.5.h),
-                                 Text(
-                                   (cardName ?? (bankName != null ? '$bankName ${l10n.creditCard}' : cardTypeLabel)).toUpperCase(),
-                                   style: GoogleFonts.inter(
-                                     fontSize: isSmallScreen ? 12.sp : 13.sp,
-                                     fontWeight: FontWeight.w600,
-                                     color: Colors.white,
-                                     letterSpacing: 0.5,
-                                   ),
-                                   overflow: TextOverflow.ellipsis,
-                                   maxLines: 1,
-                                   textAlign: TextAlign.start,
-                                 ),
-                               ],
-                             ),
-                           ),
+                            // Card name on the left
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                (cardName ?? (bankName != null ? '$bankName ${l10n.creditCard}' : cardTypeLabel)).toUpperCase(),
+                                style: GoogleFonts.inter(
+                                  fontSize: isSmallScreen ? 10.sp : 11.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                textAlign: TextAlign.start,
+                              ),
+                            ),
                            
-                           // Bank badge on the right
+                           // Minimal contactless badge on the right
                            Container(
-                             padding: EdgeInsets.symmetric(
-                               horizontal: isSmallScreen ? 8.w : 10.w, 
-                               vertical: isSmallScreen ? 3.h : 4.h,
-                             ),
+                             padding: EdgeInsets.all(isSmallScreen ? 6.w : 8.w),
                              decoration: BoxDecoration(
-                               color: accentColor,
-                               borderRadius: BorderRadius.circular(isSmallScreen ? 4.r : 5.r),
+                               color: Colors.white.withOpacity(0.15),
+                               borderRadius: BorderRadius.circular(isSmallScreen ? 6.r : 8.r),
                              ),
-                             child: Text(
-                               bankName?.toUpperCase() ?? cardTypeLabel.toUpperCase(),
-                               style: GoogleFonts.inter(
-                                 fontSize: isSmallScreen ? 10.sp : 11.sp,
-                                 fontWeight: FontWeight.bold,
-                                 color: Colors.white,
-                                 letterSpacing: 0.6,
-                               ),
-                               overflow: TextOverflow.ellipsis,
-                               maxLines: 1,
+                             child: Icon(
+                               Icons.contactless_rounded,
+                               color: Colors.white,
+                               size: isSmallScreen ? 16.sp : 18.sp,
                              ),
                            ),
                          ],
@@ -216,6 +195,7 @@ class CreditCardWidget extends StatelessWidget {
                                      fontWeight: FontWeight.w500,
                                    ),
                                  ),
+                                 SizedBox(height: isSmallScreen ? 3.h : 4.h),
                                  CurrencyUtils.buildCurrencyText(
                                    themeProvider.formatAmount(balance),
                                    style: GoogleFonts.inter(
@@ -226,6 +206,7 @@ class CreditCardWidget extends StatelessWidget {
                                    currency: themeProvider.currency,
                                  ),
                                  if (isCreditCardWithDebt) ...[
+                                   SizedBox(height: isSmallScreen ? 3.h : 4.h),
                                    CurrencyUtils.buildCurrencyText(
                                      '${l10n.debt}: ${themeProvider.formatAmount(totalDebt!)}',
                                      style: GoogleFonts.inter(
@@ -243,6 +224,45 @@ class CreditCardWidget extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
+                              if (onStatementsPressed != null) ...[
+                                GestureDetector(
+                                  onTap: onStatementsPressed,
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8.w,
+                                      vertical: 4.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6.r),
+                                      border: Border.all(
+                                        color: Colors.white.withValues(alpha: 0.3),
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.description_outlined,
+                                          color: Colors.white.withValues(alpha: 0.9),
+                                          size: 12.w,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          l10n.statements,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 10.sp,
+                                            color: Colors.white.withValues(alpha: 0.9),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 6.h),
+                              ],
                               if (statementDate != null) ...[
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -277,48 +297,11 @@ class CreditCardWidget extends StatelessWidget {
                   ),
                 ),
                 
-                // Temassız ikon - sağ alt köşede
-                Positioned(
-                  right: isSmallScreen ? 12.w : 16.w,
-                  bottom: isSmallScreen ? 8.h : 12.h,
-                  child: Icon(
-                    Icons.contactless,
-                    color: Colors.white.withValues(alpha: 0.8),
-                    size: isSmallScreen ? 16.w : 18.w,
-                  ),
-                ),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  void _showCardDetail(BuildContext context, ThemeProvider themeProvider, bool isDark) {
-    final gradientColors = bankCode != null 
-        ? AppConstants.getBankGradientColors(bankCode!)
-        : AppConstants.getCardGradientColors(cardTypeLabel);
-    final accentColor = bankCode != null 
-        ? AppConstants.getBankAccentColor(bankCode!)
-        : AppConstants.getCardAccentColor(cardTypeLabel);
-    
-    CardDetailBottomSheet.show(
-      context,
-      bankCode != null ? AppConstants.getLocalizedBankName(bankCode!, AppLocalizations.of(context)!) : cardType,
-      cardTypeLabel,
-      cardNumber,
-      balance,
-      gradientColors,
-      accentColor,
-      themeProvider,
-      isDark,
-      expiryDate: expiryDate,
-      totalDebt: totalDebt,
-      creditLimit: creditLimit,
-      usagePercentage: usagePercentage,
-      statementDate: statementDate,
-      dueDate: dueDate,
     );
   }
 

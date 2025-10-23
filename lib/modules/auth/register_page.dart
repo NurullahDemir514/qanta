@@ -3,7 +3,16 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import '../../core/services/firebase_auth_service.dart';
+import '../../core/services/profile_image_service.dart';
+import '../../core/services/image_cache_service.dart';
+import '../../core/providers/unified_provider_v2.dart';
+import '../../core/providers/profile_provider.dart';
+import '../../modules/stocks/providers/stock_provider.dart';
+import '../../core/providers/cash_account_provider.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/custom_button.dart';
@@ -45,6 +54,9 @@ class _RegisterPageState extends State<RegisterPage> {
       final credential = await FirebaseAuthService.signInWithGoogle();
 
       if (credential.user != null && mounted) {
+        // Clear all caches and refresh profile data for new user
+        await _clearAllCachesAndRefreshProfile();
+        
         // Show success message
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -61,7 +73,27 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        String errorMessage = '${l10n.googleSignUpError}: ${e.toString()}';
+        debugPrint('🔴 Google Sign Up Error: $e');
+        
+        final errorString = e.toString().toLowerCase();
+        
+        // User cancelled, don't show error
+        if (errorString.contains('cancelled') || errorString.contains('canceled') ||
+            errorString.contains('user_cancelled') || errorString.contains('sign_in_cancelled')) {
+          return;
+        }
+        
+        String errorMessage = l10n.googleSignUpError;
+
+        // Handle specific errors
+        if (errorString.contains('network') || errorString.contains('connection')) {
+          errorMessage = l10n.networkError;
+        } else if (errorString.contains('email-already-in-use') || 
+                   errorString.contains('email already in use') ||
+                   errorString.contains('already_registered') ||
+                   errorString.contains('already exists')) {
+          errorMessage = l10n.userAlreadyRegistered;
+        }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -92,6 +124,9 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (credential.user != null && mounted) {
+        // Clear all caches and refresh profile data for new user
+        await _clearAllCachesAndRefreshProfile();
+        
         // Show success message with name
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -110,17 +145,32 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        String errorMessage = '${l10n.registerError}: ${e.toString()}';
+        debugPrint('🔴 Register Error: $e');
+        
+        String errorMessage = l10n.registerError;
+        final errorString = e.toString().toLowerCase();
 
-        // Handle specific Supabase auth errors
-        if (e.toString().contains('email_address_invalid')) {
+        // Handle specific auth errors
+        if (errorString.contains('email_address_invalid') || 
+            errorString.contains('invalid-email') ||
+            errorString.contains('invalid email')) {
           errorMessage = l10n.invalidEmailAddress;
-        } else if (e.toString().contains('password_too_short')) {
+        } else if (errorString.contains('password_too_short') || 
+                   errorString.contains('weak-password') ||
+                   errorString.contains('weak password')) {
           errorMessage = l10n.passwordTooShortError;
-        } else if (e.toString().contains('user_already_registered')) {
+        } else if (errorString.contains('user_already_registered') || 
+                   errorString.contains('email-already-in-use') ||
+                   errorString.contains('email already in use') ||
+                   errorString.contains('user already registered') ||
+                   errorString.contains('already exists')) {
           errorMessage = l10n.userAlreadyRegistered;
-        } else if (e.toString().contains('signup_disabled')) {
+        } else if (errorString.contains('signup_disabled') ||
+                   errorString.contains('signup disabled')) {
           errorMessage = l10n.signupDisabled;
+        } else if (errorString.contains('network') || 
+                   errorString.contains('connection')) {
+          errorMessage = l10n.networkError;
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -133,6 +183,82 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  /// Clear all caches and refresh profile data for new user
+  Future<void> _clearAllCachesAndRefreshProfile() async {
+    try {
+      debugPrint('🧹 Clearing all caches for new user...');
+      
+      // 1. Clear all provider data
+      final unifiedProvider = Provider.of<UnifiedProviderV2>(context, listen: false);
+      await unifiedProvider.clearAllData();
+      
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      await stockProvider.clearAllData();
+      
+      final cashProvider = Provider.of<CashAccountProvider>(context, listen: false);
+      cashProvider.clear();
+      
+      // 2. Clear profile provider and refresh
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      await profileProvider.clearProfile();
+      await profileProvider.refresh(); // Refresh with new user data
+      
+      // 3. Clear all caches
+      await ProfileImageService.instance.clearAllData();
+      await ImageCacheService.instance.clearCache();
+      
+      // 4. Clear SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      
+      // 5. Clear Flutter image cache
+      imageCache.clear();
+      imageCache.clearLiveImages();
+      
+      // 6. Clear temporary files
+      await _clearTemporaryFiles();
+      
+      debugPrint('✅ All caches cleared for new user');
+    } catch (e) {
+      debugPrint('❌ Error clearing caches for new user: $e');
+    }
+  }
+
+  /// Clear temporary files
+  Future<void> _clearTemporaryFiles() async {
+    try {
+      // App documents directory'yi temizle
+      final appDocDir = await getApplicationDocumentsDirectory();
+      if (await appDocDir.exists()) {
+        final files = await appDocDir.list().toList();
+        for (final file in files) {
+          if (file is File) {
+            await file.delete();
+          } else if (file is Directory) {
+            await file.delete(recursive: true);
+          }
+        }
+      }
+      
+      // Cache directory'yi temizle
+      final cacheDir = await getTemporaryDirectory();
+      if (await cacheDir.exists()) {
+        final files = await cacheDir.list().toList();
+        for (final file in files) {
+          if (file is File) {
+            await file.delete();
+          } else if (file is Directory) {
+            await file.delete(recursive: true);
+          }
+        }
+      }
+      
+      debugPrint('✅ Temporary files cleared');
+    } catch (e) {
+      debugPrint('❌ Error clearing temporary files: $e');
     }
   }
 

@@ -5,8 +5,10 @@ import '../../../shared/models/stock_models.dart';
 import '../../../shared/models/account_model.dart';
 import '../providers/stock_provider.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/premium_service.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../premium/premium_offer_screen.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../../transactions/widgets/forms/base_transaction_form.dart';
 import '../widgets/forms/stock_selection_step.dart';
@@ -477,7 +479,36 @@ class _StockTransactionFormScreenState
           content: StockSelectionStep(
             selectedStock: _selectedStock,
             transactionType: widget.transactionType,
-            onStockSelected: (Stock stock) {
+            onStockSelected: (Stock stock) async {
+              // Yeni hisse AL işlemi için premium kontrolü (STEP 1'de)
+              if (widget.transactionType == StockTransactionType.buy) {
+                final stockProvider = Provider.of<StockProvider>(context, listen: false);
+                final premiumService = Provider.of<PremiumService>(context, listen: false);
+                
+                // Hisse zaten portfolyoda mı kontrol et
+                final existingPosition = stockProvider.stockPositions
+                    .where((p) => p.stockSymbol == stock.symbol && p.totalQuantity > 0)
+                    .firstOrNull;
+                
+                // Yeni hisse alınıyor (portfolyoda hiç yok veya 0 adet)
+                if (existingPosition == null) {
+                  // Takip listesindeki hisse sayısını kontrol et
+                  final currentStockCount = stockProvider.watchedStocks.length;
+                  
+                  if (!premiumService.canAddStock(currentStockCount)) {
+                    // Premium teklif ekranını göster
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PremiumOfferScreen(),
+                        fullscreenDialog: true,
+                      ),
+                    );
+                    return; // Hisse seçilmez, geri dön
+                  }
+                }
+              }
+              
               setState(() {
                 _selectedStock = stock;
               });

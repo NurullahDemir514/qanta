@@ -361,7 +361,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
             child: Row(
               children: [
                 Text(
-                  AppLocalizations.of(context)?.editCreditCard ?? 'Edit Credit Card',
+                  AppLocalizations.of(context)?.editCreditCard ?? 'Kredi Kartını Düzenle',
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,

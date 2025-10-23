@@ -34,7 +34,7 @@ class _IncomeTagSelectorState extends State<IncomeTagSelector> {
         .where(
           (cat) => true,
         ) // UnifiedCategoryModel doesn't have isActive, all are active
-        .map((cat) => cat.displayName.trim())
+        .map((cat) => CategoryIconService.getLocalizedCategoryName(cat.displayName.trim(), context))
         .toSet()
         .toList();
   }
@@ -95,7 +95,7 @@ class _IncomeTagSelectorState extends State<IncomeTagSelector> {
             color: isDark ? Colors.white : Colors.black,
           ),
           decoration: InputDecoration(
-            hintText: 'maaş, freelance, yatırım...',
+            hintText: 'maaş, freelance, bonus, komisyon, temettü...',
             hintStyle: GoogleFonts.inter(
               color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
             ),

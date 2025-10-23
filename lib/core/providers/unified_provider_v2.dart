@@ -18,6 +18,7 @@ import '../services/firebase_auth_service.dart';
 import '../services/statement_service.dart';
 import 'statement_provider.dart';
 import '../../shared/models/unified_category_model.dart';
+import '../../shared/services/category_icon_service.dart';
 import '../../shared/models/budget_model.dart';
 import '../../shared/models/statement_summary.dart';
 import '../../shared/models/statement_period.dart';
@@ -28,6 +29,7 @@ import '../services/unified_cache_manager.dart';
 import '../services/cache_strategy_config.dart';
 import 'profile_provider.dart';
 import '../services/profile_image_service.dart';
+import '../services/anonymous_analytics_service.dart';
 
 /// **QANTA v2 Unified Provider - Central Data Management System**
 ///
@@ -692,19 +694,30 @@ class UnifiedProviderV2 extends ChangeNotifier {
           displayName: 'Maaş',
           description: 'Aylık maaş geliri',
           iconName: 'work',
-          colorHex: '#00FFB3',
+          colorHex: '#34C759',
           sortOrder: 1,
           categoryType: CategoryType.income,
           isUserCategory: false,
         ),
         UnifiedCategoryModel(
           id: '',
-          name: 'freelance',
-          displayName: 'Freelance',
-          description: 'Serbest meslek geliri',
-          iconName: 'laptop',
-          colorHex: '#00D2FF',
+          name: 'bonus',
+          displayName: 'Bonus',
+          description: 'Prim, ikramiye',
+          iconName: 'star',
+          colorHex: '#FFD60A',
           sortOrder: 2,
+          categoryType: CategoryType.income,
+          isUserCategory: false,
+        ),
+        UnifiedCategoryModel(
+          id: '',
+          name: 'business',
+          displayName: 'İş Geliri',
+          description: 'İş ve ticaret geliri',
+          iconName: 'business',
+          colorHex: '#BF5AF2',
+          sortOrder: 3,
           categoryType: CategoryType.income,
           isUserCategory: false,
         ),
@@ -712,10 +725,76 @@ class UnifiedProviderV2 extends ChangeNotifier {
           id: '',
           name: 'investment',
           displayName: 'Yatırım',
-          description: 'Yatırım gelirleri',
+          description: 'Hisse, kripto, yatırım geliri',
           iconName: 'trending_up',
-          colorHex: '#00FF88',
-          sortOrder: 3,
+          colorHex: '#FF9500',
+          sortOrder: 4,
+          categoryType: CategoryType.income,
+          isUserCategory: false,
+        ),
+        UnifiedCategoryModel(
+          id: '',
+          name: 'dividend',
+          displayName: 'Temettü',
+          description: 'Hisse temettü geliri',
+          iconName: 'account_balance',
+          colorHex: '#5AC8FA',
+          sortOrder: 5,
+          categoryType: CategoryType.income,
+          isUserCategory: false,
+        ),
+        UnifiedCategoryModel(
+          id: '',
+          name: 'rental',
+          displayName: 'Kira Geliri',
+          description: 'Ev, dükkan kira geliri',
+          iconName: 'home',
+          colorHex: '#30D158',
+          sortOrder: 6,
+          categoryType: CategoryType.income,
+          isUserCategory: false,
+        ),
+        UnifiedCategoryModel(
+          id: '',
+          name: 'commission',
+          displayName: 'Komisyon',
+          description: 'Satış komisyonu, referans geliri',
+          iconName: 'percent',
+          colorHex: '#FF9F0A',
+          sortOrder: 7,
+          categoryType: CategoryType.income,
+          isUserCategory: false,
+        ),
+        UnifiedCategoryModel(
+          id: '',
+          name: 'sale',
+          displayName: 'Satış',
+          description: 'Ürün, eşya satışı',
+          iconName: 'shopping_bag',
+          colorHex: '#AF52DE',
+          sortOrder: 8,
+          categoryType: CategoryType.income,
+          isUserCategory: false,
+        ),
+        UnifiedCategoryModel(
+          id: '',
+          name: 'interest',
+          displayName: 'Faiz',
+          description: 'Banka faizi, mevduat',
+          iconName: 'savings',
+          colorHex: '#32ADE6',
+          sortOrder: 9,
+          categoryType: CategoryType.income,
+          isUserCategory: false,
+        ),
+        UnifiedCategoryModel(
+          id: '',
+          name: 'gift',
+          displayName: 'Hediye',
+          description: 'Hediye para',
+          iconName: 'card_giftcard',
+          colorHex: '#FF2D92',
+          sortOrder: 10,
           categoryType: CategoryType.income,
           isUserCategory: false,
         ),
@@ -781,6 +860,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Fix budget category IDs to match real category IDs
       await _fixBudgetCategoryIds();
 
+      // Reload budgets to get updated category IDs
+      _budgets = await UnifiedBudgetService.getAllBudgets();
+
       // Check and reset expired recurring budgets
       await checkAndResetExpiredBudgets();
 
@@ -805,13 +887,21 @@ class UnifiedProviderV2 extends ChangeNotifier {
   Future<void> _fixBudgetCategoryIds() async {
     try {
       for (final budget in _budgets) {
-        // Find matching category by name
+        // Find matching category by name (try displayName first, then try to match by common names)
         final matchingCategory = _categories.firstWhere(
-          (cat) => cat.displayName.trim() == budget.categoryName.trim(),
+          (cat) {
+            final displayNameMatch = cat.displayName.trim() == budget.categoryName.trim();
+            
+            // Try common name mappings
+            final commonNameMatch = _getCommonNameMapping(cat.displayName) == budget.categoryName.trim();
+            
+            return displayNameMatch || commonNameMatch;
+          },
           orElse: () => _categories.first,
         );
 
         if (matchingCategory.id != budget.categoryId) {
+          debugPrint('🔧 Fixing budget category ID: ${budget.categoryName} (${budget.categoryId}) -> ${matchingCategory.displayName} (${matchingCategory.id})');
           // Update budget category ID
           await UnifiedBudgetService.updateBudgetCategoryId(
             budget.categoryId,
@@ -819,7 +909,26 @@ class UnifiedProviderV2 extends ChangeNotifier {
           );
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('Error fixing budget category IDs: $e');
+    }
+  }
+
+  /// Get common name mapping for category matching
+  String _getCommonNameMapping(String displayName) {
+    const nameMappings = {
+      'Food': 'Yemek',
+      'Transport': 'Ulaşım', 
+      'Shopping': 'Alışveriş',
+      'Entertainment': 'Eğlence',
+      'Bills': 'Faturalar',
+      'Health': 'Sağlık',
+      'Education': 'Eğitim',
+      'Travel': 'Seyahat',
+      'Other': 'Diğer',
+      'Stocks': 'Hisse Senedi',
+    };
+    return nameMappings[displayName] ?? displayName;
   }
 
   /// Load summaries
@@ -960,7 +1069,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// **See also:**
   /// - [createInstallmentTransaction] for installment payments
   /// - [TransactionServiceV2.createTransaction] for service implementation
-  Future<String> createTransaction({
+  Future<Map<String, dynamic>> createTransaction({
     required TransactionType type,
     required double amount,
     required String description,
@@ -995,6 +1104,19 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
       // Debug: Log category info
       debugPrint('createTransaction - categoryId: $trimmedCategoryId, category: ${category?.displayName}');
+
+      // Use transaction date or current date
+      final effectiveTransactionDate = transactionDate ?? DateTime.now();
+
+      // Check budget limits for expense transactions
+      Map<String, dynamic>? budgetCheck;
+      if (type == TransactionType.expense && trimmedCategoryId != null && trimmedCategoryId.isNotEmpty) {
+        budgetCheck = _checkBudgetLimitsForTransaction(
+          categoryId: trimmedCategoryId,
+          amount: amount,
+          transactionDate: effectiveTransactionDate,
+        );
+      }
 
       // Create TransactionWithDetailsV2
       final transaction = TransactionWithDetailsV2(
@@ -1056,10 +1178,22 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Update summaries with new data
       await _updateSummariesLocally();
 
+      // Update budget if transaction is within budget date range
+      if (type == TransactionType.expense && trimmedCategoryId != null && trimmedCategoryId.isNotEmpty) {
+        await _updateBudgetForTransaction(trimmedCategoryId, amount, effectiveTransactionDate);
+      }
+
       // Invalidate statement cache for affected account
       _invalidateStatementCache(transaction.sourceAccountId);
 
       notifyListeners(); // Immediate UI update
+
+      // 📊 ANALYTICS: Anonim veri toplama (izin verilmişse)
+      if (type == TransactionType.expense) {
+        debugPrint('📊 Calling AnonymousAnalyticsService.trackExpense...');
+        await AnonymousAnalyticsService.trackExpense(newTransaction);
+        debugPrint('📊 trackExpense completed');
+      }
 
       // ✅ BACKGROUND RELOAD: Reload data in background without affecting UI
       Future.microtask(() async {
@@ -1089,13 +1223,19 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
         if (matchingBudget == null) {
           // Don't update budget if no matching category found
-          return transactionId;
+          return {
+            'transactionId': transactionId,
+            'budgetCheck': budgetCheck,
+          };
         }
 
-        _updateBudgetSpentAmounts(trimmedCategoryId);
+        await _updateBudgetSpentAmounts(trimmedCategoryId);
       }
 
-      return transactionId;
+      return {
+        'transactionId': transactionId,
+        'budgetCheck': budgetCheck,
+      };
     } catch (e) {
       rethrow;
     }
@@ -1259,6 +1399,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // ✅ OPTIMISTIC BALANCE UPDATE: Update account balance immediately
       await _updateAccountBalanceOptimistically(transaction, isReversal: true);
 
+      // ✅ BUDGET UPDATE: Update budget spent amounts if it's an expense transaction
+      if (transaction.type == TransactionType.expense && transaction.categoryId != null) {
+        await _updateBudgetSpentAmounts(transaction.categoryId!);
+      }
+
       // Invalidate statement cache for affected account
       _invalidateStatementCache(transaction.sourceAccountId);
 
@@ -1334,6 +1479,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
         // ✅ OPTIMISTIC BALANCE UPDATE: Update account balance immediately
         await _updateAccountBalanceOptimistically(transaction, isReversal: true);
 
+        // ✅ BUDGET UPDATE: Update budget spent amounts if it's an expense transaction
+        if (transaction.type == TransactionType.expense && transaction.categoryId != null) {
+          await _updateBudgetSpentAmounts(transaction.categoryId!);
+        }
+
         // Update summaries locally
         _updateSummariesLocally();
 
@@ -1364,8 +1514,253 @@ class UnifiedProviderV2 extends ChangeNotifier {
     }
   }
 
+  /// Check if transaction date is within budget date range
+  bool _isTransactionInBudgetDateRange(BudgetModel budget, DateTime transactionDate) {
+    final startDate = budget.startDate;
+    DateTime endDate;
+    
+    switch (budget.period) {
+      case BudgetPeriod.weekly:
+        // 7 gün sonra
+        endDate = startDate.add(const Duration(days: 7));
+        break;
+      case BudgetPeriod.monthly:
+        // 1 ay sonra
+        endDate = DateTime(startDate.year, startDate.month + 1, startDate.day);
+        break;
+      case BudgetPeriod.yearly:
+        // 1 yıl sonra
+        endDate = DateTime(startDate.year + 1, startDate.month, startDate.day);
+        break;
+    }
+    
+    final isInRange = transactionDate.isAfter(startDate.subtract(const Duration(days: 1))) && 
+                      transactionDate.isBefore(endDate.add(const Duration(days: 1)));
+    
+    return isInRange;
+  }
+
+  /// Update budget spent amount for transaction
+  Future<void> _updateBudgetForTransaction(String categoryId, double amount, DateTime transactionDate) async {
+    try {
+      // First try to find by exact category ID match
+      int matchingBudgetIndex = _budgets.indexWhere((budget) => budget.categoryId == categoryId);
+      
+      // If not found, try to find by category name (for cases where category IDs don't match)
+      if (matchingBudgetIndex == -1) {
+        final category = getCategoryById(categoryId);
+        if (category != null) {
+          // Try exact match first
+          matchingBudgetIndex = _budgets.indexWhere((budget) => budget.categoryName.trim() == category.displayName.trim());
+          
+          // If still not found, try common name mapping
+          if (matchingBudgetIndex == -1) {
+            final commonName = _getCommonNameMapping(category.displayName);
+            matchingBudgetIndex = _budgets.indexWhere((budget) => 
+              budget.categoryName.trim() == commonName.trim() ||
+              budget.categoryName.trim() == category.displayName.trim()
+            );
+          }
+        }
+      }
+      
+      if (matchingBudgetIndex == -1) {
+        return; // No budget found
+      }
+      
+      final matchingBudget = _budgets[matchingBudgetIndex];
+      
+      // Check if transaction date is within budget date range
+      if (!_isTransactionInBudgetDateRange(matchingBudget, transactionDate)) {
+        return; // Transaction is not in budget date range
+      }
+      
+      // Update spent amount
+      final updatedBudget = matchingBudget.copyWith(
+        spentAmount: matchingBudget.spentAmount + amount,
+        updatedAt: DateTime.now(),
+      );
+      
+      // Update in local list
+      _budgets[matchingBudgetIndex] = updatedBudget;
+      
+      // Update in database
+      await UnifiedBudgetService.updateBudget(
+        budgetId: updatedBudget.id,
+        budget: updatedBudget,
+      );
+    } catch (e) {
+      debugPrint('Error updating budget for transaction: $e');
+    }
+  }
+
+  /// Check budget limits before creating regular transaction
+  /// Returns budget validation result with warnings
+  Map<String, dynamic> _checkBudgetLimitsForTransaction({
+    required String categoryId,
+    required double amount,
+    DateTime? transactionDate,
+  }) {
+    try {
+      // Find matching budget for the category
+      final matchingBudget = _budgets.firstWhere(
+        (budget) => budget.categoryId == categoryId,
+        orElse: () => BudgetModel(
+          id: '',
+          userId: '',
+          categoryId: '',
+          categoryName: '',
+          limit: 0.0,
+          period: BudgetPeriod.monthly,
+          month: DateTime.now().month,
+          year: DateTime.now().year,
+          startDate: DateTime.now(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      // If no budget found, allow transaction
+      if (matchingBudget.id.isEmpty) {
+        return {
+          'isValid': true,
+          'hasBudget': false,
+          'message': null,
+          'warning': null,
+        };
+      }
+
+      // Check if transaction date is within budget date range
+      final effectiveTransactionDate = transactionDate ?? DateTime.now();
+      final isInDateRange = _isTransactionInBudgetDateRange(matchingBudget, effectiveTransactionDate);
+      
+      // If transaction is not in budget date range, don't apply budget limits
+      if (!isInDateRange) {
+        return {
+          'isValid': true,
+          'hasBudget': false,
+          'message': 'İşlem tarihi budget tarih aralığı dışında',
+          'warning': null,
+        };
+      }
+
+      // Check if transaction amount exceeds budget limit
+      final remainingBudget = matchingBudget.limit - matchingBudget.spentAmount;
+      final isOverBudget = amount > remainingBudget;
+      
+      // Check if transaction would exceed budget significantly
+      final exceedsBudget = amount > matchingBudget.limit;
+      
+      String? warning;
+      if (isOverBudget) {
+        warning = 'Bu işlem bütçe limitinizi aşacak. Tutar: ${amount.toStringAsFixed(2)}₺, Kalan bütçe: ${remainingBudget.toStringAsFixed(2)}₺';
+      } else if (exceedsBudget) {
+        warning = 'Bu işlem bütçe limitini (${matchingBudget.limit.toStringAsFixed(2)}₺) aşıyor';
+      } else if (amount > matchingBudget.limit * 0.8) {
+        warning = 'Bu işlem bütçe limitinin %80\'ini aşıyor';
+      }
+
+      return {
+        'isValid': true, // Always allow, but show warning
+        'hasBudget': true,
+        'budget': matchingBudget,
+        'amount': amount,
+        'remainingBudget': remainingBudget,
+        'isOverBudget': isOverBudget,
+        'exceedsBudget': exceedsBudget,
+        'warning': warning,
+        'message': isOverBudget 
+            ? 'Bu işlem bütçe limitinizi aşacak'
+            : null,
+      };
+    } catch (e) {
+      return {
+        'isValid': true,
+        'hasBudget': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Check budget limits before creating installment transaction
+  /// Returns budget validation result with warnings
+  Map<String, dynamic> _checkBudgetLimitsForInstallment({
+    required String categoryId,
+    required double totalAmount,
+    required int installmentCount,
+  }) {
+    try {
+      // Find matching budget for the category
+      final matchingBudget = _budgets.firstWhere(
+        (budget) => budget.categoryId == categoryId,
+        orElse: () => BudgetModel(
+          id: '',
+          userId: '',
+          categoryId: '',
+          categoryName: '',
+          limit: 0.0,
+          period: BudgetPeriod.monthly,
+          month: DateTime.now().month,
+          year: DateTime.now().year,
+          startDate: DateTime.now(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      // If no budget found, allow transaction
+      if (matchingBudget.id.isEmpty) {
+        return {
+          'isValid': true,
+          'hasBudget': false,
+          'message': null,
+          'warning': null,
+        };
+      }
+
+      // Calculate monthly installment amount
+      final monthlyAmount = totalAmount / installmentCount;
+      
+      // Check if monthly installment exceeds budget limit
+      final remainingBudget = matchingBudget.limit - matchingBudget.spentAmount;
+      final isOverBudget = monthlyAmount > remainingBudget;
+      
+      // Check if total amount would exceed budget significantly
+      final totalExceedsBudget = totalAmount > matchingBudget.limit;
+      
+      String? warning;
+      if (isOverBudget) {
+        warning = 'Aylık taksit tutarı (${monthlyAmount.toStringAsFixed(2)}₺) bütçe limitini aşıyor. Kalan bütçe: ${remainingBudget.toStringAsFixed(2)}₺';
+      } else if (totalExceedsBudget) {
+        warning = 'Toplam tutar (${totalAmount.toStringAsFixed(2)}₺) bütçe limitini (${matchingBudget.limit.toStringAsFixed(2)}₺) aşıyor';
+      } else if (monthlyAmount > matchingBudget.limit * 0.8) {
+        warning = 'Aylık taksit tutarı bütçe limitinin %80\'ini aşıyor';
+      }
+
+      return {
+        'isValid': true, // Always allow, but show warning
+        'hasBudget': true,
+        'budget': matchingBudget,
+        'monthlyAmount': monthlyAmount,
+        'remainingBudget': remainingBudget,
+        'isOverBudget': isOverBudget,
+        'totalExceedsBudget': totalExceedsBudget,
+        'warning': warning,
+        'message': isOverBudget 
+            ? 'Bu taksitli alışveriş bütçe limitinizi aşacak'
+            : null,
+      };
+    } catch (e) {
+      return {
+        'isValid': true,
+        'hasBudget': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
   /// Create installment transaction
-  Future<String> createInstallmentTransaction({
+  Future<Map<String, dynamic>> createInstallmentTransaction({
     required String sourceAccountId,
     required double totalAmount,
     required int count,
@@ -1375,6 +1770,16 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }) async {
     try {
       final startTime = DateTime.now();
+
+      // Check budget limits if category is provided
+      Map<String, dynamic>? budgetCheck;
+      if (categoryId != null && categoryId.isNotEmpty) {
+        budgetCheck = _checkBudgetLimitsForInstallment(
+          categoryId: categoryId,
+          totalAmount: totalAmount,
+          installmentCount: count,
+        );
+      }
 
       // Get current credit card balance BEFORE
       final currentAccount = getAccountById(sourceAccountId);
@@ -1464,8 +1869,18 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Invalidate statement cache for affected account
       _invalidateStatementCache(sourceAccountId);
 
+      // Update budget spent amounts if category is provided
+      if (categoryId != null && categoryId.isNotEmpty) {
+        await _updateBudgetSpentAmounts(categoryId);
+      }
+
       // Notify listeners for immediate UI update
       notifyListeners();
+
+      // 📊 ANALYTICS: Anonim taksitli harcama verisi toplama (izin verilmişse)
+      debugPrint('📊 [INSTALLMENT] Calling AnonymousAnalyticsService.trackExpense...');
+      await AnonymousAnalyticsService.trackExpense(newTransaction);
+      debugPrint('📊 [INSTALLMENT] trackExpense completed');
 
       // ✅ BACKGROUND RELOAD: Reload data in background without affecting UI
       Future.microtask(() async {
@@ -1488,7 +1903,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Get updated account balance
       final updatedAccount = getAccountById(sourceAccountId);
 
-      return installmentId;
+      // Return installment ID and budget check result
+      return {
+        'installmentId': installmentId,
+        'budgetCheck': budgetCheck,
+      };
     } catch (e) {
       rethrow;
     }
@@ -1647,6 +2066,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
     required double limit,
     required BudgetPeriod period,
     bool isRecurring = false,
+    DateTime? startDate,
     int? month,
     int? year,
     int? week,
@@ -1656,17 +2076,18 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Debug log kaldırıldı
 
       final now = DateTime.now();
-      final budgetMonth = month ?? now.month;
-      final budgetYear = year ?? now.year;
+      final budgetStartDate = startDate ?? now;
+      final budgetMonth = month ?? budgetStartDate.month;
+      final budgetYear = year ?? budgetStartDate.year;
       
       // Calculate week and yearlyBudgetYear based on period
       int? budgetWeek;
       int? yearlyBudgetYear;
       
       if (period == BudgetPeriod.weekly) {
-        budgetWeek = week ?? _getWeekOfYear(now);
+        budgetWeek = week ?? _getWeekOfYear(budgetStartDate);
       } else if (period == BudgetPeriod.yearly) {
-        yearlyBudgetYear = year ?? now.year;
+        yearlyBudgetYear = year ?? budgetStartDate.year;
       }
 
       final budget = BudgetModel(
@@ -1681,6 +2102,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
         week: budgetWeek,
         budgetYear: yearlyBudgetYear,
         isRecurring: isRecurring,
+        startDate: budgetStartDate,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         spentAmount: 0.0,
@@ -2571,18 +2993,59 @@ class UnifiedProviderV2 extends ChangeNotifier {
   /// Update budget spent amounts in background
   Future<void> _updateBudgetSpentAmounts(String categoryId) async {
     try {
-      final now = DateTime.now();
-      await UnifiedBudgetService.updateSpentAmountsForMonth(
-        now.month,
-        now.year,
-      );
+      // Update all budgets by recalculating spent amounts from transactions
+      await _recalculateAllBudgetSpentAmounts();
 
       // Reload budgets to get updated spent amounts
       _budgets = await UnifiedBudgetService.getAllBudgets();
+      
+      // Notify listeners to update UI
       notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating budget spent amounts: $e');
+    }
+  }
 
-      for (final budget in _budgets) {}
-    } catch (e) {}
+  /// Recalculate spent amounts for all budgets based on current transactions
+  Future<void> _recalculateAllBudgetSpentAmounts() async {
+    try {
+      for (final budget in _budgets) {
+        // Calculate spent amount for this budget's date range
+        final spentAmount = await _calculateBudgetSpentAmount(budget);
+        
+        if (spentAmount != budget.spentAmount) {
+          final updatedBudget = budget.copyWith(spentAmount: spentAmount);
+          await UnifiedBudgetService.updateBudget(
+            budgetId: budget.id,
+            budget: updatedBudget,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error recalculating budget spent amounts: $e');
+    }
+  }
+
+  /// Calculate spent amount for a specific budget based on its date range
+  Future<double> _calculateBudgetSpentAmount(BudgetModel budget) async {
+    try {
+      final startDate = budget.startDate;
+      final endDate = budget.endDate;
+      
+      // Get all expense transactions for this category within the budget date range
+      final matchingTransactions = _transactions.where((transaction) {
+        return transaction.type == TransactionType.expense &&
+               transaction.categoryId == budget.categoryId &&
+               transaction.transactionDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
+               transaction.transactionDate.isBefore(endDate.add(const Duration(days: 1)));
+      }).toList();
+      
+      // Sum up the amounts
+      return matchingTransactions.fold<double>(0.0, (sum, transaction) => sum + transaction.amount);
+    } catch (e) {
+      debugPrint('Error calculating budget spent amount: $e');
+      return 0.0;
+    }
   }
 
   // ============================================================================
@@ -3164,6 +3627,56 @@ class UnifiedProviderV2 extends ChangeNotifier {
     } catch (e) {
       debugPrint('❌ Error loading profile data: $e');
       // Profil verileri yüklenemezse sessizce devam et
+    }
+  }
+
+  /// Clear all data (logout)
+  Future<void> clearAllData() async {
+    try {
+      debugPrint('🧹 Clearing all unified data...');
+      
+      // Clear all lists
+      _accounts.clear();
+      _transactions.clear();
+      _categories.clear();
+      _installments.clear();
+      _budgets.clear();
+      
+      // Reset cache flags
+      _isDataCached = false;
+      _isLoading = false;
+      _isLoadingAccounts = false;
+      _isLoadingTransactions = false;
+      _isLoadingCategories = false;
+      _isLoadingInstallments = false;
+      _isLoadingBudgets = false;
+      
+      // Clear summaries
+      _balanceSummary = {
+        'totalAssets': 0.0,
+        'totalDebts': 0.0,
+        'netWorth': 0.0,
+        'availableCredit': 0.0,
+      };
+      
+      _monthlySummary = {
+        'totalIncome': 0.0,
+        'totalExpenses': 0.0,
+        'netAmount': 0.0,
+        'transactionCount': 0,
+      };
+      
+      // Clear error
+      _error = null;
+      
+      // Clear cache
+      await _cacheManager.clearAll();
+      
+      notifyListeners();
+      
+      debugPrint('✅ All unified data cleared');
+    } catch (e) {
+      debugPrint('❌ Error clearing unified data: $e');
     }
   }
 }

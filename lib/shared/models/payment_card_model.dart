@@ -57,7 +57,7 @@ class PaymentCardModel {
       case CardType.credit:
         return '$bankName $cardName';
       case CardType.debit:
-        return '$bankName ${accountType ?? 'Debit Card'}';
+        return '$bankName ${accountType ?? 'Banka Kartı'}';
       case CardType.cash:
         return 'Nakit';
     }

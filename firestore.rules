@@ -313,6 +313,26 @@ match /installment_details/{installmentDetailId} {
     }
     
     // =====================================================
+    // ANONİM ANALİTİK VERİLERİ - Sadece yazma izni
+    // =====================================================
+    match /anonymous_analytics/{documentId} {
+      // Authenticated kullanıcılar yazabilir (anonim veri toplama için)
+      // Kimse okuyamaz (gizlilik için)
+      allow create: if request.auth != null &&
+                     'anonymousId' in request.resource.data &&
+                     'amount' in request.resource.data &&
+                     'category' in request.resource.data &&
+                     'transactionDate' in request.resource.data &&
+                     'timestamp' in request.resource.data &&
+                     'isInstallment' in request.resource.data &&
+                     request.resource.data.amount is number &&
+                     request.resource.data.amount > 0 &&
+                     request.resource.data.isInstallment is bool;
+      allow read: if false; // Sadece admin (Firebase Console'dan) okuyabilir
+      allow update, delete: if false; // Güncelleme ve silme yasak
+    }
+    
+    // =====================================================
     // GENEL KURALLAR
     // =====================================================
     

@@ -9,10 +9,14 @@ import '../widgets/debit_card_widget.dart';
 import '../widgets/edit_debit_card_form.dart';
 import '../widgets/add_debit_card_form.dart';
 import '../widgets/card_transaction_section.dart';
-import '../../home/bottom_sheets/card_detail_bottom_sheet.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/events/card_events.dart';
+import '../../../core/services/premium_service.dart';
+import '../../premium/premium_offer_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
+import '../../advertisement/config/advertisement_config.dart' as config;
+import '../../advertisement/models/advertisement_models.dart';
 
 class DebitCardsTab extends StatefulWidget {
   final AppLocalizations l10n;
@@ -33,10 +37,21 @@ class _DebitCardsTabState extends State<DebitCardsTab>
   int _currentPage = 0;
   VoidCallback? _providerListener;
   UnifiedProviderV2? _unifiedProviderV2;
+  late GoogleAdsRealBannerService _debitCardsBannerService;
 
   @override
   void initState() {
     super.initState();
+
+    // Debit Cards tab banner reklamını başlat
+    _debitCardsBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.debitCardsTabBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Reklamı yükle
+    _debitCardsBannerService.loadAd();
 
     // Card event listener'larını başlat
     _setupCardEventListeners();
@@ -151,6 +166,7 @@ class _DebitCardsTabState extends State<DebitCardsTab>
   @override
   void dispose() {
     _pageController.dispose();
+    _debitCardsBannerService.dispose();
     if (_providerListener != null && _unifiedProviderV2 != null) {
       try {
         _unifiedProviderV2!.removeListener(_providerListener!);
@@ -161,119 +177,151 @@ class _DebitCardsTabState extends State<DebitCardsTab>
     super.dispose();
   }
 
-  void _showCardDetail(
-    BuildContext context,
-    card,
-    ThemeProvider themeProvider,
-    bool isDark,
-  ) {
-    final gradientColors = AppConstants.getBankGradientColors(
-      card['bankCode'] ?? 'qanta',
-    );
-    final accentColor = AppConstants.getBankAccentColor(
-      card['bankCode'] ?? 'qanta',
-    );
-
-    CardDetailBottomSheet.show(
-      context,
-      card['cardName'] ??
-          AppConstants.getLocalizedBankName(
-            card['bankCode'] ?? 'qanta',
-            AppLocalizations.of(context)!,
-          ),
-      widget.l10n.debit,
-      card['maskedCardNumber'] ?? '**** **** **** ****',
-      card['balance']?.toDouble() ?? 0.0,
-      gradientColors,
-      accentColor,
-      themeProvider,
-      isDark,
-    );
+  String _getLocalizedCardName(String? cardName, String? bankCode, String localizedCardType) {
+    if (cardName == null || cardName.isEmpty) {
+      return '${AppConstants.getLocalizedBankName(bankCode ?? 'qanta', AppLocalizations.of(context)!)} $localizedCardType';
+    }
+    
+    // Remove card type phrases in any language from cardName
+    String cleanName = cardName
+        .replaceAll(RegExp(r'\s*(Credit Card|Kredi Kartı|Debit Card|Banka Kartı)\s*$', caseSensitive: false), '')
+        .trim();
+    
+    // If nothing left after cleaning, use bank name
+    if (cleanName.isEmpty) {
+      return '${AppConstants.getLocalizedBankName(bankCode ?? 'qanta', AppLocalizations.of(context)!)} $localizedCardType';
+    }
+    
+    // Return cleaned name + localized card type
+    return '$cleanName $localizedCardType';
   }
 
   void _showCardActions(BuildContext context, card) {
     HapticFeedback.mediumImpact();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    showCupertinoModalPopup(
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text(
-          card['cardName'] ??
-              AppConstants.getLocalizedBankName(
-                card['bankCode'] ?? 'qanta',
-                AppLocalizations.of(context)!,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              // Handle
+              Container(
+                width: 36,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: isDark 
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(1.5),
+                ),
               ),
-          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        message: Text(
-          AppLocalizations.of(context)!.debitCard,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            color: CupertinoColors.secondaryLabel,
-          ),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              _editCard(card);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  CupertinoIcons.pencil,
-                  color: CupertinoColors.systemBlue,
-                  size: 20,
+              const SizedBox(height: 20),
+              
+              // Title
+              Text(
+                _getLocalizedCardName(
+                  card['cardName'],
+                  card['bankCode'],
+                  AppLocalizations.of(context)!.debitCard,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Düzenle',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: CupertinoColors.systemBlue,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF1A1A1A),
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Divider
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                color: isDark 
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.08),
+              ),
+              
+              // Edit
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  _editCard(card);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.edit_outlined,
+                        size: 22,
+                        color: isDark 
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : const Color(0xFF3C3C43).withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        AppLocalizations.of(context)?.edit ?? 'Edit',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF1A1A1A),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(context);
-              _showDeleteConfirmation(card);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  CupertinoIcons.delete,
-                  color: CupertinoColors.destructiveRed,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  AppLocalizations.of(context)?.delete ?? 'Delete',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: CupertinoColors.destructiveRed,
+              ),
+              
+              // Divider
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                indent: 24,
+                color: isDark 
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.08),
+              ),
+              
+              // Delete
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteConfirmation(card);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.delete_outline,
+                        size: 22,
+                        color: Color(0xFFFF453A),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        AppLocalizations.of(context)?.delete ?? 'Delete',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFFFF453A),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            AppLocalizations.of(context)?.cancel ?? 'Cancel',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: CupertinoColors.systemBlue,
-            ),
+              ),
+              
+              const SizedBox(height: 12),
+            ],
           ),
         ),
       ),
@@ -285,7 +333,7 @@ class _DebitCardsTabState extends State<DebitCardsTab>
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'Kartı Sil',
+          AppLocalizations.of(context)!.deleteCard,
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -293,7 +341,9 @@ class _DebitCardsTabState extends State<DebitCardsTab>
           ),
         ),
         message: Text(
-          '${card['cardName'] ?? AppConstants.getLocalizedBankName(card['bankCode'] ?? 'qanta', AppLocalizations.of(context)!)} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.',
+          AppLocalizations.of(context)!.deleteCardConfirm(
+            card['cardName'] ?? AppConstants.getLocalizedBankName(card['bankCode'] ?? 'qanta', AppLocalizations.of(context)!)
+          ),
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -308,7 +358,7 @@ class _DebitCardsTabState extends State<DebitCardsTab>
               _deleteCard(card);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)?.delete ?? 'Delete',
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -395,7 +445,7 @@ class _DebitCardsTabState extends State<DebitCardsTab>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Kart silinirken hata oluştu',
+              AppLocalizations.of(context)!.cardDeleteError,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -488,12 +538,7 @@ class _DebitCardsTabState extends State<DebitCardsTab>
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: GestureDetector(
-                              onTap: () => _showCardDetail(
-                                context,
-                                card,
-                                themeProvider,
-                                isDark,
-                              ),
+                              onTap: null, // Already in cards page
                               onLongPress: () =>
                                   _showCardActions(context, card),
                               child: SizedBox(
@@ -501,12 +546,7 @@ class _DebitCardsTabState extends State<DebitCardsTab>
                                 height: 180, // Kredi kartı ile aynı yükseklik
                                 child: DebitCardWidget(
                                   card: card,
-                                  onTap: () => _showCardDetail(
-                                    context,
-                                    card,
-                                    themeProvider,
-                                    isDark,
-                                  ),
+                                  onTap: null, // Already in cards page
                                 ),
                               ),
                             ),
@@ -516,6 +556,27 @@ class _DebitCardsTabState extends State<DebitCardsTab>
                     ),
 
                     const SizedBox(height: 20),
+
+                    // Banner reklam - Debit card'lardan sonra (Premium kullanıcılara gösterilmez)
+                    Consumer<PremiumService>(
+                      builder: (context, premiumService, child) {
+                        if (premiumService.isPremium) return const SizedBox.shrink();
+                        
+                        if (_debitCardsBannerService.isLoaded && _debitCardsBannerService.bannerWidget != null) {
+                          return Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                                height: 50,
+                                child: _debitCardsBannerService.bannerWidget!,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
 
                     // Sayfa göstergesi (dots)
                     if (unifiedProviderV2.debitCards.length > 1)
@@ -668,6 +729,22 @@ class _DebitCardsTabState extends State<DebitCardsTab>
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(16),
                                 onTap: () {
+                                  // Kart limiti kontrolü
+                                  final premiumService = context.read<PremiumService>();
+                                  final totalCards = unifiedProviderV2.debitCards.length + unifiedProviderV2.creditCards.length;
+                                  
+                                  if (!premiumService.canAddCard(totalCards)) {
+                                    // Premium teklif ekranını göster
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const PremiumOfferScreen(),
+                                        fullscreenDialog: true,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  
                                   // Debit card form'unu aç
                                   showModalBottomSheet(
                                     context: context,

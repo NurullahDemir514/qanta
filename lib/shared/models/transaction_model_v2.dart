@@ -1,6 +1,8 @@
-import '../utils/date_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
+import '../services/category_icon_service.dart';
+import '../utils/date_utils.dart' as custom_date_utils;
 
 /// Installment information for display purposes
 class InstallmentInfo {
@@ -171,7 +173,7 @@ class TransactionModelV2 {
 
   /// **Updated:** Use centralized DateUtils for consistent date parsing
   static DateTime _parseDateTime(dynamic value) {
-    return DateUtils.fromFirebase(value);
+    return custom_date_utils.DateUtils.fromFirebase(value);
   }
 
   /// Convert to JSON with consistent date formatting
@@ -184,7 +186,7 @@ class TransactionModelV2 {
       'type': type.value,
       'amount': amount,
       'description': description,
-      'transaction_date': DateUtils.toIso8601(transactionDate),
+      'transaction_date': custom_date_utils.DateUtils.toIso8601(transactionDate),
       'category_id': categoryId,
       'source_account_id': sourceAccountId,
       'target_account_id': targetAccountId,
@@ -196,8 +198,8 @@ class TransactionModelV2 {
       'stock_name': stockName,
       'stock_quantity': stockQuantity,
       'stock_price': stockPrice,
-      'created_at': DateUtils.toIso8601(createdAt),
-      'updated_at': DateUtils.toIso8601(updatedAt),
+      'created_at': custom_date_utils.DateUtils.toIso8601(createdAt),
+      'updated_at': custom_date_utils.DateUtils.toIso8601(updatedAt),
     };
   }
 
@@ -410,6 +412,36 @@ class TransactionWithDetailsV2 extends TransactionModelV2 {
         // For income: show category name as title
         if (categoryName != null) {
           return categoryName!;
+        }
+        // If no category name, clean description from installment info
+        return _cleanDescriptionFromInstallmentInfo(description);
+      case TransactionType.transfer:
+        // For transfers: show description as title
+        return description;
+      case TransactionType.stock:
+        // For stocks: show simple stock transaction title
+        if (stockSymbol != null) {
+          final action = amount > 0 ? 'Satış' : 'Alış';
+          return '$action $stockSymbol';
+        }
+        return description;
+    }
+  }
+
+  /// Get localized display title with BuildContext
+  String getLocalizedDisplayTitle(BuildContext context) {
+    switch (type) {
+      case TransactionType.expense:
+        // For expenses: show localized category name as title
+        if (categoryName != null) {
+          return CategoryIconService.getLocalizedCategoryName(categoryName!, context);
+        }
+        // If no category name, clean description from installment info
+        return _cleanDescriptionFromInstallmentInfo(description);
+      case TransactionType.income:
+        // For income: show localized category name as title
+        if (categoryName != null) {
+          return CategoryIconService.getLocalizedCategoryName(categoryName!, context);
         }
         // If no category name, clean description from installment info
         return _cleanDescriptionFromInstallmentInfo(description);

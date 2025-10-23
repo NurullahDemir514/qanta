@@ -9,6 +9,3 @@ export 'installment_models_v2.dart';
 
 // Legacy models (for backward compatibility during migration)
 export 'user_model.dart';
-
-// Quick Note models
-export 'quick_note_model.dart'; 

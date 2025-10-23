@@ -117,22 +117,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get defaultUserName => 'User';
 
   @override
-  String get nameRequired => 'Your name is required';
+  String get nameRequired => 'Please enter your name';
 
   @override
-  String get emailRequired => 'Email is required';
+  String get emailRequired => 'Please enter your email address';
 
   @override
-  String get emailInvalid => 'Please enter a valid email';
+  String get emailInvalid => 'Please enter a valid email address';
 
   @override
-  String get passwordRequired => 'Password is required';
+  String get passwordRequired => 'Please enter your password';
 
   @override
   String get passwordTooShort => 'Password must be at least 6 characters';
 
   @override
-  String get confirmPasswordRequired => 'Password confirmation is required';
+  String get confirmPasswordRequired => 'Please confirm your password';
 
   @override
   String get passwordsDoNotMatch => 'Passwords do not match';
@@ -172,31 +172,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerError => 'Registration error';
 
   @override
+  String get networkError =>
+      'Please check your internet connection and try again';
+
+  @override
   String get emailNotConfirmed =>
       'You need to verify your email address. Please check your email.';
 
   @override
   String get invalidCredentials =>
-      'Invalid email or password. Please try again.';
+      'Invalid email or password. Please check your credentials and try again.';
 
   @override
-  String get tooManyRequests => 'Too many attempts. Please try again later.';
+  String get tooManyRequests =>
+      'Too many attempts. Please wait a few minutes and try again.';
 
   @override
   String get invalidEmailAddress =>
-      'Invalid email address. Please enter a valid email.';
+      'Invalid email address. Please enter a valid email address.';
 
   @override
   String get passwordTooShortError =>
-      'Password is too short. Must be at least 6 characters.';
+      'Password is too short. Please enter a password with at least 6 characters.';
 
   @override
   String get userAlreadyRegistered =>
-      'This email is already registered. Try signing in.';
+      'This email is already registered. Please sign in instead.';
 
   @override
   String get signupDisabled =>
-      'Registration is currently disabled. Please try again later.';
+      'Registration is currently unavailable. Please try again later.';
+
+  @override
+  String unknownError(String error) {
+    return 'An error occurred: $error';
+  }
+
+  @override
+  String get noInternetConnection => 'No Internet Connection';
+
+  @override
+  String get noInternetDescription =>
+      'Please check your internet connection and try again';
+
+  @override
+  String get tryAgain => 'Try Again';
 
   @override
   String registrationSuccessful(String name) {
@@ -243,7 +263,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetUsed => 'Used';
 
   @override
-  String get remaining => 'Remaining:';
+  String get remaining => 'Remaining';
 
   @override
   String get installment => 'Installment';
@@ -262,10 +282,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createBudget => 'Create Budget';
 
   @override
+  String get averageDailySpending => 'Average Daily Spending';
+
+  @override
+  String get spent => 'spent';
+
+  @override
+  String get addExpense => 'Add Expense';
+
+  @override
   String get expenseLimitTracking => 'Expense Limit Tracking';
 
   @override
-  String get manage => 'Manage';
+  String get future => 'Future';
 
   @override
   String get thisMonthGrowth => 'this month';
@@ -345,6 +374,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get about => 'About';
+
+  @override
+  String get edit => 'Edit';
 
   @override
   String get editProfile => 'Edit Profile';
@@ -1131,7 +1163,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
-  String get updateCashBalance => 'Update Cash Balance';
+  String get updateCashBalance => 'Update your cash balance';
 
   @override
   String get updateCashBalanceDesc => 'Enter your current cash amount';
@@ -1157,11 +1189,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cashAccountLoadError => 'Error loading cash account';
 
   @override
-  String unknownError(String error) {
-    return 'An error occurred: $error';
-  }
-
-  @override
   String get retry => 'Retry';
 
   @override
@@ -1173,6 +1200,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get balanceUpdated => 'Cash Added';
+
+  @override
+  String get updateBalance => 'Update Balance';
 
   @override
   String get walletBalanceUpdated => 'Manual cash addition';
@@ -1289,9 +1319,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectionError => 'Connection problem occurred';
-
-  @override
-  String get tryAgain => 'Try Again';
 
   @override
   String get noAccountsAvailable => 'No accounts available';
@@ -1624,21 +1651,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelAction => 'Cancel';
-
-  @override
-  String get quickNotes => 'Quick Notes';
-
-  @override
-  String get quickNotesSubtitle =>
-      'Persistent notification for instant note taking';
-
-  @override
-  String get quickNotesNotificationEnabled =>
-      'Quick notes notification enabled';
-
-  @override
-  String get quickNotesNotificationDisabled =>
-      'Quick notes notification disabled';
 
   @override
   String get notificationPermissionRequired =>
@@ -1984,6 +1996,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalDebt => 'Total Debt';
 
   @override
+  String get creditCardDebt => 'Credit Card Debt';
+
+  @override
+  String cardCount(int count) {
+    return '$count cards';
+  }
+
+  @override
   String get noTransactionsForThisCard => 'No transactions found for this card';
 
   @override
@@ -2267,13 +2287,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get howToUseBudgetManagementAnswer =>
       'You can set monthly limits for categories, track your expenses, and receive alerts when limits are exceeded.';
-
-  @override
-  String get whatIsQuickNotesFeature => 'What is the quick notes feature?';
-
-  @override
-  String get whatIsQuickNotesFeatureAnswer =>
-      'You can quickly take notes with persistent notifications, add photos, and categorize your notes.';
 
   @override
   String get appCrashingWhatToDo => 'The app is crashing, what should I do?';
@@ -2619,16 +2632,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allNotifications => 'All Notifications';
-
-  @override
-  String get pendingNotes => 'Pending';
-
-  @override
-  String get addQuickNote => 'Add Quick Note';
-
-  @override
-  String get addQuickNoteDescription =>
-      'Write your expense or income note. You can add it as a transaction later.';
 
   @override
   String exampleExpenseNote(String currency) {
@@ -3063,6 +3066,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addMoney => 'Add Money';
 
   @override
+  String get addBankAccount => 'Add bank account';
+
+  @override
+  String get noBankAccountCashZero =>
+      'Your cash balance is zero and you have no bank account';
+
+  @override
+  String get updateCashOrAddBank =>
+      'Update your cash balance or add bank account';
+
+  @override
   String get totalValue => 'Total Value';
 
   @override
@@ -3112,14 +3126,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get returnLabel => 'Return';
 
   @override
-  String get quickNotesTitle => 'Quick Notes';
-
-  @override
-  String pendingNotesCount(int count) {
-    return '$count pending notes';
-  }
-
-  @override
   String get quickAddNote => 'Quick Add Note';
 
   @override
@@ -3136,6 +3142,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addButton => 'Add';
+
+  @override
+  String get pendingNotes => 'Pending';
 
   @override
   String get processedNotes => 'Processed';
@@ -3407,9 +3416,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insufficientBalanceTitle => 'Insufficient Balance';
 
   @override
-  String get spent => 'spent';
-
-  @override
   String get spentAmount => 'Spent:';
 
   @override
@@ -3423,6 +3429,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get limitAmountPlaceholder => '0.00';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get selectStartDate => 'Select start date';
+
+  @override
+  String get startDateHint => 'Budget start date';
+
+  @override
+  String get limitDuration => 'Limit Duration';
+
+  @override
+  String get oneTime => 'One Time';
+
+  @override
+  String get recurring => 'Recurring';
+
+  @override
+  String limitWillRenew(String period) {
+    return 'This limit will automatically renew $period';
+  }
+
+  @override
+  String get limitOneTime => 'This limit will be created as one-time';
 
   @override
   String get saveLimit => 'Save Limit';
@@ -3528,4 +3560,292 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tryDifferentFilter => 'Try selecting a different filter';
+
+  @override
+  String get lunchBreak => 'Lunch Break';
+
+  @override
+  String get lunchBreakMessage =>
+      'Half the day has passed, check today\'s expenses';
+
+  @override
+  String get eveningCheck => 'Evening Check';
+
+  @override
+  String get eveningCheckMessage => 'Don\'t forget to record today\'s expenses';
+
+  @override
+  String get dayEnd => 'Day End';
+
+  @override
+  String get dayEndMessage => 'Note today\'s income and expenses';
+
+  @override
+  String get qantaReminders => 'Qanta Reminders';
+
+  @override
+  String get reminderChannelDescription => 'Expense and income reminders';
+
+  @override
+  String budgetExceededWarning(String amount) {
+    return 'This expense will exceed your budget limit by $amount₺';
+  }
+
+  @override
+  String budgetExceededWarningTotal(String amount) {
+    return 'This expense will exceed your budget limit by $amount₺';
+  }
+
+  @override
+  String get budgetNearLimitWarning =>
+      'This expense will exceed 80% of your budget limit';
+
+  @override
+  String get exampleMarketShopping => 'e.g. Grocery shopping';
+
+  @override
+  String get exampleSalary => 'e.g. Salary';
+
+  @override
+  String get accountInfoError => 'Account information could not be retrieved';
+
+  @override
+  String transactionError(String error) {
+    return 'Error occurred while adding transaction: $error';
+  }
+
+  @override
+  String get limitDeleteError => 'Limit could not be deleted';
+
+  @override
+  String get installment_summary => 'Installments';
+
+  @override
+  String get manage => 'Manage';
+
+  @override
+  String get overallBudget => 'Overall Budget';
+
+  @override
+  String get categoryDistribution => 'Category Distribution';
+
+  @override
+  String get spendingStatus => 'Spending Status';
+
+  @override
+  String get duplicateBudgetWarning => 'Existing Budget';
+
+  @override
+  String get duplicateBudgetMessage =>
+      'A budget already exists for this category in the same period. Use the budget management page to edit the existing budget.';
+
+  @override
+  String get categories => 'categories';
+
+  @override
+  String get overBudget => 'Over Budget';
+
+  @override
+  String budgetExceededBy(Object amount) {
+    return 'You exceeded your budget by $amount';
+  }
+
+  @override
+  String get days => 'days';
+
+  @override
+  String get weeks => 'weeks';
+
+  @override
+  String get months => 'months';
+
+  @override
+  String get years => 'years';
+
+  @override
+  String get weeklyTrend => 'Weekly Trend';
+
+  @override
+  String get weeklyTrendExplanation =>
+      'Shows spending pattern of the last 7 days. Higher spending on weekends and lower on Mondays is normal.';
+
+  @override
+  String get dailyLimit => 'Daily Limit';
+
+  @override
+  String get fastSpendingExplanation =>
+      'You are spending more than 15% of your daily budget. It is recommended to be more careful.';
+
+  @override
+  String get normalSpendingExplanation =>
+      'You are spending between 8-15% of your daily budget. This is a healthy spending rate.';
+
+  @override
+  String get slowSpendingExplanation =>
+      'You are spending less than 8% of your daily budget. You are saving!';
+
+  @override
+  String get defaultSpendingExplanation =>
+      'This amount is your total budget divided by remaining days.';
+
+  @override
+  String get analyticsConsentTitle => 'Help Us Improve the App';
+
+  @override
+  String get analyticsConsentMessage =>
+      'We want to make Qanta better for you! By collecting anonymous spending data, we can improve the app and offer better features.\n\n• Your data is completely anonymous\n• Personal information is never shared\n• Only spending amounts and categories are collected\n• You can opt out anytime';
+
+  @override
+  String get analyticsAccept => 'I Accept';
+
+  @override
+  String get analyticsDecline => 'No, Thanks';
+
+  @override
+  String get analyticsConsentNotice =>
+      'You can change this permission in Profile > Preferences.';
+
+  @override
+  String get anonymousDataCollection => 'Anonymous Data Collection';
+
+  @override
+  String get anonymousDataCollectionSubtitle =>
+      'Share anonymous spending data\nto help improve the app';
+
+  @override
+  String get analyticsEnabled => 'Anonymous data collection enabled';
+
+  @override
+  String get analyticsDisabled => 'Anonymous data collection disabled';
+
+  @override
+  String get cardLimitReached => 'Card Limit Reached';
+
+  @override
+  String get cardLimitReachedMessage =>
+      'You can add up to 3 cards in the free version';
+
+  @override
+  String get upgradeToPremium => 'Upgrade to Premium';
+
+  @override
+  String get premiumOfferTitle => 'Qanta Premium';
+
+  @override
+  String get premiumOfferSubtitle => 'Unlock all features';
+
+  @override
+  String get freeVersion => 'Free';
+
+  @override
+  String get premiumVersion => 'Premium';
+
+  @override
+  String get featureCardLimit => 'Card Limit';
+
+  @override
+  String get featureCardLimitFree => '3 cards';
+
+  @override
+  String get featureCardLimitPremium => 'Unlimited';
+
+  @override
+  String get featureStockLimit => 'Stock Limit';
+
+  @override
+  String get featureStockLimitFree => '3 stocks';
+
+  @override
+  String get featureStockLimitPremium => 'Unlimited';
+
+  @override
+  String get stockLimitReached => 'Stock Limit Reached';
+
+  @override
+  String get stockLimitReachedMessage =>
+      'You can add up to 3 stocks in the free version';
+
+  @override
+  String get featureAds => 'Advertisements';
+
+  @override
+  String get featureAdsFree => 'Yes';
+
+  @override
+  String get featureAdsPremium => 'No';
+
+  @override
+  String get featureSupport => 'Support';
+
+  @override
+  String get featureSupportFree => 'Community';
+
+  @override
+  String get featureSupportPremium => 'Priority';
+
+  @override
+  String get featureUpdates => 'Updates';
+
+  @override
+  String get featureUpdatesFree => 'Standard';
+
+  @override
+  String get featureUpdatesPremium => 'Early Access';
+
+  @override
+  String get getQantaPremium => 'Get Qanta Premium';
+
+  @override
+  String get continueWithFree => 'Continue with Free';
+
+  @override
+  String get premiumBenefitsTitle => 'Premium Benefits';
+
+  @override
+  String get upgradeToPremiumBanner => 'Upgrade to Premium';
+
+  @override
+  String get premiumBannerSubtitle => 'Remove ads, unlimited features';
+
+  @override
+  String get discover => 'Discover';
+
+  @override
+  String get premiumStatus => 'Premium';
+
+  @override
+  String get premiumActive => 'Premium Active';
+
+  @override
+  String get premiumActiveDescription =>
+      'Unlimited features, ad-free experience';
+
+  @override
+  String get manageSubscription => 'Manage Subscription';
+
+  @override
+  String get manageSubscriptionDescription =>
+      'Edit subscription settings in Google Play';
+
+  @override
+  String get restorePurchases => 'Restore Purchases';
+
+  @override
+  String get restorePurchasesDescription =>
+      'Restore premium if you purchased before';
+
+  @override
+  String get checkingPurchases => 'Checking...';
+
+  @override
+  String get premiumRestored => 'Premium restored!';
+
+  @override
+  String get noActivePremium => 'No active premium subscription found';
+
+  @override
+  String get playStoreError => 'Could not open Google Play Store';
+
+  @override
+  String get upgradeNow => 'Upgrade';
 }

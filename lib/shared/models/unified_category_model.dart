@@ -117,7 +117,8 @@ enum CategoryType {
   transfer,
   other;
 
-  /// Get display name
+  /// Get display name (deprecated - use CategoryIconService.getCategoryTypeName instead)
+  @Deprecated('Use CategoryIconService.getCategoryTypeName(context, this) instead')
   String get displayName {
     switch (this) {
       case CategoryType.income:

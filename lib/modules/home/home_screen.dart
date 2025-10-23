@@ -5,9 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/services/firebase_auth_service.dart';
 import '../../core/services/profile_image_service.dart';
-import '../../core/services/quick_note_notification_service.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/providers/unified_card_provider.dart';
 import '../../core/providers/unified_provider_v2.dart';
+import '../../core/services/premium_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../stocks/providers/stock_provider.dart';
 import '../../shared/widgets/app_page_scaffold.dart';
@@ -25,15 +26,17 @@ import 'widgets/balance_overview_card.dart';
 import 'widgets/budget_overview_card.dart';
 import 'widgets/cards_section.dart';
 import 'widgets/recent_transactions_section.dart';
-import 'widgets/quick_notes_card.dart';
 import 'widgets/top_gainers_section.dart';
 import 'utils/greeting_utils.dart';
 import '../../core/providers/profile_provider.dart';
-import '../../shared/widgets/quick_note_dialog.dart';
 import '../../shared/widgets/reminder_checker.dart';
-import '../../modules/advertisement/services/google_ads_real_banner_service.dart';
 import '../../modules/advertisement/config/advertisement_config.dart' as config;
-import '../../modules/advertisement/models/advertisement_models.dart';
+import '../../modules/advertisement/services/native_ad_service.dart';
+import '../../core/services/analytics_consent_service.dart';
+import '../../shared/widgets/analytics_consent_dialog.dart';
+import '../advertisement/providers/advertisement_provider.dart';
+import '../advertisement/services/google_ads_interstitial_service.dart';
+import '../premium/premium_offer_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -46,17 +49,171 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late int _currentIndex;
+  int _statisticsTabVisitCount = 0; // İstatistik sekmesi kaç kez ziyaret edildi
+  int _transactionsTabVisitCount = 0; // İşlemler sekmesi kaç kez ziyaret edildi
+  int _stocksTabVisitCount = 0; // Yatırım sekmesi kaç kez ziyaret edildi
+  late GoogleAdsInterstitialService _transactionsInterstitialService;
+  late GoogleAdsInterstitialService _stocksInterstitialService;
+  late PremiumService _premiumService;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    
+    // Transactions için interstitial servisini başlat
+    _transactionsInterstitialService = GoogleAdsInterstitialService(
+      adUnitId: config.AdvertisementConfig.transactionsInterstitial.interstitialAdUnitId,
+      isTestMode: false,
+    );
+    
+    // Stocks için interstitial servisini başlat
+    _stocksInterstitialService = GoogleAdsInterstitialService(
+      adUnitId: config.AdvertisementConfig.stocksInterstitial.interstitialAdUnitId,
+      isTestMode: false,
+    );
+    
+    // Reklamları yükle
+    _transactionsInterstitialService.loadAd();
+    _stocksInterstitialService.loadAd();
+    
+    // Premium service'i al ve dinle
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _premiumService = context.read<PremiumService>();
+      _premiumService.addListener(_onPremiumChanged);
+    });
+  }
+  
+  void _onPremiumChanged() {
+    if (!_premiumService.isPremium) {
+      // Premium kapatıldığında sayaçları sıfırla (tekrar reklam gösterebilmek için)
+      setState(() {
+        _transactionsTabVisitCount = 0;
+        _stocksTabVisitCount = 0;
+      });
+      debugPrint('💎 Premium deactivated - Resetting visit counters');
+    }
+  }
+
+  @override
+  void dispose() {
+    _premiumService.removeListener(_onPremiumChanged);
+    _transactionsInterstitialService.dispose();
+    _stocksInterstitialService.dispose();
+    super.dispose();
   }
 
   void _onTabChanged(int index) {
     setState(() {
       _currentIndex = index;
+      
+      // İstatistik sekmesine (index 3) geçildiğinde sayacı artır
+      if (index == 3) {
+        _statisticsTabVisitCount++;
+      }
+      
+      // İşlemler sekmesine (index 1) geçildiğinde
+      if (index == 1) {
+        _transactionsTabVisitCount++;
+        debugPrint('📊 Transactions tab visit count: $_transactionsTabVisitCount');
+        
+        // İlk ziyaret VEYA 3'ün katları (3, 6, 9, ...) ise reklam göster
+        if (_transactionsTabVisitCount == 1 || _transactionsTabVisitCount % 3 == 0) {
+          debugPrint('🎬 Transactions: Should show ad (visit #$_transactionsTabVisitCount)');
+          _showTransactionsInterstitialAd();
+        }
+      }
+      
+      // Yatırım sekmesine (index 5) geçildiğinde
+      if (index == 5) {
+        _stocksTabVisitCount++;
+        debugPrint('📊 Stocks tab visit count: $_stocksTabVisitCount');
+        
+        // İlk ziyaret VEYA 3'ün katları (3, 6, 9, ...) ise reklam göster
+        if (_stocksTabVisitCount == 1 || _stocksTabVisitCount % 3 == 0) {
+          debugPrint('🎬 Stocks: Should show ad (visit #$_stocksTabVisitCount)');
+          _showStocksInterstitialAd();
+        }
+      }
     });
+  }
+
+  /// İşlemler sayfası için geçiş reklamını göster
+  Future<void> _showTransactionsInterstitialAd() async {
+    // Premium kullanıcılar için reklam gösterme
+    if (_premiumService.isPremium) {
+      debugPrint('💎 Transactions: Premium user - Skipping interstitial ad');
+      return;
+    }
+    
+    // Bir saniye bekle (smooth geçiş için)
+    await Future.delayed(const Duration(seconds: 1));
+    
+    if (!mounted) return;
+    
+    try {
+      // Interstitial reklamın yüklenmesini bekle (max 15 saniye)
+      int loadAttempts = 0;
+      while (!_transactionsInterstitialService.isLoaded && loadAttempts < 30) {
+        debugPrint('⏳ Transactions: Waiting for ad to load... (${loadAttempts + 1}/30)');
+        await Future.delayed(const Duration(milliseconds: 500));
+        loadAttempts++;
+      }
+      
+      if (!_transactionsInterstitialService.isLoaded) {
+        debugPrint('⚠️ Transactions: Interstitial ad not loaded after 15 seconds');
+        debugPrint('💡 TIP: Test cihazlarda AdMob "No fill" nedeniyle reklam göstermeyebilir');
+        return;
+      }
+      
+      debugPrint('🎬 Transactions: Showing interstitial ad...');
+      await _transactionsInterstitialService.showInterstitialAd();
+      debugPrint('✅ Transactions: Interstitial ad shown successfully');
+      
+      // Bir sonraki için reklamı tekrar yükle
+      _transactionsInterstitialService.loadAd();
+    } catch (e) {
+      debugPrint('❌ Transactions: Failed to show ad: $e');
+    }
+  }
+
+  /// Yatırım (Stocks) sayfası için geçiş reklamını göster
+  Future<void> _showStocksInterstitialAd() async {
+    // Premium kullanıcılar için reklam gösterme
+    if (_premiumService.isPremium) {
+      debugPrint('💎 Stocks: Premium user - Skipping interstitial ad');
+      return;
+    }
+    
+    // Bir saniye bekle (smooth geçiş için)
+    await Future.delayed(const Duration(seconds: 1));
+    
+    if (!mounted) return;
+    
+    try {
+      // Interstitial reklamın yüklenmesini bekle (max 15 saniye)
+      int loadAttempts = 0;
+      while (!_stocksInterstitialService.isLoaded && loadAttempts < 30) {
+        debugPrint('⏳ Stocks: Waiting for ad to load... (${loadAttempts + 1}/30)');
+        await Future.delayed(const Duration(milliseconds: 500));
+        loadAttempts++;
+      }
+      
+      if (!_stocksInterstitialService.isLoaded) {
+        debugPrint('⚠️ Stocks: Interstitial ad not loaded after 15 seconds');
+        debugPrint('💡 TIP: Test cihazlarda AdMob "No fill" nedeniyle reklam göstermeyebilir');
+        return;
+      }
+      
+      debugPrint('🎬 Stocks: Showing interstitial ad...');
+      await _stocksInterstitialService.showInterstitialAd();
+      debugPrint('✅ Stocks: Interstitial ad shown successfully');
+      
+      // Bir sonraki için reklamı tekrar yükle
+      _stocksInterstitialService.loadAd();
+    } catch (e) {
+      debugPrint('❌ Stocks: Failed to show ad: $e');
+    }
   }
 
   @override
@@ -72,7 +229,10 @@ class _MainScreenState extends State<MainScreen> {
               const HomeScreen(),
               const TransactionsScreen(),
               const CardsScreen(),
-              const StatisticsScreen(),
+              StatisticsScreen(
+                key: ValueKey(_statisticsTabVisitCount),
+                isActive: _currentIndex == 3, // Sadece bu tab aktifken true
+              ),
               const CalendarScreen(),
               const StocksScreen(),
             ],
@@ -152,35 +312,92 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late GoogleAdsRealBannerService _budgetBannerService;
+  late NativeAdService _homeNativeAd;
+  late PremiumService _premiumService;
 
   @override
   void initState() {
     super.initState();
     
-    // Bütçe kartından sonraki banner reklam service'ini başlat
-    _budgetBannerService = GoogleAdsRealBannerService(
-      adUnitId: config.AdvertisementConfig.testBanner4.bannerAdUnitId,
-      size: AdvertisementSize.banner320x50,
-      isTestMode: true,
+    // Yerel gelişmiş reklam
+    _homeNativeAd = NativeAdService(
+      adUnitId: config.AdvertisementConfig.production.nativeAdUnitId!,
     );
-    
-    // İkinci reklamı hemen yükle
-    _budgetBannerService.loadAd();
     
     // Initialize providers
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Premium service listener ekle
+      _premiumService = context.read<PremiumService>();
+      _premiumService.addListener(_onPremiumChanged);
+      
+      // Premium değilse reklamı yükle
+      if (!_premiumService.isPremium) {
+        _homeNativeAd.load();
+        debugPrint('💎 HomeScreen: Loading native ad (not premium)');
+      } else {
+        debugPrint('💎 HomeScreen: Skipping native ad (premium user)');
+      }
       // Data already loaded in splash screen, no need to reload
       // Set context for notification service
-      QuickNoteNotificationService.setContext(context);
+      NotificationService().setContext(context);
+      
+      // Initialize advertisement provider
+      final adProvider = context.read<AdvertisementProvider>();
+      adProvider.initialize();
       
       debugPrint('🏠 HomeScreen.initState() - Data loading completed');
+      
+      // Analytics consent kontrolü - sadece ilk açılışta
+      _checkAndShowAnalyticsConsent();
     });
+  }
+
+  void _onPremiumChanged() {
+    if (_premiumService.isPremium) {
+      // Premium aktif - Native ad'ı dispose et
+      _homeNativeAd.disposeAd();
+      setState(() {}); // UI'ı güncelle
+      debugPrint('💎 HomeScreen: Premium active - Native ad disposed');
+    } else {
+      // Premium kapatıldı - Native ad'ı tekrar yükle
+      _homeNativeAd.load();
+      setState(() {}); // UI'ı güncelle
+      debugPrint('💎 HomeScreen: Premium deactivated - Reloading native ad');
+    }
+  }
+
+  /// Analytics consent kontrolü ve modalı göster
+  Future<void> _checkAndShowAnalyticsConsent() async {
+    try {
+      // Daha önce sorulmuş mu kontrol et
+      final hasBeenAsked = await AnalyticsConsentService.hasBeenAsked();
+      
+      if (!hasBeenAsked && mounted) {
+        // 1 saniye bekle (smooth görünüm için)
+        await Future.delayed(const Duration(seconds: 1));
+        
+        if (!mounted) return;
+        
+        // Modalı göster
+        await AnalyticsConsentDialog.show(
+          context,
+          onConsentGiven: () {
+            debugPrint('✅ Analytics consent given');
+          },
+          onConsentDeclined: () {
+            debugPrint('❌ Analytics consent declined');
+          },
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Error checking analytics consent: $e');
+    }
   }
 
   @override
   void dispose() {
-    _budgetBannerService.dispose();
+    _premiumService.removeListener(_onPremiumChanged);
+    _homeNativeAd.disposeAd();
     super.dispose();
   }
 
@@ -203,62 +420,67 @@ class _HomeScreenState extends State<HomeScreen> {
               subtitleFontSize: 13, // Daha küçük alt başlık
               bottomPadding: 125,
               actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: ProfileAvatar(
-                    imageUrl: profileImageUrl,
-                    userName: fullName,
-                    size: 44,
-                    showBorder: true,
-                    onTap: () {
-                      _navigateToProfile(context);
-                    },
-                  ),
+                Consumer<PremiumService>(
+                  builder: (context, premiumService, child) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: ProfileAvatar(
+                        imageUrl: profileImageUrl,
+                        userName: fullName,
+                        size: 44,
+                        showBorder: true,
+                        isPremium: premiumService.isPremium,
+                        onTap: () {
+                          _navigateToProfile(context);
+                        },
+                      ),
+                    );
+                  },
                 ),
               ],
               body: SliverToBoxAdapter(
-                child: SingleChildScrollView(
+                child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Center(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final double containerWidth = constraints.maxWidth * 1;
-                        return SizedBox(
-                          width: containerWidth,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const BalanceOverviewCard(),
-                              // TopGainersSection - Kendi içinde reactive
-                              const Column(
-                                children: [
-                                  SizedBox(height: 20),
-                                  TopGainersSection(),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              const BudgetOverviewCard(),
-                              // Banner reklam - Bütçe kartından sonra (sadece yüklendiyse göster)
-                              if (_budgetBannerService.isLoaded && _budgetBannerService.bannerWidget != null) ...[
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const BalanceOverviewCard(),
+                      // TopGainersSection - Kendi içinde reactive
+                      const Column(
+                        children: [
+                          SizedBox(height: 20),
+                          TopGainersSection(),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      const BudgetOverviewCard(),
+                      const SizedBox(height: 20),
+                      // Native Ad - RecentTransactionsSection üstü (Premium kullanıcılara gösterilmez)
+                      Consumer<PremiumService>(
+                        builder: (context, premiumService, child) {
+                          if (premiumService.isPremium) return const SizedBox.shrink();
+                          
+                          if (_homeNativeAd.isLoaded && _homeNativeAd.adWidget != null) {
+                            return Column(
+                              children: [
                                 const SizedBox(height: 12),
                                 Container(
                                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                                  height: 50,
-                                  child: _budgetBannerService.bannerWidget!,
+                                  height: 90,
+                                  child: _homeNativeAd.adWidget!,
                                 ),
                                 const SizedBox(height: 12),
                               ],
-                              if (!_budgetBannerService.isLoaded || _budgetBannerService.bannerWidget == null)
-                                const SizedBox(height: 20),
-                              const CardsSection(),
-                              const SizedBox(height: 20),
-                              const RecentTransactionsSection(),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                      const CardsSection(),
+                      const SizedBox(height: 20),
+                      const RecentTransactionsSection(),
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 ),
               ),

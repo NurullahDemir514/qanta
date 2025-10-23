@@ -205,8 +205,8 @@ class _CardsSectionState extends State<CardsSection> {
                   l10n.seeAll,
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF007AFF),
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? const Color(0xFFE5E5EA) : const Color(0xFF6D6D70),
                   ),
                 ),
               ),
@@ -285,8 +285,8 @@ class _CardsSectionState extends State<CardsSection> {
                 l10n.seeAll,
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF007AFF),
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? const Color(0xFFE5E5EA) : const Color(0xFF6D6D70),
                 ),
               ),
             ),
@@ -308,13 +308,12 @@ class _CardsSectionState extends State<CardsSection> {
                         ? CashBalanceCard(
                             balance: card['balance'] as double,
                             themeProvider: themeProvider,
+                            onTap: () => context.go('/cards'),
                           )
                         : card['cardType'] == 'debit'
                         ? DebitCardWidget(
                             card: card,
-                            onTap: () {
-                              // Handle debit card tap
-                            },
+                            onTap: () => context.go('/cards'),
                           )
                         : CreditCardWidget(
                             cardType: card['cardType'] as String,
@@ -328,6 +327,7 @@ class _CardsSectionState extends State<CardsSection> {
                             usagePercentage: card['usagePercentage'] as double?,
                             statementDate: card['statementDate'] as int?,
                             dueDate: card['dueDate'] as int?,
+                            onTap: () => context.go('/cards'),
                           ),
                   ),
                 );
@@ -362,13 +362,12 @@ class _CardsSectionState extends State<CardsSection> {
                               ? CashBalanceCard(
                                   balance: card['balance'] as double,
                                   themeProvider: themeProvider,
+                                  onTap: () => context.go('/cards'),
                                 )
                               : card['cardType'] == 'debit'
                               ? DebitCardWidget(
                                   card: card,
-                                  onTap: () {
-                                    // Handle debit card tap
-                                  },
+                                  onTap: () => context.go('/cards'),
                                 )
                               : CreditCardWidget(
                                   cardType: card['cardType'] as String,
@@ -384,6 +383,7 @@ class _CardsSectionState extends State<CardsSection> {
                                       card['usagePercentage'] as double?,
                                   statementDate: card['statementDate'] as int?,
                                   dueDate: card['dueDate'] as int?,
+                                  onTap: () => context.go('/cards'),
                                 ),
                         ),
                       );

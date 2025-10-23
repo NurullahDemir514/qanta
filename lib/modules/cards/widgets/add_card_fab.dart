@@ -2,8 +2,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/utils/fab_positioning.dart';
+import '../../../core/services/premium_service.dart';
+import '../../../core/providers/unified_provider_v2.dart';
+import '../../premium/premium_offer_screen.dart';
 import '../widgets/add_debit_card_form.dart';
 import '../widgets/add_credit_card_form.dart';
 
@@ -120,7 +124,7 @@ class _AddCardFabState extends State<AddCardFab>
                   // Debit Card Option
                   _buildCardTypeOption(
                     icon: Icons.account_balance_wallet_outlined,
-                    title: AppLocalizations.of(context)?.debitCard ?? 'Debit Card',
+                    title: AppLocalizations.of(context)?.debitCard ?? 'Banka Kartı',
                     subtitle: AppLocalizations.of(context)?.addDebitCardDescription ?? 'Add checking account card',
                     onTap: () {
                       Navigator.pop(context);
@@ -133,7 +137,7 @@ class _AddCardFabState extends State<AddCardFab>
                   // Credit Card Option
                   _buildCardTypeOption(
                     icon: Icons.credit_card_outlined,
-                    title: AppLocalizations.of(context)?.creditCard ?? 'Credit Card',
+                    title: AppLocalizations.of(context)?.creditCard ?? 'Kredi Kartı',
                     subtitle: AppLocalizations.of(context)?.addCreditCardDescription ?? 'Add your credit card information',
                     onTap: () {
                       Navigator.pop(context);
@@ -233,6 +237,9 @@ class _AddCardFabState extends State<AddCardFab>
   }
 
   void _showDebitCardForm() {
+    // Check card limit
+    if (!_checkCardLimit()) return;
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -251,6 +258,9 @@ class _AddCardFabState extends State<AddCardFab>
   }
 
   void _showCreditCardForm() {
+    // Check card limit
+    if (!_checkCardLimit()) return;
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -266,6 +276,30 @@ class _AddCardFabState extends State<AddCardFab>
         ),
       ),
     );
+  }
+
+  /// Kart limiti kontrolü - false dönerse ekleme yapılamaz
+  bool _checkCardLimit() {
+    final premiumService = context.read<PremiumService>();
+    final unifiedProvider = context.read<UnifiedProviderV2>();
+    
+    // Toplam kart sayısı (debit + credit)
+    final totalCards = unifiedProvider.debitCards.length + unifiedProvider.creditCards.length;
+    
+    // Premium kontrolü
+    if (!premiumService.canAddCard(totalCards)) {
+      // Premium teklif ekranını göster
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PremiumOfferScreen(),
+          fullscreenDialog: true,
+        ),
+      );
+      return false;
+    }
+    
+    return true;
   }
 
 

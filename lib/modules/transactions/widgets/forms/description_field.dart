@@ -33,13 +33,13 @@ class DescriptionField extends StatelessWidget {
             letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
             color: isDark 
               ? const Color(0xFF2C2C2E)
               : const Color(0xFFF8F8F8),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: errorText != null
                 ? const Color(0xFFFF3B30)
@@ -52,26 +52,19 @@ class DescriptionField extends StatelessWidget {
           child: TextField(
             controller: controller,
             onChanged: onChanged,
-            maxLines: 3,
+            maxLines: 1,
+            textInputAction: TextInputAction.done,
+            textCapitalization: TextCapitalization.words,
             style: GoogleFonts.inter(
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: FontWeight.w400,
               color: isDark ? Colors.white : Colors.black,
               letterSpacing: -0.2,
             ),
             decoration: InputDecoration(
-              labelText: hintText ?? l10n.description,
-              hintText: hintText,
-              labelStyle: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: isDark 
-                  ? const Color(0xFF8E8E93)
-                  : const Color(0xFF6D6D70),
-                letterSpacing: -0.2,
-              ),
+              hintText: hintText ?? l10n.exampleMarketShopping,
               hintStyle: GoogleFonts.inter(
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w400,
                 color: isDark 
                   ? const Color(0xFF8E8E93)
@@ -79,17 +72,16 @@ class DescriptionField extends StatelessWidget {
                 letterSpacing: -0.2,
               ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.all(16),
-              floatingLabelBehavior: FloatingLabelBehavior.auto,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
           ),
         ),
         if (errorText != null) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             errorText!,
             style: GoogleFonts.inter(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w400,
               color: const Color(0xFFFF3B30),
               letterSpacing: -0.1,

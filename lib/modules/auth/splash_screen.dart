@@ -301,7 +301,8 @@ class _SplashScreenState extends State<SplashScreen>
                       // App name
                       Text(
                         'Qanta',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
+                          fontFamily: '.SF Pro Display',
                           fontSize: 32,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.5,
@@ -320,8 +321,8 @@ class _SplashScreenState extends State<SplashScreen>
                           fontWeight: FontWeight.w400,
                           letterSpacing: 0.5,
                           color: isDark
-                              ? Colors.white.withOpacity(0.7)
-                              : AppConstants.primaryColor.withOpacity(0.7),
+                              ? Colors.white.withOpacity(1)
+                              : AppConstants.primaryColor.withOpacity(1),
                         ),
                         textAlign: TextAlign.center,
                       ),

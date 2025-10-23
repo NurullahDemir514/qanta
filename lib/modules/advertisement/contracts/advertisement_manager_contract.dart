@@ -39,6 +39,12 @@ abstract class AdvertisementConfigContract {
   /// Rewarded Ad Unit ID
   String get rewardedAdUnitId;
   
+  /// Native Ad Unit ID (optional)
+  String? get nativeAdUnitId;
+  
+  /// App Open Ad Unit ID (optional)
+  String? get appOpenAdUnitId;
+  
   /// Test modunda mı?
   bool get isTestMode;
   

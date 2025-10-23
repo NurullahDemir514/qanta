@@ -3,7 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import '../../core/services/firebase_auth_service.dart';
+import '../../core/services/profile_image_service.dart';
+import '../../core/services/image_cache_service.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/custom_button.dart';
@@ -13,6 +18,7 @@ import '../../core/firebase_client.dart';
 import '../../core/providers/unified_provider_v2.dart';
 import '../../modules/stocks/providers/stock_provider.dart';
 import '../../core/providers/profile_provider.dart';
+import '../../core/providers/cash_account_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -134,6 +140,9 @@ class _LoginPageState extends State<LoginPage> {
       final credential = await FirebaseAuthService.signInWithGoogle();
 
       if (credential.user != null && mounted) {
+        // Clear all caches and refresh profile data for existing user
+        await _clearAllCachesAndRefreshProfile();
+        
         await ReminderService.clearAllRemindersForCurrentUser();
 
         // Kullanıcı verilerini önceden yükle
@@ -146,7 +155,22 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        String errorMessage = '${l10n.googleSignInError}: ${e.toString()}';
+        debugPrint('🔴 Google Sign In Error: $e');
+        
+        final errorString = e.toString().toLowerCase();
+        
+        // User cancelled, don't show error
+        if (errorString.contains('cancelled') || errorString.contains('canceled') ||
+            errorString.contains('user_cancelled') || errorString.contains('sign_in_cancelled')) {
+          return;
+        }
+        
+        String errorMessage = l10n.googleSignInError;
+
+        // Handle specific errors
+        if (errorString.contains('network') || errorString.contains('connection')) {
+          errorMessage = l10n.networkError;
+        }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -176,6 +200,9 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (credential.user != null && mounted) {
+        // Clear all caches and refresh profile data for existing user
+        await _clearAllCachesAndRefreshProfile();
+        
         await ReminderService.clearAllRemindersForCurrentUser();
 
         // Kullanıcı verilerini önceden yükle
@@ -188,15 +215,32 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        String errorMessage = '${l10n.loginError}: ${e.toString()}';
+        debugPrint('🔴 Login Error: $e');
+        
+        String errorMessage = l10n.invalidCredentials; // Default to invalid credentials
+        final errorString = e.toString().toLowerCase();
 
-        // Handle specific Supabase auth errors
-        if (e.toString().contains('email_not_confirmed')) {
+        // Handle specific auth errors
+        if (errorString.contains('email_not_confirmed') || 
+            errorString.contains('email not confirmed')) {
           errorMessage = l10n.emailNotConfirmed;
-        } else if (e.toString().contains('invalid_credentials')) {
+        } else if (errorString.contains('invalid_credentials') || 
+                   errorString.contains('invalid login credentials') ||
+                   errorString.contains('invalid email') ||
+                   errorString.contains('invalid password') ||
+                   errorString.contains('wrong-password') ||
+                   errorString.contains('wrong password') ||
+                   errorString.contains('user-not-found') ||
+                   errorString.contains('user not found') ||
+                   errorString.contains('no user record')) {
           errorMessage = l10n.invalidCredentials;
-        } else if (e.toString().contains('too_many_requests')) {
+        } else if (errorString.contains('too_many_requests') || 
+                   errorString.contains('too-many-requests') ||
+                   errorString.contains('too many')) {
           errorMessage = l10n.tooManyRequests;
+        } else if (errorString.contains('network') || 
+                   errorString.contains('connection')) {
+          errorMessage = l10n.networkError;
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -209,6 +253,82 @@ class _LoginPageState extends State<LoginPage> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  /// Clear all caches and refresh profile data for existing user
+  Future<void> _clearAllCachesAndRefreshProfile() async {
+    try {
+      debugPrint('🧹 Clearing all caches for existing user...');
+      
+      // 1. Clear all provider data
+      final unifiedProvider = Provider.of<UnifiedProviderV2>(context, listen: false);
+      await unifiedProvider.clearAllData();
+      
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      await stockProvider.clearAllData();
+      
+      final cashProvider = Provider.of<CashAccountProvider>(context, listen: false);
+      cashProvider.clear();
+      
+      // 2. Clear profile provider and refresh
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      await profileProvider.clearProfile();
+      await profileProvider.refresh(); // Refresh with new user data
+      
+      // 3. Clear all caches
+      await ProfileImageService.instance.clearAllData();
+      await ImageCacheService.instance.clearCache();
+      
+      // 4. Clear SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      
+      // 5. Clear Flutter image cache
+      imageCache.clear();
+      imageCache.clearLiveImages();
+      
+      // 6. Clear temporary files
+      await _clearTemporaryFiles();
+      
+      debugPrint('✅ All caches cleared for existing user');
+    } catch (e) {
+      debugPrint('❌ Error clearing caches for existing user: $e');
+    }
+  }
+
+  /// Clear temporary files
+  Future<void> _clearTemporaryFiles() async {
+    try {
+      // App documents directory'yi temizle
+      final appDocDir = await getApplicationDocumentsDirectory();
+      if (await appDocDir.exists()) {
+        final files = await appDocDir.list().toList();
+        for (final file in files) {
+          if (file is File) {
+            await file.delete();
+          } else if (file is Directory) {
+            await file.delete(recursive: true);
+          }
+        }
+      }
+      
+      // Cache directory'yi temizle
+      final cacheDir = await getTemporaryDirectory();
+      if (await cacheDir.exists()) {
+        final files = await cacheDir.list().toList();
+        for (final file in files) {
+          if (file is File) {
+            await file.delete();
+          } else if (file is Directory) {
+            await file.delete(recursive: true);
+          }
+        }
+      }
+      
+      debugPrint('✅ Temporary files cleared');
+    } catch (e) {
+      debugPrint('❌ Error clearing temporary files: $e');
     }
   }
 

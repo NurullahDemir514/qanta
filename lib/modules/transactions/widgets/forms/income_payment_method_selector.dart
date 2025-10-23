@@ -31,6 +31,34 @@ class IncomePaymentMethodSelector extends StatefulWidget {
 
 class _IncomePaymentMethodSelectorState
     extends State<IncomePaymentMethodSelector> {
+  // Kart ismini temizle ve localize et
+  String _getLocalizedCardName(String? cardName, String? bankName, CardType cardType) {
+    final l10n = AppLocalizations.of(context)!;
+    final localizedCardType = cardType == CardType.credit ? l10n.creditCard : l10n.debitCard;
+    
+    if (cardName == null || cardName.isEmpty) {
+      return '${bankName ?? ''} $localizedCardType';
+    }
+    
+    // Remove card type phrases in any language from cardName
+    String cleanName = cardName
+        .replaceAll(RegExp(r'\s*(Credit Card|Kredi Kartı|Debit Card|Banka Kartı)\s*$', caseSensitive: false), '')
+        .trim();
+    
+    // If nothing left after cleaning, use bank name
+    if (cleanName.isEmpty && bankName != null) {
+      return '$bankName $localizedCardType';
+    }
+    
+    // If still empty, return just card type
+    if (cleanName.isEmpty) {
+      return localizedCardType;
+    }
+    
+    // Return cleaned name + localized card type
+    return '$cleanName $localizedCardType';
+  }
+
   // Para formatı için yardımcı metod
   String _formatCurrency(double amount) {
     return Provider.of<ThemeProvider>(
@@ -168,9 +196,11 @@ class _IncomePaymentMethodSelectorState
             ...debitCards.map((cardData) {
               final paymentCard = PaymentCard(
                 id: cardData['id'] as String,
-                name:
-                    cardData['cardName'] as String? ??
-                    AppLocalizations.of(context)!.debitCard,
+                name: _getLocalizedCardName(
+                  cardData['cardName'] as String?,
+                  cardData['bankName'] as String?,
+                  CardType.debit,
+                ),
                 type: CardType.debit,
                 number:
                     cardData['maskedCardNumber'] as String? ??
@@ -609,33 +639,51 @@ class _IncomePaymentMethodSelectorState
 
                 // Card Info
                 Expanded(
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              card.name,
+                              style: GoogleFonts.inter(
+                                fontSize: titleFontSize,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected
+                                    ? card.color
+                                    : (isDark ? Colors.white : Colors.black),
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ),
+                          if (balance != null) ...[
+                            Text(
+                              _formatCurrency(balance),
+                              style: GoogleFonts.inter(
+                                fontSize: balanceFontSize,
+                                fontWeight: FontWeight.w500,
+                                color: isDark
+                                    ? const Color(0xFF8E8E93)
+                                    : const Color(0xFF6D6D70),
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
                       Text(
-                        card.name,
+                        AppLocalizations.of(context)?.debitCard ?? 'Banka Kartı',
                         style: GoogleFonts.inter(
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w600,
-                          color: isSelected
-                              ? card.color
-                              : (isDark ? Colors.white : Colors.black),
-                          letterSpacing: -0.2,
+                          fontSize: balanceFontSize - 2,
+                          fontWeight: FontWeight.w400,
+                          color: isDark 
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
+                          letterSpacing: -0.1,
                         ),
                       ),
-                      if (balance != null) ...[
-                        const Spacer(),
-                        Text(
-                          _formatCurrency(balance),
-                          style: GoogleFonts.inter(
-                            fontSize: balanceFontSize,
-                            fontWeight: FontWeight.w500,
-                            color: isDark
-                                ? const Color(0xFF8E8E93)
-                                : const Color(0xFF6D6D70),
-                            letterSpacing: -0.1,
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),

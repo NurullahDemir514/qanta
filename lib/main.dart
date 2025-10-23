@@ -10,7 +10,6 @@ import 'core/providers/unified_provider_v2.dart';
 import 'core/providers/profile_provider.dart';
 import 'core/theme/light_theme.dart';
 import 'core/theme/dark_theme.dart';
-import 'core/services/quick_note_notification_service.dart';
 import 'core/services/reminder_service.dart';
 import 'core/services/notification_service.dart';
 import 'routes/app_router.dart';
@@ -23,6 +22,10 @@ import 'modules/advertisement/providers/advertisement_provider.dart';
 import 'core/providers/statement_provider.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'core/firebase_client.dart';
+import 'core/services/network_service.dart';
+import 'core/services/app_lifecycle_manager.dart';
+import 'core/services/premium_service.dart';
+import 'shared/widgets/no_internet_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,11 +73,6 @@ void main() async {
     // Continue without ads for now
   }
 
-  // Initialize Quick Note Notification Service
-  try {
-    await QuickNoteNotificationService.initialize();
-    await QuickNoteNotificationService.startIfEnabled();
-  } catch (e) {}
 
   // Initialize Reminder Service
   try {
@@ -89,12 +87,21 @@ void main() async {
     debugPrint('Notification service initialization failed: $e');
   }
 
+  // Initialize Premium Service
+  try {
+    await PremiumService().initialize();
+  } catch (e) {
+    debugPrint('Premium service initialization failed: $e');
+  }
+
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => NetworkService()),
         ChangeNotifierProvider(create: (context) => StatementProvider.instance),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => ProfileProvider()),
+        ChangeNotifierProvider.value(value: PremiumService()),
 
         // QANTA v2 provider (main provider)
         ChangeNotifierProvider(
@@ -143,37 +150,48 @@ void main() async {
         // ChangeNotifierProvider(create: (context) => CreditCardProvider.instance),
         // ChangeNotifierProvider(create: (context) => UnifiedCardProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      child: Consumer2<ThemeProvider, NetworkService>(
+        builder: (context, themeProvider, networkService, child) {
           return ScreenUtilInit(
             designSize: const Size(375, 812), // iPhone X design size
             minTextAdapt: true,
             splitScreenMode: true,
             useInheritedMediaQuery: true,
             builder: (context, child) {
-              return MaterialApp.router(
-                title: 'Qanta',
-                debugShowCheckedModeBanner: false,
+              return AppLifecycleManager(
+                child: MaterialApp.router(
+                  title: 'Qanta',
+                  debugShowCheckedModeBanner: false,
 
-                // Theme configuration
-                theme: LightTheme.theme,
-                darkTheme: DarkTheme.theme,
-                themeMode: themeProvider.themeMode,
+                  // Theme configuration
+                  theme: LightTheme.theme,
+                  darkTheme: DarkTheme.theme,
+                  themeMode: themeProvider.themeMode,
 
-                // Localization configuration
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: const [
-                  Locale('tr'), // Turkish (default)
-                  Locale('en'), // English
-                ],
-                locale: themeProvider.locale, // Use locale from provider
-                // Router configuration
-                routerConfig: AppRouter.router,
+                  // Localization configuration
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: const [
+                    Locale('tr'), // Turkish (default)
+                    Locale('en'), // English
+                  ],
+                  locale: themeProvider.locale, // Use locale from provider
+                  
+                  // Router configuration
+                  routerConfig: AppRouter.router,
+                  
+                  // Network check builder
+                  builder: (context, child) {
+                    if (!networkService.isConnected) {
+                      return const NoInternetScreen();
+                    }
+                    return child ?? const SizedBox.shrink();
+                  },
+                ),
               );
             },
           );

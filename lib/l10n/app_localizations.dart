@@ -218,7 +218,7 @@ abstract class AppLocalizations {
   /// **'Expenses'**
   String get expenses;
 
-  /// Income label
+  /// Income category type
   ///
   /// In en, this message translates to:
   /// **'Income'**
@@ -311,25 +311,25 @@ abstract class AppLocalizations {
   /// Name field validation error
   ///
   /// In en, this message translates to:
-  /// **'Your name is required'**
+  /// **'Please enter your name'**
   String get nameRequired;
 
   /// Email field validation error
   ///
   /// In en, this message translates to:
-  /// **'Email is required'**
+  /// **'Please enter your email address'**
   String get emailRequired;
 
   /// Invalid email validation error
   ///
   /// In en, this message translates to:
-  /// **'Please enter a valid email'**
+  /// **'Please enter a valid email address'**
   String get emailInvalid;
 
   /// Password field validation error
   ///
   /// In en, this message translates to:
-  /// **'Password is required'**
+  /// **'Please enter your password'**
   String get passwordRequired;
 
   /// Password too short validation error
@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// Confirm password field validation error
   ///
   /// In en, this message translates to:
-  /// **'Password confirmation is required'**
+  /// **'Please confirm your password'**
   String get confirmPasswordRequired;
 
   /// Passwords do not match
@@ -416,6 +416,12 @@ abstract class AppLocalizations {
   /// **'Registration error'**
   String get registerError;
 
+  /// Network error message
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your internet connection and try again'**
+  String get networkError;
+
   /// Email not confirmed error
   ///
   /// In en, this message translates to:
@@ -425,38 +431,62 @@ abstract class AppLocalizations {
   /// Invalid credentials error
   ///
   /// In en, this message translates to:
-  /// **'Invalid email or password. Please try again.'**
+  /// **'Invalid email or password. Please check your credentials and try again.'**
   String get invalidCredentials;
 
   /// Too many requests error
   ///
   /// In en, this message translates to:
-  /// **'Too many attempts. Please try again later.'**
+  /// **'Too many attempts. Please wait a few minutes and try again.'**
   String get tooManyRequests;
 
   /// Invalid email address error
   ///
   /// In en, this message translates to:
-  /// **'Invalid email address. Please enter a valid email.'**
+  /// **'Invalid email address. Please enter a valid email address.'**
   String get invalidEmailAddress;
 
   /// Password too short error message
   ///
   /// In en, this message translates to:
-  /// **'Password is too short. Must be at least 6 characters.'**
+  /// **'Password is too short. Please enter a password with at least 6 characters.'**
   String get passwordTooShortError;
 
   /// User already registered error
   ///
   /// In en, this message translates to:
-  /// **'This email is already registered. Try signing in.'**
+  /// **'This email is already registered. Please sign in instead.'**
   String get userAlreadyRegistered;
 
   /// Signup disabled error
   ///
   /// In en, this message translates to:
-  /// **'Registration is currently disabled. Please try again later.'**
+  /// **'Registration is currently unavailable. Please try again later.'**
   String get signupDisabled;
+
+  /// Unknown error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred: {error}'**
+  String unknownError(String error);
+
+  /// No internet connection title
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get noInternetConnection;
+
+  /// No internet connection description
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your internet connection and try again'**
+  String get noInternetDescription;
+
+  /// Try again button text
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
 
   /// Registration successful message
   ///
@@ -545,10 +575,10 @@ abstract class AppLocalizations {
   /// Remaining amount label
   ///
   /// In en, this message translates to:
-  /// **'Remaining:'**
+  /// **'Remaining'**
   String get remaining;
 
-  /// Installment word
+  /// Installment text
   ///
   /// In en, this message translates to:
   /// **'Installment'**
@@ -578,17 +608,35 @@ abstract class AppLocalizations {
   /// **'Create Budget'**
   String get createBudget;
 
+  /// Average daily spending label in budget card
+  ///
+  /// In en, this message translates to:
+  /// **'Average Daily Spending'**
+  String get averageDailySpending;
+
+  /// Spent percentage suffix
+  ///
+  /// In en, this message translates to:
+  /// **'spent'**
+  String get spent;
+
+  /// Add expense button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get addExpense;
+
   /// Expense limit tracking title
   ///
   /// In en, this message translates to:
   /// **'Expense Limit Tracking'**
   String get expenseLimitTracking;
 
-  /// Manage button text
+  /// Future filter label
   ///
   /// In en, this message translates to:
-  /// **'Manage'**
-  String get manage;
+  /// **'Future'**
+  String get future;
 
   /// This month growth indicator
   ///
@@ -745,6 +793,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'About'**
   String get about;
+
+  /// Edit action
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
 
   /// Edit profile button
   ///
@@ -1172,7 +1226,7 @@ abstract class AppLocalizations {
   /// **'Please enter a valid amount'**
   String get enterValidAmount;
 
-  /// Cash account type
+  /// Cash payment text
   ///
   /// In en, this message translates to:
   /// **'Cash'**
@@ -1502,7 +1556,7 @@ abstract class AppLocalizations {
   /// **'Education'**
   String get education;
 
-  /// Other category
+  /// Other category type
   ///
   /// In en, this message translates to:
   /// **'Other'**
@@ -1580,13 +1634,13 @@ abstract class AppLocalizations {
   /// **'Save Recurring Payment'**
   String get saveRecurring;
 
-  /// Weekly frequency
+  /// Weekly period
   ///
   /// In en, this message translates to:
   /// **'Weekly'**
   String get weekly;
 
-  /// Monthly frequency
+  /// Monthly subscription plan
   ///
   /// In en, this message translates to:
   /// **'Monthly'**
@@ -1598,7 +1652,7 @@ abstract class AppLocalizations {
   /// **'Quarterly'**
   String get quarterly;
 
-  /// Yearly frequency
+  /// Yearly subscription plan
   ///
   /// In en, this message translates to:
   /// **'Yearly'**
@@ -2264,10 +2318,10 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get back;
 
-  /// Update cash balance button text
+  /// Update cash balance message
   ///
   /// In en, this message translates to:
-  /// **'Update Cash Balance'**
+  /// **'Update your cash balance'**
   String get updateCashBalance;
 
   /// Update cash balance description
@@ -2312,12 +2366,6 @@ abstract class AppLocalizations {
   /// **'Error loading cash account'**
   String get cashAccountLoadError;
 
-  /// Unknown error message
-  ///
-  /// In en, this message translates to:
-  /// **'An error occurred: {error}'**
-  String unknownError(String error);
-
   /// Retry button text
   ///
   /// In en, this message translates to:
@@ -2341,6 +2389,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cash Added'**
   String get balanceUpdated;
+
+  /// Button text for updating cash balance
+  ///
+  /// In en, this message translates to:
+  /// **'Update Balance'**
+  String get updateBalance;
 
   /// Subtitle for manual cash addition
   ///
@@ -2563,12 +2617,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connection problem occurred'**
   String get connectionError;
-
-  /// Try again button text
-  ///
-  /// In en, this message translates to:
-  /// **'Try Again'**
-  String get tryAgain;
 
   /// No accounts available message
   ///
@@ -3182,30 +3230,6 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancelAction;
 
-  /// Quick notes title
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Notes'**
-  String get quickNotes;
-
-  /// Quick notes feature subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Persistent notification for instant note taking'**
-  String get quickNotesSubtitle;
-
-  /// Quick notes notification enabled message
-  ///
-  /// In en, this message translates to:
-  /// **'Quick notes notification enabled'**
-  String get quickNotesNotificationEnabled;
-
-  /// Quick notes notification disabled message
-  ///
-  /// In en, this message translates to:
-  /// **'Quick notes notification disabled'**
-  String get quickNotesNotificationDisabled;
-
   /// Notification permission required message
   ///
   /// In en, this message translates to:
@@ -3236,13 +3260,13 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get yesterday;
 
-  /// Expense label
+  /// Expense category type
   ///
   /// In en, this message translates to:
   /// **'Expense'**
   String get expense;
 
-  /// Transfer transaction type
+  /// Transfer category type
   ///
   /// In en, this message translates to:
   /// **'Transfer'**
@@ -3338,13 +3362,13 @@ abstract class AppLocalizations {
   /// **'Net'**
   String get net;
 
-  /// Please enter amount error
+  /// Please enter an amount message
   ///
   /// In en, this message translates to:
   /// **'Please enter an amount'**
   String get pleaseEnterAmount;
 
-  /// Please enter valid amount validation
+  /// Please enter a valid amount message
   ///
   /// In en, this message translates to:
   /// **'Please enter a valid amount'**
@@ -3380,13 +3404,13 @@ abstract class AppLocalizations {
   /// **'Account information could not be retrieved'**
   String get accountInfoNotFoundSingle;
 
-  /// Please select a category
+  /// Please select a category message
   ///
   /// In en, this message translates to:
   /// **'Please select a category'**
   String get pleaseSelectCategory;
 
-  /// Please select a payment method
+  /// Please select a payment method message
   ///
   /// In en, this message translates to:
   /// **'Please select a payment method'**
@@ -3860,6 +3884,18 @@ abstract class AppLocalizations {
   /// **'Total Debt'**
   String get totalDebt;
 
+  /// Credit Card Debt
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card Debt'**
+  String get creditCardDebt;
+
+  /// Card count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cards'**
+  String cardCount(int count);
+
   /// No transactions found for this card
   ///
   /// In en, this message translates to:
@@ -4286,7 +4322,7 @@ abstract class AppLocalizations {
   /// **'Account and Security'**
   String get accountAndSecurity;
 
-  /// Features
+  /// Features column header
   ///
   /// In en, this message translates to:
   /// **'Features'**
@@ -4369,18 +4405,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can set monthly limits for categories, track your expenses, and receive alerts when limits are exceeded.'**
   String get howToUseBudgetManagementAnswer;
-
-  /// What is quick notes feature?
-  ///
-  /// In en, this message translates to:
-  /// **'What is the quick notes feature?'**
-  String get whatIsQuickNotesFeature;
-
-  /// What is quick notes feature answer
-  ///
-  /// In en, this message translates to:
-  /// **'You can quickly take notes with persistent notifications, add photos, and categorize your notes.'**
-  String get whatIsQuickNotesFeatureAnswer;
 
   /// App is crashing, what should I do?
   ///
@@ -5006,24 +5030,6 @@ abstract class AppLocalizations {
   /// **'All Notifications'**
   String get allNotifications;
 
-  /// Pending notes tab
-  ///
-  /// In en, this message translates to:
-  /// **'Pending'**
-  String get pendingNotes;
-
-  /// Add quick note title
-  ///
-  /// In en, this message translates to:
-  /// **'Add Quick Note'**
-  String get addQuickNote;
-
-  /// Add quick note description
-  ///
-  /// In en, this message translates to:
-  /// **'Write your expense or income note. You can add it as a transaction later.'**
-  String get addQuickNoteDescription;
-
   /// Example expense note with currency
   ///
   /// In en, this message translates to:
@@ -5450,7 +5456,7 @@ abstract class AppLocalizations {
   /// **'Stock Trading'**
   String get stockTrading;
 
-  /// Unknown category
+  /// Unknown category name
   ///
   /// In en, this message translates to:
   /// **'Unknown Category'**
@@ -5804,6 +5810,24 @@ abstract class AppLocalizations {
   /// **'Add Money'**
   String get addMoney;
 
+  /// Add bank account message
+  ///
+  /// In en, this message translates to:
+  /// **'Add bank account'**
+  String get addBankAccount;
+
+  /// No bank account and cash is zero message
+  ///
+  /// In en, this message translates to:
+  /// **'Your cash balance is zero and you have no bank account'**
+  String get noBankAccountCashZero;
+
+  /// Update cash or add bank account message
+  ///
+  /// In en, this message translates to:
+  /// **'Update your cash balance or add bank account'**
+  String get updateCashOrAddBank;
+
   /// Total portfolio value
   ///
   /// In en, this message translates to:
@@ -5900,18 +5924,6 @@ abstract class AppLocalizations {
   /// **'Return'**
   String get returnLabel;
 
-  /// Quick notes page title
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Notes'**
-  String get quickNotesTitle;
-
-  /// Pending notes count
-  ///
-  /// In en, this message translates to:
-  /// **'{count} pending notes'**
-  String pendingNotesCount(int count);
-
   /// Quick add note section title
   ///
   /// In en, this message translates to:
@@ -5947,6 +5959,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add'**
   String get addButton;
+
+  /// Pending notes tab
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pendingNotes;
 
   /// Processed notes tab
   ///
@@ -6434,12 +6452,6 @@ abstract class AppLocalizations {
   /// **'Insufficient Balance'**
   String get insufficientBalanceTitle;
 
-  /// Spent percentage suffix
-  ///
-  /// In en, this message translates to:
-  /// **'spent'**
-  String get spent;
-
   /// Spent amount label
   ///
   /// In en, this message translates to:
@@ -6469,6 +6481,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'0.00'**
   String get limitAmountPlaceholder;
+
+  /// Start date label
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get startDate;
+
+  /// Select start date hint
+  ///
+  /// In en, this message translates to:
+  /// **'Select start date'**
+  String get selectStartDate;
+
+  /// Start date input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Budget start date'**
+  String get startDateHint;
+
+  /// Limit duration label
+  ///
+  /// In en, this message translates to:
+  /// **'Limit Duration'**
+  String get limitDuration;
+
+  /// One time option
+  ///
+  /// In en, this message translates to:
+  /// **'One Time'**
+  String get oneTime;
+
+  /// Recurring option
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get recurring;
+
+  /// Limit will renew message
+  ///
+  /// In en, this message translates to:
+  /// **'This limit will automatically renew {period}'**
+  String limitWillRenew(String period);
+
+  /// Limit one time message
+  ///
+  /// In en, this message translates to:
+  /// **'This limit will be created as one-time'**
+  String get limitOneTime;
 
   /// Save limit button text
   ///
@@ -6661,6 +6721,534 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try selecting a different filter'**
   String get tryDifferentFilter;
+
+  /// Lunch break notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch Break'**
+  String get lunchBreak;
+
+  /// Lunch break notification message
+  ///
+  /// In en, this message translates to:
+  /// **'Half the day has passed, check today\'s expenses'**
+  String get lunchBreakMessage;
+
+  /// Evening check notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Evening Check'**
+  String get eveningCheck;
+
+  /// Evening check notification message
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t forget to record today\'s expenses'**
+  String get eveningCheckMessage;
+
+  /// Day end notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Day End'**
+  String get dayEnd;
+
+  /// Day end notification message
+  ///
+  /// In en, this message translates to:
+  /// **'Note today\'s income and expenses'**
+  String get dayEndMessage;
+
+  /// Notification channel name for reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta Reminders'**
+  String get qantaReminders;
+
+  /// Notification channel description for reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Expense and income reminders'**
+  String get reminderChannelDescription;
+
+  /// Warning message when budget will be exceeded
+  ///
+  /// In en, this message translates to:
+  /// **'This expense will exceed your budget limit by {amount}₺'**
+  String budgetExceededWarning(String amount);
+
+  /// Warning message when budget limit will be exceeded
+  ///
+  /// In en, this message translates to:
+  /// **'This expense will exceed your budget limit by {amount}₺'**
+  String budgetExceededWarningTotal(String amount);
+
+  /// Warning message when approaching budget limit
+  ///
+  /// In en, this message translates to:
+  /// **'This expense will exceed 80% of your budget limit'**
+  String get budgetNearLimitWarning;
+
+  /// Example text for market shopping
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Grocery shopping'**
+  String get exampleMarketShopping;
+
+  /// Example text for salary
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Salary'**
+  String get exampleSalary;
+
+  /// Account information could not be retrieved
+  ///
+  /// In en, this message translates to:
+  /// **'Account information could not be retrieved'**
+  String get accountInfoError;
+
+  /// Error occurred while adding transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Error occurred while adding transaction: {error}'**
+  String transactionError(String error);
+
+  /// Error message when limit cannot be deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Limit could not be deleted'**
+  String get limitDeleteError;
+
+  /// No description provided for @installment_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Installments'**
+  String get installment_summary;
+
+  /// Manage
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// No description provided for @overallBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Budget'**
+  String get overallBudget;
+
+  /// No description provided for @categoryDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Distribution'**
+  String get categoryDistribution;
+
+  /// No description provided for @spendingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Status'**
+  String get spendingStatus;
+
+  /// No description provided for @duplicateBudgetWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing Budget'**
+  String get duplicateBudgetWarning;
+
+  /// No description provided for @duplicateBudgetMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A budget already exists for this category in the same period. Use the budget management page to edit the existing budget.'**
+  String get duplicateBudgetMessage;
+
+  /// No description provided for @categories.
+  ///
+  /// In en, this message translates to:
+  /// **'categories'**
+  String get categories;
+
+  /// No description provided for @overBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Over Budget'**
+  String get overBudget;
+
+  /// No description provided for @budgetExceededBy.
+  ///
+  /// In en, this message translates to:
+  /// **'You exceeded your budget by {amount}'**
+  String budgetExceededBy(Object amount);
+
+  /// Days text
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get days;
+
+  /// Weeks text
+  ///
+  /// In en, this message translates to:
+  /// **'weeks'**
+  String get weeks;
+
+  /// Months text
+  ///
+  /// In en, this message translates to:
+  /// **'months'**
+  String get months;
+
+  /// Years text
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get years;
+
+  /// No description provided for @weeklyTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Trend'**
+  String get weeklyTrend;
+
+  /// No description provided for @weeklyTrendExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows spending pattern of the last 7 days. Higher spending on weekends and lower on Mondays is normal.'**
+  String get weeklyTrendExplanation;
+
+  /// No description provided for @dailyLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Limit'**
+  String get dailyLimit;
+
+  /// No description provided for @fastSpendingExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'You are spending more than 15% of your daily budget. It is recommended to be more careful.'**
+  String get fastSpendingExplanation;
+
+  /// No description provided for @normalSpendingExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'You are spending between 8-15% of your daily budget. This is a healthy spending rate.'**
+  String get normalSpendingExplanation;
+
+  /// No description provided for @slowSpendingExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'You are spending less than 8% of your daily budget. You are saving!'**
+  String get slowSpendingExplanation;
+
+  /// No description provided for @defaultSpendingExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This amount is your total budget divided by remaining days.'**
+  String get defaultSpendingExplanation;
+
+  /// Analytics consent modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Help Us Improve the App'**
+  String get analyticsConsentTitle;
+
+  /// Analytics consent modal message
+  ///
+  /// In en, this message translates to:
+  /// **'We want to make Qanta better for you! By collecting anonymous spending data, we can improve the app and offer better features.\n\n• Your data is completely anonymous\n• Personal information is never shared\n• Only spending amounts and categories are collected\n• You can opt out anytime'**
+  String get analyticsConsentMessage;
+
+  /// Accept analytics consent button
+  ///
+  /// In en, this message translates to:
+  /// **'I Accept'**
+  String get analyticsAccept;
+
+  /// Decline analytics consent button
+  ///
+  /// In en, this message translates to:
+  /// **'No, Thanks'**
+  String get analyticsDecline;
+
+  /// Analytics consent change notice
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this permission in Profile > Preferences.'**
+  String get analyticsConsentNotice;
+
+  /// Anonymous data collection setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous Data Collection'**
+  String get anonymousDataCollection;
+
+  /// Anonymous data collection setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Share anonymous spending data\nto help improve the app'**
+  String get anonymousDataCollectionSubtitle;
+
+  /// Analytics enabled message
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous data collection enabled'**
+  String get analyticsEnabled;
+
+  /// Analytics disabled message
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous data collection disabled'**
+  String get analyticsDisabled;
+
+  /// Card limit reached title
+  ///
+  /// In en, this message translates to:
+  /// **'Card Limit Reached'**
+  String get cardLimitReached;
+
+  /// Card limit reached message
+  ///
+  /// In en, this message translates to:
+  /// **'You can add up to 3 cards in the free version'**
+  String get cardLimitReachedMessage;
+
+  /// Upgrade to premium button
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgradeToPremium;
+
+  /// Premium offer screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Qanta Premium'**
+  String get premiumOfferTitle;
+
+  /// Premium offer screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all features'**
+  String get premiumOfferSubtitle;
+
+  /// Free version label
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get freeVersion;
+
+  /// Premium version label
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get premiumVersion;
+
+  /// Card limit feature
+  ///
+  /// In en, this message translates to:
+  /// **'Card Limit'**
+  String get featureCardLimit;
+
+  /// Free card limit
+  ///
+  /// In en, this message translates to:
+  /// **'3 cards'**
+  String get featureCardLimitFree;
+
+  /// Premium card limit
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get featureCardLimitPremium;
+
+  /// Stock limit feature
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Limit'**
+  String get featureStockLimit;
+
+  /// Free stock limit
+  ///
+  /// In en, this message translates to:
+  /// **'3 stocks'**
+  String get featureStockLimitFree;
+
+  /// Premium stock limit
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get featureStockLimitPremium;
+
+  /// Stock limit reached title
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Limit Reached'**
+  String get stockLimitReached;
+
+  /// Stock limit reached message
+  ///
+  /// In en, this message translates to:
+  /// **'You can add up to 3 stocks in the free version'**
+  String get stockLimitReachedMessage;
+
+  /// Ads feature
+  ///
+  /// In en, this message translates to:
+  /// **'Advertisements'**
+  String get featureAds;
+
+  /// Free version has ads
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get featureAdsFree;
+
+  /// Premium version no ads
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get featureAdsPremium;
+
+  /// Support feature
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get featureSupport;
+
+  /// Free version support
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get featureSupportFree;
+
+  /// Premium version support
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get featureSupportPremium;
+
+  /// Updates feature
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get featureUpdates;
+
+  /// Free version updates
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get featureUpdatesFree;
+
+  /// Premium version updates
+  ///
+  /// In en, this message translates to:
+  /// **'Early Access'**
+  String get featureUpdatesPremium;
+
+  /// Get Qanta Premium button
+  ///
+  /// In en, this message translates to:
+  /// **'Get Qanta Premium'**
+  String get getQantaPremium;
+
+  /// Continue with free button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Free'**
+  String get continueWithFree;
+
+  /// Premium benefits title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Benefits'**
+  String get premiumBenefitsTitle;
+
+  /// Premium banner title
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgradeToPremiumBanner;
+
+  /// Premium banner subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Remove ads, unlimited features'**
+  String get premiumBannerSubtitle;
+
+  /// Discover button text
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discover;
+
+  /// Premium section title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get premiumStatus;
+
+  /// Premium active status
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Active'**
+  String get premiumActive;
+
+  /// Premium active description
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited features, ad-free experience'**
+  String get premiumActiveDescription;
+
+  /// Manage subscription button
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Subscription'**
+  String get manageSubscription;
+
+  /// Manage subscription description
+  ///
+  /// In en, this message translates to:
+  /// **'Edit subscription settings in Google Play'**
+  String get manageSubscriptionDescription;
+
+  /// Restore purchases button
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchases'**
+  String get restorePurchases;
+
+  /// Restore purchases description
+  ///
+  /// In en, this message translates to:
+  /// **'Restore premium if you purchased before'**
+  String get restorePurchasesDescription;
+
+  /// Checking purchases loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get checkingPurchases;
+
+  /// Premium restored success message
+  ///
+  /// In en, this message translates to:
+  /// **'Premium restored!'**
+  String get premiumRestored;
+
+  /// No active premium found message
+  ///
+  /// In en, this message translates to:
+  /// **'No active premium subscription found'**
+  String get noActivePremium;
+
+  /// Play Store error message
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open Google Play Store'**
+  String get playStoreError;
+
+  /// Upgrade now button text for premium banner
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get upgradeNow;
 }
 
 class _AppLocalizationsDelegate

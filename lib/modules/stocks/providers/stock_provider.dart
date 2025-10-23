@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import '../contracts/stock_repository_contract.dart';
 import '../contracts/stock_api_contract.dart';
@@ -21,6 +22,9 @@ class StockProvider extends ChangeNotifier {
   bool _isUpdatingPrices = false;
   String? _error;
   Map<String, List<double>> _historicalData = {}; // Symbol -> Historical data
+  Map<String, double> _stockChangesToday = {}; // Symbol -> today change %
+  Map<String, double> _stockChanges7Days = {}; // Symbol -> 7-day change %
+  Map<String, double> _stockChanges30Days = {}; // Symbol -> 30-day change %
   bool _isMockDataMode = false; // Mock data mode flag for screenshots
 
   StockProvider({
@@ -39,6 +43,9 @@ class StockProvider extends ChangeNotifier {
   bool get isUpdatingPrices => _isUpdatingPrices;
   String? get error => _error;
   bool get isMockDataMode => _isMockDataMode;
+  Map<String, double> get stockChangesToday => _stockChangesToday;
+  Map<String, double> get stockChanges7Days => _stockChanges7Days;
+  Map<String, double> get stockChanges30Days => _stockChanges30Days;
 
   // Optimistic UI Updates
   void addWatchedStockOptimistically(Stock stock) {
@@ -317,6 +324,9 @@ class StockProvider extends ChangeNotifier {
       // Grafik verilerini de güncelle (daha sık)
       await _updateHistoricalDataForWatchedStocks();
 
+      // Hisse değişimlerini de güncelle (7 ve 30 günlük)
+      await _updateStockChangesSilently();
+
       notifyListeners();
       _error = null;
     } catch (e) {
@@ -405,6 +415,9 @@ class StockProvider extends ChangeNotifier {
       // Grafik verilerini de güncelle (daha sık)
       await _updateHistoricalDataForWatchedStocks();
 
+      // Hisse değişimlerini de güncelle (7 ve 30 günlük)
+      await _updateStockChangesSilently();
+
       // SİLENT UPDATE - notifyListeners() çağırma, UI render etme
       _error = null;
     } catch (e) {
@@ -427,6 +440,260 @@ class StockProvider extends ChangeNotifier {
       }
     } catch (e) {
       // Hata olsa bile devam et
+    }
+  }
+
+  /// Hisse değişimlerini sessizce güncelle (gerçek zamanlı)
+  Future<void> _updateStockChangesSilently() async {
+    try {
+      if (_watchedStocks.isEmpty) return;
+      
+      // Dinamik hesaplama kullan
+      await _updateDynamicStockChanges();
+      
+      debugPrint('🔄 Dynamic stock changes updated silently: 7d=${_stockChanges7Days.length}, 30d=${_stockChanges30Days.length}');
+    } catch (e) {
+      debugPrint('❌ Error updating stock changes silently: $e');
+    }
+  }
+
+  /// Dinamik hisse değişimlerini güncelle
+  Future<void> _updateDynamicStockChanges() async {
+    try {
+      if (_watchedStocks.isEmpty) {
+        debugPrint('🔍 No watched stocks for dynamic changes');
+        return;
+      }
+      
+      // Stock transactions'ları yükle (eğer yüklenmemişse)
+      if (_stockTransactions.isEmpty) {
+        debugPrint('🔄 Loading stock transactions for dynamic changes...');
+        final userId = FirebaseAuthService.currentUserId;
+        if (userId != null) {
+          await loadStockTransactionsSilently(userId);
+        }
+      }
+      
+      _stockChangesToday.clear();
+      _stockChanges7Days.clear();
+      _stockChanges30Days.clear();
+      
+      for (final stock in _watchedStocks) {
+        // Bu hisse için ilk işlem tarihini bul
+        final firstTransactionDate = _getFirstTransactionDate(stock.symbol);
+        if (firstTransactionDate == null) {
+          continue;
+        }
+        
+        final daysSinceFirst = DateTime.now().difference(firstTransactionDate).inDays;
+        
+        // Bugünkü değişim - her zaman hesapla (piyasa kapalıysa da)
+        final changeToday = await _calculateTodayChange(stock.symbol);
+        _stockChangesToday[stock.symbol] = changeToday;
+        
+        if (daysSinceFirst >= 0) {
+          // Bugün veya daha önce eklendi - son 7 günlük değişim
+          final change7d = await _calculateDynamicChange(stock.symbol, 7, daysSinceFirst);
+          _stockChanges7Days[stock.symbol] = change7d;
+        }
+        
+        if (daysSinceFirst >= 0) {
+          // Bugün veya daha önce eklendi - son 30 günlük değişim
+          final change30d = await _calculateDynamicChange(stock.symbol, 30, daysSinceFirst);
+          _stockChanges30Days[stock.symbol] = change30d;
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error updating dynamic stock changes: $e');
+    }
+  }
+
+  /// Belirli bir hisse için ilk işlem tarihini bul
+  DateTime? _getFirstTransactionDate(String stockSymbol) {
+    try {
+      // Bu hisse ile ilgili tüm işlemleri filtrele
+      final stockTransactions = _stockTransactions
+          .where((txn) => txn.stockSymbol == stockSymbol)
+          .toList();
+      
+      if (stockTransactions.isEmpty) {
+        return null;
+      }
+      
+      // En eski işlem tarihini bul
+      stockTransactions.sort((a, b) => a.transactionDate.compareTo(b.transactionDate));
+      final firstDate = stockTransactions.first.transactionDate;
+      
+      return firstDate;
+    } catch (e) {
+      debugPrint('❌ Error getting first transaction date for $stockSymbol: $e');
+      return null;
+    }
+  }
+
+  /// Bugünkü değişim hesapla (hisse modelindeki mevcut değişim verisini kullan)
+  Future<double> _calculateTodayChange(String symbol) async {
+    try {
+      // Hisse modelindeki mevcut değişim yüzdesini al
+      final stock = _watchedStocks.firstWhere(
+        (s) => s.symbol == symbol,
+        orElse: () => throw Exception('Stock not found'),
+      );
+      
+      // Daily performance değişim yüzdesi (zaten hesaplanmış)
+      final changePercent = stock.changePercent ?? 0.0;
+      
+      return changePercent;
+    } catch (e) {
+      debugPrint('❌ Error calculating today change for $symbol: $e');
+      return 0.0;
+    }
+  }
+
+  /// Dinamik değişim hesapla (gerçek fiyat farkları ile)
+  Future<double> _calculateDynamicChange(String symbol, int targetDays, int availableDays) async {
+    try {
+      // Mevcut gün sayısı ile hedef gün sayısı arasından küçük olanı kullan
+      final actualDays = math.min(targetDays, availableDays);
+      
+      // İlk işlem tarihini bul
+      final firstTransactionDate = _getFirstTransactionDate(symbol);
+      if (firstTransactionDate == null) return 0.0;
+      
+      // Başlangıç tarihini hesapla (bugünden geriye doğru)
+      final startDate = DateTime.now().subtract(Duration(days: actualDays));
+      
+      // Başlangıç tarihi ilk işlem tarihinden önceyse, ilk işlem tarihini kullan
+      final effectiveStartDate = startDate.isBefore(firstTransactionDate) 
+          ? firstTransactionDate 
+          : startDate;
+      
+      // Gerçek gün sayısını hesapla
+      final realDays = DateTime.now().difference(effectiveStartDate).inDays;
+      
+      // Bugün eklenen hisseler için özel mantık
+      if (realDays == 0) {
+        // Bugün eklenen hisse - bugünkü değişimi hesapla
+        final currentPrice = await _getCurrentPrice(symbol);
+        final openPrice = await _getTodayOpenPrice(symbol);
+        
+        if (currentPrice == null || openPrice == null || openPrice <= 0) {
+          debugPrint('❌ Cannot calculate change for $symbol: currentPrice=$currentPrice, openPrice=$openPrice');
+          return 0.0;
+        }
+        
+        final changePercent = ((currentPrice - openPrice) / openPrice) * 100;
+        debugPrint('📊 Today change for $symbol: ${openPrice.toStringAsFixed(2)} → ${currentPrice.toStringAsFixed(2)} = ${changePercent.toStringAsFixed(2)}%');
+        return changePercent;
+      }
+      
+      if (realDays < 0) return 0.0;
+      
+      // Güncel fiyatı al (canlı fiyat - piyasa açıksa bugünkü değişim dahil)
+      final currentPrice = await _getCurrentPrice(symbol);
+      if (currentPrice == null) return 0.0;
+      
+      // Başlangıç fiyatını al
+      double? startPrice;
+      
+      // Eğer bugün işlem yapıldıysa ve piyasa açıksa, bugünkü açılış fiyatını kullan
+      if (effectiveStartDate.day == DateTime.now().day && 
+          effectiveStartDate.month == DateTime.now().month &&
+          effectiveStartDate.year == DateTime.now().year) {
+        startPrice = await _getTodayOpenPrice(symbol);
+      }
+      
+      // Eğer bugünkü açılış fiyatı bulunamazsa, geçmiş fiyatı kullan
+      startPrice ??= await _getHistoricalPrice(symbol, effectiveStartDate);
+      
+      if (startPrice == null || startPrice <= 0) {
+        return 0.0;
+      }
+      
+      // Gerçek değişim yüzdesini hesapla
+      final changePercent = ((currentPrice - startPrice) / startPrice) * 100;
+      
+      final isMarketOpen = _isMarketOpen();
+      final marketStatus = isMarketOpen ? 'AÇIK' : 'KAPALI';
+      
+      debugPrint('📊 Dynamic change for $symbol: ${realDays} days, ${startPrice.toStringAsFixed(2)} → ${currentPrice.toStringAsFixed(2)} = ${changePercent.toStringAsFixed(2)}% (Piyasa: $marketStatus)');
+      
+      return changePercent;
+    } catch (e) {
+      debugPrint('❌ Error calculating dynamic change for $symbol: $e');
+      return 0.0;
+    }
+  }
+
+  /// Bugünkü açılış fiyatını al
+  Future<double?> _getTodayOpenPrice(String symbol) async {
+    try {
+      final stock = _watchedStocks.firstWhere(
+        (s) => s.symbol == symbol,
+        orElse: () => throw Exception('Stock not found'),
+      );
+      return stock.openPrice;
+    } catch (e) {
+      debugPrint('❌ Error getting today open price for $symbol: $e');
+      return null;
+    }
+  }
+
+  /// Piyasa açık mı kontrol et (basit kontrol)
+  bool _isMarketOpen() {
+    final now = DateTime.now();
+    final hour = now.hour;
+    final weekday = now.weekday;
+    
+    // Hafta sonu değilse ve 09:00-18:00 arasındaysa piyasa açık
+    return weekday >= 1 && weekday <= 5 && hour >= 9 && hour < 18;
+  }
+
+  /// Güncel fiyatı al
+  Future<double?> _getCurrentPrice(String symbol) async {
+    try {
+      final stock = _watchedStocks.firstWhere(
+        (s) => s.symbol == symbol,
+        orElse: () => throw Exception('Stock not found'),
+      );
+      return stock.currentPrice;
+    } catch (e) {
+      debugPrint('❌ Error getting current price for $symbol: $e');
+      return null;
+    }
+  }
+
+  /// Belirli bir tarihteki fiyatı al
+  Future<double?> _getHistoricalPrice(String symbol, DateTime date) async {
+    try {
+      // API'den o tarihteki fiyatı al
+      final historicalData = await _stockApiService.getHistoricalPrices(
+        symbol,
+        '1d',
+        '30d', // 30 günlük veri al, içinden istediğimizi seçeriz
+      );
+      
+      if (historicalData.isEmpty) return null;
+      
+      // Tarihe en yakın fiyatı bul
+      double? closestPrice;
+      DateTime? closestDate;
+      
+      for (final priceData in historicalData) {
+        final priceDate = priceData.timestamp; // timestamp kullan
+        final daysDiff = date.difference(priceDate).inDays.abs();
+        
+        if (closestDate == null || 
+            daysDiff < date.difference(closestDate).inDays.abs()) {
+          closestPrice = priceData.close;
+          closestDate = priceDate;
+        }
+      }
+      
+      return closestPrice;
+    } catch (e) {
+      debugPrint('❌ Error getting historical price for $symbol on ${date.toIso8601String()}: $e');
+      return null;
     }
   }
 
@@ -905,21 +1172,47 @@ class StockProvider extends ChangeNotifier {
     }
   }
 
+  /// Check if stock transaction can be deleted (when lot count is 0)
+  bool canDeleteStockTransaction(String stockSymbol) {
+    try {
+      final position = _stockPositions.firstWhere(
+        (pos) => pos.stockSymbol == stockSymbol,
+      );
+      return position.totalQuantity <= 0;
+    } catch (e) {
+      // Stock not found in positions, can delete
+      return true;
+    }
+  }
+
   Future<void> deleteStockTransaction(String transactionId) async {
     try {
-      // 1. OPTIMISTIC UI UPDATE - Önce UI'yi anında güncelle
-      _removeTransactionFromUI(transactionId);
+      // 1. Find transaction to get stock symbol
+      final transaction = _stockTransactions.firstWhere(
+        (t) => t.id == transactionId,
+      );
+      
+      // 2. Check if deletion is allowed (lot count must be 0)
+      if (!canDeleteStockTransaction(transaction.stockSymbol)) {
+        throw Exception('Hisse pozisyonu mevcut olduğu için işlem silinemez');
+      }
 
-      // 2. Backend işlemini yap
+      // 3. OPTIMISTIC UI UPDATE - Önce UI'yi anında güncelle
+      _removeTransactionFromUI(transactionId);
+      
+      // 4. UnifiedProviderV2'yi hemen güncelle (home screen için)
+      _updateUnifiedProvider();
+
+      // 5. Backend işlemini yap
       await _transactionService.deleteStockTransaction(transactionId);
 
-      // 3. User ID'yi al
+      // 6. User ID'yi al
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) {
         throw Exception('Kullanıcı oturumu bulunamadı');
       }
 
-      // 4. Arka planda verileri yenile (UI zaten güncellenmiş)
+      // 7. Arka planda verileri yenile (UI zaten güncellenmiş)
       _refreshAllDataInBackground(userId);
     } catch (e) {
       _error = e.toString();
@@ -927,18 +1220,53 @@ class StockProvider extends ChangeNotifier {
       // Hata durumunda UI'yi geri yükle
       _refreshAllDataInBackground(FirebaseAuthService.currentUserId ?? '');
 
-      if (kDebugMode) {}
+      if (kDebugMode) {
+        debugPrint('Error deleting stock transaction: $e');
+      }
+      rethrow; // Re-throw to show error to user
     }
   }
 
   /// UI'den transaction'ı anında kaldır (optimistic update)
   void _removeTransactionFromUI(String transactionId) {
     try {
-      // Stock transaction'ları ayrı bir liste olarak yönetiliyor
-      // Bu yüzden sadece state'i güncelle ve arka planda yenile
+      // 1. Stock transactions listesinden kaldır
+      _stockTransactions.removeWhere((transaction) => transaction.id == transactionId);
+      
+      // 2. UI'yi güncelle
       notifyListeners();
+      
+      debugPrint('✅ Stock transaction $transactionId removed from UI (optimistic update)');
     } catch (e) {
-      // Hata durumunda sessizce devam et
+      debugPrint('❌ Error removing transaction from UI: $e');
+    }
+  }
+
+  /// UnifiedProviderV2'yi güncelle (home screen için)
+  void _updateUnifiedProvider() {
+    try {
+      final unifiedProvider = UnifiedProviderV2.instance;
+      
+      // Hisse pozisyonlarını güncelle
+      final stockPositions = _stockPositions
+          .map(
+            (position) => {
+              'symbol': position.stockSymbol,
+              'quantity': position.totalQuantity,
+              'currentValue': position.currentValue,
+              'totalValue': position.currentValue,
+              'totalCost': position.totalCost,
+            },
+          )
+          .toList();
+      unifiedProvider.updateStockPositions(stockPositions);
+      
+      // UnifiedProviderV2'yi refresh et
+      unifiedProvider.refresh();
+      
+      debugPrint('✅ UnifiedProviderV2 updated after stock transaction deletion');
+    } catch (e) {
+      debugPrint('⚠️ Error updating UnifiedProviderV2: $e');
     }
   }
 
@@ -947,6 +1275,7 @@ class StockProvider extends ChangeNotifier {
     // ✅ VERİ KORUMA: Mevcut veriyi koru, hata durumunda geri yükle
     final currentStocks = List<Stock>.from(_watchedStocks);
     final currentPositions = List<StockPosition>.from(_stockPositions);
+    final currentTransactions = List<StockTransaction>.from(_stockTransactions);
     
     // Arka planda çalıştır, UI'yi bloklamasın
     Future.microtask(() async {
@@ -954,13 +1283,18 @@ class StockProvider extends ChangeNotifier {
         // ✅ SILENT REFRESH: UI'yi boşaltmadan yenile
         await loadWatchedStocksSilently(userId);
         await loadStockPositions(userId); // Pozisyon bilgilerini de yenile
+        await loadStockTransactions(userId); // Stock transactions'ları da yenile
         await updateRealTimePricesSilently();
+        
+        // Hisse değişimlerini de güncelle
+        await _updateStockChangesSilently();
         
         debugPrint('🔄 Background refresh completed successfully');
       } catch (e) {
         // ✅ HATA DURUMUNDA GERİ YÜKLE: Mevcut veriyi koru
         _watchedStocks = currentStocks;
         _stockPositions = currentPositions;
+        _stockTransactions = currentTransactions;
         debugPrint('⚠️ Background refresh failed, restored previous data: $e');
       }
     });
@@ -1328,5 +1662,75 @@ class StockProvider extends ChangeNotifier {
     notifyListeners();
 
     debugPrint('✅ Mock stock data cleared');
+  }
+
+  /// Son 7 günlük değişimleri yükle (dinamik)
+  Future<void> loadStockChanges7Days() async {
+    try {
+      if (_watchedStocks.isEmpty) return;
+      
+      // Dinamik hesaplama kullan
+      await _updateDynamicStockChanges();
+      notifyListeners();
+      
+      debugPrint('✅ Dynamic 7-day stock changes loaded: ${_stockChanges7Days.length} stocks');
+    } catch (e) {
+      debugPrint('❌ Error loading dynamic 7-day changes: $e');
+    }
+  }
+
+  /// Son 30 günlük değişimleri yükle (dinamik)
+  Future<void> loadStockChanges30Days() async {
+    try {
+      if (_watchedStocks.isEmpty) return;
+      
+      // Dinamik hesaplama kullan
+      await _updateDynamicStockChanges();
+      notifyListeners();
+      
+      debugPrint('✅ Dynamic 30-day stock changes loaded: ${_stockChanges30Days.length} stocks');
+    } catch (e) {
+      debugPrint('❌ Error loading dynamic 30-day changes: $e');
+    }
+  }
+
+  /// Belirli bir hisse için bugünkü değişim al
+  double getStockChangeToday(String symbol) {
+    return _stockChangesToday[symbol] ?? 0.0;
+  }
+
+  /// Belirli bir hisse için 7 günlük değişim al
+  double getStockChange7Days(String symbol) {
+    return _stockChanges7Days[symbol] ?? 0.0;
+  }
+
+  /// Belirli bir hisse için 30 günlük değişim al
+  double getStockChange30Days(String symbol) {
+    return _stockChanges30Days[symbol] ?? 0.0;
+  }
+
+  /// Clear all data (logout)
+  Future<void> clearAllData() async {
+    try {
+      debugPrint('🧹 Clearing all stock data...');
+      
+      _watchedStocks.clear();
+      _stockPositions.clear();
+      _stockTransactions.clear();
+      _historicalData.clear();
+      _stockChangesToday.clear();
+      _stockChanges7Days.clear();
+      _stockChanges30Days.clear();
+      _isLoading = false;
+      _isUpdatingPrices = false;
+      _error = null;
+      _isMockDataMode = false;
+      
+      notifyListeners();
+      
+      debugPrint('✅ All stock data cleared');
+    } catch (e) {
+      debugPrint('❌ Error clearing stock data: $e');
+    }
   }
 }

@@ -254,7 +254,6 @@ class DebitCardWidget extends StatelessWidget {
                 stops: const [0.0, 0.5, 1.0],
               ),
               borderRadius: BorderRadius.circular(cardBorderRadius),
-              boxShadow: AppConstants.getCardShadows(accentColor),
             ),
             child: Stack(
               children: [
@@ -279,60 +278,34 @@ class DebitCardWidget extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Card name on the left
-                          Expanded(
-                            flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)?.cardName ??
-                                      'Card Name',
-                                  style: GoogleFonts.inter(
-                                    fontSize: isSmallMobile ? 11.0 : 12.0,
-                                    color: Colors.white.withValues(alpha: 1.0),
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                                SizedBox(height: isSmallMobile ? 1.0 : 2.0),
-                                Text(
-                                  getCardName(context).toUpperCase(),
-                                  style: GoogleFonts.inter(
-                                    fontSize: isSmallMobile ? 13.0 : 14.0,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                    letterSpacing: 0.5,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  textAlign: TextAlign.start,
-                                ),
-                              ],
-                            ),
-                          ),
+                           // Card name on the left
+                           Expanded(
+                             flex: 3,
+                             child: Text(
+                               getCardName(context).toUpperCase(),
+                               style: GoogleFonts.inter(
+                                 fontSize: isSmallMobile ? 11.0 : 12.0,
+                                 fontWeight: FontWeight.w600,
+                                 color: Colors.white,
+                                 letterSpacing: 0.5,
+                               ),
+                               overflow: TextOverflow.ellipsis,
+                               maxLines: 1,
+                               textAlign: TextAlign.start,
+                             ),
+                           ),
                           
-                          // Bank badge on the right
+                          // Minimal contactless badge on the right
                           Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: bankBadgePadding,
-                              vertical: bankBadgePadding * 0.5,
-                            ),
+                            padding: EdgeInsets.all(isSmallMobile ? 6.0 : 8.0),
                             decoration: BoxDecoration(
-                              color: accentColor,
-                              borderRadius: BorderRadius.circular(
-                                bankBadgeRadius,
-                              ),
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(isSmallMobile ? 6.0 : 8.0),
                             ),
-                            child: Text(
-                              bankName.toUpperCase(),
-                              style: GoogleFonts.inter(
-                                fontSize: bankBadgeFontSize,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 0.8,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                            child: Icon(
+                              Icons.contactless_rounded,
+                              color: Colors.white,
+                              size: isSmallMobile ? 16.0 : 18.0,
                             ),
                           ),
                         ],
@@ -374,17 +347,6 @@ class DebitCardWidget extends StatelessWidget {
                         ],
                       ),
                     ],
-                  ),
-                ),
-                
-                // Temassız ikon - sağ alt köşede
-                Positioned(
-                  right: isSmallMobile ? 12.0 : 16.0,
-                  bottom: isSmallMobile ? 8.0 : 12.0,
-                  child: Icon(
-                    Icons.contactless,
-                    color: Colors.white.withValues(alpha: 0.8),
-                    size: contactlessIconSize,
                   ),
                 ),
               ],

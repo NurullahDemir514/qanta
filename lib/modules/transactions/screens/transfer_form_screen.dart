@@ -5,6 +5,7 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/utils/currency_utils.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/services/premium_service.dart';
 import '../models/payment_method.dart';
 import '../widgets/forms/base_transaction_form.dart';
 import '../widgets/forms/calculator_input_field.dart';
@@ -12,6 +13,10 @@ import '../widgets/forms/transfer_account_selector.dart';
 import '../widgets/forms/description_field.dart';
 import '../widgets/forms/date_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../advertisement/providers/advertisement_provider.dart';
+import '../../advertisement/services/google_ads_banner_service.dart';
+import '../../advertisement/config/advertisement_config.dart' as ad_config;
+import '../../advertisement/models/advertisement_models.dart';
 
 class TransferFormScreen extends StatefulWidget {
   const TransferFormScreen({super.key});
@@ -35,6 +40,10 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   bool _isLoading = false;
   int _currentStep = 0;
 
+  // Banner servisleri
+  GoogleAdsBannerService? _step1BannerService; // Step 1 için (Calculator altı)
+  GoogleAdsBannerService? _step4BannerService; // Step 4 için
+
   @override
   void initState() {
     super.initState();
@@ -50,6 +59,39 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
         cardProvider.loadAllData();
       }
     });
+
+    _initializeStep1Banner();
+    _initializeStep4Banner();
+  }
+
+  // Step 1 için banner servisi başlat (Calculator altı)
+  void _initializeStep1Banner() async {
+    _step1BannerService = GoogleAdsBannerService(
+      adUnitId: ad_config.AdvertisementConfig.transactionFormStep1Banner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: ad_config.AdvertisementConfig.transactionFormStep1Banner.isTestMode,
+    );
+    
+    await _step1BannerService!.loadAd();
+    
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  // Step 4 için ikinci banner servisi başlat
+  void _initializeStep4Banner() async {
+    _step4BannerService = GoogleAdsBannerService(
+      adUnitId: ad_config.AdvertisementConfig.incomeTransferFormBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: ad_config.AdvertisementConfig.incomeTransferFormBanner.isTestMode,
+    );
+    
+    await _step4BannerService!.loadAd();
+    
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   List<String> _getStepTitles(AppLocalizations l10n) => [
@@ -66,11 +108,59 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     ).formatAmount(amount);
   }
 
+  /// Banner reklam ile content wrapper
+  Widget _buildStepWithBanner(Widget content, {bool showBanner = false, bool useStep1Banner = false, bool useStep4Banner = false}) {
+    final adProvider = context.watch<AdvertisementProvider>();
+    
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        content,
+        
+        // Banner Reklam (Step 1, Step 3, Step 4 için) - Premium kullanıcılara gösterilmez
+        Consumer<PremiumService>(
+          builder: (context, premiumService, child) {
+            if (premiumService.isPremium) return const SizedBox.shrink();
+            
+            if (showBanner) {
+              if (useStep1Banner && _step1BannerService != null && _step1BannerService!.isLoaded) {
+                // Step 1 Banner (Calculator altı)
+                return Container(
+                  margin: const EdgeInsets.only(top: 16),
+                  height: 60,
+                  alignment: Alignment.center,
+                  child: _step1BannerService!.bannerWidget,
+                );
+              } else if (useStep4Banner && _step4BannerService != null && _step4BannerService!.isLoaded) {
+                return Container(
+                  margin: const EdgeInsets.only(top: 16),
+                  height: 60,
+                  alignment: Alignment.center,
+                  child: _step4BannerService!.bannerWidget,
+                );
+              } else if (!useStep1Banner && !useStep4Banner && adProvider.isInitialized && adProvider.adManager.bannerService.isLoaded) {
+                return Container(
+                  margin: const EdgeInsets.only(top: 16),
+                  height: 60,
+                  alignment: Alignment.center,
+                  child: adProvider.getBannerWidget(),
+                );
+              }
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _amountController.dispose();
     _descriptionController.dispose();
     _pageController.dispose();
+    _step1BannerService?.dispose();
+    _step4BannerService?.dispose();
     super.dispose();
   }
 
@@ -94,14 +184,18 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
         // Step 1: Amount with Calculator
         BaseFormStep(
           title: l10n.howMuchTransfer,
-          content: CalculatorInputField(
-            controller: _amountController,
-            errorText: _amountError,
-            onChanged: () {
-              setState(() {
-                _amountError = null;
-              });
-            },
+          content: _buildStepWithBanner(
+            CalculatorInputField(
+              controller: _amountController,
+              errorText: _amountError,
+              onChanged: () {
+                setState(() {
+                  _amountError = null;
+                });
+              },
+            ),
+            showBanner: true, // Step 1 banner'ı göster
+            useStep1Banner: true, // Calculator altı banner
           ),
         ),
 
@@ -129,29 +223,33 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
         // Step 3: To Account
         BaseFormStep(
           title: l10n.toWhichAccount,
-          content: TransferAccountSelector(
-            selectedAccount: _toAccount,
-            onAccountSelected: (account) {
-              setState(() {
-                _toAccount = account;
-                _toAccountError = null;
-                // If same account selected for both, clear the other
-                if (_fromAccount == account) {
-                  _fromAccount = null;
-                }
-              });
-            },
-            errorText: _toAccountError,
-            excludeAccount: _fromAccount,
-            isSourceSelection: false,
+          content: _buildStepWithBanner(
+            TransferAccountSelector(
+              selectedAccount: _toAccount,
+              onAccountSelected: (account) {
+                setState(() {
+                  _toAccount = account;
+                  _toAccountError = null;
+                  // If same account selected for both, clear the other
+                  if (_fromAccount == account) {
+                    _fromAccount = null;
+                  }
+                });
+              },
+              errorText: _toAccountError,
+              excludeAccount: _fromAccount,
+              isSourceSelection: false,
+            ),
+            showBanner: true, // Banner Step 3'te göster
           ),
         ),
 
         // Step 4: Summary and Details
         BaseFormStep(
           title: l10n.details,
-          content: Column(
-            children: [
+          content: _buildStepWithBanner(
+            Column(
+              children: [
               // Transfer Preview Card
               if (_amountController.text.isNotEmpty &&
                   _fromAccount != null &&
@@ -313,7 +411,10 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                   });
                 },
               ),
-            ],
+              ],
+            ),
+            showBanner: true, // Banner Step 4'te göster
+            useStep4Banner: true, // Step 4'ün kendi banner'ını kullan
           ),
         ),
       ],

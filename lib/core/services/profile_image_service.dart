@@ -55,9 +55,11 @@ class ProfileImageService {
     // If not in SharedPreferences, try Firestore
     debugPrint('🔍 No URL in SharedPreferences - checking Firestore...');
     final firestoreUrl = await loadProfileImageUrlFromFirestore();
-    if (firestoreUrl != null) {
+    if (firestoreUrl != null && firestoreUrl.isNotEmpty) {
       debugPrint('✅ Loaded URL from Firestore: $firestoreUrl');
       return firestoreUrl;
+    } else {
+      debugPrint('❌ No valid URL found in Firestore');
     }
     
     debugPrint('❌ No profile image URL found in any storage');
@@ -116,6 +118,8 @@ class ProfileImageService {
           // Save to local cache
           await _saveImageUrlToCache(profileImageUrl);
           return profileImageUrl;
+        } else {
+          debugPrint('❌ Profile image URL is null or empty in Firestore');
         }
       } else {
         debugPrint('❌ No profile document found in Firestore');
@@ -269,14 +273,21 @@ class ProfileImageService {
     }
   }
 
-  /// Delete profile image from Firebase Storage
+  /// Delete profile image from Firebase Storage and Firestore
   Future<void> deleteProfileImage() async {
     try {
+      // 1. Delete from Firebase Storage
       await _deleteOldProfileImage();
+      
+      // 2. Delete from Firestore (critical - must succeed)
+      await _deleteProfileImageFromFirestore();
+      
+      // 3. Clear cache and SharedPreferences (only if Firestore deletion succeeded)
       await _saveImageUrlToCache(null);
-      debugPrint('Profile image deleted successfully');
+      
+      debugPrint('✅ Profile image deleted successfully from storage, Firestore, and cache');
     } catch (e) {
-      debugPrint('Error deleting profile image: $e');
+      debugPrint('❌ Error deleting profile image: $e');
       rethrow;
     }
   }
@@ -292,6 +303,31 @@ class ProfileImageService {
     } catch (e) {
       // Don't throw error if old image doesn't exist
       debugPrint('Error deleting old profile image (may not exist): $e');
+    }
+  }
+
+  /// Delete profile image from Firestore
+  Future<void> _deleteProfileImageFromFirestore() async {
+    try {
+      final userId = FirebaseAuthService.currentUserId;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Use the same path as saveProfileImageUrlToFirestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('profile')
+          .doc('settings')
+          .update({
+        'profile_image_url': FieldValue.delete(),
+      });
+      
+      debugPrint('✅ Profile image deleted from Firestore');
+    } catch (e) {
+      debugPrint('❌ Error deleting profile image from Firestore: $e');
+      rethrow; // Re-throw to ensure deletion fails if Firestore fails
     }
   }
 

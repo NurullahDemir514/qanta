@@ -146,6 +146,34 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
   PaymentCard? _selectedCreditCard;
   int? _selectedInstallments;
   
+  // Kart ismini temizle ve localize et
+  String _getLocalizedCardName(String? cardName, String? bankName, CardType cardType) {
+    final l10n = AppLocalizations.of(context)!;
+    final localizedCardType = cardType == CardType.credit ? l10n.creditCard : l10n.debitCard;
+    
+    if (cardName == null || cardName.isEmpty) {
+      return '${bankName ?? ''} $localizedCardType';
+    }
+    
+    // Remove card type phrases in any language from cardName
+    String cleanName = cardName
+        .replaceAll(RegExp(r'\s*(Credit Card|Kredi Kartı|Debit Card|Banka Kartı)\s*$', caseSensitive: false), '')
+        .trim();
+    
+    // If nothing left after cleaning, use bank name
+    if (cleanName.isEmpty && bankName != null) {
+      return '$bankName $localizedCardType';
+    }
+    
+    // If still empty, return just card type
+    if (cleanName.isEmpty) {
+      return localizedCardType;
+    }
+    
+    // Return cleaned name + localized card type
+    return '$cleanName $localizedCardType';
+  }
+
   // Para formatı için yardımcı metod
   String _formatCurrency(double amount) {
     return Provider.of<ThemeProvider>(context, listen: false).formatAmount(amount);
@@ -301,7 +329,11 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
             ...debitCards.map((cardData) {
               final paymentCard = PaymentCard(
                 id: cardData['id'] as String,
-                name: cardData['cardName'] as String? ?? AppLocalizations.of(context)!.debitCard,
+                name: _getLocalizedCardName(
+                  cardData['cardName'] as String?,
+                  cardData['bankName'] as String?,
+                  CardType.debit,
+                ),
                 type: CardType.debit,
                 number: cardData['maskedCardNumber'] as String? ?? '**** **** **** ****',
                 expiryDate: '',
@@ -341,7 +373,11 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
               // Convert legacy format to PaymentCard
               final paymentCard = PaymentCard(
                 id: cardData['id'] as String,
-                name: cardData['cardName'] as String? ?? AppLocalizations.of(context)!.creditCard,
+                name: _getLocalizedCardName(
+                  cardData['cardName'] as String?,
+                  cardData['bankName'] as String?,
+                  CardType.credit,
+                ),
                 type: CardType.credit,
                 number: cardData['formattedCardNumber'] as String? ?? '**** **** **** ****',
                 expiryDate: '',
@@ -445,7 +481,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                                         ),
                                       ),
                                       child: Text(
-                                        installmentCount == 1 ? (AppLocalizations.of(context)?.cash ?? 'NAKİT') : '$installmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}',
+                                        installmentCount == 1 ? (AppLocalizations.of(context)?.cash ?? 'NAKİT') : '$installmentCount ${AppLocalizations.of(context)?.installment_summary ?? 'Installment'}',
                                         style: GoogleFonts.inter(
                                           fontSize: MediaQuery.of(context).size.width > 600 ? 15 : 13,
                                           fontWeight: FontWeight.w500,
@@ -743,33 +779,53 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                 
                 // Card Info
                 Expanded(
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        card.name,
-                        style: GoogleFonts.inter(
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w600,
-                          color: isSelected 
-                            ? card.color
-                            : (isDark ? Colors.white : Colors.black),
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      if (balance != null) ...[
-                          const Spacer(),
-                            Text(
-                              _formatCurrency(balance),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              card.name,
                               style: GoogleFonts.inter(
-                                fontSize: balanceFontSize,
-                                fontWeight: FontWeight.w500,
-                                color: isDark 
-                                  ? const Color(0xFF8E8E93)
-                                  : const Color(0xFF6D6D70),
-                                letterSpacing: -0.1,
+                                fontSize: titleFontSize,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected 
+                                  ? card.color
+                                  : (isDark ? Colors.white : Colors.black),
+                                letterSpacing: -0.2,
                               ),
                             ),
-                          ],
+                          ),
+                          if (balance != null) ...[
+                              Text(
+                                _formatCurrency(balance),
+                                style: GoogleFonts.inter(
+                                  fontSize: balanceFontSize,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark 
+                                    ? const Color(0xFF8E8E93)
+                                    : const Color(0xFF6D6D70),
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                            ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        card.type == CardType.credit 
+                          ? (AppLocalizations.of(context)?.creditCard ?? 'Kredi Kartı')
+                          : (AppLocalizations.of(context)?.debitCard ?? 'Banka Kartı'),
+                        style: GoogleFonts.inter(
+                          fontSize: balanceFontSize - 2,
+                          fontWeight: FontWeight.w400,
+                          color: isDark 
+                            ? const Color(0xFF8E8E93)
+                            : const Color(0xFF6D6D70),
+                          letterSpacing: -0.1,
+                        ),
+                      ),
                     ],
                   ),
                 ),

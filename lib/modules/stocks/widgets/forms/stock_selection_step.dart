@@ -95,7 +95,7 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
 
   void _onSearchChanged(String query) {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+    _debounceTimer = Timer(const Duration(milliseconds: 15), () {
       _searchStocks(query);
     });
   }
@@ -216,7 +216,12 @@ class _StockSelectionStepState extends State<StockSelectionStep> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF007AFF), width: 2),
+              borderSide: BorderSide(
+                color: isDark
+                    ? const Color(0xFF6D6D70)
+                    : const Color(0xFF8E8E93),
+                width: 2,
+              ),
             ),
             filled: true,
             fillColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,

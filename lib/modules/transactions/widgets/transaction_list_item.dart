@@ -83,7 +83,7 @@ class TransactionListItem extends StatelessWidget {
       }
     }
     if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
-      installmentText = '$currentInstallment/$effectiveInstallmentCount Taksit';
+      installmentText = '$currentInstallment/$effectiveInstallmentCount ${AppLocalizations.of(context)?.installment_summary ?? 'Taksit'}';
     } else if (effectiveInstallmentCount == 1) {
       installmentText = AppLocalizations.of(context)?.cash ?? 'NAKİT';
     }

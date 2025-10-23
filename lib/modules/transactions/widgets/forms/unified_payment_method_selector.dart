@@ -197,7 +197,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Taksit Seçenekleri',
+                    AppLocalizations.of(context)?.installmentOptions ?? 'Taksit Seçenekleri',
                     style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -376,7 +376,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
     required AppLocalizations l10n,
     required VoidCallback onTap,
   }) {
-    final displayText = installments == 1 ? (AppLocalizations.of(context)?.cash ?? 'NAKİT') : '$installments ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
+    final displayText = installments == 1 ? (AppLocalizations.of(context)?.cash ?? 'NAKİT') : '$installments ${AppLocalizations.of(context)?.installment_summary ?? 'Installment'}';
     
     return Container(
       decoration: BoxDecoration(

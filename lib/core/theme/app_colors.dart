@@ -17,6 +17,6 @@ class AppColors {
   static const Color error = Color(0xFFFF4C4C);
   static const Color warning = Color(0xFFFFC300);
   static const Color info = Color(0xFF00C2FF);
-  static const Color success = Color(0xFF4CAF50);
+  static const Color success = Color(0xFF2E7D32); // Rich Green - Balance Overview profit color
   static const Color neutral = Color(0xFFA0A0A0);
 } 

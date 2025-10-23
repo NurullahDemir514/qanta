@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/budget_model.dart';
@@ -28,6 +29,39 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
     super.initState();
   }
 
+  /// Get localized period name
+  String _getLocalizedPeriodName(BudgetPeriod period) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (period) {
+      case BudgetPeriod.weekly:
+        return l10n.weekly;
+      case BudgetPeriod.monthly:
+        return l10n.monthly;
+      case BudgetPeriod.yearly:
+        return l10n.yearly;
+    }
+  }
+
+  /// Format date range for budget duration with clear calculation info
+  String _formatDateRange(DateTime startDate, DateTime endDate, BudgetPeriod period) {
+    final locale = Localizations.localeOf(context);
+    final startFormatter = DateFormat('dd MMM', locale.toString());
+    final endFormatter = DateFormat('dd MMM', locale.toString());
+    
+    // Calculate duration in days
+    final durationInDays = endDate.difference(startDate).inDays;
+    
+    // Format based on period type
+    switch (period) {
+      case BudgetPeriod.weekly:
+        return '${startFormatter.format(startDate)} - ${endFormatter.format(endDate)} ($durationInDays gün)';
+      case BudgetPeriod.monthly:
+        return '${startFormatter.format(startDate)} - ${endFormatter.format(endDate)} ($durationInDays gün)';
+      case BudgetPeriod.yearly:
+        return '${startFormatter.format(startDate)} - ${endFormatter.format(endDate)} ($durationInDays gün)';
+    }
+  }
+
   /// Calculate budget stats from current budgets
   List<BudgetCategoryStats> _calculateBudgetStats(List<BudgetModel> budgets) {
     return budgets.map((budget) {
@@ -36,9 +70,12 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
           : 0.0;
       final isOverBudget = budget.spentAmount > budget.limit;
 
+      // Get localized category name
+      final localizedCategoryName = CategoryIconService.getLocalizedCategoryName(budget.categoryName, context);
+
       return BudgetCategoryStats(
         categoryId: budget.categoryId,
-        categoryName: budget.categoryName,
+        categoryName: localizedCategoryName, // Use localized name
         limit: budget.limit,
         period: budget.period,
         currentSpent: budget.spentAmount,
@@ -46,6 +83,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
         percentage: percentage,
         isOverBudget: isOverBudget,
         isRecurring: budget.isRecurring,
+        startDate: budget.startDate,
       );
     }).toList();
   }
@@ -183,8 +221,8 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                       l10n.manage,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF007AFF),
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? const Color(0xFFE5E5EA) : const Color(0xFF6D6D70),
                       ),
                     ),
                   ),
@@ -223,8 +261,8 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                     l10n.manage,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF007AFF),
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? const Color(0xFFE5E5EA) : const Color(0xFF6D6D70),
                     ),
                   ),
                 ),
@@ -314,15 +352,20 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              stat.categoryName,
-                              style: GoogleFonts.inter(
-                                fontSize: 13.sp, // Increased font size
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? Colors.white : const Color(0xFF1C1C1E),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  stat.categoryName,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13.sp, // Increased font size
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ],
                             ),
                           ),
                           Row(
@@ -336,7 +379,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                                   borderRadius: BorderRadius.circular(3.r), // Reduced radius
                                 ),
                                 child: Text(
-                                  stat.periodDisplayName,
+                                  _getLocalizedPeriodName(stat.period),
                                   style: GoogleFonts.inter(
                                     fontSize: 11.sp, // Increased font size
                                     fontWeight: FontWeight.w500,
@@ -385,7 +428,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                             decoration: BoxDecoration(
                               color: stat.isOverBudget
                                   ? const Color(0xFFFF453A)
-                                  : const Color(0xFF34C759),
+                                  : const Color(0xFF2E7D32),
                               borderRadius: BorderRadius.circular(1.5.r), // Responsive radius
                             ),
                           ),
@@ -400,7 +443,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
                         fontWeight: FontWeight.w600,
                         color: stat.isOverBudget
                             ? const Color(0xFFFF453A)
-                            : const Color(0xFF34C759),
+                            : const Color(0xFF2E7D32),
                       ),
                     ),
                   ],

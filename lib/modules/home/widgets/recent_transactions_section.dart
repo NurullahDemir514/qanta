@@ -28,7 +28,10 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     return Consumer<UnifiedProviderV2>(
       builder: (context, providerV2, child) {
         final buildStartTime = DateTime.now();
-        final v2Transactions = providerV2.recentTransactions;
+        // Hisse işlemlerini recent transactions listesinden gizle
+        final v2Transactions = providerV2.recentTransactions
+            .where((t) => !t.isStockTransaction)
+            .toList();
         final isLoadingV2 = providerV2.isLoadingTransactions;
 
         return Column(
@@ -241,7 +244,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     if (isActualInstallment) {
       return InstallmentExpandableCard(
         installmentId: transaction.installmentId,
-        title: transaction.categoryName ?? transaction.description, // Kategori adı
+        title: transaction.getLocalizedDisplayTitle(context), // Kategori adı
         subtitle: cardName, // Banka adı
         amount: amount,
         time: time,
@@ -283,41 +286,52 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
   void _showV2DeleteActionSheet(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
     final l10n = AppLocalizations.of(context)!;
     
-    // Hisse işlemleri için bottom sheet gösterme, direkt uyarı göster
+    // Hisse işlemleri için lot kontrolü yap
     if (transaction.isStockTransaction) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.stockTransactionCannotDelete,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      
+      // Lot sayısı 0 ise silmeye izin ver
+      if (stockProvider.canDeleteStockTransaction(transaction.stockSymbol ?? '')) {
+        // Normal silme işlemi yap
+        _deleteV2Transaction(context, transaction);
+        return;
+      } else {
+        // Lot sayısı 0 değilse uyarı göster
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.stockTransactionCannotDelete,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.stockTransactionDeleteWarning,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white70,
+                const SizedBox(height: 4),
+                Text(
+                  l10n.stockTransactionDeleteWarning,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            backgroundColor: const Color(0xFFFF9500), // Orange warning color
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
           ),
-          backgroundColor: const Color(0xFFFF9500), // Orange warning color
-          duration: const Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
-      return;
+        );
+        return;
+      }
     }
 
     // Normal işlemler için bottom sheet göster
@@ -373,50 +387,55 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
   }
 
   /// Delete V2 transaction
-  void _deleteV2Transaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) {
+  void _deleteV2Transaction(BuildContext context, v2.TransactionWithDetailsV2 transaction) async {
     final l10n = AppLocalizations.of(context)!;
-    final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
     
     // Check if this is a stock transaction
     if (transaction.isStockTransaction) {
-      // Hisse işlemleri silinemez - uyarı göster
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.stockTransactionCannotDelete,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.stockTransactionDeleteWarning,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
+      try {
+        final stockProvider = Provider.of<StockProvider>(context, listen: false);
+        await stockProvider.deleteStockTransaction(transaction.id);
+        
+        // Başarı mesajı göster
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.transactionDeleted,
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            backgroundColor: const Color(0xFFFF9500), // Orange warning color
-            duration: const Duration(seconds: 4),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+          );
+        }
+      } catch (e) {
+        // Hata mesajı göster
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                e.toString(),
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
+          );
+        }
       }
-      return; // Silme işlemini durdur
+      return;
     } else {
       // Regular transaction - use UnifiedProviderV2
+      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
       providerV2.deleteTransaction(transaction.id).then((success) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

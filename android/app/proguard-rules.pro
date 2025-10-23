@@ -40,6 +40,34 @@
 -keep class com.google.android.play.core.** { *; }
 -dontwarn com.google.android.play.core.**
 
+# Flutter Local Notifications için
+-keep class com.dexterous.** { *; }
+-keep class androidx.work.** { *; }
+-keep class androidx.core.app.** { *; }
+-keep class androidx.core.content.** { *; }
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations
+-keepattributes RuntimeVisibleParameterAnnotations
+
+# Gson TypeToken için özel kurallar
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+-keepclassmembers class * extends com.google.gson.reflect.TypeToken {
+    <init>(...);
+}
+
+# Gson generic type preservation
+-keep class com.google.gson.** { *; }
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-keepclassmembers class * {
+    @com.google.gson.annotations.Expose <fields>;
+}
+
 # Diğer yaygın kurallar
 -dontwarn sun.misc.**
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement

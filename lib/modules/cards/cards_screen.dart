@@ -192,7 +192,7 @@ class _CardsScreenState extends State<CardsScreen>
           builder: (context, child) {
             return WillPopScope(
               onWillPop: () async {
-                context.go('/home?tab=2');
+                context.go('/home?tab=0');
                 return false; // Pop işlemini engelle, GoRouter ile yönlendir
               },
               child: AppPageScaffold(

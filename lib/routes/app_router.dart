@@ -10,7 +10,6 @@ import '../modules/cards/cards_screen.dart';
 import '../modules/insights/statistics_screen.dart';
 import '../modules/calendar/calendar_screen.dart';
 import '../modules/home/pages/budget_management_page.dart';
-import '../modules/home/pages/quick_notes_page.dart';
 import '../modules/transactions/screens/expense_form_screen.dart';
 import '../modules/transactions/screens/income_form_screen.dart';
 import '../modules/cards/screens/credit_card_statements_screen.dart';
@@ -222,29 +221,6 @@ class AppRouter {
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const BudgetManagementPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOut;
-
-            var tween = Tween(begin: begin, end: end).chain(
-              CurveTween(curve: curve),
-            );
-
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 400),
-        ),
-      ),
-      GoRoute(
-        path: '/quick-notes',
-        name: 'quick-notes',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const QuickNotesPageNew(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;

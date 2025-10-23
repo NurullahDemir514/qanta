@@ -89,6 +89,7 @@ class _UnifiedStatementsWidgetState extends State<UnifiedStatementsWidget> {
                     const SizedBox(height: 12),
                     _buildCurrentStatementCard(
                       currentStatement,
+                      pastStatements,
                       themeProvider,
                       isDark,
                     ),
@@ -102,15 +103,29 @@ class _UnifiedStatementsWidgetState extends State<UnifiedStatementsWidget> {
                       isDark,
                     ),
                     const SizedBox(height: 12),
-                    ...futureStatements.map(
-                      (statement) => Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: _buildFutureStatementCard(
-                          statement,
-                          themeProvider,
-                          isDark,
-                        ),
-                      ),
+                    ...futureStatements.asMap().entries.map(
+                      (entry) {
+                        final index = entry.key;
+                        final statement = entry.value;
+                        
+                        // Bir önceki ay: index 0 ise current statement, değilse bir önceki future statement
+                        double? previousMonthTotal;
+                        if (index == 0) {
+                          previousMonthTotal = currentStatement?.remainingAmount;
+                        } else {
+                          previousMonthTotal = futureStatements[index - 1].remainingAmount;
+                        }
+                        
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _buildFutureStatementCard(
+                            statement,
+                            previousMonthTotal,
+                            themeProvider,
+                            isDark,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ],
@@ -135,10 +150,16 @@ class _UnifiedStatementsWidgetState extends State<UnifiedStatementsWidget> {
   /// **Current Statement Card**
   Widget _buildCurrentStatementCard(
     StatementSummary statement,
+    List<StatementSummary> pastStatements,
     ThemeProvider themeProvider,
     bool isDark,
   ) {
     final installments = statement.upcomingInstallments;
+    
+    // Bir önceki ayın toplam tutarını al (en son past statement)
+    final previousMonthTotal = pastStatements.isNotEmpty 
+        ? pastStatements.first.remainingAmount 
+        : null;
 
     return StatementCard(
       statement: statement,
@@ -147,7 +168,8 @@ class _UnifiedStatementsWidgetState extends State<UnifiedStatementsWidget> {
       isNextStatement: false,
       transactions: const [],
       installments: installments,
-      showMonthlyChange: false,
+      previousMonthTotal: previousMonthTotal,
+      showMonthlyChange: true,
       showTransactionCount: true,
     );
   }
@@ -175,6 +197,7 @@ class _UnifiedStatementsWidgetState extends State<UnifiedStatementsWidget> {
   /// **Future Statement Card**
   Widget _buildFutureStatementCard(
     StatementSummary statement,
+    double? previousMonthTotal,
     ThemeProvider themeProvider,
     bool isDark,
   ) {
@@ -187,7 +210,8 @@ class _UnifiedStatementsWidgetState extends State<UnifiedStatementsWidget> {
       isNextStatement: true,
       transactions: const [],
       installments: installments,
-      showMonthlyChange: false,
+      previousMonthTotal: previousMonthTotal,
+      showMonthlyChange: true,
       showTransactionCount: true,
     );
   }
@@ -205,8 +229,16 @@ class _UnifiedStatementsWidgetState extends State<UnifiedStatementsWidget> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: pastStatements.map((statement) {
+        children: pastStatements.asMap().entries.map((entry) {
+          final index = entry.key;
+          final statement = entry.value;
           final transactions = _getStatementTransactions(statement);
+          
+          // Bir önceki ayın toplam tutarını al (bir sonraki index, çünkü liste ters sırada)
+          final previousMonthTotal = index < pastStatements.length - 1
+              ? pastStatements[index + 1].remainingAmount
+              : null;
+          
           return Container(
             width: MediaQuery.of(context).size.width * 0.9, // 90% of screen width
             margin: const EdgeInsets.only(right: 16),
@@ -217,7 +249,8 @@ class _UnifiedStatementsWidgetState extends State<UnifiedStatementsWidget> {
               isNextStatement: false,
               transactions: transactions,
               installments: statement.upcomingInstallments,
-              showMonthlyChange: false,
+              previousMonthTotal: previousMonthTotal,
+              showMonthlyChange: true,
               showTransactionCount: true,
             ),
           );

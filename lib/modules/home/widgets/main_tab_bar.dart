@@ -173,14 +173,22 @@ class _TabItem extends StatelessWidget {
                   ShaderMask(
                     shaderCallback: (Rect bounds) {
                       return LinearGradient(
-                        colors: [
-                          isSelected
-                              ? (isDark ? Colors.white : Colors.black)
-                              : (isDark ? Color(0xFFD1D1D6) : Color(0xFF444446)),
-                          isSelected
-                              ? (isDark ? Colors.white : Colors.black)
-                              : (isDark ? Color(0xFFD1D1D6) : Color(0xFF444446)),
-                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: isSelected
+                            ? (isDark 
+                                ? [
+                                    Colors.white,
+                                    const Color(0xFFE0E0E0), // Açık gri
+                                  ]
+                                : [
+                                    Colors.black,
+                                    const Color(0xFF3C3C43), // Koyu gri
+                                  ])
+                            : [
+                                isDark ? const Color(0xFFD1D1D6) : const Color(0xFF444446),
+                                isDark ? const Color(0xFFD1D1D6) : const Color(0xFF444446),
+                              ],
                       ).createShader(bounds);
                     },
                     blendMode: BlendMode.srcIn,
@@ -203,14 +211,22 @@ class _TabItem extends StatelessWidget {
                   ShaderMask(
                     shaderCallback: (Rect bounds) {
                       return LinearGradient(
-                        colors: [
-                          isSelected
-                              ? (isDark ? Colors.white : Colors.black)
-                              : (isDark ? Color(0xFFD1D1D6) : Color(0xFF444446)),
-                          isSelected
-                              ? (isDark ? Colors.white : Colors.black)
-                              : (isDark ? Color(0xFFD1D1D6) : Color(0xFF444446)),
-                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: isSelected
+                            ? (isDark 
+                                ? [
+                                    Colors.white,
+                                    const Color(0xFFE0E0E0), // Açık gri
+                                  ]
+                                : [
+                                    Colors.black,
+                                    const Color(0xFF3C3C43), // Koyu gri
+                                  ])
+                            : [
+                                isDark ? const Color(0xFFD1D1D6) : const Color(0xFF444446),
+                                isDark ? const Color(0xFFD1D1D6) : const Color(0xFF444446),
+                              ],
                       ).createShader(bounds);
                     },
                     blendMode: BlendMode.srcIn,

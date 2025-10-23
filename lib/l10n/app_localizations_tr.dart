@@ -118,22 +118,22 @@ class AppLocalizationsTr extends AppLocalizations {
   String get defaultUserName => 'Qanta Kullanıcısı';
 
   @override
-  String get nameRequired => 'İsim gerekli';
+  String get nameRequired => 'Lütfen adınızı girin';
 
   @override
-  String get emailRequired => 'E-posta gerekli';
+  String get emailRequired => 'Lütfen e-posta adresinizi girin';
 
   @override
-  String get emailInvalid => 'Geçerli bir e-posta girin';
+  String get emailInvalid => 'Lütfen geçerli bir e-posta adresi girin';
 
   @override
-  String get passwordRequired => 'Şifre gerekli';
+  String get passwordRequired => 'Lütfen şifrenizi girin';
 
   @override
-  String get passwordTooShort => 'Şifre çok kısa';
+  String get passwordTooShort => 'Şifre en az 6 karakter olmalıdır';
 
   @override
-  String get confirmPasswordRequired => 'Şifre onayı gerekli';
+  String get confirmPasswordRequired => 'Lütfen şifrenizi tekrar girin';
 
   @override
   String get passwordsDoNotMatch => 'Yeni şifreler eşleşmiyor';
@@ -172,32 +172,51 @@ class AppLocalizationsTr extends AppLocalizations {
   String get registerError => 'Kayıt hatası';
 
   @override
+  String get networkError =>
+      'İnternet bağlantınızı kontrol edin ve tekrar deneyin';
+
+  @override
   String get emailNotConfirmed =>
       'E-posta adresinizi doğrulamanız gerekiyor. Lütfen e-postanızı kontrol edin.';
 
   @override
   String get invalidCredentials =>
-      'E-posta veya şifre hatalı. Lütfen tekrar deneyin.';
+      'E-posta veya şifre hatalı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.';
 
   @override
   String get tooManyRequests =>
-      'Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.';
+      'Çok fazla deneme yaptınız. Lütfen birkaç dakika bekleyip tekrar deneyin.';
 
   @override
   String get invalidEmailAddress =>
-      'Geçersiz e-posta adresi. Lütfen doğru bir e-posta girin.';
+      'Geçersiz e-posta adresi. Lütfen geçerli bir e-posta adresi girin.';
 
   @override
   String get passwordTooShortError =>
-      'Şifre çok kısa. En az 6 karakter olmalı.';
+      'Şifre çok kısa. Lütfen en az 6 karakter uzunluğunda bir şifre girin.';
 
   @override
   String get userAlreadyRegistered =>
-      'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.';
+      'Bu e-posta adresi zaten kayıtlı. Lütfen giriş yapın.';
 
   @override
   String get signupDisabled =>
-      'Kayıt işlemi şu anda devre dışı. Lütfen daha sonra deneyin.';
+      'Kayıt işlemi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.';
+
+  @override
+  String unknownError(String error) {
+    return 'Bir hata oluştu: $error';
+  }
+
+  @override
+  String get noInternetConnection => 'İnternet Bağlantısı Yok';
+
+  @override
+  String get noInternetDescription =>
+      'İnternet bağlantınızı kontrol edip tekrar deneyin';
+
+  @override
+  String get tryAgain => 'Tekrar Dene';
 
   @override
   String registrationSuccessful(String name) {
@@ -244,7 +263,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get budgetUsed => 'Kullanıldı';
 
   @override
-  String get remaining => 'Kalan:';
+  String get remaining => 'Kalan';
 
   @override
   String get installment => 'Taksit';
@@ -263,10 +282,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get createBudget => 'Bütçe Oluştur';
 
   @override
+  String get averageDailySpending => 'Ortalama Günlük Harcama';
+
+  @override
+  String get spent => 'harcandı';
+
+  @override
+  String get addExpense => 'Harcama Ekle';
+
+  @override
   String get expenseLimitTracking => 'Harcama Limit Takibi';
 
   @override
-  String get manage => 'Yönet';
+  String get future => 'Gelecek';
 
   @override
   String get thisMonthGrowth => 'bu ay';
@@ -346,6 +374,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get about => 'Hakkında';
+
+  @override
+  String get edit => 'Düzenle';
 
   @override
   String get editProfile => 'Profili Düzenle';
@@ -565,7 +596,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get enterValidAmount => 'Geçerli bir miktar girin';
 
   @override
-  String get cash => 'Nakit';
+  String get cash => 'Peşin';
 
   @override
   String get digitalWallet => 'Dijital Cüzdan';
@@ -1133,7 +1164,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get back => 'Geri';
 
   @override
-  String get updateCashBalance => 'Nakit Bakiyeyi Güncelle';
+  String get updateCashBalance => 'Nakit bakiyenizi güncelleyin';
 
   @override
   String get updateCashBalanceDesc =>
@@ -1161,11 +1192,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cashAccountLoadError => 'Nakit hesabı yüklenirken hata oluştu';
 
   @override
-  String unknownError(String error) {
-    return 'Bir hata oluştu: $error';
-  }
-
-  @override
   String get retry => 'Tekrar Dene';
 
   @override
@@ -1177,6 +1203,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get balanceUpdated => 'Nakit Eklendi';
+
+  @override
+  String get updateBalance => 'Bakiye Güncelle';
 
   @override
   String get walletBalanceUpdated => 'Nakit güncellendi';
@@ -1293,9 +1322,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get connectionError => 'Bağlantı sorunu yaşanıyor';
-
-  @override
-  String get tryAgain => 'Tekrar Dene';
 
   @override
   String get noAccountsAvailable => 'Kullanılabilir hesap yok';
@@ -1629,19 +1655,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cancelAction => 'İptal Et';
 
   @override
-  String get quickNotes => 'Hızlı Notlar';
-
-  @override
-  String get quickNotesSubtitle => 'Anında not alma için kalıcı bildirim';
-
-  @override
-  String get quickNotesNotificationEnabled => 'Hızlı notlar bildirimi açıldı';
-
-  @override
-  String get quickNotesNotificationDisabled =>
-      'Hızlı notlar bildirimi kapatıldı';
-
-  @override
   String get notificationPermissionRequired =>
       'Bildirim izni gerekli! Lütfen ayarlardan açın.';
 
@@ -1724,7 +1737,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pleaseEnterAmount => 'Lütfen bir tutar girin';
 
   @override
-  String get pleaseEnterValidAmount => 'Geçerli bir tutar girin';
+  String get pleaseEnterValidAmount => 'Lütfen geçerli bir tutar girin';
 
   @override
   String get pleaseSelectSourceAccount => 'Lütfen kaynak hesap seçin';
@@ -1980,6 +1993,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get totalDebt => 'Toplam Borç';
+
+  @override
+  String get creditCardDebt => 'Kredi Kartı Borcu';
+
+  @override
+  String cardCount(int count) {
+    return '$count kart';
+  }
 
   @override
   String get noTransactionsForThisCard => 'Bu kart için henüz işlem bulunmuyor';
@@ -2264,13 +2285,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get howToUseBudgetManagementAnswer =>
       'Kategoriler için aylık limitler belirleyebilir, harcamalarını takip edebilir ve limit aşımlarında uyarı alabilirsin.';
-
-  @override
-  String get whatIsQuickNotesFeature => 'Hızlı notlar özelliği nedir?';
-
-  @override
-  String get whatIsQuickNotesFeatureAnswer =>
-      'Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarını kategorize edebilirsin.';
 
   @override
   String get appCrashingWhatToDo => 'Uygulama çöküyor, ne yapmalıyım?';
@@ -2616,16 +2630,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get allNotifications => 'Tüm Bildirimler';
-
-  @override
-  String get pendingNotes => 'Bekleyen';
-
-  @override
-  String get addQuickNote => 'Hızlı Not Ekle';
-
-  @override
-  String get addQuickNoteDescription =>
-      'Harcama veya gelir notunu yaz. Daha sonra işlem olarak ekleyebilirsin.';
 
   @override
   String exampleExpenseNote(String currency) {
@@ -3057,6 +3061,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addMoney => 'Para Ekle';
 
   @override
+  String get addBankAccount => 'Banka hesabı ekleyin';
+
+  @override
+  String get noBankAccountCashZero =>
+      'Nakit bakiyeniz yok ve banka hesabınız yok';
+
+  @override
+  String get updateCashOrAddBank =>
+      'Nakit bakiyenizi güncelleyin veya banka hesabı ekleyin';
+
+  @override
   String get totalValue => 'Toplam Değer';
 
   @override
@@ -3106,14 +3121,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get returnLabel => 'Getiri';
 
   @override
-  String get quickNotesTitle => 'Hızlı Notlar';
-
-  @override
-  String pendingNotesCount(int count) {
-    return '$count bekleyen not';
-  }
-
-  @override
   String get quickAddNote => 'Hızlı Not Ekle';
 
   @override
@@ -3130,6 +3137,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get addButton => 'Ekle';
+
+  @override
+  String get pendingNotes => 'Bekleyen';
 
   @override
   String get processedNotes => 'İşlenen';
@@ -3399,9 +3409,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get insufficientBalanceTitle => 'Yetersiz Bakiye';
 
   @override
-  String get spent => 'harcandı';
-
-  @override
   String get spentAmount => 'Harcanan:';
 
   @override
@@ -3415,6 +3422,32 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get limitAmountPlaceholder => '0,00';
+
+  @override
+  String get startDate => 'Başlangıç Tarihi';
+
+  @override
+  String get selectStartDate => 'Başlangıç tarihi seçin';
+
+  @override
+  String get startDateHint => 'Limit başlangıç tarihi';
+
+  @override
+  String get limitDuration => 'Limit Süresi';
+
+  @override
+  String get oneTime => 'Tek Seferlik';
+
+  @override
+  String get recurring => 'Yenile';
+
+  @override
+  String limitWillRenew(String period) {
+    return 'Bu limit $period otomatik olarak yenilenecek';
+  }
+
+  @override
+  String get limitOneTime => 'Bu limit tek seferlik olarak oluşturulacak';
 
   @override
   String get saveLimit => 'Limiti Kaydet';
@@ -3519,4 +3552,292 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tryDifferentFilter => 'Farklı bir filtre seçmeyi deneyin';
+
+  @override
+  String get lunchBreak => 'Öğle Molası';
+
+  @override
+  String get lunchBreakMessage =>
+      'Günün yarısı geçti, bugünkü harcamalarını kontrol et';
+
+  @override
+  String get eveningCheck => 'Akşam Kontrolü';
+
+  @override
+  String get eveningCheckMessage => 'Günün harcamalarını kaydetmeyi unutma';
+
+  @override
+  String get dayEnd => 'Gün Sonu';
+
+  @override
+  String get dayEndMessage => 'Bugünün gelir ve giderlerini not al';
+
+  @override
+  String get qantaReminders => 'Qanta Hatırlatmaları';
+
+  @override
+  String get reminderChannelDescription => 'Harcama ve gelir hatırlatmaları';
+
+  @override
+  String budgetExceededWarning(String amount) {
+    return 'Bu harcamayla birlikte bütçe limitiniz $amount₺ aşacak';
+  }
+
+  @override
+  String budgetExceededWarningTotal(String amount) {
+    return 'Bu harcamayla birlikte bütçe limitiniz $amount₺ aşacak';
+  }
+
+  @override
+  String get budgetNearLimitWarning =>
+      'Bu harcamayla birlikte bütçe limitinin %80\'ini aşacaksınız';
+
+  @override
+  String get exampleMarketShopping => 'Örn: Market alışverişi';
+
+  @override
+  String get exampleSalary => 'Örn: Maaş';
+
+  @override
+  String get accountInfoError => 'Hesap bilgileri alınamadı';
+
+  @override
+  String transactionError(String error) {
+    return 'İşlem eklenirken hata: $error';
+  }
+
+  @override
+  String get limitDeleteError => 'Limit silinemedi';
+
+  @override
+  String get installment_summary => 'Taksit';
+
+  @override
+  String get manage => 'Yönet';
+
+  @override
+  String get overallBudget => 'Genel Bütçe';
+
+  @override
+  String get categoryDistribution => 'Kategori Dağılımı';
+
+  @override
+  String get spendingStatus => 'Harcama Durumu';
+
+  @override
+  String get duplicateBudgetWarning => 'Zaten Mevcut Limit';
+
+  @override
+  String get duplicateBudgetMessage =>
+      'Bu kategori için aynı periyotta zaten bir limit bulunmaktadır. Mevcut limiti düzenlemek için budget yönetimi sayfasını kullanın.';
+
+  @override
+  String get categories => 'kategori';
+
+  @override
+  String get overBudget => 'Aşım';
+
+  @override
+  String budgetExceededBy(Object amount) {
+    return 'Bütçenizi $amount aştınız';
+  }
+
+  @override
+  String get days => 'gün';
+
+  @override
+  String get weeks => 'hafta';
+
+  @override
+  String get months => 'ay';
+
+  @override
+  String get years => 'yıl';
+
+  @override
+  String get weeklyTrend => 'Haftalık Trend';
+
+  @override
+  String get weeklyTrendExplanation =>
+      'Son 7 günün harcama pattern\'ini gösterir. Hafta sonu daha yüksek, pazartesi daha düşük harcama normaldir.';
+
+  @override
+  String get dailyLimit => 'Günlük Limit';
+
+  @override
+  String get fastSpendingExplanation =>
+      'Günlük bütçenizin %15\'inden fazlasını harcıyorsunuz. Daha dikkatli olmanız önerilir.';
+
+  @override
+  String get normalSpendingExplanation =>
+      'Günlük bütçenizin %8-15\'i arasında harcıyorsunuz. Sağlıklı bir harcama hızı.';
+
+  @override
+  String get slowSpendingExplanation =>
+      'Günlük bütçenizin %8\'inden az harcıyorsunuz. Tasarruf ediyorsunuz!';
+
+  @override
+  String get defaultSpendingExplanation =>
+      'Bu miktar, kalan günlere bölünmüş toplam bütçenizdir.';
+
+  @override
+  String get analyticsConsentTitle => 'Uygulamayı Geliştirmemize Yardım Edin';
+
+  @override
+  String get analyticsConsentMessage =>
+      'Qanta\'yı sizin için daha iyi hale getirmek istiyoruz! Anonim harcama verilerinizi toplayarak uygulamayı geliştirebilir, daha iyi özellikler sunabiliriz.\n\n• Verileriniz tamamen anonimdir\n• Kişisel bilgileriniz asla paylaşılmaz\n• Sadece harcama tutarları ve kategorileri toplanır\n• İstediğiniz zaman iptal edebilirsiniz';
+
+  @override
+  String get analyticsAccept => 'Kabul Ediyorum';
+
+  @override
+  String get analyticsDecline => 'Hayır, Teşekkürler';
+
+  @override
+  String get analyticsConsentNotice =>
+      'Bu izni Profil > Tercihler bölümünden değiştirebilirsiniz.';
+
+  @override
+  String get anonymousDataCollection => 'Anonim Veri Toplama';
+
+  @override
+  String get anonymousDataCollectionSubtitle =>
+      'Uygulamayı geliştirmek için\nanonim harcama verilerini paylaş';
+
+  @override
+  String get analyticsEnabled => 'Anonim veri toplama açıldı';
+
+  @override
+  String get analyticsDisabled => 'Anonim veri toplama kapatıldı';
+
+  @override
+  String get cardLimitReached => 'Kart Limiti Doldu';
+
+  @override
+  String get cardLimitReachedMessage =>
+      'Ücretsiz sürümde en fazla 3 kart ekleyebilirsiniz';
+
+  @override
+  String get upgradeToPremium => 'Premium\'a Geç';
+
+  @override
+  String get premiumOfferTitle => 'Qanta Premium';
+
+  @override
+  String get premiumOfferSubtitle => 'Tüm özelliklerin kilidini aç';
+
+  @override
+  String get freeVersion => 'Ücretsiz';
+
+  @override
+  String get premiumVersion => 'Premium';
+
+  @override
+  String get featureCardLimit => 'Kart Limiti';
+
+  @override
+  String get featureCardLimitFree => '3 kart';
+
+  @override
+  String get featureCardLimitPremium => 'Sınırsız';
+
+  @override
+  String get featureStockLimit => 'Hisse Limiti';
+
+  @override
+  String get featureStockLimitFree => '3 hisse';
+
+  @override
+  String get featureStockLimitPremium => 'Sınırsız';
+
+  @override
+  String get stockLimitReached => 'Hisse Limiti Doldu';
+
+  @override
+  String get stockLimitReachedMessage =>
+      'Ücretsiz sürümde en fazla 3 hisse ekleyebilirsiniz';
+
+  @override
+  String get featureAds => 'Reklamlar';
+
+  @override
+  String get featureAdsFree => 'Var';
+
+  @override
+  String get featureAdsPremium => 'Yok';
+
+  @override
+  String get featureSupport => 'Destek';
+
+  @override
+  String get featureSupportFree => 'Topluluk';
+
+  @override
+  String get featureSupportPremium => 'Öncelikli';
+
+  @override
+  String get featureUpdates => 'Güncellemeler';
+
+  @override
+  String get featureUpdatesFree => 'Standart';
+
+  @override
+  String get featureUpdatesPremium => 'Erken Erişim';
+
+  @override
+  String get getQantaPremium => 'Qanta Premium\'u Edinin';
+
+  @override
+  String get continueWithFree => 'Ücretsiz Devam Et';
+
+  @override
+  String get premiumBenefitsTitle => 'Premium Avantajları';
+
+  @override
+  String get upgradeToPremiumBanner => 'Premium\'a Geç';
+
+  @override
+  String get premiumBannerSubtitle => 'Reklamları kaldır, sınırsız özellikler';
+
+  @override
+  String get discover => 'Keşfet';
+
+  @override
+  String get premiumStatus => 'Premium';
+
+  @override
+  String get premiumActive => 'Premium Aktif';
+
+  @override
+  String get premiumActiveDescription =>
+      'Sınırsız özellikler, reklamsız deneyim';
+
+  @override
+  String get manageSubscription => 'Aboneliği Yönet';
+
+  @override
+  String get manageSubscriptionDescription =>
+      'Google Play\'de abonelik ayarlarını düzenle';
+
+  @override
+  String get restorePurchases => 'Satın Almaları Geri Yükle';
+
+  @override
+  String get restorePurchasesDescription =>
+      'Daha önce satın aldıysanız premium\'u geri yükleyin';
+
+  @override
+  String get checkingPurchases => 'Kontrol ediliyor...';
+
+  @override
+  String get premiumRestored => 'Premium geri yüklendi!';
+
+  @override
+  String get noActivePremium => 'Aktif premium aboneliği bulunamadı';
+
+  @override
+  String get playStoreError => 'Google Play Store açılamadı';
+
+  @override
+  String get upgradeNow => 'Yükselt';
 }

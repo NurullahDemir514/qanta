@@ -11,6 +11,7 @@ class ProfileAvatar extends StatefulWidget {
   final String userName;
   final double size;
   final bool showBorder;
+  final bool isPremium;
   final VoidCallback? onTap;
 
   const ProfileAvatar({
@@ -19,6 +20,7 @@ class ProfileAvatar extends StatefulWidget {
     required this.userName,
     this.size = 64,
     this.showBorder = false,
+    this.isPremium = false,
     this.onTap,
   });
 
@@ -79,6 +81,51 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Premium kullanıcılar için gradient border
+    if (widget.isPremium && widget.showBorder) {
+      return GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: widget.size,
+          height: widget.size,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.size / 2),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFFFD700), // Gold
+                Color(0xFFFFA500), // Orange
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFFA500).withValues(alpha: 0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(1.5), // Border thickness (ince)
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: BorderRadius.circular((widget.size - 3) / 2),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular((widget.size - 3) / 2),
+              child: _isLoading
+                  ? _buildPlaceholder(isDark)
+                  : (_cachedImageData != null
+                        ? _buildImageWidget(_cachedImageData!)
+                        : _buildPlaceholder(isDark)),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Normal kullanıcılar için standart border
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(

@@ -29,4 +29,10 @@ abstract class IStockApiService {
   
   /// Geçmiş veri çekme (mini grafik için)
   Future<List<double>> getHistoricalData(String symbol, {int days = 30});
+  
+  /// Son 7 günlük değişim hesapla
+  Future<Map<String, double>> getStockChange7Days(List<String> symbols);
+  
+  /// Son 30 günlük değişim hesapla
+  Future<Map<String, double>> getStockChange30Days(List<String> symbols);
 }

@@ -7,6 +7,8 @@ import '../providers/stock_provider.dart';
 import '../widgets/stock_search_item.dart';
 import '../../../shared/models/stock_models.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/premium_service.dart';
+import '../../premium/premium_offer_screen.dart';
 
 /// Hisse arama ekranı
 class StockSearchScreen extends StatefulWidget {

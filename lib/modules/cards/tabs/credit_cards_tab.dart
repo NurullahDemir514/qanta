@@ -11,9 +11,13 @@ import '../../home/widgets/credit_card_widget.dart';
 import '../widgets/add_credit_card_form.dart';
 import '../widgets/edit_credit_card_form.dart';
 import '../widgets/card_transaction_section.dart';
-import '../../home/bottom_sheets/card_detail_bottom_sheet.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/premium_service.dart';
+import '../../premium/premium_offer_screen.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
+import '../../advertisement/config/advertisement_config.dart' as config;
+import '../../advertisement/models/advertisement_models.dart';
 
 class CreditCardsTab extends StatefulWidget {
   final AppLocalizations l10n;
@@ -36,10 +40,21 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
   int _currentPage = 0;
   VoidCallback? _providerListener;
   UnifiedProviderV2? _unifiedProviderV2;
+  late GoogleAdsRealBannerService _creditCardsBannerService;
 
   @override
   void initState() {
     super.initState();
+    
+    // Credit Cards tab banner reklamını başlat
+    _creditCardsBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.creditCardsTabBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Reklamı yükle
+    _creditCardsBannerService.loadAd();
     
     // Provider referansını sakla ve verileri yükle
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -120,6 +135,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
   @override
   void dispose() {
     _pageController.dispose();
+    _creditCardsBannerService.dispose();
     if (_providerListener != null && _unifiedProviderV2 != null) {
       try {
         _unifiedProviderV2!.removeListener(_providerListener!);
@@ -131,6 +147,23 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
   }
 
   void _showAddCreditCardForm() {
+    // Kart limiti kontrolü
+    final premiumService = context.read<PremiumService>();
+    final unifiedProvider = context.read<UnifiedProviderV2>();
+    final totalCards = unifiedProvider.debitCards.length + unifiedProvider.creditCards.length;
+    
+    if (!premiumService.canAddCard(totalCards)) {
+      // Premium teklif ekranını göster
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PremiumOfferScreen(),
+          fullscreenDialog: true,
+        ),
+      );
+      return;
+    }
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -148,135 +181,151 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
     );
   }
 
-  void _showCardDetail(BuildContext context, creditCard, ThemeProvider themeProvider, bool isDark) {
-    final gradientColors = AppConstants.getBankGradientColors(creditCard['bankCode'] ?? 'qanta');
-    final accentColor = AppConstants.getBankAccentColor(creditCard['bankCode'] ?? 'qanta');
+  String _getLocalizedCardName(String? cardName, String? bankCode, String localizedCardType) {
+    if (cardName == null || cardName.isEmpty) {
+      return '${AppConstants.getLocalizedBankName(bankCode ?? 'qanta', AppLocalizations.of(context)!)} $localizedCardType';
+    }
     
-    CardDetailBottomSheet.show(
-      context,
-      creditCard['cardName'] ?? AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!),
-      widget.l10n.credit,
-      creditCard['formattedCardNumber'] ?? '**** **** **** ****',
-      creditCard['availableLimit']?.toDouble() ?? 0.0,
-      gradientColors,
-      accentColor,
-      themeProvider,
-      isDark,
-      totalDebt: creditCard['totalDebt']?.toDouble() ?? 0.0,
-      creditLimit: creditCard['creditLimit']?.toDouble() ?? 0.0,
-      usagePercentage: creditCard['usagePercentage']?.toDouble() ?? 0.0,
-      statementDate: creditCard['statementDate'] ?? 1,
-      dueDate: creditCard['dueDate'] ?? 15,
-    );
+    // Remove card type phrases in any language from cardName
+    String cleanName = cardName
+        .replaceAll(RegExp(r'\s*(Credit Card|Kredi Kartı|Debit Card|Banka Kartı)\s*$', caseSensitive: false), '')
+        .trim();
+    
+    // If nothing left after cleaning, use bank name
+    if (cleanName.isEmpty) {
+      return '${AppConstants.getLocalizedBankName(bankCode ?? 'qanta', AppLocalizations.of(context)!)} $localizedCardType';
+    }
+    
+    // Return cleaned name + localized card type
+    return '$cleanName $localizedCardType';
   }
 
   void _showCardActions(BuildContext context, creditCard) {
     HapticFeedback.mediumImpact();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    showCupertinoModalPopup(
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text(
-          creditCard['cardName'] ?? AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!),
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
-        message: Text(
-          AppLocalizations.of(context)!.creditCard,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            color: CupertinoColors.secondaryLabel,
-          ),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              _showStatements(creditCard);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  CupertinoIcons.doc_text,
-                  color: CupertinoColors.systemBlue,
-                  size: 20,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              // Handle
+              Container(
+                width: 36,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: isDark 
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(1.5),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Ekstreler',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: CupertinoColors.systemBlue,
+              ),
+              const SizedBox(height: 20),
+              
+              // Title
+              Text(
+                _getLocalizedCardName(
+                  creditCard['cardName'],
+                  creditCard['bankCode'],
+                  AppLocalizations.of(context)!.creditCard,
+                ),
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF1A1A1A),
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Divider
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                color: isDark 
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.08),
+              ),
+              
+              // Edit
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  _editCard(creditCard);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.edit_outlined,
+                        size: 22,
+                        color: isDark 
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : const Color(0xFF3C3C43).withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        AppLocalizations.of(context)?.edit ?? 'Edit',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF1A1A1A),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              _editCard(creditCard);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  CupertinoIcons.pencil,
-                  color: CupertinoColors.systemBlue,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Düzenle',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: CupertinoColors.systemBlue,
+              ),
+              
+              // Divider
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                indent: 24,
+                color: isDark 
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.08),
+              ),
+              
+              // Delete
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteConfirmation(creditCard);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.delete_outline,
+                        size: 22,
+                        color: Color(0xFFFF453A),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        AppLocalizations.of(context)?.delete ?? 'Delete',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFFFF453A),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(context);
-              _showDeleteConfirmation(creditCard);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  CupertinoIcons.delete,
-                  color: CupertinoColors.destructiveRed,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  AppLocalizations.of(context)?.delete ?? 'Delete',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: CupertinoColors.destructiveRed,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            AppLocalizations.of(context)?.cancel ?? 'Cancel',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: CupertinoColors.systemBlue,
-            ),
+              ),
+              
+              const SizedBox(height: 12),
+            ],
           ),
         ),
       ),
@@ -288,7 +337,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'Kartı Sil',
+          AppLocalizations.of(context)!.deleteCard,
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -296,7 +345,9 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
           ),
         ),
         message: Text(
-          '${creditCard['cardName'] ?? AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!)} kartını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.',
+          AppLocalizations.of(context)!.deleteCardConfirm(
+            creditCard['cardName'] ?? AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!)
+          ),
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -311,7 +362,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
               _deleteCard(creditCard);
             },
             child: Text(
-              'Sil',
+              AppLocalizations.of(context)?.delete ?? 'Delete',
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
@@ -377,7 +428,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Kart başarıyla silindi',
+              AppLocalizations.of(context)!.cardDeleted,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -397,7 +448,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Kart silinirken hata oluştu',
+              AppLocalizations.of(context)!.cardDeleteError,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -594,7 +645,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: GestureDetector(
-                            onTap: () => _showCardDetail(context, creditCard, themeProvider, isDark),
+                            onTap: null, // Already in cards page
                             onLongPress: () => _showCardActions(context, creditCard),
                             child: SizedBox(
                               width: double.infinity,
@@ -610,6 +661,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
                                 usagePercentage: creditCard['usagePercentage']?.toDouble() ?? 0.0,
                                 statementDate: creditCard['statementDate'] ?? 1,
                                 dueDate: creditCard['dueDate'] ?? 15,
+                                onStatementsPressed: () => _showStatements(creditCard),
                               ),
                             ),
                           ),
@@ -619,6 +671,27 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
                   ),
 
                   const SizedBox(height: 20),
+                  
+                  // Banner reklam - Credit card'lardan sonra (Premium kullanıcılara gösterilmez)
+                  Consumer<PremiumService>(
+                    builder: (context, premiumService, child) {
+                      if (premiumService.isPremium) return const SizedBox.shrink();
+                      
+                      if (_creditCardsBannerService.isLoaded && _creditCardsBannerService.bannerWidget != null) {
+                        return Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              height: 50,
+                              child: _creditCardsBannerService.bannerWidget!,
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   
                   // Sayfa göstergesi (dots)
                   if (unifiedProviderV2.creditCards.length > 1)

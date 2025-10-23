@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/theme_provider.dart';
+import '../../../../core/providers/unified_provider_v2.dart';
+import '../../../../shared/models/budget_model.dart';
+import '../../../../shared/utils/currency_utils.dart';
 
 class TransactionSummary extends StatelessWidget {
   final double amount;
@@ -38,8 +41,17 @@ class TransactionSummary extends StatelessWidget {
     return formatter.format(amount);
   }
 
-  String _formatDate(DateTime date) {
-    final formatter = DateFormat('dd MMMM yyyy', 'tr_TR');
+  String _formatDate(DateTime date, BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      // Fallback to English format
+      final formatter = DateFormat('dd MMMM yyyy', 'en_US');
+      return formatter.format(date);
+    }
+    
+    // Use localized date format based on current locale
+    final locale = Localizations.localeOf(context);
+    final formatter = DateFormat('dd MMMM yyyy', locale.toString());
     return formatter.format(date);
   }
 
@@ -51,12 +63,89 @@ class TransactionSummary extends StatelessWidget {
     return AppLocalizations.of(context)?.transaction ?? 'Transaction';
   }
 
+  /// Check budget limits for this transaction
+  Map<String, dynamic>? _checkBudgetLimits(BuildContext context) {
+    // Only check for expense transactions
+    if (isIncome == true) return null;
+    
+    final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+    final l10n = AppLocalizations.of(context)!;
+    final categoryName = _categoryDisplay;
+    
+    if (categoryName.isEmpty) return null;
+    
+    // Find matching budget for the category
+    final matchingBudget = provider.budgets.firstWhere(
+      (budget) => budget.categoryName.toLowerCase() == categoryName.toLowerCase(),
+      orElse: () => BudgetModel(
+        id: '',
+        userId: '',
+        categoryId: '',
+        categoryName: '',
+        limit: 0.0,
+        period: BudgetPeriod.monthly,
+        month: DateTime.now().month,
+        year: DateTime.now().year,
+        startDate: DateTime.now(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+    );
+
+    // If no budget found, no warning
+    if (matchingBudget.id.isEmpty) return null;
+
+    // Check if transaction amount exceeds budget limit
+    final remainingBudget = matchingBudget.limit - matchingBudget.spentAmount;
+    final isOverBudget = amount > remainingBudget;
+    
+    // Check if transaction would exceed budget significantly
+    final exceedsBudget = amount > matchingBudget.limit;
+    
+    String? warning;
+    String? warningType;
+    Color? warningColor;
+    
+    if (isOverBudget) {
+      final overAmount = amount - remainingBudget;
+      final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(overAmount, Currency.TRY);
+      warning = l10n.budgetExceededWarning(formattedAmount);
+      warningType = 'over_budget';
+      warningColor = const Color(0xFFFF4C4C);
+    } else if (exceedsBudget) {
+      final overAmount = amount - matchingBudget.limit;
+      final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(overAmount, Currency.TRY);
+      warning = l10n.budgetExceededWarningTotal(formattedAmount);
+      warningType = 'exceeds_budget';
+      warningColor = const Color(0xFFFF9500);
+    } else if (amount > matchingBudget.limit * 0.8) {
+      warning = l10n.budgetNearLimitWarning;
+      warningType = 'near_limit';
+      warningColor = const Color(0xFFFFC300);
+    }
+
+    if (warning == null) return null;
+
+    return {
+      'warning': warning,
+      'warningType': warningType,
+      'warningColor': warningColor,
+      'budget': matchingBudget,
+      'remainingBudget': remainingBudget,
+      'isOverBudget': isOverBudget,
+      'exceedsBudget': exceedsBudget,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Check budget limits
+    final budgetCheck = _checkBudgetLimits(context);
     
     // Detaylı Responsive Breakpoints
     final isSmallMobile = screenWidth <= 360;      // iPhone SE, küçük telefonlar
@@ -142,9 +231,9 @@ class TransactionSummary extends StatelessWidget {
               l10n.summary,
               style: GoogleFonts.inter(
                 fontSize: titleFontSize,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: isDark ? Colors.white : Colors.black,
-                letterSpacing: -0.3,
+                letterSpacing: -0.2,
               ),
             ),
             
@@ -215,7 +304,7 @@ class TransactionSummary extends StatelessWidget {
                     _buildDetailRow(l10n.payment, _paymentMethodDisplay, isDark, screenWidth),
                     SizedBox(height: adjustedDetailSpacing),
                   ],
-                  _buildDetailRow(l10n.date, _formatDate(date), isDark, screenWidth),
+                  _buildDetailRow(l10n.date, _formatDate(date, context), isDark, screenWidth),
                   
                   if (description != null && description!.isNotEmpty) ...[
                     SizedBox(height: adjustedDetailSpacing),
@@ -224,6 +313,12 @@ class TransactionSummary extends StatelessWidget {
                 ],
               ),
             ),
+            
+            // Budget Warning (if any)
+            if (budgetCheck != null) ...[
+              SizedBox(height: adjustedTitleSpacing),
+              _buildBudgetWarning(budgetCheck, isDark, screenWidth),
+            ],
           ],
         );
       },
@@ -293,6 +388,82 @@ class TransactionSummary extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBudgetWarning(Map<String, dynamic> budgetCheck, bool isDark, double screenWidth) {
+    final warning = budgetCheck['warning'] as String;
+    final warningColor = budgetCheck['warningColor'] as Color;
+    final warningType = budgetCheck['warningType'] as String;
+    
+    // Responsive değerler
+    final isSmallMobile = screenWidth <= 360;
+    final isMobile = screenWidth > 360 && screenWidth <= 480;
+    final isLargeMobile = screenWidth > 480 && screenWidth <= 600;
+    
+    final warningPadding = isSmallMobile ? 12.0 :
+                          isMobile ? 14.0 :
+                          isLargeMobile ? 16.0 : 18.0;
+    
+    final warningBorderRadius = isSmallMobile ? 8.0 :
+                               isMobile ? 10.0 :
+                               isLargeMobile ? 12.0 : 14.0;
+    
+    final iconSize = isSmallMobile ? 16.0 :
+                    isMobile ? 18.0 :
+                    isLargeMobile ? 20.0 : 22.0;
+    
+    final textFontSize = isSmallMobile ? 12.0 :
+                        isMobile ? 13.0 :
+                        isLargeMobile ? 14.0 : 15.0;
+    
+    IconData iconData;
+    switch (warningType) {
+      case 'over_budget':
+        iconData = Icons.warning_amber_rounded;
+        break;
+      case 'exceeds_budget':
+        iconData = Icons.error_outline_rounded;
+        break;
+      case 'near_limit':
+        iconData = Icons.info_outline_rounded;
+        break;
+      default:
+        iconData = Icons.info_outline_rounded;
+    }
+    
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(warningPadding),
+      decoration: BoxDecoration(
+        color: warningColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(warningBorderRadius),
+        border: Border.all(
+          color: warningColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            iconData,
+            color: warningColor,
+            size: iconSize,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              warning,
+              style: GoogleFonts.inter(
+                fontSize: textFontSize,
+                fontWeight: FontWeight.w500,
+                color: warningColor,
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 } 

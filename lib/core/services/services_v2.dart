@@ -20,7 +20,6 @@ export 'firebase_debit_card_service.dart';
 export 'firebase_budget_service.dart';
 export 'firebase_budget_service_v2.dart';
 export 'profile_image_service.dart';
-export 'quick_note_service.dart';
 
 // Legacy services (for backward compatibility during migration)
 // export 'supabase_service.dart'; // Temporarily disabled for Firebase migration

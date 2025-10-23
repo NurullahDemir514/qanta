@@ -17,6 +17,8 @@ import '../widgets/stock_detail_screen.dart';
 import 'stock_transaction_form_screen.dart';
 import '../../../shared/models/stock_models.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/premium_service.dart';
+import '../../premium/premium_offer_screen.dart';
 import '../widgets/stock_transaction_fab.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 
@@ -167,7 +169,7 @@ class _StocksScreenState extends State<StocksScreen>
                                     gradient: const LinearGradient(
                                       colors: [
                                         Color(0xFF007AFF),
-                                        Color(0xFF34D399),
+                                        Color(0xFF2E7D32),
                                       ],
                                     ),
                                   ),
@@ -747,87 +749,90 @@ class _StocksScreenState extends State<StocksScreen>
   Widget _buildEmptyPortfolioState(bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Simple Icon
-            Icon(
-              Icons.trending_up_rounded,
-              size: 80,
-              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Title
-            Text(
-              l10n.noStocksTracked,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            
-            const SizedBox(height: 8),
-            
-            // Subtitle
-            Text(
-              l10n.addStocksInstruction,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.6, // Take up 60% of screen height
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Simple Icon
+              Icon(
+                Icons.trending_up_rounded,
+                size: 80,
                 color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
               ),
-              textAlign: TextAlign.center,
-            ),
-            
-            const SizedBox(height: 32),
-            
-            // Simple Add Stocks Button
-            Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF9500),
-                borderRadius: BorderRadius.circular(8),
+              
+              const SizedBox(height: 24),
+              
+              // Title
+              Text(
+                l10n.noStocksTracked,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+                textAlign: TextAlign.center,
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
+              
+              const SizedBox(height: 8),
+              
+              // Subtitle
+              Text(
+                l10n.addStocksInstruction,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Simple Add Stocks Button
+              Container(
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF9500),
                   borderRadius: BorderRadius.circular(8),
-                  onTap: () {
-                    _checkBalanceAndNavigate(context);
-                  },
-                  child: Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.add_rounded,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.addStocks,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      _checkBalanceAndNavigate(context);
+                    },
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.add_rounded,
                             color: Colors.white,
+                            size: 16,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.addStocks,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -836,45 +841,48 @@ class _StocksScreenState extends State<StocksScreen>
   Widget _buildNoStocksMatchFilter(bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 100, left: 20, right: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            // Filter Icon
-            Icon(
-              Icons.filter_list_off_rounded,
-              size: 80,
-              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Title
-            Text(
-              l10n.noStocksMatchFilter,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            
-            const SizedBox(height: 8),
-            
-            // Subtitle
-            Text(
-              l10n.tryDifferentFilter,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.6, // Take up 60% of screen height
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Filter Icon
+              Icon(
+                Icons.filter_list_off_rounded,
+                size: 80,
                 color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              
+              const SizedBox(height: 24),
+              
+              // Title
+              Text(
+                l10n.noStocksMatchFilter,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              
+              const SizedBox(height: 8),
+              
+              // Subtitle
+              Text(
+                l10n.tryDifferentFilter,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -959,6 +967,8 @@ class _StocksScreenState extends State<StocksScreen>
   }
 
   void _showStockSearch() {
+    // Free kullanıcılar da hisse arayabilir
+    // Limit kontrolü hisse eklerken yapılacak
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const StockSearchScreen()),
@@ -987,11 +997,34 @@ class _StocksScreenState extends State<StocksScreen>
       totalCashBalance += cash.balance;
     }
     
+    // Kart varlığı kontrolü
+    bool hasDebitCards = provider.debitCards.isNotEmpty;
+    bool hasCreditCards = provider.creditCards.isNotEmpty;
+    bool hasAnyCards = hasDebitCards || hasCreditCards;
+    
     // Toplam kullanılabilir para (sadece nakit + debit bakiye)
     double totalAvailableBalance = totalCashBalance + totalDebitBalance;
     
+    // Senaryo 1: Nakit sıfır ve banka hesabı yok
+    if (totalCashBalance <= 0 && !hasAnyCards) {
+      _showNoAccountCashZeroSnackBar(context, l10n);
+      return;
+    }
+    
+    // Senaryo 2: Nakit sıfır ama banka hesabı var
+    if (totalCashBalance <= 0 && hasAnyCards && totalDebitBalance <= 0) {
+      _showUpdateCashBalanceSnackBar(context, l10n);
+      return;
+    }
+    
+    // Senaryo 3: Banka hesabı yok ama nakit var
+    if (totalCashBalance > 0 && !hasAnyCards) {
+      _showAddBankAccountSnackBar(context, l10n);
+      return;
+    }
+    
+    // Senaryo 4: Hem nakit hem banka hesabı sıfır
     if (totalAvailableBalance <= 0) {
-      // Toplam kullanılabilir para sıfır ise uyarı göster
       _showInsufficientBalanceSnackBar(context, l10n);
       return;
     }
@@ -1058,6 +1091,171 @@ class _StocksScreenState extends State<StocksScreen>
           textColor: Colors.white,
           onPressed: () {
             // Para ekleme sayfasına yönlendir
+            context.go('/cards');
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showNoAccountCashZeroSnackBar(BuildContext context, AppLocalizations l10n) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.account_balance_wallet_outlined,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.noBankAccountCashZero,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.updateCashOrAddBank,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFFFF9500),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        action: SnackBarAction(
+          label: l10n.addMoney,
+          textColor: Colors.white,
+          onPressed: () {
+            context.go('/cards');
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showUpdateCashBalanceSnackBar(BuildContext context, AppLocalizations l10n) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.monetization_on_outlined,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.insufficientBalance,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.updateCashBalance,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF007AFF),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        action: SnackBarAction(
+          label: l10n.addMoney,
+          textColor: Colors.white,
+          onPressed: () {
+            context.go('/cards');
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showAddBankAccountSnackBar(BuildContext context, AppLocalizations l10n) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.account_balance_outlined,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.insufficientBalance,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.addBankAccount,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF2E7D32),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        action: SnackBarAction(
+          label: l10n.addMoney,
+          textColor: Colors.white,
+          onPressed: () {
             context.go('/cards');
           },
         ),

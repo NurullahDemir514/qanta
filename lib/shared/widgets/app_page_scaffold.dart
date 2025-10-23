@@ -194,8 +194,8 @@ class AppPageScaffold extends StatelessWidget {
       body: SafeArea(
         top: false, // SliverAppBar kendi padding'ini yönetir
         bottom: true,
-        left: false,
-        right: false,
+        left: true,  // Edge-to-edge overflow'u önle
+        right: true, // Edge-to-edge overflow'u önle
         child: content,
       ),
       floatingActionButton: floatingActionButton,

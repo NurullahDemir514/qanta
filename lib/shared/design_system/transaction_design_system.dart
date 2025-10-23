@@ -81,6 +81,40 @@ class TransactionDesignSystem {
       return AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap';
     }
     
+    // Localize card type names and cash account names
+    if (context != null) {
+      final l10n = AppLocalizations.of(context)!;
+      
+      // Remove card type phrases in any language and re-add in current language
+      String localizedName = accountName;
+      
+      // Check if it's a cash account (various formats)
+      final isCashAccount = RegExp(r'^(Cash Account|Nakit Hesap|Nakit|Cash)$', caseSensitive: false).hasMatch(localizedName);
+      
+      // Check if it contains card type phrases
+      final hasCreditCard = RegExp(r'(Credit Card|Kredi Kartı)', caseSensitive: false).hasMatch(localizedName);
+      final hasDebitCard = RegExp(r'(Debit Card|Banka Kartı)', caseSensitive: false).hasMatch(localizedName);
+      
+      if (isCashAccount) {
+        // Replace with localized cash account name
+        localizedName = l10n.cashAccount;
+      } else if (hasCreditCard) {
+        // Remove all variants and add localized version
+        localizedName = localizedName
+            .replaceAll(RegExp(r'\s*(Credit Card|Kredi Kartı)\s*', caseSensitive: false), ' ')
+            .trim();
+        localizedName = '$localizedName ${l10n.creditCard}';
+      } else if (hasDebitCard) {
+        // Remove all variants and add localized version
+        localizedName = localizedName
+            .replaceAll(RegExp(r'\s*(Debit Card|Banka Kartı)\s*', caseSensitive: false), ' ')
+            .trim();
+        localizedName = '$localizedName ${l10n.debitCard}';
+      }
+      
+      accountName = localizedName;
+    }
+    
     if (accountName.length <= maxLength) {
       return accountName;
     }
@@ -551,15 +585,22 @@ class TransactionDesignSystem {
     final displayTime = time ?? transaction.displayTime;
 
     // Handle installment transactions
-    String displayTitle = transaction.displayTitle;
+    String displayTitle = transaction.getLocalizedDisplayTitle(context);
     String displaySubtitle = transaction.displaySubtitle;
     
-    // Localize CASH_WALLET in subtitle
-    if (displaySubtitle.contains('CASH_WALLET')) {
-      displaySubtitle = displaySubtitle.replaceAll(
-        'CASH_WALLET', 
-        AppLocalizations.of(context)?.cashWallet ?? 'Nakit Hesap'
-      );
+    // Localize account names in subtitle (for all account name formats)
+    // Check if it's a transfer (contains →)
+    if (displaySubtitle.contains('→')) {
+      // Transfer: localize both source and target
+      final parts = displaySubtitle.split('→');
+      if (parts.length == 2) {
+        final localizedSource = shortenAccountName(parts[0].trim(), maxLength: 100, context: context);
+        final localizedTarget = shortenAccountName(parts[1].trim(), maxLength: 100, context: context);
+        displaySubtitle = '$localizedSource → $localizedTarget';
+      }
+    } else {
+      // Single account: localize directly
+      displaySubtitle = shortenAccountName(displaySubtitle, maxLength: 100, context: context);
     }
 
     // Check if this is a credit card installment transaction

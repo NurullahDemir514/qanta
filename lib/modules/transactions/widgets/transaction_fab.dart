@@ -8,7 +8,6 @@ import '../../../shared/utils/fab_positioning.dart';
 import '../screens/expense_form_screen.dart';
 import '../screens/income_form_screen.dart';
 import '../screens/transfer_form_screen.dart';
-import '../../home/pages/quick_notes_page.dart';
 import '../../stocks/screens/stocks_screen.dart';
 
 class TransactionFab extends StatefulWidget {
@@ -59,20 +58,6 @@ class _TransactionFabState extends State<TransactionFab> {
     }
   }
 
-  void _onQuickNoteSelected() {
-    HapticFeedback.selectionClick();
-
-    // Önce FAB'ı kapat
-    setState(() {
-      _isExpanded = false;
-    });
-
-    // Hızlı Not sayfasını aç
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QuickNotesPageNew()),
-    );
-  }
 
   void _onStockSelected() {
     HapticFeedback.selectionClick();
@@ -110,10 +95,6 @@ class _TransactionFabState extends State<TransactionFab> {
         children: [
           // Speed Dial Options
           if (_isExpanded) ...[
-            // Quick Note Option
-            _buildQuickNoteOption(context: context, isDark: isDark),
-
-            SizedBox(height: speedDialSpacing),
 
             // Transfer Option
             _buildSpeedDialOption(
@@ -150,77 +131,6 @@ class _TransactionFabState extends State<TransactionFab> {
     );
   }
 
-  Widget _buildQuickNoteOption({
-    required BuildContext context,
-    required bool isDark,
-  }) {
-    final l10n = AppLocalizations.of(context)!;
-    final color = isDark ? Colors.white : Colors.black; // Açık tema için siyah
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF232326).withOpacity(0.92)
-                : Colors.white.withOpacity(0.92),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.18)
-                    : Colors.black.withOpacity(0.06),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-            border: Border.all(
-              color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
-              width: 1,
-            ),
-          ),
-          child: Text(
-            l10n.addQuickNote,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: color,
-              letterSpacing: -0.1,
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF232326).withOpacity(0.85)
-                    : Colors.white.withOpacity(0.85),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF38383A)
-                      : const Color(0xFFE5E5EA),
-                  width: 1,
-                ),
-              ),
-              child: IconButton(
-                icon: Icon(Icons.edit_note_rounded, color: color, size: 22),
-                onPressed: _onQuickNoteSelected,
-                splashRadius: 24,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildSpeedDialOption({
     required BuildContext context,

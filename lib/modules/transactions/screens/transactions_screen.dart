@@ -8,6 +8,7 @@ import '../../../shared/widgets/app_page_scaffold.dart';
 import '../../../shared/widgets/animated_empty_state.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/services/premium_service.dart';
 import '../widgets/transaction_search_bar.dart';
 import '../widgets/transaction_time_period_selector.dart';
 import '../widgets/transaction_combined_filters.dart';
@@ -20,6 +21,7 @@ import '../../../shared/services/category_icon_service.dart';
 import '../../advertisement/services/google_ads_real_banner_service.dart';
 import '../../advertisement/config/advertisement_config.dart' as config;
 import '../../advertisement/models/advertisement_models.dart';
+import '../../advertisement/services/native_ad_service.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -34,6 +36,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   final _numberFormat = NumberFormat('#,##0', 'tr_TR'); // Türkçe binlik ayıraç
   late AppLocalizations l10n;
   late GoogleAdsRealBannerService _transactionsBannerService;
+  late NativeAdService _transactionsNativeAd;
 
   // Filter state using V2 transaction types
   v2.TransactionType? _selectedFilter;
@@ -48,19 +51,26 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     
     // İşlemler sayfası banner reklamını başlat
     _transactionsBannerService = GoogleAdsRealBannerService(
-      adUnitId: config.AdvertisementConfig.testBanner1.bannerAdUnitId,
+      adUnitId: config.AdvertisementConfig.production.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
-      isTestMode: true,
+      isTestMode: false,
+    );
+    _transactionsNativeAd = NativeAdService(
+      adUnitId: config.AdvertisementConfig.production.nativeAdUnitId!,
     );
     
     debugPrint('🔄 İŞLEMLER SAYFASI Banner reklam yükleniyor...');
-    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.testBanner1.bannerAdUnitId}');
-    debugPrint('🧪 Test Mode: true');
+    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.production.bannerAdUnitId}');
+    debugPrint('🧪 Test Mode: false');
     debugPrint('📍 Konum: İşlemler sayfası - Gelir/Gider kartı altı');
     
     // İşlemler sayfası reklamını 5 saniye geciktir
     Future.delayed(const Duration(seconds: 5), () {
       _transactionsBannerService.loadAd();
+    });
+    // Native ad'ı gecikmeli yükle (liste UI hazır olduğunda)
+    Future.delayed(const Duration(seconds: 6), () {
+      _transactionsNativeAd.load();
     });
   }
 
@@ -75,6 +85,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     _searchController.dispose();
     _scrollController.dispose();
     _transactionsBannerService.dispose();
+    _transactionsNativeAd.disposeAd();
     super.dispose();
   }
 
@@ -116,6 +127,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     List<v2.TransactionWithDetailsV2> transactions,
   ) {
     var filtered = transactions;
+
+    // Hisse işlemlerini genel listeden gizle
+    filtered = filtered.where((t) => !t.isStockTransaction).toList();
 
     // Apply type filter
     if (_selectedFilter != null) {
@@ -270,16 +284,47 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             children: [
               // Quick stats card
               _buildQuickStatsCard(transactions, isDark),
+              // Native Ad - Quick stats'ten sonra (Premium kullanıcılara gösterilmez)
+              Consumer<PremiumService>(
+                builder: (context, premiumService, child) {
+                  if (premiumService.isPremium) return const SizedBox.shrink();
+                  
+                  if (_transactionsNativeAd.isLoaded && _transactionsNativeAd.adWidget != null) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          height: 90,
+                          child: _transactionsNativeAd.adWidget!,
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               
-              // Banner reklam - Gelir/Gider kartından sonra (sadece yüklendiyse göster)
-              if (_transactionsBannerService.isLoaded && _transactionsBannerService.bannerWidget != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  height: 50,
-                  child: _transactionsBannerService.bannerWidget!,
-                ),
-              ],
+              // Banner reklam - Gelir/Gider kartından sonra (Premium kullanıcılara gösterilmez)
+              Consumer<PremiumService>(
+                builder: (context, premiumService, child) {
+                  if (premiumService.isPremium) return const SizedBox.shrink();
+                  
+                  if (_transactionsBannerService.isLoaded && _transactionsBannerService.bannerWidget != null) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          height: 50,
+                          child: _transactionsBannerService.bannerWidget!,
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               
               const SizedBox(height: 16),
 
@@ -510,7 +555,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
     if (effectiveInstallmentCount != null && effectiveInstallmentCount > 1) {
       installmentText =
-          '$effectiveInstallmentCount ${AppLocalizations.of(context)?.installment ?? 'Installment'}';
+          '$effectiveInstallmentCount ${AppLocalizations.of(context)?.installment_summary ?? 'Installment'}';
     } else if (effectiveInstallmentCount == 1) {
       installmentText = AppLocalizations.of(context)?.cash ?? 'NAKİT';
     }
@@ -565,8 +610,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       // Get installment count for title
       final totalInstallments = installmentInfo?['totalInstallments'];
       final installmentSuffix = totalInstallments != null
-          ? ' ($totalInstallments Taksit)'
-          : ' (Taksitli)';
+          ? ' ($totalInstallments ${AppLocalizations.of(context)?.installment_summary ?? 'Taksit'})'
+          : ' (${AppLocalizations.of(context)?.installment_summary ?? 'Taksitli'})';
 
       // Remove installment pattern from title for cleaner display
       final cleanTitle =
@@ -574,7 +619,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           transaction.description
               .replaceAll(RegExp(r'\s*\(\d+/\d+\)'), '')
               .replaceAll(
-                AppLocalizations.of(context)?.installment ?? 'Installment',
+                AppLocalizations.of(context)?.installment_summary ?? 'Installment',
                 '',
               )
               .trim();
@@ -641,41 +686,52 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     BuildContext context,
     v2.TransactionWithDetailsV2 transaction,
   ) {
-    // Hisse işlemleri için bottom sheet gösterme, direkt uyarı göster
+    // Hisse işlemleri için lot kontrolü yap
     if (transaction.isStockTransaction) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.stockTransactionCannotDelete,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+      final stockProvider = Provider.of<StockProvider>(context, listen: false);
+      
+      // Lot sayısı 0 ise silmeye izin ver
+      if (stockProvider.canDeleteStockTransaction(transaction.stockSymbol ?? '')) {
+        // Normal silme işlemi yap
+        _deleteTransaction(transaction);
+        return;
+      } else {
+        // Lot sayısı 0 değilse uyarı göster
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.stockTransactionCannotDelete,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.stockTransactionDeleteWarning,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white70,
+                const SizedBox(height: 4),
+                Text(
+                  l10n.stockTransactionDeleteWarning,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            backgroundColor: const Color(0xFFFF9500), // Orange warning color
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
           ),
-          backgroundColor: const Color(0xFFFF9500), // Orange warning color
-          duration: const Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
-      return;
+        );
+        return;
+      }
     }
 
     // Normal işlemler için bottom sheet göster
@@ -782,49 +838,53 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   /// Delete regular transaction
-  void _deleteTransaction(v2.TransactionWithDetailsV2 transaction) {
-    final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
-
+  void _deleteTransaction(v2.TransactionWithDetailsV2 transaction) async {
     // Check if this is a stock transaction
     if (transaction.isStockTransaction) {
-      // Hisse işlemleri silinemez - uyarı göster
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.stockTransactionCannotDelete,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.stockTransactionDeleteWarning,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
+      try {
+        final stockProvider = Provider.of<StockProvider>(context, listen: false);
+        await stockProvider.deleteStockTransaction(transaction.id);
+        
+        // Başarı mesajı göster
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.transactionDeleted,
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            backgroundColor: const Color(0xFFFF9500), // Orange warning color
-            duration: const Duration(seconds: 4),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+          );
+        }
+      } catch (e) {
+        // Hata mesajı göster
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                e.toString(),
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
+          );
+        }
       }
-      return; // Silme işlemini durdur
+      return;
     } else {
       // Regular transaction - use UnifiedProviderV2
+      final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
       providerV2
           .deleteTransaction(transaction.id)
           .then((success) {

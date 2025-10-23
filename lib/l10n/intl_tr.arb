@@ -146,31 +146,31 @@
   "@defaultUserName": {
     "description": "Default user name when no name is provided"
   },
-  "nameRequired": "İsim gerekli",
+  "nameRequired": "Lütfen adınızı girin",
   "@nameRequired": {
     "description": "Name required validation message"
   },
-  "emailRequired": "E-posta gerekli",
+  "emailRequired": "Lütfen e-posta adresinizi girin",
   "@emailRequired": {
     "description": "Email required validation message"
   },
-  "invalidEmail": "Geçersiz e-posta",
+  "invalidEmail": "Geçersiz e-posta adresi",
   "@invalidEmail": {
     "description": "Invalid email validation message"
   },
-  "emailInvalid": "Geçerli bir e-posta girin",
+  "emailInvalid": "Lütfen geçerli bir e-posta adresi girin",
   "@emailInvalid": {
     "description": "Invalid email validation error"
   },
-  "passwordRequired": "Şifre gerekli",
+  "passwordRequired": "Lütfen şifrenizi girin",
   "@passwordRequired": {
     "description": "Password required validation message"
   },
-  "passwordTooShort": "Şifre çok kısa",
+  "passwordTooShort": "Şifre en az 6 karakter olmalıdır",
   "@passwordTooShort": {
     "description": "Password too short validation message"
   },
-  "confirmPasswordRequired": "Şifre onayı gerekli",
+  "confirmPasswordRequired": "Lütfen şifrenizi tekrar girin",
   "@confirmPasswordRequired": {
     "description": "Confirm password field validation error"
   },
@@ -226,7 +226,7 @@
   "@registerError": {
     "description": "Register error prefix"
   },
-  "networkError": "Ağ hatası",
+  "networkError": "İnternet bağlantınızı kontrol edin ve tekrar deneyin",
   "@networkError": {
     "description": "Network error message"
   },
@@ -234,29 +234,45 @@
   "@emailNotConfirmed": {
     "description": "Email not confirmed error"
   },
-  "invalidCredentials": "E-posta veya şifre hatalı. Lütfen tekrar deneyin.",
+  "invalidCredentials": "E-posta veya şifre hatalı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.",
   "@invalidCredentials": {
     "description": "Invalid credentials error"
   },
-  "tooManyRequests": "Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.",
+  "tooManyRequests": "Çok fazla deneme yaptınız. Lütfen birkaç dakika bekleyip tekrar deneyin.",
   "@tooManyRequests": {
     "description": "Too many requests error"
   },
-  "invalidEmailAddress": "Geçersiz e-posta adresi. Lütfen doğru bir e-posta girin.",
+  "invalidEmailAddress": "Geçersiz e-posta adresi. Lütfen geçerli bir e-posta adresi girin.",
   "@invalidEmailAddress": {
     "description": "Invalid email address error"
   },
-  "passwordTooShortError": "Şifre çok kısa. En az 6 karakter olmalı.",
+  "passwordTooShortError": "Şifre çok kısa. Lütfen en az 6 karakter uzunluğunda bir şifre girin.",
   "@passwordTooShortError": {
     "description": "Password too short error message"
   },
-  "userAlreadyRegistered": "Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.",
+  "userAlreadyRegistered": "Bu e-posta adresi zaten kayıtlı. Lütfen giriş yapın.",
   "@userAlreadyRegistered": {
     "description": "User already registered error"
   },
-  "signupDisabled": "Kayıt işlemi şu anda devre dışı. Lütfen daha sonra deneyin.",
+  "signupDisabled": "Kayıt işlemi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
   "@signupDisabled": {
     "description": "Signup disabled error"
+  },
+  "unknownError": "Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
+  "@unknownError": {
+    "description": "Unknown error message"
+  },
+  "noInternetConnection": "İnternet Bağlantısı Yok",
+  "@noInternetConnection": {
+    "description": "No internet connection title"
+  },
+  "noInternetDescription": "İnternet bağlantınızı kontrol edip tekrar deneyin",
+  "@noInternetDescription": {
+    "description": "No internet connection description"
+  },
+  "tryAgain": "Tekrar Dene",
+  "@tryAgain": {
+    "description": "Try again button"
   },
   "registrationSuccessful": "Kayıt başarılı! Hoş geldin {name}!",
   "@registrationSuccessful": {
@@ -344,9 +360,25 @@
   "@createBudget": {
     "description": "Create budget button text"
   },
+  "averageDailySpending": "Ortalama Günlük Harcama",
+  "@averageDailySpending": {
+    "description": "Average daily spending label in budget card"
+  },
+  "spent": "Harcanan",
+  "@spent": {
+    "description": "Spent amount label"
+  },
+  "addExpense": "Harcama Ekle",
+  "@addExpense": {
+    "description": "Add expense button text"
+  },
   "expenseLimitTracking": "Harcama Limit Takibi",
   "@expenseLimitTracking": {
     "description": "Expense limit tracking title"
+  },
+  "future": "Gelecek",
+  "@future": {
+    "description": "Future filter label"
   },
   "manage": "Yönet",
   "@manage": {
@@ -455,6 +487,10 @@
   "about": "Hakkında",
   "@about": {
     "description": "About section"
+  },
+  "edit": "Düzenle",
+  "@edit": {
+    "description": "Edit action"
   },
   "editProfile": "Profili Düzenle",
   "@editProfile": {
@@ -1518,6 +1554,10 @@
   "@balanceUpdated": {
     "description": "Title for cash balance increase transaction"
   },
+  "updateBalance": "Bakiye Güncelle",
+  "@updateBalance": {
+    "description": "Button text for updating cash balance"
+  },
   "walletBalanceUpdated": "Nakit güncellendi",
   "@walletBalanceUpdated": {
     "description": "Subtitle for manual cash addition"
@@ -2164,22 +2204,6 @@
   "@cancelAction": {
     "description": "Cancel action button text"
   },
-  "quickNotes": "Hızlı Notlar",
-  "@quickNotes": {
-    "description": "Quick notes feature title"
-  },
-  "quickNotesSubtitle": "Anında not alma için kalıcı bildirim",
-  "@quickNotesSubtitle": {
-    "description": "Quick notes feature subtitle"
-  },
-  "quickNotesNotificationEnabled": "Hızlı notlar bildirimi açıldı",
-  "@quickNotesNotificationEnabled": {
-    "description": "Quick notes notification enabled message"
-  },
-  "quickNotesNotificationDisabled": "Hızlı notlar bildirimi kapatıldı",
-  "@quickNotesNotificationDisabled": {
-    "description": "Quick notes notification disabled message"
-  },
   "notificationPermissionRequired": "Bildirim izni gerekli! Lütfen ayarlardan açın.",
   "@notificationPermissionRequired": {
     "description": "Notification permission required message"
@@ -2810,6 +2834,19 @@
   "@totalDebt": {
     "description": "Total Debt"
   },
+  "creditCardDebt": "Kredi Kartı Borcu",
+  "@creditCardDebt": {
+    "description": "Credit Card Debt"
+  },
+  "cardCount": "{count} kart",
+  "@cardCount": {
+    "description": "Card count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "noTransactionsForThisCard": "Bu kart için henüz işlem bulunmuyor",
   "@noTransactionsForThisCard": {
     "description": "No transactions found for this card"
@@ -3225,14 +3262,6 @@
   "howToUseBudgetManagementAnswer": "Kategoriler için aylık limitler belirleyebilir, harcamalarını takip edebilir ve limit aşımlarında uyarı alabilirsin.",
   "@howToUseBudgetManagementAnswer": {
     "description": "How to use budget management answer"
-  },
-  "whatIsQuickNotesFeature": "Hızlı notlar özelliği nedir?",
-  "@whatIsQuickNotesFeature": {
-    "description": "What is quick notes feature?"
-  },
-  "whatIsQuickNotesFeatureAnswer": "Kalıcı bildirim ile hızlıca not alabilir, fotoğraf ekleyebilir ve notlarını kategorize edebilirsin.",
-  "@whatIsQuickNotesFeatureAnswer": {
-    "description": "What is quick notes feature answer"
   },
   "appCrashingWhatToDo": "Uygulama çöküyor, ne yapmalıyım?",
   "@appCrashingWhatToDo": {
@@ -3762,11 +3791,6 @@
       }
     }
   },
-  "quickNotes": "Hızlı Notlar",
-  "@quickNotes": {
-    "description": "Quick notes title"
-  },
-  "pendingNotes": "{count} bekleyen not",
   "@pendingNotes": {
     "description": "Pending notes count",
     "placeholders": {
@@ -3774,14 +3798,6 @@
         "type": "int"
       }
     }
-  },
-  "addQuickNote": "Hızlı Not Ekle",
-  "@addQuickNote": {
-    "description": "Add quick note title"
-  },
-  "addQuickNoteDescription": "Harcama veya gelir notunu yaz. Daha sonra işlem olarak ekleyebilirsin.",
-  "@addQuickNoteDescription": {
-    "description": "Add quick note description"
   },
   "exampleExpenseNote": "Örn: Market alışverişi 150{currency}",
   "@exampleExpenseNote": {
@@ -4896,6 +4912,22 @@
   "@addMoney": {
     "description": "Add money button text"
   },
+  "updateCashBalance": "Nakit bakiyenizi güncelleyin",
+  "@updateCashBalance": {
+    "description": "Update cash balance message"
+  },
+  "addBankAccount": "Banka hesabı ekleyin",
+  "@addBankAccount": {
+    "description": "Add bank account message"
+  },
+  "noBankAccountCashZero": "Nakit bakiyeniz yok ve banka hesabınız yok",
+  "@noBankAccountCashZero": {
+    "description": "No bank account and cash is zero message"
+  },
+  "updateCashOrAddBank": "Nakit bakiyenizi güncelleyin veya banka hesabı ekleyin",
+  "@updateCashOrAddBank": {
+    "description": "Update cash or add bank account message"
+  },
   "totalValue": "Toplam Değer",
   "@totalValue": {
     "description": "Total portfolio value"
@@ -5044,11 +5076,6 @@
   "@returnLabel": {
     "description": "Return label"
   },
-  "quickNotesTitle": "Hızlı Notlar",
-  "@quickNotesTitle": {
-    "description": "Quick notes page title"
-  },
-  "pendingNotesCount": "{count} bekleyen not",
   "@pendingNotesCount": {
     "description": "Pending notes count",
     "placeholders": {
@@ -5521,6 +5548,75 @@
   "@limitAmountPlaceholder": {
     "description": "Placeholder for limit amount input"
   },
+  "startDate": "Başlangıç Tarihi",
+  "@startDate": {
+    "description": "Start date label"
+  },
+  "selectStartDate": "Başlangıç tarihi seçin",
+  "@selectStartDate": {
+    "description": "Select start date hint"
+  },
+  "startDateHint": "Limit başlangıç tarihi",
+  "@startDateHint": {
+    "description": "Start date input hint"
+  },
+  "limitDuration": "Limit Süresi",
+  "@limitDuration": {
+    "description": "Limit duration label"
+  },
+  "weekly": "Haftalık",
+  "@weekly": {
+    "description": "Weekly period"
+  },
+  "monthly": "Aylık",
+  "@monthly": {
+    "description": "Monthly period"
+  },
+  "yearly": "Yıllık",
+  "@yearly": {
+    "description": "Yearly period"
+  },
+  "oneTime": "Tek Seferlik",
+  "@oneTime": {
+    "description": "One time option"
+  },
+  "recurring": "Yenile",
+  "@recurring": {
+    "description": "Recurring option"
+  },
+  "limitWillRenew": "Bu limit {period} otomatik olarak yenilenecek",
+  "@limitWillRenew": {
+    "description": "Limit will renew message",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "limitOneTime": "Bu limit tek seferlik olarak oluşturulacak",
+  "@limitOneTime": {
+    "description": "Limit one time message"
+  },
+  "income": "Gelir",
+  "@income": {
+    "description": "Income category type"
+  },
+  "expense": "Gider",
+  "@expense": {
+    "description": "Expense category type"
+  },
+  "transfer": "Transfer",
+  "@transfer": {
+    "description": "Transfer category type"
+  },
+  "other": "Diğer",
+  "@other": {
+    "description": "Other category type"
+  },
+  "unknownCategory": "Bilinmeyen Kategori",
+  "@unknownCategory": {
+    "description": "Unknown category name"
+  },
   "saveLimit": "Limiti Kaydet",
   "@saveLimit": {
     "description": "Save limit button text"
@@ -5857,5 +5953,368 @@
   "tryDifferentFilter": "Farklı bir filtre seçmeyi deneyin",
   "@tryDifferentFilter": {
     "description": "Suggestion to try different filter when no stocks match"
+  },
+  "lunchBreak": "Öğle Molası",
+  "@lunchBreak": {
+    "description": "Lunch break notification title"
+  },
+  "lunchBreakMessage": "Günün yarısı geçti, bugünkü harcamalarını kontrol et",
+  "@lunchBreakMessage": {
+    "description": "Lunch break notification message"
+  },
+  "eveningCheck": "Akşam Kontrolü",
+  "@eveningCheck": {
+    "description": "Evening check notification title"
+  },
+  "eveningCheckMessage": "Günün harcamalarını kaydetmeyi unutma",
+  "@eveningCheckMessage": {
+    "description": "Evening check notification message"
+  },
+  "dayEnd": "Gün Sonu",
+  "@dayEnd": {
+    "description": "Day end notification title"
+  },
+  "dayEndMessage": "Bugünün gelir ve giderlerini not al",
+  "@dayEndMessage": {
+    "description": "Day end notification message"
+  },
+  "qantaReminders": "Qanta Hatırlatmaları",
+  "@qantaReminders": {
+    "description": "Notification channel name for reminders"
+  },
+  "reminderChannelDescription": "Harcama ve gelir hatırlatmaları",
+  "@reminderChannelDescription": {
+    "description": "Notification channel description for reminders"
+  },
+  "budgetExceededWarning": "Bu harcamayla birlikte bütçe limitiniz {amount}₺ aşacak",
+  "@budgetExceededWarning": {
+    "description": "Warning message when budget will be exceeded",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetExceededWarningTotal": "Bu harcamayla birlikte bütçe limitiniz {amount}₺ aşacak",
+  "@budgetExceededWarningTotal": {
+    "description": "Warning message when budget limit will be exceeded",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetNearLimitWarning": "Bu harcamayla birlikte bütçe limitinin %80'ini aşacaksınız",
+  "@budgetNearLimitWarning": {
+    "description": "Warning message when approaching budget limit"
+  },
+  "exampleMarketShopping": "Örn: Market alışverişi",
+  "@exampleMarketShopping": {
+    "description": "Example text for market shopping"
+  },
+  "exampleSalary": "Örn: Maaş",
+  "@exampleSalary": {
+    "description": "Example text for salary"
+  },
+  "pleaseEnterAmount": "Lütfen bir tutar girin",
+  "@pleaseEnterAmount": {
+    "description": "Please enter an amount message"
+  },
+  "pleaseEnterValidAmount": "Lütfen geçerli bir tutar girin",
+  "@pleaseEnterValidAmount": {
+    "description": "Please enter a valid amount message"
+  },
+  "pleaseSelectCategory": "Lütfen bir kategori seçin",
+  "@pleaseSelectCategory": {
+    "description": "Please select a category message"
+  },
+  "pleaseSelectPaymentMethod": "Lütfen bir ödeme yöntemi seçin",
+  "@pleaseSelectPaymentMethod": {
+    "description": "Please select a payment method message"
+  },
+  "accountInfoError": "Hesap bilgileri alınamadı",
+  "@accountInfoError": {
+    "description": "Account information could not be retrieved"
+  },
+  "transactionError": "İşlem eklenirken hata: {error}",
+  "@transactionError": {
+    "description": "Error occurred while adding transaction",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tryAgain": "Tekrar Dene",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+  "installmentOptions": "Taksit Seçenekleri",
+  "@installmentOptions": {
+    "description": "Installment options title"
+  },
+  "limitDeleteError": "Limit silinemedi",
+  "@limitDeleteError": {
+    "description": "Error message when limit cannot be deleted"
+  },
+  "installment": "Taksit",
+  "@installment": {
+    "description": "Installment text"
+  },
+  "installment_summary": "Taksit",
+  "@installment_summary": {
+    "description": "Installment summary text"
+  },
+  "cash": "Peşin",
+  "@cash": {
+    "description": "Cash payment text"
+  },
+  "overallBudget": "Genel Bütçe",
+  "categoryDistribution": "Kategori Dağılımı",
+  "spendingStatus": "Harcama Durumu",
+  "duplicateBudgetWarning": "Zaten Mevcut Limit",
+  "duplicateBudgetMessage": "Bu kategori için aynı periyotta zaten bir limit bulunmaktadır. Mevcut limiti düzenlemek için budget yönetimi sayfasını kullanın.",
+  "categories": "kategori",
+  "overBudget": "Aşım",
+  "budgetExceededBy": "Bütçenizi {amount} aştınız",
+  "remaining": "Kalan",
+  "days": "gün",
+  "@days": {
+    "description": "Days text"
+  },
+  "weeks": "hafta",
+  "@weeks": {
+    "description": "Weeks text"
+  },
+  "months": "ay",
+  "@months": {
+    "description": "Months text"
+  },
+  "years": "yıl",
+  "@years": {
+    "description": "Years text"
+  },
+  "weeklyTrend": "Haftalık Trend",
+  "weeklyTrendExplanation": "Son 7 günün harcama pattern'ini gösterir. Hafta sonu daha yüksek, pazartesi daha düşük harcama normaldir.",
+  "dailyLimit": "Günlük Limit",
+  "fastSpendingExplanation": "Günlük bütçenizin %15'inden fazlasını harcıyorsunuz. Daha dikkatli olmanız önerilir.",
+  "normalSpendingExplanation": "Günlük bütçenizin %8-15'i arasında harcıyorsunuz. Sağlıklı bir harcama hızı.",
+  "slowSpendingExplanation": "Günlük bütçenizin %8'inden az harcıyorsunuz. Tasarruf ediyorsunuz!",
+  "defaultSpendingExplanation": "Bu miktar, kalan günlere bölünmüş toplam bütçenizdir.",
+  "analyticsConsentTitle": "Uygulamayı Geliştirmemize Yardım Edin",
+  "@analyticsConsentTitle": {
+    "description": "Analytics consent modal title"
+  },
+  "analyticsConsentMessage": "Qanta'yı sizin için daha iyi hale getirmek istiyoruz! Anonim harcama verilerinizi toplayarak uygulamayı geliştirebilir, daha iyi özellikler sunabiliriz.\n\n• Verileriniz tamamen anonimdir\n• Kişisel bilgileriniz asla paylaşılmaz\n• Sadece harcama tutarları ve kategorileri toplanır\n• İstediğiniz zaman iptal edebilirsiniz",
+  "@analyticsConsentMessage": {
+    "description": "Analytics consent modal message"
+  },
+  "analyticsAccept": "Kabul Ediyorum",
+  "@analyticsAccept": {
+    "description": "Accept analytics consent button"
+  },
+  "analyticsDecline": "Hayır, Teşekkürler",
+  "@analyticsDecline": {
+    "description": "Decline analytics consent button"
+  },
+  "analyticsConsentNotice": "Bu izni Profil > Tercihler bölümünden değiştirebilirsiniz.",
+  "@analyticsConsentNotice": {
+    "description": "Analytics consent change notice"
+  },
+  "anonymousDataCollection": "Anonim Veri Toplama",
+  "@anonymousDataCollection": {
+    "description": "Anonymous data collection setting title"
+  },
+  "anonymousDataCollectionSubtitle": "Uygulamayı geliştirmek için\nanonim harcama verilerini paylaş",
+  "@anonymousDataCollectionSubtitle": {
+    "description": "Anonymous data collection setting subtitle"
+  },
+  "analyticsEnabled": "Anonim veri toplama açıldı",
+  "@analyticsEnabled": {
+    "description": "Analytics enabled message"
+  },
+  "analyticsDisabled": "Anonim veri toplama kapatıldı",
+  "@analyticsDisabled": {
+    "description": "Analytics disabled message"
+  },
+  "cardLimitReached": "Kart Limiti Doldu",
+  "@cardLimitReached": {
+    "description": "Card limit reached title"
+  },
+  "cardLimitReachedMessage": "Ücretsiz sürümde en fazla 3 kart ekleyebilirsiniz",
+  "@cardLimitReachedMessage": {
+    "description": "Card limit reached message"
+  },
+  "upgradeToPremium": "Premium'a Geç",
+  "@upgradeToPremium": {
+    "description": "Upgrade to premium button"
+  },
+  "premiumOfferTitle": "Qanta Premium",
+  "@premiumOfferTitle": {
+    "description": "Premium offer screen title"
+  },
+  "premiumOfferSubtitle": "Tüm özelliklerin kilidini aç",
+  "@premiumOfferSubtitle": {
+    "description": "Premium offer screen subtitle"
+  },
+  "freeVersion": "Ücretsiz",
+  "@freeVersion": {
+    "description": "Free version label"
+  },
+  "premiumVersion": "Premium",
+  "@premiumVersion": {
+    "description": "Premium version label"
+  },
+  "featureCardLimit": "Kart Limiti",
+  "@featureCardLimit": {
+    "description": "Card limit feature"
+  },
+  "featureCardLimitFree": "3 kart",
+  "@featureCardLimitFree": {
+    "description": "Free card limit"
+  },
+  "featureCardLimitPremium": "Sınırsız",
+  "@featureCardLimitPremium": {
+    "description": "Premium card limit"
+  },
+  "featureStockLimit": "Hisse Limiti",
+  "@featureStockLimit": {
+    "description": "Stock limit feature"
+  },
+  "featureStockLimitFree": "3 hisse",
+  "@featureStockLimitFree": {
+    "description": "Free stock limit"
+  },
+  "featureStockLimitPremium": "Sınırsız",
+  "@featureStockLimitPremium": {
+    "description": "Premium stock limit"
+  },
+  "stockLimitReached": "Hisse Limiti Doldu",
+  "@stockLimitReached": {
+    "description": "Stock limit reached title"
+  },
+  "stockLimitReachedMessage": "Ücretsiz sürümde en fazla 3 hisse ekleyebilirsiniz",
+  "@stockLimitReachedMessage": {
+    "description": "Stock limit reached message"
+  },
+  "featureAds": "Reklamlar",
+  "@featureAds": {
+    "description": "Ads feature"
+  },
+  "featureAdsFree": "Var",
+  "@featureAdsFree": {
+    "description": "Free version has ads"
+  },
+  "featureAdsPremium": "Yok",
+  "@featureAdsPremium": {
+    "description": "Premium version no ads"
+  },
+  "featureSupport": "Destek",
+  "@featureSupport": {
+    "description": "Support feature"
+  },
+  "featureSupportFree": "Topluluk",
+  "@featureSupportFree": {
+    "description": "Free version support"
+  },
+  "featureSupportPremium": "Öncelikli",
+  "@featureSupportPremium": {
+    "description": "Premium version support"
+  },
+  "featureUpdates": "Güncellemeler",
+  "@featureUpdates": {
+    "description": "Updates feature"
+  },
+  "featureUpdatesFree": "Standart",
+  "@featureUpdatesFree": {
+    "description": "Free version updates"
+  },
+  "featureUpdatesPremium": "Erken Erişim",
+  "@featureUpdatesPremium": {
+    "description": "Premium version updates"
+  },
+  "getQantaPremium": "Qanta Premium'u Edinin",
+  "@getQantaPremium": {
+    "description": "Get Qanta Premium button"
+  },
+  "continueWithFree": "Ücretsiz Devam Et",
+  "@continueWithFree": {
+    "description": "Continue with free button"
+  },
+  "premiumBenefitsTitle": "Premium Avantajları",
+  "@premiumBenefitsTitle": {
+    "description": "Premium benefits title"
+  },
+  "features": "Özellikler",
+  "@features": {
+    "description": "Features column header"
+  },
+  "upgradeToPremiumBanner": "Premium'a Geç",
+  "@upgradeToPremiumBanner": {
+    "description": "Premium banner title"
+  },
+  "premiumBannerSubtitle": "Reklamları kaldır, sınırsız özellikler",
+  "@premiumBannerSubtitle": {
+    "description": "Premium banner subtitle"
+  },
+  "discover": "Keşfet",
+  "@discover": {
+    "description": "Discover button text"
+  },
+  "monthly": "Aylık",
+  "@monthly": {
+    "description": "Monthly subscription plan"
+  },
+  "yearly": "Yıllık",
+  "@yearly": {
+    "description": "Yearly subscription plan"
+  },
+  "premiumStatus": "Premium",
+  "@premiumStatus": {
+    "description": "Premium section title"
+  },
+  "premiumActive": "Premium Aktif",
+  "@premiumActive": {
+    "description": "Premium active status"
+  },
+  "premiumActiveDescription": "Sınırsız özellikler, reklamsız deneyim",
+  "@premiumActiveDescription": {
+    "description": "Premium active description"
+  },
+  "manageSubscription": "Aboneliği Yönet",
+  "@manageSubscription": {
+    "description": "Manage subscription button"
+  },
+  "manageSubscriptionDescription": "Google Play'de abonelik ayarlarını düzenle",
+  "@manageSubscriptionDescription": {
+    "description": "Manage subscription description"
+  },
+  "restorePurchases": "Satın Almaları Geri Yükle",
+  "@restorePurchases": {
+    "description": "Restore purchases button"
+  },
+  "restorePurchasesDescription": "Daha önce satın aldıysanız premium'u geri yükleyin",
+  "@restorePurchasesDescription": {
+    "description": "Restore purchases description"
+  },
+  "checkingPurchases": "Kontrol ediliyor...",
+  "@checkingPurchases": {
+    "description": "Checking purchases loading text"
+  },
+  "premiumRestored": "Premium geri yüklendi!",
+  "@premiumRestored": {
+    "description": "Premium restored success message"
+  },
+  "noActivePremium": "Aktif premium aboneliği bulunamadı",
+  "@noActivePremium": {
+    "description": "No active premium found message"
+  },
+  "playStoreError": "Google Play Store açılamadı",
+  "@playStoreError": {
+    "description": "Play Store error message"
+  },
+  "upgradeNow": "Yükselt",
+  "@upgradeNow": {
+    "description": "Upgrade now button text for premium banner"
   }
 } 

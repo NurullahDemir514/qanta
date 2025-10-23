@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
+import '../models/unified_category_model.dart';
 
 /// **Centralized Category Management Service**
 /// 
@@ -1022,11 +1023,11 @@ class CategoryIconService {
         'sortOrder': 1,
       },
       {
-        'name': 'freelance',
-        'displayName': 'Freelance',
-        'description': 'Serbest çalışma geliri',
-        'iconName': 'laptop_rounded',
-        'colorHex': '#007AFF',
+        'name': 'bonus',
+        'displayName': 'Bonus',
+        'description': 'Prim, ikramiye',
+        'iconName': 'star_rounded',
+        'colorHex': '#FFD60A',
         'sortOrder': 2,
       },
       {
@@ -1046,20 +1047,84 @@ class CategoryIconService {
         'sortOrder': 4,
       },
       {
+        'name': 'dividend',
+        'displayName': 'Temettü',
+        'description': 'Hisse temettü geliri',
+        'iconName': 'account_balance_rounded',
+        'colorHex': '#5AC8FA',
+        'sortOrder': 5,
+      },
+      {
         'name': 'rental',
         'displayName': 'Kira Geliri',
         'description': 'Ev, dükkan kira geliri',
         'iconName': 'home_rounded',
         'colorHex': '#30D158',
-        'sortOrder': 5,
+        'sortOrder': 6,
       },
       {
         'name': 'bonus',
         'displayName': 'Bonus',
         'description': 'Prim, ikramiye',
         'iconName': 'star_rounded',
-        'colorHex': '#FF3B30',
-        'sortOrder': 6,
+        'colorHex': '#FFD60A',
+        'sortOrder': 7,
+      },
+      {
+        'name': 'commission',
+        'displayName': 'Komisyon',
+        'description': 'Satış komisyonu, referans geliri',
+        'iconName': 'percent_rounded',
+        'colorHex': '#FF9F0A',
+        'sortOrder': 8,
+      },
+      {
+        'name': 'scholarship',
+        'displayName': 'Burs',
+        'description': 'Eğitim bursu',
+        'iconName': 'school_rounded',
+        'colorHex': '#64D2FF',
+        'sortOrder': 9,
+      },
+      {
+        'name': 'sale',
+        'displayName': 'Satış',
+        'description': 'Ürün, eşya satışı',
+        'iconName': 'shopping_bag_rounded',
+        'colorHex': '#AF52DE',
+        'sortOrder': 10,
+      },
+      {
+        'name': 'interest',
+        'displayName': 'Faiz',
+        'description': 'Banka faizi, mevduat',
+        'iconName': 'savings_rounded',
+        'colorHex': '#32ADE6',
+        'sortOrder': 11,
+      },
+      {
+        'name': 'consulting',
+        'displayName': 'Danışmanlık',
+        'description': 'Danışmanlık ücreti',
+        'iconName': 'support_agent_rounded',
+        'colorHex': '#BF5AF2',
+        'sortOrder': 12,
+      },
+      {
+        'name': 'refund',
+        'displayName': 'İade',
+        'description': 'Geri ödeme, iade',
+        'iconName': 'replay_rounded',
+        'colorHex': '#5E5CE6',
+        'sortOrder': 13,
+      },
+      {
+        'name': 'award',
+        'displayName': 'Ödül',
+        'description': 'Yarışma, çekiliş ödülü',
+        'iconName': 'emoji_events_rounded',
+        'colorHex': '#FFD60A',
+        'sortOrder': 14,
       },
       {
         'name': 'gift',
@@ -1067,7 +1132,23 @@ class CategoryIconService {
         'description': 'Hediye para',
         'iconName': 'card_giftcard_rounded',
         'colorHex': '#FF2D92',
-        'sortOrder': 7,
+        'sortOrder': 15,
+      },
+      {
+        'name': 'social_benefit',
+        'displayName': 'Sosyal Yardım',
+        'description': 'Devlet yardımı, maaş desteği',
+        'iconName': 'volunteer_activism_rounded',
+        'colorHex': '#34C759',
+        'sortOrder': 16,
+      },
+      {
+        'name': 'royalty',
+        'displayName': 'Telif',
+        'description': 'Telif hakkı geliri',
+        'iconName': 'library_music_rounded',
+        'colorHex': '#AC8E68',
+        'sortOrder': 17,
       },
       {
         'name': 'other',
@@ -1075,7 +1156,7 @@ class CategoryIconService {
         'description': 'Diğer gelirler',
         'iconName': 'more_horiz_rounded',
         'colorHex': '#8E8E93',
-        'sortOrder': 8,
+        'sortOrder': 18,
       },
     ];
   }
@@ -1328,7 +1409,10 @@ class CategoryIconService {
       return _getFallbackCategoryName(categoryId, 'en');
     }
     
-    switch (categoryId) {
+    // Make case-insensitive comparison
+    final lowerCategoryId = categoryId.toLowerCase();
+    
+    switch (lowerCategoryId) {
       case 'food':
         return l10n.food;
       case 'transport':
@@ -1354,6 +1438,83 @@ class CategoryIconService {
     }
   }
 
+  /// Get localized category name from stored category name (handles both ID and display name)
+  static String getLocalizedCategoryName(String storedCategoryName, BuildContext context) {
+    // First try to get by category ID (if it's already an ID)
+    if (_isCategoryId(storedCategoryName)) {
+      return getCategoryName(storedCategoryName, context);
+    }
+    
+    // If it's a display name, try to find the corresponding ID
+    final categoryId = _getCategoryIdFromDisplayName(storedCategoryName);
+    if (categoryId != null) {
+      return getCategoryName(categoryId, context);
+    }
+    
+    // Fallback: return the stored name as is
+    return storedCategoryName;
+  }
+
+  /// Check if the string is a category ID
+  static bool _isCategoryId(String name) {
+    const categoryIds = ['food', 'transport', 'shopping', 'entertainment', 'bills', 'health', 'education', 'travel', 'other', 'stocks'];
+    return categoryIds.contains(name.toLowerCase());
+  }
+
+  /// Get category ID from display name
+  static String? _getCategoryIdFromDisplayName(String displayName) {
+    // Map Turkish display names to category IDs
+    final turkishToId = {
+      'Yemek': 'food',
+      'Yemek & İçecek': 'food',
+      'Ulaşım': 'transport',
+      'Alışveriş': 'shopping',
+      'Eğlence': 'entertainment',
+      'Faturalar': 'bills',
+      'Sağlık': 'health',
+      'Eğitim': 'education',
+      'Seyahat': 'travel',
+      'Diğer': 'other',
+      'Hisse Alış/Satış': 'stocks',
+    };
+    
+    // Map English display names to category IDs
+    final englishToId = {
+      'Food': 'food',
+      'Food & Drink': 'food',
+      'Transport': 'transport',
+      'Shopping': 'shopping',
+      'Entertainment': 'entertainment',
+      'Bills': 'bills',
+      'Health': 'health',
+      'Education': 'education',
+      'Travel': 'travel',
+      'Other': 'other',
+      'Stock Trading': 'stocks',
+    };
+    
+    return turkishToId[displayName] ?? englishToId[displayName];
+  }
+
+  /// Get localized category type name with context
+  static String getCategoryTypeName(BuildContext context, CategoryType categoryType) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return _getFallbackCategoryTypeName(categoryType, 'en');
+    }
+    
+    switch (categoryType) {
+      case CategoryType.income:
+        return l10n.income;
+      case CategoryType.expense:
+        return l10n.expense;
+      case CategoryType.transfer:
+        return l10n.transfer;
+      case CategoryType.other:
+        return l10n.other;
+    }
+  }
+
   /// Get localized category name with language code (fallback)
   static String getCategoryNameByLanguage(String categoryId, String language) {
     return _getFallbackCategoryName(categoryId, language);
@@ -1374,6 +1535,17 @@ class CategoryIconService {
       'stocks': language == 'tr' ? 'Hisse Alış/Satış' : 'Stock Trading',
     };
     return categoryNames[categoryId] ?? (language == 'tr' ? 'Bilinmeyen Kategori' : 'Unknown Category');
+  }
+
+  /// Internal fallback method for category types
+  static String _getFallbackCategoryTypeName(CategoryType categoryType, String language) {
+    final categoryTypeNames = {
+      CategoryType.income: language == 'tr' ? 'Gelir' : 'Income',
+      CategoryType.expense: language == 'tr' ? 'Gider' : 'Expense',
+      CategoryType.transfer: language == 'tr' ? 'Transfer' : 'Transfer',
+      CategoryType.other: language == 'tr' ? 'Diğer' : 'Other',
+    };
+    return categoryTypeNames[categoryType] ?? (language == 'tr' ? 'Bilinmeyen' : 'Unknown');
   }
 
   /// Get fallback category name (for backward compatibility)

@@ -41,8 +41,8 @@ android {
         applicationId = "com.qanta"
         minSdk = 23
         targetSdk = 35
-        versionCode = 12
-        versionName = "1.0.0"
+        versionCode = 24
+        versionName = "1.0.2"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
         
@@ -63,7 +63,7 @@ android {
                 "proguard-rules.pro"
             )
             ndk {
-                debugSymbolLevel = "FULL"
+                debugSymbolLevel = "SYMBOL_TABLE"
             }
         }
         getByName("debug") {

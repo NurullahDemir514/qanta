@@ -76,50 +76,13 @@ class GoogleAdsBannerService implements BannerAdvertisementServiceContract {
     _error = null;
   }
   
-  /// Mock banner widget oluştur
+  /// Mock banner widget oluştur (tamamen boş - sadece gerçek reklamlar gösterilecek)
   Widget _buildMockBanner() {
-    return Container(
+    return SizedBox(
       width: size.width,
       height: size.height,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.ads_click,
-              color: Colors.grey[600],
-              size: 20,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              isTestMode ? 'Test Ad' : 'Advertisement',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (isTestMode) ...[
-              const SizedBox(height: 1),
-              Text(
-                adUnitId.length > 20 ? '${adUnitId.substring(0, 20)}...' : adUnitId,
-                style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 8,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ],
-        ),
-      ),
+      // Tamamen boş - sadece gerçek AdMob reklamları gösterilecek
     );
   }
 }
+

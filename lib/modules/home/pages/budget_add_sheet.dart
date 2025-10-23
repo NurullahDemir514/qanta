@@ -26,6 +26,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
   bool _isSaving = false;
   BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
   bool _isRecurring = false;
+  DateTime _selectedStartDate = DateTime.now();
 
   List<String> _getActiveExpenseCategories(BuildContext context) {
     final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
@@ -33,7 +34,15 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
         .where(
           (cat) => true,
         ) // UnifiedCategoryModel doesn't have isActive, all are active
-        .map((cat) => cat.displayName.trim())
+        .map((cat) {
+          // For system categories, use localized names
+          // For user-created categories, use displayName directly
+          if (!cat.isUserCategory) {
+            return CategoryIconService.getCategoryName(cat.name, context);
+          } else {
+            return cat.displayName;
+          }
+        })
         .toSet()
         .toList();
   }
@@ -51,28 +60,37 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
   }
 
   bool _canSave() {
-    return _selectedCategoryName != null &&
-        _selectedCategoryName!.isNotEmpty &&
+    return _categoryController.text.isNotEmpty &&
         _limitController.text.isNotEmpty &&
         !_isSaving;
   }
 
   Future<void> _findRealCategoryId(String categoryName) async {
     try {
-      // Find the actual category ID from the provider
+      // Find the actual category ID from the provider by matching names
       final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
 
       final matchedCategory = provider.expenseCategories.firstWhere(
-        (cat) => cat.displayName.trim() == categoryName,
+        (cat) {
+          // For system categories, match with localized names
+          // For user-created categories, match with displayName
+          if (!cat.isUserCategory) {
+            return CategoryIconService.getCategoryName(cat.name, context) == categoryName;
+          } else {
+            return cat.displayName == categoryName;
+          }
+        },
         orElse: () => provider.expenseCategories.first,
       );
 
       setState(() {
         _selectedCategoryId = matchedCategory.id;
+        _selectedCategoryName = matchedCategory.displayName; // Use original displayName for backend
       });
     } catch (e) {
       setState(() {
         _selectedCategoryId = categoryName.toLowerCase().replaceAll(' ', '_');
+        _selectedCategoryName = categoryName;
       });
     }
   }
@@ -81,6 +99,13 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
     if (!_canSave()) {
       return;
     }
+    
+    // Duplicate budget kontrolü
+    if (_hasDuplicateBudget()) {
+      _showDuplicateWarning();
+      return;
+    }
+    
     setState(() => _isSaving = true);
     try {
       final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
@@ -90,12 +115,18 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
         return;
       }
 
+      // Ensure category is selected
+      if (_selectedCategoryId == null || _selectedCategoryName == null) {
+        await _findRealCategoryId(_categoryController.text);
+      }
+
       await provider.createBudget(
         categoryId: _selectedCategoryId!,
         categoryName: _selectedCategoryName!,
         limit: limit,
         period: _selectedPeriod,
         isRecurring: _isRecurring,
+        startDate: _selectedStartDate,
       );
 
       _limitController.clear();
@@ -123,6 +154,10 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
   @override
   void initState() {
     super.initState();
+    // Add listener to category controller for debugging
+    _categoryController.addListener(() {
+      print('DEBUG: Controller listener - Text: "${_categoryController.text}"');
+    });
   }
 
   @override
@@ -143,13 +178,14 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
   }
 
   String _getPeriodDisplayName() {
+    final l10n = AppLocalizations.of(context)!;
     switch (_selectedPeriod) {
       case BudgetPeriod.weekly:
-        return 'Haftalık';
+        return l10n.weekly;
       case BudgetPeriod.monthly:
-        return 'Aylık';
+        return l10n.monthly;
       case BudgetPeriod.yearly:
-        return 'Yıllık';
+        return l10n.yearly;
     }
   }
 
@@ -158,9 +194,6 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final suggestions = _getFilteredSuggestions(context);
     return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -170,10 +203,14 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
             topRight: Radius.circular(20),
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Center(
               child: Container(
                 width: 40,
@@ -269,8 +306,16 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
               ),
               textInputAction: TextInputAction.next,
               onChanged: (value) {
-                setState(() {});
-                _selectedCategoryName = value;
+                print('DEBUG: TextField onChanged - Old: "${_categoryController.text}", New: "$value"');
+                // Update state without setState to avoid interrupting text input
+                if (value.isEmpty) {
+                  _selectedCategoryId = null;
+                  _selectedCategoryName = null;
+                } else {
+                  _selectedCategoryName = value;
+                }
+                // Call setState after a microtask to avoid interrupting text input
+                Future.microtask(() => setState(() {}));
               },
               onSubmitted: (value) async {
                 if (value.isNotEmpty) {
@@ -374,7 +419,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
             ],
             const SizedBox(height: 20),
             Text(
-              'Limit Süresi',
+              AppLocalizations.of(context)!.limitDuration,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -386,15 +431,16 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
               children: BudgetPeriod.values.map((period) {
                 final isSelected = _selectedPeriod == period;
                 String periodName;
+                final l10n = AppLocalizations.of(context)!;
                 switch (period) {
                   case BudgetPeriod.weekly:
-                    periodName = 'Haftalık';
+                    periodName = l10n.weekly;
                     break;
                   case BudgetPeriod.monthly:
-                    periodName = 'Aylık';
+                    periodName = l10n.monthly;
                     break;
                   case BudgetPeriod.yearly:
-                    periodName = 'Yıllık';
+                    periodName = l10n.yearly;
                     break;
                 }
                 
@@ -407,12 +453,12 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? (isDark ? const Color(0xFF007AFF) : const Color(0xFF007AFF))
+                              ? (isDark ? const Color(0xFF6D6D70) : const Color(0xFF6D6D70))
                               : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7)),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isSelected
-                                ? const Color(0xFF007AFF)
+                                ? const Color(0xFF6D6D70)
                                 : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
                           ),
                         ),
@@ -560,7 +606,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                                       : const Color(0xFF6D6D70),
                               letterSpacing: 0.2,
                             ),
-                            child: Text('Tek Seferlik'),
+                            child: Text(AppLocalizations.of(context)!.oneTime),
                           ),
                         ),
                       ),
@@ -607,7 +653,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                                       : const Color(0xFF6D6D70),
                               letterSpacing: 0.2,
                             ),
-                            child: Text('Yenile'),
+                            child: Text(AppLocalizations.of(context)!.recurring),
                           ),
                         ),
                       ),
@@ -644,8 +690,8 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                   Expanded(
                     child: Text(
                       _isRecurring 
-                          ? 'Bu limit ${_getPeriodDisplayName().toLowerCase()} otomatik olarak yenilenecek'
-                          : 'Bu limit tek seferlik olarak oluşturulacak',
+                          ? AppLocalizations.of(context)!.limitWillRenew(_getPeriodDisplayName().toLowerCase())
+                          : AppLocalizations.of(context)!.limitOneTime,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: _isRecurring 
@@ -655,6 +701,80 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Start Date Selection
+            Text(
+              AppLocalizations.of(context)!.startDate,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () async {
+                final DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedStartDate,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2030),
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: ColorScheme.light(
+                          primary: const Color(0xFF007AFF),
+                          onPrimary: Colors.white,
+                          surface: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                          onSurface: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+                if (pickedDate != null && pickedDate != _selectedStartDate) {
+                  setState(() {
+                    _selectedStartDate = pickedDate;
+                  });
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                    width: 1.2,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      color: isDark ? Colors.white : const Color(0xFF6D6D70),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '${_selectedStartDate.day.toString().padLeft(2, '0')}/${_selectedStartDate.month.toString().padLeft(2, '0')}/${_selectedStartDate.year}',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      color: isDark ? Colors.white : const Color(0xFF6D6D70),
+                      size: 20,
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -694,9 +814,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
                     onPressed: _canSave() ? _saveBudget : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _canSave()
-                          ? (isDark
-                                ? const Color(0xFF38383A)
-                                : const Color(0xFF6D6D70))
+                          ? const Color(0xFFFF453A) // Red - consistent with FAB
                           : (isDark
                                 ? const Color(0xFF38383A)
                                 : const Color(0xFFE5E5EA)),
@@ -729,6 +847,99 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
             ),
             const SizedBox(height: 20),
           ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _hasDuplicateBudget() {
+    if (_selectedCategoryId == null) return false;
+    
+    final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
+    final existingBudgets = provider.budgets;
+    
+    // Aynı kategori ve periyot kontrolü
+    return existingBudgets.any((budget) => 
+      budget.categoryId == _selectedCategoryId && 
+      budget.period == _selectedPeriod
+    );
+  }
+
+  void _showDuplicateWarning() {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Title
+              Text(
+                l10n.duplicateBudgetWarning,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              // Message
+              Text(
+                l10n.duplicateBudgetMessage,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: isDark 
+                      ? Colors.white.withOpacity(0.7) 
+                      : const Color(0xFF1C1C1E).withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              // OK Button
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: isDark ? Colors.white : Colors.white,
+                    backgroundColor: isDark ? const Color(0xFF48484A) : const Color(0xFF8E8E93),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.ok,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

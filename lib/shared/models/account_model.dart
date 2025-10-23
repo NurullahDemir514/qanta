@@ -88,11 +88,11 @@ class AccountModel {
   String get typeDisplayName {
     switch (type) {
       case AccountType.credit:
-        return 'Credit Card';
+        return 'Kredi Kartı';
       case AccountType.debit:
-        return 'Debit Card';
+        return 'Banka Kartı';
       case AccountType.cash:
-        return 'Cash Account';
+        return 'Nakit Hesap';
     }
   }
 

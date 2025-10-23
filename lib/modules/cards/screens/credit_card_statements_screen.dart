@@ -105,7 +105,7 @@ class _CreditCardStatementsScreenState
                   ),
                 ),
                 Text(
-                  widget.cardName,
+                  widget.bankName,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,

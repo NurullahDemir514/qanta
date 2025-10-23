@@ -102,10 +102,6 @@ class FAQPage extends StatelessWidget {
                   question: l10n?.howToUseBudgetManagement ?? 'How to use budget management?',
                   answer: l10n?.howToUseBudgetManagementAnswer ?? 'How to use budget management answer',
                 ),
-                FAQItem(
-                  question: l10n?.whatIsQuickNotesFeature ?? 'What is quick notes feature?',
-                  answer: l10n?.whatIsQuickNotesFeatureAnswer ?? 'What is quick notes feature answer',
-                ),
               ],
               isDark: isDark,
             ),

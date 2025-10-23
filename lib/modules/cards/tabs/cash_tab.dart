@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/services/premium_service.dart';
 import '../../../shared/models/account_model.dart';
 import '../../../core/events/card_events.dart';
 import '../../../l10n/app_localizations.dart';
@@ -33,14 +34,14 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
     
     // Cash tab banner reklamını başlat
     _cashBannerService = GoogleAdsRealBannerService(
-      adUnitId: config.AdvertisementConfig.testBanner2.bannerAdUnitId,
+      adUnitId: config.AdvertisementConfig.cashTabBanner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
-      isTestMode: true,
+      isTestMode: false,
     );
     
     debugPrint('🔄 CASH TAB Banner reklam yükleniyor...');
-    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.testBanner2.bannerAdUnitId}');
-    debugPrint('🧪 Test Mode: true');
+    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.cashTabBanner.bannerAdUnitId}');
+    debugPrint('🧪 Test Mode: false');
     debugPrint('📍 Konum: Kartlarım - Cash Tab');
     
     // Verileri yükle
@@ -108,40 +109,37 @@ class _CashTabState extends State<CashTab> with AutomaticKeepAliveClientMixin {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: GestureDetector(
-                    onTap: () {
-                      // Direkt güncelleme dialog'u aç
-                      CashManagementService.showDirectUpdateDialog(
-                        context,
-                        cashBalance,
-                        (newBalance) {
-                          // Balance updated callback - provider will automatically update
-                        },
-                      );
-                    },
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 180,
-                      child: CashBalanceCard(
-                        balance: cashBalance,
-                        themeProvider: themeProvider,
-                      ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 180,
+                    child: CashBalanceCard(
+                      balance: cashBalance,
+                      themeProvider: themeProvider,
                     ),
                   ),
                 ),
               ),
 
-              // Banner reklam - Cash kartından sonra (sadece yüklendiyse göster)
-              if (_cashBannerService.isLoaded && _cashBannerService.bannerWidget != null) ...[
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                SliverToBoxAdapter(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    height: 50,
-                    child: _cashBannerService.bannerWidget!,
-                  ),
-                ),
-              ],
+              // Banner reklam - Cash kartından sonra (Premium kullanıcılara gösterilmez)
+              Consumer<PremiumService>(
+                builder: (context, premiumService, child) {
+                  if (premiumService.isPremium) return const SliverToBoxAdapter(child: SizedBox.shrink());
+                  
+                  if (_cashBannerService.isLoaded && _cashBannerService.bannerWidget != null) {
+                    return SliverList(
+                      delegate: SliverChildListDelegate([
+                        const SizedBox(height: 16),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          height: 50,
+                          child: _cashBannerService.bannerWidget!,
+                        ),
+                      ]),
+                    );
+                  }
+                  return const SliverToBoxAdapter(child: SizedBox.shrink());
+                },
+              ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 20)),
 

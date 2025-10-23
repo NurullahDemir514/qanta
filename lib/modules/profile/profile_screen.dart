@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +10,6 @@ import 'dart:io';
 import '../../core/theme/theme_provider.dart';
 import '../../core/services/firebase_auth_service.dart';
 import '../../core/services/profile_image_service.dart';
-import '../../core/services/quick_note_notification_service.dart';
 import '../../core/providers/unified_provider_v2.dart';
 import '../../core/providers/profile_provider.dart';
 import '../../modules/stocks/providers/stock_provider.dart';
@@ -26,6 +25,10 @@ import '../settings/pages/support_page.dart';
 import '../settings/pages/change_password_page.dart';
 import '../settings/pages/faq_page.dart';
 import '../../core/services/reminder_service.dart';
+import '../../core/services/analytics_consent_service.dart';
+import '../../core/services/premium_service.dart';
+import 'pages/premium_test_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -37,16 +40,39 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
   bool _isUploadingImage = false;
+  bool _analyticsConsent = false;
+  bool _isLoadingConsent = true;
 
   @override
   void initState() {
     super.initState();
     // Bucket'ın var olduğundan emin ol
     _ensureBucketExists();
+    // Analytics consent'i yükle
+    _loadAnalyticsConsent();
     // Focus'u temizle ve klavyeyi kapat
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).unfocus();
     });
+  }
+
+  Future<void> _loadAnalyticsConsent() async {
+    try {
+      final consent = await AnalyticsConsentService.isConsentGiven();
+      if (mounted) {
+        setState(() {
+          _analyticsConsent = consent;
+          _isLoadingConsent = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _analyticsConsent = false;
+          _isLoadingConsent = false;
+        });
+      }
+    }
   }
 
   Future<void> _ensureBucketExists() async {
@@ -343,75 +369,214 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   );
                                 },
                               ),
-                              FutureBuilder<bool>(
-                                future:
-                                    QuickNoteNotificationService.isEnabled(),
-                                builder: (context, snapshot) {
-                                  final isEnabled = snapshot.data ?? false;
-                                  return ProfileItem(
-                                    icon: Icons.edit_note_outlined,
-                                    title: AppLocalizations.of(
-                                      context,
-                                    )!.quickNotes,
-                                    subtitle: AppLocalizations.of(
-                                      context,
-                                    )!.quickNotesSubtitle,
-                                    trailing: _buildCustomToggle(
-                                      value: isEnabled,
-                                      onChanged: (value) async {
-                                        final success =
-                                            await QuickNoteNotificationService.setEnabled(
-                                              value,
+                              // Analytics Consent Toggle
+                              ProfileItem(
+                                icon: Icons.analytics_outlined,
+                                title: l10n.anonymousDataCollection,
+                                subtitle: l10n.anonymousDataCollectionSubtitle,
+                                onTap: null, // Switch ile kontrol edilecek
+                                trailing: _isLoadingConsent
+                                    ? const SizedBox(
+                                        width: 80,
+                                        height: 36,
+                                        child: Center(
+                                          child: SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : _buildCustomToggle(
+                                        value: _analyticsConsent,
+                                        onChanged: (value) async {
+                                          setState(() {
+                                            _analyticsConsent = value;
+                                          });
+                                          await AnalyticsConsentService.saveConsent(value);
+                                          
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  value
+                                                      ? l10n.analyticsEnabled
+                                                      : l10n.analyticsDisabled,
+                                                  style: GoogleFonts.inter(),
+                                                ),
+                                                duration: const Duration(seconds: 2),
+                                              ),
                                             );
-                                        if (success) {
-                                          setState(() {});
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                value
-                                                    ? AppLocalizations.of(
-                                                        context,
-                                                      )!.quickNotesNotificationEnabled
-                                                    : AppLocalizations.of(
-                                                        context,
-                                                      )!.quickNotesNotificationDisabled,
-                                              ),
-                                              backgroundColor: value
-                                                  ? Colors.green
-                                                  : Colors.orange,
-                                              duration: const Duration(
-                                                seconds: 2,
-                                              ),
-                                            ),
-                                          );
-                                        } else {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.notificationPermissionRequired,
-                                              ),
-                                              backgroundColor: Colors.red,
-                                              duration: const Duration(
-                                                seconds: 3,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      isDark: Theme.of(context).brightness == Brightness.dark,
-                                      onText: l10n.on,
-                                      offText: l10n.off,
-                                    ),
-                                  );
-                                },
+                                          }
+                                        },
+                                        isDark: Theme.of(context).brightness == Brightness.dark,
+                                        onText: l10n.on,
+                                        offText: l10n.off,
+                                      ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 24),
+                          // Premium Management Section
+                          Consumer<PremiumService>(
+                            builder: (context, premiumService, child) {
+                              return ProfileSection(
+                                title: l10n.premiumStatus,
+                                children: [
+                                  if (premiumService.isPremium) ...[
+                                    // Premium Aktif Durumu
+                                    ProfileItem(
+                                      icon: Icons.workspace_premium_rounded,
+                                      title: l10n.premiumActive,
+                                      subtitle: l10n.premiumActiveDescription,
+                                      onTap: null, // Tıklanamaz, sadece durum gösterisi
+                                    ),
+                                    // Aboneliği Yönet Butonu
+                                    ProfileItem(
+                                      icon: Icons.manage_accounts_outlined,
+                                      title: l10n.manageSubscription,
+                                      subtitle: l10n.manageSubscriptionDescription,
+                                      onTap: () async {
+                                        final url = Uri.parse(
+                                          'https://play.google.com/store/account/subscriptions',
+                                        );
+                                        try {
+                                          if (await canLaunchUrl(url)) {
+                                            await launchUrl(
+                                              url,
+                                              mode: LaunchMode.externalApplication,
+                                            );
+                                          } else {
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    l10n.playStoreError,
+                                                    style: GoogleFonts.inter(),
+                                                  ),
+                                                  backgroundColor: const Color(0xFFFF4C4C),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        } catch (e) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  '${l10n.error}: $e',
+                                                  style: GoogleFonts.inter(),
+                                                ),
+                                                backgroundColor: const Color(0xFFFF4C4C),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ] else ...[
+                                    // Premium Değil - Satın Almaları Geri Yükle
+                                    ProfileItem(
+                                      icon: Icons.restore_outlined,
+                                      title: l10n.restorePurchases,
+                                      subtitle: l10n.restorePurchasesDescription,
+                                      onTap: () async {
+                                        // Loading göster
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (context) => Center(
+                                            child: Container(
+                                              padding: const EdgeInsets.all(20),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).brightness == Brightness.dark
+                                                    ? const Color(0xFF1C1C1E)
+                                                    : Colors.white,
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const CircularProgressIndicator(
+                                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                                      Color(0xFFFFD700),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 16),
+                                                  Text(
+                                                    l10n.checkingPurchases,
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 14,
+                                                      color: Theme.of(context).brightness == Brightness.dark
+                                                          ? Colors.white
+                                                          : Colors.black,
+                                                      decoration: TextDecoration.none,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+
+                                        try {
+                                          await premiumService.restorePurchases();
+                                          
+                                          // 2 saniye bekle (Google Play yanıt vermesi için)
+                                          await Future.delayed(const Duration(seconds: 2));
+                                          
+                                          if (context.mounted) {
+                                            Navigator.pop(context); // Close loading
+                                            
+                                            if (premiumService.isPremium) {
+                                              // Başarılı
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    '✅ ${l10n.premiumRestored}',
+                                                    style: GoogleFonts.inter(),
+                                                  ),
+                                                  backgroundColor: const Color(0xFF4CAF50),
+                                                  duration: const Duration(seconds: 3),
+                                                ),
+                                              );
+                                            } else {
+                                              // Aktif abonelik bulunamadı
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'ℹ️ ${l10n.noActivePremium}',
+                                                    style: GoogleFonts.inter(),
+                                                  ),
+                                                  backgroundColor: const Color(0xFF007AFF),
+                                                  duration: const Duration(seconds: 3),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        } catch (e) {
+                                          if (context.mounted) {
+                                            Navigator.pop(context); // Close loading
+                                            
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  '❌ ${l10n.error}: $e',
+                                                  style: GoogleFonts.inter(),
+                                                ),
+                                                backgroundColor: const Color(0xFFFF4C4C),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ],
+                              );
+                            },
                           ),
                           const SizedBox(height: 24),
                           // Security Section
@@ -484,6 +649,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
+                          
+                          // Debug Section (sadece debug modda görünür)
+                          if (kDebugMode) ...[
+                            const SizedBox(height: 24),
+                            ProfileSection(
+                              title: '🧪 Debug Tools',
+                              children: [
+                                ProfileItem(
+                                  icon: Icons.science_outlined,
+                                  title: 'Premium Test',
+                                  subtitle: 'Reklamsız sürümü test et',
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const PremiumTestPage(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                          
                           const SizedBox(height: 24),
                           _buildLogoutButton(context, l10n),
                         ],
@@ -509,7 +698,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -535,7 +724,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ProfileAvatar(
                 imageUrl: profileImageUrl,
                 userName: userName,
-                size: 64,
+                size: 56,
                 showBorder: false,
                 onTap: _isUploadingImage ? null : _showImageSourceActionSheet,
               ),
@@ -544,7 +733,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(32),
+                      borderRadius: BorderRadius.circular(28),
                     ),
                     child: const Center(
                       child: SizedBox(
@@ -562,7 +751,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
             ],
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
 
           // User Info
           Expanded(
@@ -572,16 +761,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   userName,
                   style: GoogleFonts.inter(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   userEmail,
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Theme.of(
                       context,
                     ).colorScheme.onSurface.withValues(alpha: 0.7),
@@ -866,12 +1055,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: value
-                    ? const Color(0xFF22C55E) // Daha canlı yeşil
+                    ? const Color(0xFF2E7D32) // Rich Green (same as stocks toggle)
                     : Colors.transparent,
                 boxShadow: value
                     ? [
                         BoxShadow(
-                          color: const Color(0xFF22C55E).withOpacity(0.3),
+                          color: const Color(0xFF2E7D32).withOpacity(0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -898,4 +1087,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
 }
+
+

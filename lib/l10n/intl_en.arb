@@ -146,19 +146,19 @@
   "@defaultUserName": {
     "description": "Default name when user name is not available"
   },
-  "nameRequired": "Your name is required",
+  "nameRequired": "Please enter your name",
   "@nameRequired": {
     "description": "Name field validation error"
   },
-  "emailRequired": "Email is required",
+  "emailRequired": "Please enter your email address",
   "@emailRequired": {
     "description": "Email field validation error"
   },
-  "emailInvalid": "Please enter a valid email",
+  "emailInvalid": "Please enter a valid email address",
   "@emailInvalid": {
     "description": "Invalid email validation error"
   },
-  "passwordRequired": "Password is required",
+  "passwordRequired": "Please enter your password",
   "@passwordRequired": {
     "description": "Password field validation error"
   },
@@ -166,7 +166,7 @@
   "@passwordTooShort": {
     "description": "Password too short validation error"
   },
-  "confirmPasswordRequired": "Password confirmation is required",
+  "confirmPasswordRequired": "Please confirm your password",
   "@confirmPasswordRequired": {
     "description": "Confirm password field validation error"
   },
@@ -218,33 +218,53 @@
   "@registerError": {
     "description": "Register error prefix"
   },
+  "networkError": "Please check your internet connection and try again",
+  "@networkError": {
+    "description": "Network error message"
+  },
   "emailNotConfirmed": "You need to verify your email address. Please check your email.",
   "@emailNotConfirmed": {
     "description": "Email not confirmed error"
   },
-  "invalidCredentials": "Invalid email or password. Please try again.",
+  "invalidCredentials": "Invalid email or password. Please check your credentials and try again.",
   "@invalidCredentials": {
     "description": "Invalid credentials error"
   },
-  "tooManyRequests": "Too many attempts. Please try again later.",
+  "tooManyRequests": "Too many attempts. Please wait a few minutes and try again.",
   "@tooManyRequests": {
     "description": "Too many requests error"
   },
-  "invalidEmailAddress": "Invalid email address. Please enter a valid email.",
+  "invalidEmailAddress": "Invalid email address. Please enter a valid email address.",
   "@invalidEmailAddress": {
     "description": "Invalid email address error"
   },
-  "passwordTooShortError": "Password is too short. Must be at least 6 characters.",
+  "passwordTooShortError": "Password is too short. Please enter a password with at least 6 characters.",
   "@passwordTooShortError": {
     "description": "Password too short error message"
   },
-  "userAlreadyRegistered": "This email is already registered. Try signing in.",
+  "userAlreadyRegistered": "This email is already registered. Please sign in instead.",
   "@userAlreadyRegistered": {
     "description": "User already registered error"
   },
-  "signupDisabled": "Registration is currently disabled. Please try again later.",
+  "signupDisabled": "Registration is currently unavailable. Please try again later.",
   "@signupDisabled": {
     "description": "Signup disabled error"
+  },
+  "unknownError": "An unexpected error occurred. Please try again later.",
+  "@unknownError": {
+    "description": "Unknown error message"
+  },
+  "noInternetConnection": "No Internet Connection",
+  "@noInternetConnection": {
+    "description": "No internet connection title"
+  },
+  "noInternetDescription": "Please check your internet connection and try again",
+  "@noInternetDescription": {
+    "description": "No internet connection description"
+  },
+  "tryAgain": "Try Again",
+  "@tryAgain": {
+    "description": "Try again button"
   },
   "registrationSuccessful": "Registration successful! Welcome {name}!",
   "@registrationSuccessful": {
@@ -332,13 +352,25 @@
   "@createBudget": {
     "description": "Create budget button text"
   },
+  "averageDailySpending": "Average Daily Spending",
+  "@averageDailySpending": {
+    "description": "Average daily spending label in budget card"
+  },
+  "spent": "Spent",
+  "@spent": {
+    "description": "Spent amount label"
+  },
+  "addExpense": "Add Expense",
+  "@addExpense": {
+    "description": "Add expense button text"
+  },
   "expenseLimitTracking": "Expense Limit Tracking",
   "@expenseLimitTracking": {
     "description": "Expense limit tracking title"
   },
-  "manage": "Manage",
-  "@manage": {
-    "description": "Manage button text"
+  "future": "Future",
+  "@future": {
+    "description": "Future filter label"
   },
   "thisMonthGrowth": "this month",
   "@thisMonthGrowth": {
@@ -443,6 +475,10 @@
   "about": "About",
   "@about": {
     "description": "About section"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit action"
   },
   "editProfile": "Edit Profile",
   "@editProfile": {
@@ -1590,6 +1626,10 @@
   "@balanceUpdated": {
     "description": "Title for cash balance increase transaction"
   },
+  "updateBalance": "Update Balance",
+  "@updateBalance": {
+    "description": "Button text for updating cash balance"
+  },
   "walletBalanceUpdated": "Manual cash addition",
   "@walletBalanceUpdated": {
     "description": "Subtitle for manual cash addition"
@@ -2143,22 +2183,6 @@
   "cancelAction": "Cancel",
   "@cancelAction": {
     "description": "Cancel action button text"
-  },
-  "quickNotes": "Quick Notes",
-  "@quickNotes": {
-    "description": "Quick notes feature title"
-  },
-  "quickNotesSubtitle": "Persistent notification for instant note taking",
-  "@quickNotesSubtitle": {
-    "description": "Quick notes feature subtitle"
-  },
-  "quickNotesNotificationEnabled": "Quick notes notification enabled",
-  "@quickNotesNotificationEnabled": {
-    "description": "Quick notes notification enabled message"
-  },
-  "quickNotesNotificationDisabled": "Quick notes notification disabled",
-  "@quickNotesNotificationDisabled": {
-    "description": "Quick notes notification disabled message"
   },
   "notificationPermissionRequired": "Notification permission required! Please enable it in settings.",
   "@notificationPermissionRequired": {
@@ -2790,6 +2814,19 @@
   "@totalDebt": {
     "description": "Total Debt"
   },
+  "creditCardDebt": "Credit Card Debt",
+  "@creditCardDebt": {
+    "description": "Credit Card Debt"
+  },
+  "cardCount": "{count} cards",
+  "@cardCount": {
+    "description": "Card count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "noTransactionsForThisCard": "No transactions found for this card",
   "@noTransactionsForThisCard": {
     "description": "No transactions found for this card"
@@ -3205,14 +3242,6 @@
   "howToUseBudgetManagementAnswer": "You can set monthly limits for categories, track your expenses, and receive alerts when limits are exceeded.",
   "@howToUseBudgetManagementAnswer": {
     "description": "How to use budget management answer"
-  },
-  "whatIsQuickNotesFeature": "What is the quick notes feature?",
-  "@whatIsQuickNotesFeature": {
-    "description": "What is quick notes feature?"
-  },
-  "whatIsQuickNotesFeatureAnswer": "You can quickly take notes with persistent notifications, add photos, and categorize your notes.",
-  "@whatIsQuickNotesFeatureAnswer": {
-    "description": "What is quick notes feature answer"
   },
   "appCrashingWhatToDo": "The app is crashing, what should I do?",
   "@appCrashingWhatToDo": {
@@ -3854,11 +3883,6 @@
       }
     }
   },
-  "quickNotes": "Quick Notes",
-  "@quickNotes": {
-    "description": "Quick notes title"
-  },
-  "pendingNotes": "{count} pending notes",
   "@pendingNotes": {
     "description": "Pending notes count",
     "placeholders": {
@@ -3866,14 +3890,6 @@
         "type": "int"
       }
     }
-  },
-  "addQuickNote": "Add Quick Note",
-  "@addQuickNote": {
-    "description": "Add quick note title"
-  },
-  "addQuickNoteDescription": "Write your expense or income note. You can add it as a transaction later.",
-  "@addQuickNoteDescription": {
-    "description": "Add quick note description"
   },
   "exampleExpenseNote": "E.g.: Grocery shopping 150{currency}",
   "@exampleExpenseNote": {
@@ -4992,6 +5008,22 @@
   "@addMoney": {
     "description": "Add money button text"
   },
+  "updateCashBalance": "Update your cash balance",
+  "@updateCashBalance": {
+    "description": "Update cash balance message"
+  },
+  "addBankAccount": "Add bank account",
+  "@addBankAccount": {
+    "description": "Add bank account message"
+  },
+  "noBankAccountCashZero": "Your cash balance is zero and you have no bank account",
+  "@noBankAccountCashZero": {
+    "description": "No bank account and cash is zero message"
+  },
+  "updateCashOrAddBank": "Update your cash balance or add bank account",
+  "@updateCashOrAddBank": {
+    "description": "Update cash or add bank account message"
+  },
   "totalValue": "Total Value",
   "@totalValue": {
     "description": "Total portfolio value"
@@ -5140,11 +5172,6 @@
   "@returnLabel": {
     "description": "Return label"
   },
-  "quickNotesTitle": "Quick Notes",
-  "@quickNotesTitle": {
-    "description": "Quick notes page title"
-  },
-  "pendingNotesCount": "{count} pending notes",
   "@pendingNotesCount": {
     "description": "Pending notes count",
     "placeholders": {
@@ -5621,6 +5648,75 @@
   "@limitAmountPlaceholder": {
     "description": "Placeholder for limit amount input"
   },
+  "startDate": "Start Date",
+  "@startDate": {
+    "description": "Start date label"
+  },
+  "selectStartDate": "Select start date",
+  "@selectStartDate": {
+    "description": "Select start date hint"
+  },
+  "startDateHint": "Budget start date",
+  "@startDateHint": {
+    "description": "Start date input hint"
+  },
+  "limitDuration": "Limit Duration",
+  "@limitDuration": {
+    "description": "Limit duration label"
+  },
+  "weekly": "Weekly",
+  "@weekly": {
+    "description": "Weekly period"
+  },
+  "monthly": "Monthly",
+  "@monthly": {
+    "description": "Monthly period"
+  },
+  "yearly": "Yearly",
+  "@yearly": {
+    "description": "Yearly period"
+  },
+  "oneTime": "One Time",
+  "@oneTime": {
+    "description": "One time option"
+  },
+  "recurring": "Recurring",
+  "@recurring": {
+    "description": "Recurring option"
+  },
+  "limitWillRenew": "This limit will automatically renew {period}",
+  "@limitWillRenew": {
+    "description": "Limit will renew message",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "limitOneTime": "This limit will be created as one-time",
+  "@limitOneTime": {
+    "description": "Limit one time message"
+  },
+  "income": "Income",
+  "@income": {
+    "description": "Income category type"
+  },
+  "expense": "Expense",
+  "@expense": {
+    "description": "Expense category type"
+  },
+  "transfer": "Transfer",
+  "@transfer": {
+    "description": "Transfer category type"
+  },
+  "other": "Other",
+  "@other": {
+    "description": "Other category type"
+  },
+  "unknownCategory": "Unknown Category",
+  "@unknownCategory": {
+    "description": "Unknown category name"
+  },
   "saveLimit": "Save Limit",
   "@saveLimit": {
     "description": "Save limit button text"
@@ -5841,5 +5937,368 @@
   "tryDifferentFilter": "Try selecting a different filter",
   "@tryDifferentFilter": {
     "description": "Suggestion to try different filter when no stocks match"
+  },
+  "lunchBreak": "Lunch Break",
+  "@lunchBreak": {
+    "description": "Lunch break notification title"
+  },
+  "lunchBreakMessage": "Half the day has passed, check today's expenses",
+  "@lunchBreakMessage": {
+    "description": "Lunch break notification message"
+  },
+  "eveningCheck": "Evening Check",
+  "@eveningCheck": {
+    "description": "Evening check notification title"
+  },
+  "eveningCheckMessage": "Don't forget to record today's expenses",
+  "@eveningCheckMessage": {
+    "description": "Evening check notification message"
+  },
+  "dayEnd": "Day End",
+  "@dayEnd": {
+    "description": "Day end notification title"
+  },
+  "dayEndMessage": "Note today's income and expenses",
+  "@dayEndMessage": {
+    "description": "Day end notification message"
+  },
+  "qantaReminders": "Qanta Reminders",
+  "@qantaReminders": {
+    "description": "Notification channel name for reminders"
+  },
+  "reminderChannelDescription": "Expense and income reminders",
+  "@reminderChannelDescription": {
+    "description": "Notification channel description for reminders"
+  },
+  "budgetExceededWarning": "This expense will exceed your budget limit by {amount}₺",
+  "@budgetExceededWarning": {
+    "description": "Warning message when budget will be exceeded",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetExceededWarningTotal": "This expense will exceed your budget limit by {amount}₺",
+  "@budgetExceededWarningTotal": {
+    "description": "Warning message when budget limit will be exceeded",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetNearLimitWarning": "This expense will exceed 80% of your budget limit",
+  "@budgetNearLimitWarning": {
+    "description": "Warning message when approaching budget limit"
+  },
+  "exampleMarketShopping": "e.g. Grocery shopping",
+  "@exampleMarketShopping": {
+    "description": "Example text for market shopping"
+  },
+  "exampleSalary": "e.g. Salary",
+  "@exampleSalary": {
+    "description": "Example text for salary"
+  },
+  "pleaseEnterAmount": "Please enter an amount",
+  "@pleaseEnterAmount": {
+    "description": "Please enter an amount message"
+  },
+  "pleaseEnterValidAmount": "Please enter a valid amount",
+  "@pleaseEnterValidAmount": {
+    "description": "Please enter a valid amount message"
+  },
+  "pleaseSelectCategory": "Please select a category",
+  "@pleaseSelectCategory": {
+    "description": "Please select a category message"
+  },
+  "pleaseSelectPaymentMethod": "Please select a payment method",
+  "@pleaseSelectPaymentMethod": {
+    "description": "Please select a payment method message"
+  },
+  "accountInfoError": "Account information could not be retrieved",
+  "@accountInfoError": {
+    "description": "Account information could not be retrieved"
+  },
+  "transactionError": "Error occurred while adding transaction: {error}",
+  "@transactionError": {
+    "description": "Error occurred while adding transaction",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tryAgain": "Try Again",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+  "installmentOptions": "Installment Options",
+  "@installmentOptions": {
+    "description": "Installment options title"
+  },
+  "limitDeleteError": "Limit could not be deleted",
+  "@limitDeleteError": {
+    "description": "Error message when limit cannot be deleted"
+  },
+  "installment_summary": "Installments",
+  "@installment": {
+    "description": "Installment text"
+  },
+  "cash": "Cash",
+  "@cash": {
+    "description": "Cash payment text"
+  },
+  "manage": "Manage",
+  "@manage": {
+    "description": "Manage"
+  },
+  "overallBudget": "Overall Budget",
+  "categoryDistribution": "Category Distribution",
+  "spendingStatus": "Spending Status",
+  "duplicateBudgetWarning": "Existing Budget",
+  "duplicateBudgetMessage": "A budget already exists for this category in the same period. Use the budget management page to edit the existing budget.",
+  "categories": "categories",
+  "overBudget": "Over Budget",
+  "budgetExceededBy": "You exceeded your budget by {amount}",
+  "remaining": "Remaining",
+  "days": "days",
+  "@days": {
+    "description": "Days text"
+  },
+  "weeks": "weeks",
+  "@weeks": {
+    "description": "Weeks text"
+  },
+  "months": "months",
+  "@months": {
+    "description": "Months text"
+  },
+  "years": "years",
+  "@years": {
+    "description": "Years text"
+  },
+  "weeklyTrend": "Weekly Trend",
+  "weeklyTrendExplanation": "Shows spending pattern of the last 7 days. Higher spending on weekends and lower on Mondays is normal.",
+  "dailyLimit": "Daily Limit",
+  "fastSpendingExplanation": "You are spending more than 15% of your daily budget. It is recommended to be more careful.",
+  "normalSpendingExplanation": "You are spending between 8-15% of your daily budget. This is a healthy spending rate.",
+  "slowSpendingExplanation": "You are spending less than 8% of your daily budget. You are saving!",
+  "defaultSpendingExplanation": "This amount is your total budget divided by remaining days.",
+  "analyticsConsentTitle": "Help Us Improve the App",
+  "@analyticsConsentTitle": {
+    "description": "Analytics consent modal title"
+  },
+  "analyticsConsentMessage": "We want to make Qanta better for you! By collecting anonymous spending data, we can improve the app and offer better features.\n\n• Your data is completely anonymous\n• Personal information is never shared\n• Only spending amounts and categories are collected\n• You can opt out anytime",
+  "@analyticsConsentMessage": {
+    "description": "Analytics consent modal message"
+  },
+  "analyticsAccept": "I Accept",
+  "@analyticsAccept": {
+    "description": "Accept analytics consent button"
+  },
+  "analyticsDecline": "No, Thanks",
+  "@analyticsDecline": {
+    "description": "Decline analytics consent button"
+  },
+  "analyticsConsentNotice": "You can change this permission in Profile > Preferences.",
+  "@analyticsConsentNotice": {
+    "description": "Analytics consent change notice"
+  },
+  "anonymousDataCollection": "Anonymous Data Collection",
+  "@anonymousDataCollection": {
+    "description": "Anonymous data collection setting title"
+  },
+  "anonymousDataCollectionSubtitle": "Share anonymous spending data\nto help improve the app",
+  "@anonymousDataCollectionSubtitle": {
+    "description": "Anonymous data collection setting subtitle"
+  },
+  "analyticsEnabled": "Anonymous data collection enabled",
+  "@analyticsEnabled": {
+    "description": "Analytics enabled message"
+  },
+  "analyticsDisabled": "Anonymous data collection disabled",
+  "@analyticsDisabled": {
+    "description": "Analytics disabled message"
+  },
+  "cardLimitReached": "Card Limit Reached",
+  "@cardLimitReached": {
+    "description": "Card limit reached title"
+  },
+  "cardLimitReachedMessage": "You can add up to 3 cards in the free version",
+  "@cardLimitReachedMessage": {
+    "description": "Card limit reached message"
+  },
+  "upgradeToPremium": "Upgrade to Premium",
+  "@upgradeToPremium": {
+    "description": "Upgrade to premium button"
+  },
+  "premiumOfferTitle": "Qanta Premium",
+  "@premiumOfferTitle": {
+    "description": "Premium offer screen title"
+  },
+  "premiumOfferSubtitle": "Unlock all features",
+  "@premiumOfferSubtitle": {
+    "description": "Premium offer screen subtitle"
+  },
+  "freeVersion": "Free",
+  "@freeVersion": {
+    "description": "Free version label"
+  },
+  "premiumVersion": "Premium",
+  "@premiumVersion": {
+    "description": "Premium version label"
+  },
+  "featureCardLimit": "Card Limit",
+  "@featureCardLimit": {
+    "description": "Card limit feature"
+  },
+  "featureCardLimitFree": "3 cards",
+  "@featureCardLimitFree": {
+    "description": "Free card limit"
+  },
+  "featureCardLimitPremium": "Unlimited",
+  "@featureCardLimitPremium": {
+    "description": "Premium card limit"
+  },
+  "featureStockLimit": "Stock Limit",
+  "@featureStockLimit": {
+    "description": "Stock limit feature"
+  },
+  "featureStockLimitFree": "3 stocks",
+  "@featureStockLimitFree": {
+    "description": "Free stock limit"
+  },
+  "featureStockLimitPremium": "Unlimited",
+  "@featureStockLimitPremium": {
+    "description": "Premium stock limit"
+  },
+  "stockLimitReached": "Stock Limit Reached",
+  "@stockLimitReached": {
+    "description": "Stock limit reached title"
+  },
+  "stockLimitReachedMessage": "You can add up to 3 stocks in the free version",
+  "@stockLimitReachedMessage": {
+    "description": "Stock limit reached message"
+  },
+  "featureAds": "Advertisements",
+  "@featureAds": {
+    "description": "Ads feature"
+  },
+  "featureAdsFree": "Yes",
+  "@featureAdsFree": {
+    "description": "Free version has ads"
+  },
+  "featureAdsPremium": "No",
+  "@featureAdsPremium": {
+    "description": "Premium version no ads"
+  },
+  "featureSupport": "Support",
+  "@featureSupport": {
+    "description": "Support feature"
+  },
+  "featureSupportFree": "Community",
+  "@featureSupportFree": {
+    "description": "Free version support"
+  },
+  "featureSupportPremium": "Priority",
+  "@featureSupportPremium": {
+    "description": "Premium version support"
+  },
+  "featureUpdates": "Updates",
+  "@featureUpdates": {
+    "description": "Updates feature"
+  },
+  "featureUpdatesFree": "Standard",
+  "@featureUpdatesFree": {
+    "description": "Free version updates"
+  },
+  "featureUpdatesPremium": "Early Access",
+  "@featureUpdatesPremium": {
+    "description": "Premium version updates"
+  },
+  "getQantaPremium": "Get Qanta Premium",
+  "@getQantaPremium": {
+    "description": "Get Qanta Premium button"
+  },
+  "continueWithFree": "Continue with Free",
+  "@continueWithFree": {
+    "description": "Continue with free button"
+  },
+  "premiumBenefitsTitle": "Premium Benefits",
+  "@premiumBenefitsTitle": {
+    "description": "Premium benefits title"
+  },
+  "features": "Features",
+  "@features": {
+    "description": "Features column header"
+  },
+  "upgradeToPremiumBanner": "Upgrade to Premium",
+  "@upgradeToPremiumBanner": {
+    "description": "Premium banner title"
+  },
+  "premiumBannerSubtitle": "Remove ads, unlimited features",
+  "@premiumBannerSubtitle": {
+    "description": "Premium banner subtitle"
+  },
+  "discover": "Discover",
+  "@discover": {
+    "description": "Discover button text"
+  },
+  "monthly": "Monthly",
+  "@monthly": {
+    "description": "Monthly subscription plan"
+  },
+  "yearly": "Yearly",
+  "@yearly": {
+    "description": "Yearly subscription plan"
+  },
+  "premiumStatus": "Premium",
+  "@premiumStatus": {
+    "description": "Premium section title"
+  },
+  "premiumActive": "Premium Active",
+  "@premiumActive": {
+    "description": "Premium active status"
+  },
+  "premiumActiveDescription": "Unlimited features, ad-free experience",
+  "@premiumActiveDescription": {
+    "description": "Premium active description"
+  },
+  "manageSubscription": "Manage Subscription",
+  "@manageSubscription": {
+    "description": "Manage subscription button"
+  },
+  "manageSubscriptionDescription": "Edit subscription settings in Google Play",
+  "@manageSubscriptionDescription": {
+    "description": "Manage subscription description"
+  },
+  "restorePurchases": "Restore Purchases",
+  "@restorePurchases": {
+    "description": "Restore purchases button"
+  },
+  "restorePurchasesDescription": "Restore premium if you purchased before",
+  "@restorePurchasesDescription": {
+    "description": "Restore purchases description"
+  },
+  "checkingPurchases": "Checking...",
+  "@checkingPurchases": {
+    "description": "Checking purchases loading text"
+  },
+  "premiumRestored": "Premium restored!",
+  "@premiumRestored": {
+    "description": "Premium restored success message"
+  },
+  "noActivePremium": "No active premium subscription found",
+  "@noActivePremium": {
+    "description": "No active premium found message"
+  },
+  "playStoreError": "Could not open Google Play Store",
+  "@playStoreError": {
+    "description": "Play Store error message"
+  },
+  "upgradeNow": "Upgrade",
+  "@upgradeNow": {
+    "description": "Upgrade now button text for premium banner"
   }
 } 

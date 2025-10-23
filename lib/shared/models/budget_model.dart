@@ -16,12 +16,27 @@ class BudgetModel {
   final int? week; // Haftalık limitler için
   final int? budgetYear; // Yıllık limitler için (aylık limitlerde de kullanılır)
   final bool isRecurring; // Otomatik yenileme
+  final DateTime startDate; // Başlangıç tarihi
   final DateTime createdAt;
   final DateTime updatedAt;
   final double spentAmount;
 
   // Computed properties
   double get amount => limit;
+  
+  /// Calculate end date based on start date and period
+  DateTime get endDate {
+    switch (period) {
+      case BudgetPeriod.weekly:
+        return startDate.add(const Duration(days: 7));
+      case BudgetPeriod.monthly:
+        // 1 month from start date
+        return DateTime(startDate.year, startDate.month + 1, startDate.day);
+      case BudgetPeriod.yearly:
+        // 1 year from start date
+        return DateTime(startDate.year + 1, startDate.month, startDate.day);
+    }
+  }
   
   // Backward compatibility
   double get monthlyLimit => period == BudgetPeriod.monthly ? limit : 0.0;
@@ -38,6 +53,7 @@ class BudgetModel {
     this.week,
     this.budgetYear,
     this.isRecurring = false,
+    required this.startDate,
     required this.createdAt,
     required this.updatedAt,
     this.spentAmount = 0.0,
@@ -59,6 +75,7 @@ class BudgetModel {
       week: json['week'] as int?,
       budgetYear: json['budget_year'] as int?,
       isRecurring: json['is_recurring'] as bool? ?? false,
+      startDate: _parseDateTime(json['start_date'] ?? json['created_at']), // Fallback to created_at for backward compatibility
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
       spentAmount: (json['spent_amount'] as num?)?.toDouble() ?? 0.0,
@@ -102,6 +119,7 @@ class BudgetModel {
       'week': week,
       'budget_year': budgetYear,
       'is_recurring': isRecurring,
+      'start_date': startDate.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'spent_amount': spentAmount,
@@ -122,6 +140,7 @@ class BudgetModel {
     int? week,
     int? budgetYear,
     bool? isRecurring,
+    DateTime? startDate,
     DateTime? createdAt,
     DateTime? updatedAt,
     double? spentAmount,
@@ -138,6 +157,7 @@ class BudgetModel {
       week: week ?? this.week,
       budgetYear: budgetYear ?? this.budgetYear,
       isRecurring: isRecurring ?? this.isRecurring,
+      startDate: startDate ?? this.startDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       spentAmount: spentAmount ?? this.spentAmount,
@@ -155,6 +175,7 @@ class BudgetCategoryStats {
   final double percentage;
   final bool isOverBudget;
   final bool isRecurring;
+  final DateTime startDate;
 
   BudgetCategoryStats({
     required this.categoryId,
@@ -166,7 +187,22 @@ class BudgetCategoryStats {
     required this.percentage,
     required this.isOverBudget,
     required this.isRecurring,
+    required this.startDate,
   });
+
+  /// Calculate end date based on start date and period
+  DateTime get endDate {
+    switch (period) {
+      case BudgetPeriod.weekly:
+        return startDate.add(const Duration(days: 7));
+      case BudgetPeriod.monthly:
+        // 1 month from start date
+        return DateTime(startDate.year, startDate.month + 1, startDate.day);
+      case BudgetPeriod.yearly:
+        // 1 year from start date
+        return DateTime(startDate.year + 1, startDate.month, startDate.day);
+    }
+  }
 
   // Backward compatibility
   double get monthlyLimit => period == BudgetPeriod.monthly ? limit : 0.0;
@@ -178,11 +214,11 @@ class BudgetCategoryStats {
   String get periodDisplayName {
     switch (period) {
       case BudgetPeriod.weekly:
-        return 'Haftalık';
+        return 'Haftalık'; // Fallback - should use localized version
       case BudgetPeriod.monthly:
-        return 'Aylık';
+        return 'Aylık'; // Fallback - should use localized version
       case BudgetPeriod.yearly:
-        return 'Yıllık';
+        return 'Yıllık'; // Fallback - should use localized version
     }
   }
 } 

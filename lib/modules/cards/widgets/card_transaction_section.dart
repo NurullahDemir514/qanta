@@ -77,7 +77,11 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
 
   /// Setup paging with all transactions
   void _setupPaging(UnifiedProviderV2 provider) {
-    final allTransactions = provider.getTransactionsByAccount(widget.cardId);
+    // Bu kart için işlemleri yükle ve hisse işlemlerini gizle
+    final allTransactions = provider
+        .getTransactionsByAccount(widget.cardId)
+        .where((t) => !t.isStockTransaction)
+        .toList();
     
     setState(() {
       _allTransactions = allTransactions;

@@ -43,7 +43,7 @@ class _ExpenseTagSelectorState extends State<ExpenseTagSelector> {
         .where(
           (cat) => true,
         ) // UnifiedCategoryModel doesn't have isActive, all are active
-        .map((cat) => cat.displayName.trim())
+        .map((cat) => CategoryIconService.getLocalizedCategoryName(cat.displayName.trim(), context))
         .toSet()
         .toList();
   }
@@ -55,10 +55,10 @@ class _ExpenseTagSelectorState extends State<ExpenseTagSelector> {
   ) {
     final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
 
-    // Find category by name
+    // Find category by localized name
     try {
       final category = provider.expenseCategories.firstWhere(
-        (cat) => cat.displayName.trim() == categoryName,
+        (cat) => CategoryIconService.getLocalizedCategoryName(cat.displayName.trim(), context) == categoryName,
       );
 
       // Find budget for this category

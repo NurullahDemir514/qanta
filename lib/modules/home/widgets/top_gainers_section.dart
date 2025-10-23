@@ -14,6 +14,7 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../insights/providers/statistics_provider.dart';
 import '../../insights/models/statistics_model.dart';
 import '../../stocks/screens/stock_transaction_form_screen.dart';
+import '../../../shared/utils/currency_utils.dart';
 
 class TopGainersSection extends StatefulWidget {
   const TopGainersSection({super.key});
@@ -239,26 +240,32 @@ class _TopGainersSectionState extends State<TopGainersSection> {
   }
 
   Widget _buildStocksList(List<Stock> stocks, List<StockPosition> positions, bool isDark, AppLocalizations l10n) {
-    return SizedBox(
-      height: 93.h, // Sabit yükseklik geri eklendi
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: stocks.length,
-        itemBuilder: (context, index) {
-          final stock = stocks[index];
-          return Padding(
-            padding: EdgeInsets.only(
-              right: index < stocks.length - 1 ? 8.w : 0,
-            ),
-            child: _buildStockCard(stock, positions, isDark, l10n),
-          );
-        },
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const ClampingScrollPhysics(),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: List.generate(
+            stocks.length,
+            (index) {
+              final stock = stocks[index];
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: index < stocks.length - 1 ? 8.w : 0,
+                ),
+                child: _buildStockCard(stock, positions, isDark, l10n),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildTotalProfitLoss(List<Stock> topStocks, List<Stock> allStocks, List<StockPosition> positions, bool isDark) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
 
     double totalProfitLoss = 0.0;
     double totalCost = 0.0;
@@ -269,11 +276,50 @@ class _TopGainersSectionState extends State<TopGainersSection> {
           (pos) => pos.stockSymbol == stock.symbol,
         );
 
-        // DOĞRU GÜNLÜK P/L HESAPLAMA - changePercent kullan
         if (position.averagePrice != null) {
-          final dailyChangeAmount =
-              (stock.changePercent / 100) * position.averagePrice;
-          final dailyProfitLoss = dailyChangeAmount * position.totalQuantity;
+          // Bugün alınan hisse lotlarını bul
+          final today = DateTime.now();
+          final todayTransactions = stockProvider.stockTransactions.where((txn) {
+            final txnDate = txn.transactionDate;
+            return txn.stockSymbol == stock.symbol &&
+                   txn.type == StockTransactionType.buy &&
+                   txnDate.year == today.year &&
+                   txnDate.month == today.month &&
+                   txnDate.day == today.day;
+          }).toList();
+          
+          double todayLots = 0.0;
+          double todayTotalCost = 0.0;
+          
+          for (final txn in todayTransactions) {
+            todayLots += txn.quantity;
+            todayTotalCost += txn.totalAmount;
+          }
+          
+          final previousLots = position.totalQuantity - todayLots;
+          
+          double dailyProfitLoss = 0.0;
+          
+          // Günlük P/L hesaplama - İKİ FARKLI MANTIK
+          if (todayLots > 0 && stock.openPrice != null) {
+            // 1. Önceki günlerde alınan lotlar için: Açılış fiyatı referans
+            final previousDailyChange = previousLots > 0
+                ? ((stock.currentPrice - stock.openPrice!) * previousLots)
+                : 0.0;
+            
+            // 2. Bugün alınan lotlar için: Alış fiyatı referans
+            final todayAvgPrice = todayTotalCost / todayLots;
+            final todayDailyChange = (stock.currentPrice - todayAvgPrice) * todayLots;
+            
+            // Toplam günlük kar/zarar
+            dailyProfitLoss = previousDailyChange + todayDailyChange;
+          } else {
+            // Bugün alış yoksa veya açılış fiyatı yoksa - eski mantık
+            final dailyChangeAmount =
+                (stock.changePercent / 100) * position.averagePrice;
+            dailyProfitLoss = dailyChangeAmount * position.totalQuantity;
+          }
+          
           totalProfitLoss += dailyProfitLoss;
           
           // Toplam maliyet hesaplama (yüzde hesaplaması için)
@@ -328,10 +374,7 @@ class _TopGainersSectionState extends State<TopGainersSection> {
 
   Widget _buildStockCard(Stock stock, List<StockPosition> positions, bool isDark, AppLocalizations l10n) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final isPositive = stock.changePercent >= 0;
-    final changeColor = isPositive
-        ? const Color(0xFF4CAF50)
-        : const Color(0xFFFF4C4C);
+    final stockProvider = Provider.of<StockProvider>(context, listen: false);
 
     // Pozisyonu bul
     StockPosition? position;
@@ -346,16 +389,65 @@ class _TopGainersSectionState extends State<TopGainersSection> {
     // Günlük ve Toplam Kar/Zarar Hesaplamaları
     double dailyProfitLoss = 0.0;
     double dailyProfitLossPercent = stock.changePercent;
+    double? weightedOpenPrice; // Ağırlıklı ortalama açılış fiyatı
     
     double totalProfitLoss = 0.0;
     double totalProfitLossPercent = 0.0;
     
     if (position != null) {
-      // Günlük değişim miktarı = (Yüzde değişim / 100) × Ortalama maliyet
-      final dailyChangeAmount =
-          (stock.changePercent / 100) * position.averagePrice;
-      // Günlük P/L = Günlük değişim miktarı × Adet
-      dailyProfitLoss = dailyChangeAmount * position.totalQuantity;
+      // Bugün alınan hisse lotlarını bul
+      final today = DateTime.now();
+      final todayTransactions = stockProvider.stockTransactions.where((txn) {
+        final txnDate = txn.transactionDate;
+        return txn.stockSymbol == stock.symbol &&
+               txn.type == StockTransactionType.buy &&
+               txnDate.year == today.year &&
+               txnDate.month == today.month &&
+               txnDate.day == today.day;
+      }).toList();
+      
+      double todayLots = 0.0;
+      double todayTotalCost = 0.0;
+      
+      for (final txn in todayTransactions) {
+        todayLots += txn.quantity;
+        todayTotalCost += txn.totalAmount;
+      }
+      
+      final previousLots = position.totalQuantity - todayLots;
+      
+      // Günlük P/L hesaplama - İKİ FARKLI MANTIK
+      if (todayLots > 0 && stock.openPrice != null) {
+        // 1. Önceki günlerde alınan lotlar için: Açılış fiyatı referans
+        final previousDailyChange = previousLots > 0
+            ? ((stock.currentPrice - stock.openPrice!) * previousLots)
+            : 0.0;
+        
+        // 2. Bugün alınan lotlar için: Alış fiyatı referans
+        final todayAvgPrice = todayTotalCost / todayLots;
+        final todayDailyChange = (stock.currentPrice - todayAvgPrice) * todayLots;
+        
+        // Toplam günlük kar/zarar
+        dailyProfitLoss = previousDailyChange + todayDailyChange;
+        
+        // Ağırlıklı ortalama açılış fiyatı hesapla
+        // (Önceki lotlar × açılış fiyatı + Bugün alınan lotlar × alış fiyatı) / Toplam lotlar
+        final previousOpenValue = previousLots > 0 ? (previousLots * stock.openPrice!) : 0.0;
+        final todayOpenValue = todayLots * todayAvgPrice;
+        weightedOpenPrice = (previousOpenValue + todayOpenValue) / position.totalQuantity;
+        
+        // Günlük yüzde - ağırlıklı ortalama açılış fiyatına göre
+        if (weightedOpenPrice > 0) {
+          dailyProfitLossPercent = ((stock.currentPrice - weightedOpenPrice) / weightedOpenPrice) * 100;
+        }
+      } else {
+        // Bugün alış yoksa veya açılış fiyatı yoksa - eski mantık
+        final dailyChangeAmount =
+            (stock.changePercent / 100) * position.averagePrice;
+        dailyProfitLoss = dailyChangeAmount * position.totalQuantity;
+        // Açılış fiyatını kullan (varsa)
+        weightedOpenPrice = stock.openPrice;
+      }
       
       // Toplam P/L hesaplama
       totalProfitLoss = position.currentValue - position.totalCost;
@@ -364,6 +456,13 @@ class _TopGainersSectionState extends State<TopGainersSection> {
       }
     }
     
+    // Daily P/L rengi - günlük kar/zarara göre
+    final dailyIsPositive = dailyProfitLoss >= 0;
+    final changeColor = dailyIsPositive
+        ? const Color(0xFF4CAF50)
+        : const Color(0xFFFF4C4C);
+    
+    // Total P/L rengi - toplam kar/zarara göre
     final totalIsPositive = totalProfitLoss >= 0;
     final totalChangeColor = totalIsPositive
         ? const Color(0xFF4CAF50)
@@ -418,9 +517,10 @@ class _TopGainersSectionState extends State<TopGainersSection> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Opening price with arrow (if available)
-                    if (stock.openPrice != null) ...[
+                    // Ağırlıklı ortalama açılış fiyatı kullan (bugün alım varsa)
+                    if (weightedOpenPrice != null) ...[
                       Text(
-                        themeProvider.formatAmount(stock.openPrice!),
+                        themeProvider.formatAmount(weightedOpenPrice),
                         style: GoogleFonts.inter(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600,
@@ -431,11 +531,11 @@ class _TopGainersSectionState extends State<TopGainersSection> {
                       ),
                       SizedBox(width: 2.w),
                       Icon(
-                        stock.currentPrice >= stock.openPrice! 
+                        stock.currentPrice >= weightedOpenPrice 
                             ? Icons.arrow_upward 
                             : Icons.arrow_downward,
                         size: 10.sp,
-                        color: stock.currentPrice >= stock.openPrice! 
+                        color: stock.currentPrice >= weightedOpenPrice 
                             ? const Color(0xFF4CAF50) 
                             : const Color(0xFFFF4C4C),
                       ),
@@ -461,15 +561,12 @@ class _TopGainersSectionState extends State<TopGainersSection> {
           // Performance Data - Kompakt
           if (position != null) ...[
             // Daily Performance Row
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: changeColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Label (Sol)
                   Text(
                     l10n.today,
                     style: GoogleFonts.inter(
@@ -480,24 +577,25 @@ class _TopGainersSectionState extends State<TopGainersSection> {
                           : const Color(0xFF4A4A4A),
                     ),
                   ),
+                  // Tutar + Yüzde (Sağ)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${isPositive ? '+' : ''}${dailyProfitLossPercent.toStringAsFixed(1)}%',
+                        '${_formatCompactNumber(dailyProfitLoss, currency: themeProvider.currency)} ${themeProvider.currency.symbol}',
                         style: GoogleFonts.inter(
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w800,
                           color: changeColor,
                         ),
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        '${isPositive ? '+' : ''}${themeProvider.formatAmount(dailyProfitLoss)}',
+                        _formatCompactNumber(dailyProfitLossPercent, isPercent: true),
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w800,
-                          color: changeColor.withOpacity(0.8),
+                          color: changeColor.withOpacity(0.85),
                         ),
                       ),
                     ],
@@ -506,18 +604,31 @@ class _TopGainersSectionState extends State<TopGainersSection> {
               ),
             ),
             
-            SizedBox(height: 6.h),
+            // Divider - Dashed Style
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+              child: SizedBox(
+                height: 1,
+                child: CustomPaint(
+                  painter: DashedLinePainter(
+                    color: isDark
+                        ? const Color(0xFF3A3A3C)
+                        : const Color(0xFFE5E5EA),
+                    dashWidth: 3,
+                    dashSpace: 2,
+                  ),
+                  child: Container(),
+                ),
+              ),
+            ),
             
             // Total Performance Row
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: totalChangeColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Label (Sol)
                   Text(
                     l10n.total,
                     style: GoogleFonts.inter(
@@ -528,24 +639,25 @@ class _TopGainersSectionState extends State<TopGainersSection> {
                           : const Color(0xFF4A4A4A),
                     ),
                   ),
+                  // Tutar + Yüzde (Sağ)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${totalIsPositive ? '+' : ''}${totalProfitLossPercent.toStringAsFixed(1)}%',
+                        '${_formatCompactNumber(totalProfitLoss, currency: themeProvider.currency)} ${themeProvider.currency.symbol}',
                         style: GoogleFonts.inter(
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w800,
                           color: totalChangeColor,
                         ),
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        '${totalIsPositive ? '+' : ''}${themeProvider.formatAmount(totalProfitLoss)}',
+                        _formatCompactNumber(totalProfitLossPercent, isPercent: true),
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w800,
-                          color: totalChangeColor.withOpacity(0.8),
+                          color: totalChangeColor.withOpacity(0.85),
                         ),
                       ),
                     ],
@@ -879,4 +991,68 @@ class _TopGainersSectionState extends State<TopGainersSection> {
       ),
     );
   }
+}
+
+// Helper function to format compact numbers
+String _formatCompactNumber(double value, {bool isPercent = false, Currency? currency}) {
+  final absValue = value.abs();
+  final sign = value >= 0 ? '+' : '-';
+  
+  if (isPercent) {
+    // Yüzde formatı - %1000 üzeri için k, m, b
+    if (absValue >= 1000000) {
+      return '$sign${(absValue / 1000000).toStringAsFixed(1)}M%';
+    } else if (absValue >= 1000) {
+      return '$sign${(absValue / 1000).toStringAsFixed(1)}K%';
+    } else {
+      return '$sign${absValue.toStringAsFixed(1)}%';
+    }
+  } else {
+    // Tutar formatı - 5 basamak (10,000) üzeri için k, m, b - ondalıklı
+    if (absValue >= 1000000000) {
+      return '$sign${(absValue / 1000000000).toStringAsFixed(2)}B';
+    } else if (absValue >= 1000000) {
+      return '$sign${(absValue / 1000000).toStringAsFixed(2)}M';
+    } else if (absValue >= 10000) {
+      return '$sign${(absValue / 1000).toStringAsFixed(1)}K';
+    } else {
+      // 10K altında CurrencyUtils kullan
+      final formatted = CurrencyUtils.formatAmountWithoutSymbol(absValue, currency ?? Currency.TRY);
+      return '$sign$formatted';
+    }
+  }
+}
+
+// Custom Painter for Dashed Line
+class DashedLinePainter extends CustomPainter {
+  final Color color;
+  final double dashWidth;
+  final double dashSpace;
+
+  DashedLinePainter({
+    required this.color,
+    this.dashWidth = 4,
+    this.dashSpace = 3,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    double startX = 0;
+    while (startX < size.width) {
+      canvas.drawLine(
+        Offset(startX, 0),
+        Offset(startX + dashWidth, 0),
+        paint,
+      );
+      startX += dashWidth + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

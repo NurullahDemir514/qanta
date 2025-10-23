@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/app_page_scaffold.dart';
+import '../../core/services/premium_service.dart';
+import '../advertisement/providers/advertisement_provider.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key});
+  final bool isActive; // Bu tab aktif mi?
+  
+  const StatisticsScreen({super.key, this.isActive = false});
 
   @override
   State<StatisticsScreen> createState() => _StatisticsScreenState();
@@ -18,10 +23,13 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   late AnimationController _rotationController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _rotationAnimation;
+  
+  bool _isShowingAd = false; // Aynı anda birden fazla reklam gösterilmesini engelle
 
   @override
   void initState() {
     super.initState();
+    
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -41,6 +49,80 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
     _pulseController.repeat(reverse: true);
     _rotationController.repeat();
+    
+    // Eğer widget aktif olarak oluşturulduysa reklam göster
+    debugPrint('📊 StatisticsScreen initState - isActive: ${widget.isActive}');
+    if (widget.isActive) {
+      _scheduleInterstitialAd();
+    }
+  }
+  
+  /// Geçiş reklamını zamanla
+  void _scheduleInterstitialAd() {
+    debugPrint('📊 Scheduling interstitial ad...');
+    // Sayfa yüklendikten 1 saniye sonra reklam göster
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted && !_isShowingAd) {
+        debugPrint('📊 Attempting to show ad now');
+        _showInterstitialAd();
+      }
+    });
+  }
+  
+  /// Geçiş reklamını göster
+  Future<void> _showInterstitialAd() async {
+    if (_isShowingAd) return; // Zaten gösteriliyorsa tekrar gösterme
+    
+    // Premium kullanıcılar için reklam gösterme
+    final premiumService = context.read<PremiumService>();
+    if (premiumService.isPremium) {
+      debugPrint('💎 Statistics: Premium user - Skipping interstitial ad');
+      return;
+    }
+    
+    _isShowingAd = true;
+    
+    final adProvider = context.read<AdvertisementProvider>();
+    
+    // Ad provider initialize olana kadar bekle (max 10 saniye)
+    int initAttempts = 0;
+    while (!adProvider.isInitialized && initAttempts < 20) {
+      debugPrint('⏳ Insights: Waiting for ad provider to initialize... (${initAttempts + 1}/20)');
+      await Future.delayed(const Duration(milliseconds: 500));
+      initAttempts++;
+    }
+    
+    if (!adProvider.isInitialized) {
+      debugPrint('⚠️ Insights: Ad provider not initialized after 10 seconds, skipping ad');
+      _isShowingAd = false;
+      return;
+    }
+    
+    // Interstitial reklamın yüklenmesini bekle (max 15 saniye)
+    int loadAttempts = 0;
+    while (!adProvider.adManager.interstitialService.isLoaded && loadAttempts < 30) {
+      debugPrint('⏳ Insights: Waiting for interstitial ad to load... (${loadAttempts + 1}/30)');
+      await Future.delayed(const Duration(milliseconds: 500));
+      loadAttempts++;
+    }
+    
+    if (!adProvider.adManager.interstitialService.isLoaded) {
+      debugPrint('⚠️ Insights: Interstitial ad not loaded after 15 seconds, skipping ad');
+      debugPrint('💡 TIP: Test cihazlarda AdMob "No fill" nedeniyle reklam göstermeyebilir');
+      _isShowingAd = false;
+      return;
+    }
+    
+    try {
+      debugPrint('🎬 Insights: Showing interstitial ad...');
+      await adProvider.showInterstitialAd();
+      debugPrint('✅ Insights: Interstitial ad shown successfully');
+    } catch (e) {
+      debugPrint('❌ Insights: Failed to show interstitial ad: $e');
+    } finally {
+      // Reklam gösterildikten sonra flag'i reset et (bir sonraki sayfa açılışında tekrar gösterilebilsin)
+      _isShowingAd = false;
+    }
   }
 
   @override

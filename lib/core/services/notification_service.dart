@@ -4,11 +4,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 import '../../routes/app_router.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Service for managing push notifications
 ///
 /// Features:
-/// - Periodic notifications every 15 seconds
+/// - Periodic notifications every 15 minutes
 /// - Expense/Income reminder notifications
 /// - Tap to open home screen
 /// - Permission handling
@@ -21,10 +22,12 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   Timer? _notificationTimer;
   final int _notificationId = 0;
+  BuildContext? _context;
+  int _notificationCounter = 0;
 
   /// Initialize notification service
   Future<void> initialize() async {
-    // Android initialization settings
+    // Android initialization settings with notification channel
     const androidSettings = AndroidInitializationSettings(
       '@drawable/ic_notification_q',
     );
@@ -46,8 +49,29 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
+    // Create Android notification channel (Android 8+)
+    await _createNotificationChannel();
+
     // Request permissions
     await _requestPermissions();
+  }
+
+  /// Create notification channel for Android 8+
+  Future<void> _createNotificationChannel() async {
+    const androidChannel = AndroidNotificationChannel(
+      'qanta_reminders', // Channel ID
+      'Qanta Reminders', // Channel name
+      description: 'Expense and income reminders', // Channel description
+      importance: Importance.high,
+      playSound: true,
+      enableVibration: true,
+      showBadge: true,
+    );
+
+    await _notifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(androidChannel);
   }
 
   /// Request notification permissions
@@ -61,6 +85,14 @@ class NotificationService {
     if (androidStatus.isDenied) {
       final requestResult = await Permission.notification.request();
       print('Android permission request result: $requestResult');
+      
+      if (requestResult.isPermanentlyDenied) {
+        print('Notification permission permanently denied. User needs to enable from settings.');
+      }
+    } else if (androidStatus.isPermanentlyDenied) {
+      print('Notification permission permanently denied. Opening app settings...');
+      // Optionally open settings
+      // await openAppSettings();
     }
 
     // iOS notification permission
@@ -78,12 +110,18 @@ class NotificationService {
       print('iOS permission request result: $iosResult');
     }
   }
+  
+  /// Check if notifications are enabled
+  Future<bool> get hasNotificationPermission async {
+    final status = await Permission.notification.status;
+    return status.isGranted;
+  }
 
-  /// Start scheduled notifications (12:00, 18:00, 22:00)
+  /// Start scheduled notifications (every 15 minutes)
   void startScheduledNotifications() {
     stopScheduledNotifications(); // Stop any existing timers
 
-    _scheduleDailyNotifications();
+    _schedulePeriodicNotifications();
   }
 
   /// Stop scheduled notifications
@@ -92,31 +130,49 @@ class NotificationService {
     _notificationTimer = null;
   }
 
-  /// Schedule daily notifications at specific times
-  void _scheduleDailyNotifications() {
-    // Schedule for 12:00
-    _scheduleNotificationAt(
-      14,
-      35,
-      'Öğle Molası',
-      'Günün yarısı geçti, bugünkü harcamalarını kontrol et',
+  /// Schedule periodic notifications every 15 minutes
+  void _schedulePeriodicNotifications() {
+    // Get localization
+    final context = _context ?? _getDefaultContext();
+    if (context == null) return;
+    
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
+
+    // Array of notification messages
+    final notificationMessages = [
+      {'title': l10n.lunchBreak, 'body': l10n.lunchBreakMessage},
+      {'title': l10n.eveningCheck, 'body': l10n.eveningCheckMessage},
+      {'title': l10n.dayEnd, 'body': l10n.dayEndMessage},
+      {'title': l10n.qantaReminders, 'body': l10n.reminderChannelDescription},
+    ];
+
+    // Start periodic timer for 15 minutes (900 seconds)
+    _notificationTimer = Timer.periodic(
+      const Duration(minutes: 15),
+      (timer) {
+        // Get current message (cycle through messages)
+        final message = notificationMessages[_notificationCounter % notificationMessages.length];
+        
+        _showNotification(
+          title: message['title']!,
+          body: message['body']!,
+          payload: 'home_screen',
+        );
+
+        // Increment counter
+        _notificationCounter++;
+      },
     );
 
-    // Schedule for 18:00
-    _scheduleNotificationAt(
-      18,
-      0,
-      'Akşam Kontrolü',
-      'Günün harcamalarını kaydetmeyi unutma',
+    // Show first notification immediately
+    final firstMessage = notificationMessages[0];
+    _showNotification(
+      title: firstMessage['title']!,
+      body: firstMessage['body']!,
+      payload: 'home_screen',
     );
-
-    // Schedule for 22:00
-    _scheduleNotificationAt(
-      22,
-      0,
-      'Gün Sonu',
-      'Bugünün gelir ve giderlerini not al',
-    );
+    _notificationCounter++;
   }
 
   /// Schedule notification at specific hour and minute
@@ -155,14 +211,26 @@ class NotificationService {
     print('Showing scheduled notification. Has permission: $hasPermission');
 
     if (!hasPermission) {
-      print('No notification permission. Cannot show scheduled notification.');
-      return;
+      print('No notification permission. Requesting permission...');
+      // İzin yoksa iste
+      final requestResult = await Permission.notification.request();
+      print('Permission request result: $requestResult');
+      
+      // İzin verilmezse bildirim gönderme
+      if (!requestResult.isGranted) {
+        print('Permission denied. Cannot show scheduled notification.');
+        return;
+      }
     }
 
-    const androidDetails = AndroidNotificationDetails(
+    // Get localization for notification details
+    final context = _context ?? _getDefaultContext();
+    final l10n = context != null ? AppLocalizations.of(context) : null;
+    
+    final androidDetails = AndroidNotificationDetails(
       'qanta_reminders',
-      'Qanta Hatırlatmaları',
-      channelDescription: 'Harcama ve gelir hatırlatmaları',
+      l10n?.qantaReminders ?? 'Qanta Reminders',
+      channelDescription: l10n?.reminderChannelDescription ?? 'Expense and income reminders',
       importance: Importance.high,
       priority: Priority.high,
       showWhen: true,
@@ -177,7 +245,7 @@ class NotificationService {
       presentSound: true,
     );
 
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
@@ -210,6 +278,21 @@ class NotificationService {
   void _navigateToHome() {
     // Use the global router to navigate
     AppRouter.router.go('/home');
+  }
+
+  /// Set context for localization
+  void setContext(BuildContext context) {
+    _context = context;
+  }
+
+  /// Get default context for fallback
+  BuildContext? _getDefaultContext() {
+    // Try to get context from router
+    try {
+      return AppRouter.router.routerDelegate.navigatorKey.currentContext;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Dispose resources

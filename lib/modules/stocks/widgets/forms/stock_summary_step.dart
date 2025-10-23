@@ -245,13 +245,18 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
+                                color: isDark
+                                    ? const Color(0xFF3A3A3C)
+                                    : const Color(0xFFD1D1D6),
+                                width: 1.5,
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF007AFF),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF6D6D70)
+                                    : const Color(0xFF8E8E93),
                                 width: 2,
                               ),
                             ),

@@ -10,6 +10,34 @@ import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/models/account_model.dart';
 import '../../../../shared/models/cash_account.dart';
 
+// Kart ismini temizle ve localize et
+String _getLocalizedCardName(String? cardName, String? bankName, CardType cardType, BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  final localizedCardType = cardType == CardType.credit ? l10n.creditCard : l10n.debitCard;
+  
+  if (cardName == null || cardName.isEmpty) {
+    return '${bankName ?? ''} $localizedCardType';
+  }
+  
+  // Remove card type phrases in any language from cardName
+  String cleanName = cardName
+      .replaceAll(RegExp(r'\s*(Credit Card|Kredi Kartı|Debit Card|Banka Kartı)\s*$', caseSensitive: false), '')
+      .trim();
+  
+  // If nothing left after cleaning, use bank name
+  if (cleanName.isEmpty && bankName != null) {
+    return '$bankName $localizedCardType';
+  }
+  
+  // If still empty, return just card type
+  if (cleanName.isEmpty) {
+    return localizedCardType;
+  }
+  
+  // Return cleaned name + localized card type
+  return '$cleanName $localizedCardType';
+}
+
 class TransferAccountSelector extends StatelessWidget {
   final PaymentMethod? selectedAccount;
   final Function(PaymentMethod) onAccountSelected;
@@ -59,9 +87,11 @@ class TransferAccountSelector extends StatelessWidget {
                 type: PaymentMethodType.card,
                 card: PaymentCard(
                   id: creditCardData['id'],
-                  name:
-                      creditCardData['cardName'] ??
-                      AppLocalizations.of(context)!.creditCard,
+                  name: _getLocalizedCardName(
+                      creditCardData['cardName'],
+                      creditCardData['bankName'],
+                      CardType.credit,
+                      context),
                   number:
                       creditCardData['formattedCardNumber'] ??
                       '**** **** **** ****',
@@ -82,9 +112,11 @@ class TransferAccountSelector extends StatelessWidget {
               type: PaymentMethodType.card,
               card: PaymentCard(
                 id: debitCardData['id'],
-                name:
-                    debitCardData['cardName'] ??
-                    AppLocalizations.of(context)!.debitCard,
+                name: _getLocalizedCardName(
+                    debitCardData['cardName'],
+                    debitCardData['bankName'],
+                    CardType.debit,
+                    context),
                 number:
                     debitCardData['maskedCardNumber'] ?? '**** **** **** ****',
                 type: CardType.debit,
@@ -358,7 +390,7 @@ class TransferAccountSelector extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        card.name,
+                        _getLocalizedCardName(card.name, card.bankName, card.type, context),
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -372,7 +404,7 @@ class TransferAccountSelector extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            card.bankName,
+                            '${card.bankName} • ${card.type == CardType.credit ? (AppLocalizations.of(context)?.creditCard ?? 'Kredi Kartı') : (AppLocalizations.of(context)?.debitCard ?? 'Banka Kartı')}',
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,

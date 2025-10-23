@@ -45,6 +45,11 @@ class _BalanceDetailContent extends StatelessWidget {
         // Calculate totals
         final totalBalance = dataProvider.totalBalance;
         final accounts = dataProvider.accounts;
+        // Stocks P/L for inline display
+        final totalStockValue = dataProvider.balanceSummary['totalStockValue'] ?? 0.0;
+        final totalStockCost = dataProvider.balanceSummary['totalStockCost'] ?? 0.0;
+        final stockProfitLoss = totalStockValue - totalStockCost;
+        final stockProfitLossPercent = totalStockCost > 0 ? (stockProfitLoss / totalStockCost) * 100 : 0.0;
         
         // Get current month transactions for summary
         final now = DateTime.now();
@@ -103,7 +108,33 @@ class _BalanceDetailContent extends StatelessWidget {
                       subtitle: l10n.allAccountsTotal,
                       icon: Icons.account_balance_wallet_outlined,
                       color: const Color(0xFF007AFF),
+                      trailingText: (totalStockValue > 0)
+                          ? '${stockProfitLoss >= 0 ? '+' : ''}${themeProvider.formatAmount(stockProfitLoss)} (${stockProfitLossPercent.abs().toStringAsFixed(1)}%)'
+                          : null,
+                      trailingColor: stockProfitLoss >= 0
+                          ? const Color(0xFF4CAF50) // Material Green (günlük performans ile aynı)
+                          : const Color(0xFFD32F2F),
                     ),
+                    
+                    const SizedBox(height: 12),
+                    // Total Credit Card Debt - Simplified
+                    if (accounts.any((a) => a.type == AccountType.credit)) ...[
+                      Builder(
+                        builder: (context) {
+                          final totalUsed = accounts
+                              .where((a) => a.type == AccountType.credit)
+                              .fold<double>(0.0, (sum, a) => sum + a.usedCredit);
+                          return _DetailCard(
+                            isDark: isDark,
+                            title: l10n.totalDebts,
+                            amount: themeProvider.formatAmount(totalUsed),
+                            subtitle: l10n.creditCard,
+                            icon: Icons.credit_card_outlined,
+                            color: const Color(0xFFFF3B30),
+                          );
+                        },
+                      ),
+                    ],
                     
                     const SizedBox(height: 16),
                     
@@ -119,15 +150,26 @@ class _BalanceDetailContent extends StatelessWidget {
                     
                     const SizedBox(height: 12),
                     
-                    // Dynamic account list
-                    ...accounts.map((account) => Padding(
+                    // Dynamic account list - sorted by balance (highest first)
+                    ...(() {
+                      final sortedAccounts = accounts.toList();
+                      sortedAccounts.sort((a, b) {
+                        // Credit cards: sort by used credit (highest debt first)
+                        if (a.type == AccountType.credit && b.type == AccountType.credit) {
+                          return b.usedCredit.compareTo(a.usedCredit);
+                        }
+                        // Regular accounts: sort by balance (highest first)
+                        return b.balance.compareTo(a.balance);
+                      });
+                      return sortedAccounts.map((account) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: _AccountItem(
                         isDark: isDark,
                         themeProvider: themeProvider,
                         account: account,
                       ),
-                    )),
+                      ));
+                    })(),
                     
                     if (accounts.isEmpty)
                       Container(
@@ -200,8 +242,9 @@ class _BalanceDetailContent extends StatelessWidget {
                             themeProvider: themeProvider,
                             title: l10n.income,
                             amount: monthlyIncome,
-                            icon: Icons.trending_up,
-                            color: const Color(0xFF6D6D70),
+                            icon: Icons.trending_up_rounded,
+                            color: const Color(0xFF34C759), // Yeşil
+                            subtitle: l10n.thisMonth,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -211,12 +254,19 @@ class _BalanceDetailContent extends StatelessWidget {
                             themeProvider: themeProvider,
                             title: l10n.expenses,
                             amount: monthlyExpenses,
-                            icon: Icons.trending_down,
-                            color: const Color(0xFFFF3B30),
+                            icon: Icons.trending_down_rounded,
+                            color: const Color(0xFFFF3B30), // Kırmızı
+                            subtitle: l10n.thisMonth,
                           ),
                         ),
                       ],
                     ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Net Amount Card - will be added later
+                    // if (monthlyIncome > 0 || monthlyExpenses > 0)
+                    //   _NetAmountCard(...)
                     
                     const SizedBox(height: 30),
                   ],
@@ -237,6 +287,8 @@ class _DetailCard extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final Color color;
+  final String? trailingText;
+  final Color? trailingColor;
 
   const _DetailCard({
     required this.isDark,
@@ -245,6 +297,8 @@ class _DetailCard extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.color,
+    this.trailingText,
+    this.trailingColor,
   });
 
   @override
@@ -303,7 +357,7 @@ class _DetailCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Expanded(
                             child: Text(
@@ -317,6 +371,10 @@ class _DetailCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          // Amount + optional trailing P/L
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                           Text(
                             amount,
                             style: GoogleFonts.inter(
@@ -324,6 +382,20 @@ class _DetailCard extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                               color: isDark ? Colors.white : Colors.black,
                             ),
+                              ),
+                              if (trailingText != null) ...[
+                                const SizedBox(width: 8),
+                                Text(
+                                  trailingText!,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: trailingColor ?? (isDark ? Colors.white : Colors.black),
+                                    letterSpacing: 0.1,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
@@ -494,8 +566,8 @@ class _AccountItem extends StatelessWidget {
                                 Text(
                                   themeProvider.formatAmount(account.usedCredit),
                                   style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
                                     color: account.usedCredit > 0 
                                       ? const Color(0xFFFF3B30)
                                       : isDark ? Colors.white : Colors.black,
@@ -519,8 +591,8 @@ class _AccountItem extends StatelessWidget {
                                 Text(
                                   themeProvider.formatAmount(account.availableAmount),
                                   style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
                                     color: const Color(0xFF34C759),
                                   ),
                                 ),
@@ -555,8 +627,8 @@ class _AccountItem extends StatelessWidget {
                             Text(
                               themeProvider.formatAmount(account.balance),
                               style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
                                 color: isDark ? Colors.white : Colors.black,
                               ),
                             ),
@@ -642,6 +714,7 @@ class _SummaryCard extends StatelessWidget {
   final double amount;
   final IconData icon;
   final Color color;
+  final String? subtitle;
 
   const _SummaryCard({
     required this.isDark,
@@ -650,6 +723,7 @@ class _SummaryCard extends StatelessWidget {
     required this.amount,
     required this.icon,
     required this.color,
+    this.subtitle,
   });
 
   @override
@@ -719,11 +793,23 @@ class _SummaryCard extends StatelessWidget {
                       Text(
                         themeProvider.formatAmount(amount),
                         style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: color,
                         ),
                       ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle!,
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: isDark 
+                              ? const Color(0xFF8E8E93)
+                              : const Color(0xFF6D6D70),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

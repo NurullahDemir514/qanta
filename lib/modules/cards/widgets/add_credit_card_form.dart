@@ -67,7 +67,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
       // Auto-generate card name when bank is selected
       final bankName = AppConstants.getBankName(bankCode);
       _cardNameController.text =
-          '$bankName ${AppLocalizations.of(context)?.creditCard ?? 'Credit Card'}';
+          '$bankName ${AppLocalizations.of(context)?.creditCard ?? 'Kredi Kartı'}';
     });
   }
 
@@ -225,7 +225,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
               children: [
                 Text(
                   AppLocalizations.of(context)?.addCreditCard ??
-                      'Add Credit Card',
+                      'Kredi Kartı Ekle',
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -586,10 +586,10 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          AppLocalizations.of(
+                                              AppLocalizations.of(
                                                 context,
                                               )?.addCreditCard ??
-                                              'Add Credit Card',
+                                              'Kredi Kartı Ekle',
                                           style: GoogleFonts.inter(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,

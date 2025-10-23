@@ -49,3 +49,15 @@ abstract class RewardedAdvertisementServiceContract extends AdvertisementService
   void Function()? get onRewardEarned;
   set onRewardEarned(void Function()? callback);
 }
+
+/// App Open reklam servisi için contract
+abstract class AppOpenAdvertisementServiceContract extends AdvertisementServiceContract {
+  /// App Open reklam göster
+  Future<void> showAppOpenAd();
+  
+  /// Son gösterim zamanı
+  DateTime? get lastShownTime;
+  
+  /// Reklam gösterilebilir mi? (cooldown kontrolü)
+  bool canShowAd();
+}

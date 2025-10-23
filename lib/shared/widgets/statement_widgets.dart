@@ -168,30 +168,15 @@ class _StatementCardState extends State<StatementCard>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Flexible(
-                        child: ShaderMask(
-                          shaderCallback: (bounds) => LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: widget.isDark
-                                ? [
-                                    const Color(0xFFFF4C4C), // Red
-                                    const Color(0xFFFF6B6B), // Coral
-                                    const Color(0xFFFF8E53), // Orange
-                                  ]
-                                : [
-                                    const Color(0xFF34D399), // Mint Green
-                                    const Color(0xFF00C2FF), // Cyan
-                                    const Color(0xFF007AFF), // iOS Blue
-                                  ],
-                          ).createShader(bounds),
-                          child: Text(
-                            widget.themeProvider.formatAmount(totalAmount),
-                            style: GoogleFonts.inter(
-                              fontSize: 24.sp,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              letterSpacing: -0.5,
-                            ),
+                        child: Text(
+                          widget.themeProvider.formatAmount(totalAmount),
+                          style: GoogleFonts.inter(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.w700,
+                            color: widget.isDark
+                                ? Colors.white
+                                : const Color(0xFF1C1C1E),
+                            letterSpacing: -0.5,
                           ),
                         ),
                       ),
@@ -490,50 +475,41 @@ class MonthlyChangeBadge extends StatelessWidget {
     final isNeutral = !isIncrease && !isDecrease;
 
     Color badgeColor;
-    String arrow;
+    IconData icon;
 
     if (isIncrease) {
-      badgeColor = const Color(
-        0xFFFF453A,
-      ); // Red for increase (bad for credit cards)
-      arrow = '↑';
+      badgeColor = const Color(0xFFFF453A); // Red for increase (bad for credit cards)
+      icon = Icons.trending_up_rounded;
     } else if (isDecrease) {
-      badgeColor = const Color(
-        0xFF30D158,
-      ); // Green for decrease (good for credit cards)
-      arrow = '↓';
+      badgeColor = const Color(0xFF2E7D32); // Rich Green for decrease (good for credit cards)
+      icon = Icons.trending_down_rounded;
     } else {
-      badgeColor = const Color(0xFF007AFF); // Blue for neutral
-      arrow = '';
+      badgeColor = const Color(0xFF8E8E93); // Gray for neutral
+      icon = Icons.remove_rounded;
     }
 
     return Container(
       margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(isNeutral ? 0.10 : 0.12),
-        borderRadius: BorderRadius.circular(8),
+        color: badgeColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (arrow.isNotEmpty) ...[
-            Text(
-              arrow,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: badgeColor,
-              ),
-            ),
-            const SizedBox(width: 2),
-          ],
+          Icon(
+            icon,
+            size: 14,
+            color: badgeColor,
+          ),
+          const SizedBox(width: 4),
           Text(
-            '%${change.abs().toStringAsFixed(0)}',
+            '${change > 0 ? '+' : ''}${change.toStringAsFixed(0)}%',
             style: GoogleFonts.inter(
               fontSize: 12,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: badgeColor,
             ),
           ),

@@ -62,7 +62,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
       // Auto-generate card name when bank is selected
       final bankName = AppConstants.getBankName(bankCode);
       _cardNameController.text =
-          '$bankName ${AppLocalizations.of(context)?.debitCard ?? 'Debit Card'}';
+          '$bankName ${AppLocalizations.of(context)?.debitCard ?? 'Banka Kartı'}';
     });
   }
 
@@ -153,7 +153,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
               children: [
                 Text(
                   AppLocalizations.of(context)?.addDebitCard ??
-                      'Add Debit Card',
+                      'Banka Kartı Ekle',
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -317,10 +317,10 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          AppLocalizations.of(
+                                              AppLocalizations.of(
                                                 context,
                                               )?.addDebitCard ??
-                                              'Add Debit Card',
+                                              'Banka Kartı Ekle',
                                           style: GoogleFonts.inter(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,
