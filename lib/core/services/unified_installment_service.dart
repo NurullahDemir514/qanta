@@ -379,11 +379,13 @@ class UnifiedInstallmentService {
     }
   }
 
-  /// Get all installment masters for current user
+  /// Get all installment masters for current user WITH progress data
   static Future<List<Map<String, dynamic>>> getAllInstallmentMasters() async {
     try {
       final userId = FirebaseAuthService.currentUserId;
       if (userId == null) throw Exception('Kullanıcı oturumu bulunamadı');
+
+      List<Map<String, dynamic>> masterDataList;
 
       // Try indexed query first
       try {
@@ -394,7 +396,7 @@ class UnifiedInstallmentService {
               .orderBy('created_at', descending: true),
         );
 
-        return snapshot.docs.map((doc) {
+        masterDataList = snapshot.docs.map((doc) {
           final data = doc.data();
           return {
             ...data,
@@ -415,7 +417,7 @@ class UnifiedInstallmentService {
           ).where('user_id', isEqualTo: userId),
         );
 
-        final results = snapshot.docs.map((doc) {
+        masterDataList = snapshot.docs.map((doc) {
           final data = doc.data();
           return {
             ...data,
@@ -427,14 +429,49 @@ class UnifiedInstallmentService {
         }).toList();
 
         // Sort by created_at in memory
-        results.sort((a, b) {
+        masterDataList.sort((a, b) {
           final aDate = a['created_at'] as DateTime? ?? DateTime(1970);
           final bDate = b['created_at'] as DateTime? ?? DateTime(1970);
           return bDate.compareTo(aDate); // Descending order
         });
-
-        return results;
       }
+
+      // ✨ ENHANCEMENT: Add progress data for each master
+      final enrichedData = await Future.wait(masterDataList.map((masterData) async {
+        final masterId = masterData['id'] as String;
+        final totalCount = masterData['count'] as int;
+        final monthlyAmount = (masterData['monthly_amount'] as num).toDouble();
+        
+        // Get installment details to calculate progress
+        final details = await getInstallmentDetails(masterId);
+        final paidCount = details.where((d) => d['is_paid'] == true).length;
+        final paidAmount = paidCount * monthlyAmount;
+        final remainingAmount = (totalCount - paidCount) * monthlyAmount;
+        
+        // Find next due date from unpaid installments
+        final unpaidDetails = details.where((d) => d['is_paid'] == false).toList();
+        DateTime? nextDueDate;
+        if (unpaidDetails.isNotEmpty) {
+          // Sort by due_date and get the earliest
+          unpaidDetails.sort((a, b) {
+            final aDate = _parseDateTime(a['due_date']) ?? DateTime(2100);
+            final bDate = _parseDateTime(b['due_date']) ?? DateTime(2100);
+            return aDate.compareTo(bDate);
+          });
+          nextDueDate = _parseDateTime(unpaidDetails.first['due_date']);
+        }
+        
+        return {
+          ...masterData,
+          'paid_count': paidCount,
+          'total_count': totalCount,
+          'paid_amount': paidAmount,
+          'remaining_amount': remainingAmount,
+          'next_due_date': nextDueDate?.toIso8601String(),
+        };
+      }));
+
+      return enrichedData;
     } catch (e) {
       debugPrint('❌ Error getting installment masters: $e');
       rethrow;
@@ -449,7 +486,10 @@ class UnifiedInstallmentService {
       return value;
     } else if (value is String) {
       try {
-        return DateTime.parse(value);
+        final parsed = DateTime.parse(value);
+        // Prevent UTC conversion
+        return DateTime(parsed.year, parsed.month, parsed.day, 
+                       parsed.hour, parsed.minute, parsed.second);
       } catch (e) {
         return null;
       }

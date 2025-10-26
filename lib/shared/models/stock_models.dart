@@ -1,6 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/currency_utils.dart';
 
+/// Helper function to parse datetime without UTC conversion
+DateTime _parseLocalDateTime(String dateStr) {
+  try {
+    final parsed = DateTime.parse(dateStr);
+    return DateTime(
+      parsed.year,
+      parsed.month,
+      parsed.day,
+      parsed.hour,
+      parsed.minute,
+      parsed.second,
+      parsed.millisecond,
+    );
+  } catch (e) {
+    return DateTime.now();
+  }
+}
+
 /// Hisse senedi modeli
 class Stock {
   final String symbol;           // AAPL, SASA.IS
@@ -49,7 +67,7 @@ class Stock {
       changeAmount: (json['changeAmount'] ?? 0.0).toDouble(),
       changePercent: (json['changePercent'] ?? 0.0).toDouble(),
       lastUpdated: json['lastUpdated'] != null 
-          ? DateTime.parse(json['lastUpdated'])
+          ? _parseLocalDateTime(json['lastUpdated'] as String)
           : DateTime.now(),
       sector: json['sector'] ?? '',
       country: json['country'] ?? '',
@@ -211,6 +229,8 @@ class StockTransaction {
   final String? notes;
   final String userId;
   final String? accountId;
+  final double profitLoss; // Gerçekleşmiş kar/zarar (sadece satışlarda)
+  final double profitLossPercent; // Gerçekleşmiş kar/zarar yüzdesi
   
   const StockTransaction({
     required this.id,
@@ -225,6 +245,8 @@ class StockTransaction {
     this.notes,
     required this.userId,
     this.accountId,
+    this.profitLoss = 0.0,
+    this.profitLossPercent = 0.0,
   });
   
   factory StockTransaction.fromJson(Map<String, dynamic> json) {
@@ -241,11 +263,13 @@ class StockTransaction {
       totalAmount: (json['totalAmount'] ?? 0.0).toDouble(),
       commission: (json['commission'] ?? 0.0).toDouble(),
       transactionDate: json['transactionDate'] != null
-          ? DateTime.parse(json['transactionDate'])
+          ? _parseLocalDateTime(json['transactionDate'] as String)
           : DateTime.now(),
       notes: json['notes'],
       userId: json['userId'] ?? '',
       accountId: json['accountId'] ?? '',
+      profitLoss: (json['profitLoss'] ?? 0.0).toDouble(),
+      profitLossPercent: (json['profitLossPercent'] ?? 0.0).toDouble(),
     );
   }
   
@@ -263,6 +287,8 @@ class StockTransaction {
       'notes': notes,
       'userId': userId,
       'accountId': accountId,
+      'profitLoss': profitLoss,
+      'profitLossPercent': profitLossPercent,
     };
   }
   
@@ -328,7 +354,7 @@ class StockPosition {
       profitLoss: (json['profitLoss'] ?? 0.0).toDouble(),
       profitLossPercent: (json['profitLossPercent'] ?? 0.0).toDouble(),
       lastUpdated: json['lastUpdated'] != null
-          ? DateTime.parse(json['lastUpdated'])
+          ? _parseLocalDateTime(json['lastUpdated'] as String)
           : DateTime.now(),
       currency: json['currency'] ?? 'TRY',
       historicalData: json['historicalData'] != null 

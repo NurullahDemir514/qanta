@@ -3585,6 +3585,18 @@
   "@stockDetails": {
     "description": "Stock details title"
   },
+  "positionSummary": "Position Summary",
+  "@positionSummary": {
+    "description": "Position summary title"
+  },
+  "averagePrice": "Avg. Price",
+  "@averagePrice": {
+    "description": "Average price label"
+  },
+  "noTransactionsYet": "No transactions yet",
+  "@noTransactionsYet": {
+    "description": "No transactions message"
+  },
   "stockInfo": "Stock Information",
   "@stockInfo": {
     "description": "Stock information section"
@@ -4699,6 +4711,10 @@
   "@remove": {
     "description": "Remove button"
   },
+  "removeFromWatchlist": "Remove from Watchlist",
+  "@removeFromWatchlist": {
+    "description": "Remove stock from watchlist"
+  },
   "userSessionNotFound": "User session not found",
   "@userSessionNotFound": {
     "description": "User session not found error"
@@ -4717,9 +4733,27 @@
       }
     }
   },
-  "confirmRemoveStock": "Are you sure you want to remove this stock from your portfolio?",
+  "confirmRemoveStock": "Are you sure you want to remove {stockName} from watchlist?",
   "@confirmRemoveStock": {
-    "description": "Confirm stock removal message"
+    "description": "Confirm stock removal message",
+    "placeholders": {
+      "stockName": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotRemoveStock": "Cannot Remove",
+  "@cannotRemoveStock": {
+    "description": "Cannot remove stock title"
+  },
+  "cannotRemoveStockWithPosition": "You have an active position in {stockName}. Please sell all shares before removing from watchlist.",
+  "@cannotRemoveStockWithPosition": {
+    "description": "Cannot remove stock with active position",
+    "placeholders": {
+      "stockName": {
+        "type": "String"
+      }
+    }
   },
   "stockTransaction": "Stock Transaction",
   "@stockTransaction": {
@@ -6181,6 +6215,18 @@
   "@stockLimitReachedMessage": {
     "description": "Stock limit reached message"
   },
+  "featureAILimit": "AI Usage Limit",
+  "@featureAILimit": {
+    "description": "AI usage limit feature"
+  },
+  "featureAILimitFree": "10/day",
+  "@featureAILimitFree": {
+    "description": "Free AI limit per day"
+  },
+  "featureAILimitPremium": "75/day",
+  "@featureAILimitPremium": {
+    "description": "Premium AI limit per day"
+  },
   "featureAds": "Advertisements",
   "@featureAds": {
     "description": "Ads feature"
@@ -6300,5 +6346,515 @@
   "upgradeNow": "Upgrade",
   "@upgradeNow": {
     "description": "Upgrade now button text for premium banner"
+  },
+  "quickAddHint": "e.g: $50 coffee | sold 15 apple at $180",
+  "@quickAddHint": {
+    "description": "Quick add FAB input hint text with stock example"
+  },
+  "quickAddTransaction": "Quick Add Transaction",
+  "@quickAddTransaction": {
+    "description": "Quick add transaction title"
+  },
+  "january": "January",
+  "@january": {
+    "description": "January month name"
+  },
+  "february": "February",
+  "@february": {
+    "description": "February month name"
+  },
+  "march": "March",
+  "@march": {
+    "description": "March month name"
+  },
+  "april": "April",
+  "@april": {
+    "description": "April month name"
+  },
+  "may": "May",
+  "@may": {
+    "description": "May month name"
+  },
+  "june": "June",
+  "@june": {
+    "description": "June month name"
+  },
+  "july": "July",
+  "@july": {
+    "description": "July month name"
+  },
+  "august": "August",
+  "@august": {
+    "description": "August month name"
+  },
+  "september": "September",
+  "@september": {
+    "description": "September month name"
+  },
+  "october": "October",
+  "@october": {
+    "description": "October month name"
+  },
+  "november": "November",
+  "@november": {
+    "description": "November month name"
+  },
+  "december": "December",
+  "@december": {
+    "description": "December month name"
+  },
+  "confirmAndSave": "Confirm and Save",
+  "@confirmAndSave": {
+    "description": "Confirm and save button"
+  },
+  "buy": "Buy",
+  "@buy": {
+    "description": "Buy stock action"
+  },
+  "sell": "Sell",
+  "@sell": {
+    "description": "Sell stock action"
+  },
+  "transaction": "Transaction",
+  "@transaction": {
+    "description": "Transaction"
+  },
+  "selectTransactionType": "Select Transaction Type",
+  "@selectTransactionType": {
+    "description": "Select transaction type title"
+  },
+  "stockSymbolQuantity": "{quantity} shares of {symbol}",
+  "@stockSymbolQuantity": {
+    "description": "Stock symbol and quantity",
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "buyOrSell": "Buy or Sell?",
+  "@buyOrSell": {
+    "description": "Buy or sell question"
+  },
+  "priceNotSpecified": "Price Not Specified",
+  "@priceNotSpecified": {
+    "description": "Price not specified message"
+  },
+  "pleaseEnterPrice": "Please enter the price.\nExample: \"sold 15 apple at $180\"",
+  "@pleaseEnterPrice": {
+    "description": "Please enter price instruction"
+  },
+  "goBack": "Go Back",
+  "@goBack": {
+    "description": "Go back button"
+  },
+  "quantity": "Quantity",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "price": "Price",
+  "@price": {
+    "description": "Price label"
+  },
+  "total": "Total",
+  "@total": {
+    "description": "Total label"
+  },
+  "commission": "Commission",
+  "@commission": {
+    "description": "Commission label"
+  },
+  "netAmount": "Net Amount",
+  "@netAmount": {
+    "description": "Net amount label"
+  },
+  "summaryHint": "Confirm or cancel the summary",
+  "@summaryHint": {
+    "description": "Summary hint text"
+  },
+  "aiChatWelcome": "Hello {name}!\nHow can I help you? Would you like to add an expense or income?",
+  "@aiChatWelcome": {
+    "description": "AI chat welcome message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aiChatError": "Sorry, an error occurred. Would you like to try again?",
+  "@aiChatError": {
+    "description": "AI chat error message"
+  },
+  "aiChatTransactionSuccess": "Transaction saved successfully!\n\nWould you like to add another transaction? 😊",
+  "@aiChatTransactionSuccess": {
+    "description": "Transaction saved successfully message"
+  },
+  "aiChatTransactionFailed": "An error occurred while adding the transaction. Please try again.",
+  "@aiChatTransactionFailed": {
+    "description": "Transaction failed message"
+  },
+  "aiChatThemeFailed": "Could not change theme. Please try again.",
+  "@aiChatThemeFailed": {
+    "description": "Theme change failed message"
+  },
+  "aiChatDeleteConfirmTitle": "Bulk Delete Confirmation",
+  "@aiChatDeleteConfirmTitle": {
+    "description": "Bulk delete confirmation dialog title"
+  },
+  "aiChatDeleteButton": "Delete",
+  "@aiChatDeleteButton": {
+    "description": "Delete button"
+  },
+  "aiChatDeleteProcessing": "Deleting transactions, please wait...",
+  "@aiChatDeleteProcessing": {
+    "description": "Delete in progress message"
+  },
+  "aiChatDeleteSuccess": "Deletion completed! {count} transactions successfully deleted.",
+  "@aiChatDeleteSuccess": {
+    "description": "Delete success message",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatDeleteFailed": "❌ Deletion failed.\n\nPlease try again or check your internet connection.",
+  "@aiChatDeleteFailed": {
+    "description": "Delete failed message"
+  },
+  "aiChatConfirmButton": "Confirm",
+  "@aiChatConfirmButton": {
+    "description": "Confirm button"
+  },
+  "aiChatCancelButton": "Cancel",
+  "@aiChatCancelButton": {
+    "description": "Cancel button in AI chat"
+  },
+  "aiChatPendingApproval": "Please approve the transaction above...",
+  "@aiChatPendingApproval": {
+    "description": "Pending approval message"
+  },
+  "aiChatSendPlaceholder": "Type a message... (e.g. $50 coffee)",
+  "@aiChatSendPlaceholder": {
+    "description": "Send message placeholder"
+  },
+  "aiChatToday": "Today's",
+  "@aiChatToday": {
+    "description": "Today's"
+  },
+  "aiChatYesterday": "Yesterday's",
+  "@aiChatYesterday": {
+    "description": "Yesterday's"
+  },
+  "aiChatLastNDays": "Last {days} days'",
+  "@aiChatLastNDays": {
+    "description": "Last N days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatAllTransactions": "all transactions",
+  "@aiChatAllTransactions": {
+    "description": "All transactions"
+  },
+  "aiChatExpenses": "expenses",
+  "@aiChatExpenses": {
+    "description": "Expenses"
+  },
+  "aiChatIncome": "income",
+  "@aiChatIncome": {
+    "description": "Income"
+  },
+  "aiChatDeleteWarning": "You are about to delete {timeText} {typeText}. This action cannot be undone. Are you sure?",
+  "@aiChatDeleteWarning": {
+    "description": "Delete warning message",
+    "placeholders": {
+      "timeText": {
+        "type": "String"
+      },
+      "typeText": {
+        "type": "String"
+      }
+    }
+  },
+  "aiChatDailyUsage": "Daily usage",
+  "@aiChatDailyUsage": {
+    "description": "Daily AI usage display"
+  },
+  "aiChatAssistant": "Your financial assistant",
+  "@aiChatAssistant": {
+    "description": "Financial assistant label"
+  },
+  "clearChatHistory": "Clear History",
+  "@clearChatHistory": {
+    "description": "Clear chat history button"
+  },
+  "clearChatHistoryConfirmation": "All chat history will be deleted. Are you sure?",
+  "@clearChatHistoryConfirmation": {
+    "description": "Clear chat history confirmation message"
+  },
+  "chatHistoryCleared": "Chat history cleared",
+  "@chatHistoryCleared": {
+    "description": "Chat history cleared snackbar message"
+  },
+  "clear": "Clear",
+  "@clear": {
+    "description": "Clear button"
+  },
+  "aiChatTransactionSuccess": "Transaction successfully recorded.",
+  "@aiChatTransactionSuccess": {
+    "description": "Transaction successfully created message"
+  },
+  "aiChatDailyLimitReached": "You've reached your daily AI limit ({limit} messages/day). Try again tomorrow.",
+  "@aiChatDailyLimitReached": {
+    "description": "Daily limit reached message",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatTransactionCancelled": "Alright, cancelled 👍",
+  "@aiChatTransactionCancelled": {
+    "description": "Transaction cancelled message"
+  },
+  "confirmTransactions": "Confirm Transactions",
+  "@confirmTransactions": {
+    "description": "Confirm transactions screen title"
+  },
+  "transactionsSelected": "transactions selected",
+  "@transactionsSelected": {
+    "description": "Number of transactions selected"
+  },
+  "noTransactionsSelected": "Please select at least one transaction",
+  "@noTransactionsSelected": {
+    "description": "No transactions selected error"
+  },
+  "pleaseSelectAccount": "Please select an account for each transaction",
+  "@pleaseSelectAccount": {
+    "description": "Please select account validation error"
+  },
+  "transactionsSaved": "transactions saved",
+  "@transactionsSaved": {
+    "description": "Transactions saved success message"
+  },
+  "errorSavingTransactions": "Failed to save transactions. Please try again.",
+  "@errorSavingTransactions": {
+    "description": "Error saving transactions"
+  },
+  "saveSelected": "Save Selected",
+  "@saveSelected": {
+    "description": "Save selected transactions button"
+  },
+  "selectAccount": "Select Account",
+  "@selectAccount": {
+    "description": "Select account label"
+  },
+  "budgetCreated": "Budget created! {period} limit of {limit} set for {category}. 💰",
+  "@budgetCreated": {
+    "description": "Budget created success message",
+    "placeholders": {
+      "category": {},
+      "period": {},
+      "limit": {}
+    }
+  },
+  "budgetUpdated": "Budget updated! New limit for {category}: {limit} 📊",
+  "@budgetUpdated": {
+    "description": "Budget updated success message",
+    "placeholders": {
+      "category": {},
+      "limit": {}
+    }
+  },
+  "budgetDeleted": "Budget deleted. {category} budget is no longer tracked. ✅",
+  "@budgetDeleted": {
+    "description": "Budget deleted success message",
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "budgetCreateFailed": "Failed to create budget. Please try again. ❌",
+  "@budgetCreateFailed": {
+    "description": "Budget create failed error message"
+  },
+  "budgetUpdateFailed": "Failed to update budget. Please try again. ❌",
+  "@budgetUpdateFailed": {
+    "description": "Budget update failed error message"
+  },
+  "budgetDeleteFailed": "Failed to delete budget. Please try again. ❌",
+  "@budgetDeleteFailed": {
+    "description": "Budget delete failed error message"
+  },
+  "quickActionAddExpense": "Add Expense",
+  "@quickActionAddExpense": {
+    "description": "Quick action pill button for adding expense"
+  },
+  "quickActionAddIncome": "Add Income",
+  "@quickActionAddIncome": {
+    "description": "Quick action pill button for adding income"
+  },
+  "quickActionAnalyzeInvoice": "Analyze Invoice",
+  "@quickActionAnalyzeInvoice": {
+    "description": "Quick action pill button for analyzing invoice"
+  },
+  "quickActionCreateBudget": "Create Budget",
+  "@quickActionCreateBudget": {
+    "description": "Quick action pill button for creating budget"
+  },
+  "quickActionAddAccount": "Add Account",
+  "@quickActionAddAccount": {
+    "description": "Quick action pill button for adding account"
+  },
+  "quickActionViewTransactions": "View My Transactions",
+  "@quickActionViewTransactions": {
+    "description": "Quick action pill button for viewing transactions"
+  },
+  "planFree": "Free",
+  "@planFree": {
+    "description": "Free plan name"
+  },
+  "planPremium": "Premium",
+  "@planPremium": {
+    "description": "Premium plan name"
+  },
+  "planPremiumPlus": "Premium Plus",
+  "@planPremiumPlus": {
+    "description": "Premium Plus plan name"
+  },
+  "mostPopular": "Most Popular",
+  "@mostPopular": {
+    "description": "Most popular badge"
+  },
+  "perMonth": "/mo",
+  "@perMonth": {
+    "description": "Per month text"
+  },
+  "perYear": "/yr",
+  "@perYear": {
+    "description": "Per year text"
+  },
+  "savePercentage": "Save {percentage}%",
+  "@savePercentage": {
+    "description": "Save percentage text",
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
+  "monthly": "Monthly",
+  "@monthly": {
+    "description": "Monthly subscription"
+  },
+  "featureAILimitPremiumPlus": "250/day",
+  "@featureAILimitPremiumPlus": {
+    "description": "Premium Plus AI limit per day"
+  },
+  "planFreeDescription": "Perfect to get started",
+  "@planFreeDescription": {
+    "description": "Free plan description"
+  },
+  "planPremiumDescription": "For daily use",
+  "@planPremiumDescription": {
+    "description": "Premium plan description"
+  },
+  "planPremiumPlusDescription": "For power users",
+  "@planPremiumPlusDescription": {
+    "description": "Premium Plus plan description"
+  },
+  "choosePlan": "Choose Plan",
+  "@choosePlan": {
+    "description": "Choose plan button"
+  },
+  "currentPlan": "Current Plan",
+  "@currentPlan": {
+    "description": "Current plan badge"
+  },
+  "unlockAllFeatures": "Unlock all features",
+  "@unlockAllFeatures": {
+    "description": "Unlock all features subtitle"
+  },
+  "comparePlans": "Compare Plans",
+  "@comparePlans": {
+    "description": "Compare plans section title"
+  },
+  "featurePrioritySupport": "24/7 Priority Support",
+  "@featurePrioritySupport": {
+    "description": "24/7 priority support feature"
+  },
+  "featureEarlyAccess": "Early Access",
+  "@featureEarlyAccess": {
+    "description": "Early access feature"
+  },
+  "featureAIMessagesPerDay": "{count} queries/month",
+  "@featureAIMessagesPerDay": {
+    "description": "AI queries per month feature",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "featureUnlimitedCards": "Unlimited cards",
+  "@featureUnlimitedCards": {
+    "description": "Unlimited cards feature"
+  },
+  "featureLimitedCards": "Up to {count} cards",
+  "@featureLimitedCards": {
+    "description": "Limited cards feature",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "featureUnlimitedStocks": "Unlimited stock tracking",
+  "@featureUnlimitedStocks": {
+    "description": "Unlimited stocks feature"
+  },
+  "featureLimitedStocks": "Up to {count} stocks",
+  "@featureLimitedStocks": {
+    "description": "Limited stocks feature",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "featureWithAds": "Contains ads",
+  "@featureWithAds": {
+    "description": "With ads feature"
+  },
+  "featureNoAds": "Ad-free experience",
+  "@featureNoAds": {
+    "description": "No ads feature"
+  },
+  "featureBasicSupport": "Basic support",
+  "@featureBasicSupport": {
+    "description": "Basic support feature"
+  },
+  "featurePrioritySupport": "Priority support",
+  "@featurePrioritySupport": {
+    "description": "Priority support feature"
+  },
+  "feature247Support": "24/7 priority support",
+  "@feature247Support": {
+    "description": "24/7 priority support feature"
+  },
+  "featureEarlyAccessDescription": "Early access to new features",
+  "@featureEarlyAccessDescription": {
+    "description": "Early access to new features"
   }
 } 

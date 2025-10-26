@@ -18,6 +18,8 @@ import '../cards/cards_screen.dart';
 import '../cards/widgets/add_card_fab.dart';
 import '../transactions/index.dart';
 import '../transactions/screens/transactions_screen.dart';
+import '../transactions/widgets/quick_add_fab.dart';
+import '../transactions/widgets/quick_add_chat_fab.dart';
 import '../insights/statistics_screen.dart';
 import '../calendar/calendar_screen.dart';
 import '../stocks/screens/stocks_screen.dart';
@@ -30,6 +32,7 @@ import 'widgets/top_gainers_section.dart';
 import 'utils/greeting_utils.dart';
 import '../../core/providers/profile_provider.dart';
 import '../../shared/widgets/reminder_checker.dart';
+import '../../shared/utils/fab_positioning.dart';
 import '../../modules/advertisement/config/advertisement_config.dart' as config;
 import '../../modules/advertisement/services/native_ad_service.dart';
 import '../../core/services/analytics_consent_service.dart';
@@ -238,8 +241,22 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
           MainTabBar(currentIndex: _currentIndex, onTabChanged: _onTabChanged),
-          if (_currentIndex != 2 && _currentIndex != 4 && _currentIndex != 5) const TransactionFab(),
+          
+          // AI Chat FAB - Her zaman görünür (altta, sağda)
+          if (_currentIndex != 2 && _currentIndex != 4 && _currentIndex != 5)
+            QuickAddChatFAB(
+              customRight: FabPositioning.getRightPosition(context),
+              customBottom: FabPositioning.getBottomPosition(context), // En altta
+            ),
+          
+          // Kart FAB - Sadece Kartlar sayfasında
           if (_currentIndex == 2) AddCardFab(currentTabIndex: _currentIndex),
+          
+          // Transaction FAB - Her zaman görünür (AI Chat FAB'ın üstünde)
+          if (_currentIndex != 2 && _currentIndex != 4 && _currentIndex != 5)
+            TransactionFab(
+              customBottom: FabPositioning.getBottomPosition(context) + 60, // AI Chat FAB'ın 60px üstünde
+            ),
         ],
       ),
     );

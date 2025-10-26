@@ -36,7 +36,14 @@ class AnalyticsConsentService {
     final prefs = await SharedPreferences.getInstance();
     final dateString = prefs.getString(_consentDateKey);
     if (dateString != null) {
-      return DateTime.parse(dateString);
+      try {
+        final parsed = DateTime.parse(dateString);
+        // Prevent UTC conversion
+        return DateTime(parsed.year, parsed.month, parsed.day, 
+                       parsed.hour, parsed.minute, parsed.second);
+      } catch (e) {
+        return null;
+      }
     }
     return null;
   }

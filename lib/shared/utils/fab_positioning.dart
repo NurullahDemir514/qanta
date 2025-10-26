@@ -69,29 +69,29 @@ class FabPositioning {
     }
   }
   
-  /// FAB boyutu için responsive değer
+  /// FAB boyutu için responsive değer (50-54px arası)
   static double getFabSize(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     
     if (screenWidth < 375) {
-      return 52.0;
+      return 50.0; // Küçük ekranlar
     } else if (screenWidth < 414) {
-      return 56.0;
+      return 52.0; // Orta ekranlar
     } else {
-      return 60.0;
+      return 54.0; // Büyük ekranlar
     }
   }
   
-  /// Icon boyutu için responsive değer
+  /// Icon boyutu için responsive değer (küçültülmüş)
   static double getIconSize(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     
     if (screenWidth < 375) {
-      return 24.0;
+      return 22.0; // 24'ten 22'ye
     } else if (screenWidth < 414) {
-      return 28.0;
+      return 24.0; // 28'den 24'e
     } else {
-      return 32.0;
+      return 28.0; // 32'den 28'e
     }
   }
   

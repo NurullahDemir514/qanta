@@ -243,10 +243,21 @@ class TransferModel {
       targetCreditCardId: json['target_credit_card_id'],
       targetDebitCardId: json['target_debit_card_id'],
       targetCashAccountId: json['target_cash_account_id'],
-      transactionDate: DateTime.parse(json['transaction_date']),
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      transactionDate: _parseLocalDate(json['transaction_date'] as String),
+      createdAt: _parseLocalDate(json['created_at'] as String),
+      updatedAt: _parseLocalDate(json['updated_at'] as String),
     );
+  }
+  
+  /// Helper to parse date without UTC conversion
+  static DateTime _parseLocalDate(String dateStr) {
+    try {
+      final parsed = DateTime.parse(dateStr);
+      return DateTime(parsed.year, parsed.month, parsed.day, 
+                     parsed.hour, parsed.minute, parsed.second);
+    } catch (e) {
+      return DateTime.now();
+    }
   }
 
   @override

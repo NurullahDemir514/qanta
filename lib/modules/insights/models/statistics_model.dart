@@ -193,9 +193,20 @@ class StatisticsData {
       monthlyTrends: (json['monthlyTrends'] as List<dynamic>?)
           ?.map((item) => MonthlyTrend.fromJson(item))
           .toList() ?? [],
-      startDate: DateTime.parse(json['startDate'] ?? DateTime.now().toIso8601String()),
-      endDate: DateTime.parse(json['endDate'] ?? DateTime.now().toIso8601String()),
+      startDate: _parseLocalDate(json['startDate'] ?? DateTime.now().toIso8601String()),
+      endDate: _parseLocalDate(json['endDate'] ?? DateTime.now().toIso8601String()),
     );
+  }
+  
+  /// Helper to parse date without UTC conversion
+  static DateTime _parseLocalDate(String dateStr) {
+    try {
+      final parsed = DateTime.parse(dateStr);
+      return DateTime(parsed.year, parsed.month, parsed.day, 
+                     parsed.hour, parsed.minute, parsed.second);
+    } catch (e) {
+      return DateTime.now();
+    }
   }
 
   Map<String, dynamic> toJson() {

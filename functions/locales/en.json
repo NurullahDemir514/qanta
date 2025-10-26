@@ -1,0 +1,47 @@
+{
+  "greeting": "Hello {name}! 👋 How can I help you? Would you like to add a transaction?",
+  "howAmI": "This month you earned {income} and spent {expense}. {balance} {status}",
+  "balancePositive": "positive balance 👏",
+  "balanceNegative": "negative balance ⚠️",
+  "askAmount": "How much did you pay for {category}? {emoji}",
+  "askAccount": "Which account did you pay from?",
+  "confirmTransaction": "Got it! {amount} {description} expense will be added to your {account} account. Do you confirm? ✅",
+  "confirmTransactionIncome": "Great! {amount} {description} income will be added to your {account} account. Do you confirm? ✅",
+  "bulkDeleteConfirm": "All {type} from the last {days} days will be deleted. Are you sure? ⚠️",
+  "bulkDeleteToday": "You are about to delete all of today's transactions ({type}). Do you confirm? 🗑️",
+  "transactionTypes": {
+    "expense": "expenses",
+    "income": "income",
+    "all": "transactions (income and expenses)"
+  },
+  "financialSummary": {
+    "title": "USER'S FINANCIAL STATUS:",
+    "thisMonth": "This Month ({month}):",
+    "income": "Income",
+    "expense": "Expense",
+    "net": "Net",
+    "totalBalance": "Total Balance",
+    "accounts": "accounts",
+    "topExpenses": "Top Expenses (Last 30 Days):",
+    "recentTransactions": "Recent Transactions:",
+    "noExpenses": "No expenses yet",
+    "noTransactions": "No transactions yet"
+  },
+  "accountsTitle": "AVAILABLE ACCOUNTS:",
+  "noAccounts": "No accounts added yet",
+  "months": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  }
+}
+

@@ -286,7 +286,7 @@ class _AddCardFabState extends State<AddCardFab>
     // Toplam kart sayısı (debit + credit)
     final totalCards = unifiedProvider.debitCards.length + unifiedProvider.creditCards.length;
     
-    // Premium kontrolü
+    // Premium kontrolü (event handler içinde listen: false kullanmalıyız)
     if (!premiumService.canAddCard(totalCards)) {
       // Premium teklif ekranını göster
       Navigator.push(
@@ -312,7 +312,10 @@ class _AddCardFabState extends State<AddCardFab>
     final bottomPosition = FabPositioning.getBottomPosition(context);
     final fabSize = FabPositioning.getFabSize(context);
     final iconSize = FabPositioning.getIconSize(context);
-    return Positioned(
+    
+    // Consumer ile sarmala - test modu değişince rebuild olsun
+    return Consumer<PremiumService>(
+      builder: (context, premiumService, child) => Positioned(
       right: rightPosition,
       bottom: bottomPosition,
       child: Column(
@@ -349,6 +352,7 @@ class _AddCardFabState extends State<AddCardFab>
           // Main FAB
           _buildMainFab(context, isDark, fabSize, iconSize),
         ],
+      ),
       ),
     );
   }

@@ -1534,7 +1534,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
         break;
     }
     
-    final isInRange = transactionDate.isAfter(startDate.subtract(const Duration(days: 1))) && 
+    // Only include transactions on or after the start date (not before)
+    final isInRange = transactionDate.isAfter(startDate.subtract(const Duration(milliseconds: 1))) && 
                       transactionDate.isBefore(endDate.add(const Duration(days: 1)));
     
     return isInRange;
@@ -3033,10 +3034,11 @@ class UnifiedProviderV2 extends ChangeNotifier {
       final endDate = budget.endDate;
       
       // Get all expense transactions for this category within the budget date range
+      // Only include transactions on or after the start date (not before)
       final matchingTransactions = _transactions.where((transaction) {
         return transaction.type == TransactionType.expense &&
                transaction.categoryId == budget.categoryId &&
-               transaction.transactionDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
+               transaction.transactionDate.isAfter(startDate.subtract(const Duration(milliseconds: 1))) &&
                transaction.transactionDate.isBefore(endDate.add(const Duration(days: 1)));
       }).toList();
       

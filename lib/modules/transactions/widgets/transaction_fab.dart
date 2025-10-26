@@ -11,7 +11,9 @@ import '../screens/transfer_form_screen.dart';
 import '../../stocks/screens/stocks_screen.dart';
 
 class TransactionFab extends StatefulWidget {
-  const TransactionFab({super.key});
+  final double? customBottom;
+  
+  const TransactionFab({super.key, this.customBottom});
 
   @override
   State<TransactionFab> createState() => _TransactionFabState();
@@ -81,7 +83,7 @@ class _TransactionFabState extends State<TransactionFab> {
 
     // Responsive değerler - Navbar'ın hemen üstünde
     final rightPosition = FabPositioning.getRightPosition(context);
-    final bottomPosition = FabPositioning.getBottomPosition(context);
+    final bottomPosition = widget.customBottom ?? FabPositioning.getBottomPosition(context);
     final fabSize = FabPositioning.getFabSize(context);
     final iconSize = FabPositioning.getIconSize(context);
     final speedDialSpacing = FabPositioning.getSpeedDialSpacing(context);

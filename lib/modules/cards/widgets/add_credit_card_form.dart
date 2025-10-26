@@ -354,7 +354,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                             ? (AppLocalizations.of(context)?.currentDebt ?? 'Current Debt')
                             : (AppLocalizations.of(context)?.availableLimit ?? 'Available Limit'),
                           style: GoogleFonts.inter(
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
@@ -397,7 +397,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                                   child: Text(
                                     AppLocalizations.of(context)?.debt ?? 'Debt',
                                     style: GoogleFonts.inter(
-                                      fontSize: 9,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: _isDebtMode
                                           ? Colors.white
@@ -431,7 +431,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                                   child: Text(
                                     AppLocalizations.of(context)?.limit ?? 'Limit',
                                     style: GoogleFonts.inter(
-                                      fontSize: 9,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: !_isDebtMode
                                           ? Colors.white
@@ -481,15 +481,8 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
                     // Son ödeme tarihi preview
                     const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF007AFF).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0xFF007AFF).withValues(alpha: 0.3),
-                        ),
-                      ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(
                         children: [
                           Icon(

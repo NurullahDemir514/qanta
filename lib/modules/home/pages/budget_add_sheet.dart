@@ -24,7 +24,8 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
   String? _selectedCategoryId;
   String? _selectedCategoryName;
   bool _isSaving = false;
-  BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
+  // Sadece aylık bütçe destekleniyor
+  final BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
   bool _isRecurring = false;
   DateTime _selectedStartDate = DateTime.now();
 
@@ -179,14 +180,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
 
   String _getPeriodDisplayName() {
     final l10n = AppLocalizations.of(context)!;
-    switch (_selectedPeriod) {
-      case BudgetPeriod.weekly:
-        return l10n.weekly;
-      case BudgetPeriod.monthly:
-        return l10n.monthly;
-      case BudgetPeriod.yearly:
-        return l10n.yearly;
-    }
+    return l10n.monthly; // Sadece aylık destekleniyor
   }
 
   @override
@@ -418,68 +412,7 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
               ),
             ],
             const SizedBox(height: 20),
-            Text(
-              AppLocalizations.of(context)!.limitDuration,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : const Color(0xFF1C1C1E),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: BudgetPeriod.values.map((period) {
-                final isSelected = _selectedPeriod == period;
-                String periodName;
-                final l10n = AppLocalizations.of(context)!;
-                switch (period) {
-                  case BudgetPeriod.weekly:
-                    periodName = l10n.weekly;
-                    break;
-                  case BudgetPeriod.monthly:
-                    periodName = l10n.monthly;
-                    break;
-                  case BudgetPeriod.yearly:
-                    periodName = l10n.yearly;
-                    break;
-                }
-                
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedPeriod = period),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? (isDark ? const Color(0xFF6D6D70) : const Color(0xFF6D6D70))
-                              : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7)),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected
-                                ? const Color(0xFF6D6D70)
-                                : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
-                          ),
-                        ),
-                        child: Text(
-                          periodName,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: isSelected
-                                ? Colors.white
-                                : (isDark ? Colors.white : Colors.black),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 20),
+            // Period seçimi kaldırıldı - sadece aylık destekleniyor
             Text(
               '${_getPeriodDisplayName()} Limit',
               style: GoogleFonts.inter(
@@ -664,19 +597,8 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
             ),
             // Always show info box with dynamic content
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _isRecurring 
-                    ? const Color(0xFF007AFF).withOpacity(0.1)
-                    : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7)),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: _isRecurring 
-                      ? const Color(0xFF007AFF).withOpacity(0.3)
-                      : (isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA)),
-                ),
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Row(
                 children: [
                   Icon(

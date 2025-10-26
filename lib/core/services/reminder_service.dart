@@ -7,6 +7,17 @@ import '../../shared/models/statement_period.dart';
 
 /// Hatırlatıcı servisi - Ekstre ödeme hatırlatıcıları yönetir
 class ReminderService {
+  /// Helper to parse date without UTC conversion
+  static DateTime _parseLocalDate(String dateStr) {
+    try {
+      final parsed = DateTime.parse(dateStr);
+      return DateTime(parsed.year, parsed.month, parsed.day, 
+                     parsed.hour, parsed.minute, parsed.second);
+    } catch (e) {
+      return DateTime.now();
+    }
+  }
+  
   /// Hatırlatıcı kur
   static Future<bool> setStatementReminder({
     required String cardId,
@@ -178,8 +189,8 @@ class ReminderService {
                 jsonDecode(reminderDataString) as Map<String, dynamic>;
 
             if (!reminderData['isShown']) {
-              final reminderDate = DateTime.parse(reminderData['reminderDate']);
-              final dueDate = DateTime.parse(reminderData['dueDate']);
+              final reminderDate = _parseLocalDate(reminderData['reminderDate']);
+              final dueDate = _parseLocalDate(reminderData['dueDate']);
 
               debugPrint(
                 '🔔 Checking reminder: cardId=${reminderData['cardId']}, type=${reminderData['type']}, reminderDate=$reminderDate, dueDate=$dueDate, now=$now',
@@ -256,7 +267,7 @@ class ReminderService {
         if (reminderDataString != null) {
           final reminderData =
               jsonDecode(reminderDataString) as Map<String, dynamic>;
-          final dueDate = DateTime.parse(reminderData['dueDate']);
+          final dueDate = _parseLocalDate(reminderData['dueDate']);
 
           // 30 gün önceki hatırlatıcıları sil
           if (now.difference(dueDate).inDays > 30) {

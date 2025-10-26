@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,8 +13,10 @@ import 'budget_add_sheet.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/utils/currency_utils.dart';
+import '../../../shared/utils/fab_positioning.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../transactions/screens/expense_form_screen.dart';
+import '../../transactions/widgets/quick_add_chat_fab.dart';
 
 class BudgetManagementPage extends StatefulWidget {
   final VoidCallback? onBudgetSaved;
@@ -31,8 +34,8 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   bool _isSaving = false;
   final PageController _overallPageController = PageController();
   
-  // Filter toggle state
-  String _selectedFilter = 'weekly';
+  // Sadece aylık bütçe destekleniyor - filter gerekmez
+  final String _selectedFilter = 'monthly';
   final List<String> _availableFilters = [];
 
   /// Format date range for budget duration with clear calculation info
@@ -45,15 +48,8 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     // Calculate duration in days
     final durationInDays = endDate.difference(startDate).inDays;
     
-    // Format based on period type
-    switch (period) {
-      case BudgetPeriod.weekly:
-        return '${startFormatter.format(startDate)} - ${endFormatter.format(endDate)} ($durationInDays ${l10n.days})';
-      case BudgetPeriod.monthly:
-        return '${startFormatter.format(startDate)} - ${endFormatter.format(endDate)} ($durationInDays ${l10n.days})';
-      case BudgetPeriod.yearly:
-        return '${startFormatter.format(startDate)} - ${endFormatter.format(endDate)} ($durationInDays ${l10n.days})';
-    }
+    // Sadece aylık format
+    return '${startFormatter.format(startDate)} - ${endFormatter.format(endDate)} ($durationInDays ${l10n.days})';
   }
 
   BudgetCategoryStats _calculateBudgetStats(BudgetModel budget) {
@@ -94,83 +90,19 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
 
   /// Update available filters based on existing budgets
   void _updateAvailableFilters() {
-    final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-    final budgets = provider.budgets;
-    
-    final availablePeriods = <String>[];
-    
-    // Check which periods have budgets
-    if (budgets.any((budget) => budget.period == BudgetPeriod.weekly)) {
-      availablePeriods.add('weekly');
-    }
-    if (budgets.any((budget) => budget.period == BudgetPeriod.monthly)) {
-      availablePeriods.add('monthly');
-    }
-    if (budgets.any((budget) => budget.period == BudgetPeriod.yearly)) {
-      availablePeriods.add('yearly');
-    }
-    
-    // Add future budgets if any exist (only future start dates)
-    final now = DateTime.now();
-    if (budgets.any((budget) => budget.startDate.isAfter(now))) {
-      availablePeriods.add('future');
-    }
-    
-    // Only update if filters have changed
-    if (_availableFilters.length != availablePeriods.length || 
-        !_availableFilters.every((filter) => availablePeriods.contains(filter))) {
-      setState(() {
-        _availableFilters.clear();
-        _availableFilters.addAll(availablePeriods);
-        
-        // Set default selection to first available filter if current filter is not available
-        if (_availableFilters.isNotEmpty && !_availableFilters.contains(_selectedFilter)) {
-          _selectedFilter = _availableFilters.first;
-        }
-      });
-    }
+    // Artık filter gerekmez - sadece aylık bütçeler gösteriliyor
+    // Bu metod geriye dönük uyumluluk için boş bırakıldı
   }
 
   /// Filter budgets based on selected filter
   List<BudgetModel> _getFilteredBudgets(List<BudgetModel> allBudgets) {
-    final now = DateTime.now();
-    
-    switch (_selectedFilter) {
-      case 'weekly':
-        return allBudgets.where((budget) => budget.period == BudgetPeriod.weekly).toList();
-      case 'monthly':
-        return allBudgets.where((budget) => budget.period == BudgetPeriod.monthly).toList();
-      case 'yearly':
-        return allBudgets.where((budget) => budget.period == BudgetPeriod.yearly).toList();
-      case 'future':
-        return allBudgets.where((budget) => budget.startDate.isAfter(now)).toList();
-      default:
-        return allBudgets;
-    }
+    // Sadece aylık bütçeler göster
+    return allBudgets.where((budget) => budget.period == BudgetPeriod.monthly).toList();
   }
 
   /// Check if current filter has any budgets and switch to available filter if needed
   void _checkAndSwitchFilterIfNeeded() {
-    final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-    final allBudgets = provider.budgets;
-    final currentFilteredBudgets = _getFilteredBudgets(allBudgets);
-    
-    // If current filter has no budgets, switch to first available filter
-    if (currentFilteredBudgets.isEmpty && _availableFilters.isNotEmpty) {
-      // Find first available filter that has budgets
-      for (final filter in _availableFilters) {
-        final tempFilter = _selectedFilter;
-        _selectedFilter = filter;
-        final testBudgets = _getFilteredBudgets(allBudgets);
-        if (testBudgets.isNotEmpty) {
-          setState(() {
-            _selectedFilter = filter;
-          });
-          return;
-        }
-        _selectedFilter = tempFilter;
-      }
-    }
+    // Artık filter switching gerekmez - sadece aylık bütçe var
   }
 
   bool _canSave() {
@@ -236,14 +168,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
 
   String _getPeriodDisplayName(BudgetPeriod period) {
     final l10n = AppLocalizations.of(context)!;
-    switch (period) {
-      case BudgetPeriod.weekly:
-        return l10n.weekly;
-      case BudgetPeriod.monthly:
-        return l10n.monthly;
-      case BudgetPeriod.yearly:
-        return l10n.yearly;
-    }
+    return l10n.monthly; // Sadece aylık destekleniyor
   }
 
   @override
@@ -276,62 +201,121 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
             ),
             centerTitle: true,
           ),
-          body: isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF007AFF)),
-                )
-              : (currentBudgets.isEmpty && _availableFilters.isEmpty)
-              ? _buildEmptyState(isDark)
-              : Column(
-                  children: [
-                    // Genel bütçe kartı
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: _buildOverallBudgetCard(
-                        currentBudgets.map((budget) => _calculateBudgetStats(budget)).toList(),
-                        isDark,
-                      ),
-                    ),
-                    // Page indicator
-                    _buildPageIndicator(currentBudgets.map((budget) => _calculateBudgetStats(budget)).toList(), isDark),
-                    // Spacing after indicator
-                    SizedBox(height: 8),
-                    // Filter toggle (only show if more than 1 filter)
-                    if (_availableFilters.length > 1) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: _buildFilterToggle(isDark),
-                      ),
-                    ],
-                    // Bireysel bütçe kartları
-                    SizedBox(height: 8),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: currentBudgets.length,
-                        itemBuilder: (context, index) {
-                          final budget = currentBudgets[index];
-                          final stat = _calculateBudgetStats(budget);
-                          return _buildBudgetCard(
-                            stat,
+          body: Stack(
+            children: [
+              // Main content
+              isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: Color(0xFF007AFF)),
+                    )
+                  : (currentBudgets.isEmpty && _availableFilters.isEmpty)
+                  ? _buildEmptyState(isDark)
+                  : Column(
+                      children: [
+                        // Genel bütçe kartı
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _buildOverallBudgetCard(
+                            currentBudgets.map((budget) => _calculateBudgetStats(budget)).toList(),
                             isDark,
-                            index,
-                            currentBudgets.length,
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+                        // Page indicator
+                        _buildPageIndicator(currentBudgets.map((budget) => _calculateBudgetStats(budget)).toList(), isDark),
+                        // Spacing after indicator
+                        const SizedBox(height: 8),
+                        // Filter toggle kaldırıldı - sadece aylık bütçe destekleniyor
+                        // Bireysel bütçe kartları
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: currentBudgets.length,
+                            itemBuilder: (context, index) {
+                              final budget = currentBudgets[index];
+                              final stat = _calculateBudgetStats(budget);
+                              return _buildBudgetCard(
+                                stat,
+                                isDark,
+                                index,
+                                currentBudgets.length,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddBudgetBottomSheet(context),
-            backgroundColor: const Color(0xFFFF453A), // Red
-            foregroundColor: Colors.white,
-            elevation: 12,
-            child: const Icon(Icons.add, size: 28),
+              // FABs (AI + Add Budget)
+              _buildAIFABStack(currentBudgets, isDark),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildAIFABStack(List<BudgetModel> currentBudgets, bool isDark) {
+    final fabSize = FabPositioning.getFabSize(context);
+    final iconSize = FabPositioning.getIconSize(context);
+    final rightPosition = FabPositioning.getRightPosition(context);
+    
+    // Budget sayfasında navbar yok, FAB'lar ekranın dibine yakın olmalı
+    // Safe area (home indicator) üstüne konumlandır
+    final safeAreaBottom = MediaQuery.of(context).padding.bottom;
+    final bottomPosition = safeAreaBottom + 16.0; // Safe area + 16px padding
+    
+    return Stack(
+      children: [
+        // Budget FAB (altta, sağda) - Glassmorphism tasarımı
+        Positioned(
+          right: rightPosition,
+          bottom: bottomPosition,
+          child: GestureDetector(
+            onTap: () => _showAddBudgetBottomSheet(context),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  width: fabSize,
+                  height: fabSize,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF232326).withOpacity(0.85)
+                        : Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark
+                            ? Colors.black.withOpacity(0.18)
+                            : Colors.black.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF38383A)
+                          : const Color(0xFFE5E5EA),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    color: isDark ? Colors.white : Colors.black,
+                    size: iconSize,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        // AI Chat FAB (üstte, sağda - Budget FAB'ın üzerinde)
+        QuickAddChatFAB(
+          customRight: rightPosition,
+          customBottom: bottomPosition + 60, // Budget FAB'ın 60px üstünde
+        ),
+      ],
     );
   }
 
@@ -1950,14 +1934,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   }
 
   int _getPeriodDays(BudgetPeriod period) {
-    switch (period) {
-      case BudgetPeriod.weekly:
-        return 7;
-      case BudgetPeriod.monthly:
-        return 30;
-      case BudgetPeriod.yearly:
-        return 365;
-    }
+    return 30; // Sadece aylık destekleniyor
   }
 
   Map<String, dynamic> _calculateSpendingSpeed(List<BudgetCategoryStats> stats) {
@@ -2003,130 +1980,11 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   }
 
   /// Build filter toggle widget
-  Widget _buildFilterToggle(bool isDark) {
-    final l10n = AppLocalizations.of(context)!;
-    
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        gradient: isDark 
-            ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF2A2A2E),
-                  Color(0xFF1A1A1C),
-                ],
-              )
-            : const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFFFFFFF),
-                  Color(0xFFF8F8F8),
-                ],
-              ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: _availableFilters.asMap().entries.map((entry) {
-          final index = entry.key;
-          final filter = entry.value;
-          final isSelected = _selectedFilter == filter;
-          final isFirst = index == 0;
-          final isLast = index == _availableFilters.length - 1;
-          
-          return Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedFilter = filter;
-                });
-                // Update filters when selection changes
-                _updateAvailableFilters();
-                // Check if we need to switch filter after selection
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _checkAndSwitchFilterIfNeeded();
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                margin: EdgeInsets.only(
-                  left: isFirst ? 2 : 1,
-                  right: isLast ? 2 : 1,
-                  top: 2,
-                  bottom: 2,
-                ),
-                decoration: BoxDecoration(
-                  gradient: isSelected
-                      ? (isDark 
-                          ? const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF6D6D70),
-                                Color(0xFF5A5A5E),
-                              ],
-                            )
-                          : const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF6D6D70),
-                                Color(0xFF5A5A5E),
-                              ],
-                            ))
-                      : null,
-                  color: isSelected ? null : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Center(
-                  child: Text(
-                    _getFilterLabel(filter, l10n),
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected
-                          ? Colors.white
-                          : (isDark ? Colors.white70 : Colors.black54),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
+  // _buildFilterToggle kaldırıldı - artık filter toggle UI'ı yok (sadece aylık bütçe)
 
   /// Get filter label based on filter type
   String _getFilterLabel(String filter, AppLocalizations l10n) {
-    switch (filter) {
-      case 'weekly':
-        return l10n.weekly;
-      case 'monthly':
-        return l10n.monthly;
-      case 'yearly':
-        return l10n.yearly;
-      case 'future':
-        return l10n.future;
-      default:
-        return filter;
-    }
+    // Sadece aylık destekleniyor
+    return l10n.monthly;
   }
 }

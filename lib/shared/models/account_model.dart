@@ -122,7 +122,10 @@ class AccountModel {
     
     if (value is String) {
       try {
-        return DateTime.parse(value);
+        final parsed = DateTime.parse(value);
+        // Prevent UTC conversion
+        return DateTime(parsed.year, parsed.month, parsed.day, 
+                       parsed.hour, parsed.minute, parsed.second);
       } catch (e) {
         return DateTime.now();
       }

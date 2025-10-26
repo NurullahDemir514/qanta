@@ -25,6 +25,7 @@ import 'core/firebase_client.dart';
 import 'core/services/network_service.dart';
 import 'core/services/app_lifecycle_manager.dart';
 import 'core/services/premium_service.dart';
+import 'core/services/rewarded_ad_service.dart';
 import 'shared/widgets/no_internet_screen.dart';
 
 void main() async {
@@ -94,6 +95,13 @@ void main() async {
     debugPrint('Premium service initialization failed: $e');
   }
 
+  // Initialize Rewarded Ad Service
+  try {
+    await RewardedAdService().initialize();
+  } catch (e) {
+    debugPrint('Rewarded Ad service initialization failed: $e');
+  }
+
   runApp(
     MultiProvider(
       providers: [
@@ -102,6 +110,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => ProfileProvider()),
         ChangeNotifierProvider.value(value: PremiumService()),
+        ChangeNotifierProvider.value(value: RewardedAdService()),
 
         // QANTA v2 provider (main provider)
         ChangeNotifierProvider(

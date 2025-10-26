@@ -673,7 +673,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get close => 'Kapat';
 
   @override
-  String get selectTransactionType => 'Yapmak istediğiniz işlem türünü seçin';
+  String get selectTransactionType => 'İşlem Türü Seçin';
 
   @override
   String get selectTransactionTypeDesc =>
@@ -1470,7 +1470,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get availableCredit => 'Kullanılabilir Limit';
 
   @override
-  String get netAmount => 'Net';
+  String get netAmount => 'Net Tutar';
 
   @override
   String get transactionCount => 'İşlem';
@@ -1728,7 +1728,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get twoDaysAgo => '2 gün önce';
 
   @override
-  String get perMonth => '/ ay';
+  String get perMonth => '/ay';
 
   @override
   String get net => 'Net';
@@ -2345,7 +2345,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String stockPurchaseInsufficientBalance(String balance) {
-    return 'Hisse alımı için yetersiz bakiye. Mevcut: $balance';
+    return 'Hisse alışı için yetersiz bakiye. Mevcut: $balance';
   }
 
   @override
@@ -2488,6 +2488,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get stockDetails => 'Hisse Detayları';
 
   @override
+  String get positionSummary => 'Pozisyon Özeti';
+
+  @override
+  String get averagePrice => 'Ort. Fiyat';
+
+  @override
   String get stockInfo => 'Hisse Bilgileri';
 
   @override
@@ -2524,8 +2530,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get stockRemoved => 'Hisse takip listesinden kaldırıldı';
 
   @override
-  String get confirmRemoveStock =>
-      'Bu hisseyi portföyden kaldırmak istediğinizden emin misiniz?';
+  String confirmRemoveStock(String stockName) {
+    return '$stockName hissesini takipten çıkarmak istediğinizden emin misiniz?';
+  }
 
   @override
   String get chartComingSoon => 'Grafik Yakında';
@@ -2911,11 +2918,22 @@ class AppLocalizationsTr extends AppLocalizations {
   String get remove => 'Kaldır';
 
   @override
+  String get removeFromWatchlist => 'Takipten Çıkar';
+
+  @override
   String get errorRemovingStock => 'Hisse kaldırılırken hata oluştu';
 
   @override
   String stockRemovedFromPortfolio(String stockName) {
     return '$stockName portföyden kaldırıldı';
+  }
+
+  @override
+  String get cannotRemoveStock => 'Kaldırılamaz';
+
+  @override
+  String cannotRemoveStockWithPosition(String stockName) {
+    return '$stockName hissesinde pozisyonunuz bulunmaktadır. Takipten çıkarmak için önce tüm hisselerinizi satmalısınız.';
   }
 
   @override
@@ -2951,7 +2969,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pleaseSelectStock => 'Lütfen bir hisse seçin';
 
   @override
-  String get pleaseSelectAccount => 'Lütfen bir hesap seçin';
+  String get pleaseSelectAccount => 'Lütfen her işlem için hesap seçin';
 
   @override
   String get noStockSelected => 'Hisse seçilmedi';
@@ -3758,6 +3776,15 @@ class AppLocalizationsTr extends AppLocalizations {
       'Ücretsiz sürümde en fazla 3 hisse ekleyebilirsiniz';
 
   @override
+  String get featureAILimit => 'AI Kullanım Limiti';
+
+  @override
+  String get featureAILimitFree => '10/gün';
+
+  @override
+  String get featureAILimitPremium => '75/gün';
+
+  @override
   String get featureAds => 'Reklamlar';
 
   @override
@@ -3840,4 +3867,284 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get upgradeNow => 'Yükselt';
+
+  @override
+  String get quickAddHint => 'Örn: 50₺ kahve | 15 aselsan 205₺den sattım';
+
+  @override
+  String get quickAddTransaction => 'Hızlı İşlem Ekle';
+
+  @override
+  String get confirmAndSave => 'Onayla ve Kaydet';
+
+  @override
+  String stockSymbolQuantity(String symbol, int quantity) {
+    return '$symbol için $quantity adet';
+  }
+
+  @override
+  String get buyOrSell => 'Alış mı Satış mı?';
+
+  @override
+  String get priceNotSpecified => 'Fiyat Belirtilmedi';
+
+  @override
+  String get pleaseEnterPrice =>
+      'Lütfen fiyat bilgisi girin.\nÖrnek: \"15 aselsan 205₺den sattım\"';
+
+  @override
+  String get goBack => 'Geri Dön';
+
+  @override
+  String get summaryHint => 'Özeti onaylayın veya iptal edin';
+
+  @override
+  String aiChatWelcome(String name) {
+    return 'Merhaba $name!\nNasıl yardımcı olabilirim? Harcama veya gelir eklemek ister misin?';
+  }
+
+  @override
+  String get aiChatError => 'Üzgünüm, bir hata oluştu. Tekrar dener misiniz?';
+
+  @override
+  String get aiChatTransactionSuccess => 'İşlem başarıyla kaydedildi.';
+
+  @override
+  String get aiChatTransactionFailed =>
+      'İşlem eklenirken bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get aiChatThemeFailed =>
+      'Tema değiştirilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get aiChatDeleteConfirmTitle => 'Toplu Silme Onayı';
+
+  @override
+  String get aiChatDeleteButton => 'Sil';
+
+  @override
+  String get aiChatDeleteProcessing => 'İşlemler siliniyor, lütfen bekleyin...';
+
+  @override
+  String aiChatDeleteSuccess(String message, int count, int duration) {
+    return '✅ Silme işlemi tamamlandı! $count adet işlem başarıyla silindi.';
+  }
+
+  @override
+  String get aiChatDeleteFailed =>
+      '❌ Silme işlemi başarısız oldu.\n\nLütfen tekrar deneyin veya internet bağlantınızı kontrol edin.';
+
+  @override
+  String get aiChatConfirmButton => 'Onayla';
+
+  @override
+  String get aiChatCancelButton => 'İptal';
+
+  @override
+  String get aiChatPendingApproval => 'Lütfen yukarıdaki işlemi onaylayın...';
+
+  @override
+  String get aiChatSendPlaceholder => 'Mesaj yazın... (Örn: 50 TL kahve)';
+
+  @override
+  String get aiChatToday => 'Bugünkü';
+
+  @override
+  String get aiChatYesterday => 'Dünkü';
+
+  @override
+  String aiChatLastNDays(int days) {
+    return 'Son $days gündeki';
+  }
+
+  @override
+  String get aiChatAllTransactions => 'tüm işlemlerinizi';
+
+  @override
+  String get aiChatExpenses => 'harcamalarınızı';
+
+  @override
+  String get aiChatIncome => 'gelirlerinizi';
+
+  @override
+  String aiChatDeleteWarning(String timeText, String typeText) {
+    return '$timeText $typeText silmek üzeresiniz. Bu işlem geri alınamaz. Emin misiniz?';
+  }
+
+  @override
+  String get aiChatDailyUsage => 'Günlük kullanım';
+
+  @override
+  String get aiChatAssistant => 'Finansal asistanınız';
+
+  @override
+  String get clearChatHistory => 'Geçmişi Temizle';
+
+  @override
+  String get clearChatHistoryConfirmation =>
+      'Tüm konuşma geçmişi silinecek. Emin misiniz?';
+
+  @override
+  String get chatHistoryCleared => 'Konuşma geçmişi temizlendi';
+
+  @override
+  String get clear => 'Temizle';
+
+  @override
+  String aiChatDailyLimitReached(int limit) {
+    return 'Günlük AI limitinize ulaştınız ($limit mesaj/gün). Yarın tekrar deneyin.';
+  }
+
+  @override
+  String get aiChatTransactionCancelled => 'Tamam, iptal edildi 👍';
+
+  @override
+  String get confirmTransactions => 'İşlemleri Onayla';
+
+  @override
+  String get transactionsSelected => 'işlem seçili';
+
+  @override
+  String get noTransactionsSelected => 'Lütfen en az bir işlem seçin';
+
+  @override
+  String get transactionsSaved => 'işlem kaydedildi';
+
+  @override
+  String get errorSavingTransactions =>
+      'İşlemler kaydedilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get saveSelected => 'Seçilenleri Kaydet';
+
+  @override
+  String budgetCreated(Object category, Object period, Object limit) {
+    return 'Bütçe oluşturuldu! $category için $period $limit limiti belirlendi. 💰';
+  }
+
+  @override
+  String budgetUpdated(Object category, Object limit) {
+    return 'Bütçe güncellendi! $category için yeni limit: $limit 📊';
+  }
+
+  @override
+  String budgetDeleted(Object category) {
+    return 'Bütçe silindi. $category bütçesi artık takip edilmiyor. ✅';
+  }
+
+  @override
+  String get budgetCreateFailed =>
+      'Bütçe oluşturulamadı. Lütfen tekrar deneyin. ❌';
+
+  @override
+  String get budgetUpdateFailed =>
+      'Bütçe güncellenemedi. Lütfen tekrar deneyin. ❌';
+
+  @override
+  String get budgetDeleteFailed => 'Bütçe silinemedi. Lütfen tekrar deneyin. ❌';
+
+  @override
+  String get quickActionAddExpense => 'Harcama Ekle';
+
+  @override
+  String get quickActionAddIncome => 'Gelir Ekle';
+
+  @override
+  String get quickActionAnalyzeInvoice => 'Fatura Analizi';
+
+  @override
+  String get quickActionCreateBudget => 'Bütçe Oluştur';
+
+  @override
+  String get quickActionAddAccount => 'Hesap Ekle';
+
+  @override
+  String get quickActionViewTransactions => 'İşlemlerimi Göster';
+
+  @override
+  String get planFree => 'Ücretsiz';
+
+  @override
+  String get planPremium => 'Premium';
+
+  @override
+  String get planPremiumPlus => 'Premium Plus';
+
+  @override
+  String get mostPopular => 'En Popüler';
+
+  @override
+  String get perYear => '/yıl';
+
+  @override
+  String savePercentage(int percentage) {
+    return '%$percentage Tasarruf';
+  }
+
+  @override
+  String get featureAILimitPremiumPlus => '250/gün';
+
+  @override
+  String get planFreeDescription => 'Başlamak için ideal';
+
+  @override
+  String get planPremiumDescription => 'Günlük kullanım için';
+
+  @override
+  String get planPremiumPlusDescription => 'Güç kullanıcıları için';
+
+  @override
+  String get choosePlan => 'Plan Seç';
+
+  @override
+  String get currentPlan => 'Mevcut Plan';
+
+  @override
+  String get unlockAllFeatures => 'Tüm özelliklerin kilidini aç';
+
+  @override
+  String get comparePlans => 'Planları Karşılaştır';
+
+  @override
+  String get featurePrioritySupport => 'Öncelikli destek';
+
+  @override
+  String get featureEarlyAccess => 'Erken Erişim';
+
+  @override
+  String featureAIMessagesPerDay(String count) {
+    return '$count sorgu/ay';
+  }
+
+  @override
+  String get featureUnlimitedCards => 'Sınırsız kart ekleyebilirsiniz';
+
+  @override
+  String featureLimitedCards(String count) {
+    return '$count karta kadar';
+  }
+
+  @override
+  String get featureUnlimitedStocks => 'Sınırsız hisse takibi';
+
+  @override
+  String featureLimitedStocks(String count) {
+    return '$count hisseye kadar';
+  }
+
+  @override
+  String get featureWithAds => 'Reklam içerir';
+
+  @override
+  String get featureNoAds => 'Reklamsız deneyim';
+
+  @override
+  String get featureBasicSupport => 'Temel destek';
+
+  @override
+  String get feature247Support => '7/24 öncelikli destek';
+
+  @override
+  String get featureEarlyAccessDescription => 'Yeni özelliklere erken erişim';
 }

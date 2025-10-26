@@ -66,27 +66,51 @@ class StockTransactionService implements IStockTransactionService {
         );
       }
 
-      // 2. İşlemi kaydet
+      // 2. FIFO mantığıyla gerçekleşmiş kar/zarar hesapla
+      final realizedProfitLoss = (transaction.price - currentPosition.averagePrice) * transaction.quantity;
+      final realizedProfitLossPercent = currentPosition.averagePrice > 0
+          ? (realizedProfitLoss / (currentPosition.averagePrice * transaction.quantity)) * 100
+          : 0.0;
+
+      // Transaction'ı güncel kar/zarar ile oluştur
+      final updatedTransaction = StockTransaction(
+        id: transaction.id,
+        userId: transaction.userId,
+        stockSymbol: transaction.stockSymbol,
+        stockName: transaction.stockName,
+        type: transaction.type,
+        quantity: transaction.quantity,
+        price: transaction.price,
+        totalAmount: transaction.totalAmount,
+        commission: transaction.commission,
+        transactionDate: transaction.transactionDate,
+        accountId: transaction.accountId,
+        notes: transaction.notes,
+        profitLoss: realizedProfitLoss,
+        profitLossPercent: realizedProfitLossPercent,
+      );
+
+      // 3. İşlemi kaydet (güncellenmiş kar/zarar ile)
       await _firestore
           .collection('users')
           .doc(transaction.userId)
           .collection('stock_transactions')
-          .doc(transaction.id)
-          .set(transaction.toFirestore());
+          .doc(updatedTransaction.id)
+          .set(updatedTransaction.toFirestore());
 
-      // 3. Hisse pozisyonunu güncelle
-      await _updateStockPositionAfterSell(transaction);
+      // 4. Hisse pozisyonunu güncelle
+      await _updateStockPositionAfterSell(updatedTransaction);
 
-      // 4. Kullanıcı bakiyesini güncelle
-      if (transaction.accountId != null) {
+      // 5. Kullanıcı bakiyesini güncelle
+      if (updatedTransaction.accountId != null) {
         await _updateUserBalance(
-          transaction.accountId!,
-          transaction.totalAmount,
+          updatedTransaction.accountId!,
+          updatedTransaction.totalAmount,
         );
       }
 
-      // 5. Recent transactions'a ekle
-      await _addToRecentTransactions(transaction);
+      // 6. Recent transactions'a ekle
+      await _addToRecentTransactions(updatedTransaction);
     } catch (e) {
       if (e is StockTransactionException) rethrow;
       throw StockTransactionException(

@@ -671,8 +671,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
-  String get selectTransactionType =>
-      'Select the type of transaction you want to make';
+  String get selectTransactionType => 'Select Transaction Type';
 
   @override
   String get selectTransactionTypeDesc =>
@@ -1467,7 +1466,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get availableCredit => 'Available Credit';
 
   @override
-  String get netAmount => 'Net';
+  String get netAmount => 'Net Amount';
 
   @override
   String get transactionCount => 'Transactions';
@@ -1726,7 +1725,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get twoDaysAgo => '2 days ago';
 
   @override
-  String get perMonth => '/ month';
+  String get perMonth => '/mo';
 
   @override
   String get net => 'Net';
@@ -2490,6 +2489,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stockDetails => 'Stock Details';
 
   @override
+  String get positionSummary => 'Position Summary';
+
+  @override
+  String get averagePrice => 'Avg. Price';
+
+  @override
   String get stockInfo => 'Stock Information';
 
   @override
@@ -2526,8 +2531,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stockRemoved => 'Stock removed from watchlist';
 
   @override
-  String get confirmRemoveStock =>
-      'Are you sure you want to remove this stock from your portfolio?';
+  String confirmRemoveStock(String stockName) {
+    return 'Are you sure you want to remove $stockName from watchlist?';
+  }
 
   @override
   String get chartComingSoon => 'Chart Coming Soon';
@@ -2915,11 +2921,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remove => 'Remove';
 
   @override
+  String get removeFromWatchlist => 'Remove from Watchlist';
+
+  @override
   String get errorRemovingStock => 'Error removing stock';
 
   @override
   String stockRemovedFromPortfolio(String stockName) {
     return '$stockName removed from portfolio';
+  }
+
+  @override
+  String get cannotRemoveStock => 'Cannot Remove';
+
+  @override
+  String cannotRemoveStockWithPosition(String stockName) {
+    return 'You have an active position in $stockName. Please sell all shares before removing from watchlist.';
   }
 
   @override
@@ -2955,7 +2972,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseSelectStock => 'Please select a stock';
 
   @override
-  String get pleaseSelectAccount => 'Please select an account';
+  String get pleaseSelectAccount =>
+      'Please select an account for each transaction';
 
   @override
   String get noStockSelected => 'No stock selected';
@@ -3766,6 +3784,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can add up to 3 stocks in the free version';
 
   @override
+  String get featureAILimit => 'AI Usage Limit';
+
+  @override
+  String get featureAILimitFree => '10/day';
+
+  @override
+  String get featureAILimitPremium => '75/day';
+
+  @override
   String get featureAds => 'Advertisements';
 
   @override
@@ -3848,4 +3875,285 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get upgradeNow => 'Upgrade';
+
+  @override
+  String get quickAddHint => 'e.g: \$50 coffee | sold 15 apple at \$180';
+
+  @override
+  String get quickAddTransaction => 'Quick Add Transaction';
+
+  @override
+  String get confirmAndSave => 'Confirm and Save';
+
+  @override
+  String stockSymbolQuantity(String symbol, int quantity) {
+    return '$quantity shares of $symbol';
+  }
+
+  @override
+  String get buyOrSell => 'Buy or Sell?';
+
+  @override
+  String get priceNotSpecified => 'Price Not Specified';
+
+  @override
+  String get pleaseEnterPrice =>
+      'Please enter the price.\nExample: \"sold 15 apple at \$180\"';
+
+  @override
+  String get goBack => 'Go Back';
+
+  @override
+  String get summaryHint => 'Confirm or cancel the summary';
+
+  @override
+  String aiChatWelcome(String name) {
+    return 'Hello $name!\nHow can I help you? Would you like to add an expense or income?';
+  }
+
+  @override
+  String get aiChatError =>
+      'Sorry, an error occurred. Would you like to try again?';
+
+  @override
+  String get aiChatTransactionSuccess => 'Transaction successfully recorded.';
+
+  @override
+  String get aiChatTransactionFailed =>
+      'An error occurred while adding the transaction. Please try again.';
+
+  @override
+  String get aiChatThemeFailed => 'Could not change theme. Please try again.';
+
+  @override
+  String get aiChatDeleteConfirmTitle => 'Bulk Delete Confirmation';
+
+  @override
+  String get aiChatDeleteButton => 'Delete';
+
+  @override
+  String get aiChatDeleteProcessing => 'Deleting transactions, please wait...';
+
+  @override
+  String aiChatDeleteSuccess(String message, int count, int duration) {
+    return 'Deletion completed! $count transactions successfully deleted.';
+  }
+
+  @override
+  String get aiChatDeleteFailed =>
+      '❌ Deletion failed.\n\nPlease try again or check your internet connection.';
+
+  @override
+  String get aiChatConfirmButton => 'Confirm';
+
+  @override
+  String get aiChatCancelButton => 'Cancel';
+
+  @override
+  String get aiChatPendingApproval => 'Please approve the transaction above...';
+
+  @override
+  String get aiChatSendPlaceholder => 'Type a message... (e.g. \$50 coffee)';
+
+  @override
+  String get aiChatToday => 'Today\'s';
+
+  @override
+  String get aiChatYesterday => 'Yesterday\'s';
+
+  @override
+  String aiChatLastNDays(int days) {
+    return 'Last $days days\'';
+  }
+
+  @override
+  String get aiChatAllTransactions => 'all transactions';
+
+  @override
+  String get aiChatExpenses => 'expenses';
+
+  @override
+  String get aiChatIncome => 'income';
+
+  @override
+  String aiChatDeleteWarning(String timeText, String typeText) {
+    return 'You are about to delete $timeText $typeText. This action cannot be undone. Are you sure?';
+  }
+
+  @override
+  String get aiChatDailyUsage => 'Daily usage';
+
+  @override
+  String get aiChatAssistant => 'Your financial assistant';
+
+  @override
+  String get clearChatHistory => 'Clear History';
+
+  @override
+  String get clearChatHistoryConfirmation =>
+      'All chat history will be deleted. Are you sure?';
+
+  @override
+  String get chatHistoryCleared => 'Chat history cleared';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String aiChatDailyLimitReached(int limit) {
+    return 'You\'ve reached your daily AI limit ($limit messages/day). Try again tomorrow.';
+  }
+
+  @override
+  String get aiChatTransactionCancelled => 'Alright, cancelled 👍';
+
+  @override
+  String get confirmTransactions => 'Confirm Transactions';
+
+  @override
+  String get transactionsSelected => 'transactions selected';
+
+  @override
+  String get noTransactionsSelected => 'Please select at least one transaction';
+
+  @override
+  String get transactionsSaved => 'transactions saved';
+
+  @override
+  String get errorSavingTransactions =>
+      'Failed to save transactions. Please try again.';
+
+  @override
+  String get saveSelected => 'Save Selected';
+
+  @override
+  String budgetCreated(Object category, Object period, Object limit) {
+    return 'Budget created! $period limit of $limit set for $category. 💰';
+  }
+
+  @override
+  String budgetUpdated(Object category, Object limit) {
+    return 'Budget updated! New limit for $category: $limit 📊';
+  }
+
+  @override
+  String budgetDeleted(Object category) {
+    return 'Budget deleted. $category budget is no longer tracked. ✅';
+  }
+
+  @override
+  String get budgetCreateFailed =>
+      'Failed to create budget. Please try again. ❌';
+
+  @override
+  String get budgetUpdateFailed =>
+      'Failed to update budget. Please try again. ❌';
+
+  @override
+  String get budgetDeleteFailed =>
+      'Failed to delete budget. Please try again. ❌';
+
+  @override
+  String get quickActionAddExpense => 'Add Expense';
+
+  @override
+  String get quickActionAddIncome => 'Add Income';
+
+  @override
+  String get quickActionAnalyzeInvoice => 'Analyze Invoice';
+
+  @override
+  String get quickActionCreateBudget => 'Create Budget';
+
+  @override
+  String get quickActionAddAccount => 'Add Account';
+
+  @override
+  String get quickActionViewTransactions => 'View My Transactions';
+
+  @override
+  String get planFree => 'Free';
+
+  @override
+  String get planPremium => 'Premium';
+
+  @override
+  String get planPremiumPlus => 'Premium Plus';
+
+  @override
+  String get mostPopular => 'Most Popular';
+
+  @override
+  String get perYear => '/yr';
+
+  @override
+  String savePercentage(int percentage) {
+    return 'Save $percentage%';
+  }
+
+  @override
+  String get featureAILimitPremiumPlus => '250/day';
+
+  @override
+  String get planFreeDescription => 'Perfect to get started';
+
+  @override
+  String get planPremiumDescription => 'For daily use';
+
+  @override
+  String get planPremiumPlusDescription => 'For power users';
+
+  @override
+  String get choosePlan => 'Choose Plan';
+
+  @override
+  String get currentPlan => 'Current Plan';
+
+  @override
+  String get unlockAllFeatures => 'Unlock all features';
+
+  @override
+  String get comparePlans => 'Compare Plans';
+
+  @override
+  String get featurePrioritySupport => 'Priority support';
+
+  @override
+  String get featureEarlyAccess => 'Early Access';
+
+  @override
+  String featureAIMessagesPerDay(String count) {
+    return '$count queries/month';
+  }
+
+  @override
+  String get featureUnlimitedCards => 'Unlimited cards';
+
+  @override
+  String featureLimitedCards(String count) {
+    return 'Up to $count cards';
+  }
+
+  @override
+  String get featureUnlimitedStocks => 'Unlimited stock tracking';
+
+  @override
+  String featureLimitedStocks(String count) {
+    return 'Up to $count stocks';
+  }
+
+  @override
+  String get featureWithAds => 'Contains ads';
+
+  @override
+  String get featureNoAds => 'Ad-free experience';
+
+  @override
+  String get featureBasicSupport => 'Basic support';
+
+  @override
+  String get feature247Support => '24/7 priority support';
+
+  @override
+  String get featureEarlyAccessDescription => 'Early access to new features';
 }

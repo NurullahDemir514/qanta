@@ -1,0 +1,47 @@
+{
+  "greeting": "Merhaba {name}! 👋 Size nasıl yardımcı olabilirim? İşlem eklemek ister misiniz?",
+  "howAmI": "Bu ay toplam {income} gelir elde ettiniz ve {expense} harcadınız. {balance} {status}",
+  "balancePositive": "artı bakiye 👏",
+  "balanceNegative": "eksi bakiye ⚠️",
+  "askAmount": "{category} için ne kadar ödediniz? {emoji}",
+  "askAccount": "Hangi hesabınızdan ödeme yaptınız?",
+  "confirmTransaction": "Tamam! {amount} {description} harcaması {account} hesabınıza eklenecek. Onaylıyor musunuz? ✅",
+  "confirmTransactionIncome": "Harika! {amount} {description} geliri {account} hesabınıza eklenecek. Onaylıyor musunuz? ✅",
+  "bulkDeleteConfirm": "Son {days} gün içindeki tüm {type} silinecek. Emin misiniz? ⚠️",
+  "bulkDeleteToday": "Bugünkü tüm işlemlerinizi ({type}) silmek üzeresiniz. Onaylıyor musunuz? 🗑️",
+  "transactionTypes": {
+    "expense": "harcamalarınız",
+    "income": "gelirleriniz",
+    "all": "işlemleriniz (gelir ve gider)"
+  },
+  "financialSummary": {
+    "title": "KULLANICININ FİNANSAL DURUMU:",
+    "thisMonth": "Bu Ay ({month}):",
+    "income": "Gelir",
+    "expense": "Gider",
+    "net": "Net",
+    "totalBalance": "Toplam Bakiye",
+    "accounts": "hesap",
+    "topExpenses": "En Çok Harcama (Son 30 Gün):",
+    "recentTransactions": "Son İşlemler:",
+    "noExpenses": "Henüz harcama yok",
+    "noTransactions": "Henüz işlem yok"
+  },
+  "accountsTitle": "KULLANILABILIR HESAPLAR:",
+  "noAccounts": "Henüz hesap eklenmemiş",
+  "months": {
+    "1": "Ocak",
+    "2": "Şubat",
+    "3": "Mart",
+    "4": "Nisan",
+    "5": "Mayıs",
+    "6": "Haziran",
+    "7": "Temmuz",
+    "8": "Ağustos",
+    "9": "Eylül",
+    "10": "Ekim",
+    "11": "Kasım",
+    "12": "Aralık"
+  }
+}
+

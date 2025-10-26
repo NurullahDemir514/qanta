@@ -1376,10 +1376,10 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get close;
 
-  /// Select transaction type message
+  /// Select transaction type title
   ///
   /// In en, this message translates to:
-  /// **'Select the type of transaction you want to make'**
+  /// **'Select Transaction Type'**
   String get selectTransactionType;
 
   /// Select transaction type description
@@ -1640,7 +1640,7 @@ abstract class AppLocalizations {
   /// **'Weekly'**
   String get weekly;
 
-  /// Monthly subscription plan
+  /// Monthly subscription
   ///
   /// In en, this message translates to:
   /// **'Monthly'**
@@ -2906,10 +2906,10 @@ abstract class AppLocalizations {
   /// **'Available Credit'**
   String get availableCredit;
 
-  /// No description provided for @netAmount.
+  /// Net amount label
   ///
   /// In en, this message translates to:
-  /// **'Net'**
+  /// **'Net Amount'**
   String get netAmount;
 
   /// No description provided for @transactionCount.
@@ -3350,10 +3350,10 @@ abstract class AppLocalizations {
   /// **'2 days ago'**
   String get twoDaysAgo;
 
-  /// Per month suffix
+  /// Per month text
   ///
   /// In en, this message translates to:
-  /// **'/ month'**
+  /// **'/mo'**
   String get perMonth;
 
   /// Net balance label
@@ -3428,7 +3428,7 @@ abstract class AppLocalizations {
   /// **'No cards added yet'**
   String get noCardsAddedYet;
 
-  /// Transaction generic term
+  /// Transaction
   ///
   /// In en, this message translates to:
   /// **'Transaction'**
@@ -4784,6 +4784,18 @@ abstract class AppLocalizations {
   /// **'Stock Details'**
   String get stockDetails;
 
+  /// Position summary title
+  ///
+  /// In en, this message translates to:
+  /// **'Position Summary'**
+  String get positionSummary;
+
+  /// Average price label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. Price'**
+  String get averagePrice;
+
   /// Stock information section title
   ///
   /// In en, this message translates to:
@@ -4820,13 +4832,13 @@ abstract class AppLocalizations {
   /// **'Sell Stock'**
   String get sellStock;
 
-  /// Buy action
+  /// Buy stock action
   ///
   /// In en, this message translates to:
   /// **'Buy'**
   String get buy;
 
-  /// Sell action
+  /// Sell stock action
   ///
   /// In en, this message translates to:
   /// **'Sell'**
@@ -4859,8 +4871,8 @@ abstract class AppLocalizations {
   /// Confirm stock removal message
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to remove this stock from your portfolio?'**
-  String get confirmRemoveStock;
+  /// **'Are you sure you want to remove {stockName} from watchlist?'**
+  String confirmRemoveStock(String stockName);
 
   /// Chart coming soon message
   ///
@@ -5528,6 +5540,12 @@ abstract class AppLocalizations {
   /// **'Remove'**
   String get remove;
 
+  /// Remove stock from watchlist
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Watchlist'**
+  String get removeFromWatchlist;
+
   /// Error removing stock message
   ///
   /// In en, this message translates to:
@@ -5539,6 +5557,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{stockName} removed from portfolio'**
   String stockRemovedFromPortfolio(String stockName);
+
+  /// Cannot remove stock title
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot Remove'**
+  String get cannotRemoveStock;
+
+  /// Cannot remove stock with active position
+  ///
+  /// In en, this message translates to:
+  /// **'You have an active position in {stockName}. Please sell all shares before removing from watchlist.'**
+  String cannotRemoveStockWithPosition(String stockName);
 
   /// Stock transaction title
   ///
@@ -5588,7 +5618,7 @@ abstract class AppLocalizations {
   /// **'Select Stock'**
   String get selectStock;
 
-  /// Select account step
+  /// Select account label
   ///
   /// In en, this message translates to:
   /// **'Select Account'**
@@ -5600,10 +5630,10 @@ abstract class AppLocalizations {
   /// **'Please select a stock'**
   String get pleaseSelectStock;
 
-  /// Please select account message
+  /// Please select account validation error
   ///
   /// In en, this message translates to:
-  /// **'Please select an account'**
+  /// **'Please select an account for each transaction'**
   String get pleaseSelectAccount;
 
   /// No stock selected message
@@ -7088,6 +7118,24 @@ abstract class AppLocalizations {
   /// **'You can add up to 3 stocks in the free version'**
   String get stockLimitReachedMessage;
 
+  /// AI usage limit feature
+  ///
+  /// In en, this message translates to:
+  /// **'AI Usage Limit'**
+  String get featureAILimit;
+
+  /// Free AI limit per day
+  ///
+  /// In en, this message translates to:
+  /// **'10/day'**
+  String get featureAILimitFree;
+
+  /// Premium AI limit per day
+  ///
+  /// In en, this message translates to:
+  /// **'75/day'**
+  String get featureAILimitPremium;
+
   /// Ads feature
   ///
   /// In en, this message translates to:
@@ -7249,6 +7297,498 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upgrade'**
   String get upgradeNow;
+
+  /// Quick add FAB input hint text with stock example
+  ///
+  /// In en, this message translates to:
+  /// **'e.g: \$50 coffee | sold 15 apple at \$180'**
+  String get quickAddHint;
+
+  /// Quick add transaction title
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add Transaction'**
+  String get quickAddTransaction;
+
+  /// Confirm and save button
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and Save'**
+  String get confirmAndSave;
+
+  /// Stock symbol and quantity
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} shares of {symbol}'**
+  String stockSymbolQuantity(String symbol, int quantity);
+
+  /// Buy or sell question
+  ///
+  /// In en, this message translates to:
+  /// **'Buy or Sell?'**
+  String get buyOrSell;
+
+  /// Price not specified message
+  ///
+  /// In en, this message translates to:
+  /// **'Price Not Specified'**
+  String get priceNotSpecified;
+
+  /// Please enter price instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the price.\nExample: \"sold 15 apple at \$180\"'**
+  String get pleaseEnterPrice;
+
+  /// Go back button
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get goBack;
+
+  /// Summary hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm or cancel the summary'**
+  String get summaryHint;
+
+  /// AI chat welcome message
+  ///
+  /// In en, this message translates to:
+  /// **'Hello {name}!\nHow can I help you? Would you like to add an expense or income?'**
+  String aiChatWelcome(String name);
+
+  /// AI chat error message
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, an error occurred. Would you like to try again?'**
+  String get aiChatError;
+
+  /// Transaction successfully created message
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction successfully recorded.'**
+  String get aiChatTransactionSuccess;
+
+  /// Transaction failed message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while adding the transaction. Please try again.'**
+  String get aiChatTransactionFailed;
+
+  /// Theme change failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change theme. Please try again.'**
+  String get aiChatThemeFailed;
+
+  /// Bulk delete confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk Delete Confirmation'**
+  String get aiChatDeleteConfirmTitle;
+
+  /// Delete button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get aiChatDeleteButton;
+
+  /// Delete in progress message
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting transactions, please wait...'**
+  String get aiChatDeleteProcessing;
+
+  /// Delete success message
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion completed! {count} transactions successfully deleted.'**
+  String aiChatDeleteSuccess(String message, int count, int duration);
+
+  /// Delete failed message
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Deletion failed.\n\nPlease try again or check your internet connection.'**
+  String get aiChatDeleteFailed;
+
+  /// Confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get aiChatConfirmButton;
+
+  /// Cancel button in AI chat
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get aiChatCancelButton;
+
+  /// Pending approval message
+  ///
+  /// In en, this message translates to:
+  /// **'Please approve the transaction above...'**
+  String get aiChatPendingApproval;
+
+  /// Send message placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message... (e.g. \$50 coffee)'**
+  String get aiChatSendPlaceholder;
+
+  /// Today's
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s'**
+  String get aiChatToday;
+
+  /// Yesterday's
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday\'s'**
+  String get aiChatYesterday;
+
+  /// Last N days
+  ///
+  /// In en, this message translates to:
+  /// **'Last {days} days\''**
+  String aiChatLastNDays(int days);
+
+  /// All transactions
+  ///
+  /// In en, this message translates to:
+  /// **'all transactions'**
+  String get aiChatAllTransactions;
+
+  /// Expenses
+  ///
+  /// In en, this message translates to:
+  /// **'expenses'**
+  String get aiChatExpenses;
+
+  /// Income
+  ///
+  /// In en, this message translates to:
+  /// **'income'**
+  String get aiChatIncome;
+
+  /// Delete warning message
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to delete {timeText} {typeText}. This action cannot be undone. Are you sure?'**
+  String aiChatDeleteWarning(String timeText, String typeText);
+
+  /// Daily AI usage display
+  ///
+  /// In en, this message translates to:
+  /// **'Daily usage'**
+  String get aiChatDailyUsage;
+
+  /// Financial assistant label
+  ///
+  /// In en, this message translates to:
+  /// **'Your financial assistant'**
+  String get aiChatAssistant;
+
+  /// Clear chat history button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear History'**
+  String get clearChatHistory;
+
+  /// Clear chat history confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'All chat history will be deleted. Are you sure?'**
+  String get clearChatHistoryConfirmation;
+
+  /// Chat history cleared snackbar message
+  ///
+  /// In en, this message translates to:
+  /// **'Chat history cleared'**
+  String get chatHistoryCleared;
+
+  /// Clear button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// Daily limit reached message
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached your daily AI limit ({limit} messages/day). Try again tomorrow.'**
+  String aiChatDailyLimitReached(int limit);
+
+  /// Transaction cancelled message
+  ///
+  /// In en, this message translates to:
+  /// **'Alright, cancelled 👍'**
+  String get aiChatTransactionCancelled;
+
+  /// Confirm transactions screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Transactions'**
+  String get confirmTransactions;
+
+  /// Number of transactions selected
+  ///
+  /// In en, this message translates to:
+  /// **'transactions selected'**
+  String get transactionsSelected;
+
+  /// No transactions selected error
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one transaction'**
+  String get noTransactionsSelected;
+
+  /// Transactions saved success message
+  ///
+  /// In en, this message translates to:
+  /// **'transactions saved'**
+  String get transactionsSaved;
+
+  /// Error saving transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save transactions. Please try again.'**
+  String get errorSavingTransactions;
+
+  /// Save selected transactions button
+  ///
+  /// In en, this message translates to:
+  /// **'Save Selected'**
+  String get saveSelected;
+
+  /// Budget created success message
+  ///
+  /// In en, this message translates to:
+  /// **'Budget created! {period} limit of {limit} set for {category}. 💰'**
+  String budgetCreated(Object category, Object period, Object limit);
+
+  /// Budget updated success message
+  ///
+  /// In en, this message translates to:
+  /// **'Budget updated! New limit for {category}: {limit} 📊'**
+  String budgetUpdated(Object category, Object limit);
+
+  /// Budget deleted success message
+  ///
+  /// In en, this message translates to:
+  /// **'Budget deleted. {category} budget is no longer tracked. ✅'**
+  String budgetDeleted(Object category);
+
+  /// Budget create failed error message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create budget. Please try again. ❌'**
+  String get budgetCreateFailed;
+
+  /// Budget update failed error message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update budget. Please try again. ❌'**
+  String get budgetUpdateFailed;
+
+  /// Budget delete failed error message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete budget. Please try again. ❌'**
+  String get budgetDeleteFailed;
+
+  /// Quick action pill button for adding expense
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get quickActionAddExpense;
+
+  /// Quick action pill button for adding income
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get quickActionAddIncome;
+
+  /// Quick action pill button for analyzing invoice
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze Invoice'**
+  String get quickActionAnalyzeInvoice;
+
+  /// Quick action pill button for creating budget
+  ///
+  /// In en, this message translates to:
+  /// **'Create Budget'**
+  String get quickActionCreateBudget;
+
+  /// Quick action pill button for adding account
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account'**
+  String get quickActionAddAccount;
+
+  /// Quick action pill button for viewing transactions
+  ///
+  /// In en, this message translates to:
+  /// **'View My Transactions'**
+  String get quickActionViewTransactions;
+
+  /// Free plan name
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get planFree;
+
+  /// Premium plan name
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get planPremium;
+
+  /// Premium Plus plan name
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Plus'**
+  String get planPremiumPlus;
+
+  /// Most popular badge
+  ///
+  /// In en, this message translates to:
+  /// **'Most Popular'**
+  String get mostPopular;
+
+  /// Per year text
+  ///
+  /// In en, this message translates to:
+  /// **'/yr'**
+  String get perYear;
+
+  /// Save percentage text
+  ///
+  /// In en, this message translates to:
+  /// **'Save {percentage}%'**
+  String savePercentage(int percentage);
+
+  /// Premium Plus AI limit per day
+  ///
+  /// In en, this message translates to:
+  /// **'250/day'**
+  String get featureAILimitPremiumPlus;
+
+  /// Free plan description
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect to get started'**
+  String get planFreeDescription;
+
+  /// Premium plan description
+  ///
+  /// In en, this message translates to:
+  /// **'For daily use'**
+  String get planPremiumDescription;
+
+  /// Premium Plus plan description
+  ///
+  /// In en, this message translates to:
+  /// **'For power users'**
+  String get planPremiumPlusDescription;
+
+  /// Choose plan button
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Plan'**
+  String get choosePlan;
+
+  /// Current plan badge
+  ///
+  /// In en, this message translates to:
+  /// **'Current Plan'**
+  String get currentPlan;
+
+  /// Unlock all features subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all features'**
+  String get unlockAllFeatures;
+
+  /// Compare plans section title
+  ///
+  /// In en, this message translates to:
+  /// **'Compare Plans'**
+  String get comparePlans;
+
+  /// Priority support feature
+  ///
+  /// In en, this message translates to:
+  /// **'Priority support'**
+  String get featurePrioritySupport;
+
+  /// Early access feature
+  ///
+  /// In en, this message translates to:
+  /// **'Early Access'**
+  String get featureEarlyAccess;
+
+  /// AI queries per month feature
+  ///
+  /// In en, this message translates to:
+  /// **'{count} queries/month'**
+  String featureAIMessagesPerDay(String count);
+
+  /// Unlimited cards feature
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited cards'**
+  String get featureUnlimitedCards;
+
+  /// Limited cards feature
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} cards'**
+  String featureLimitedCards(String count);
+
+  /// Unlimited stocks feature
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited stock tracking'**
+  String get featureUnlimitedStocks;
+
+  /// Limited stocks feature
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} stocks'**
+  String featureLimitedStocks(String count);
+
+  /// With ads feature
+  ///
+  /// In en, this message translates to:
+  /// **'Contains ads'**
+  String get featureWithAds;
+
+  /// No ads feature
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-free experience'**
+  String get featureNoAds;
+
+  /// Basic support feature
+  ///
+  /// In en, this message translates to:
+  /// **'Basic support'**
+  String get featureBasicSupport;
+
+  /// 24/7 priority support feature
+  ///
+  /// In en, this message translates to:
+  /// **'24/7 priority support'**
+  String get feature247Support;
+
+  /// Early access to new features
+  ///
+  /// In en, this message translates to:
+  /// **'Early access to new features'**
+  String get featureEarlyAccessDescription;
 }
 
 class _AppLocalizationsDelegate

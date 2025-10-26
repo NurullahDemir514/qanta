@@ -729,7 +729,7 @@ class _DebitCardsTabState extends State<DebitCardsTab>
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(16),
                                 onTap: () {
-                                  // Kart limiti kontrolü
+                                  // Kart limiti kontrolü (event handler içinde listen: false kullanmalıyız)
                                   final premiumService = context.read<PremiumService>();
                                   final totalCards = unifiedProviderV2.debitCards.length + unifiedProviderV2.creditCards.length;
                                   

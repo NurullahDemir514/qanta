@@ -1,5 +1,23 @@
 import '../design_system/transaction_design_system.dart';
 
+/// Helper function to parse datetime without UTC conversion
+DateTime _parseLocalDate(String dateStr) {
+  try {
+    final parsed = DateTime.parse(dateStr);
+    return DateTime(
+      parsed.year,
+      parsed.month,
+      parsed.day,
+      parsed.hour,
+      parsed.minute,
+      parsed.second,
+      parsed.millisecond,
+    );
+  } catch (e) {
+    return DateTime.now();
+  }
+}
+
 /// Master installment transaction model
 class InstallmentTransactionModel {
   final String id;
@@ -40,11 +58,11 @@ class InstallmentTransactionModel {
       totalAmount: (json['total_amount'] as num).toDouble(),
       monthlyAmount: (json['monthly_amount'] as num).toDouble(),
       count: json['count'] as int,
-      startDate: DateTime.parse(json['start_date'] as String),
+      startDate: _parseLocalDate(json['start_date'] as String),
       description: json['description'] as String,
       categoryId: json['category_id'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: _parseLocalDate(json['created_at'] as String),
+      updatedAt: _parseLocalDate(json['updated_at'] as String),
     );
   }
 
@@ -195,15 +213,15 @@ class InstallmentDetailModel {
       id: json['id'] as String,
       installmentTransactionId: json['installment_transaction_id'] as String,
       installmentNumber: json['installment_number'] as int,
-      dueDate: DateTime.parse(json['due_date'] as String),
+      dueDate: _parseLocalDate(json['due_date'] as String),
       amount: (json['amount'] as num).toDouble(),
       isPaid: json['is_paid'] as bool? ?? false,
       paidDate: json['paid_date'] != null 
-          ? DateTime.parse(json['paid_date'] as String) 
+          ? _parseLocalDate(json['paid_date'] as String) 
           : null,
       transactionId: json['transaction_id'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: _parseLocalDate(json['created_at'] as String),
+      updatedAt: _parseLocalDate(json['updated_at'] as String),
     );
   }
 
@@ -313,18 +331,18 @@ class InstallmentWithProgressModel extends InstallmentTransactionModel {
       totalAmount: (json['total_amount'] as num).toDouble(),
       monthlyAmount: (json['monthly_amount'] as num).toDouble(),
       count: json['count'] as int,
-      startDate: json['start_date'] is DateTime ? json['start_date'] as DateTime : DateTime.parse(json['start_date'] as String),
+      startDate: json['start_date'] is DateTime ? json['start_date'] as DateTime : _parseLocalDate(json['start_date'] as String),
       description: json['description'] as String,
       categoryId: json['category_id'] as String?,
-      createdAt: json['created_at'] is DateTime ? json['created_at'] as DateTime : DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] is DateTime ? json['updated_at'] as DateTime : DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] is DateTime ? json['created_at'] as DateTime : _parseLocalDate(json['created_at'] as String),
+      updatedAt: json['updated_at'] is DateTime ? json['updated_at'] as DateTime : _parseLocalDate(json['updated_at'] as String),
       accountName: json['account_name'] as String?,
       paidCount: json['paid_count'] as int? ?? 0,
       totalCount: json['total_count'] as int? ?? 0,
       paidAmount: (json['paid_amount'] as num?)?.toDouble() ?? 0.0,
       remainingAmount: (json['remaining_amount'] as num?)?.toDouble() ?? 0.0,
       nextDueDate: json['next_due_date'] != null 
-          ? DateTime.parse(json['next_due_date'] as String) 
+          ? _parseLocalDate(json['next_due_date'] as String) 
           : null,
     );
   }

@@ -147,7 +147,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
   }
 
   void _showAddCreditCardForm() {
-    // Kart limiti kontrolü
+    // Kart limiti kontrolü (event handler içinde listen: false kullanmalıyız)
     final premiumService = context.read<PremiumService>();
     final unifiedProvider = context.read<UnifiedProviderV2>();
     final totalCards = unifiedProvider.debitCards.length + unifiedProvider.creditCards.length;
@@ -469,10 +469,11 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
   @override
   Widget build(BuildContext context) {
     super.build(context); // AutomaticKeepAliveClientMixin için gerekli
-    return ListenableBuilder(
-      listenable: UnifiedProviderV2.instance,
-      builder: (context, child) {
-        final unifiedProviderV2 = UnifiedProviderV2.instance;
+    return Consumer<PremiumService>(
+      builder: (context, premiumService, _) => ListenableBuilder(
+        listenable: UnifiedProviderV2.instance,
+        builder: (context, child) {
+          final unifiedProviderV2 = UnifiedProviderV2.instance;
         // Loading durumunda normal UI göster
         // if (unifiedProviderV2.isLoading) {
         //   return const Center(
@@ -748,6 +749,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
           },
         );
       },
+      ),
     );
   }
 } 

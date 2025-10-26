@@ -7,6 +7,7 @@ import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../providers/stock_provider.dart';
 import 'mini_chart_widget.dart';
 
 /// Açılır-kapanır hisse kartı widget'ı
@@ -337,12 +338,11 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
       );
     }
 
-    return Consumer<UnifiedProviderV2>(
-      builder: (context, provider, child) {
+    return Consumer<StockProvider>(
+      builder: (context, stockProvider, child) {
         // Bu hisse ile ilgili transaction'ları filtrele
-        final stockTransactions = provider.transactions.where((transaction) {
-          return transaction.type == txn.TransactionType.stock &&
-                 transaction.stockSymbol == widget.stock.symbol;
+        final stockTransactions = stockProvider.stockTransactions.where((transaction) {
+          return transaction.stockSymbol == widget.stock.symbol;
         }).toList();
 
         // Tarihe göre sırala (en yeni üstte)
@@ -497,10 +497,10 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
                 )
               else
                 ...stockTransactions.map((transaction) {
-                  final isBuy = transaction.amount < 0; // Negatif amount = alış
-                  final quantity = transaction.stockQuantity ?? 0.0;
-                  final price = transaction.stockPrice ?? 0.0;
-                  final totalAmount = quantity * price;
+                  final isBuy = transaction.type == StockTransactionType.buy;
+                  final quantity = transaction.quantity;
+                  final price = transaction.price;
+                  final totalAmount = transaction.totalAmount;
                   
                   // Mevcut fiyata göre kar/zarar hesapla
                   final currentPrice = widget.stock.currentPrice;

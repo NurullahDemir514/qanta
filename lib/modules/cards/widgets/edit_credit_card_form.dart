@@ -652,7 +652,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                             ? (AppLocalizations.of(context)?.currentDebt ?? 'Current Debt')
                             : (AppLocalizations.of(context)?.availableLimit ?? 'Available Limit'),
                           style: GoogleFonts.inter(
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
@@ -691,7 +691,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                                   child: Text(
                                     AppLocalizations.of(context)?.debt ?? 'Debt',
                                     style: GoogleFonts.inter(
-                                      fontSize: 9,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: _isDebtMode
                                           ? Colors.white
@@ -721,7 +721,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                                   child: Text(
                                     AppLocalizations.of(context)?.limit ?? 'Limit',
                                     style: GoogleFonts.inter(
-                                      fontSize: 9,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: !_isDebtMode
                                           ? Colors.white

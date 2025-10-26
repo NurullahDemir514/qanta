@@ -3335,7 +3335,7 @@
   "@cashWallet": {
     "description": "Cash Wallet"
   },
-  "stockPurchaseInsufficientBalance": "Hisse alımı için yetersiz bakiye. Mevcut: {balance}",
+  "stockPurchaseInsufficientBalance": "Hisse alışı için yetersiz bakiye. Mevcut: {balance}",
   "@stockPurchaseInsufficientBalance": {
     "description": "Insufficient balance for stock purchase",
     "placeholders": {
@@ -3492,6 +3492,18 @@
   "stockDetails": "Hisse Detayları",
   "@stockDetails": {
     "description": "Stock details title"
+  },
+  "positionSummary": "Pozisyon Özeti",
+  "@positionSummary": {
+    "description": "Position summary title"
+  },
+  "averagePrice": "Ort. Fiyat",
+  "@averagePrice": {
+    "description": "Average price label"
+  },
+  "noTransactionsYet": "Henüz işlem yok",
+  "@noTransactionsYet": {
+    "description": "No transactions message"
   },
   "stockInfo": "Hisse Bilgileri",
   "@stockInfo": {
@@ -4603,6 +4615,10 @@
   "@remove": {
     "description": "Remove button"
   },
+  "removeFromWatchlist": "Takipten Çıkar",
+  "@removeFromWatchlist": {
+    "description": "Remove stock from watchlist"
+  },
   "userSessionNotFound": "Kullanıcı oturumu bulunamadı",
   "@userSessionNotFound": {
     "description": "User session not found error"
@@ -4621,9 +4637,27 @@
       }
     }
   },
-  "confirmRemoveStock": "Bu hisseyi portföyden kaldırmak istediğinizden emin misiniz?",
+  "confirmRemoveStock": "{stockName} hissesini takipten çıkarmak istediğinizden emin misiniz?",
   "@confirmRemoveStock": {
-    "description": "Confirm stock removal message"
+    "description": "Confirm stock removal message",
+    "placeholders": {
+      "stockName": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotRemoveStock": "Kaldırılamaz",
+  "@cannotRemoveStock": {
+    "description": "Cannot remove stock title"
+  },
+  "cannotRemoveStockWithPosition": "{stockName} hissesinde pozisyonunuz bulunmaktadır. Takipten çıkarmak için önce tüm hisselerinizi satmalısınız.",
+  "@cannotRemoveStockWithPosition": {
+    "description": "Cannot remove stock with active position",
+    "placeholders": {
+      "stockName": {
+        "type": "String"
+      }
+    }
   },
   "stockTransaction": "Hisse İşlemi",
   "@stockTransaction": {
@@ -6197,6 +6231,18 @@
   "@stockLimitReachedMessage": {
     "description": "Stock limit reached message"
   },
+  "featureAILimit": "AI Kullanım Limiti",
+  "@featureAILimit": {
+    "description": "AI usage limit feature"
+  },
+  "featureAILimitFree": "10/gün",
+  "@featureAILimitFree": {
+    "description": "Free AI limit per day"
+  },
+  "featureAILimitPremium": "75/gün",
+  "@featureAILimitPremium": {
+    "description": "Premium AI limit per day"
+  },
   "featureAds": "Reklamlar",
   "@featureAds": {
     "description": "Ads feature"
@@ -6316,5 +6362,515 @@
   "upgradeNow": "Yükselt",
   "@upgradeNow": {
     "description": "Upgrade now button text for premium banner"
+  },
+  "quickAddHint": "Örn: 50₺ kahve | 15 aselsan 205₺den sattım",
+  "@quickAddHint": {
+    "description": "Quick add FAB input hint text with stock example"
+  },
+  "quickAddTransaction": "Hızlı İşlem Ekle",
+  "@quickAddTransaction": {
+    "description": "Quick add transaction title"
+  },
+  "january": "Ocak",
+  "@january": {
+    "description": "January month name"
+  },
+  "february": "Şubat",
+  "@february": {
+    "description": "February month name"
+  },
+  "march": "Mart",
+  "@march": {
+    "description": "March month name"
+  },
+  "april": "Nisan",
+  "@april": {
+    "description": "April month name"
+  },
+  "may": "Mayıs",
+  "@may": {
+    "description": "May month name"
+  },
+  "june": "Haziran",
+  "@june": {
+    "description": "June month name"
+  },
+  "july": "Temmuz",
+  "@july": {
+    "description": "July month name"
+  },
+  "august": "Ağustos",
+  "@august": {
+    "description": "August month name"
+  },
+  "september": "Eylül",
+  "@september": {
+    "description": "September month name"
+  },
+  "october": "Ekim",
+  "@october": {
+    "description": "October month name"
+  },
+  "november": "Kasım",
+  "@november": {
+    "description": "November month name"
+  },
+  "december": "Aralık",
+  "@december": {
+    "description": "December month name"
+  },
+  "confirmAndSave": "Onayla ve Kaydet",
+  "@confirmAndSave": {
+    "description": "Confirm and save button"
+  },
+  "buy": "Alış",
+  "@buy": {
+    "description": "Buy stock action"
+  },
+  "sell": "Satış",
+  "@sell": {
+    "description": "Sell stock action"
+  },
+  "transaction": "İşlem",
+  "@transaction": {
+    "description": "Transaction"
+  },
+  "selectTransactionType": "İşlem Türü Seçin",
+  "@selectTransactionType": {
+    "description": "Select transaction type title"
+  },
+  "stockSymbolQuantity": "{symbol} için {quantity} adet",
+  "@stockSymbolQuantity": {
+    "description": "Stock symbol and quantity",
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "buyOrSell": "Alış mı Satış mı?",
+  "@buyOrSell": {
+    "description": "Buy or sell question"
+  },
+  "priceNotSpecified": "Fiyat Belirtilmedi",
+  "@priceNotSpecified": {
+    "description": "Price not specified message"
+  },
+  "pleaseEnterPrice": "Lütfen fiyat bilgisi girin.\nÖrnek: \"15 aselsan 205₺den sattım\"",
+  "@pleaseEnterPrice": {
+    "description": "Please enter price instruction"
+  },
+  "goBack": "Geri Dön",
+  "@goBack": {
+    "description": "Go back button"
+  },
+  "quantity": "Miktar",
+  "@quantity": {
+    "description": "Quantity label"
+  },
+  "price": "Fiyat",
+  "@price": {
+    "description": "Price label"
+  },
+  "total": "Toplam",
+  "@total": {
+    "description": "Total label"
+  },
+  "commission": "Komisyon",
+  "@commission": {
+    "description": "Commission label"
+  },
+  "netAmount": "Net Tutar",
+  "@netAmount": {
+    "description": "Net amount label"
+  },
+  "summaryHint": "Özeti onaylayın veya iptal edin",
+  "@summaryHint": {
+    "description": "Summary hint text"
+  },
+  "aiChatWelcome": "Merhaba {name}!\nNasıl yardımcı olabilirim? Harcama veya gelir eklemek ister misin?",
+  "@aiChatWelcome": {
+    "description": "AI chat welcome message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aiChatError": "Üzgünüm, bir hata oluştu. Tekrar dener misiniz?",
+  "@aiChatError": {
+    "description": "AI chat error message"
+  },
+  "aiChatTransactionSuccess": "İşlem başarıyla kaydedildi!\n\nBaşka bir işlem eklemek ister misiniz? 😊",
+  "@aiChatTransactionSuccess": {
+    "description": "Transaction saved successfully message"
+  },
+  "aiChatTransactionFailed": "İşlem eklenirken bir hata oluştu. Lütfen tekrar deneyin.",
+  "@aiChatTransactionFailed": {
+    "description": "Transaction failed message"
+  },
+  "aiChatThemeFailed": "Tema değiştirilemedi. Lütfen tekrar deneyin.",
+  "@aiChatThemeFailed": {
+    "description": "Theme change failed message"
+  },
+  "aiChatDeleteConfirmTitle": "Toplu Silme Onayı",
+  "@aiChatDeleteConfirmTitle": {
+    "description": "Bulk delete confirmation dialog title"
+  },
+  "aiChatDeleteButton": "Sil",
+  "@aiChatDeleteButton": {
+    "description": "Delete button"
+  },
+  "aiChatDeleteProcessing": "İşlemler siliniyor, lütfen bekleyin...",
+  "@aiChatDeleteProcessing": {
+    "description": "Delete in progress message"
+  },
+  "aiChatDeleteSuccess": "✅ Silme işlemi tamamlandı! {count} adet işlem başarıyla silindi.",
+  "@aiChatDeleteSuccess": {
+    "description": "Delete success message",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatDeleteFailed": "❌ Silme işlemi başarısız oldu.\n\nLütfen tekrar deneyin veya internet bağlantınızı kontrol edin.",
+  "@aiChatDeleteFailed": {
+    "description": "Delete failed message"
+  },
+  "aiChatConfirmButton": "Onayla",
+  "@aiChatConfirmButton": {
+    "description": "Confirm button"
+  },
+  "aiChatCancelButton": "İptal",
+  "@aiChatCancelButton": {
+    "description": "Cancel button in AI chat"
+  },
+  "aiChatPendingApproval": "Lütfen yukarıdaki işlemi onaylayın...",
+  "@aiChatPendingApproval": {
+    "description": "Pending approval message"
+  },
+  "aiChatSendPlaceholder": "Mesaj yazın... (Örn: 50 TL kahve)",
+  "@aiChatSendPlaceholder": {
+    "description": "Send message placeholder"
+  },
+  "aiChatToday": "Bugünkü",
+  "@aiChatToday": {
+    "description": "Today's"
+  },
+  "aiChatYesterday": "Dünkü",
+  "@aiChatYesterday": {
+    "description": "Yesterday's"
+  },
+  "aiChatLastNDays": "Son {days} gündeki",
+  "@aiChatLastNDays": {
+    "description": "Last N days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatAllTransactions": "tüm işlemlerinizi",
+  "@aiChatAllTransactions": {
+    "description": "All transactions"
+  },
+  "aiChatExpenses": "harcamalarınızı",
+  "@aiChatExpenses": {
+    "description": "Expenses"
+  },
+  "aiChatIncome": "gelirlerinizi",
+  "@aiChatIncome": {
+    "description": "Income"
+  },
+  "aiChatDeleteWarning": "{timeText} {typeText} silmek üzeresiniz. Bu işlem geri alınamaz. Emin misiniz?",
+  "@aiChatDeleteWarning": {
+    "description": "Delete warning message",
+    "placeholders": {
+      "timeText": {
+        "type": "String"
+      },
+      "typeText": {
+        "type": "String"
+      }
+    }
+  },
+  "aiChatDailyUsage": "Günlük kullanım",
+  "@aiChatDailyUsage": {
+    "description": "Daily AI usage display"
+  },
+  "aiChatAssistant": "Finansal asistanınız",
+  "@aiChatAssistant": {
+    "description": "Financial assistant label"
+  },
+  "clearChatHistory": "Geçmişi Temizle",
+  "@clearChatHistory": {
+    "description": "Clear chat history button"
+  },
+  "clearChatHistoryConfirmation": "Tüm konuşma geçmişi silinecek. Emin misiniz?",
+  "@clearChatHistoryConfirmation": {
+    "description": "Clear chat history confirmation message"
+  },
+  "chatHistoryCleared": "Konuşma geçmişi temizlendi",
+  "@chatHistoryCleared": {
+    "description": "Chat history cleared snackbar message"
+  },
+  "clear": "Temizle",
+  "@clear": {
+    "description": "Clear button"
+  },
+  "aiChatTransactionSuccess": "İşlem başarıyla kaydedildi.",
+  "@aiChatTransactionSuccess": {
+    "description": "Transaction successfully created message"
+  },
+  "aiChatDailyLimitReached": "Günlük AI limitinize ulaştınız ({limit} mesaj/gün). Yarın tekrar deneyin.",
+  "@aiChatDailyLimitReached": {
+    "description": "Daily limit reached message",
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatTransactionCancelled": "Tamam, iptal edildi 👍",
+  "@aiChatTransactionCancelled": {
+    "description": "Transaction cancelled message"
+  },
+  "confirmTransactions": "İşlemleri Onayla",
+  "@confirmTransactions": {
+    "description": "Confirm transactions screen title"
+  },
+  "transactionsSelected": "işlem seçili",
+  "@transactionsSelected": {
+    "description": "Number of transactions selected"
+  },
+  "noTransactionsSelected": "Lütfen en az bir işlem seçin",
+  "@noTransactionsSelected": {
+    "description": "No transactions selected error"
+  },
+  "pleaseSelectAccount": "Lütfen her işlem için hesap seçin",
+  "@pleaseSelectAccount": {
+    "description": "Please select account validation error"
+  },
+  "transactionsSaved": "işlem kaydedildi",
+  "@transactionsSaved": {
+    "description": "Transactions saved success message"
+  },
+  "errorSavingTransactions": "İşlemler kaydedilemedi. Lütfen tekrar deneyin.",
+  "@errorSavingTransactions": {
+    "description": "Error saving transactions"
+  },
+  "saveSelected": "Seçilenleri Kaydet",
+  "@saveSelected": {
+    "description": "Save selected transactions button"
+  },
+  "selectAccount": "Hesap Seç",
+  "@selectAccount": {
+    "description": "Select account label"
+  },
+  "budgetCreated": "Bütçe oluşturuldu! {category} için {period} {limit} limiti belirlendi. 💰",
+  "@budgetCreated": {
+    "description": "Budget created success message",
+    "placeholders": {
+      "category": {},
+      "period": {},
+      "limit": {}
+    }
+  },
+  "budgetUpdated": "Bütçe güncellendi! {category} için yeni limit: {limit} 📊",
+  "@budgetUpdated": {
+    "description": "Budget updated success message",
+    "placeholders": {
+      "category": {},
+      "limit": {}
+    }
+  },
+  "budgetDeleted": "Bütçe silindi. {category} bütçesi artık takip edilmiyor. ✅",
+  "@budgetDeleted": {
+    "description": "Budget deleted success message",
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "budgetCreateFailed": "Bütçe oluşturulamadı. Lütfen tekrar deneyin. ❌",
+  "@budgetCreateFailed": {
+    "description": "Budget create failed error message"
+  },
+  "budgetUpdateFailed": "Bütçe güncellenemedi. Lütfen tekrar deneyin. ❌",
+  "@budgetUpdateFailed": {
+    "description": "Budget update failed error message"
+  },
+  "budgetDeleteFailed": "Bütçe silinemedi. Lütfen tekrar deneyin. ❌",
+  "@budgetDeleteFailed": {
+    "description": "Budget delete failed error message"
+  },
+  "quickActionAddExpense": "Harcama Ekle",
+  "@quickActionAddExpense": {
+    "description": "Quick action pill button for adding expense"
+  },
+  "quickActionAddIncome": "Gelir Ekle",
+  "@quickActionAddIncome": {
+    "description": "Quick action pill button for adding income"
+  },
+  "quickActionAnalyzeInvoice": "Fatura Analizi",
+  "@quickActionAnalyzeInvoice": {
+    "description": "Quick action pill button for analyzing invoice"
+  },
+  "quickActionCreateBudget": "Bütçe Oluştur",
+  "@quickActionCreateBudget": {
+    "description": "Quick action pill button for creating budget"
+  },
+  "quickActionAddAccount": "Hesap Ekle",
+  "@quickActionAddAccount": {
+    "description": "Quick action pill button for adding account"
+  },
+  "quickActionViewTransactions": "İşlemlerimi Göster",
+  "@quickActionViewTransactions": {
+    "description": "Quick action pill button for viewing transactions"
+  },
+  "planFree": "Ücretsiz",
+  "@planFree": {
+    "description": "Free plan name"
+  },
+  "planPremium": "Premium",
+  "@planPremium": {
+    "description": "Premium plan name"
+  },
+  "planPremiumPlus": "Premium Plus",
+  "@planPremiumPlus": {
+    "description": "Premium Plus plan name"
+  },
+  "mostPopular": "En Popüler",
+  "@mostPopular": {
+    "description": "Most popular badge"
+  },
+  "perMonth": "/ay",
+  "@perMonth": {
+    "description": "Per month text"
+  },
+  "perYear": "/yıl",
+  "@perYear": {
+    "description": "Per year text"
+  },
+  "savePercentage": "%{percentage} Tasarruf",
+  "@savePercentage": {
+    "description": "Save percentage text",
+    "placeholders": {
+      "percentage": {
+        "type": "int"
+      }
+    }
+  },
+  "monthly": "Aylık",
+  "@monthly": {
+    "description": "Monthly subscription"
+  },
+  "featureAILimitPremiumPlus": "250/gün",
+  "@featureAILimitPremiumPlus": {
+    "description": "Premium Plus AI limit per day"
+  },
+  "planFreeDescription": "Başlamak için ideal",
+  "@planFreeDescription": {
+    "description": "Free plan description"
+  },
+  "planPremiumDescription": "Günlük kullanım için",
+  "@planPremiumDescription": {
+    "description": "Premium plan description"
+  },
+  "planPremiumPlusDescription": "Güç kullanıcıları için",
+  "@planPremiumPlusDescription": {
+    "description": "Premium Plus plan description"
+  },
+  "choosePlan": "Plan Seç",
+  "@choosePlan": {
+    "description": "Choose plan button"
+  },
+  "currentPlan": "Mevcut Plan",
+  "@currentPlan": {
+    "description": "Current plan badge"
+  },
+  "unlockAllFeatures": "Tüm özelliklerin kilidini aç",
+  "@unlockAllFeatures": {
+    "description": "Unlock all features subtitle"
+  },
+  "comparePlans": "Planları Karşılaştır",
+  "@comparePlans": {
+    "description": "Compare plans section title"
+  },
+  "featurePrioritySupport": "7/24 Öncelikli Destek",
+  "@featurePrioritySupport": {
+    "description": "24/7 priority support feature"
+  },
+  "featureEarlyAccess": "Erken Erişim",
+  "@featureEarlyAccess": {
+    "description": "Early access feature"
+  },
+  "featureAIMessagesPerDay": "{count} sorgu/ay",
+  "@featureAIMessagesPerDay": {
+    "description": "AI queries per month feature",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "featureUnlimitedCards": "Sınırsız kart ekleyebilirsiniz",
+  "@featureUnlimitedCards": {
+    "description": "Unlimited cards feature"
+  },
+  "featureLimitedCards": "{count} karta kadar",
+  "@featureLimitedCards": {
+    "description": "Limited cards feature",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "featureUnlimitedStocks": "Sınırsız hisse takibi",
+  "@featureUnlimitedStocks": {
+    "description": "Unlimited stocks feature"
+  },
+  "featureLimitedStocks": "{count} hisseye kadar",
+  "@featureLimitedStocks": {
+    "description": "Limited stocks feature",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "featureWithAds": "Reklam içerir",
+  "@featureWithAds": {
+    "description": "With ads feature"
+  },
+  "featureNoAds": "Reklamsız deneyim",
+  "@featureNoAds": {
+    "description": "No ads feature"
+  },
+  "featureBasicSupport": "Temel destek",
+  "@featureBasicSupport": {
+    "description": "Basic support feature"
+  },
+  "featurePrioritySupport": "Öncelikli destek",
+  "@featurePrioritySupport": {
+    "description": "Priority support feature"
+  },
+  "feature247Support": "7/24 öncelikli destek",
+  "@feature247Support": {
+    "description": "24/7 priority support feature"
+  },
+  "featureEarlyAccessDescription": "Yeni özelliklere erken erişim",
+  "@featureEarlyAccessDescription": {
+    "description": "Early access to new features"
   }
 } 

@@ -19,10 +19,20 @@ class AnalyticsConsent {
   }
   
   factory AnalyticsConsent.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(String dateStr) {
+      try {
+        final parsed = DateTime.parse(dateStr);
+        return DateTime(parsed.year, parsed.month, parsed.day, 
+                       parsed.hour, parsed.minute, parsed.second);
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+    
     return AnalyticsConsent(
       isConsentGiven: json['isConsentGiven'] ?? false,
       consentDate: json['consentDate'] != null
-          ? DateTime.parse(json['consentDate'])
+          ? parseDate(json['consentDate'])
           : DateTime.now(),
       userId: json['userId'],
     );

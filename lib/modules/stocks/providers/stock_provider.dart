@@ -453,7 +453,7 @@ class StockProvider extends ChangeNotifier {
       
       debugPrint('🔄 Dynamic stock changes updated silently: 7d=${_stockChanges7Days.length}, 30d=${_stockChanges30Days.length}');
     } catch (e) {
-      debugPrint('❌ Error updating stock changes silently: $e');
+      // Silently ignore errors in background updates
     }
   }
 
@@ -504,7 +504,7 @@ class StockProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      debugPrint('❌ Error updating dynamic stock changes: $e');
+      // Silently ignore errors in dynamic updates
     }
   }
 
@@ -526,7 +526,7 @@ class StockProvider extends ChangeNotifier {
       
       return firstDate;
     } catch (e) {
-      debugPrint('❌ Error getting first transaction date for $stockSymbol: $e');
+      // Silently handle errors
       return null;
     }
   }
@@ -692,7 +692,7 @@ class StockProvider extends ChangeNotifier {
       
       return closestPrice;
     } catch (e) {
-      debugPrint('❌ Error getting historical price for $symbol on ${date.toIso8601String()}: $e');
+      // Silently handle historical price errors (API may not have data for all dates)
       return null;
     }
   }
@@ -1364,6 +1364,10 @@ class StockProvider extends ChangeNotifier {
 
   // Optimistic UI Update Methods
   void _updateUIOptimistically(StockTransaction transaction) {
+    // Transaction list'e ekle (en yeni en üstte)
+    _stockTransactions.insert(0, transaction);
+    
+    // Position'ı güncelle
     if (transaction.type == StockTransactionType.buy) {
       _updateBuyOptimistically(transaction);
     } else {
@@ -1455,10 +1459,14 @@ class StockProvider extends ChangeNotifier {
   }
 
   void _revertOptimisticUpdate(StockTransaction transaction) {
-    // Optimistic update'i geri almak için pozisyonları yeniden yükle
+    // Transaction list'ten kaldır
+    _stockTransactions.removeWhere((t) => t.id == transaction.id);
+    
+    // Optimistic update'i geri almak için pozisyonları ve transaction'ları yeniden yükle
     final userId = FirebaseAuthService.currentUserId;
     if (userId != null) {
       loadStockPositions(userId);
+      loadStockTransactions(userId);
     }
   }
 
@@ -1730,7 +1738,7 @@ class StockProvider extends ChangeNotifier {
       
       debugPrint('✅ All stock data cleared');
     } catch (e) {
-      debugPrint('❌ Error clearing stock data: $e');
+      debugPrint('Error clearing stock data: $e');
     }
   }
 }

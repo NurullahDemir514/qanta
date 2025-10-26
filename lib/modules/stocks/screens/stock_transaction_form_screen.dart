@@ -20,11 +20,17 @@ import '../widgets/forms/stock_summary_step.dart';
 class StockTransactionFormScreen extends StatefulWidget {
   final StockTransactionType transactionType;
   final Stock? stock;
+  final AccountModel? initialAccount;
+  final double? initialQuantity;
+  final double? initialPrice;
 
   const StockTransactionFormScreen({
     super.key,
     required this.transactionType,
     this.stock,
+    this.initialAccount,
+    this.initialQuantity,
+    this.initialPrice,
   });
 
   @override
@@ -58,6 +64,19 @@ class _StockTransactionFormScreenState
     // Eğer hisse seçiliyse, onu ayarla
     if (widget.stock != null) {
       _selectedStock = widget.stock;
+    }
+    // Initial hesap ayarla
+    if (widget.initialAccount != null) {
+      _selectedAccount = widget.initialAccount;
+    }
+    // Initial miktar ve fiyat ayarla
+    if (widget.initialQuantity != null && widget.initialQuantity! > 0) {
+      _quantity = widget.initialQuantity!;
+      _quantityController.text = widget.initialQuantity!.toStringAsFixed(0);
+    }
+    if (widget.initialPrice != null && widget.initialPrice! > 0) {
+      _price = widget.initialPrice!;
+      _priceController.text = widget.initialPrice!.toStringAsFixed(2);
     }
     // Async işlemi build tamamlandıktan sonra çalıştır
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -483,6 +502,7 @@ class _StockTransactionFormScreenState
               // Yeni hisse AL işlemi için premium kontrolü (STEP 1'de)
               if (widget.transactionType == StockTransactionType.buy) {
                 final stockProvider = Provider.of<StockProvider>(context, listen: false);
+                // Event handler içinde listen: false kullanmalıyız
                 final premiumService = Provider.of<PremiumService>(context, listen: false);
                 
                 // Hisse zaten portfolyoda mı kontrol et

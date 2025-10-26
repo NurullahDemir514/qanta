@@ -11,7 +11,8 @@ import '../../../shared/widgets/app_page_scaffold.dart';
 import '../../../shared/utils/fab_positioning.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../providers/stock_provider.dart';
-import '../widgets/expandable_stock_card.dart';
+import '../widgets/compact_stock_card.dart';
+import 'stock_detail_page.dart';
 import '../widgets/stock_search_screen.dart';
 import '../widgets/stock_detail_screen.dart';
 import 'stock_transaction_form_screen.dart';
@@ -21,6 +22,7 @@ import '../../../core/services/premium_service.dart';
 import '../../premium/premium_offer_screen.dart';
 import '../widgets/stock_transaction_fab.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../transactions/widgets/quick_add_chat_fab.dart';
 
 /// Hisse takip ana ekranı
 class StocksScreen extends StatefulWidget {
@@ -30,30 +32,22 @@ class StocksScreen extends StatefulWidget {
   State<StocksScreen> createState() => _StocksScreenState();
 }
 
-class _StocksScreenState extends State<StocksScreen>
-    with TickerProviderStateMixin {
+class _StocksScreenState extends State<StocksScreen> {
   Timer? _priceUpdateTimer;
-  late AnimationController _progressController;
-  late Animation<double> _progressAnimation;
   late AppLocalizations l10n;
   
   // Filtreleme state'i
   String _selectedFilter = 'all';
-  final List<String> _filterOptions = ['all', 'gainers', 'losers', 'portfolioRatio', 'alphabetical'];
+  final List<String> _filterOptions = ['all', 'gainers', 'losers', 'portfolioRatio'];
 
   @override
   void initState() {
     super.initState();
 
-    // Progress animasyonu için controller
-    _progressController = AnimationController(
-      duration: const Duration(seconds: 20),
-      vsync: this,
-    );
-
-    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _progressController, curve: Curves.linear),
-    );
+    // Validate selected filter
+    if (!_filterOptions.contains(_selectedFilter)) {
+      _selectedFilter = 'all';
+    }
 
     // Data already loaded in splash screen, no need to reload
     // Timer'ı başlat
@@ -76,7 +70,6 @@ class _StocksScreenState extends State<StocksScreen>
   @override
   void dispose() {
     _priceUpdateTimer?.cancel();
-    _progressController.dispose();
     super.dispose();
   }
 
@@ -110,12 +103,8 @@ class _StocksScreenState extends State<StocksScreen>
       final stockProvider = Provider.of<StockProvider>(context, listen: false);
 
       if (stockProvider.watchedStocks.isNotEmpty) {
-        // Progress animasyonunu başlat
-        _progressController.reset();
-        _progressController.forward();
-
         stockProvider.updateRealTimePricesSilently();
-      } else {}
+      }
     });
 
     // İlk güncelleme kaldırıldı - splash screen'de zaten güncelleniyor
@@ -136,58 +125,13 @@ class _StocksScreenState extends State<StocksScreen>
             builder: (context, stockProvider, child) {
               return SliverList(
                 delegate: SliverChildListDelegate([
-                  // Progress Bar - Sadece aktif pozisyon varsa göster
+                  // Filtreleme seçenekleri
                   if (stockProvider.watchedStocks.isNotEmpty && _hasActivePositions(stockProvider))
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 1,
-                        bottom: 10,
-                        left: 5,
-                        right: 5,
-                      ),
-                      child: AnimatedBuilder(
-                        animation: _progressAnimation,
-                        builder: (context, child) {
-                          return Container(
-                            height: 3,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(1),
-                              color: isDark
-                                  ? const Color(0xFF2C2C2E)
-                                  : const Color(0xFFE5E5EA),
-                            ),
-                            child: Stack(
-                              children: [
-                                // Progress bar
-                                Container(
-                                  height: 3,
-                                  width:
-                                      MediaQuery.of(context).size.width *
-                                      _progressAnimation.value,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(1),
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFF007AFF),
-                                        Color(0xFF2E7D32),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                    _buildFilterOptions(isDark),
 
                   // Portfolio Overview Table - Hidden when no positions
                   if (stockProvider.watchedStocks.isNotEmpty && _hasActivePositions(stockProvider))
                     _buildPortfolioOverviewTable(stockProvider, isDark),
-
-                  // Filtreleme seçenekleri
-                  if (stockProvider.watchedStocks.isNotEmpty && _hasActivePositions(stockProvider))
-                    _buildFilterOptions(isDark),
 
                   // Content
                   _buildContent(stockProvider, isDark),
@@ -196,10 +140,15 @@ class _StocksScreenState extends State<StocksScreen>
             },
           ),
         ),
-        // Positioned FAB - Responsive positioning
+        // AI Chat FAB (altta, sağda)
+        QuickAddChatFAB(
+          customRight: FabPositioning.getRightPosition(context),
+          customBottom: FabPositioning.getBottomPosition(context), // En altta
+        ),
+        // Stock Transaction FAB (üstte, sağda - AI Chat FAB'ın üzerinde)
         Positioned(
           right: FabPositioning.getRightPosition(context),
-          bottom: FabPositioning.getBottomPosition(context),
+          bottom: FabPositioning.getBottomPosition(context) + 60, // AI Chat FAB'ın 60px üstünde
           child: const StockTransactionFab(),
         ),
       ],
@@ -237,225 +186,164 @@ class _StocksScreenState extends State<StocksScreen>
         ? (totalProfitLoss / totalCost) * 100
         : 0.0;
     final isProfit = totalProfitLoss >= 0;
-    final isLoss = totalProfitLoss < 0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                  ? [const Color(0xFF1C1C1E), const Color(0xFF2C2C2E)]
-                  : [Colors.white, const Color(0xFFFAFAFA)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.06),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+      child: Column(
+        children: [
+          // Header - Portföy adı ve hisse sayısı
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.myPortfolio,
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              // Minimal badge - sadece hisse sayısı
+              Text(
+                '$totalStocks ${l10n.stocks}',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white60 : Colors.black54,
+                ),
               ),
             ],
           ),
-          child: Container(
-            padding: EdgeInsets.all(20.w),
-            child: Column(
-              children: [
-                // Header - Portföy adı ve toplam hisse sayısı
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.myPortfolio,
-                        style: GoogleFonts.inter(
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : Colors.black,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                    ),
-                    // Toplam hisse sayısı ve return - Sağ üstte
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF2C2C2E)
-                                : const Color(0xFFF8F9FA),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isDark
-                                  ? const Color(0xFF48484A)
-                                  : const Color(0xFFE5E5EA),
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            '$totalStocks ${l10n.stocks}',
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white : Colors.black,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF2C2C2E)
-                                : const Color(0xFFF8F9FA),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isDark
-                                  ? const Color(0xFF48484A)
-                                  : const Color(0xFFE5E5EA),
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            '${isProfit ? '+' : ''}${totalReturnPercent.toStringAsFixed(1)}%',
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: isProfit
-                                  ? const Color(0xFF4CAF50)
-                                  : const Color(0xFFFF4C4C),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+          
+          SizedBox(height: 24.h),
+          
+          // 🎯 HERO VALUE - Toplam Portföy Değeri (Büyük, Merkezi)
+          Column(
+            children: [
+              Text(
+                CurrencyUtils.formatAmount(totalValue, Currency.TRY),
+                style: GoogleFonts.inter(
+                  fontSize: 36.sp,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : Colors.black,
+                  letterSpacing: -1.0,
+                  height: 1.1,
                 ),
-
-                SizedBox(height: 14.h),
-
-                // Ana bilgiler - 3'lü grid
-                Row(
-                  children: [
-                    // 1. Toplam Maliyet (önce cost)
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            l10n.cost,
-                            style: GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white70 : Colors.grey[700],
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            CurrencyUtils.formatAmount(totalCost, Currency.TRY),
-                            style: GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : Colors.black,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(width: 12.w),
-
-                    // 2. Toplam Değer (sonra value)
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            l10n.value,
-                            style: GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white70 : Colors.grey[700],
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            CurrencyUtils.formatAmount(
-                              totalValue,
-                              Currency.TRY,
-                            ),
-                            style: GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : Colors.black,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(width: 12.w),
-
-                    // 3. Toplam Kar/Zarar
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            l10n.profitLoss,
-                            style: GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white70 : Colors.grey[700],
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            '${isProfit ? '+' : ''}${CurrencyUtils.formatAmount(totalProfitLoss, Currency.TRY)}',
-                            style: GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                              color: isProfit
-                                  ? const Color(0xFF4CAF50)
-                                  : const Color(0xFFFF4C4C),
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                l10n.totalValue,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white60 : Colors.black54,
+                  letterSpacing: 0.2,
                 ),
-              ],
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 20.h),
+          
+          // İnce gradient çizgi
+          Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  isDark 
+                    ? Colors.white.withOpacity(0.2) 
+                    : Colors.black.withOpacity(0.1),
+                  Colors.transparent,
+                ],
+              ),
             ),
           ),
-        ),
+          
+          SizedBox(height: 20.h),
+          
+          // 📊 Minimal Metrikler - 3'lü kompakt satır
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // 1. Toplam Kar/Zarar
+              Expanded(
+                child: _buildMetricItem(
+                  label: l10n.profitLoss,
+                  value: '${isProfit ? '+' : ''}${CurrencyUtils.formatAmount(totalProfitLoss, Currency.TRY)}',
+                  valueColor: isProfit
+                      ? Colors.green
+                      : const Color(0xFFFF4C4C),
+                  isDark: isDark,
+                ),
+              ),
+              
+              // 2. Maliyet
+              Expanded(
+                child: _buildMetricItem(
+                  label: l10n.cost,
+                  value: CurrencyUtils.formatAmount(totalCost, Currency.TRY),
+                  valueColor: isDark ? Colors.white70 : Colors.black87,
+                  isDark: isDark,
+                ),
+              ),
+              
+              // 3. Getiri %
+              Expanded(
+                child: _buildMetricItem(
+                  label: l10n.returnLabel,
+                  value: '${isProfit ? '+' : ''}${totalReturnPercent.toStringAsFixed(1)}%',
+                  valueColor: isProfit
+                      ? Colors.green
+                      : const Color(0xFFFF4C4C),
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+  
+  // Yardımcı metod: Minimal metrik item
+  Widget _buildMetricItem({
+    required String label,
+    required String value,
+    required Color valueColor,
+    required bool isDark,
+  }) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.white54 : Colors.black45,
+            letterSpacing: 0.3,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: valueColor,
+            letterSpacing: -0.2,
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 
@@ -467,21 +355,6 @@ class _StocksScreenState extends State<StocksScreen>
           // Segmented Control Style Filter
           Container(
             height: 40,
-            decoration: BoxDecoration(
-              gradient: isDark
-                  ? LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [const Color(0xFF1C1C1E), const Color(0xFF2C2C2E)],
-                    )
-                  : null,
-              color: isDark ? null : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
-                width: 1,
-              ),
-            ),
             child: Row(
               children: _filterOptions.asMap().entries.map((entry) {
                 final index = entry.key;
@@ -567,8 +440,6 @@ class _StocksScreenState extends State<StocksScreen>
         return l10n.gainers;
       case 'losers':
         return l10n.losers;
-      case 'alphabetical':
-        return l10n.alphabetical;
       case 'portfolioRatio':
         return l10n.portfolioRatio;
       default:
@@ -596,7 +467,6 @@ class _StocksScreenState extends State<StocksScreen>
       case 'losers':
         // Negatif performans gösterenler (zarar edenler)
         return position.profitLoss < 0;
-      case 'alphabetical':
       case 'portfolioRatio':
         // Sıralama filtreleri - tüm hisseleri göster
         return true;
@@ -607,84 +477,23 @@ class _StocksScreenState extends State<StocksScreen>
   }
 
   /// Sort stocks based on current filter
-  List<Widget> _sortStocks(List<Widget> stocks, StockProvider stockProvider) {
-    if (_selectedFilter == 'alphabetical') {
-      // Alfabetik sıralama için stocks listesini yeniden oluştur
-      final sortedStocks = <Widget>[];
-      final stockPositions = <String, StockPosition>{};
-      
-      // Pozisyonları map'e çevir
-      for (final position in stockProvider.stockPositions) {
-        stockPositions[position.stockSymbol] = position;
+  void _sortStocksList(List<Stock> stocks, List<StockPosition?> positions, StockProvider stockProvider) {
+    if (_selectedFilter == 'portfolioRatio') {
+      // Portföy oranına göre sıralama (en büyük değer önce)
+      final combined = List.generate(stocks.length, (i) => {'stock': stocks[i], 'position': positions[i]});
+      combined.sort((a, b) {
+        final posA = a['position'] as StockPosition?;
+        final posB = b['position'] as StockPosition?;
+        if (posA == null || posB == null) return 0;
+        return posB.currentValue.compareTo(posA.currentValue);
+      });
+      stocks.clear();
+      positions.clear();
+      for (var item in combined) {
+        stocks.add(item['stock'] as Stock);
+        positions.add(item['position'] as StockPosition?);
       }
-      
-      // Hisse sembollerini alfabetik sırala
-      final sortedSymbols = stockProvider.watchedStocks
-          .where((stock) => stockPositions.containsKey(stock.symbol) && 
-                           stockPositions[stock.symbol]!.totalQuantity > 0)
-          .map((stock) => stock.symbol)
-          .toList()
-        ..sort();
-      
-      // Sıralı şekilde widget'ları oluştur
-      for (final symbol in sortedSymbols) {
-        final stock = stockProvider.watchedStocks.firstWhere((s) => s.symbol == symbol);
-        final position = stockPositions[symbol]!;
-        
-        sortedStocks.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: ExpandableStockCard(
-              stock: stock,
-              position: position,
-              onTap: () => _showStockDetail(stock),
-            ),
-          ),
-        );
-      }
-      
-      return sortedStocks;
-    } else if (_selectedFilter == 'portfolioRatio') {
-      // Portföy oranına göre sıralama
-      final sortedStocks = <Widget>[];
-      final stockPositions = <String, StockPosition>{};
-      
-      // Pozisyonları map'e çevir
-      for (final position in stockProvider.stockPositions) {
-        stockPositions[position.stockSymbol] = position;
-      }
-      
-      // Hisse sembollerini portföy oranına göre sırala
-      final sortedSymbols = stockProvider.watchedStocks
-          .where((stock) => stockPositions.containsKey(stock.symbol) && 
-                           stockPositions[stock.symbol]!.totalQuantity > 0)
-          .toList()
-        ..sort((a, b) {
-          final positionA = stockPositions[a.symbol]!;
-          final positionB = stockPositions[b.symbol]!;
-          return positionB.currentValue.compareTo(positionA.currentValue);
-        });
-      
-      // Sıralı şekilde widget'ları oluştur
-      for (final stock in sortedSymbols) {
-        final position = stockPositions[stock.symbol]!;
-        
-        sortedStocks.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: ExpandableStockCard(
-              stock: stock,
-              position: position,
-              onTap: () => _showStockDetail(stock),
-            ),
-          ),
-        );
-      }
-      
-      return sortedStocks;
     }
-    
-    return stocks;
   }
 
   Widget _buildContent(StockProvider stockProvider, bool isDark) {
@@ -698,7 +507,8 @@ class _StocksScreenState extends State<StocksScreen>
       return _buildEmptyPortfolioState(isDark);
     } else {
       // Pozisyonu olan hisseleri filtrele
-      final stocksWithPositions = <Widget>[];
+      final stocksWithPositions = <Stock>[];
+      final positions = <StockPosition?>[];
       
       for (int index = 0; index < stockProvider.watchedStocks.length; index++) {
         final stock = stockProvider.watchedStocks[index];
@@ -715,16 +525,8 @@ class _StocksScreenState extends State<StocksScreen>
         final hasPosition = position != null && position.totalQuantity > 0;
 
         if (hasPosition && _shouldShowStock(position!)) {
-          stocksWithPositions.add(
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: ExpandableStockCard(
-                stock: stock,
-                position: position,
-                onTap: () => _showStockDetail(stock),
-              ),
-            ),
-          );
+          stocksWithPositions.add(stock);
+          positions.add(position);
         }
       }
 
@@ -739,10 +541,44 @@ class _StocksScreenState extends State<StocksScreen>
       }
 
       // Sıralama uygula
-      final sortedStocks = _sortStocks(stocksWithPositions, stockProvider);
+      _sortStocksList(stocksWithPositions, positions, stockProvider);
 
-      // Hisse listesi
-      return Column(children: sortedStocks);
+      // Hisse listesi - Divider ile ayrılmış
+      return Column(
+        children: List.generate(
+          stocksWithPositions.length,
+          (index) {
+            final stock = stocksWithPositions[index];
+            final position = positions[index];
+            
+            return Column(
+              children: [
+                CompactStockCard(
+                  stock: stock,
+                  position: position,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StockDetailPage(
+                        stock: stock,
+                        position: position,
+                      ),
+                    ),
+                  ),
+                ),
+                if (index < stocksWithPositions.length - 1)
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: isDark 
+                        ? const Color(0xFF38383A) 
+                        : const Color(0xFFE5E5EA),
+                  ),
+              ],
+            );
+          },
+        ),
+      );
     }
   }
 
