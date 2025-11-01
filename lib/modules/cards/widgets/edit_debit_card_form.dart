@@ -5,6 +5,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/bank_service.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 
@@ -25,6 +26,8 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
 
   String? _selectedBankCode;
   bool _isLoading = false;
+  List<BankModel> _availableBanks = [];
+  bool _isLoadingBanks = false;
 
   // Helper methods to extract data from either DebitCardModel or Map
   String get cardId {
@@ -63,6 +66,7 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
   void initState() {
     super.initState();
     _initializeForm();
+    _loadBanks();
   }
 
   void _initializeForm() {
@@ -70,6 +74,55 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
     _selectedBankCode = bankCode;
     _cardNameController.text = cardName ?? '';
     _balanceController.text = CurrencyUtils.formatAmountWithoutSymbol(balance, themeProvider.currency);
+  }
+
+  /// Bankaları yükle (dinamik)
+  Future<void> _loadBanks() async {
+    setState(() {
+      _isLoadingBanks = true;
+    });
+
+    try {
+      final bankService = BankService();
+      await bankService.loadBanks();
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      _availableBanks = bankService.getAvailableBanks(currency: themeProvider.currency);
+      
+      // Fallback: Eğer hiç banka yoksa static listeyi kullan
+      if (_availableBanks.isEmpty) {
+        final staticBanks = AppConstants.getAvailableBanks();
+        _availableBanks = staticBanks.map((code) {
+          return BankModel(
+            code: code,
+            name: AppConstants.getBankName(code),
+            gradientColors: AppConstants.getBankGradientColors(code)
+                .map((c) => c.value)
+                .toList(),
+            accentColor: AppConstants.getBankAccentColor(code).value,
+            isActive: true,
+          );
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading banks: $e');
+      // Fallback: Static banks
+      final staticBanks = AppConstants.getAvailableBanks();
+      _availableBanks = staticBanks.map((code) {
+        return BankModel(
+          code: code,
+          name: AppConstants.getBankName(code),
+          gradientColors: AppConstants.getBankGradientColors(code)
+              .map((c) => c.value)
+              .toList(),
+          accentColor: AppConstants.getBankAccentColor(code).value,
+          isActive: true,
+        );
+      }).toList();
+    } finally {
+      setState(() {
+        _isLoadingBanks = false;
+      });
+    }
   }
 
   @override
@@ -96,9 +149,13 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
 
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final locale = themeProvider.currency.locale;
 
-      final balance =
-          double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0;
+      final balance = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _balanceController.text,
+        locale,
+      );
 
       final updatedAccount = await unifiedProvider.updateAccount(
         accountId: cardId,
@@ -298,11 +355,13 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                         dropdownColor: isDark
                             ? const Color(0xFF2C2C2E)
                             : Colors.white,
-                        items: AppConstants.getAvailableBanks().map((bankCode) {
+                        items: _isLoadingBanks
+                            ? [DropdownMenuItem(value: _selectedBankCode, child: const Text('Yükleniyor...'))]
+                            : _availableBanks.map((bank) {
                           return DropdownMenuItem(
-                            value: bankCode,
+                                  value: bank.code,
                             child: Text(
-                              AppConstants.getBankName(bankCode),
+                                    bank.name,
                               style: GoogleFonts.inter(
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
@@ -384,60 +443,65 @@ class _EditDebitCardFormState extends State<EditDebitCardForm> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _balanceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [ThousandsSeparatorInputFormatter()],
-                      decoration: InputDecoration(
-                        hintText: '0,00',
-                        suffixText: Provider.of<ThemeProvider>(
-                          context,
-                          listen: false,
-                        ).currency.symbol,
-                        filled: true,
-                        fillColor: isDark
-                            ? const Color(0xFF2C2C2E)
-                            : const Color(0xFFF2F2F7),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: isDark
-                                ? const Color(0xFF38383A)
-                                : const Color(0xFFE5E5EA),
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        final locale = themeProvider.currency.locale;
+                        return TextFormField(
+                          controller: _balanceController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
                           ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: isDark
-                                ? const Color(0xFF38383A)
-                                : const Color(0xFFE5E5EA),
+                          inputFormatters: [
+                            ThousandsSeparatorInputFormatter(locale: locale)
+                          ],
+                          decoration: InputDecoration(
+                            hintText: '0,00',
+                            suffixText: themeProvider.currency.symbol,
+                            filled: true,
+                            fillColor: isDark
+                                ? const Color(0xFF2C2C2E)
+                                : const Color(0xFFF2F2F7),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF38383A)
+                                    : const Color(0xFFE5E5EA),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF38383A)
+                                    : const Color(0xFFE5E5EA),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF6D6D70),
+                                width: 2,
+                              ),
+                            ),
                           ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF6D6D70),
-                            width: 2,
+                          style: GoogleFonts.inter(
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                        ),
-                      ),
-                      style: GoogleFonts.inter(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Bakiye gerekli';
-                        }
-                        final amount = double.tryParse(
-                          value.replaceAll(',', ''),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Bakiye gerekli';
+                            }
+                            final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+                              value,
+                              locale,
+                            );
+                            if (amount < 0) {
+                              return 'Geçerli bir tutar girin';
+                            }
+                            return null;
+                          },
                         );
-                        if (amount == null || amount < 0) {
-                          return 'Geçerli bir tutar girin';
-                        }
-                        return null;
                       },
                     ),
 

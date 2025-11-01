@@ -9,7 +9,7 @@ class ThemeProvider extends ChangeNotifier {
   static const String _currencyKey = 'currency';
   
   ThemeMode _themeMode = ThemeMode.light;
-  Locale _locale = const Locale('tr'); // Default to Turkish
+  Locale _locale = const Locale('en'); // Default to English for global audience
   bool _onboardingCompleted = false;
   Currency _currency = Currency.TRY; // Default to Turkish Lira
   
@@ -20,6 +20,7 @@ class ThemeProvider extends ChangeNotifier {
   
   bool get isDarkMode => _themeMode == ThemeMode.dark;
   bool get isTurkish => _locale.languageCode == 'tr';
+  bool get isGerman => _locale.languageCode == 'de';
 
   ThemeProvider() {
     _loadPreferences();
@@ -33,7 +34,7 @@ class ThemeProvider extends ChangeNotifier {
     _themeMode = ThemeMode.values[themeIndex];
     
     // Load locale
-    final localeCode = prefs.getString(_localeKey) ?? 'tr';
+    final localeCode = prefs.getString(_localeKey) ?? 'en';
     _locale = Locale(localeCode);
     
     // Load currency

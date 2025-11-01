@@ -44,6 +44,10 @@
   "@turkish": {
     "description": "Turkish language option"
   },
+  "german": "German",
+  "@german": {
+    "description": "German language option"
+  },
   "login": "Login",
   "@login": {
     "description": "Login button text"
@@ -364,9 +368,9 @@
   "@addExpense": {
     "description": "Add expense button text"
   },
-  "expenseLimitTracking": "Expense Limit Tracking",
+  "expenseLimitTracking": "My Budgets",
   "@expenseLimitTracking": {
-    "description": "Expense limit tracking title"
+    "description": "My budgets title - user's personal budgets section"
   },
   "future": "Future",
   "@future": {
@@ -840,6 +844,14 @@
   "@installmentOptions": {
     "description": "Installment options"
   },
+  "singlePayment": "Single Payment",
+  "@singlePayment": {
+    "description": "Single payment (no installments)"
+  },
+  "howManyInstallments": "How many installments?",
+  "@howManyInstallments": {
+    "description": "How many installments question"
+  },
   "installmentOptionsDesc": "Convert your purchases to installments",
   "@installmentOptionsDesc": {
     "description": "Installment options description"
@@ -1100,6 +1112,10 @@
   "@subscription": {
     "description": "Subscription category"
   },
+  "thisIsSubscription": "This is a subscription",
+  "@thisIsSubscription": {
+    "description": "Checkbox label for recurring transaction"
+  },
   "utilities": "Utilities",
   "@utilities": {
     "description": "Utilities category"
@@ -1147,6 +1163,28 @@
   "save": "Save",
   "@save": {
     "description": "Save button text"
+  },
+  "automatic": "Automatic",
+  "@automatic": {
+    "description": "Automatic label"
+  },
+  "createdAutomatically": "Created automatically (Subscription)",
+  "@createdAutomatically": {
+    "description": "Note for automatically created subscription transaction"
+  },
+  "automaticPaymentCreated": "Automatic payment created",
+  "@automaticPaymentCreated": {
+    "description": "Notification message for single automatic payment"
+  },
+  "automaticPaymentsCreated": "{count} automatic payments created",
+  "@automaticPaymentsCreated": {
+    "description": "Notification message for multiple automatic payments",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      }
+    }
   },
   "incomeFormOpening": "Income form will open",
   "@incomeFormOpening": {
@@ -2188,6 +2226,22 @@
   "@notificationPermissionRequired": {
     "description": "Notification permission required message"
   },
+  "enableNotifications": "Enable Notifications",
+  "@enableNotifications": {
+    "description": "Enable notifications dialog title"
+  },
+  "subscriptionNotificationPermissionMessage": "Would you like to receive automatic notifications for subscription payments? Notifications will remind you when payments are made and about upcoming payment dates.",
+  "@subscriptionNotificationPermissionMessage": {
+    "description": "Subscription notification permission explanation message"
+  },
+  "notNow": "Not Now",
+  "@notNow": {
+    "description": "Not now button text"
+  },
+  "enable": "Enable",
+  "@enable": {
+    "description": "Enable button text"
+  },
   "frequentlyAskedQuestions": "Frequently Asked Questions",
   "@frequentlyAskedQuestions": {
     "description": "FAQ section title"
@@ -2337,6 +2391,10 @@
   "perMonth": "/month",
   "@perMonth": {
     "description": "Per month indicator"
+  },
+  "perDay": "/day",
+  "@perDay": {
+    "description": "Per day indicator"
   },
   "income": "Income",
   "@income": {
@@ -3593,6 +3651,10 @@
   "@averagePrice": {
     "description": "Average price label"
   },
+  "avg": "Avg",
+  "@avg": {
+    "description": "Average (short form)"
+  },
   "noTransactionsYet": "No transactions yet",
   "@noTransactionsYet": {
     "description": "No transactions message"
@@ -4243,7 +4305,11 @@
   },
   "pieces": "lot",
   "@pieces": {
-    "description": "Pieces unit"
+    "description": "Pieces unit (singular)"
+  },
+  "piecesPlural": "lots",
+  "@piecesPlural": {
+    "description": "Pieces unit (plural)"
   },
   "noTransactionsFound": "No transactions found",
   "@noTransactionsFound": {
@@ -4801,7 +4867,11 @@
   },
   "pieces": "lot",
   "@pieces": {
-    "description": "Pieces unit"
+    "description": "Pieces unit (singular)"
+  },
+  "piecesPlural": "lots",
+  "@piecesPlural": {
+    "description": "Pieces unit (plural)"
   },
   "executeTransaction": "Execute {transactionType} Transaction",
   "@executeTransaction": {
@@ -4895,7 +4965,11 @@
   },
   "pieces": "lot",
   "@pieces": {
-    "description": "Pieces unit"
+    "description": "Pieces unit (singular)"
+  },
+  "piecesPlural": "lots",
+  "@piecesPlural": {
+    "description": "Pieces unit (plural)"
   },
   "commissionRate": "Commission Rate:",
   "@commissionRate": {
@@ -6119,42 +6193,6 @@
   "normalSpendingExplanation": "You are spending between 8-15% of your daily budget. This is a healthy spending rate.",
   "slowSpendingExplanation": "You are spending less than 8% of your daily budget. You are saving!",
   "defaultSpendingExplanation": "This amount is your total budget divided by remaining days.",
-  "analyticsConsentTitle": "Help Us Improve the App",
-  "@analyticsConsentTitle": {
-    "description": "Analytics consent modal title"
-  },
-  "analyticsConsentMessage": "We want to make Qanta better for you! By collecting anonymous spending data, we can improve the app and offer better features.\n\n• Your data is completely anonymous\n• Personal information is never shared\n• Only spending amounts and categories are collected\n• You can opt out anytime",
-  "@analyticsConsentMessage": {
-    "description": "Analytics consent modal message"
-  },
-  "analyticsAccept": "I Accept",
-  "@analyticsAccept": {
-    "description": "Accept analytics consent button"
-  },
-  "analyticsDecline": "No, Thanks",
-  "@analyticsDecline": {
-    "description": "Decline analytics consent button"
-  },
-  "analyticsConsentNotice": "You can change this permission in Profile > Preferences.",
-  "@analyticsConsentNotice": {
-    "description": "Analytics consent change notice"
-  },
-  "anonymousDataCollection": "Anonymous Data Collection",
-  "@anonymousDataCollection": {
-    "description": "Anonymous data collection setting title"
-  },
-  "anonymousDataCollectionSubtitle": "Share anonymous spending data\nto help improve the app",
-  "@anonymousDataCollectionSubtitle": {
-    "description": "Anonymous data collection setting subtitle"
-  },
-  "analyticsEnabled": "Anonymous data collection enabled",
-  "@analyticsEnabled": {
-    "description": "Analytics enabled message"
-  },
-  "analyticsDisabled": "Anonymous data collection disabled",
-  "@analyticsDisabled": {
-    "description": "Analytics disabled message"
-  },
   "cardLimitReached": "Card Limit Reached",
   "@cardLimitReached": {
     "description": "Card limit reached title"
@@ -6162,6 +6200,24 @@
   "cardLimitReachedMessage": "You can add up to 3 cards in the free version",
   "@cardLimitReachedMessage": {
     "description": "Card limit reached message"
+  },
+  "cardLimitExceeded": "Card Limit",
+  "@cardLimitExceeded": {
+    "description": "Card limit exceeded title for downgraded users"
+  },
+  "cardLimitExceededMessage": "You have {totalCards} cards (from Premium plan)\n\nFree users can use max 3 cards. Please delete {deleteCount} cards or upgrade to Premium.",
+  "@cardLimitExceededMessage": {
+    "description": "Card limit exceeded message with parameters",
+    "placeholders": {
+      "totalCards": {
+        "type": "int",
+        "example": "5"
+      },
+      "deleteCount": {
+        "type": "int",
+        "example": "2"
+      }
+    }
   },
   "upgradeToPremium": "Upgrade to Premium",
   "@upgradeToPremium": {
@@ -6488,6 +6544,22 @@
   "@aiChatError": {
     "description": "AI chat error message"
   },
+  "aiImageAnalysisError": "An error occurred while analyzing the image. Please try again.",
+  "@aiImageAnalysisError": {
+    "description": "AI image analysis error message"
+  },
+  "aiCategoryCreationError": "An error occurred while creating the category. Please try again.",
+  "@aiCategoryCreationError": {
+    "description": "AI category creation error message"
+  },
+  "watchAdBonus": "Watch Ad (+5 Bonus)",
+  "@watchAdBonus": {
+    "description": "Watch ad to get bonus button text"
+  },
+  "adLoading": "Loading Ad...",
+  "@adLoading": {
+    "description": "Ad loading text"
+  },
   "aiChatTransactionSuccess": "Transaction saved successfully!\n\nWould you like to add another transaction? 😊",
   "@aiChatTransactionSuccess": {
     "description": "Transaction saved successfully message"
@@ -6786,6 +6858,40 @@
   "@unlockAllFeatures": {
     "description": "Unlock all features subtitle"
   },
+  "welcomeCampaign": "Welcome Campaign!",
+  "@welcomeCampaign": {
+    "description": "Welcome campaign banner title"
+  },
+  "monthlyPremiumOnly": "Monthly premium only {price}",
+  "@monthlyPremiumOnly": {
+    "description": "Monthly premium price in campaign",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$2.99"
+      }
+    }
+  },
+  "percentDiscount": "{percent}% OFF",
+  "@percentDiscount": {
+    "description": "Percent discount label",
+    "placeholders": {
+      "percent": {
+        "type": "String",
+        "example": "50"
+      }
+    }
+  },
+  "daysRemaining": "{days} days",
+  "@daysRemaining": {
+    "description": "Days remaining label",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
   "comparePlans": "Compare Plans",
   "@comparePlans": {
     "description": "Compare plans section title"
@@ -6856,5 +6962,909 @@
   "featureEarlyAccessDescription": "Early access to new features",
   "@featureEarlyAccessDescription": {
     "description": "Early access to new features"
+  },
+  "skip": "Skip",
+  "@skip": {
+    "description": "Skip button text"
+  },
+  "premiumWelcomeTitle": "Welcome to Premium!",
+  "@premiumWelcomeTitle": {
+    "description": "Premium onboarding welcome title"
+  },
+  "premiumWelcomeSubtitle": "Thank you for upgrading. You now have access to all premium features.",
+  "@premiumWelcomeSubtitle": {
+    "description": "Premium onboarding welcome subtitle"
+  },
+  "premiumFeaturesTitle": "Your Premium Features",
+  "@premiumFeaturesTitle": {
+    "description": "Premium features page title"
+  },
+  "premiumFeatureAI": "Unlimited AI Insights",
+  "@premiumFeatureAI": {
+    "description": "Premium AI insights feature"
+  },
+  "premiumFeatureReports": "Advanced Reports & Analytics",
+  "@premiumFeatureReports": {
+    "description": "Premium reports feature"
+  },
+  "premiumFeatureCards": "Unlimited Cards & Accounts",
+  "@premiumFeatureCards": {
+    "description": "Premium unlimited cards feature"
+  },
+  "premiumFeatureStocks": "Unlimited Stock Tracking",
+  "@premiumFeatureStocks": {
+    "description": "Premium unlimited stocks feature"
+  },
+  "premiumFeatureNoAds": "Ad-Free Experience",
+  "@premiumFeatureNoAds": {
+    "description": "Premium no ads feature"
+  },
+  "premiumReadyTitle": "You're All Set!",
+  "@premiumReadyTitle": {
+    "description": "Premium ready title"
+  },
+  "premiumReadySubtitle": "Start your premium journey and take control of your finances.",
+  "@premiumReadySubtitle": {
+    "description": "Premium ready subtitle"
+  },
+  "savings": "Savings",
+  "@savings": {
+    "description": "Savings tab title"
+  },
+  "totalSavings": "Total Savings",
+  "@totalSavings": {
+    "description": "Total savings label"
+  },
+  "myGoals": "My Goals",
+  "@myGoals": {
+    "description": "My goals header"
+  },
+  "goals": "Goals",
+  "@goals": {
+    "description": "Goals plural"
+  },
+  "noSavingsGoals": "No Savings Goals Yet",
+  "@noSavingsGoals": {
+    "description": "No savings goals empty state"
+  },
+  "createFirstGoal": "Create your first savings goal and start building your financial future!",
+  "@createFirstGoal": {
+    "description": "Create first goal description"
+  },
+  "createGoal": "Create Goal",
+  "@createGoal": {
+    "description": "Create goal button"
+  },
+  "createSavingsGoal": "Create Savings Goal",
+  "@createSavingsGoal": {
+    "description": "Create savings goal title"
+  },
+  "goalName": "Goal Name",
+  "@goalName": {
+    "description": "Goal name label"
+  },
+  "enterGoalName": "Enter goal name",
+  "@enterGoalName": {
+    "description": "Enter goal name hint"
+  },
+  "pleaseEnterGoalName": "Please enter a goal name",
+  "@pleaseEnterGoalName": {
+    "description": "Goal name validation message"
+  },
+  "targetAmount": "Target Amount",
+  "@targetAmount": {
+    "description": "Target amount label"
+  },
+  "currentAmount": "Current Amount",
+  "@currentAmount": {
+    "description": "Current amount label"
+  },
+  "current": "Current",
+  "@current": {
+    "description": "Current label"
+  },
+  "remaining": "Remaining",
+  "@remaining": {
+    "description": "Remaining label"
+  },
+  "target": "Target",
+  "@target": {
+    "description": "Target label"
+  },
+  "targetDate": "Target Date",
+  "@targetDate": {
+    "description": "Target date label"
+  },
+  "selectDate": "Select Date",
+  "@selectDate": {
+    "description": "Select date hint"
+  },
+  "selectColor": "Select Color",
+  "@selectColor": {
+    "description": "Select color label"
+  },
+  "optional": "Optional",
+  "@optional": {
+    "description": "Optional field indicator"
+  },
+  "goalCreatedSuccessfully": "Goal created successfully!",
+  "@goalCreatedSuccessfully": {
+    "description": "Goal created success message"
+  },
+  "pleaseEnterAmount": "Please enter an amount",
+  "@pleaseEnterAmount": {
+    "description": "Amount validation message"
+  },
+  "pleaseEnterValidAmount": "Please enter a valid amount",
+  "@pleaseEnterValidAmount": {
+    "description": "Valid amount validation message"
+  },
+  "days": "days",
+  "@days": {
+    "description": "Days label"
+  },
+  "day": "day",
+  "@day": {
+    "description": "Day label singular"
+  },
+  "category": "Category",
+  "@category": {
+    "description": "Category label"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error title"
+  },
+  "archived": "Archived",
+  "@archived": {
+    "description": "Archived goals section title"
+  },
+  "completed": "Completed",
+  "@completed": {
+    "description": "Completed goals section title"
+  },
+  "goalInfoFailed": "Goal information could not be loaded. Please refresh the page.",
+  "@goalInfoFailed": {
+    "description": "Goal info load failed message"
+  },
+  "goalNotFound": "Goal Not Found",
+  "@goalNotFound": {
+    "description": "Goal not found title"
+  },
+  "savingsCompleted": "Savings Completed",
+  "@savingsCompleted": {
+    "description": "Savings completed badge"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Add button"
+  },
+  "addSavings": "Add savings",
+  "@addSavings": {
+    "description": "Add savings subtitle"
+  },
+  "withdraw": "Withdraw",
+  "@withdraw": {
+    "description": "Withdraw button"
+  },
+  "withdrawMoney": "Withdraw money",
+  "@withdrawMoney": {
+    "description": "Withdraw money subtitle"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit button"
+  },
+  "editGoal": "Edit goal",
+  "@editGoal": {
+    "description": "Edit goal subtitle"
+  },
+  "unarchive": "Unarchive",
+  "@unarchive": {
+    "description": "Unarchive button"
+  },
+  "activate": "Activate",
+  "@activate": {
+    "description": "Activate button"
+  },
+  "archive": "Archive",
+  "@archive": {
+    "description": "Archive button"
+  },
+  "activateGoal": "Activate goal",
+  "@activateGoal": {
+    "description": "Activate goal subtitle"
+  },
+  "restartGoal": "Restart goal",
+  "@restartGoal": {
+    "description": "Restart goal subtitle"
+  },
+  "archiveGoal": "Archive goal",
+  "@archiveGoal": {
+    "description": "Archive goal subtitle"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button"
+  },
+  "deleteGoal": "Delete goal",
+  "@deleteGoal": {
+    "description": "Delete goal subtitle"
+  },
+  "transactionHistory": "Transaction History",
+  "@transactionHistory": {
+    "description": "Transaction history title"
+  },
+  "progress": "Progress",
+  "@progress": {
+    "description": "Progress label"
+  },
+  "remainingDays": "Remaining Days",
+  "@remainingDays": {
+    "description": "Remaining days label"
+  },
+  "monthlyTarget": "Monthly Target",
+  "@monthlyTarget": {
+    "description": "Monthly target label"
+  },
+  "noTransactionsYet": "No transactions yet",
+  "@noTransactionsYet": {
+    "description": "No transactions yet message"
+  },
+  "noTransactionsHint": "You can use the buttons above\nto make your first transaction",
+  "@noTransactionsHint": {
+    "description": "No transactions hint message"
+  },
+  "savingsAdded": "Savings Added",
+  "@savingsAdded": {
+    "description": "Savings added label"
+  },
+  "moneyWithdrawn": "Money Withdrawn",
+  "@moneyWithdrawn": {
+    "description": "Money withdrawn label"
+  },
+  "today": "Today",
+  "@today": {
+    "description": "Today label"
+  },
+  "yesterday": "Yesterday",
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
+  "invalidGoal": "Invalid goal",
+  "@invalidGoal": {
+    "description": "Invalid goal message"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "goalArchived": "Goal archived",
+  "@goalArchived": {
+    "description": "Goal archived message"
+  },
+  "goalActivated": "Goal activated",
+  "@goalActivated": {
+    "description": "Goal activated message"
+  },
+  "goalReactivated": "Goal reactivated",
+  "@goalReactivated": {
+    "description": "Goal reactivated message"
+  },
+  "markAsCompleted": "Mark as Completed",
+  "@markAsCompleted": {
+    "description": "Mark as completed button"
+  },
+  "completedButton": "Completed",
+  "@completedButton": {
+    "description": "Completed button"
+  },
+  "goalCompletedImpact": "Completed %{percent} of the goal",
+  "@goalCompletedImpact": {
+    "description": "Goal completion impact text",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "archiveGoalDialogTitle": "Archive Goal?",
+  "@archiveGoalDialogTitle": {
+    "description": "Archive goal dialog title"
+  },
+  "archiveGoalDialogContent": "The goal will be archived. You can access it later from the archive.",
+  "@archiveGoalDialogContent": {
+    "description": "Archive goal dialog content"
+  },
+  "unarchiveGoalDialogTitle": "Unarchive?",
+  "@unarchiveGoalDialogTitle": {
+    "description": "Unarchive goal dialog title"
+  },
+  "unarchiveGoalDialogContent": "The goal will be unarchived and added to your active goals.",
+  "@unarchiveGoalDialogContent": {
+    "description": "Unarchive goal dialog content"
+  },
+  "activateGoalDialogTitle": "Activate Goal?",
+  "@activateGoalDialogTitle": {
+    "description": "Activate goal dialog title"
+  },
+  "activateGoalDialogContent": "The completed goal will be reactivated and you can continue working on it.",
+  "@activateGoalDialogContent": {
+    "description": "Activate goal dialog content"
+  },
+  "completeGoalDialogTitle": "🎉 Congratulations!",
+  "@completeGoalDialogTitle": {
+    "description": "Complete goal dialog title"
+  },
+  "completeGoalDialogContent": "You've completed your goal! Would you like to mark it as completed?",
+  "@completeGoalDialogContent": {
+    "description": "Complete goal dialog content"
+  },
+  "deleteGoalDialogTitle": "Delete Goal?",
+  "@deleteGoalDialogTitle": {
+    "description": "Delete goal dialog title"
+  },
+  "deleteGoalDialogContent": "This action cannot be undone. The goal and all transaction history will be deleted.",
+  "@deleteGoalDialogContent": {
+    "description": "Delete goal dialog content"
+  },
+  "goalCompletedSuccess": "🎉 Awesome! You've completed your goal!",
+  "@goalCompletedSuccess": {
+    "description": "Goal completed success message"
+  },
+  "pleaseSelectAccount": "Please select an account",
+  "@pleaseSelectAccount": {
+    "description": "Please select account validation"
+  },
+  "transactionFailed": "Transaction failed",
+  "@transactionFailed": {
+    "description": "Transaction failed message"
+  },
+  "addSavingsTitle": "Add Savings",
+  "@addSavingsTitle": {
+    "description": "Add savings form title"
+  },
+  "withdrawTitle": "Withdraw Money",
+  "@withdrawTitle": {
+    "description": "Withdraw form title"
+  },
+  "savingsDeposited": "Money deposited!",
+  "@savingsDeposited": {
+    "description": "Money deposited success message"
+  },
+  "savingsWithdrawn": "Money withdrawn!",
+  "@savingsWithdrawn": {
+    "description": "Money withdrawn success message"
+  },
+  "depositNoteHint": "e.g. Payday savings",
+  "@depositNoteHint": {
+    "description": "Deposit note hint text"
+  },
+  "withdrawNoteHint": "e.g. Emergency need",
+  "@withdrawNoteHint": {
+    "description": "Withdraw note hint text"
+  },
+  "savingsGoalImpactDeposit": "Completed {percentage}% of goal",
+  "@savingsGoalImpactDeposit": {
+    "description": "Savings goal deposit impact message",
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsGoalImpactWithdraw": "Decreased by {percentage}% from goal",
+  "@savingsGoalImpactWithdraw": {
+    "description": "Savings goal withdraw impact message",
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "Amount label"
+  },
+  "insufficientBalance": "Insufficient balance",
+  "@insufficientBalance": {
+    "description": "Insufficient balance error"
+  },
+  "editSavingsGoal": "Edit Savings",
+  "@editSavingsGoal": {
+    "description": "Edit savings goal title"
+  },
+  "savingsName": "Savings Name",
+  "@savingsName": {
+    "description": "Savings name label"
+  },
+  "enterGoalNameHint": "Enter goal name",
+  "@enterGoalNameHint": {
+    "description": "Enter goal name hint"
+  },
+  "pleaseEnterGoalNameError": "Please enter goal name",
+  "@pleaseEnterGoalNameError": {
+    "description": "Please enter goal name error"
+  },
+  "selectDateHint": "Select date",
+  "@selectDateHint": {
+    "description": "Select date hint"
+  },
+  "color": "Color",
+  "@color": {
+    "description": "Color label"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "Update button"
+  },
+  "milestone25Title": "Great Start!",
+  "@milestone25Title": {
+    "description": "25% milestone title"
+  },
+  "milestone50Title": "Halfway There!",
+  "@milestone50Title": {
+    "description": "50% milestone title"
+  },
+  "milestone75Title": "Almost Done!",
+  "@milestone75Title": {
+    "description": "75% milestone title"
+  },
+  "milestone100Title": "Savings Completed!",
+  "@milestone100Title": {
+    "description": "100% milestone title"
+  },
+  "milestoneDefaultTitle": "Congratulations!",
+  "@milestoneDefaultTitle": {
+    "description": "Default milestone title"
+  },
+  "milestone25Message": "You've reached 25% of your goal! Keep going!",
+  "@milestone25Message": {
+    "description": "25% milestone message"
+  },
+  "milestone50Message": "You've completed half of your goal! Great progress!",
+  "@milestone50Message": {
+    "description": "50% milestone message"
+  },
+  "milestone75Message": "You've reached 75% of your goal! Final sprint!",
+  "@milestone75Message": {
+    "description": "75% milestone message"
+  },
+  "milestone100Message": "You've completed your goal! Amazing achievement!",
+  "@milestone100Message": {
+    "description": "100% milestone message"
+  },
+  "milestoneDefaultMessage": "You're one step closer to your goal!",
+  "@milestoneDefaultMessage": {
+    "description": "Default milestone message"
+  },
+  "fromWhichAccount": "From Which Account?",
+  "@fromWhichAccount": {
+    "description": "From which account label"
+  },
+  "toWhichAccount": "To Which Account?",
+  "@toWhichAccount": {
+    "description": "To which account label"
+  },
+  "optionalField": "(Optional)",
+  "@optionalField": {
+    "description": "Optional field indicator"
+  },
+  "perMonth": "/mo",
+  "@perMonth": {
+    "description": "Per month unit"
+  },
+  "daysUnit": "days",
+  "@daysUnit": {
+    "description": "Days unit"
+  },
+  "monthsUnit": "mo",
+  "@monthsUnit": {
+    "description": "Months unit"
+  },
+  "yearsUnit": "yr",
+  "@yearsUnit": {
+    "description": "Years unit"
+  },
+  "timeRemaining": "remaining",
+  "@timeRemaining": {
+    "description": "Time remaining (lowercase)"
+  },
+  "aiUsageLimit": "AI Usage Limit",
+  "@aiUsageLimit": {
+    "description": "AI usage limit title"
+  },
+  "remainingCount": "{count} remaining",
+  "@remainingCount": {
+    "description": "Remaining count message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messages": "messages",
+  "@messages": {
+    "description": "Messages label"
+  },
+  "watchAdBonusInfo": "Watch an ad to earn +5 extra usage rights",
+  "@watchAdBonusInfo": {
+    "description": "Watch ad bonus info message"
+  },
+  "maxBonusRemaining": "You can earn up to {count} more bonus per day",
+  "@maxBonusRemaining": {
+    "description": "Maximum bonus remaining message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unlimitedAIWithPremium": "Unlimited AI usage with Premium",
+  "@unlimitedAIWithPremium": {
+    "description": "Unlimited AI with premium message"
+  },
+  "upgradeToPremium": "Upgrade to Premium",
+  "@upgradeToPremium": {
+    "description": "Upgrade to premium button text"
+  },
+  "adLoadingWait": "Ad is loading, please wait...",
+  "@adLoadingWait": {
+    "description": "Ad loading wait message"
+  },
+  "dailyUsage": "Daily usage",
+  "@dailyUsage": {
+    "description": "Daily usage label"
+  },
+  "rights": "rights",
+  "@rights": {
+    "description": "Rights label (usage rights)"
+  },
+  "watchAdBonusShort": "Watch Ad (+5)",
+  "@watchAdBonusShort": {
+    "description": "Watch ad bonus short button text"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading text"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
+  },
+  "adLoadError": "An error occurred while loading the ad",
+  "@adLoadError": {
+    "description": "Ad load error message"
+  },
+  "noDescription": "No description",
+  "@noDescription": {
+    "description": "No description text for savings transactions"
+  },
+  "insufficientBalance": "Insufficient balance",
+  "@insufficientBalance": {
+    "description": "Insufficient balance error"
+  },
+  "insufficientBalanceDetail": "This account doesn't have enough balance",
+  "@insufficientBalanceDetail": {
+    "description": "Insufficient balance detail message"
+  },
+  "insufficientSavings": "Insufficient savings",
+  "@insufficientSavings": {
+    "description": "Insufficient savings error"
+  },
+  "insufficientSavingsDetail": "Available to withdraw from this goal: {amount}",
+  "@insufficientSavingsDetail": {
+    "description": "Insufficient savings detail message with available amount"
+  },
+  "availableBalance": "Available: {amount}",
+  "@availableBalance": {
+    "description": "Available balance label"
+  },
+  "availableBalanceLabel": "Available Balance",
+  "@availableBalanceLabel": {
+    "description": "Available balance text only"
+  },
+  "maxAmount": "Max",
+  "@maxAmount": {
+    "description": "Max amount button"
+  },
+  "amountMustBeGreaterThanZero": "Amount must be greater than 0",
+  "@amountMustBeGreaterThanZero": {
+    "description": "Amount validation error"
+  },
+  "amountExceedsBalance": "Amount exceeds available balance",
+  "@amountExceedsBalance": {
+    "description": "Amount exceeds available balance error"
+  },
+  "amountExceedsSavings": "Amount exceeds available savings",
+  "@amountExceedsSavings": {
+    "description": "Amount exceeds available savings error"
+  },
+  "amountExceedsGoalRemaining": "Amount exceeds goal remaining",
+  "@amountExceedsGoalRemaining": {
+    "description": "Amount exceeds goal remaining amount error"
+  },
+  "goalCompletedTitle": "Goal Completed! 🎉",
+  "@goalCompletedTitle": {
+    "description": "Goal completed dialog title"
+  },
+  "goalCompletedMessage": "Congratulations! You've reached {goalName}!",
+  "@goalCompletedMessage": {
+    "description": "Goal completed message"
+  },
+  "goalCompletedStats": "Saved {amount} in {days} days",
+  "@goalCompletedStats": {
+    "description": "Goal completion stats"
+  },
+  "archiveGoal": "Archive",
+  "@archiveGoal": {
+    "description": "Archive goal button"
+  },
+  "keepActive": "Keep Active",
+  "@keepActive": {
+    "description": "Keep goal active button"
+  },
+  "createNewGoal": "New Goal",
+  "@createNewGoal": {
+    "description": "Create new goal button"
+  },
+  "goalArchivedSuccess": "Goal archived",
+  "@goalArchivedSuccess": {
+    "description": "Goal archived success message"
+  },
+  "budgetAndSubscriptions": "Budget and Subscriptions",
+  "@budgetAndSubscriptions": {
+    "description": "Budget and Subscriptions page title"
+  },
+  "budgets": "Budgets",
+  "@budgets": {
+    "description": "Budgets tab label"
+  },
+  "subscriptions": "Subscriptions",
+  "@subscriptions": {
+    "description": "Subscriptions tab label"
+  },
+  "subscriptionDetails": "Subscription Details",
+  "@subscriptionDetails": {
+    "description": "Subscription details step title"
+  },
+  "subscriptionSchedule": "Schedule",
+  "@subscriptionSchedule": {
+    "description": "Subscription schedule step title"
+  },
+  "paymentAccount": "Payment Account",
+  "@paymentAccount": {
+    "description": "Payment account label"
+  },
+  "summary": "Summary",
+  "@summary": {
+    "description": "Summary step title"
+  },
+  "subscriptionName": "Subscription Name",
+  "@subscriptionName": {
+    "description": "Subscription name field label"
+  },
+  "frequency": "Frequency",
+  "@frequency": {
+    "description": "Frequency label"
+  },
+  "startDate": "Start Date",
+  "@startDate": {
+    "description": "Start date label"
+  },
+  "endDate": "End Date",
+  "@endDate": {
+    "description": "End date label"
+  },
+  "endDateOptional": "End Date (Optional)",
+  "@endDateOptional": {
+    "description": "End date optional label"
+  },
+  "selectDate": "Select Date",
+  "@selectDate": {
+    "description": "Select date button"
+  },
+  "selectAccount": "Select Payment Account",
+  "@selectAccount": {
+    "description": "Select account label"
+  },
+  "reviewSubscription": "Review Subscription",
+  "@reviewSubscription": {
+    "description": "Review subscription label"
+  },
+  "nextPayment": "Next",
+  "@nextPayment": {
+    "description": "Next payment label"
+  },
+  "noSubscriptionsYet": "No subscriptions yet",
+  "@noSubscriptionsYet": {
+    "description": "No subscriptions empty state title"
+  },
+  "addFirstSubscriptionDescription": "Add subscriptions like Netflix, Spotify to track them automatically",
+  "@addFirstSubscriptionDescription": {
+    "description": "Add first subscription description"
+  },
+  "addSubscription": "Add Subscription",
+  "@addSubscription": {
+    "description": "Add subscription button"
+  },
+  "requiredField": "This field is required",
+  "@requiredField": {
+    "description": "Required field validation message"
+  },
+  "invalidAmount": "Please enter a valid amount",
+  "@invalidAmount": {
+    "description": "Invalid amount validation message"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+  "next": "Next",
+  "@next": {
+    "description": "Next button"
+  },
+  "back": "Back",
+  "@back": {
+    "description": "Back button"
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "Amount label"
+  },
+  "deleteSubscription": "Delete Subscription",
+  "@deleteSubscription": {
+    "description": "Delete subscription dialog title"
+  },
+  "deleteSubscriptionConfirm": "Are you sure you want to delete {subscriptionName} subscription?",
+  "@deleteSubscriptionConfirm": {
+    "description": "Delete subscription confirmation message",
+    "placeholders": {
+      "subscriptionName": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDeleted": "Subscription deleted successfully",
+  "@subscriptionDeleted": {
+    "description": "Subscription deleted success message"
+  },
+  "activeSubscriptions": "Active Subscriptions",
+  "@activeSubscriptions": {
+    "description": "Active subscriptions header"
+  },
+  "inactiveSubscriptions": "Inactive Subscriptions",
+  "@inactiveSubscriptions": {
+    "description": "Inactive subscriptions header",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inactiveSubscriptionsWithCount": "{count, plural, =0{Inactive Subscriptions} other{Inactive Subscriptions ({count})}}",
+  "@inactiveSubscriptionsWithCount": {
+    "description": "Inactive subscriptions header with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inactive": "Inactive",
+  "@inactive": {
+    "description": "Inactive badge text"
+  },
+  "monthlyTotal": "Monthly Total",
+  "@monthlyTotal": {
+    "description": "Monthly total label"
+  },
+  "yearlyPrefix": "Yearly:",
+  "@yearlyPrefix": {
+    "description": "Yearly prefix label"
+  },
+  "subscriptionAdded": "Subscription added successfully",
+  "@subscriptionAdded": {
+    "description": "Subscription added success message"
+  },
+  "subscriptionExample": "e.g: Netflix Premium",
+  "@subscriptionExample": {
+    "description": "Subscription name example placeholder"
+  },
+  "available": "Available",
+  "@available": {
+    "description": "Available amount label"
+  },
+  "perMonth": "/ month",
+  "@perMonth": {
+    "description": "Per month suffix"
+  },
+  "active": "Active",
+  "@active": {
+    "description": "Active label"
+  },
+  "tutorialTitle": "Quick Add Transaction",
+  "@tutorialTitle": {
+    "description": "Tutorial title - FAB step"
+  },
+  "tutorialDescription": "Tap the button in the bottom corner to add expenses, income, or transfer transactions.",
+  "@tutorialDescription": {
+    "description": "Tutorial description - FAB step"
+  },
+  "tutorialNext": "Continue",
+  "@tutorialNext": {
+    "description": "Tutorial next button"
+  },
+  "tutorialPrevious": "Previous",
+  "@tutorialPrevious": {
+    "description": "Tutorial previous button"
+  },
+  "tutorialSkip": "Skip",
+  "@tutorialSkip": {
+    "description": "Tutorial skip button"
+  },
+  "tutorialGotIt": "Got it!",
+  "@tutorialGotIt": {
+    "description": "Tutorial completed button"
+  },
+  "tutorialBalanceOverviewTitle": "Total Assets",
+  "@tutorialBalanceOverviewTitle": {
+    "description": "Tutorial title - Balance Overview (Total Assets) step"
+  },
+  "tutorialBalanceOverviewDescription": "Here you can see the total balance of all your accounts, cards, and investments.",
+  "@tutorialBalanceOverviewDescription": {
+    "description": "Tutorial description - Balance Overview step"
+  },
+  "tutorialRecentTransactionsTitle": "Recent Transactions",
+  "@tutorialRecentTransactionsTitle": {
+    "description": "Tutorial title - Recent Transactions step"
+  },
+  "tutorialRecentTransactionsDescription": "All your transactions are displayed here. Long press to edit or delete transactions.",
+  "@tutorialRecentTransactionsDescription": {
+    "description": "Tutorial description - Recent Transactions step"
+  },
+  "tutorialAIChatTitle": "AI Assistant",
+  "@tutorialAIChatTitle": {
+    "description": "Tutorial title - AI Chat step"
+  },
+  "tutorialAIChatDescription": "Chat naturally with AI assistant to add transactions, get financial summaries, perform analysis, bulk delete transactions, and ask any financial questions. You have a powerful financial assistant!",
+  "@tutorialAIChatDescription": {
+    "description": "Tutorial description - AI Chat step"
+  },
+  "tutorialCardsTitle": "Card Management",
+  "@tutorialCardsTitle": {
+    "description": "Tutorial title - Cards section step"
+  },
+  "tutorialCardsDescription": "Here you can view your cards, add new cards, and track your balance information.",
+  "@tutorialCardsDescription": {
+    "description": "Tutorial description - Cards section step"
+  },
+  "tutorialBottomNavigationTitle": "Navigation Tabs",
+  "@tutorialBottomNavigationTitle": {
+    "description": "Tutorial title - Bottom Navigation Bar step"
+  },
+  "tutorialBottomNavigationDescription": "Use the tabs at the bottom to navigate between Home, Transactions, Cards, Analytics, Calendar, and Stocks pages.",
+  "@tutorialBottomNavigationDescription": {
+    "description": "Tutorial description - Bottom Navigation Bar step"
+  },
+  "tutorialBudgetTitle": "Budget Management",
+  "@tutorialBudgetTitle": {
+    "description": "Tutorial title - Budget Overview step"
+  },
+  "tutorialBudgetDescription": "Track your monthly expenses, set budgets, and monitor your spending limits.",
+  "@tutorialBudgetDescription": {
+    "description": "Tutorial description - Budget Overview step"
+  },
+  "tutorialProfileTitle": "Profile",
+  "@tutorialProfileTitle": {
+    "description": "Tutorial title - Profile Avatar step"
+  },
+  "tutorialProfileDescription": "Tap your profile photo to access settings, premium features, and your personal information.",
+  "@tutorialProfileDescription": {
+    "description": "Tutorial description - Profile Avatar step"
   }
 } 

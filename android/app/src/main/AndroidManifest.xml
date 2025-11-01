@@ -1,9 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.qanta">
-    <!-- Image picker permissions -->
+    <!-- Camera permission for taking photos (only when user explicitly uses camera) -->
+    <!-- Photo Picker doesn't need READ_MEDIA_IMAGES permission on Android 13+ -->
+    <!-- For Android 12 and below, image_picker handles permissions automatically -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     
     <!-- Speech to Text permissions -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -12,6 +11,11 @@
     <!-- Notification permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    
+    <!-- Background task permissions -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- SCHEDULE_EXACT_ALARM removed - not required for financial app, normal notifications are sufficient -->
     
     <!-- Google Mobile Ads permissions -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -43,7 +47,8 @@
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:enableOnBackInvokedCallback="true">
         
         <!-- Google Mobile Ads App ID -->
         <meta-data

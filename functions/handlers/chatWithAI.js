@@ -794,17 +794,19 @@ YOUR ROLE:
      * User says "card" → Suggest credit card accounts
    - NEVER create account names! If not in list, ask user!
    
-   🏦 CREDIT CARD INSTALLMENT TRANSACTIONS:
-   - Credit card purchases can be split into installments
-   - Installment count: 1 (one-time) to 12 months
-   - If user says "3 installments", "6 months", "one-time", use installmentCount parameter
-   - If no installments or debit/cash account, installmentCount: 1
-   - Only "Credit Card" type accounts can use installments
-   - Examples:
-     * "$1500 laptop, 6 installments" → installmentCount: 6
-     * "$500 groceries, one-time" → installmentCount: 1
-     * "$2400 phone, 12 installments" → installmentCount: 12
-     * If user doesn't specify installments, ask: "How many installments?"
+  🏦 CREDIT CARD INSTALLMENT TRANSACTIONS:
+  - Credit card purchases can be split into installments
+  - Installment count: 1 (one-time) to 12 months
+  - If user says "3 installments", "6 months", "one-time", use installmentCount parameter
+  - ⚠️ IMPORTANT: ONLY ask about installments if account is "Credit Card" type
+  - For Cash, Debit Card, or Bank accounts → NEVER ask installments, set installmentCount: 1
+  - Only "Credit Card" type accounts can use installments
+  - Examples:
+    * "$1500 laptop, 6 installments" from credit card → installmentCount: 6
+    * "$500 groceries, one-time" → installmentCount: 1
+    * "$2400 phone, 12 installments" from credit card → installmentCount: 12
+    * "$100 from cash account" → installmentCount: 1 (DON'T ask about installments)
+    * If user doesn't specify installments AND account is Credit Card, ask: "How many installments?"
    
    💳 CREDIT CARD PAYMENT DATES:
    - Account list above shows statement and payment dates for credit cards
@@ -1159,21 +1161,20 @@ async function chatWithAI(request) {
     }
 
     // 🚨 GÜNLÜK LİMİT KONTROLÜ - MODEL ÇAĞRILMADAN ÖNCE!
+    // Normalize language first (needed for limit messages)
+    const lang = normalizeLanguage(finalLanguage);
+    
     // Görsel mesaj ise hem chat_with_image hem de chat limitini kontrol et
     const hasImage = !!imageBase64;
     
     if (hasImage) {
       // Önce görsel mesaj limitini kontrol et
-      await checkDailyLimit(userId, "chat_with_image", timezone);
+      await checkDailyLimit(userId, "chat_with_image", timezone, lang);
     }
     
     // Sonra toplam mesaj limitini kontrol et
-    const limitCheck = await checkDailyLimit(userId, "chat", timezone);
+    const limitCheck = await checkDailyLimit(userId, "chat", timezone, lang);
     logger.info(`✅ Daily limit check passed: ${limitCheck.current}/${limitCheck.limit} (${limitCheck.remaining} remaining)`);
-
-
-    // Normalize language and currency
-    const lang = normalizeLanguage(finalLanguage);
     const curr = currency || "TRY";
 
     // Gemini AI model - Görsel/PDF varsa Pro, yoksa Flash Lite
@@ -1306,11 +1307,11 @@ async function chatWithAI(request) {
     }
 
     // AI başarıyla çalıştı - kullanımı kaydet
-    await incrementDailyUsage(userId, "chat", timezone);
+    await incrementDailyUsage(userId, "chat", timezone, lang);
     
     // Görsel mesaj ise ayrıca chat_with_image'ı da artır
     if (hasImage) {
-      await incrementDailyUsage(userId, "chat_with_image", timezone);
+      await incrementDailyUsage(userId, "chat_with_image", timezone, lang);
     }
     
     const usage = await trackAIUsage(userId, "chat");

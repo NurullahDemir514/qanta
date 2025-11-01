@@ -25,10 +25,16 @@ import '../settings/pages/support_page.dart';
 import '../settings/pages/change_password_page.dart';
 import '../settings/pages/faq_page.dart';
 import '../../core/services/reminder_service.dart';
-import '../../core/services/analytics_consent_service.dart';
 import '../../core/services/premium_service.dart';
+import '../../core/services/consent_service.dart';
+import '../../core/services/recurring_transaction_service.dart';
+import '../../core/utils/recurring_transaction_debug.dart';
+import 'package:workmanager/workmanager.dart';
 import 'pages/premium_test_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../advertisement/services/google_ads_real_banner_service.dart';
+import '../advertisement/config/advertisement_config.dart' as config;
+import '../advertisement/models/advertisement_models.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -40,40 +46,40 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
   bool _isUploadingImage = false;
-  bool _analyticsConsent = false;
-  bool _isLoadingConsent = true;
+  
+  late GoogleAdsRealBannerService _settingsBannerService;
 
   @override
   void initState() {
     super.initState();
     // Bucket'ın var olduğundan emin ol
     _ensureBucketExists();
-    // Analytics consent'i yükle
-    _loadAnalyticsConsent();
     // Focus'u temizle ve klavyeyi kapat
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).unfocus();
     });
+    
+    // Initialize banner service
+    _settingsBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.settingsBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Load ad after a delay
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        _settingsBannerService.loadAd();
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    _settingsBannerService.dispose();
+    super.dispose();
   }
 
-  Future<void> _loadAnalyticsConsent() async {
-    try {
-      final consent = await AnalyticsConsentService.isConsentGiven();
-      if (mounted) {
-        setState(() {
-          _analyticsConsent = consent;
-          _isLoadingConsent = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _analyticsConsent = false;
-          _isLoadingConsent = false;
-        });
-      }
-    }
-  }
 
   Future<void> _ensureBucketExists() async {
     try {
@@ -338,12 +344,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               Consumer<ThemeProvider>(
                                 builder: (context, themeProvider, child) {
+                                  String languageSubtitle;
+                                  if (themeProvider.isTurkish) {
+                                    languageSubtitle = l10n.turkish;
+                                  } else if (themeProvider.isGerman) {
+                                    languageSubtitle = l10n.german;
+                                  } else {
+                                    languageSubtitle = l10n.english;
+                                  }
+                                  
                                   return ProfileItem(
                                     icon: Icons.language_outlined,
                                     title: l10n.language,
-                                    subtitle: themeProvider.isTurkish
-                                        ? l10n.turkish
-                                        : l10n.english,
+                                    subtitle: languageSubtitle,
                                     onTap: () => _showLanguagePicker(
                                       context,
                                       themeProvider,
@@ -368,53 +381,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   );
                                 },
-                              ),
-                              // Analytics Consent Toggle
-                              ProfileItem(
-                                icon: Icons.analytics_outlined,
-                                title: l10n.anonymousDataCollection,
-                                subtitle: l10n.anonymousDataCollectionSubtitle,
-                                onTap: null, // Switch ile kontrol edilecek
-                                trailing: _isLoadingConsent
-                                    ? const SizedBox(
-                                        width: 80,
-                                        height: 36,
-                                        child: Center(
-                                          child: SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : _buildCustomToggle(
-                                        value: _analyticsConsent,
-                                        onChanged: (value) async {
-                                          setState(() {
-                                            _analyticsConsent = value;
-                                          });
-                                          await AnalyticsConsentService.saveConsent(value);
-                                          
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  value
-                                                      ? l10n.analyticsEnabled
-                                                      : l10n.analyticsDisabled,
-                                                  style: GoogleFonts.inter(),
-                                                ),
-                                                duration: const Duration(seconds: 2),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        isDark: Theme.of(context).brightness == Brightness.dark,
-                                        onText: l10n.on,
-                                        offText: l10n.off,
-                                      ),
                               ),
                             ],
                           ),
@@ -601,6 +567,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   );
                                 },
                               ),
+                              // Privacy Options (GDPR/CCPA)
+                              ProfileItem(
+                                icon: Icons.privacy_tip_outlined,
+                                title: 'Privacy Options',
+                                subtitle: 'Manage ad preferences (GDPR/CCPA)',
+                                onTap: () async {
+                                  try {
+                                    await ConsentService().showPrivacyOptionsForm();
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Privacy options not available'),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
                             ],
                           ),
                           const SizedBox(height: 24),
@@ -669,12 +654,254 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     );
                                   },
                                 ),
+                                ProfileItem(
+                                  icon: Icons.repeat,
+                                  title: 'Test Recurring Transactions',
+                                  subtitle: 'Workmanager task\'ını manuel çalıştır',
+                                  onTap: () async {
+                                    try {
+                                      // Show loading
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                      
+                                      // Execute directly (not through Workmanager for immediate test)
+                                      await RecurringTransactionService.executeRecurringTransactions();
+                                      
+                                      // Close loading
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                        
+                                        // Show success
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('✅ Recurring transactions executed! Check transactions list.'),
+                                            backgroundColor: Colors.green,
+                                            duration: Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('❌ Error: $e'),
+                                            backgroundColor: Colors.red,
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                                ProfileItem(
+                                  icon: Icons.analytics_outlined,
+                                  title: 'Recurring Transactions Debug',
+                                  subtitle: 'Detaylı sistem durumu ve test',
+                                  onTap: () async {
+                                    // Show loading
+                                    if (context.mounted) {
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
+                                    
+                                    try {
+                                      // Get summary
+                                      final summary = await RecurringTransactionDebug.getSummary();
+                                      
+                                      // Get test results
+                                      final testResults = await RecurringTransactionDebug.testExecution();
+                                      
+                                      // Check WorkManager
+                                      final workManagerStatus = await RecurringTransactionDebug.checkWorkManager();
+                                      
+                                      // Close loading
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                        
+                                        // Show results in dialog
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text('🧪 Recurring Transactions Debug'),
+                                            content: SingleChildScrollView(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  _buildDebugSection('Summary', [
+                                                    'Total: ${summary['total']}',
+                                                    'Active: ${summary['active']}',
+                                                    'Inactive: ${summary['inactive']}',
+                                                    'Due Today: ${summary['dueToday']}',
+                                                    'Due This Week: ${summary['dueThisWeek']}',
+                                                    'Due This Month: ${summary['dueThisMonth']}',
+                                                    'Never Executed: ${summary['neverExecuted']}',
+                                                    'Recently Executed: ${summary['recentlyExecuted']}',
+                                                  ]),
+                                                  const SizedBox(height: 16),
+                                                  _buildDebugSection('Test Execution', [
+                                                    'Total Recurring: ${testResults['totalRecurring']}',
+                                                    'Active: ${testResults['activeRecurring']}',
+                                                    'Due Today: ${testResults['dueToday']}',
+                                                  ]),
+                                                  const SizedBox(height: 16),
+                                                  _buildDebugSection('WorkManager', [
+                                                    'Initialized: ${workManagerStatus['isInitialized']}',
+                                                    'Task Registered: ${workManagerStatus['taskRegistered']}',
+                                                    'Task Name: ${workManagerStatus['taskName']}',
+                                                  ]),
+                                                  if (testResults['details'] != null && (testResults['details'] as List).isNotEmpty) ...[
+                                                    const SizedBox(height: 16),
+                                                    const Text(
+                                                      'Details:',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    ...((testResults['details'] as List).take(5).map((detail) => Padding(
+                                                      padding: const EdgeInsets.only(bottom: 4),
+                                                      child: Text(
+                                                        '• ${detail['name']}: ${detail['reason']}',
+                                                        style: const TextStyle(fontSize: 12),
+                                                      ),
+                                                    ))),
+                                                    if ((testResults['details'] as List).length > 5)
+                                                      Text(
+                                                        '... and ${(testResults['details'] as List).length - 5} more',
+                                                        style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                                                      ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: const Text('Close'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () async {
+                                                  Navigator.pop(context);
+                                                  // Manual execute
+                                                  if (context.mounted) {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierDismissible: false,
+                                                      builder: (context) => const Center(
+                                                        child: CircularProgressIndicator(),
+                                                      ),
+                                                    );
+                                                  }
+                                                  
+                                                  final result = await RecurringTransactionDebug.manualExecute();
+                                                  
+                                                  if (context.mounted) {
+                                                    Navigator.pop(context);
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(result['message'] as String),
+                                                        backgroundColor: result['success'] as bool ? Colors.green : Colors.red,
+                                                        duration: const Duration(seconds: 3),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                                child: const Text('Execute Now'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('❌ Debug error: $e'),
+                                            backgroundColor: Colors.red,
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                                ProfileItem(
+                                  icon: Icons.schedule,
+                                  title: 'Schedule Test Task',
+                                  subtitle: 'Workmanager ile 5 saniye sonra çalıştır',
+                                  onTap: () async {
+                                    try {
+                                      await Workmanager().registerOneOffTask(
+                                        'manual_test_recurring',
+                                        'execute_recurring_transactions',
+                                        initialDelay: const Duration(seconds: 5),
+                                        constraints: Constraints(
+                                          networkType: NetworkType.notRequired,
+                                        ),
+                                      );
+                                      
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('✅ Task scheduled! Will run in 5 seconds. Check logs.'),
+                                            backgroundColor: Colors.green,
+                                            duration: Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('❌ Error: $e'),
+                                            backgroundColor: Colors.red,
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                           ],
                           
                           const SizedBox(height: 24),
                           _buildLogoutButton(context, l10n),
+                          
+                          // Banner ad at the bottom
+                          Consumer<PremiumService>(
+                            builder: (context, premiumService, child) {
+                              if (!premiumService.isPremium && 
+                                  _settingsBannerService.isLoaded && 
+                                  _settingsBannerService.bannerWidget != null) {
+                                return Column(
+                                  children: [
+                                    const SizedBox(height: 24),
+                                    Container(
+                                      height: 50,
+                                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                                      alignment: Alignment.center,
+                                      child: _settingsBannerService.bannerWidget!,
+                                    ),
+                                    const SizedBox(height: 16),
+                                  ],
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
                         ],
                       ),
                     );
@@ -870,29 +1097,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            ...Currency.values.map(
-              (currency) => ListTile(
-                leading: Text(
-                  currency.symbol,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 360),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...Currency.values.map(
+                      (currency) => ListTile(
+                        leading: Text(
+                          currency.symbol,
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        title: Text(
+                          CurrencyUtils.getDisplayName(
+                            currency,
+                            themeProvider.locale.languageCode,
+                          ),
+                          style: GoogleFonts.inter(fontSize: 16),
+                        ),
+                        trailing: themeProvider.currency == currency
+                            ? const Icon(Icons.check, color: Color(0xFF6D6D70))
+                            : null,
+                        onTap: () {
+                          themeProvider.setCurrency(currency);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                title: Text(
-                  CurrencyUtils.getDisplayName(
-                    currency,
-                    themeProvider.locale.languageCode,
-                  ),
-                  style: GoogleFonts.inter(fontSize: 16),
-                ),
-                trailing: themeProvider.currency == currency
-                    ? const Icon(Icons.check, color: Color(0xFF6D6D70))
-                    : null,
-                onTap: () {
-                  themeProvider.setCurrency(currency);
-                  Navigator.pop(context);
-                },
               ),
             ),
             const SizedBox(height: 20),
@@ -932,22 +1169,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ? const Icon(Icons.check, color: Color(0xFF6D6D70))
                   : null,
               onTap: () {
-                if (!themeProvider.isTurkish) {
-                  themeProvider.toggleLanguage();
-                }
+                themeProvider.setLocale(const Locale('tr'));
                 Navigator.pop(context);
               },
             ),
             ListTile(
               leading: const Text('🇺🇸', style: TextStyle(fontSize: 24)),
               title: Text(l10n.english, style: GoogleFonts.inter(fontSize: 16)),
-              trailing: !themeProvider.isTurkish
+              trailing: themeProvider.locale.languageCode == 'en'
                   ? const Icon(Icons.check, color: Color(0xFF6D6D70))
                   : null,
               onTap: () {
-                if (themeProvider.isTurkish) {
-                  themeProvider.toggleLanguage();
-                }
+                themeProvider.setLocale(const Locale('en'));
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Text('🇩🇪', style: TextStyle(fontSize: 24)),
+              title: Text(l10n.german, style: GoogleFonts.inter(fontSize: 16)),
+              trailing: themeProvider.isGerman
+                  ? const Icon(Icons.check, color: Color(0xFF6D6D70))
+                  : null,
+              onTap: () {
+                themeProvider.setLocale(const Locale('de'));
                 Navigator.pop(context);
               },
             ),
@@ -1085,6 +1329,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+  
+  Widget _buildDebugSection(String title, List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...items.map((item) => Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Text(
+            item,
+            style: const TextStyle(fontSize: 12),
+          ),
+        )),
+      ],
     );
   }
 

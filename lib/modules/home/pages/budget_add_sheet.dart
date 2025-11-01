@@ -6,6 +6,8 @@ import '../../../shared/services/category_icon_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/models/budget_model.dart';
+import '../../../shared/widgets/thousands_separator_input_formatter.dart';
+import '../../../core/theme/theme_provider.dart';
 
 class BudgetAddSheet extends StatefulWidget {
   final VoidCallback? onBudgetSaved;
@@ -110,7 +112,12 @@ class _BudgetAddSheetState extends State<BudgetAddSheet> {
     setState(() => _isSaving = true);
     try {
       final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
-      final limit = double.tryParse(_limitController.text.replaceAll(',', ''));
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final locale = themeProvider.currency.locale;
+      final limit = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _limitController.text,
+        locale,
+      );
       if (limit == null || limit <= 0) {
         setState(() => _isSaving = false);
         return;

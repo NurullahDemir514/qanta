@@ -6,6 +6,7 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/models/account_model.dart';
 import '../../../shared/widgets/installment_expandable_card.dart';
@@ -403,15 +404,28 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
     );
 
     // Format amount with dynamic currency
-    final currencySymbol = Provider.of<ThemeProvider>(
+    final currency = Provider.of<ThemeProvider>(
       context,
       listen: false,
-    ).currency.symbol;
-    final amount = TransactionDesignSystem.formatAmount(
-      transaction.amount,
-      transactionType,
-      currencySymbol: currencySymbol,
-    );
+    ).currency;
+    
+    // Use CurrencyUtils directly for proper formatting
+    final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(transaction.amount.abs(), currency);
+    final currencySymbol = currency.symbol;
+    
+    // Apply prefix based on transaction type
+    String amount;
+    switch (transactionType) {
+      case TransactionType.income:
+        amount = '+$formattedAmount$currencySymbol';
+        break;
+      case TransactionType.expense:
+        amount = '-$formattedAmount$currencySymbol';
+        break;
+      case TransactionType.transfer:
+        amount = '$formattedAmount$currencySymbol';
+        break;
+    }
 
     // Use displayTime from transaction model and localize it
     final rawTime = transaction.displayTime;
@@ -439,15 +453,39 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
             .trim();
       }
 
+      // Format installment amount
+      final installmentFormattedAmount = CurrencyUtils.formatAmountWithoutSymbol((totalAmount ?? transaction.amount).abs(), currency);
+      String installmentAmount;
+      switch (transactionType) {
+        case TransactionType.income:
+          installmentAmount = '+$installmentFormattedAmount$currencySymbol';
+          break;
+        case TransactionType.expense:
+          installmentAmount = '-$installmentFormattedAmount$currencySymbol';
+          break;
+        case TransactionType.transfer:
+          installmentAmount = '$installmentFormattedAmount$currencySymbol';
+          break;
+      }
+
+      // Prepare display title with description for installment
+      String displayTitle = transaction.displayTitle;
+      
+      if (transaction.description.isNotEmpty) {
+        String cleanDescription = transaction.description
+            .replaceAll(RegExp(r'\s*\(\d+ taksit\)\s*'), '')
+            .trim();
+        
+        if (cleanDescription.isNotEmpty && cleanDescription != displayTitle) {
+          displayTitle = '$displayTitle • $cleanDescription';
+        }
+      }
+
       return InstallmentExpandableCard(
         installmentId: transaction.installmentId,
-        title: transaction.displayTitle, // Use displayTitle for consistency
+        title: displayTitle, // Use displayTitle with description
         subtitle: cardName, // Banka adı
-        amount: TransactionDesignSystem.formatAmount(
-          totalAmount ?? transaction.amount,
-          transactionType,
-          currencySymbol: currencySymbol,
-        ),
+        amount: installmentAmount,
         time: time,
         type: transactionType,
         categoryIcon: transaction.categoryName ?? category?.iconName,
@@ -522,12 +560,27 @@ class _CardTransactionSectionState extends State<CardTransactionSection> {
       }
     }
 
-    // Regular transaction - use Firebase integrated design system
-    return TransactionDesignSystem.buildTransactionItemFromV2(
-      context: context,
-      transaction: transaction,
-      isDark: isDark,
+    // Prepare display title with description for regular transactions
+    String displayTitle = transaction.getLocalizedDisplayTitle(context);
+    
+    if (transaction.description.isNotEmpty) {
+      String cleanDescription = transaction.description
+          .replaceAll(RegExp(r'\s*\(\d+ taksit\)\s*'), '')
+          .trim();
+      
+      if (cleanDescription.isNotEmpty && cleanDescription != displayTitle) {
+        displayTitle = '$displayTitle • $cleanDescription';
+      }
+    }
+
+    // Regular transaction - use direct build method with custom title
+    return TransactionDesignSystem.buildTransactionItem(
+      title: displayTitle,
+      subtitle: cardName,
+      amount: amount,
       time: time,
+      type: transactionType,
+      isDark: isDark,
       categoryIconData: categoryIcon,
       categoryColorData: categoryColor,
       onLongPress: () {

@@ -6,14 +6,38 @@ service cloud.firestore {
     // KULLANICI VERİLERİ - Ana Koleksiyon
     // =====================================================
     match /users/{userId} {
-      // Sadece kendi verilerine erişim
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Okuma: Sadece kendi verilerine erişim
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // Yazma: Premium-related field'lar SADECE backend tarafından yazılabilir
+      // Kullanıcı diğer field'ları güncelleyebilir ama isPremium/isTestMode'u değiştiremez
+      allow write: if request.auth != null && 
+                    request.auth.uid == userId &&
+                    // Premium field'ları değiştirmemeyi garanti et
+                    (!request.resource.data.keys().hasAny(['isPremium', 'isPremiumPlus', 'isTestMode', 'subscriptionStatus']) ||
+                     (request.resource.data.keys().hasAny(['isPremium', 'isPremiumPlus', 'isTestMode', 'subscriptionStatus']) &&
+                      request.resource.data.get('isPremium', false) == resource.data.get('isPremium', false) &&
+                      request.resource.data.get('isPremiumPlus', false) == resource.data.get('isPremiumPlus', false) &&
+                      request.resource.data.get('isTestMode', false) == resource.data.get('isTestMode', false) &&
+                      request.resource.data.get('subscriptionStatus', 'free') == resource.data.get('subscriptionStatus', 'free')));
       
       // =====================================================
       // HESAPLAR (accounts) - Kredi, Debit, Nakit
       // =====================================================
       match /accounts/{accountId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        // Okuma: Kullanıcı kendi hesaplarını okuyabilir
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Oluşturma: Kullanıcı kendi hesaplarını oluşturabilir
+        allow create: if request.auth != null && 
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.type in ['credit', 'debit', 'cash'] &&
+                       request.resource.data.balance is number &&
+                       request.resource.data.is_active is bool;
+        
+        // Güncelleme ve silme: Kullanıcı kendi hesaplarını yönetebilir
+        allow update, delete: if request.auth != null && request.auth.uid == userId;
         
         // Hesap doğrulama
         function isValidAccount() {
@@ -144,30 +168,125 @@ service cloud.firestore {
       }
       
       // =====================================================
-      // AI GÜNLÜK KULLANIM (ai_usage_daily) - Günlük limit tracking
+      // AI GÜNLÜK KULLANIM (ai_usage_daily) - Free users için günlük limit tracking
       // =====================================================
       match /ai_usage_daily/{dateKey} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
       
-    // =====================================================
-    // HİSSE İŞLEMLERİ (stock_transactions)
-    // =====================================================
-    match /stock_transactions/{transactionId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // =====================================================
+      // AI AYLIK KULLANIM (ai_usage_monthly) - Premium/Plus için aylık limit tracking
+      // =====================================================
+      match /ai_usage_monthly/{monthKey} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // =====================================================
+      // AI KULLANIM LİMİTLERİ (ai_usage) - Backward compatibility
+      // =====================================================
+      match /ai_usage/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // =====================================================
+      // HİSSE İŞLEMLERİ (stock_transactions)
+      // =====================================================
+      match /stock_transactions/{transactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // =====================================================
+      // HİSSE POZİSYONLARI (stock_positions)
+      // =====================================================
+      match /stock_positions/{stockSymbol} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // =====================================================
+      // TASARRUF KATEGORİLERİ (savings_categories)
+      // =====================================================
+      match /savings_categories/{categoryId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Yeni kategori oluşturma
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.name is string &&
+                       request.resource.data.name.size() > 0;
+      }
+      
+      // =====================================================
+      // TASARRUF HEDEFLERİ (savings_goals)
+      // =====================================================
+      match /savings_goals/{goalId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Yeni hedef oluşturma
+        allow create: if request.auth != null && 
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.target_amount > 0 &&
+                       request.resource.data.current_amount >= 0;
+        
+        // Hedef güncelleme
+        allow update: if request.auth != null && 
+                       request.auth.uid == userId &&
+                       resource.data.user_id == userId &&
+                       request.resource.data.target_amount > 0 &&
+                       request.resource.data.current_amount >= 0;
+        
+        // Hedef silme
+        allow delete: if request.auth != null && 
+                       request.auth.uid == userId &&
+                       resource.data.user_id == userId;
+      }
+      
+      // =====================================================
+      // TASARRUF İŞLEMLERİ (savings_transactions)
+      // =====================================================
+      match /savings_transactions/{transactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // İşlem doğrulama
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.amount > 0;
+      }
+      
+      // =====================================================
+      // TEKRARLAYAN İŞLEMLER (recurring_transactions) - Abonelikler
+      // =====================================================
+      match /recurring_transactions/{recurringTransactionId} {
+        // Okuma: Kullanıcı kendi tekrarlayan işlemlerini okuyabilir
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Oluşturma: Kullanıcı kendi tekrarlayan işlemlerini oluşturabilir
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.amount > 0 &&
+                       request.resource.data.amount is number &&
+                       request.resource.data.is_active is bool &&
+                       request.resource.data.keys().hasAll(['name', 'category', 'frequency', 'start_date', 'account_id']);
+        
+        // Güncelleme: Kullanıcı kendi tekrarlayan işlemlerini güncelleyebilir
+        allow update: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       resource.data.user_id == userId &&
+                       request.resource.data.user_id == userId;
+        
+        // Silme: Kullanıcı kendi tekrarlayan işlemlerini silebilir
+        allow delete: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       resource.data.user_id == userId;
+      }
     }
     
     // =====================================================
-    // HİSSE POZİSYONLARI (stock_positions)
+    // HİSSE İŞLEMLERİ (stock_transactions) - Collection Group Query
     // =====================================================
-    match /stock_positions/{stockSymbol} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-  
-  // =====================================================
-  // HİSSE İŞLEMLERİ (stock_transactions) - Collection Group Query
-  // =====================================================
   match /{path=**}/stock_transactions/{transactionId} {
     allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
   }
@@ -312,6 +431,34 @@ match /installment_details/{installmentDetailId} {
     }
     
     // =====================================================
+    // TEKRARLAYAN İŞLEMLER (recurring_transactions) - Ana Collection
+    // =====================================================
+    match /recurring_transactions/{recurringTransactionId} {
+      // Okuma: Kullanıcı kendi tekrarlayan işlemlerini okuyabilir
+      allow read: if request.auth != null && request.auth.uid == resource.data.user_id;
+      
+      // Oluşturma: Kullanıcı kendi tekrarlayan işlemlerini oluşturabilir
+      allow create: if request.auth != null &&
+                     request.auth.uid == request.resource.data.user_id &&
+                     request.resource.data.user_id == request.auth.uid &&
+                     request.resource.data.amount > 0 &&
+                     request.resource.data.amount is number &&
+                     request.resource.data.is_active is bool &&
+                     request.resource.data.keys().hasAll(['name', 'category', 'frequency', 'start_date', 'account_id']);
+      
+      // Güncelleme: Kullanıcı kendi tekrarlayan işlemlerini güncelleyebilir
+      allow update: if request.auth != null &&
+                     request.auth.uid == resource.data.user_id &&
+                     resource.data.user_id == request.auth.uid &&
+                     request.resource.data.user_id == request.auth.uid;
+      
+      // Silme: Kullanıcı kendi tekrarlayan işlemlerini silebilir
+      allow delete: if request.auth != null &&
+                     request.auth.uid == resource.data.user_id &&
+                     resource.data.user_id == request.auth.uid;
+    }
+    
+    // =====================================================
     // SİSTEM KATEGORİLERİ - Herkes okuyabilir
     // =====================================================
     match /system_categories/{categoryId} {
@@ -320,23 +467,11 @@ match /installment_details/{installmentDetailId} {
     }
     
     // =====================================================
-    // ANONİM ANALİTİK VERİLERİ - Sadece yazma izni
+    // BANKA LİSTESİ - Herkes okuyabilir (dinamik banka yönetimi için)
     // =====================================================
-    match /anonymous_analytics/{documentId} {
-      // Authenticated kullanıcılar yazabilir (anonim veri toplama için)
-      // Kimse okuyamaz (gizlilik için)
-      allow create: if request.auth != null &&
-                     'anonymousId' in request.resource.data &&
-                     'amount' in request.resource.data &&
-                     'category' in request.resource.data &&
-                     'transactionDate' in request.resource.data &&
-                     'timestamp' in request.resource.data &&
-                     'isInstallment' in request.resource.data &&
-                     request.resource.data.amount is number &&
-                     request.resource.data.amount > 0 &&
-                     request.resource.data.isInstallment is bool;
-      allow read: if false; // Sadece admin (Firebase Console'dan) okuyabilir
-      allow update, delete: if false; // Güncelleme ve silme yasak
+    match /banks/{bankId} {
+      allow read: if request.auth != null; // Authenticated kullanıcılar okuyabilir
+      allow write: if false; // Sadece admin yazabilir (Firebase Console'dan)
     }
     
     // =====================================================

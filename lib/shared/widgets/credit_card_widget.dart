@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/services/bank_service.dart';
 import '../../core/theme/theme_provider.dart';
 import '../models/credit_card_model.dart';
 import '../../l10n/app_localizations.dart';
@@ -13,7 +14,12 @@ class CreditCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bankColor = AppConstants.getBankAccentColor(card.bankCode);
+    // Get bank color from BankService (dynamic) or fallback to AppConstants
+    final bankService = BankService();
+    final bank = bankService.getBankByCode(card.bankCode);
+    final bankColor = bank != null 
+        ? bank.accentColorValue 
+        : AppConstants.getBankAccentColor(card.bankCode);
 
     return GestureDetector(
       onTap: onTap,

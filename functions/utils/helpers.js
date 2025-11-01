@@ -5,6 +5,41 @@
 
 const admin = require("firebase-admin");
 const {HttpsError} = require("firebase-functions/v2/https");
+const fs = require("fs");
+const path = require("path");
+
+// Load localization files
+const locales = {
+  tr: JSON.parse(fs.readFileSync(path.join(__dirname, "../locales/tr.json"), "utf8")),
+  en: JSON.parse(fs.readFileSync(path.join(__dirname, "../locales/en.json"), "utf8")),
+};
+
+/**
+ * Get localized message with parameter substitution
+ * @param {string} locale - Language code (tr/en)
+ * @param {string} key - Dot-notation key (e.g., "limits.freeWithoutBonus")
+ * @param {Object} params - Parameters to replace in the message
+ * @return {string} Localized message
+ */
+function getLocalizedMessage(locale = "tr", key, params = {}) {
+  const keys = key.split(".");
+  let message = locales[locale] || locales.tr;
+  
+  for (const k of keys) {
+    message = message[k];
+    if (!message) {
+      console.error(`Localization key not found: ${key} for locale: ${locale}`);
+      return key;
+    }
+  }
+  
+  // Replace parameters {param} with actual values
+  Object.keys(params).forEach((param) => {
+    message = message.replace(new RegExp(`\\{${param}\\}`, "g"), params[param]);
+  });
+  
+  return message;
+}
 
 // 🔓 Developer Bypass - Limitsiz kullanım için UID listesi
 const DEVELOPER_BYPASS_UIDS = [
@@ -144,10 +179,11 @@ function getUserLocalMonthKey(timezone = "+03:00") {
  * @param {string} userId - Kullanıcı ID
  * @param {string} requestType - İstek tipi (chat, chat_with_image, categorize, vs.)
  * @param {string} userTimezone - Kullanıcının timezone offset (örn: "+03:00", "-05:00")
+ * @param {string} locale - Dil kodu (tr/en) - Default: tr
  * @return {object} { allowed: boolean, current: number, limit: number, bonusAvailable: boolean }
  * @throws {HttpsError} Limit aşılmışsa
  */
-async function checkDailyLimit(userId, requestType, userTimezone = "+03:00") {
+async function checkDailyLimit(userId, requestType, userTimezone = "+03:00", locale = "tr") {
   // 🔓 Developer Bypass - Limitsiz erişim
   if (DEVELOPER_BYPASS_UIDS.includes(userId)) {
     return {
@@ -202,20 +238,28 @@ async function checkDailyLimit(userId, requestType, userTimezone = "+03:00") {
   const bonusAvailable = !isPremium && bonusCount < maxBonus;
   
   if (currentCount >= totalLimit) {
-    // Türkçe mesaj formatı
-    const messageType = requestType === "chat" ? "sorgu" : 
-                       requestType === "chat_with_image" ? "görselli sorgu" : 
-                       requestType;
+    // Localized message based on user's language
+    const messageType = getLocalizedMessage(locale, `limits.types.${requestType}`);
+    const period = getLocalizedMessage(locale, `limits.periods.${isPremium ? "monthly" : "daily"}`);
     
     let message;
     if (isPremium) {
       // Premium ve Premium Plus - Aylık limit
-      const limitText = isPremiumPlus ? "3000 sorgu/ay" : "1500 sorgu/ay";
-      message = `${periodText} limitinize ulaştınız (${limitText}). Ay sonunda limitiniz yenilenecek.`;
+      const limitText = isPremiumPlus ? "3000/ay" : "1500/ay";
+      message = getLocalizedMessage(locale, "limits.premiumMonthly", {
+        period: period,
+        limit: limitText,
+      });
     } else if (bonusAvailable) {
-      message = `${periodText} ${messageType} limitinize ulaştınız. Reklam izleyerek +5 ek sorgu hakkı kazanabilirsiniz.`;
+      message = getLocalizedMessage(locale, "limits.freeWithBonus", {
+        period: period,
+        type: messageType,
+      });
     } else {
-      message = `${periodText} ${messageType} limitinize ulaştınız. Premium'a geçerek ayda 1500 sorgu hakkı kazanın.`;
+      message = getLocalizedMessage(locale, "limits.freeWithoutBonus", {
+        period: period,
+        type: messageType,
+      });
     }
     
     throw new HttpsError(
@@ -249,8 +293,9 @@ async function checkDailyLimit(userId, requestType, userTimezone = "+03:00") {
  * @param {string} userId - Kullanıcı ID
  * @param {string} requestType - İstek tipi
  * @param {string} userTimezone - Kullanıcının timezone offset (örn: "+03:00", "-05:00")
+ * @param {string} locale - Dil kodu (tr/en) - Default: tr (not used in this function but kept for consistency)
  */
-async function incrementDailyUsage(userId, requestType, userTimezone = "+03:00") {
+async function incrementDailyUsage(userId, requestType, userTimezone = "+03:00", locale = "tr") {
   const db = admin.firestore();
   
   // Kullanıcının premium tier'ını kontrol et

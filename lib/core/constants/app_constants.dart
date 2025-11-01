@@ -730,6 +730,220 @@ class AppConstants {
     ],
     'accentColor': Color(0xFF1976D2),
   },
+
+  // India - Major Banks
+  'sbi': {
+    'name': 'State Bank of India',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'hdfc': {
+    'name': 'HDFC Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF64B5F6),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'icicibank': {
+    'name': 'ICICI Bank',
+    'gradientColors': [
+      Color(0xFFFF6F00), // turuncu
+      Color(0xFFFF8F00),
+      Color(0xFFFFA726),
+    ],
+    'accentColor': Color(0xFFFF6F00),
+  },
+
+  'axisbank': {
+    'name': 'Axis Bank',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'pnb': {
+    'name': 'Punjab National Bank',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'bankofbaroda': {
+    'name': 'Bank of Baroda',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'canarabank': {
+    'name': 'Canara Bank',
+    'gradientColors': [
+      Color(0xFFFFC107), // sarı
+      Color(0xFFFFA000),
+      Color(0xFFFFB74D),
+    ],
+    'accentColor': Color(0xFFFFA000),
+  },
+
+  // Pakistan - Major Banks
+  'hbl': {
+    'name': 'Habib Bank Limited',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'ubl': {
+    'name': 'United Bank Limited',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'mcb': {
+    'name': 'MCB Bank',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'alliedbank': {
+    'name': 'Allied Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF64B5F6),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'bankalfalah': {
+    'name': 'Bank Alfalah',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  // Bangladesh - Major Banks
+  'sonalibank': {
+    'name': 'Sonali Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'janatabank': {
+    'name': 'Janata Bank',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'agranibank': {
+    'name': 'Agrani Bank',
+    'gradientColors': [
+      Color(0xFFD32F2F), // kırmızı
+      Color(0xFFE53935),
+      Color(0xFFEF5350),
+    ],
+    'accentColor': Color(0xFFD32F2F),
+  },
+
+  'bracbank': {
+    'name': 'BRAC Bank',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'dutchbanglabank': {
+    'name': 'Dutch-Bangla Bank',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF64B5F6),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'easternbank': {
+    'name': 'Eastern Bank Limited',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF90CAF9),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  // Sudan - Major Banks
+  'bankofkhartoum': {
+    'name': 'Bank of Khartoum',
+    'gradientColors': [
+      Color(0xFF1976D2), // mavi
+      Color(0xFF2196F3),
+      Color(0xFF64B5F6),
+    ],
+    'accentColor': Color(0xFF1976D2),
+  },
+
+  'omdurmangbank': {
+    'name': 'Omdurman National Bank',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
+
+  'agriculturalbank': {
+    'name': 'Agricultural Bank of Sudan',
+    'gradientColors': [
+      Color(0xFF1B5E20), // koyu yeşil
+      Color(0xFF388E3C),
+      Color(0xFF81C784),
+    ],
+    'accentColor': Color(0xFF388E3C),
+  },
 };
 
   // Card Design Helper Methods
@@ -803,7 +1017,7 @@ class AppConstants {
     }
   }
 
-  // Get all available banks
+  // Get all available banks (Static - Fallback)
   static List<String> getAvailableBanks() {
     return bankDesigns.keys.toList();
   }

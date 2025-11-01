@@ -42,6 +42,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get turkish => 'Turkish';
 
   @override
+  String get german => 'German';
+
+  @override
   String get login => 'Login';
 
   @override
@@ -233,7 +236,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allAccounts => 'All your accounts';
 
   @override
-  String get availableBalance => 'Available Balance';
+  String availableBalance(Object amount) {
+    return 'Available: $amount';
+  }
 
   @override
   String get thisMonthIncome => 'This Month Income';
@@ -257,7 +262,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisMonthSummary => 'This Month Summary';
 
   @override
-  String get savings => 'SAVINGS';
+  String get savings => 'Savings';
 
   @override
   String get budgetUsed => 'Used';
@@ -291,7 +296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addExpense => 'Add Expense';
 
   @override
-  String get expenseLimitTracking => 'Expense Limit Tracking';
+  String get expenseLimitTracking => 'My Budgets';
 
   @override
   String get future => 'Future';
@@ -590,7 +595,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get invalidAmount => 'Invalid amount';
+  String get invalidAmount => 'Please enter a valid amount';
 
   @override
   String get enterValidAmount => 'Please enter a valid amount';
@@ -642,6 +647,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get installmentOptions => 'Installment Options';
+
+  @override
+  String get singlePayment => 'Single Payment';
+
+  @override
+  String get howManyInstallments => 'How many installments?';
 
   @override
   String get installmentOptionsDesc => 'Convert your purchases to installments';
@@ -832,6 +843,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscription => 'Subscription';
 
   @override
+  String get thisIsSubscription => 'This is a subscription';
+
+  @override
   String get utilities => 'Utilities';
 
   @override
@@ -866,6 +880,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get save => 'Save';
+
+  @override
+  String get automatic => 'Automatic';
+
+  @override
+  String get createdAutomatically => 'Created automatically (Subscription)';
+
+  @override
+  String get automaticPaymentCreated => 'Automatic payment created';
+
+  @override
+  String automaticPaymentsCreated(int count) {
+    return '$count automatic payments created';
+  }
 
   @override
   String get incomeFormOpening => 'Income form will open';
@@ -1242,10 +1270,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get howMuchTransfer => 'How much will you transfer?';
 
   @override
-  String get fromWhichAccount => 'From which account?';
+  String get fromWhichAccount => 'From Which Account?';
 
   @override
-  String get toWhichAccount => 'To which account?';
+  String get toWhichAccount => 'To Which Account?';
 
   @override
   String get investmentIncome => 'Investment Income';
@@ -1656,6 +1684,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Notification permission required! Please enable it in settings.';
 
   @override
+  String get enableNotifications => 'Enable Notifications';
+
+  @override
+  String get subscriptionNotificationPermissionMessage =>
+      'Would you like to receive automatic notifications for subscription payments? Notifications will remind you when payments are made and about upcoming payment dates.';
+
+  @override
+  String get notNow => 'Not Now';
+
+  @override
+  String get enable => 'Enable';
+
+  @override
   String get frequentlyAskedQuestions => 'Frequently Asked Questions';
 
   @override
@@ -1725,7 +1766,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get twoDaysAgo => '2 days ago';
 
   @override
-  String get perMonth => '/mo';
+  String get perMonth => '/ month';
+
+  @override
+  String get perDay => '/day';
 
   @override
   String get net => 'Net';
@@ -1986,7 +2030,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lastPayment => 'Last Payment';
 
   @override
-  String get nextPayment => 'Next Payment';
+  String get nextPayment => 'Next';
 
   @override
   String get minimumPayment => 'Minimum Payment';
@@ -2495,6 +2539,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get averagePrice => 'Avg. Price';
 
   @override
+  String get avg => 'Avg';
+
+  @override
   String get stockInfo => 'Stock Information';
 
   @override
@@ -2792,6 +2839,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pieces => 'lot';
 
   @override
+  String get piecesPlural => 'lots';
+
+  @override
   String totalTransactionsCount(int count) {
     return '$count transactions';
   }
@@ -2966,14 +3016,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectStock => 'Select Stock';
 
   @override
-  String get selectAccount => 'Select Account';
+  String get selectAccount => 'Select Payment Account';
 
   @override
   String get pleaseSelectStock => 'Please select a stock';
 
   @override
-  String get pleaseSelectAccount =>
-      'Please select an account for each transaction';
+  String get pleaseSelectAccount => 'Please select an account';
 
   @override
   String get noStockSelected => 'No stock selected';
@@ -3075,7 +3124,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get portfolioRatio => 'Weight';
 
   @override
-  String get insufficientBalance => 'Insufficient Balance';
+  String get insufficientBalance => 'Insufficient balance';
 
   @override
   String get addMoneyToAccount => 'Add money to your account to buy stocks';
@@ -3707,41 +3756,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'This amount is your total budget divided by remaining days.';
 
   @override
-  String get analyticsConsentTitle => 'Help Us Improve the App';
-
-  @override
-  String get analyticsConsentMessage =>
-      'We want to make Qanta better for you! By collecting anonymous spending data, we can improve the app and offer better features.\n\n• Your data is completely anonymous\n• Personal information is never shared\n• Only spending amounts and categories are collected\n• You can opt out anytime';
-
-  @override
-  String get analyticsAccept => 'I Accept';
-
-  @override
-  String get analyticsDecline => 'No, Thanks';
-
-  @override
-  String get analyticsConsentNotice =>
-      'You can change this permission in Profile > Preferences.';
-
-  @override
-  String get anonymousDataCollection => 'Anonymous Data Collection';
-
-  @override
-  String get anonymousDataCollectionSubtitle =>
-      'Share anonymous spending data\nto help improve the app';
-
-  @override
-  String get analyticsEnabled => 'Anonymous data collection enabled';
-
-  @override
-  String get analyticsDisabled => 'Anonymous data collection disabled';
-
-  @override
   String get cardLimitReached => 'Card Limit Reached';
 
   @override
   String get cardLimitReachedMessage =>
       'You can add up to 3 cards in the free version';
+
+  @override
+  String get cardLimitExceeded => 'Card Limit';
+
+  @override
+  String cardLimitExceededMessage(int totalCards, int deleteCount) {
+    return 'You have $totalCards cards (from Premium plan)\n\nFree users can use max 3 cards. Please delete $deleteCount cards or upgrade to Premium.';
+  }
 
   @override
   String get upgradeToPremium => 'Upgrade to Premium';
@@ -3914,6 +3941,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aiChatError =>
       'Sorry, an error occurred. Would you like to try again?';
+
+  @override
+  String get aiImageAnalysisError =>
+      'An error occurred while analyzing the image. Please try again.';
+
+  @override
+  String get aiCategoryCreationError =>
+      'An error occurred while creating the category. Please try again.';
+
+  @override
+  String get watchAdBonus => 'Watch Ad (+5 Bonus)';
+
+  @override
+  String get adLoading => 'Loading Ad...';
 
   @override
   String get aiChatTransactionSuccess => 'Transaction successfully recorded.';
@@ -4113,6 +4154,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlockAllFeatures => 'Unlock all features';
 
   @override
+  String get welcomeCampaign => 'Welcome Campaign!';
+
+  @override
+  String monthlyPremiumOnly(String price) {
+    return 'Monthly premium only $price';
+  }
+
+  @override
+  String percentDiscount(String percent) {
+    return '$percent% OFF';
+  }
+
+  @override
+  String daysRemaining(int days) {
+    return '$days days';
+  }
+
+  @override
   String get comparePlans => 'Compare Plans';
 
   @override
@@ -4156,4 +4215,575 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featureEarlyAccessDescription => 'Early access to new features';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get premiumWelcomeTitle => 'Welcome to Premium!';
+
+  @override
+  String get premiumWelcomeSubtitle =>
+      'Thank you for upgrading. You now have access to all premium features.';
+
+  @override
+  String get premiumFeaturesTitle => 'Your Premium Features';
+
+  @override
+  String get premiumFeatureAI => 'Unlimited AI Insights';
+
+  @override
+  String get premiumFeatureReports => 'Advanced Reports & Analytics';
+
+  @override
+  String get premiumFeatureCards => 'Unlimited Cards & Accounts';
+
+  @override
+  String get premiumFeatureStocks => 'Unlimited Stock Tracking';
+
+  @override
+  String get premiumFeatureNoAds => 'Ad-Free Experience';
+
+  @override
+  String get premiumReadyTitle => 'You\'re All Set!';
+
+  @override
+  String get premiumReadySubtitle =>
+      'Start your premium journey and take control of your finances.';
+
+  @override
+  String get totalSavings => 'Total Savings';
+
+  @override
+  String get myGoals => 'My Goals';
+
+  @override
+  String get noSavingsGoals => 'No Savings Goals Yet';
+
+  @override
+  String get createFirstGoal =>
+      'Create your first savings goal and start building your financial future!';
+
+  @override
+  String get createGoal => 'Create Goal';
+
+  @override
+  String get createSavingsGoal => 'Create Savings Goal';
+
+  @override
+  String get goalName => 'Goal Name';
+
+  @override
+  String get enterGoalName => 'Enter goal name';
+
+  @override
+  String get pleaseEnterGoalName => 'Please enter a goal name';
+
+  @override
+  String get targetAmount => 'Target Amount';
+
+  @override
+  String get currentAmount => 'Current Amount';
+
+  @override
+  String get current => 'Current';
+
+  @override
+  String get target => 'Target';
+
+  @override
+  String get targetDate => 'Target Date';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get selectColor => 'Select Color';
+
+  @override
+  String get optional => 'Optional';
+
+  @override
+  String get goalCreatedSuccessfully => 'Goal created successfully!';
+
+  @override
+  String get archived => 'Archived';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get goalInfoFailed =>
+      'Goal information could not be loaded. Please refresh the page.';
+
+  @override
+  String get goalNotFound => 'Goal Not Found';
+
+  @override
+  String get savingsCompleted => 'Savings Completed';
+
+  @override
+  String get addSavings => 'Add savings';
+
+  @override
+  String get withdraw => 'Withdraw';
+
+  @override
+  String get withdrawMoney => 'Withdraw money';
+
+  @override
+  String get editGoal => 'Edit goal';
+
+  @override
+  String get unarchive => 'Unarchive';
+
+  @override
+  String get activate => 'Activate';
+
+  @override
+  String get archive => 'Archive';
+
+  @override
+  String get activateGoal => 'Activate goal';
+
+  @override
+  String get restartGoal => 'Restart goal';
+
+  @override
+  String get archiveGoal => 'Archive';
+
+  @override
+  String get deleteGoal => 'Delete goal';
+
+  @override
+  String get progress => 'Progress';
+
+  @override
+  String get remainingDays => 'Remaining Days';
+
+  @override
+  String get monthlyTarget => 'Monthly Target';
+
+  @override
+  String get noTransactionsHint =>
+      'You can use the buttons above\nto make your first transaction';
+
+  @override
+  String get savingsAdded => 'Savings Added';
+
+  @override
+  String get moneyWithdrawn => 'Money Withdrawn';
+
+  @override
+  String get invalidGoal => 'Invalid goal';
+
+  @override
+  String get goalArchived => 'Goal archived';
+
+  @override
+  String get goalActivated => 'Goal activated';
+
+  @override
+  String get goalReactivated => 'Goal reactivated';
+
+  @override
+  String get markAsCompleted => 'Mark as Completed';
+
+  @override
+  String get completedButton => 'Completed';
+
+  @override
+  String goalCompletedImpact(String percent) {
+    return 'Completed %$percent of the goal';
+  }
+
+  @override
+  String get archiveGoalDialogTitle => 'Archive Goal?';
+
+  @override
+  String get archiveGoalDialogContent =>
+      'The goal will be archived. You can access it later from the archive.';
+
+  @override
+  String get unarchiveGoalDialogTitle => 'Unarchive?';
+
+  @override
+  String get unarchiveGoalDialogContent =>
+      'The goal will be unarchived and added to your active goals.';
+
+  @override
+  String get activateGoalDialogTitle => 'Activate Goal?';
+
+  @override
+  String get activateGoalDialogContent =>
+      'The completed goal will be reactivated and you can continue working on it.';
+
+  @override
+  String get completeGoalDialogTitle => '🎉 Congratulations!';
+
+  @override
+  String get completeGoalDialogContent =>
+      'You\'ve completed your goal! Would you like to mark it as completed?';
+
+  @override
+  String get deleteGoalDialogTitle => 'Delete Goal?';
+
+  @override
+  String get deleteGoalDialogContent =>
+      'This action cannot be undone. The goal and all transaction history will be deleted.';
+
+  @override
+  String get goalCompletedSuccess => '🎉 Awesome! You\'ve completed your goal!';
+
+  @override
+  String get transactionFailed => 'Transaction failed';
+
+  @override
+  String get addSavingsTitle => 'Add Savings';
+
+  @override
+  String get withdrawTitle => 'Withdraw Money';
+
+  @override
+  String get savingsDeposited => 'Money deposited!';
+
+  @override
+  String get savingsWithdrawn => 'Money withdrawn!';
+
+  @override
+  String get depositNoteHint => 'e.g. Payday savings';
+
+  @override
+  String get withdrawNoteHint => 'e.g. Emergency need';
+
+  @override
+  String savingsGoalImpactDeposit(String percentage) {
+    return 'Completed $percentage% of goal';
+  }
+
+  @override
+  String savingsGoalImpactWithdraw(String percentage) {
+    return 'Decreased by $percentage% from goal';
+  }
+
+  @override
+  String get editSavingsGoal => 'Edit Savings';
+
+  @override
+  String get savingsName => 'Savings Name';
+
+  @override
+  String get enterGoalNameHint => 'Enter goal name';
+
+  @override
+  String get pleaseEnterGoalNameError => 'Please enter goal name';
+
+  @override
+  String get selectDateHint => 'Select date';
+
+  @override
+  String get color => 'Color';
+
+  @override
+  String get milestone25Title => 'Great Start!';
+
+  @override
+  String get milestone50Title => 'Halfway There!';
+
+  @override
+  String get milestone75Title => 'Almost Done!';
+
+  @override
+  String get milestone100Title => 'Savings Completed!';
+
+  @override
+  String get milestoneDefaultTitle => 'Congratulations!';
+
+  @override
+  String get milestone25Message =>
+      'You\'ve reached 25% of your goal! Keep going!';
+
+  @override
+  String get milestone50Message =>
+      'You\'ve completed half of your goal! Great progress!';
+
+  @override
+  String get milestone75Message =>
+      'You\'ve reached 75% of your goal! Final sprint!';
+
+  @override
+  String get milestone100Message =>
+      'You\'ve completed your goal! Amazing achievement!';
+
+  @override
+  String get milestoneDefaultMessage => 'You\'re one step closer to your goal!';
+
+  @override
+  String get optionalField => '(Optional)';
+
+  @override
+  String get daysUnit => 'days';
+
+  @override
+  String get monthsUnit => 'mo';
+
+  @override
+  String get yearsUnit => 'yr';
+
+  @override
+  String get timeRemaining => 'remaining';
+
+  @override
+  String get aiUsageLimit => 'AI Usage Limit';
+
+  @override
+  String remainingCount(int count) {
+    return '$count remaining';
+  }
+
+  @override
+  String get messages => 'messages';
+
+  @override
+  String get watchAdBonusInfo => 'Watch an ad to earn +5 extra usage rights';
+
+  @override
+  String maxBonusRemaining(int count) {
+    return 'You can earn up to $count more bonus per day';
+  }
+
+  @override
+  String get unlimitedAIWithPremium => 'Unlimited AI usage with Premium';
+
+  @override
+  String get adLoadingWait => 'Ad is loading, please wait...';
+
+  @override
+  String get dailyUsage => 'Daily usage';
+
+  @override
+  String get rights => 'rights';
+
+  @override
+  String get watchAdBonusShort => 'Watch Ad (+5)';
+
+  @override
+  String get adLoadError => 'An error occurred while loading the ad';
+
+  @override
+  String get noDescription => 'No description';
+
+  @override
+  String get insufficientBalanceDetail =>
+      'This account doesn\'t have enough balance';
+
+  @override
+  String get insufficientSavings => 'Insufficient savings';
+
+  @override
+  String insufficientSavingsDetail(Object amount) {
+    return 'Available to withdraw from this goal: $amount';
+  }
+
+  @override
+  String get availableBalanceLabel => 'Available Balance';
+
+  @override
+  String get maxAmount => 'Max';
+
+  @override
+  String get amountMustBeGreaterThanZero => 'Amount must be greater than 0';
+
+  @override
+  String get amountExceedsBalance => 'Amount exceeds available balance';
+
+  @override
+  String get amountExceedsSavings => 'Amount exceeds available savings';
+
+  @override
+  String get amountExceedsGoalRemaining => 'Amount exceeds goal remaining';
+
+  @override
+  String get goalCompletedTitle => 'Goal Completed! 🎉';
+
+  @override
+  String goalCompletedMessage(Object goalName) {
+    return 'Congratulations! You\'ve reached $goalName!';
+  }
+
+  @override
+  String goalCompletedStats(Object amount, Object days) {
+    return 'Saved $amount in $days days';
+  }
+
+  @override
+  String get keepActive => 'Keep Active';
+
+  @override
+  String get createNewGoal => 'New Goal';
+
+  @override
+  String get goalArchivedSuccess => 'Goal archived';
+
+  @override
+  String get budgetAndSubscriptions => 'Budget and Subscriptions';
+
+  @override
+  String get budgets => 'Budgets';
+
+  @override
+  String get subscriptions => 'Subscriptions';
+
+  @override
+  String get subscriptionDetails => 'Subscription Details';
+
+  @override
+  String get subscriptionSchedule => 'Schedule';
+
+  @override
+  String get paymentAccount => 'Payment Account';
+
+  @override
+  String get subscriptionName => 'Subscription Name';
+
+  @override
+  String get frequency => 'Frequency';
+
+  @override
+  String get endDate => 'End Date';
+
+  @override
+  String get endDateOptional => 'End Date (Optional)';
+
+  @override
+  String get reviewSubscription => 'Review Subscription';
+
+  @override
+  String get noSubscriptionsYet => 'No subscriptions yet';
+
+  @override
+  String get addFirstSubscriptionDescription =>
+      'Add subscriptions like Netflix, Spotify to track them automatically';
+
+  @override
+  String get addSubscription => 'Add Subscription';
+
+  @override
+  String get requiredField => 'This field is required';
+
+  @override
+  String get deleteSubscription => 'Delete Subscription';
+
+  @override
+  String deleteSubscriptionConfirm(String subscriptionName) {
+    return 'Are you sure you want to delete $subscriptionName subscription?';
+  }
+
+  @override
+  String get subscriptionDeleted => 'Subscription deleted successfully';
+
+  @override
+  String get activeSubscriptions => 'Active Subscriptions';
+
+  @override
+  String inactiveSubscriptions(int count) {
+    return 'Inactive Subscriptions';
+  }
+
+  @override
+  String inactiveSubscriptionsWithCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Inactive Subscriptions ($count)',
+      zero: 'Inactive Subscriptions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get monthlyTotal => 'Monthly Total';
+
+  @override
+  String get yearlyPrefix => 'Yearly:';
+
+  @override
+  String get subscriptionAdded => 'Subscription added successfully';
+
+  @override
+  String get subscriptionExample => 'e.g: Netflix Premium';
+
+  @override
+  String get available => 'Available';
+
+  @override
+  String get tutorialTitle => 'Quick Add Transaction';
+
+  @override
+  String get tutorialDescription =>
+      'Tap the button in the bottom corner to add expenses, income, or transfer transactions.';
+
+  @override
+  String get tutorialNext => 'Continue';
+
+  @override
+  String get tutorialPrevious => 'Previous';
+
+  @override
+  String get tutorialSkip => 'Skip';
+
+  @override
+  String get tutorialGotIt => 'Got it!';
+
+  @override
+  String get tutorialBalanceOverviewTitle => 'Total Assets';
+
+  @override
+  String get tutorialBalanceOverviewDescription =>
+      'Here you can see the total balance of all your accounts, cards, and investments.';
+
+  @override
+  String get tutorialRecentTransactionsTitle => 'Recent Transactions';
+
+  @override
+  String get tutorialRecentTransactionsDescription =>
+      'All your transactions are displayed here. Long press to edit or delete transactions.';
+
+  @override
+  String get tutorialAIChatTitle => 'AI Assistant';
+
+  @override
+  String get tutorialAIChatDescription =>
+      'Chat naturally with AI assistant to add transactions, get financial summaries, perform analysis, bulk delete transactions, and ask any financial questions. You have a powerful financial assistant!';
+
+  @override
+  String get tutorialCardsTitle => 'Card Management';
+
+  @override
+  String get tutorialCardsDescription =>
+      'Here you can view your cards, add new cards, and track your balance information.';
+
+  @override
+  String get tutorialBottomNavigationTitle => 'Navigation Tabs';
+
+  @override
+  String get tutorialBottomNavigationDescription =>
+      'Use the tabs at the bottom to navigate between Home, Transactions, Cards, Analytics, Calendar, and Stocks pages.';
+
+  @override
+  String get tutorialBudgetTitle => 'Budget Management';
+
+  @override
+  String get tutorialBudgetDescription =>
+      'Track your monthly expenses, set budgets, and monitor your spending limits.';
+
+  @override
+  String get tutorialProfileTitle => 'Profile';
+
+  @override
+  String get tutorialProfileDescription =>
+      'Tap your profile photo to access settings, premium features, and your personal information.';
 }

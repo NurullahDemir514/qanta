@@ -350,11 +350,12 @@ class TransactionDetailModal extends StatelessWidget {
     final absAmount = amount.abs();
     final formattedAmount = _formatCurrency(absAmount, context);
     final displayAmount = transaction.isIncome ? '+$formattedAmount' : '-$formattedAmount';
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
     
     return CurrencyUtils.buildCurrencyText(
       displayAmount,
       style: style,
-      currency: Currency.TRY,
+      currency: currency,
     );
   }
 
@@ -369,17 +370,19 @@ class TransactionDetailModal extends StatelessWidget {
 
 
   String _formatCurrency(double amount, BuildContext context) {
-    // TransactionDesignSystem'den binlik ayırıcı ile formatlama
-    return TransactionDesignSystem.formatNumber(amount) + Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
+    // Use CurrencyUtils for proper formatting with correct locale
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    return CurrencyUtils.formatAmountWithoutSymbol(amount, currency) + currency.symbol;
   }
 
   // Para birimi için güvenli formatlama
   Widget _buildCurrencyText(double amount, TextStyle style, BuildContext context) {
     final formattedAmount = _formatCurrency(amount, context);
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
     return CurrencyUtils.buildCurrencyText(
       formattedAmount,
       style: style,
-      currency: Currency.TRY,
+      currency: currency,
     );
   }
 } 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:developer' as developer;
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/services/firebase_auth_service.dart';
@@ -18,28 +19,30 @@ import '../cards/cards_screen.dart';
 import '../cards/widgets/add_card_fab.dart';
 import '../transactions/index.dart';
 import '../transactions/screens/transactions_screen.dart';
-import '../transactions/widgets/quick_add_fab.dart';
-import '../transactions/widgets/quick_add_chat_fab.dart';
 import '../insights/statistics_screen.dart';
 import '../calendar/calendar_screen.dart';
 import '../stocks/screens/stocks_screen.dart';
 import 'widgets/main_tab_bar.dart';
 import 'widgets/balance_overview_card.dart';
 import 'widgets/budget_overview_card.dart';
+import 'widgets/subscriptions_overview_card.dart';
 import 'widgets/cards_section.dart';
 import 'widgets/recent_transactions_section.dart';
 import 'widgets/top_gainers_section.dart';
 import 'utils/greeting_utils.dart';
 import '../../core/providers/profile_provider.dart';
 import '../../shared/widgets/reminder_checker.dart';
-import '../../shared/utils/fab_positioning.dart';
 import '../../modules/advertisement/config/advertisement_config.dart' as config;
 import '../../modules/advertisement/services/native_ad_service.dart';
-import '../../core/services/analytics_consent_service.dart';
-import '../../shared/widgets/analytics_consent_dialog.dart';
 import '../advertisement/providers/advertisement_provider.dart';
 import '../advertisement/services/google_ads_interstitial_service.dart';
 import '../premium/premium_offer_screen.dart';
+import '../../shared/utils/fab_positioning.dart';
+import '../transactions/widgets/quick_add_chat_fab.dart';
+import '../../core/services/tutorial_service.dart';
+import '../../shared/widgets/tutorial_overlay.dart';
+import '../../shared/models/tutorial_step_model.dart';
+import '../transactions/widgets/transaction_fab.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -58,6 +61,16 @@ class _MainScreenState extends State<MainScreen> {
   late GoogleAdsInterstitialService _transactionsInterstitialService;
   late GoogleAdsInterstitialService _stocksInterstitialService;
   late PremiumService _premiumService;
+  
+  // Tutorial için keys
+  final GlobalKey _balanceOverviewTutorialKey = GlobalKey();
+  final GlobalKey _fabTutorialKey = GlobalKey();
+  final GlobalKey _recentTransactionsTutorialKey = GlobalKey();
+  final GlobalKey _aiChatTutorialKey = GlobalKey();
+  final GlobalKey _cardsSectionTutorialKey = GlobalKey();
+  final GlobalKey _bottomNavTutorialKey = GlobalKey();
+  final GlobalKey _budgetOverviewTutorialKey = GlobalKey();
+  final GlobalKey _profileAvatarTutorialKey = GlobalKey();
 
   @override
   void initState() {
@@ -84,7 +97,104 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _premiumService = context.read<PremiumService>();
       _premiumService.addListener(_onPremiumChanged);
+      
+      // Tutorial kontrolü - İlk açılışta göster
+      _checkAndShowTutorial();
     });
+  }
+  
+  /// Tutorial kontrolü ve gösterimi
+  Future<void> _checkAndShowTutorial() async {
+    try {
+      // Tutorial gösterilmeli mi kontrol et
+      final shouldShow = await TutorialService.shouldShowTutorial();
+      
+      if (!shouldShow || !mounted) return;
+      
+      // Widget'ların render olmasını bekle
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (!mounted) return;
+      
+      // Tutorial steps oluştur - Tüm adımlar birbirine bağlı
+      // HomeScreen'in render olmasını bekle
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      if (!mounted) return;
+      
+      final steps = [
+        // Step 1: Balance Overview (Total Assets) tutorial
+        TutorialStep.balanceOverview(
+          targetKey: _balanceOverviewTutorialKey,
+          onStepCompleted: () {
+            debugPrint('✅ Balance Overview tutorial step completed');
+          },
+        ),
+        // Step 2: FAB tutorial
+        TutorialStep.fab(
+          targetKey: _fabTutorialKey,
+          onStepCompleted: () {
+            debugPrint('✅ FAB tutorial step completed');
+          },
+        ),
+        // Step 3: Recent Transactions tutorial
+        TutorialStep.recentTransactions(
+          targetKey: _recentTransactionsTutorialKey,
+          onStepCompleted: () {
+            debugPrint('✅ Recent Transactions tutorial step completed');
+          },
+        ),
+        // Step 4: AI Chat tutorial
+        TutorialStep.aiChat(
+          targetKey: _aiChatTutorialKey,
+          onStepCompleted: () {
+            debugPrint('✅ AI Chat tutorial step completed');
+          },
+        ),
+        // Step 5: Budget Overview tutorial
+        TutorialStep.budgetOverview(
+          targetKey: _budgetOverviewTutorialKey,
+          onStepCompleted: () {
+            debugPrint('✅ Budget Overview tutorial step completed');
+          },
+        ),
+        // Step 6: Cards Section tutorial
+        TutorialStep.cardsSection(
+          targetKey: _cardsSectionTutorialKey,
+          onStepCompleted: () {
+            debugPrint('✅ Cards Section tutorial step completed');
+          },
+        ),
+        // Step 7: Bottom Navigation tutorial
+        TutorialStep.bottomNavigation(
+          targetKey: _bottomNavTutorialKey,
+          onStepCompleted: () {
+            debugPrint('✅ Bottom Navigation tutorial step completed');
+          },
+        ),
+        // Step 8: Profile Avatar tutorial
+        TutorialStep.profileAvatar(
+          targetKey: _profileAvatarTutorialKey,
+          onStepCompleted: () {
+            debugPrint('✅ Profile Avatar tutorial step completed');
+          },
+        ),
+      ];
+      
+      // Tutorial göster
+      await TutorialOverlay.show(
+        context,
+        steps,
+        onCompleted: () {
+          debugPrint('✅ Tutorial completed');
+        },
+        onSkipped: () {
+          debugPrint('⏭️ Tutorial skipped');
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ Tutorial error: $e');
+    }
   }
   
   void _onPremiumChanged() {
@@ -229,7 +339,16 @@ class _MainScreenState extends State<MainScreen> {
           IndexedStack(
             index: _currentIndex,
             children: [
-              const HomeScreen(),
+              HomeScreen(
+                cardsSectionKey: _cardsSectionTutorialKey, // Key'i geçir
+                balanceOverviewKey: _balanceOverviewTutorialKey, // Balance Overview key'i geçir
+                fabTutorialKey: _fabTutorialKey, // FAB key'i geçir (debug butonu için)
+                recentTransactionsKey: _recentTransactionsTutorialKey, // Recent Transactions key'i geçir
+                aiChatTutorialKey: _aiChatTutorialKey, // AI Chat key'i geçir (debug butonu için)
+                budgetOverviewKey: _budgetOverviewTutorialKey, // Budget Overview key'i geçir
+                profileAvatarKey: _profileAvatarTutorialKey, // Profile Avatar key'i geçir
+                bottomNavKey: _bottomNavTutorialKey, // Bottom Nav key'i geçir (debug butonu için)
+              ),
               const TransactionsScreen(),
               const CardsScreen(),
               StatisticsScreen(
@@ -240,23 +359,36 @@ class _MainScreenState extends State<MainScreen> {
               const StocksScreen(),
             ],
           ),
-          MainTabBar(currentIndex: _currentIndex, onTabChanged: _onTabChanged),
-          
-          // AI Chat FAB - Her zaman görünür (altta, sağda)
-          if (_currentIndex != 2 && _currentIndex != 4 && _currentIndex != 5)
-            QuickAddChatFAB(
-              customRight: FabPositioning.getRightPosition(context),
-              customBottom: FabPositioning.getBottomPosition(context), // En altta
+          MainTabBar(
+            currentIndex: _currentIndex,
+            onTabChanged: _onTabChanged,
+            tutorialKey: _bottomNavTutorialKey, // Tutorial key ekle
+          ),
+          // FAB'ları Recent Transactions tutorial adımında gizle
+          if (_currentIndex != 2 && _currentIndex != 4 && _currentIndex != 5 && !TutorialService.isRecentTransactionsStep)
+            Builder(
+              builder: (context) {
+                final baseBottom = FabPositioning.getBottomPosition(context);
+                return TransactionFab(
+                  customBottom: baseBottom + 60,
+                  tutorialKey: _fabTutorialKey, // Tutorial key ekle
+                );
+              },
             ),
-          
-          // Kart FAB - Sadece Kartlar sayfasında
+          if (_currentIndex != 2 && _currentIndex != 4 && _currentIndex != 5 && !TutorialService.isRecentTransactionsStep)
+            Builder(
+              builder: (context) {
+                final right = FabPositioning.getRightPosition(context);
+                final baseBottom = FabPositioning.getBottomPosition(context);
+                // Stocks ekranındaki düzenle aynı: Chat en altta (baseBottom)
+                return QuickAddChatFAB(
+                  customRight: right,
+                  customBottom: baseBottom,
+                  tutorialKey: _aiChatTutorialKey, // Tutorial key ekle
+                );
+              },
+            ),
           if (_currentIndex == 2) AddCardFab(currentTabIndex: _currentIndex),
-          
-          // Transaction FAB - Her zaman görünür (AI Chat FAB'ın üstünde)
-          if (_currentIndex != 2 && _currentIndex != 4 && _currentIndex != 5)
-            TransactionFab(
-              customBottom: FabPositioning.getBottomPosition(context) + 60, // AI Chat FAB'ın 60px üstünde
-            ),
         ],
       ),
     );
@@ -322,7 +454,26 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final GlobalKey? cardsSectionKey; // Tutorial için key
+  final GlobalKey? balanceOverviewKey; // Tutorial için Balance Overview key
+  final GlobalKey? fabTutorialKey; // Tutorial için FAB key
+  final GlobalKey? recentTransactionsKey; // Tutorial için Recent Transactions key
+  final GlobalKey? aiChatTutorialKey; // Tutorial için AI Chat key
+  final GlobalKey? budgetOverviewKey; // Tutorial için Budget Overview key
+  final GlobalKey? profileAvatarKey; // Tutorial için Profile Avatar key
+  final GlobalKey? bottomNavKey; // Tutorial için Bottom Navigation key
+  
+  const HomeScreen({
+    super.key,
+    this.cardsSectionKey,
+    this.balanceOverviewKey,
+    this.fabTutorialKey,
+    this.recentTransactionsKey,
+    this.aiChatTutorialKey,
+    this.budgetOverviewKey,
+    this.profileAvatarKey,
+    this.bottomNavKey,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -363,11 +514,114 @@ class _HomeScreenState extends State<HomeScreen> {
       adProvider.initialize();
       
       debugPrint('🏠 HomeScreen.initState() - Data loading completed');
-      
-      // Analytics consent kontrolü - sadece ilk açılışta
-      _checkAndShowAnalyticsConsent();
     });
   }
+  
+  /// Debug: Tutorial'ı manuel başlat (kDebugMode)
+  Future<void> _startTutorialDebug() async {
+    try {
+      // Tutorial'ı reset et (debug için)
+      await TutorialService.resetTutorial();
+      
+      // Widget'ların render olmasını bekle
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (!mounted) return;
+      
+      // Tüm tutorial adımları (MainScreen'den geçirilen key'ler ile)
+      final steps = [
+        // Step 1: Balance Overview (Total Assets) tutorial
+        TutorialStep.balanceOverview(
+          targetKey: widget.balanceOverviewKey ?? GlobalKey(),
+          onStepCompleted: () {
+            debugPrint('✅ [DEBUG] Balance Overview tutorial step completed');
+          },
+        ),
+        // Step 2: FAB tutorial
+        TutorialStep.fab(
+          targetKey: widget.fabTutorialKey ?? GlobalKey(),
+          onStepCompleted: () {
+            debugPrint('✅ [DEBUG] FAB tutorial step completed');
+          },
+        ),
+        // Step 3: Recent Transactions tutorial
+        TutorialStep.recentTransactions(
+          targetKey: widget.recentTransactionsKey ?? GlobalKey(),
+          onStepCompleted: () {
+            debugPrint('✅ [DEBUG] Recent Transactions tutorial step completed');
+          },
+        ),
+        // Step 4: AI Chat tutorial
+        TutorialStep.aiChat(
+          targetKey: widget.aiChatTutorialKey ?? GlobalKey(),
+          onStepCompleted: () {
+            debugPrint('✅ [DEBUG] AI Chat tutorial step completed');
+          },
+        ),
+        // Step 5: Budget Overview tutorial
+        TutorialStep.budgetOverview(
+          targetKey: widget.budgetOverviewKey ?? GlobalKey(),
+          onStepCompleted: () {
+            debugPrint('✅ [DEBUG] Budget Overview tutorial step completed');
+          },
+        ),
+        // Step 6: Cards Section tutorial
+        TutorialStep.cardsSection(
+          targetKey: widget.cardsSectionKey ?? GlobalKey(),
+          onStepCompleted: () {
+            debugPrint('✅ [DEBUG] Cards Section tutorial step completed');
+          },
+        ),
+        // Step 7: Bottom Navigation tutorial
+        TutorialStep.bottomNavigation(
+          targetKey: widget.bottomNavKey ?? GlobalKey(),
+          onStepCompleted: () {
+            debugPrint('✅ [DEBUG] Bottom Navigation tutorial step completed');
+          },
+        ),
+        // Step 8: Profile Avatar tutorial
+        TutorialStep.profileAvatar(
+          targetKey: widget.profileAvatarKey ?? GlobalKey(),
+          onStepCompleted: () {
+            debugPrint('✅ [DEBUG] Profile Avatar tutorial step completed');
+          },
+        ),
+      ];
+      
+      // Tutorial göster (Debug: Tüm adımlar)
+      await TutorialOverlay.show(
+        context,
+        steps,
+        onCompleted: () {
+          debugPrint('✅ [DEBUG] Tutorial completed');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('🎓 Tutorial tamamlandı!'),
+                duration: Duration(seconds: 2),
+                backgroundColor: Color(0xFF34D399),
+              ),
+            );
+          }
+        },
+        onSkipped: () {
+          debugPrint('⏭️ [DEBUG] Tutorial skipped');
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ [DEBUG] Tutorial error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Tutorial hatası: $e'),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+  
 
   void _onPremiumChanged() {
     if (_premiumService.isPremium) {
@@ -383,33 +637,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// Analytics consent kontrolü ve modalı göster
-  Future<void> _checkAndShowAnalyticsConsent() async {
-    try {
-      // Daha önce sorulmuş mu kontrol et
-      final hasBeenAsked = await AnalyticsConsentService.hasBeenAsked();
-      
-      if (!hasBeenAsked && mounted) {
-        // 1 saniye bekle (smooth görünüm için)
-        await Future.delayed(const Duration(seconds: 1));
-        
-        if (!mounted) return;
-        
-        // Modalı göster
-        await AnalyticsConsentDialog.show(
-          context,
-          onConsentGiven: () {
-            debugPrint('✅ Analytics consent given');
-          },
-          onConsentDeclined: () {
-            debugPrint('❌ Analytics consent declined');
-          },
-        );
-      }
-    } catch (e) {
-      debugPrint('❌ Error checking analytics consent: $e');
-    }
-  }
 
   @override
   void dispose() {
@@ -437,11 +664,23 @@ class _HomeScreenState extends State<HomeScreen> {
               subtitleFontSize: 13, // Daha küçük alt başlık
               bottomPadding: 125,
               actions: [
+                // Debug: Tutorial butonu (kDebugMode)
+                if (kDebugMode)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: IconButton(
+                      icon: const Icon(Icons.school_outlined),
+                      tooltip: 'Tutorial Başlat (Debug)',
+                      onPressed: () => _startTutorialDebug(),
+                      color: const Color(0xFF6D6D70),
+                    ),
+                  ),
                 Consumer<PremiumService>(
                   builder: (context, premiumService, child) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 4),
                       child: ProfileAvatar(
+                        tutorialKey: widget.profileAvatarKey, // Tutorial key ekle
                         imageUrl: profileImageUrl,
                         userName: fullName,
                         size: 44,
@@ -461,7 +700,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const BalanceOverviewCard(),
+                      BalanceOverviewCard(
+                        tutorialKey: widget.balanceOverviewKey, // Tutorial key - sadece Balance Card için
+                      ),
                       // TopGainersSection - Kendi içinde reactive
                       const Column(
                         children: [
@@ -470,7 +711,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      const BudgetOverviewCard(),
+                      BudgetOverviewCard(
+                        tutorialKey: widget.budgetOverviewKey, // Tutorial key ekle
+                      ),
+                      const SizedBox(height: 20),
+                      const SubscriptionsOverviewCard(),
                       const SizedBox(height: 20),
                       // Native Ad - RecentTransactionsSection üstü (Premium kullanıcılara gösterilmez)
                       Consumer<PremiumService>(
@@ -493,9 +738,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           return const SizedBox.shrink();
                         },
                       ),
-                      const CardsSection(),
+                      CardsSection(
+                        tutorialKey: widget.cardsSectionKey, // Tutorial key ekle
+                      ),
                       const SizedBox(height: 20),
-                      const RecentTransactionsSection(),
+                      RecentTransactionsSection(
+                        tutorialKey: widget.recentTransactionsKey, // Tutorial key ekle
+                      ),
                       const SizedBox(height: 16),
                     ],
                   ),

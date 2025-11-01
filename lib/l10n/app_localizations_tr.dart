@@ -42,6 +42,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get turkish => 'Türkçe';
 
   @override
+  String get german => 'Almanca';
+
+  @override
   String get login => 'Giriş Yap';
 
   @override
@@ -233,7 +236,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get allAccounts => 'Tüm hesaplarınız';
 
   @override
-  String get availableBalance => 'Kullanılabilir Bakiye';
+  String availableBalance(Object amount) {
+    return 'Kullanılabilir: $amount';
+  }
 
   @override
   String get thisMonthIncome => 'Bu Ay Gelir';
@@ -257,7 +262,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get thisMonthSummary => 'Bu Ay Özeti';
 
   @override
-  String get savings => 'BİRİKİM';
+  String get savings => 'Birikimler';
 
   @override
   String get budgetUsed => 'Kullanıldı';
@@ -291,7 +296,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addExpense => 'Harcama Ekle';
 
   @override
-  String get expenseLimitTracking => 'Harcama Limit Takibi';
+  String get expenseLimitTracking => 'Bütçelerim';
 
   @override
   String get future => 'Gelecek';
@@ -409,7 +414,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get transactions => 'İşlemler';
 
   @override
-  String get goals => 'Hedefler';
+  String get goals => 'Birikim';
 
   @override
   String get upcomingPayments => 'Yaklaşan Ödemeler';
@@ -590,7 +595,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get invalidAmount => 'Geçersiz miktar';
+  String get invalidAmount => 'Geçerli bir tutar giriniz';
 
   @override
   String get enterValidAmount => 'Geçerli bir miktar girin';
@@ -645,17 +650,23 @@ class AppLocalizationsTr extends AppLocalizations {
   String get installmentOptions => 'Taksit Seçenekleri';
 
   @override
+  String get singlePayment => 'Peşin';
+
+  @override
+  String get howManyInstallments => 'Kaç taksit?';
+
+  @override
   String get installmentOptionsDesc => 'Alışverişlerinizi taksitlendirin';
 
   @override
   String get savingsManagement => 'Tasarruf Yönetimi';
 
   @override
-  String get savingsGoals => 'Tasarruf Hedefleri';
+  String get savingsGoals => 'Birikimler';
 
   @override
   String get savingsGoalsDesc =>
-      'Tasarruf hedeflerinizi belirleyin ve takip edin';
+      'Birikim hedeflerinizi belirleyin ve takip edin';
 
   @override
   String get autoSave => 'Otomatik Tasarruf';
@@ -834,6 +845,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get subscription => 'Abonelik';
 
   @override
+  String get thisIsSubscription => 'Bu bir abonelik';
+
+  @override
   String get utilities => 'Faturalar';
 
   @override
@@ -868,6 +882,20 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get save => 'Kaydet';
+
+  @override
+  String get automatic => 'Otomatik';
+
+  @override
+  String get createdAutomatically => 'Otomatik oluşturuldu (Abonelik)';
+
+  @override
+  String get automaticPaymentCreated => 'Otomatik ödeme işlemi oluşturuldu';
+
+  @override
+  String automaticPaymentsCreated(int count) {
+    return '$count otomatik ödeme işlemi oluşturuldu';
+  }
 
   @override
   String get incomeFormOpening => 'Gelir ekleme formu açılacak';
@@ -1246,10 +1274,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get howMuchTransfer => 'Ne kadar transfer yapacaksınız?';
 
   @override
-  String get fromWhichAccount => 'Hangi hesaptan?';
+  String get fromWhichAccount => 'Hangi Hesaptan?';
 
   @override
-  String get toWhichAccount => 'Hangi hesaba?';
+  String get toWhichAccount => 'Hangi Hesaba?';
 
   @override
   String get investmentIncome => 'Yatırım Geliri';
@@ -1659,6 +1687,19 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bildirim izni gerekli! Lütfen ayarlardan açın.';
 
   @override
+  String get enableNotifications => 'Bildirimleri Etkinleştir';
+
+  @override
+  String get subscriptionNotificationPermissionMessage =>
+      'Abonelik ödemeleri için otomatik bildirim almak ister misiniz? Bildirimler, ödemelerin ne zaman yapıldığını ve bir sonraki ödeme tarihini hatırlatır.';
+
+  @override
+  String get notNow => 'Şimdi Değil';
+
+  @override
+  String get enable => 'Etkinleştir';
+
+  @override
   String get frequentlyAskedQuestions => 'Sık Sorulan Sorular';
 
   @override
@@ -1728,16 +1769,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get twoDaysAgo => '2 gün önce';
 
   @override
-  String get perMonth => '/ay';
+  String get perMonth => '/ ay';
+
+  @override
+  String get perDay => '/gün';
 
   @override
   String get net => 'Net';
 
   @override
-  String get pleaseEnterAmount => 'Lütfen bir tutar girin';
+  String get pleaseEnterAmount => 'Lütfen bir miktar girin';
 
   @override
-  String get pleaseEnterValidAmount => 'Lütfen geçerli bir tutar girin';
+  String get pleaseEnterValidAmount => 'Lütfen geçerli bir miktar girin';
 
   @override
   String get pleaseSelectSourceAccount => 'Lütfen kaynak hesap seçin';
@@ -1986,7 +2030,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get lastPayment => 'Son Ödeme';
 
   @override
-  String get nextPayment => 'Sonraki Ödeme';
+  String get nextPayment => 'Sonraki';
 
   @override
   String get minimumPayment => 'Minimum Ödeme';
@@ -2494,6 +2538,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get averagePrice => 'Ort. Fiyat';
 
   @override
+  String get avg => 'Ort';
+
+  @override
   String get stockInfo => 'Hisse Bilgileri';
 
   @override
@@ -2791,6 +2838,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pieces => 'lot';
 
   @override
+  String get piecesPlural => 'lot';
+
+  @override
   String totalTransactionsCount(int count) {
     return '$count işlem';
   }
@@ -2963,13 +3013,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get selectStock => 'Hisse Seç';
 
   @override
-  String get selectAccount => 'Hesap Seç';
+  String get selectAccount => 'Ödeme Hesabı Seçin';
 
   @override
   String get pleaseSelectStock => 'Lütfen bir hisse seçin';
 
   @override
-  String get pleaseSelectAccount => 'Lütfen her işlem için hesap seçin';
+  String get pleaseSelectAccount => 'Lütfen bir hesap seçin';
 
   @override
   String get noStockSelected => 'Hisse seçilmedi';
@@ -3070,7 +3120,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get portfolioRatio => 'Ağırlık';
 
   @override
-  String get insufficientBalance => 'Yetersiz Bakiye';
+  String get insufficientBalance => 'Yetersiz bakiye';
 
   @override
   String get addMoneyToAccount => 'Hisse almak için hesabınıza para ekleyin';
@@ -3699,41 +3749,19 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu miktar, kalan günlere bölünmüş toplam bütçenizdir.';
 
   @override
-  String get analyticsConsentTitle => 'Uygulamayı Geliştirmemize Yardım Edin';
-
-  @override
-  String get analyticsConsentMessage =>
-      'Qanta\'yı sizin için daha iyi hale getirmek istiyoruz! Anonim harcama verilerinizi toplayarak uygulamayı geliştirebilir, daha iyi özellikler sunabiliriz.\n\n• Verileriniz tamamen anonimdir\n• Kişisel bilgileriniz asla paylaşılmaz\n• Sadece harcama tutarları ve kategorileri toplanır\n• İstediğiniz zaman iptal edebilirsiniz';
-
-  @override
-  String get analyticsAccept => 'Kabul Ediyorum';
-
-  @override
-  String get analyticsDecline => 'Hayır, Teşekkürler';
-
-  @override
-  String get analyticsConsentNotice =>
-      'Bu izni Profil > Tercihler bölümünden değiştirebilirsiniz.';
-
-  @override
-  String get anonymousDataCollection => 'Anonim Veri Toplama';
-
-  @override
-  String get anonymousDataCollectionSubtitle =>
-      'Uygulamayı geliştirmek için\nanonim harcama verilerini paylaş';
-
-  @override
-  String get analyticsEnabled => 'Anonim veri toplama açıldı';
-
-  @override
-  String get analyticsDisabled => 'Anonim veri toplama kapatıldı';
-
-  @override
   String get cardLimitReached => 'Kart Limiti Doldu';
 
   @override
   String get cardLimitReachedMessage =>
       'Ücretsiz sürümde en fazla 3 kart ekleyebilirsiniz';
+
+  @override
+  String get cardLimitExceeded => 'Kart Limiti';
+
+  @override
+  String cardLimitExceededMessage(int totalCards, int deleteCount) {
+    return '$totalCards kartınız var (Premium\'dan kalan)\n\nFree kullanıcılar maksimum 3 kart kullanabilir. $deleteCount kart silmeniz veya Premium\'a geçmeniz gerekiyor.';
+  }
 
   @override
   String get upgradeToPremium => 'Premium\'a Geç';
@@ -3905,6 +3933,20 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get aiChatError => 'Üzgünüm, bir hata oluştu. Tekrar dener misiniz?';
+
+  @override
+  String get aiImageAnalysisError =>
+      'Görüntü analiz edilirken hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get aiCategoryCreationError =>
+      'Kategori oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get watchAdBonus => 'Reklam İzle (+5 Hak)';
+
+  @override
+  String get adLoading => 'Reklam Yükleniyor...';
 
   @override
   String get aiChatTransactionSuccess => 'İşlem başarıyla kaydedildi.';
@@ -4104,6 +4146,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get unlockAllFeatures => 'Tüm özelliklerin kilidini aç';
 
   @override
+  String get welcomeCampaign => 'Hoş Geldin Kampanyası!';
+
+  @override
+  String monthlyPremiumOnly(String price) {
+    return 'Aylık premium sadece $price';
+  }
+
+  @override
+  String percentDiscount(String percent) {
+    return '%$percent';
+  }
+
+  @override
+  String daysRemaining(int days) {
+    return '$days gün';
+  }
+
+  @override
   String get comparePlans => 'Planları Karşılaştır';
 
   @override
@@ -4147,4 +4207,572 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get featureEarlyAccessDescription => 'Yeni özelliklere erken erişim';
+
+  @override
+  String get skip => 'Atla';
+
+  @override
+  String get premiumWelcomeTitle => 'Premium\'a Hoş Geldiniz!';
+
+  @override
+  String get premiumWelcomeSubtitle =>
+      'Yükseltme için teşekkürler. Artık tüm premium özelliklere erişiminiz var.';
+
+  @override
+  String get premiumFeaturesTitle => 'Premium Özellikleriniz';
+
+  @override
+  String get premiumFeatureAI => 'Sınırsız AI İçgörüler';
+
+  @override
+  String get premiumFeatureReports => 'Gelişmiş Raporlar ve Analizler';
+
+  @override
+  String get premiumFeatureCards => 'Sınırsız Kart ve Hesap';
+
+  @override
+  String get premiumFeatureStocks => 'Sınırsız Hisse Takibi';
+
+  @override
+  String get premiumFeatureNoAds => 'Reklamsız Deneyim';
+
+  @override
+  String get premiumReadyTitle => 'Her Şey Hazır!';
+
+  @override
+  String get premiumReadySubtitle =>
+      'Premium yolculuğunuza başlayın ve bütçenizin kontrolünü elinize alın.';
+
+  @override
+  String get totalSavings => 'Toplam Birikim';
+
+  @override
+  String get myGoals => 'Birikimlerim';
+
+  @override
+  String get noSavingsGoals => 'Henüz Birikim Hedefi Yok';
+
+  @override
+  String get createFirstGoal =>
+      'İlk birikim hedefini oluştur ve finansal geleceğini inşa etmeye başla!';
+
+  @override
+  String get createGoal => 'Hedef Oluştur';
+
+  @override
+  String get createSavingsGoal => 'Birikim Hedefi Oluştur';
+
+  @override
+  String get goalName => 'Birikim Adı';
+
+  @override
+  String get enterGoalName => 'Birikim adı girin';
+
+  @override
+  String get pleaseEnterGoalName => 'Lütfen bir birikim adı girin';
+
+  @override
+  String get targetAmount => 'Hedef Miktar';
+
+  @override
+  String get currentAmount => 'Mevcut Miktar';
+
+  @override
+  String get current => 'Mevcut';
+
+  @override
+  String get target => 'Hedef';
+
+  @override
+  String get targetDate => 'Hedef Tarih';
+
+  @override
+  String get selectDate => 'Tarih Seçin';
+
+  @override
+  String get selectColor => 'Renk Seç';
+
+  @override
+  String get optional => 'Opsiyonel';
+
+  @override
+  String get goalCreatedSuccessfully => 'Birikim hedefi başarıyla oluşturuldu!';
+
+  @override
+  String get archived => 'Arşivlenen';
+
+  @override
+  String get completed => 'Tamamlanan';
+
+  @override
+  String get goalInfoFailed =>
+      'Hedef bilgisi yüklenemedi. Lütfen sayfayı yenileyin.';
+
+  @override
+  String get goalNotFound => 'Hedef Bulunamadı';
+
+  @override
+  String get savingsCompleted => 'Birikim Tamamlandı';
+
+  @override
+  String get addSavings => 'Tasarruf ekle';
+
+  @override
+  String get withdraw => 'Çek';
+
+  @override
+  String get withdrawMoney => 'Para çek';
+
+  @override
+  String get editGoal => 'Hedefi düzenle';
+
+  @override
+  String get unarchive => 'Arşivden Çıkar';
+
+  @override
+  String get activate => 'Aktif Et';
+
+  @override
+  String get archive => 'Arşivle';
+
+  @override
+  String get activateGoal => 'Aktif et';
+
+  @override
+  String get restartGoal => 'Yeniden başlat';
+
+  @override
+  String get archiveGoal => 'Arşivle';
+
+  @override
+  String get deleteGoal => 'Hedefi sil';
+
+  @override
+  String get progress => 'İlerleme';
+
+  @override
+  String get remainingDays => 'Kalan Gün';
+
+  @override
+  String get monthlyTarget => 'Aylık Hedef';
+
+  @override
+  String get noTransactionsHint =>
+      'İlk işleminizi yapmak için yukarıdaki\nbutonları kullanabilirsiniz';
+
+  @override
+  String get savingsAdded => 'Birikim Eklendi';
+
+  @override
+  String get moneyWithdrawn => 'Para Çekildi';
+
+  @override
+  String get invalidGoal => 'Geçersiz hedef';
+
+  @override
+  String get goalArchived => 'Hedef arşivlendi';
+
+  @override
+  String get goalActivated => 'Hedef aktif edildi';
+
+  @override
+  String get goalReactivated => 'Hedef yeniden aktif edildi';
+
+  @override
+  String get markAsCompleted => 'Tamamlandı Olarak İşaretle';
+
+  @override
+  String get completedButton => 'Tamamlandı';
+
+  @override
+  String goalCompletedImpact(String percent) {
+    return 'Hedefin %$percent\'ini tamamladı';
+  }
+
+  @override
+  String get archiveGoalDialogTitle => 'Hedefi Arşivle?';
+
+  @override
+  String get archiveGoalDialogContent =>
+      'Hedef arşivlenecek. Daha sonra arşivden erişebilirsiniz.';
+
+  @override
+  String get unarchiveGoalDialogTitle => 'Arşivden Çıkar?';
+
+  @override
+  String get unarchiveGoalDialogContent =>
+      'Hedef arşivden çıkarılacak ve aktif hedeflerinize eklenecek.';
+
+  @override
+  String get activateGoalDialogTitle => 'Hedefi Aktif Et?';
+
+  @override
+  String get activateGoalDialogContent =>
+      'Tamamlanmış hedef tekrar aktif edilecek ve üzerinde çalışmaya devam edebilirsiniz.';
+
+  @override
+  String get completeGoalDialogTitle => '🎉 Tebrikler!';
+
+  @override
+  String get completeGoalDialogContent =>
+      'Hedefini tamamladın! Tamamlandı olarak işaretlemek ister misin?';
+
+  @override
+  String get deleteGoalDialogTitle => 'Hedefi Sil?';
+
+  @override
+  String get deleteGoalDialogContent =>
+      'Bu işlem geri alınamaz. Hedef ve tüm işlem geçmişi silinecek.';
+
+  @override
+  String get goalCompletedSuccess => '🎉 Harika! Hedefini tamamladın!';
+
+  @override
+  String get transactionFailed => 'İşlem başarısız oldu';
+
+  @override
+  String get addSavingsTitle => 'Tasarruf Ekle';
+
+  @override
+  String get withdrawTitle => 'Para Çek';
+
+  @override
+  String get savingsDeposited => 'Para eklendi!';
+
+  @override
+  String get savingsWithdrawn => 'Para çekildi!';
+
+  @override
+  String get depositNoteHint => 'Örn: Maaş günü tasarrufu';
+
+  @override
+  String get withdrawNoteHint => 'Örn: Acil ihtiyaç için';
+
+  @override
+  String savingsGoalImpactDeposit(String percentage) {
+    return 'Hedefin %$percentage%\'ini tamamladı';
+  }
+
+  @override
+  String savingsGoalImpactWithdraw(String percentage) {
+    return 'Hedeften %$percentage azaldı';
+  }
+
+  @override
+  String get editSavingsGoal => 'Birikimi Düzenle';
+
+  @override
+  String get savingsName => 'Birikim Adı';
+
+  @override
+  String get enterGoalNameHint => 'Hedef adını girin';
+
+  @override
+  String get pleaseEnterGoalNameError => 'Lütfen hedef adı girin';
+
+  @override
+  String get selectDateHint => 'Tarih seçin';
+
+  @override
+  String get color => 'Renk';
+
+  @override
+  String get milestone25Title => 'İyi Başlangıç!';
+
+  @override
+  String get milestone50Title => 'Yarı Yoldasın!';
+
+  @override
+  String get milestone75Title => 'Neredeyse Tamam!';
+
+  @override
+  String get milestone100Title => 'Birikim Tamamlandı!';
+
+  @override
+  String get milestoneDefaultTitle => 'Tebrikler!';
+
+  @override
+  String get milestone25Message => 'Hedefinin %25\'ine ulaştın! Devam et!';
+
+  @override
+  String get milestone50Message =>
+      'Hedefinin yarısını tamamladın! Harika gidiyorsun!';
+
+  @override
+  String get milestone75Message => 'Hedefinin %75\'ine ulaştın! Son spurt!';
+
+  @override
+  String get milestone100Message => 'Hedefini tamamladın! Harika bir başarı!';
+
+  @override
+  String get milestoneDefaultMessage => 'Hedefine bir adım daha yaklaştın!';
+
+  @override
+  String get optionalField => '(İsteğe Bağlı)';
+
+  @override
+  String get daysUnit => 'gün';
+
+  @override
+  String get monthsUnit => 'ay';
+
+  @override
+  String get yearsUnit => 'yıl';
+
+  @override
+  String get timeRemaining => 'kalan';
+
+  @override
+  String get aiUsageLimit => 'AI Kullanım Limiti';
+
+  @override
+  String remainingCount(int count) {
+    return '$count kaldı';
+  }
+
+  @override
+  String get messages => 'mesaj';
+
+  @override
+  String get watchAdBonusInfo =>
+      'Reklam izleyerek +5 ek kullanım hakkı kazanabilirsiniz';
+
+  @override
+  String maxBonusRemaining(int count) {
+    return 'Günlük maksimum $count bonus daha kazanabilirsiniz';
+  }
+
+  @override
+  String get unlimitedAIWithPremium => 'Premium ile sınırsız AI kullanımı';
+
+  @override
+  String get adLoadingWait => 'Reklam yükleniyor, lütfen bekleyin...';
+
+  @override
+  String get dailyUsage => 'Günlük kullanım';
+
+  @override
+  String get rights => 'hak';
+
+  @override
+  String get watchAdBonusShort => 'Reklam İzle (+5)';
+
+  @override
+  String get adLoadError => 'Reklam yüklenirken bir hata oluştu';
+
+  @override
+  String get noDescription => 'Açıklama yok';
+
+  @override
+  String get insufficientBalanceDetail => 'Bu hesapta yeterli bakiye yok';
+
+  @override
+  String get insufficientSavings => 'Yetersiz tasarruf';
+
+  @override
+  String insufficientSavingsDetail(Object amount) {
+    return 'Bu hedefteki çekilebilecek miktar: $amount';
+  }
+
+  @override
+  String get availableBalanceLabel => 'Kullanılabilir Bakiye';
+
+  @override
+  String get maxAmount => 'Tümünü';
+
+  @override
+  String get amountMustBeGreaterThanZero => 'Tutar 0\'dan büyük olmalı';
+
+  @override
+  String get amountExceedsBalance => 'Tutar kullanılabilir bakiyeyi aşıyor';
+
+  @override
+  String get amountExceedsSavings => 'Tutar mevcut tasarrufu aşıyor';
+
+  @override
+  String get amountExceedsGoalRemaining => 'Tutar hedefe kalan miktarı aşıyor';
+
+  @override
+  String get goalCompletedTitle => 'Hedefini Tamamladın! 🎉';
+
+  @override
+  String goalCompletedMessage(Object goalName) {
+    return 'Tebrikler! $goalName hedefine ulaştın!';
+  }
+
+  @override
+  String goalCompletedStats(Object amount, Object days) {
+    return '$days günde $amount biriktirdin';
+  }
+
+  @override
+  String get keepActive => 'Aktif Tut';
+
+  @override
+  String get createNewGoal => 'Yeni Hedef';
+
+  @override
+  String get goalArchivedSuccess => 'Hedef arşivlendi';
+
+  @override
+  String get budgetAndSubscriptions => 'Bütçe ve Abonelikler';
+
+  @override
+  String get budgets => 'Bütçeler';
+
+  @override
+  String get subscriptions => 'Abonelikler';
+
+  @override
+  String get subscriptionDetails => 'Abonelik Detayları';
+
+  @override
+  String get subscriptionSchedule => 'Tekrarlama Planı';
+
+  @override
+  String get paymentAccount => 'Ödeme Hesabı';
+
+  @override
+  String get subscriptionName => 'Abonelik Adı';
+
+  @override
+  String get frequency => 'Sıklık';
+
+  @override
+  String get endDate => 'Bitiş Tarihi';
+
+  @override
+  String get endDateOptional => 'Bitiş Tarihi (Opsiyonel)';
+
+  @override
+  String get reviewSubscription => 'Aboneliği Gözden Geçirin';
+
+  @override
+  String get noSubscriptionsYet => 'Henüz abonelik eklemediniz';
+
+  @override
+  String get addFirstSubscriptionDescription =>
+      'Netflix, Spotify gibi aboneliklerinizi ekleyerek otomatik takip edin';
+
+  @override
+  String get addSubscription => 'Abonelik Ekle';
+
+  @override
+  String get requiredField => 'Bu alan zorunludur';
+
+  @override
+  String get deleteSubscription => 'Aboneliği Sil';
+
+  @override
+  String deleteSubscriptionConfirm(String subscriptionName) {
+    return '$subscriptionName aboneliğini silmek istediğinizden emin misiniz?';
+  }
+
+  @override
+  String get subscriptionDeleted => 'Abonelik başarıyla silindi';
+
+  @override
+  String get activeSubscriptions => 'Aktif Abonelikler';
+
+  @override
+  String inactiveSubscriptions(int count) {
+    return 'Pasif Abonelikler';
+  }
+
+  @override
+  String inactiveSubscriptionsWithCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pasif Abonelikler ($count)',
+      zero: 'Pasif Abonelikler',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inactive => 'Pasif';
+
+  @override
+  String get monthlyTotal => 'Aylık Toplam';
+
+  @override
+  String get yearlyPrefix => 'Yıllık:';
+
+  @override
+  String get subscriptionAdded => 'Abonelik başarıyla eklendi';
+
+  @override
+  String get subscriptionExample => 'Örn: Netflix Premium';
+
+  @override
+  String get available => 'Kullanılabilir';
+
+  @override
+  String get tutorialTitle => 'Hızlı İşlem Ekleme';
+
+  @override
+  String get tutorialDescription =>
+      'Alt köşedeki butona tıklayarak harcama, gelir veya transfer işlemi ekleyebilirsiniz.';
+
+  @override
+  String get tutorialNext => 'Devam Et';
+
+  @override
+  String get tutorialPrevious => 'Geri';
+
+  @override
+  String get tutorialSkip => 'Atla';
+
+  @override
+  String get tutorialGotIt => 'Anladım!';
+
+  @override
+  String get tutorialBalanceOverviewTitle => 'Toplam Varlıklar';
+
+  @override
+  String get tutorialBalanceOverviewDescription =>
+      'Burada tüm hesaplarınızın, kartlarınızın ve yatırımlarınızın toplam bakiyesini görebilirsiniz.';
+
+  @override
+  String get tutorialRecentTransactionsTitle => 'Son İşlemler';
+
+  @override
+  String get tutorialRecentTransactionsDescription =>
+      'Eklediğiniz tüm işlemler burada görüntülenir. Uzun basarak işlemleri düzenleyebilir veya silebilirsiniz.';
+
+  @override
+  String get tutorialAIChatTitle => 'AI Asistan';
+
+  @override
+  String get tutorialAIChatDescription =>
+      'AI asistan ile doğal dilde konuşarak işlem ekleyin, özet alın, finansal analiz yapın, toplu silme işlemleri gerçekleştirin ve tüm finansal sorularınızı sorun. Güçlü bir finansal asistanınız var!';
+
+  @override
+  String get tutorialCardsTitle => 'Kart Yönetimi';
+
+  @override
+  String get tutorialCardsDescription =>
+      'Burada kartlarınızı görüntüleyebilir, yeni kart ekleyebilir ve bakiye bilgilerinizi takip edebilirsiniz.';
+
+  @override
+  String get tutorialBottomNavigationTitle => 'Sekmeler';
+
+  @override
+  String get tutorialBottomNavigationDescription =>
+      'Alt kısımdaki sekmeler ile Ana Sayfa, İşlemler, Kartlar, Analitik, Takvim ve Yatırım sayfaları arasında geçiş yapabilirsiniz.';
+
+  @override
+  String get tutorialBudgetTitle => 'Bütçe Yönetimi';
+
+  @override
+  String get tutorialBudgetDescription =>
+      'Aylık harcamalarınızı takip edin, bütçe belirleyin ve harcama limitlerinizi kontrol edin.';
+
+  @override
+  String get tutorialProfileTitle => 'Profil';
+
+  @override
+  String get tutorialProfileDescription =>
+      'Profil fotoğrafınıza tıklayarak ayarlara, premium özelliklere ve kişisel bilgilerinize erişebilirsiniz.';
 }

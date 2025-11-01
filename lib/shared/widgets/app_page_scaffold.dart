@@ -93,14 +93,14 @@ class AppPageScaffold extends StatelessWidget {
           backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
           surfaceTintColor: Colors.transparent,
           pinned: true,
-          expandedHeight: tabBar != null ? expandedHeight + 12 : expandedHeight,
+          expandedHeight: tabBar != null ? expandedHeight + 17 : expandedHeight,
           automaticallyImplyLeading: false,
           flexibleSpace: FlexibleSpaceBar(
             titlePadding: EdgeInsets.only(
               left: horizontalPadding, 
               right: horizontalPadding,
               top: tabBar != null ? 16 : 8,
-              bottom: tabBar != null ? 56 : 8,
+              bottom: tabBar != null ? 61 : 8,
             ),
             title: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -192,7 +192,7 @@ class AppPageScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
       body: SafeArea(
-        top: false, // SliverAppBar kendi padding'ini yönetir
+        top: true, // Android 15+ için status bar altında içerik görünmemesi için
         bottom: true,
         left: true,  // Edge-to-edge overflow'u önle
         right: true, // Edge-to-edge overflow'u önle
@@ -202,6 +202,19 @@ class AppPageScaffold extends StatelessWidget {
       floatingActionButtonLocation: floatingActionButtonLocation ?? FloatingActionButtonLocation.endFloat,
     );
   }
+}
+
+/// Tab bilgisi modeli
+class TabItem {
+  final String label;
+  final IconData? icon;
+  final int? badgeCount;
+
+  const TabItem({
+    required this.label,
+    this.icon,
+    this.badgeCount,
+  });
 }
 
 /// Tab bar için özel widget - Minimal Line Style
@@ -273,4 +286,183 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(48);
+}
+
+/// Enhanced tab bar with icons and badges - Kullanıcı dostu tasarım
+class EnhancedTabBar extends StatelessWidget implements PreferredSizeWidget {
+  final TabController controller;
+  final List<TabItem> tabs;
+  final double horizontalPadding;
+
+  const EnhancedTabBar({
+    super.key,
+    required this.controller,
+    required this.tabs,
+    this.horizontalPadding = 12,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(61),
+      child: Container(
+        margin: EdgeInsets.fromLTRB(horizontalPadding, 17, horizontalPadding, 8),
+        decoration: BoxDecoration(
+          color: isDark 
+            ? const Color(0xFF1C1C1E).withValues(alpha: 0.5)
+            : Colors.white.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark 
+              ? const Color(0xFF38383A).withValues(alpha: 0.5)
+              : const Color(0xFFE5E5EA).withValues(alpha: 0.8),
+            width: 0.5,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: TabBar(
+            controller: controller,
+            isScrollable: false,
+            indicator: BoxDecoration(
+              color: isDark 
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFF2F2F7),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorPadding: const EdgeInsets.all(4),
+            labelColor: isDark ? Colors.white : Colors.black,
+            unselectedLabelColor: isDark 
+              ? const Color(0xFF8E8E93)
+              : const Color(0xFF6D6D70),
+            labelStyle: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.2,
+            ),
+            unselectedLabelStyle: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.2,
+            ),
+            dividerColor: Colors.transparent,
+            splashFactory: NoSplash.splashFactory,
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
+            tabAlignment: TabAlignment.fill,
+            tabs: tabs.asMap().entries.map((entry) {
+              final index = entry.key;
+              final tab = entry.value;
+              return AnimatedBuilder(
+                animation: controller,
+                builder: (context, child) {
+                  final isSelected = controller.index == index;
+                  return Tab(
+                    child: _buildTabContent(tab, isSelected, isDark),
+                  );
+                },
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabContent(TabItem tab, bool isSelected, bool isDark) {
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (tab.icon != null) ...[
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    child: Icon(
+                      tab.icon,
+                      size: isSelected ? 18 : 16,
+                      color: isSelected 
+                        ? (isDark ? Colors.white : Colors.black)
+                        : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70)),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                ],
+                Flexible(
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    style: GoogleFonts.inter(
+                      fontSize: isSelected ? 13 : 12,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      letterSpacing: -0.2,
+                      color: isSelected 
+                        ? (isDark ? Colors.white : Colors.black)
+                        : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70)),
+                    ),
+                    child: Text(
+                      tab.label,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Badge
+          if (tab.badgeCount != null && tab.badgeCount! > 0)
+            Positioned(
+              top: tab.icon != null ? 0 : 8,
+              right: tab.icon != null ? 4 : 8,
+              child: AnimatedScale(
+                scale: isSelected ? 1.0 : 0.9,
+                duration: const Duration(milliseconds: 200),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399), // Mint green
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
+                  child: Text(
+                    tab.badgeCount! > 99 ? '99+' : '${tab.badgeCount}',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      height: 1.2,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(61);
 } 

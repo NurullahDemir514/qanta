@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:async';
 import '../../l10n/app_localizations.dart';
 import '../../core/services/premium_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -47,17 +49,56 @@ class _PremiumOfferScreenState extends State<PremiumOfferScreen> {
   double _premiumPlusMonthlyPrice = 119.99;
   double _premiumPlusYearlyPrice = 1199.0;
   
+  late StreamSubscription<List<PurchaseDetails>> _purchaseSubscription;
+  
   @override
   void initState() {
     super.initState();
     _loadProductPrices();
     _checkCurrentTier();
+    _listenToPurchaseUpdates();
   }
   
   @override
   void dispose() {
     _pageController.dispose();
+    _purchaseSubscription.cancel();
     super.dispose();
+  }
+  
+  /// Listen to purchase updates for navigation
+  void _listenToPurchaseUpdates() {
+    final Stream<List<PurchaseDetails>> purchaseUpdated = InAppPurchase.instance.purchaseStream;
+    _purchaseSubscription = purchaseUpdated.listen(
+      (List<PurchaseDetails> purchaseDetailsList) {
+        _handlePurchaseUpdates(purchaseDetailsList);
+      },
+      onDone: () => _purchaseSubscription.cancel(),
+      onError: (error) {
+        debugPrint('❌ PremiumOfferScreen: Purchase stream error: $error');
+      },
+    );
+  }
+  
+  /// Handle purchase updates and navigate to onboarding
+  void _handlePurchaseUpdates(List<PurchaseDetails> purchaseDetailsList) {
+    for (final purchaseDetails in purchaseDetailsList) {
+      debugPrint('📦 PremiumOfferScreen: Purchase update - Status: ${purchaseDetails.status}');
+      
+      if (purchaseDetails.status == PurchaseStatus.purchased) {
+        // Premium satın alındı - onboarding'e yönlendir
+        debugPrint('🎉 Purchase completed! Navigating to onboarding...');
+        
+        if (mounted) {
+          // Kısa bir gecikme ile smooth transition
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              context.go('/premium-onboarding');
+            }
+          });
+        }
+      }
+    }
   }
   
   /// Check user's current premium tier
@@ -168,6 +209,20 @@ class _PremiumOfferScreenState extends State<PremiumOfferScreen> {
           ),
                   onPressed: () => context.pop(),
         ),
+        actions: [
+          // DEBUG: Test Onboarding butonu
+          if (kDebugMode)
+            IconButton(
+              icon: Icon(
+                Icons.preview,
+                color: isDark ? Colors.white70 : AppColors.primary,
+              ),
+              tooltip: 'Test Premium Onboarding',
+              onPressed: () {
+                context.go('/premium-onboarding');
+              },
+            ),
+        ],
       ),
       body: Column(
                   children: [
@@ -197,22 +252,24 @@ class _PremiumOfferScreenState extends State<PremiumOfferScreen> {
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Column(
         children: [
-                    Text(
-                      l10n.premiumOfferTitle,
-                      style: GoogleFonts.inter(
+          Text(
+            l10n.premiumOfferTitle,
+            style: GoogleFonts.inter(
               fontSize: 32.sp,
-                        fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.bold,
               color: isDark ? Colors.white : AppColors.textDark,
-                      ),
-                    ),
-          SizedBox(height: 8.h),
-                    Text(
-            l10n.unlockAllFeatures,
-                      style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              color: isDark ? Colors.white70 : AppColors.textLight,
             ),
           ),
+          ...[
+            SizedBox(height: 8.h),
+            Text(
+              l10n.unlockAllFeatures,
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                color: isDark ? Colors.white70 : AppColors.textLight,
+              ),
+            ),
+          ],
         ],
       ),
     );

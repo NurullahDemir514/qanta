@@ -5,9 +5,13 @@ import '../../../../shared/models/stock_models.dart';
 import '../../../../shared/models/account_model.dart';
 import '../../../../shared/utils/currency_utils.dart';
 import '../../../../core/theme/theme_provider.dart';
+import '../../../../core/services/premium_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../mini_chart_widget.dart';
 import '../../../transactions/widgets/forms/date_selector.dart';
+import '../../../advertisement/services/google_ads_real_banner_service.dart';
+import '../../../advertisement/config/advertisement_config.dart' as config;
+import '../../../advertisement/models/advertisement_models.dart';
 
 /// Hisse işlem özet step'i
 class StockSummaryStep extends StatefulWidget {
@@ -42,11 +46,26 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
   double _commissionRate = 0.0; // %0 varsayılan komisyon
   late TextEditingController _commissionController;
   late AppLocalizations l10n;
+  late GoogleAdsRealBannerService _bannerService;
 
   @override
   void initState() {
     super.initState();
     _commissionController = TextEditingController(text: '0.0');
+    
+    // Banner servisini başlat
+    _bannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.stockTransactionFormBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Banner'ı yükle (3 saniye delay)
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        _bannerService.loadAd();
+      }
+    });
   }
 
 
@@ -59,6 +78,7 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
   @override
   void dispose() {
     _commissionController.dispose();
+    _bannerService.dispose();
     super.dispose();
   }
 
@@ -394,7 +414,7 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
                       ),
                     ),
                     Text(
-                      CurrencyUtils.formatAmount(widget.account!.balance, Currency.TRY),
+                      CurrencyUtils.formatAmount(widget.account!.balance, currency),
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -412,6 +432,27 @@ class _StockSummaryStepState extends State<StockSummaryStep> {
               selectedDate: widget.selectedDate,
               onDateSelected: (date) {
                 widget.onDateChanged?.call(date);
+              },
+            ),
+            
+            // Banner Reklam (Premium olmayanlara göster)
+            Consumer<PremiumService>(
+              builder: (context, premiumService, child) {
+                if (!premiumService.isPremium && 
+                    _bannerService.isLoaded && 
+                    _bannerService.bannerWidget != null) {
+                  return Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Container(
+                        height: 50,
+                        alignment: Alignment.center,
+                        child: _bannerService.bannerWidget!,
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
               },
             ),
             

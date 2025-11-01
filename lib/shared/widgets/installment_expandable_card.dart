@@ -311,98 +311,23 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
 
                 // Content
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title row with chip
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Title text (flexible to take available space)
-                          Flexible(
-                            child: Text(
-                              widget.title,
-                              style: GoogleFonts.inter(
-                                fontSize: TransactionDesignSystem.titleFontSize,
-                                fontWeight:
-                                    TransactionDesignSystem.titleFontWeight,
-                                color: TransactionDesignSystem.getTitleColor(
-                                  widget.isDark,
-                                ),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          SizedBox(width: 6),
-                          // Taksitli chip
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.isDark
-                                  ? Colors.orange.shade800
-                                  : Colors.orange.shade100,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: widget.isDark
-                                    ? Colors.orange.shade600
-                                    : Colors.orange.shade300,
-                                width: 0.5,
-                              ),
-                            ),
-                            child: Text(
-                              AppLocalizations.of(context)?.installment ??
-                                  'Taksitli',
-                              style: GoogleFonts.inter(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w600,
-                                color: widget.isDark
-                                    ? Colors.white
-                                    : Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: TransactionDesignSystem.titleSubtitleSpacing,
-                      ),
-                      Text(
-                        widget.time != null
-                            ? '${widget.subtitle} • ${widget.time}'
-                            : widget.subtitle,
-                        style: GoogleFonts.inter(
-                          fontSize: TransactionDesignSystem.subtitleFontSize,
-                          fontWeight:
-                              TransactionDesignSystem.subtitleFontWeight,
-                          color: TransactionDesignSystem.getSubtitleColor(
-                            widget.isDark,
-                          ),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                  child: _buildContentSection(context),
                 ),
 
-                // Amount and expand arrow
+                // Amount and expand arrow (right aligned - outside of content)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Toplam tutar (ana tutar)
+                        // Toplam tutar
                         Text(
                           _getDisplayAmount(),
                           style: GoogleFonts.inter(
                             fontSize: TransactionDesignSystem.amountFontSize,
-                            fontWeight:
-                                TransactionDesignSystem.amountFontWeight,
+                            fontWeight: TransactionDesignSystem.amountFontWeight,
                             color: TransactionDesignSystem.getAmountColor(
                               widget.type,
                               widget.isDark,
@@ -415,7 +340,7 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                             widget.totalInstallments != null &&
                             widget.totalInstallments! > 1)
                           Text(
-                            '${TransactionDesignSystem.formatAmount(widget.monthlyAmount!, widget.type, currencySymbol: Provider.of<ThemeProvider>(context, listen: false).currency.symbol)}${AppLocalizations.of(context)?.perMonth ?? '/month'}',
+                            '${TransactionDesignSystem.formatAmount(widget.monthlyAmount!, widget.type, currency: Provider.of<ThemeProvider>(context, listen: false).currency)}${AppLocalizations.of(context)?.perMonth ?? '/month'}',
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.w400,
@@ -425,6 +350,14 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
                             ),
                           ),
                       ],
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      _isExpanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      color: TransactionDesignSystem.getSubtitleColor(widget.isDark),
+                      size: 20,
                     ),
                   ],
                 ),
@@ -518,10 +451,10 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
             TransactionDesignSystem.formatAmount(
               detail.amount,
               widget.type,
-              currencySymbol: Provider.of<ThemeProvider>(
+              currency: Provider.of<ThemeProvider>(
                 context,
                 listen: false,
-              ).currency.symbol,
+              ).currency,
             ),
             style: GoogleFonts.inter(
               fontSize: 13,
@@ -591,10 +524,10 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
       return TransactionDesignSystem.formatAmount(
         widget.totalAmount!,
         widget.type,
-        currencySymbol: Provider.of<ThemeProvider>(
+        currency: Provider.of<ThemeProvider>(
           context,
           listen: false,
-        ).currency.symbol,
+        ).currency,
       );
     }
     return widget.amount;
@@ -617,5 +550,101 @@ class _InstallmentExpandableCardState extends State<InstallmentExpandableCard>
       final rawTime = '${date.day}/${date.month}';
       return TransactionDesignSystem.localizeDisplayTime(rawTime, context);
     }
+  }
+
+  /// Build content section with dynamic description support
+  Widget _buildContentSection(BuildContext context) {
+    // Split title by bullet point to separate category and description
+    final parts = widget.title.split(' • ');
+    final categoryName = parts[0];
+    final description = parts.length > 1 ? parts.sublist(1).join(' • ') : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Title row with chip (no amount here)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Category name (flexible to take available space)
+            Flexible(
+              child: Text(
+                categoryName,
+                style: GoogleFonts.inter(
+                  fontSize: TransactionDesignSystem.titleFontSize,
+                  fontWeight: TransactionDesignSystem.titleFontWeight,
+                  color: TransactionDesignSystem.getTitleColor(widget.isDark),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 6),
+            // Taksitli chip
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: widget.isDark
+                    ? Colors.orange.shade800
+                    : Colors.orange.shade100,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: widget.isDark
+                      ? Colors.orange.shade600
+                      : Colors.orange.shade300,
+                  width: 0.5,
+                ),
+              ),
+              child: Text(
+                AppLocalizations.of(context)?.installment ?? 'Taksitli',
+                style: GoogleFonts.inter(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: widget.isDark ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+          ],
+        ),
+        
+        // Description (if available) - shown below category
+        if (description != null && description.isNotEmpty) ...[
+          const SizedBox(height: 3),
+          Text(
+            description,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: widget.isDark 
+                  ? const Color(0xFF98989F)
+                  : const Color(0xFF6B6B70),
+              height: 1.3,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+        
+        const SizedBox(height: 2),
+        
+        // Subtitle (card name + time)
+        Text(
+          widget.time != null
+              ? '${widget.subtitle} • ${widget.time}'
+              : widget.subtitle,
+          style: GoogleFonts.inter(
+            fontSize: TransactionDesignSystem.subtitleFontSize,
+            fontWeight: TransactionDesignSystem.subtitleFontWeight,
+            color: TransactionDesignSystem.getSubtitleColor(widget.isDark),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
   }
 }

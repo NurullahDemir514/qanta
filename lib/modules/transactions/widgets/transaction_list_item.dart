@@ -4,7 +4,9 @@ import '../../../shared/models/transaction_model_v2.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/design_system/transaction_design_system.dart' as design;
 import '../../../core/theme/theme_provider.dart';
+import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/services/category_icon_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 class TransactionListItem extends StatelessWidget {
   final TransactionWithDetailsV2 transaction;
@@ -39,8 +41,25 @@ class TransactionListItem extends StatelessWidget {
         .firstOrNull;
 
     // Format amount with proper sign and currency
-    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
-    final amount = design.TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    
+    // Use CurrencyUtils directly for proper formatting
+    final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(transaction.amount.abs(), currency);
+    final currencySymbol = currency.symbol;
+    
+    // Apply prefix based on transaction type
+    String amount;
+    switch (transactionType) {
+      case TransactionType.income:
+        amount = '+$formattedAmount$currencySymbol';
+        break;
+      case TransactionType.expense:
+        amount = '-$formattedAmount$currencySymbol';
+        break;
+      case TransactionType.transfer:
+        amount = '$formattedAmount$currencySymbol';
+        break;
+    }
     
     // Use displayTime from transaction model (dynamic date formatting)
     final time = transaction.displayTime;
@@ -92,9 +111,11 @@ class TransactionListItem extends StatelessWidget {
     return design.TransactionDesignSystem.buildTransactionItemFromV2(
       transaction: transaction,
       isDark: isDark,
+      context: context,
       time: time,
       categoryIconData: categoryIcon,      // Use direct IconData
       categoryColorData: categoryColor,    // Use direct Color
+      currency: currency,
     );
   }
 } 

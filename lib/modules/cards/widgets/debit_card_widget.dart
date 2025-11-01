@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/bank_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/utils/currency_utils.dart';
 
@@ -233,9 +234,16 @@ class DebitCardWidget extends StatelessWidget {
         ? 26.0
         : 28.0;
 
-    // Get design from constants
-    final gradientColors = AppConstants.getBankGradientColors(bankCode);
-    final accentColor = AppConstants.getBankAccentColor(bankCode);
+    // Get design from BankService (dynamic) or fallback to AppConstants
+    final bankService = BankService();
+    final bank = bankService.getBankByCode(bankCode);
+    
+    final gradientColors = bank != null 
+        ? bank.gradientColorsList 
+        : AppConstants.getBankGradientColors(bankCode);
+    final accentColor = bank != null 
+        ? bank.accentColorValue 
+        : AppConstants.getBankAccentColor(bankCode);
     final bankName = AppConstants.getLocalizedBankName(
       bankCode,
       AppLocalizations.of(context)!,
@@ -323,7 +331,7 @@ class DebitCardWidget extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  l10n.availableBalance,
+                                  l10n.availableBalanceLabel,
                                   style: GoogleFonts.inter(
                                     fontSize: isSmallMobile ? 11.0 : 12.0,
                                     color: Colors.white.withValues(alpha: 1.0),

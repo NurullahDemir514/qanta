@@ -728,21 +728,27 @@ class _DebitCardsTabState extends State<DebitCardsTab>
                               color: Colors.transparent,
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(16),
-                                onTap: () {
-                                  // Kart limiti kontrolü (event handler içinde listen: false kullanmalıyız)
+                                onTap: () async {
+                                  // Kart limiti kontrolü (Firebase'den gerçek sayı)
                                   final premiumService = context.read<PremiumService>();
-                                  final totalCards = unifiedProviderV2.debitCards.length + unifiedProviderV2.creditCards.length;
                                   
-                                  if (!premiumService.canAddCard(totalCards)) {
-                                    // Premium teklif ekranını göster
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const PremiumOfferScreen(),
-                                        fullscreenDialog: true,
-                                      ),
-                                    );
-                                    return;
+                                  // Premium kullanıcı limitsiz
+                                  if (!premiumService.isPremium) {
+                                    final totalCards = await premiumService.getCurrentCardCount();
+                                    
+                                    if (!premiumService.canAddCard(totalCards)) {
+                                      // Premium teklif ekranını göster
+                                      if (context.mounted) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const PremiumOfferScreen(),
+                                            fullscreenDialog: true,
+                                          ),
+                                        );
+                                      }
+                                      return;
+                                    }
                                   }
                                   
                                   // Debit card form'unu aç

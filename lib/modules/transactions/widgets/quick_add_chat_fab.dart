@@ -11,10 +11,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../core/services/ai/firebase_ai_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/providers/profile_provider.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/services/premium_service.dart';
 import '../../../core/services/rewarded_ad_service.dart';
 import '../../../shared/widgets/ai_limit_indicator.dart';
@@ -30,6 +32,7 @@ import 'account_selection_message.dart';
 import 'installment_selection_message.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../stocks/providers/stock_provider.dart';
+import '../../../shared/widgets/animated_typing_message.dart';
 
 // Kart ismini temizle ve localize et
 String _getLocalizedAccountName(AccountModel account, BuildContext context) {
@@ -70,12 +73,14 @@ class QuickAddChatFAB extends StatefulWidget {
   final double? customLeft;
   final double? customRight;
   final double? customBottom;
+  final Key? tutorialKey; // Tutorial için key
   
   const QuickAddChatFAB({
     super.key,
     this.customLeft,
     this.customRight,
     this.customBottom,
+    this.tutorialKey,
   });
 
   @override
@@ -96,6 +101,10 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
   final List<Map<String, dynamic>> _chatMessages = [];
   final List<Map<String, String>> _conversationHistory = [];
   final ValueNotifier<int> _messagesUpdateTrigger = ValueNotifier<int>(0); // Trigger rebuild
+  
+  // Timestamp tracking for streaming effect (yeni AI mesajları için)
+  DateTime? _lastAIMessageTimestamp;
+  int _lastAnimatedMessageIndex = -1; // Son animasyonlu mesajın index'i
   
   // AI Usage tracking - Günlük limit (yeni sistem, UI'da gösterilecek)
   int _dailyUsage = 0;
@@ -136,19 +145,32 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
       vsync: this,
     );
     
-    // Premium kontrolü ile initial limit set et
+    // UnifiedProviderV2'den başlangıç değerlerini al ve günlük kullanımı yükle
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        // UnifiedProviderV2'den initial değerleri al
+        final provider = context.read<UnifiedProviderV2>();
         final premiumService = context.read<PremiumService>();
+        
         final isPremium = premiumService.isPremium;
+        final isPremiumPlus = premiumService.isPremiumPlus;
+        
+        // UnifiedProviderV2 zaten loadAllData ile yüklenmiş olmalı
         setState(() {
-          _dailyLimit = isPremium ? 75 : 10;
-          _dailyRemaining = _dailyLimit;
+          _dailyUsage = provider.aiUsageCurrent;
+          _dailyLimit = provider.aiUsageLimit;
+          _dailyRemaining = (_dailyLimit - _dailyUsage).clamp(0, _dailyLimit);
           _bonusAvailable = !isPremium;
         });
-        debugPrint('🎯 Initial limit set: $_dailyLimit (isPremium: $isPremium)');
         
-        // Günlük kullanım bilgisini yükle (gerçek değerlerle güncellenecek)
+        final planName = isPremiumPlus ? 'Premium Plus' : isPremium ? 'Premium' : 'Free';
+        debugPrint('🎯 Initial AI limit set from UnifiedProviderV2:');
+        debugPrint('   Plan: $planName');
+        debugPrint('   Usage: $_dailyUsage');
+        debugPrint('   Limit: $_dailyLimit');
+        debugPrint('   Remaining: $_dailyRemaining');
+        
+        // Günlük kullanım bilgisini yükle (Firebase'den en güncel değerleri çek)
         _loadDailyUsage();
       }
     });
@@ -157,7 +179,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
     _loadChatHistory();
   }
   
-  /// Günlük AI kullanım bilgisini Firestore'dan yükle
+  /// Günlük AI kullanım bilgisini UnifiedProviderV2'den yükle
   Future<void> _loadDailyUsage() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -166,64 +188,67 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
         return;
       }
       
-      // Premium kontrolü yap ve limit belirle
+      // UnifiedProviderV2'den güncel AI limiti al (uygulama başlangıcında yüklenmiş)
+      final provider = context.read<UnifiedProviderV2>();
+      final currentUsage = provider.aiUsageCurrent;
+      final baseLimit = provider.aiUsageLimit;
+      
+      // Premium kontrolü yap
       final premiumService = context.read<PremiumService>();
+      
       final isPremium = premiumService.isPremium;
-      final baseLimit = isPremium ? 75 : 10; // Premium: 75, Free: 10 (Firebase'den sync)
+      final isPremiumPlus = premiumService.isPremiumPlus;
       
-      final today = DateTime.now();
-      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final planName = isPremiumPlus ? 'Premium Plus' : isPremium ? 'Premium' : 'Free';
+      final period = isPremium ? 'aylık' : 'günlük';
       
-      debugPrint('📊 Loading daily usage for $dateKey (isPremium: $isPremium, baseLimit: $baseLimit)');
+      debugPrint('📊 Loading AI usage (Plan: $planName, Period: $period)');
+      debugPrint('   Current: $currentUsage');
+      debugPrint('   Base Limit: $baseLimit');
       
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('ai_usage_daily')
-          .doc(dateKey)
-          .get();
-      
-      if (doc.exists) {
-        final data = doc.data()!;
-        final chatCount = (data['chat'] as int?) ?? 0;
-        final bonusCount = (data['bonusCount'] as int?) ?? 0;
+      // Bonus sistemi sadece Free kullanıcılar için
+      int bonusCount = 0;
+      if (!isPremium) {
+        final today = DateTime.now();
+        final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
         
-        // Toplam limit hesapla: Base + Bonus
-        final totalLimit = baseLimit + bonusCount;
-        final remaining = totalLimit - chatCount;
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('ai_usage_daily')
+            .doc(dateKey)
+            .get();
         
-        if (mounted) {
-          setState(() {
-            _dailyLimit = baseLimit;
-            _dailyUsage = chatCount;
-            _bonusCount = bonusCount;
-            _dailyRemaining = remaining;
-            // Bonus hala kazanılabilir mi? (Premium'da bonus yok)
-            _bonusAvailable = !isPremium && bonusCount < _maxBonus;
-          });
-          debugPrint('✅ Daily usage loaded:');
-          debugPrint('   Usage: $_dailyUsage');
-          debugPrint('   Base Limit: $_dailyLimit');
+        if (doc.exists) {
+          final data = doc.data()!;
+          bonusCount = (data['bonusCount'] as int?) ?? 0;
           debugPrint('   Bonus: +$bonusCount');
-          debugPrint('   Total Limit: $totalLimit');
-          debugPrint('   Remaining: $_dailyRemaining');
-          debugPrint('   Bonus Available: $_bonusAvailable');
         }
-      } else {
-        // Bugün hiç kullanım yok
-        if (mounted) {
-          setState(() {
-            _dailyLimit = baseLimit;
-            _dailyUsage = 0;
-            _bonusCount = 0;
-            _dailyRemaining = baseLimit;
-            _bonusAvailable = !isPremium;
-          });
-          debugPrint('ℹ️ No usage today:');
-          debugPrint('   Base Limit: $_dailyLimit');
-          debugPrint('   Starting fresh: 0/$_dailyLimit');
-          debugPrint('   Bonus Available: $_bonusAvailable');
+      }
+      
+      // Toplam limit hesapla: Base + Bonus (sadece Free için)
+      final totalLimit = baseLimit + bonusCount;
+      final remaining = totalLimit - currentUsage;
+      
+      if (mounted) {
+        setState(() {
+          _dailyLimit = baseLimit;
+          _dailyUsage = currentUsage;
+          _bonusCount = bonusCount;
+          _dailyRemaining = remaining;
+          // Bonus hala kazanılabilir mi? (Premium'da bonus yok)
+          _bonusAvailable = !isPremium && bonusCount < _maxBonus;
+        });
+        debugPrint('✅ AI usage loaded:');
+        debugPrint('   Plan: $planName ($period)');
+        debugPrint('   Usage: $_dailyUsage');
+        debugPrint('   Base Limit: $_dailyLimit');
+        if (bonusCount > 0) {
+          debugPrint('   Bonus: +$bonusCount');
         }
+        debugPrint('   Total Limit: $totalLimit');
+        debugPrint('   Remaining: $_dailyRemaining');
+        debugPrint('   Bonus Available: $_bonusAvailable');
       }
     } catch (e) {
       debugPrint('❌ Error loading daily usage: $e');
@@ -253,15 +278,15 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
       _chatMessages.clear();
       _conversationHistory.clear();
       
-      // Hoş geldin mesajı ekle
+      // Hoş geldin mesajı ekle (rastgele)
       final profileProvider = context.read<ProfileProvider>();
       final userName = profileProvider.userName ?? 'dostum';
       final firstName = userName.split(' ').first;
       
-      final l10n = AppLocalizations.of(context)!;
       _chatMessages.add({
         'role': 'ai',
-        'content': l10n.aiChatWelcome(firstName),
+        'content': _getRandomWelcomeMessage(firstName),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
       
       setState(() {
@@ -588,7 +613,14 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
             _chatMessages.removeLast();
           }
           
-          _chatMessages.add({'role': 'ai', 'content': aiMessage});
+          _chatMessages.add({
+            'role': 'ai', 
+            'content': aiMessage,
+            'timestamp': DateTime.now().millisecondsSinceEpoch, // Streaming için timestamp
+            'shouldAnimate': true, // Bu mesaj animasyonlu gösterilmeli
+          });
+          _lastAIMessageTimestamp = DateTime.now(); // En son AI mesajı zamanı
+          _lastAnimatedMessageIndex = _chatMessages.length - 1; // Bu mesajın index'i
           _messagesUpdateTrigger.value++;
         });
         
@@ -636,12 +668,15 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
           final errorStr = e.toString();
           
           int startIndex = -1;
-          if (errorStr.contains('Günlük')) {
+          // Öncelik: "] " formatı - tam mesajı verir
+          if (errorStr.contains('] ')) {
+            startIndex = errorStr.indexOf('] ') + 2;
+          } 
+          // Fallback: "Günlük" veya "Daily" kelimesinden başlat
+          else if (errorStr.contains('Günlük')) {
             startIndex = errorStr.indexOf('Günlük');
           } else if (errorStr.contains('Daily')) {
             startIndex = errorStr.indexOf('Daily');
-          } else if (errorStr.contains('] ')) {
-            startIndex = errorStr.indexOf('] ') + 2;
           }
           
           if (startIndex != -1) {
@@ -657,10 +692,10 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
                 ? errorStr.substring(startIndex, endIndex + 1)
                 : errorStr.substring(startIndex);
           } else {
-            errorMessage = '⚠️ Görüntü analiz edilirken hata oluştu. Lütfen tekrar deneyin.';
+            errorMessage = '⚠️ ${AppLocalizations.of(context)!.aiImageAnalysisError}';
           }
         } else {
-          errorMessage = '❌ Görüntü analiz edilirken hata oluştu. Lütfen tekrar deneyin.';
+          errorMessage = '❌ ${AppLocalizations.of(context)!.aiImageAnalysisError}';
         }
         
         setState(() {
@@ -714,6 +749,26 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
   // setState wrapper - artık ChangeNotifier kullanmıyoruz
   // Normal setState yeterli
 
+  /// Rastgele hoş geldin mesajı al
+  String _getRandomWelcomeMessage(String firstName) {
+    final l10n = AppLocalizations.of(context)!;
+    final isTurkish = l10n.localeName == 'tr';
+    
+    final welcomeMessages = [
+      l10n.aiChatWelcome(firstName),
+      'Hey $firstName! ${isTurkish ? 'Bugün hangi işlemi eklemek istersiniz?' : 'What transaction would you like to add today?'}',
+      '${isTurkish ? 'Selam' : 'Hi'} $firstName! ${isTurkish ? 'Finansal asistanınız hazır. Harcama mı gelir mi ekleyelim?' : 'Your financial assistant is ready. Expense or income?'}',
+      '${isTurkish ? 'Hoş geldin' : 'Welcome back'} $firstName! ${isTurkish ? 'Yeni bir işlem eklemek için hazırım.' : 'Ready to add a new transaction.'}',
+      '${isTurkish ? 'Merhaba' : 'Hello'} $firstName! ${isTurkish ? 'Ne yapmak istersiniz? İşlem eklemek, analiz yapmak?' : 'What would you like to do? Add transaction or analyze?'}',
+      '$firstName, ${isTurkish ? 'tekrar hoş geldin' : 'welcome back'}! ${isTurkish ? 'Bugün bütçeni nasıl takip edelim?' : 'How should we track your budget today?'}',
+      '${isTurkish ? 'Selam' : 'Hi'} $firstName! ${isTurkish ? 'Finansal verilerinizi güncelleyelim mi?' : 'Shall we update your financial data?'}',
+      'Hey $firstName! ${isTurkish ? 'Yeni bir harcama veya gelir eklemek ister misiniz?' : 'Would you like to add a new expense or income?'}',
+    ];
+    
+    final randomIndex = (DateTime.now().millisecondsSinceEpoch % welcomeMessages.length);
+    return welcomeMessages[randomIndex];
+  }
+
   void _toggleExpand() {
     // Karşılama mesajı
     if (_chatMessages.isEmpty) {
@@ -721,10 +776,10 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
       final userName = profileProvider.userName ?? 'dostum';
       final firstName = userName.split(' ').first;
       
-      final l10n = AppLocalizations.of(context)!;
       _chatMessages.add({
         'role': 'ai',
-        'content': l10n.aiChatWelcome(firstName),
+        'content': _getRandomWelcomeMessage(firstName),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
       
       // Welcome mesajı için scroll
@@ -1150,6 +1205,9 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
         
         // Usage bilgisini güncelle
         if (usage != null) {
+          // UnifiedProviderV2'yi güncelle
+          final provider = context.read<UnifiedProviderV2>();
+          
           // Günlük kullanım (öncelik)
           if (usage['daily'] != null) {
             final daily = Map<String, dynamic>.from(usage['daily'] as Map);
@@ -1171,6 +1229,9 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
               _dailyRemaining = daily['remaining'] as int? ?? 0;
             });
             debugPrint('📊 Daily usage: $_dailyUsage/$baseLimit+$bonusCount (Total: $totalLimit, Remaining: $_dailyRemaining)');
+            
+            // UnifiedProviderV2'yi güncelle (backend'den gelen değerlerle)
+            provider.updateAIUsageFromBackend(_dailyUsage, baseLimit);
           }
           
           // Aylık kullanım (backup)
@@ -1194,7 +1255,14 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
             displayMessage = _createTransactionFallbackMessage(transactionData);
           }
           
-          _chatMessages.add({'role': 'ai', 'content': displayMessage});
+          _chatMessages.add({
+            'role': 'ai', 
+            'content': displayMessage,
+            'timestamp': DateTime.now().millisecondsSinceEpoch, // Streaming için timestamp
+            'shouldAnimate': true, // Bu mesaj animasyonlu gösterilmeli
+          });
+          _lastAIMessageTimestamp = DateTime.now(); // En son AI mesajı zamanı
+          _lastAnimatedMessageIndex = _chatMessages.length - 1; // Bu mesajın index'i
           _conversationHistory.add({'role': 'model', 'content': aiMessage}); // Conversation history'e orijinal mesajı ekle
         });
         _isProcessing.value = false;
@@ -1365,20 +1433,19 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
           // Firebase'den gelen hata mesajını parse et
           final errorStr = e.toString();
           
-          // "Günlük" (TR) veya sonraki cümleden itibaren mesajı al
+          // "] " işaretinden sonraki kısmı al (tam mesaj)
           int startIndex = -1;
           
-          // Türkçe mesaj: "Günlük chat limitinize ulaştınız..."
-          if (errorStr.contains('Günlük')) {
+          // Öncelik: "] " formatı - tam mesajı verir
+          if (errorStr.contains('] ')) {
+            startIndex = errorStr.indexOf('] ') + 2;
+          }
+          // Fallback: "Günlük" veya "Daily" kelimesinden başlat
+          else if (errorStr.contains('Günlük')) {
             startIndex = errorStr.indexOf('Günlük');
           }
-          // İngilizce mesaj: "Daily chat limit reached..."
           else if (errorStr.contains('Daily')) {
             startIndex = errorStr.indexOf('Daily');
-          }
-          // Genel mesaj formatı: "] " ile başlayan kısım
-          else if (errorStr.contains('] ')) {
-            startIndex = errorStr.indexOf('] ') + 2;
           }
           
           if (startIndex != -1) {
@@ -2446,7 +2513,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
         setState(() {
           _chatMessages.add({
             'role': 'ai',
-            'content': '❌ Kategori oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.',
+            'content': '❌ ${AppLocalizations.of(context)!.aiCategoryCreationError}',
           });
         });
         _messagesUpdateTrigger.value++;
@@ -2672,6 +2739,35 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
       if (result != null && mounted) {
         final deletedCount = result['deletedCount'] as int? ?? 0;
         final message = result['message'] as String? ?? '';
+        
+        // AI usage bilgisini güncelle
+        if (result['usage'] != null) {
+          final provider = context.read<UnifiedProviderV2>();
+          try {
+            final usage = Map<String, dynamic>.from(result['usage'] as Map);
+            final current = usage['current'] as int? ?? 0;
+            final limit = usage['limit'] as int? ?? 1500;
+            provider.updateAIUsageFromBackend(current, limit);
+            
+            // Local state'i de güncelle
+            if (usage['daily'] != null) {
+              final daily = Map<String, dynamic>.from(usage['daily'] as Map);
+              final totalLimit = daily['limit'] as int? ?? _dailyLimit;
+              final bonusCount = daily['bonusCount'] as int? ?? 0;
+              final baseLimit = totalLimit - bonusCount;
+              
+              setState(() {
+                _dailyUsage = daily['current'] as int? ?? 0;
+                _dailyLimit = baseLimit;
+                _bonusCount = bonusCount;
+                _dailyRemaining = daily['remaining'] as int? ?? 0;
+              });
+              debugPrint('📊 Usage updated after bulk delete: $_dailyUsage/$baseLimit (Remaining: $_dailyRemaining)');
+            }
+          } catch (e) {
+            debugPrint('⚠️ Failed to parse usage data after bulk delete: $e');
+          }
+        }
         
         // Loading mesajını kaldır
         setState(() {
@@ -3278,21 +3374,23 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
     final lower = dateStr.toLowerCase().trim();
     final now = DateTime.now();
 
-    // Bugün
+    // Bugün - şimdiki saati kullan
     if (lower == 'bugün' || lower == 'today') {
-      return DateTime(now.year, now.month, now.day);
+      return now;
     }
 
-    // Dün
+    // Dün - şimdiki saati koru
     if (lower == 'dün' || lower == 'yesterday') {
       final yesterday = now.subtract(const Duration(days: 1));
-      return DateTime(yesterday.year, yesterday.month, yesterday.day);
+      return DateTime(yesterday.year, yesterday.month, yesterday.day, 
+                      now.hour, now.minute, now.second, now.millisecond);
     }
 
-    // Evvelsi gün
+    // Evvelsi gün - şimdiki saati koru
     if (lower == 'evvelsi gün' || lower == 'evvelsi') {
       final dayBefore = now.subtract(const Duration(days: 2));
-      return DateTime(dayBefore.year, dayBefore.month, dayBefore.day);
+      return DateTime(dayBefore.year, dayBefore.month, dayBefore.day,
+                      now.hour, now.minute, now.second, now.millisecond);
     }
 
     // "15 ekim" formatı
@@ -3305,7 +3403,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
       'september': 9, 'october': 10, 'november': 11, 'december': 12,
     };
 
-    // "15 ekim" veya "15 october" pattern
+    // "15 ekim" veya "15 october" pattern - şimdiki saati koru
     final match = RegExp(r'(\d{1,2})\s*(\w+)').firstMatch(lower);
     if (match != null) {
       final day = int.tryParse(match.group(1) ?? '');
@@ -3314,7 +3412,8 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
       if (day != null && monthStr != null) {
         final month = monthMap[monthStr];
         if (month != null) {
-          return DateTime(now.year, month, day);
+          return DateTime(now.year, month, day,
+                          now.hour, now.minute, now.second, now.millisecond);
         }
       }
     }
@@ -3368,6 +3467,333 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
     return number.toString();
   }
 
+  /// Tutarı düzenle
+  void _editAmount(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final initialValue = _pendingTransactionData?['amount']?.toString() ?? '';
+
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final controller = TextEditingController(text: initialValue);
+        return AlertDialog(
+          title: Text(l10n.localeName == 'tr' ? 'Tutarı Düzenle' : 'Edit Amount'),
+          content: TextField(
+            controller: controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: l10n.localeName == 'tr' ? 'Tutar girin' : 'Enter amount',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, controller.text),
+              child: Text(l10n.save),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null && result.isNotEmpty && mounted) {
+      setState(() {
+        _pendingTransactionData!['amount'] = result;
+      });
+      _messagesUpdateTrigger.value++; // UI'ı güncelle
+    }
+  }
+
+  /// Açıklamayı düzenle
+  void _editDescription(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final initialValue = _pendingTransactionData?['description']?.toString() ?? '';
+
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final controller = TextEditingController(text: initialValue);
+        return AlertDialog(
+          title: Text(l10n.localeName == 'tr' ? 'Açıklamayı Düzenle' : 'Edit Description'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: l10n.localeName == 'tr' ? 'Açıklama girin' : 'Enter description',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, controller.text),
+              child: Text(l10n.save),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _pendingTransactionData!['description'] = result;
+      });
+      _messagesUpdateTrigger.value++; // UI'ı güncelle
+    }
+  }
+
+  /// Kategoriyi düzenle
+  void _editCategory(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final initialValue = _pendingTransactionData?['category']?.toString() ?? '';
+
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final controller = TextEditingController(text: initialValue);
+        return AlertDialog(
+          title: Text(l10n.localeName == 'tr' ? 'Kategoriyi Düzenle' : 'Edit Category'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: l10n.localeName == 'tr' ? 'Kategori girin' : 'Enter category',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, controller.text),
+              child: Text(l10n.save),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null && result.isNotEmpty && mounted) {
+      setState(() {
+        _pendingTransactionData!['category'] = result;
+      });
+      _messagesUpdateTrigger.value++; // UI'ı güncelle
+    }
+  }
+
+  /// Kartı/Hesabı düzenle
+  void _editAccount(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final provider = context.read<UnifiedProviderV2>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Mevcut işlemin türünü bul
+    final currentAccountName = _pendingTransactionData?['account']?.toString();
+    AccountType? currentAccountType;
+    
+    // Mevcut hesabı bul
+    if (currentAccountName != null) {
+      final currentAccount = provider.accounts.firstWhere(
+        (acc) => _getLocalizedAccountName(acc, context) == currentAccountName,
+        orElse: () => provider.accounts.first,
+      );
+      currentAccountType = currentAccount.type;
+    }
+    
+    // Hesapları filtrele: Eğer kredi kartı ise, sadece kredi kartlarını göster
+    List<AccountModel> filteredAccounts;
+    if (currentAccountType == AccountType.credit) {
+      filteredAccounts = provider.accounts.where((acc) => acc.type == AccountType.credit).toList();
+    } else {
+      filteredAccounts = provider.accounts;
+    }
+
+    if (filteredAccounts.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              currentAccountType == AccountType.credit
+                  ? (l10n.localeName == 'tr' ? 'Kredi kartı bulunamadı' : 'No credit card found')
+                  : (l10n.localeName == 'tr' ? 'Hesap bulunamadı' : 'No accounts found'),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  l10n.localeName == 'tr' ? 'Hesap Seçin' : 'Select Account',
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Divider
+              Divider(
+                height: 1,
+                color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+              ),
+              
+              // Account List
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: filteredAccounts.length,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemBuilder: (context, index) {
+                    final account = filteredAccounts[index];
+                    final localizedName = _getLocalizedAccountName(account, context);
+                    
+                    // Icon based on account type
+                    IconData accountIcon;
+                    Color iconColor;
+                    
+                    switch (account.type) {
+                      case AccountType.credit:
+                        accountIcon = Icons.credit_card;
+                        iconColor = const Color(0xFFFF6B6B);
+                        break;
+                      case AccountType.debit:
+                        accountIcon = Icons.account_balance_wallet;
+                        iconColor = const Color(0xFF4ECDC4);
+                        break;
+                      case AccountType.cash:
+                        accountIcon = Icons.payments_outlined;
+                        iconColor = const Color(0xFF95E1D3);
+                        break;
+                    }
+                    
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => Navigator.pop(dialogContext, localizedName),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            children: [
+                              // Icon
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: iconColor.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  accountIcon,
+                                  size: 20,
+                                  color: iconColor,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              
+                              // Account Name
+                              Expanded(
+                                child: Text(
+                                  localizedName,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                              ),
+                              
+                              // Arrow
+                              Icon(
+                                Icons.chevron_right,
+                                size: 20,
+                                color: isDark 
+                                    ? Colors.white.withOpacity(0.3)
+                                    : Colors.black.withOpacity(0.3),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              
+              // Divider
+              Divider(
+                height: 1,
+                color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+              ),
+              
+              // Cancel Button
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      l10n.cancel,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF6D6D70),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _pendingTransactionData!['account'] = result;
+      });
+      _messagesUpdateTrigger.value++; // UI'ı güncelle
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<PremiumService>(
@@ -3394,6 +3820,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
     final iconSize = FabPositioning.getIconSize(context);
     
     return GestureDetector(
+      key: widget.tutorialKey, // Tutorial key ekle
       onTap: _toggleExpand,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -3448,9 +3875,172 @@ class _AIChatPageWrapper extends StatefulWidget {
   State<_AIChatPageWrapper> createState() => _AIChatPageWrapperState();
 }
 
-class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
+class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBindingObserver {
   // ChangeNotifier listener sistemi kaldırıldı
   // ValueNotifier ile state yönetimi yapılıyor
+  
+  double _previousKeyboardHeight = 0;
+  
+  // Banner Ad
+  BannerAd? _bannerAd;
+  bool _isBannerAdLoaded = false;
+  
+  // Interstitial Ad (Açıkken Reklam)
+  InterstitialAd? _interstitialAd;
+  bool _isInterstitialAdLoaded = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _loadBannerAd();
+    _checkAndShowInterstitialAd();
+  }
+  
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    _interstitialAd?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  
+  /// Banner reklamı yükle
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-8222173839637306/8471335231' // Android Banner Ad Unit ID
+          : 'ca-app-pub-8222173839637306/1234567890', // iOS Banner Ad Unit ID (değiştirin)
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          if (mounted) {
+            setState(() {
+              _isBannerAdLoaded = true;
+            });
+          }
+          debugPrint('✅ Banner ad loaded successfully');
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('❌ Banner ad failed to load: $error');
+          ad.dispose();
+        },
+      ),
+    );
+    
+    _bannerAd?.load();
+  }
+  
+  /// Interstitial reklamı yükle
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-8222173839637306/2064982630' // Android Interstitial Ad Unit ID
+          : 'ca-app-pub-8222173839637306/1234567891', // iOS Interstitial Ad Unit ID (değiştirin)
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          debugPrint('✅ Interstitial ad loaded successfully');
+          _interstitialAd = ad;
+          _isInterstitialAdLoaded = true;
+          
+          // Reklam event'lerini dinle
+          _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+            onAdShowedFullScreenContent: (ad) {
+              debugPrint('📱 Interstitial ad showed full screen');
+            },
+            onAdDismissedFullScreenContent: (ad) {
+              debugPrint('❌ Interstitial ad dismissed');
+              ad.dispose();
+              _interstitialAd = null;
+              _isInterstitialAdLoaded = false;
+            },
+            onAdFailedToShowFullScreenContent: (ad, error) {
+              debugPrint('❌ Interstitial ad failed to show: $error');
+              ad.dispose();
+              _interstitialAd = null;
+              _isInterstitialAdLoaded = false;
+            },
+          );
+        },
+        onAdFailedToLoad: (error) {
+          debugPrint('❌ Interstitial ad failed to load: $error');
+          _interstitialAd = null;
+          _isInterstitialAdLoaded = false;
+        },
+      ),
+    );
+  }
+  
+  /// Chat açılma sayısını kontrol et ve interstitial reklam göster
+  /// 3., 6., 9., 12. ... açılışlarda reklam gösterir
+  Future<void> _checkAndShowInterstitialAd() async {
+    try {
+      // Premium kontrolü
+      final premiumService = context.read<PremiumService>();
+      if (premiumService.isPremium) {
+        debugPrint('👑 Premium user - No interstitial ad');
+        return;
+      }
+      
+      final prefs = await SharedPreferences.getInstance();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      
+      // Kullanıcıya özel sayaç key
+      final countKey = 'ai_chat_open_count_${user.uid}';
+      
+      // Mevcut sayacı al (default: 0)
+      int currentCount = prefs.getInt(countKey) ?? 0;
+      
+      // Sayacı artır
+      currentCount++;
+      await prefs.setInt(countKey, currentCount);
+      
+      debugPrint('🔢 Chat open count: $currentCount');
+      
+      // 3'ün katlarında reklam göster (3, 6, 9, 12, ...)
+      if (currentCount % 3 == 0) {
+        debugPrint('🎬 Showing interstitial ad at count: $currentCount');
+        
+        // Reklamı yükle
+        _loadInterstitialAd();
+        
+        // Reklamın yüklenmesi için kısa bir süre bekle
+        await Future.delayed(const Duration(seconds: 2));
+        
+        // Yüklendiyse göster
+        if (_isInterstitialAdLoaded && _interstitialAd != null) {
+          await _interstitialAd!.show();
+        } else {
+          debugPrint('⏳ Interstitial ad not ready yet');
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error checking/showing interstitial ad: $e');
+    }
+  }
+  
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    
+    // Klavye yüksekliğini kontrol et
+    final currentKeyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    
+    // Klavye açılıyorsa (yükseklik artıyorsa)
+    if (currentKeyboardHeight > _previousKeyboardHeight && currentKeyboardHeight > 0) {
+      // Kısa bir delay ile scroll yap (klavye açılma animasyonu için)
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          widget.parent._scrollToBottom();
+        }
+      });
+    }
+    
+    _previousKeyboardHeight = currentKeyboardHeight;
+  }
   
   /// Sayıyı formatla (1000 -> 1K, 100000 -> 100K)
   String _formatNumber(int number) {
@@ -3500,13 +4090,40 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Qanta AI - Beta',
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
+                      // Qanta AI + Beta badge
+                      Row(
+                        children: [
+                          Text(
+                            'Qanta AI',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.ioSBlue.withOpacity(0.8),
+                                  AppColors.mintGreen.withOpacity(0.8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'BETA',
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       Text(
                         AppLocalizations.of(context)!.aiChatAssistant,
@@ -3521,15 +4138,25 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                   ),
                 ),
                 
-                // Compact AI Limit Indicator
-                AILimitIndicator(
-                  currentUsage: widget.parent._dailyUsage,
-                  totalLimit: widget.parent._dailyLimit + widget.parent._bonusCount,
-                  bonusCount: widget.parent._bonusCount,
-                  bonusAvailable: widget.parent._bonusAvailable,
-                  maxBonus: widget.parent._maxBonus,
-                  isCompact: true,
-                  onAdWatched: () async {
+                // Compact AI Limit Indicator - Consumer ile anlık güncelleme
+                Consumer<UnifiedProviderV2>(
+                  builder: (context, provider, _) {
+                    // UnifiedProviderV2'den güncel değerleri al
+                    final currentUsage = provider.aiUsageCurrent;
+                    final baseLimit = provider.aiUsageLimit;
+                    
+                    // Bonus bilgisini local state'den al (Firebase'den yüklenecek)
+                    final bonusCount = widget.parent._bonusCount;
+                    final totalLimit = baseLimit + bonusCount;
+                    
+                    return AILimitIndicator(
+                      currentUsage: currentUsage,
+                      totalLimit: totalLimit,
+                      bonusCount: bonusCount,
+                      bonusAvailable: widget.parent._bonusAvailable,
+                      maxBonus: widget.parent._maxBonus,
+                      isCompact: true,
+                      onAdWatched: () async {
                     // Reklam izlenince Firebase'den güncel limit bilgilerini yükle
                     debugPrint('🎬 Ad watched - Reloading daily usage...');
                     
@@ -3545,22 +4172,52 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                     debugPrint('   Total: ${widget.parent._dailyLimit + widget.parent._bonusCount}');
                     debugPrint('   Remaining: ${widget.parent._dailyRemaining}');
                     
-                    // Parent'ı güncelle (QuickAddChatFABState)
-                    if (widget.parent.mounted) {
-                      widget.parent.setState(() {
-                        debugPrint('🔄 Parent state updated after ad watch');
-                      });
-                    }
-                    // Child'ı da güncelle (_AIChatPageWrapper)
-                    if (mounted) {
-                      setState(() {
-                        debugPrint('🔄 Child state updated after ad watch');
-                      });
-                    }
+                        // Parent'ı güncelle (QuickAddChatFABState)
+                        if (widget.parent.mounted) {
+                          widget.parent.setState(() {
+                            debugPrint('🔄 Parent state updated after ad watch');
+                          });
+                        }
+                        // Child'ı da güncelle (_AIChatPageWrapper)
+                        if (mounted) {
+                          setState(() {
+                            debugPrint('🔄 Child state updated after ad watch');
+                          });
+                        }
+                      },
+                    );
                   },
                 ),
               ],
             ),
+          ),
+
+          // Banner Ad - Free kullanıcılar için
+          Consumer<PremiumService>(
+            builder: (context, premiumService, _) {
+              // Premium kullanıcılar için reklam gösterme
+              if (premiumService.isPremium) {
+                return const SizedBox.shrink();
+              }
+              
+              // Reklam yüklüyse göster
+              if (_isBannerAdLoaded && _bannerAd != null) {
+                return Container(
+                  width: _bannerAd!.size.width.toDouble(),
+                  height: _bannerAd!.size.height.toDouble(),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: AdWidget(ad: _bannerAd!),
+                );
+              }
+              
+              // Reklam yüklenirken placeholder
+              return Container(
+                width: double.infinity,
+                height: 50,
+                margin: const EdgeInsets.only(bottom: 8),
+                color: Colors.transparent,
+              );
+            },
           ),
 
           // Messages - ValueListenableBuilder ile wrap (parent setState'i dinle)
@@ -3596,111 +4253,79 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                       final isAdReady = rewardedAdService.isAdReady;
                       
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 16, left: 0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.85,
-                            ),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Sadece Mesaj (icon yok)
-                                Text(
-                                  errorMessage,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                    height: 1.4,
-                                  ),
+                        padding: const EdgeInsets.only(bottom: 16, left: 0, right: 0),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Sadece Mesaj (icon yok)
+                              Text(
+                                errorMessage,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  height: 1.4,
                                 ),
+                              ),
                                 
-                                // Butonlar - Free kullanıcılar için
-                                if (!isPremium) ...[
-                                  const SizedBox(height: 16),
-                                  
-                                  // Reklam İzle Butonu - Sadece bonus varsa
-                                  if (bonusAvailable) ...[
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        onPressed: isAdReady
-                                            ? () async {
-                                                final success = await rewardedAdService.showRewardedAd();
-                                                if (success && mounted) {
-                                                  // Reklam izlenince güncel bilgileri yükle
-                                                  await Future.delayed(const Duration(milliseconds: 500));
-                                                  await widget.parent._loadDailyUsage();
-                                                  if (widget.parent.mounted) {
-                                                    widget.parent.setState(() {});
-                                                  }
-                                                  if (mounted) {
-                                                    setState(() {});
-                                                  }
-                                                }
-                                              }
-                                            : null,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.blue,
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(vertical: 14),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          elevation: 0,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const Icon(Icons.play_circle_filled, size: 20),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              isAdReady ? 'Reklam İzle (+5 Hak)' : 'Reklam Yükleniyor...',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: -0.3,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                  ],
-                                  
-                                  // Premium Butonu - Her zaman göster
+                              // Butonlar - Free kullanıcılar için
+                              if (!isPremium) ...[
+                                const SizedBox(height: 12),
+                                
+                                // Reklam İzle Butonu - Sadece bonus varsa
+                                if (bonusAvailable) ...[
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        context.push('/premium-offer');
-                                      },
+                                      onPressed: isAdReady
+                                          ? () async {
+                                              final success = await rewardedAdService.showRewardedAd();
+                                              if (success && mounted) {
+                                                // 🔔 Reklam izlenince güncel bilgileri yükle
+                                                debugPrint('🎁 Ad rewarded, reloading AI limits...');
+                                                await Future.delayed(const Duration(milliseconds: 500));
+                                                
+                                                // UnifiedProviderV2'den güncel AI limitini yükle
+                                                final provider = context.read<UnifiedProviderV2>();
+                                                await provider.loadAIUsage();
+                                                
+                                                // Local state'i de güncelle
+                                                await widget.parent._loadDailyUsage();
+                                                if (widget.parent.mounted) {
+                                                  widget.parent.setState(() {});
+                                                }
+                                                if (mounted) {
+                                                  setState(() {});
+                                                }
+                                                debugPrint('✅ AI limits reloaded after ad');
+                                              }
+                                            }
+                                          : null,
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFFF9500),
+                                        backgroundColor: Colors.blue,
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        padding: const EdgeInsets.symmetric(vertical: 10),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(10),
                                         ),
                                         elevation: 0,
                                       ),
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          const Icon(Icons.star_rounded, size: 20),
+                                          const Icon(Icons.play_circle_filled, size: 18),
                                           const SizedBox(width: 8),
                                           Text(
-                                            'Premium\'a Geç',
+                                            isAdReady ? AppLocalizations.of(context)!.watchAdBonus : AppLocalizations.of(context)!.adLoading,
                                             style: GoogleFonts.inter(
-                                              fontSize: 15,
+                                              fontSize: 14,
                                               fontWeight: FontWeight.w600,
                                               letterSpacing: -0.3,
                                             ),
@@ -3709,9 +4334,44 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(height: 8),
                                 ],
+                                
+                                // Premium Butonu - Her zaman göster
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      context.push('/premium-offer');
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFFF9500),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 10),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.star_rounded, size: 18),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          AppLocalizations.of(context)!.upgradeToPremium,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: -0.3,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ],
-                            ),
+                            ],
                           ),
                         ),
                       );
@@ -3854,39 +4514,16 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                   return const SizedBox.shrink();
                 }
                 
-                // Typing indicator için özel widget
+                // Typing indicator için özel widget - Modern animasyon
                 if (isTyping) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16, left: 0),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _TypingDot(delay: 0),
-                            const SizedBox(width: 4),
-                            _TypingDot(delay: 200),
-                            const SizedBox(width: 4),
-                            _TypingDot(delay: 400),
-                          ],
-                        ),
-                      ),
+                      child: _ModernTypingIndicator(isDark: isDark),
                     ),
-                      );
-                    }
+                  );
+                }
                     
                     // Bulk Transactions - WhatsApp tarzı
                     if (isBulkTransactions) {
@@ -3940,6 +4577,11 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                       return const SizedBox.shrink();
                     }
                     
+                    // Mesajın animasyon durumunu kontrol et
+                    final isAI = msg['role'] == 'ai' || msg['role'] == 'assistant';
+                    final shouldAnimateFlag = msg['shouldAnimate'] as bool? ?? false;
+                    final shouldAnimate = isAI && shouldAnimateFlag && index == widget.parent._lastAnimatedMessageIndex;
+                    
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: Align(
@@ -3948,25 +4590,24 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                           constraints: BoxConstraints(
                             maxWidth: MediaQuery.of(context).size.width * 0.75,
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            gradient: isUser
-                                ? const LinearGradient(
+                          padding: isUser 
+                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                              : EdgeInsets.zero, // AI mesajları için padding yok
+                          decoration: isUser
+                              ? BoxDecoration(
+                                  gradient: const LinearGradient(
                                     colors: [Color(0xFF6D6D70), Color(0xFF434343)],
-                                  )
-                                : null,
-                            color: isUser ? null : (isDark ? const Color(0xFF2C2C2E) : Colors.white),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: isUser
-                                    ? const Color(0xFF6D6D70).withOpacity(0.3)
-                                    : Colors.black.withOpacity(0.05),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF6D6D70).withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                )
+                              : null, // AI mesajları için arka plan yok
                           child: isUser 
                             ? Text(
                             content,
@@ -3976,57 +4617,71 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                                   color: Colors.white,
                                 ),
                               )
-                            : MarkdownBody(
-                                data: content,
-                                styleSheet: MarkdownStyleSheet(
-                                  p: GoogleFonts.inter(
-                                    fontSize: 15,
-                                    height: 1.5,
-                                    color: isDark ? Colors.white : Colors.black87,
+                            : (shouldAnimate && isAI)
+                                ? AnimatedTypingMessage(
+                                    fullMessage: content,
+                                    isDark: isDark,
+                                    wordsPerSecond: 18, // Karakter bazlı, smooth akış
+                                    onComplete: () {
+                                      // Animasyon tamamlandı - flag'i kaldır
+                                      if (index < widget.parent._chatMessages.length) {
+                                        widget.parent._chatMessages[index]['shouldAnimate'] = false;
+                                      }
+                                      // Scroll yap
+                                      widget.parent._scrollToBottom();
+                                    },
+                                  )
+                                : MarkdownBody(
+                                    data: content,
+                                    styleSheet: MarkdownStyleSheet(
+                                      p: GoogleFonts.inter(
+                                        fontSize: 15,
+                                        height: 1.5,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                      strong: GoogleFonts.inter(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500, // Bold yerine medium
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                      em: GoogleFonts.inter(
+                                        fontSize: 15,
+                                        fontStyle: FontStyle.italic,
+                                        color: isDark ? Colors.white70 : Colors.black54,
+                                      ),
+                                      h1: GoogleFonts.inter(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                      h2: GoogleFonts.inter(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                      h3: GoogleFonts.inter(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                      listBullet: GoogleFonts.inter(
+                                        fontSize: 15,
+                                        color: const Color(0xFF6D6D70),
+                                      ),
+                                      code: GoogleFonts.jetBrainsMono(
+                                        fontSize: 14,
+                                        backgroundColor: isDark 
+                                          ? const Color(0xFF1C1C1E) 
+                                          : const Color(0xFFF5F5F5),
+                                        color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
+                                      ),
+                                      blockquote: GoogleFonts.inter(
+                                        fontSize: 15,
+                                        fontStyle: FontStyle.italic,
+                                        color: isDark ? Colors.white60 : Colors.black54,
+                                      ),
+                                    ),
                                   ),
-                                  strong: GoogleFonts.inter(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                  em: GoogleFonts.inter(
-                                    fontSize: 15,
-                                    fontStyle: FontStyle.italic,
-                                    color: isDark ? Colors.white70 : Colors.black54,
-                                  ),
-                                  h1: GoogleFonts.inter(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                  h2: GoogleFonts.inter(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                  h3: GoogleFonts.inter(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                  listBullet: GoogleFonts.inter(
-                                    fontSize: 15,
-                                    color: const Color(0xFF6D6D70),
-                                  ),
-                                  code: GoogleFonts.jetBrainsMono(
-                                    fontSize: 14,
-                                    backgroundColor: isDark 
-                                      ? const Color(0xFF1C1C1E) 
-                                      : const Color(0xFFF5F5F5),
-                                    color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
-                                  ),
-                                  blockquote: GoogleFonts.inter(
-                                    fontSize: 15,
-                                    fontStyle: FontStyle.italic,
-                                    color: isDark ? Colors.white60 : Colors.black54,
-                                  ),
-                                ),
-                              ),
                         ),
                       ),
                     );
@@ -4263,7 +4918,128 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                   final isWaiting = isWaitingTransaction || isWaitingBulkDelete;
                   debugPrint('🔘 Building buttons - Transaction: $isWaitingTransaction, BulkDelete: $isWaitingBulkDelete');
                   
-              return AnimatedContainer(
+              return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // İşlem Detayları - Kompakt & Minimal Tasarım
+                      if (isWaitingTransaction && widget.parent._pendingTransactionData != null)
+                        ValueListenableBuilder<int>(
+                          valueListenable: widget.parent._messagesUpdateTrigger,
+                          builder: (context, _, __) {
+                            return Consumer<ThemeProvider>(
+                              builder: (context, themeProvider, _) {
+                                final userCurrency = themeProvider.currency;
+                                final data = widget.parent._pendingTransactionData!;
+                                final isStock = data['type'] == 'stock';
+                                final l10n = AppLocalizations.of(context)!;
+                            
+                            // Tutar hesapla
+                            double amount;
+                            if (isStock) {
+                              final quantity = data['quantity'];
+                              final price = data['price'];
+                              amount = (quantity != null && price != null) 
+                                  ? (double.tryParse(quantity.toString()) ?? 0) * (double.tryParse(price.toString()) ?? 0)
+                                  : 0;
+                            } else {
+                              amount = double.tryParse(data['amount']?.toString() ?? '0') ?? 0;
+                            }
+                            
+                            return Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: isDark 
+                                      ? Colors.white.withOpacity(0.1)
+                                      : Colors.black.withOpacity(0.06),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: isDark
+                                        ? Colors.black.withOpacity(0.2)
+                                        : Colors.black.withOpacity(0.04),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Tutar - Düzenlenebilir
+                                  Builder(
+                                    builder: (ctx) => _buildInfoRow(
+                                      label: l10n.localeName == 'tr' ? 'Tutar' : 'Amount',
+                                      value: CurrencyUtils.formatAmount(amount, userCurrency),
+                                      isDark: isDark,
+                                      isHighlighted: true,
+                                      onEdit: isStock ? null : () => widget.parent._editAmount(ctx),
+                                    ),
+                                  ),
+                                  
+                                  // Açıklama (varsa) - Düzenlenebilir
+                                  if (isStock)
+                                    ...[
+                                      const SizedBox(height: 10),
+                                      _buildInfoRow(
+                                        label: l10n.localeName == 'tr' ? 'Detay' : 'Details',
+                                        value: _buildStockDetails(data, userCurrency, l10n),
+                                        isDark: isDark,
+                                        // Hisse detayı düzenlenemez
+                                      ),
+                                    ]
+                                  else if (data['description'] != null && data['description'].toString().isNotEmpty)
+                                    ...[
+                                      const SizedBox(height: 10),
+                                      Builder(
+                                        builder: (ctx) => _buildInfoRow(
+                                          label: l10n.localeName == 'tr' ? 'Açıklama' : 'Description',
+                                          value: data['description'],
+                                          isDark: isDark,
+                                          onEdit: () => widget.parent._editDescription(ctx),
+                                        ),
+                                      ),
+                                    ],
+                                  
+                                  const SizedBox(height: 10),
+                                  
+                                  // Kategori - Düzenlenebilir
+                                  Builder(
+                                    builder: (ctx) => _buildInfoRow(
+                                      label: l10n.localeName == 'tr' ? 'Kategori' : 'Category',
+                                      value: isStock 
+                                          ? (l10n.localeName == 'tr' ? 'Hisse İşlemi' : 'Stock Transaction')
+                                          : (data['category'] ?? (l10n.localeName == 'tr' ? 'Kategori' : 'Category')),
+                                      isDark: isDark,
+                                      onEdit: isStock ? null : () => widget.parent._editCategory(ctx),
+                                    ),
+                                  ),
+                                  
+                                  const SizedBox(height: 10),
+                                  
+                                  // Kart/Hesap - Düzenlenebilir
+                                  Builder(
+                                    builder: (ctx) => _buildInfoRow(
+                                      label: l10n.localeName == 'tr' ? 'Kart' : 'Card',
+                                      value: data['account'] ?? (l10n.localeName == 'tr' ? 'Hesap' : 'Account'),
+                                      isDark: isDark,
+                                      onEdit: () => widget.parent._editAccount(ctx),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                              },
+                            );
+                          },
+                        ),
+                      
+                      // Onay Butonları
+                      AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
                         height: isWaiting ? 60 : 0,
@@ -4344,11 +5120,13 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                             ),
                           )
                         : const SizedBox.shrink(),
+                      ),
+                    ],
                   );
                 },
-                      );
-                    },
-                  ),
+                              );
+                            },
+                          ),
 
                   // Installment Selection Chips (Horizontal above input)
                   ValueListenableBuilder<int>(
@@ -4701,6 +5479,14 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> {
                               maxLines: null,
                           textCapitalization: TextCapitalization.sentences,
                           autofocus: false,
+                          onTap: () {
+                            // TextField'a tıklandığında scroll yap
+                            Future.delayed(const Duration(milliseconds: 300), () {
+                              if (mounted) {
+                                widget.parent._scrollToBottom();
+                              }
+                            });
+                          },
                           style: GoogleFonts.inter(
                             fontSize: 15,
                                             fontWeight: FontWeight.w400,
@@ -4884,7 +5670,188 @@ class _QuickActionPill extends StatelessWidget {
   }
 }
 
-// ==================== TYPING DOT ANIMATION ====================
+// ==================== HELPER FUNCTIONS ====================
+/// Bilgi satırı oluştur (Label: Value formatında) - Düzenlenebilir
+Widget _buildInfoRow({
+  required String label,
+  required String value,
+  required bool isDark,
+  bool isHighlighted = false,
+  VoidCallback? onEdit,
+}) {
+  final content = Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Label
+      SizedBox(
+        width: 80,
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.white60 : Colors.black45,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+      // Separator
+      Text(
+        ':',
+        style: GoogleFonts.inter(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white.withOpacity(0.4) : Colors.black26,
+        ),
+      ),
+      const SizedBox(width: 12),
+      // Value
+      Expanded(
+        child: Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: isHighlighted ? 17 : 14,
+            fontWeight: isHighlighted ? FontWeight.w700 : FontWeight.w600,
+            color: isHighlighted 
+                ? (isDark ? Colors.white : Colors.black87)
+                : (isDark ? Colors.white.withOpacity(0.95) : Colors.black87),
+            letterSpacing: isHighlighted ? -0.3 : 0,
+          ),
+        ),
+      ),
+      // Edit icon
+      if (onEdit != null) ...[
+        const SizedBox(width: 8),
+        Icon(
+          Icons.edit_outlined,
+          size: 16,
+          color: isDark ? Colors.white.withOpacity(0.4) : Colors.black.withOpacity(0.3),
+        ),
+      ],
+    ],
+  );
+
+  // Eğer onEdit varsa, tıklanabilir yap
+  if (onEdit != null) {
+    return InkWell(
+      onTap: onEdit,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        child: content,
+      ),
+    );
+  }
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: content,
+  );
+}
+
+/// Hisse detaylarını formatla
+String _buildStockDetails(Map<String, dynamic> data, Currency currency, dynamic l10n) {
+  final symbol = data['stockSymbol'] ?? '';
+  final quantity = data['quantity'];
+  final price = double.tryParse(data['price']?.toString() ?? '0') ?? 0;
+  final action = data['action'] ?? 'buy';
+  final actionText = action == 'buy' 
+      ? (l10n.localeName == 'tr' ? 'Alış' : 'Buy') 
+      : (l10n.localeName == 'tr' ? 'Satış' : 'Sell');
+  final formattedPrice = CurrencyUtils.formatAmount(price, currency);
+  
+  return '$actionText: $symbol × ${quantity ?? 0} lot @ $formattedPrice';
+}
+
+// ==================== MODERN TYPING INDICATOR ====================
+/// ChatGPT tarzı modern typing indicator - Gradient pulse animasyonu
+class _ModernTypingIndicator extends StatefulWidget {
+  final bool isDark;
+
+  const _ModernTypingIndicator({required this.isDark});
+
+  @override
+  State<_ModernTypingIndicator> createState() => _ModernTypingIndicatorState();
+}
+
+class _ModernTypingIndicatorState extends State<_ModernTypingIndicator> 
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _controller.repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Container(
+          width: 60,
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildDot(0, _animation.value),
+              const SizedBox(width: 6),
+              _buildDot(1, _animation.value),
+              const SizedBox(width: 6),
+              _buildDot(2, _animation.value),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDot(int index, double animationValue) {
+    // Her nokta için farklı delay hesapla
+    final delay = index * 0.15;
+    final progress = (animationValue + delay) % 1.0;
+    
+    // Smooth wave animation
+    final scale = 0.6 + (0.4 * (0.5 - (progress - 0.5).abs()) * 2);
+    final opacity = 0.3 + (0.7 * (0.5 - (progress - 0.5).abs()) * 2);
+    
+    return Transform.scale(
+      scale: scale,
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: widget.isDark 
+              ? Colors.white.withOpacity(opacity)
+              : Colors.black87.withOpacity(opacity),
+        ),
+      ),
+    );
+  }
+}
+
+// Eski _TypingDot widget'ı - artık kullanılmıyor
 class _TypingDot extends StatefulWidget {
   final int delay;
 

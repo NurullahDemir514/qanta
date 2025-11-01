@@ -6,6 +6,9 @@ import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/app_page_scaffold.dart';
 import '../../core/services/premium_service.dart';
 import '../advertisement/providers/advertisement_provider.dart';
+import '../advertisement/services/google_ads_real_banner_service.dart';
+import '../advertisement/config/advertisement_config.dart' as config;
+import '../advertisement/models/advertisement_models.dart';
 
 class StatisticsScreen extends StatefulWidget {
   final bool isActive; // Bu tab aktif mi?
@@ -23,12 +26,27 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   late AnimationController _rotationController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _rotationAnimation;
+  GoogleAdsRealBannerService? _statisticsBannerService;
   
   bool _isShowingAd = false; // Aynı anda birden fazla reklam gösterilmesini engelle
 
   @override
   void initState() {
     super.initState();
+    
+    // Statistics banner servisini başlat
+    _statisticsBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.analyticsBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Banner'ı yükle (3 saniye delay)
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        _statisticsBannerService?.loadAd();
+      }
+    });
     
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -126,16 +144,17 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   }
 
   @override
-  void dispose() {
-    _pulseController.dispose();
-    _rotationController.dispose();
-    super.dispose();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     l10n = AppLocalizations.of(context)!;
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _rotationController.dispose();
+    _statisticsBannerService?.dispose();
+    super.dispose();
   }
 
   String _getStatisticsSubtitle() {
@@ -201,6 +220,23 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
           // Şık animasyonlu loading
           _buildElegantLoading(isDark),
+          
+          // Banner Reklam (Premium olmayanlara göster)
+          const SizedBox(height: 48),
+          Consumer<PremiumService>(
+            builder: (context, premiumService, child) {
+              if (!premiumService.isPremium && 
+                  _statisticsBannerService?.isLoaded == true && 
+                  _statisticsBannerService?.bannerWidget != null) {
+                return Container(
+                  height: 50,
+                  alignment: Alignment.center,
+                  child: _statisticsBannerService!.bannerWidget!,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../contracts/stock_api_contract.dart';
 import '../exceptions/stock_exceptions.dart';
@@ -221,18 +222,18 @@ class YandexFinanceApiService implements IStockApiService {
 
   @override
   Future<List<Stock>> getPopularStocks() async {
-    // BIST 100 en popüler 10 hisse
+    // BIST 100 en popüler 10 hisse (uzantısız)
     final List<String> popularSymbols = [
-      'THYAO.IS', // Türk Hava Yolları
-      'AKBNK.IS', // Akbank
-      'EREGL.IS', // Eregli Demir Çelik
-      'SAHOL.IS', // Sabancı Holding
-      'BIMAS.IS', // BIM
-      'SISE.IS', // Şişe Cam
-      'TUPRS.IS', // Tüpraş
-      'KCHOL.IS', // Koç Holding
-      'ASELS.IS', // Aselsan
-      'GARAN.IS', // Garanti BBVA
+      'THYAO', // Türk Hava Yolları
+      'AKBNK', // Akbank
+      'EREGL', // Eregli Demir Çelik
+      'SAHOL', // Sabancı Holding
+      'BIMAS', // BIM
+      'SISE', // Şişe Cam
+      'TUPRS', // Tüpraş
+      'KCHOL', // Koç Holding
+      'ASELS', // Aselsan
+      'GARAN', // Garanti BBVA
     ];
 
     return getRealTimePrices(popularSymbols);
@@ -241,21 +242,21 @@ class YandexFinanceApiService implements IStockApiService {
   @override
   Future<List<Stock>> getBistStocks() async {
     final List<String> bistSymbols = [
-      'SASA.IS', // Sabancı Holding
-      'THYAO.IS', // Türk Hava Yolları
-      'EREGL.IS', // Eregli Demir Çelik
-      'TUPRS.IS', // Tüpraş
-      'AKBNK.IS', // Akbank
-      'GARAN.IS', // Garanti BBVA
-      'ISCTR.IS', // İş Bankası
-      'KRDMD.IS', // Kardemir
-      'KOZAL.IS', // Koza Altın
-      'PETKM.IS', // Petkim
-      'SAHOL.IS', // Sabancı Holding
-      'SISE.IS', // Şişe Cam
-      'TCELL.IS', // Turkcell
-      'VAKBN.IS', // VakıfBank
-      'YKBNK.IS', // Yapı Kredi
+      'SASA', // Sabancı Holding
+      'THYAO', // Türk Hava Yolları
+      'EREGL', // Eregli Demir Çelik
+      'TUPRS', // Tüpraş
+      'AKBNK', // Akbank
+      'GARAN', // Garanti BBVA
+      'ISCTR', // İş Bankası
+      'KRDMD', // Kardemir
+      'KOZAL', // Koza Altın
+      'PETKM', // Petkim
+      'SAHOL', // Sabancı Holding
+      'SISE', // Şişe Cam
+      'TCELL', // Turkcell
+      'VAKBN', // VakıfBank
+      'YKBNK', // Yapı Kredi
     ];
 
     return getRealTimePrices(bistSymbols);
@@ -595,22 +596,42 @@ class YandexFinanceApiService implements IStockApiService {
     try {
       // Yandex Finance API için symbol dönüşümü
       final yandexSymbol = _convertToYandexSymbol(symbol);
+      debugPrint('📊 getHistoricalData: $symbol -> $yandexSymbol (days: $days)');
+      
       // Yahoo Finance API endpoint'i
+      final url = 'https://query1.finance.yahoo.com/v8/finance/chart/$yandexSymbol?interval=1d&range=${days}d';
       final response = await http.get(
-        Uri.parse(
-          'https://query1.finance.yahoo.com/v8/finance/chart/$yandexSymbol?interval=1d&range=${days}d',
-        ),
+        Uri.parse(url),
         headers: {
           'User-Agent':
               'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         },
       );
 
+      debugPrint('📡 HTTP Response: ${response.statusCode} for $yandexSymbol');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        
+        // API yanıtını kontrol et - bazen error içinde olabilir
+        if (data['chart']?['error'] != null) {
+          final error = data['chart']['error'];
+          debugPrint('⚠️ Yahoo Finance API Error: ${error['description']} (code: ${error['code']})');
+          return [];
+        }
+        
         final result = _parseHistoricalData(data);
+        
+        if (result.isEmpty) {
+          debugPrint('⚠️ No historical data found for $yandexSymbol. Symbol might be invalid or delisted.');
+        }
+        
         return result;
+      } else if (response.statusCode == 404) {
+        debugPrint('❌ Symbol not found: $yandexSymbol (404)');
+        return [];
       } else {
+        debugPrint('❌ HTTP ${response.statusCode} for $yandexSymbol');
         throw StockApiException(
           'Historical data request failed with status: ${response.statusCode}',
           'HISTORICAL_FAILED',
@@ -619,6 +640,7 @@ class YandexFinanceApiService implements IStockApiService {
       }
     } catch (e) {
       if (e is StockApiException) rethrow;
+      debugPrint('❌ getHistoricalData exception for $symbol: $e');
       throw StockApiException(
         'Historical data request failed: $e',
         'HISTORICAL_ERROR',
@@ -639,12 +661,69 @@ class YandexFinanceApiService implements IStockApiService {
       return specialCases[upperSymbol]!;
     }
 
-    // Türk hisseleri için otomatik .IS uzantısı ekle
-    // Eğer zaten .IS uzantısı yoksa ekle
-    if (!upperSymbol.endsWith('.IS') && !upperSymbol.endsWith('.TR')) {
-      return '$upperSymbol.IS';
+    // USD hisseleri (Yahoo Finance'de doğrudan symbol kullanılır)
+    final usdStocks = [
+      // Tech Giants
+      'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NVDA',
+      // Semiconductors
+      'AMD', 'INTC', 'MU', 'QCOM', 'TXN', 'AMAT', 'LRCX', 'KLAC',
+      'SNPS', 'CDNS', 'MRVL', 'AVGO', 'NXPI', 'MCHP', 'ON',
+      // Software & Cloud
+      'ORCL', 'CRM', 'ADBE', 'NOW', 'WDAY', 'TEAM', 'ZM', 'DDOG',
+      'NET', 'SNOW', 'PLTR', 'CRWD', 'ZS', 'FTNT', 'PANW', 'S',
+      // Entertainment & Media
+      'NFLX', 'DIS', 'SPOT', 'ROKU', 'PARA', 'WBD',
+      // E-commerce & Fintech
+      'PYPL', 'SQ', 'SHOP', 'COIN', 'MELI', 'SE', 'SOFI',
+      // Mobility & Delivery
+      'UBER', 'LYFT', 'DASH', 'ABNB', 'RIVN', 'LCID',
+      // Social & Gaming
+      'RBLX', 'U', 'PINS', 'SNAP', 'MTCH',
+      // Industrial & Aerospace
+      'BA', 'GE', 'CAT', 'LMT', 'RTX', 'HON', 'UNP', 'DE', 'MMM',
+      // Banks & Finance
+      'JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'BLK', 'SCHW', 'AXP',
+      // Payment Networks
+      'V', 'MA', 'COF', 'DFS',
+      // Retail & Consumer
+      'WMT', 'TGT', 'COST', 'HD', 'LOW', 'NKE', 'SBUX', 'MCD',
+      // Healthcare & Pharma
+      'JNJ', 'PFE', 'ABBV', 'MRK', 'LLY', 'TMO', 'ABT', 'DHR',
+      'UNH', 'CVS', 'GILD', 'AMGN', 'BIIB', 'REGN', 'VRTX',
+      // Energy
+      'XOM', 'CVX', 'COP', 'SLB', 'EOG', 'OXY',
+      // ETFs & Indices
+      'SPY', 'QQQ', 'IWM', 'DIA', 'VOO', 'VTI', 'VT', 'EEM', 'AGG',
+      // Other Popular
+      'BROS', 'DKNG', 'PENN', 'HOOD', 'AFRM',
+    ];
+
+    if (usdStocks.contains(upperSymbol)) {
+      return upperSymbol; // USD hisseleri için uzantı ekleme
     }
 
+    // Türk hisseleri için otomatik .IS uzantısı ekle
+    // Eğer zaten .IS veya .TR uzantısı yoksa ve bilinen Türk hissesi ise ekle
+    if (!upperSymbol.endsWith('.IS') && !upperSymbol.endsWith('.TR')) {
+      // Bilinen Türk hisseleri listesi
+      final turkishStocks = [
+        'ASELS', 'AKBNK', 'ARCLK', 'BIMAS', 'EREGL', 'GARAN', 'KCHOL',
+        'KOZAL', 'PETKM', 'SAHOL', 'SISE', 'TCELL', 'THYAO', 'TOASO',
+        'TTKOM', 'TUPRS', 'VAKBN', 'YKBNK', 'HALKB', 'ISCTR', 'SODA',
+        'PGSUS', 'KOZAA', 'TAVHL', 'EKGYO', 'KRDMD', 'LOGO', 'AKSEN',
+        'FROTO', 'GUBRF', 'ODAS', 'ALARK', 'AKSA', 'ENKAI', 'TRKCM',
+        'CIMSA', 'SELEC', 'VESTL', 'SOKM', 'DOHOL', 'BRSAN', 'GLYHO',
+        'ENJSA', 'MPARK', 'IZFAS', 'ALBRK',
+      ];
+      
+      if (turkishStocks.contains(upperSymbol)) {
+        return '$upperSymbol.IS';
+      }
+    }
+
+    // Bilinmeyen hisse - olduğu gibi döndür (kullanıcı zaten doğru uzantıyı girmiş olabilir)
+    // Örn: .L (London), .PA (Paris), .DE (Frankfurt), .HK (Hong Kong), .T (Tokyo)
+    debugPrint('ℹ️ Unknown stock symbol: $upperSymbol - using as-is');
     return upperSymbol;
   }
 
@@ -786,25 +865,45 @@ class YandexFinanceApiService implements IStockApiService {
   List<double> _parseHistoricalData(Map<String, dynamic> data) {
     try {
       final chart = data['chart'];
-      if (chart == null) return [];
+      if (chart == null) {
+        debugPrint('⚠️ _parseHistoricalData: chart is null');
+        return [];
+      }
 
       final result = chart['result'] as List?;
-      if (result == null || result.isEmpty) return [];
+      if (result == null || result.isEmpty) {
+        debugPrint('⚠️ _parseHistoricalData: result is null or empty');
+        return [];
+      }
 
       final indicators = result[0]['indicators'];
-      if (indicators == null) return [];
+      if (indicators == null) {
+        debugPrint('⚠️ _parseHistoricalData: indicators is null');
+        return [];
+      }
 
       final quote = indicators['quote'] as List?;
-      if (quote == null || quote.isEmpty) return [];
+      if (quote == null || quote.isEmpty) {
+        debugPrint('⚠️ _parseHistoricalData: quote is null or empty');
+        return [];
+      }
 
       final closes = quote[0]['close'] as List?;
-      if (closes == null) return [];
+      if (closes == null) {
+        debugPrint('⚠️ _parseHistoricalData: closes is null');
+        return [];
+      }
 
-      return closes
+      final parsedData = closes
           .where((price) => price != null)
           .map((price) => (price as num).toDouble())
           .toList();
-    } catch (e) {
+      
+      debugPrint('✅ _parseHistoricalData: Parsed ${parsedData.length} data points');
+      return parsedData;
+    } catch (e, stackTrace) {
+      debugPrint('❌ _parseHistoricalData error: $e');
+      debugPrint('Stack trace: $stackTrace');
       return [];
     }
   }

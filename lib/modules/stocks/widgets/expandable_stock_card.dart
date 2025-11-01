@@ -7,6 +7,7 @@ import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../providers/stock_provider.dart';
 import 'mini_chart_widget.dart';
 
@@ -114,7 +115,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
               ),
               SizeTransition(
                 sizeFactor: _expandAnimation,
-                child: _buildExpandedView(isDark, l10n),
+                child: _buildExpandedView(context, isDark, l10n),
               ),
             ],
           ),
@@ -322,8 +323,11 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
     );
   }
 
-  Widget _buildExpandedView(bool isDark, AppLocalizations l10n) {
+  Widget _buildExpandedView(BuildContext buildContext, bool isDark, AppLocalizations l10n) {
     final position = widget.position;
+    final themeProvider = Provider.of<ThemeProvider>(buildContext, listen: false);
+    final userCurrency = themeProvider.currency;
+    final currencySymbol = userCurrency.symbol;
     
     if (position == null) {
       return Container(
@@ -389,7 +393,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.averagePrice, isUSD: widget.stock.currency == 'USD')}',
+                          '$currencySymbol${_formatNumber(position.averagePrice, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
                           style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -419,7 +423,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.currentValue, isUSD: widget.stock.currency == 'USD')}',
+                          '$currencySymbol${_formatNumber(position.currentValue, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
                           style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -449,7 +453,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${position.profitLoss >= 0 ? '+' : ''}${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.profitLoss, isUSD: widget.stock.currency == 'USD')}',
+                          '${position.profitLoss >= 0 ? '+' : ''}$currencySymbol${_formatNumber(position.profitLoss, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
                           style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -519,9 +523,9 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
                         l10n: l10n,
                         type: isBuy ? l10n.buy : l10n.sell,
                         quantity: quantity.toStringAsFixed(0),
-                        price: '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(price, isUSD: widget.stock.currency == 'USD')}',
-                        totalAmount: '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(totalAmount, isUSD: widget.stock.currency == 'USD')}',
-                        profitLoss: '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(profitLoss, isUSD: widget.stock.currency == 'USD')}',
+                        price: '$currencySymbol${_formatNumber(price, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
+                        totalAmount: '$currencySymbol${_formatNumber(totalAmount, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
+                        profitLoss: '$currencySymbol${_formatNumber(profitLoss, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
                         profitLossPercent: '${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent.toStringAsFixed(1)}%',
                         date: TransactionDesignSystem.localizeDisplayTime(
                           _getRawTransactionDate(transaction.transactionDate),
@@ -798,7 +802,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
                 child: _buildValueCard(
                   label: l10n.cost,
                   value:
-                      '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.averagePrice, isUSD: widget.stock.currency == 'USD')}',
+                      '$currencySymbol${_formatNumber(position.averagePrice, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
                   isDark: isDark,
                 ),
               ),
@@ -808,7 +812,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
                 child: _buildValueCard(
                   label: 'Güncel Değer',
                   value:
-                      '${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(currentValue, isUSD: widget.stock.currency == 'USD')}',
+                      '$currencySymbol${_formatNumber(currentValue, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
                   isDark: isDark,
                 ),
               ),
@@ -818,7 +822,7 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
                 child: _buildValueCard(
                   label: 'Kar/Zarar',
                   value:
-                      '${position.profitLoss >= 0 ? '+' : ''}${widget.stock.currency == 'USD' ? '\$' : '₺'}${_formatNumber(position.profitLoss, isUSD: widget.stock.currency == 'USD')}',
+                      '${position.profitLoss >= 0 ? '+' : ''}$currencySymbol${_formatNumber(position.profitLoss, isUSD: widget.stock.currency == 'USD', context: buildContext)}',
                   isDark: isDark,
                   valueColor: isProfit
                       ? Colors.green
@@ -881,8 +885,15 @@ class _ExpandableStockCardState extends State<ExpandableStockCard>
   }
 
   // Utility methods
-  String _formatNumber(double number, {required bool isUSD}) {
-    final currency = isUSD ? Currency.USD : Currency.TRY;
+  String _formatNumber(double number, {required bool isUSD, BuildContext? context}) {
+    // Kullanıcının seçtiği currency'yi kullan, yoksa stock'un currency'sini kullan
+    Currency currency;
+    if (context != null) {
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      currency = themeProvider.currency;
+    } else {
+      currency = isUSD ? Currency.USD : Currency.TRY;
+    }
     return CurrencyUtils.formatAmountWithoutSymbol(number, currency);
   }
 

@@ -22,6 +22,11 @@ extension RecurringFrequencyExtension on RecurringFrequency {
     }
   }
 
+  /// getDisplayName - getName ile aynı, ama daha açıklayıcı isim
+  String getDisplayName(AppLocalizations l10n) {
+    return getName(l10n);
+  }
+
   String getDescription(AppLocalizations l10n) {
     switch (this) {
       case RecurringFrequency.weekly:

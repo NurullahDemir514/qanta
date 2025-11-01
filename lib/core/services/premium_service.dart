@@ -3,6 +3,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'dart:async';
 
 /// Premium (Reklamsız) Servis
@@ -11,6 +12,9 @@ class PremiumService extends ChangeNotifier {
   static final PremiumService _instance = PremiumService._internal();
   factory PremiumService() => _instance;
   PremiumService._internal();
+  
+  // Callback for when premium status changes (for UnifiedProviderV2)
+  Function()? onPremiumStatusChanged;
 
   // Abonelik ürün ID'leri - Premium
   static const String _monthlySubscriptionId = 'qanta_premium_monthly';
@@ -26,6 +30,13 @@ class PremiumService extends ChangeNotifier {
   // Free version limits
   static const int maxFreeCards = 3; // Free kullanıcılar max 3 kart ekleyebilir (debit + credit toplam)
   static const int maxFreeStocks = 3; // Free kullanıcılar max 3 hisse ekleyebilir
+  static const int maxFreeAIRequests = 10; // Free kullanıcılar günlük 10 AI isteği yapabilir
+  
+  // Premium version limits
+  static const int maxPremiumAIRequests = 1500; // Premium kullanıcılar aylık 1500 AI isteği yapabilir
+  
+  // Premium Plus version limits  
+  static const int maxPremiumPlusAIRequests = 3000; // Premium Plus kullanıcılar aylık 3000 AI isteği yapabilir
   
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   late StreamSubscription<List<PurchaseDetails>> _subscription;
@@ -49,6 +60,69 @@ class PremiumService extends ChangeNotifier {
     return maxFreeCards - currentCardCount;
   }
   
+  /// Firebase'den gerçek kart sayısını al (cache sorununu çözer)
+  Future<int> getCurrentCardCount() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return 0;
+      
+      final firestore = FirebaseFirestore.instance;
+      
+      // Accounts collection'dan AKTIF kart sayısını say (debit + credit)
+      final accountsSnapshot = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('accounts')
+          .where('is_active', isEqualTo: true) // ✅ Sadece aktif kartları say
+          .where('type', whereIn: ['credit', 'debit']) // ✅ Backend ile aynı type değerleri
+          .get(const GetOptions(source: Source.server)); // Server'dan al
+      
+      final count = accountsSnapshot.docs.length;
+      
+      // 🔍 DEBUG: Kartların detaylarını göster
+      if (count > 0) {
+        debugPrint('🔍 PremiumService: Found $count cards:');
+        for (var doc in accountsSnapshot.docs) {
+          final data = doc.data();
+          debugPrint('   - ${doc.id}: ${data['name']} (${data['type']})');
+        }
+      } else {
+        debugPrint('🔢 PremiumService: No cards found in Firebase');
+      }
+      
+      debugPrint('🔢 PremiumService: Current card count from Firebase: $count (debit + credit)');
+      return count;
+    } catch (e) {
+      debugPrint('❌ PremiumService: Error getting card count: $e');
+      return 0; // Hata durumunda 0 döndür (güvenli taraf)
+    }
+  }
+  
+  /// Firebase'den gerçek hisse sayısını al (cache sorununu çözer)
+  Future<int> getCurrentStockCount() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return 0;
+      
+      final firestore = FirebaseFirestore.instance;
+      
+      // Stock positions'dan aktif hisse sayısını say
+      final stocksSnapshot = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('stock_positions')
+          .where('totalQuantity', isGreaterThan: 0)
+          .get(const GetOptions(source: Source.server)); // Server'dan al
+      
+      final count = stocksSnapshot.docs.length;
+      debugPrint('🔢 PremiumService: Current stock count from Firebase: $count');
+      return count;
+    } catch (e) {
+      debugPrint('❌ PremiumService: Error getting stock count: $e');
+      return 0; // Hata durumunda 0 döndür (güvenli taraf)
+    }
+  }
+  
   /// Free kullanıcı için hisse limiti kontrolü
   /// Returns true if can add more stocks
   bool canAddStock(int currentStockCount) {
@@ -60,6 +134,100 @@ class PremiumService extends ChangeNotifier {
   int getRemainingStocks(int currentStockCount) {
     if (isPremium) return -1; // -1 = unlimited
     return maxFreeStocks - currentStockCount;
+  }
+  
+  /// AI limiti kontrolü
+  /// Returns true if can use more AI
+  bool canUseAI(int currentAICount) {
+    final limit = _getAILimit();
+    return currentAICount < limit;
+  }
+  
+  /// Kalan AI isteği sayısı
+  int getRemainingAI(int currentAICount) {
+    final limit = _getAILimit();
+    return limit - currentAICount;
+  }
+  
+  /// AI limit sayısını getir (internal)
+  int _getAILimit() {
+    if (isPremiumPlus) return maxPremiumPlusAIRequests; // 3000/ay
+    if (isPremium) return maxPremiumAIRequests; // 1500/ay
+    return maxFreeAIRequests; // 10/gün
+  }
+  
+  /// AI limit sayısını getir (public)
+  int getAILimit() {
+    return _getAILimit();
+  }
+  
+  /// Firebase'den AI kullanım sayısını al (cache sorununu çözer)
+  /// Free: günlük 10, Premium: aylık 1500, Premium Plus: aylık 3000
+  Future<Map<String, int>> getCurrentAIUsage() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return {'current': 0, 'limit': _getAILimit()};
+      
+      final firestore = FirebaseFirestore.instance;
+      
+      // Free kullanıcılar için günlük, Premium için aylık kontrol
+      final docId = isPremium ? 'monthly' : 'daily';
+      
+      // ai_usage document'ını al
+      final usageDoc = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('ai_usage')
+          .doc(docId)
+          .get(const GetOptions(source: Source.server)); // Server'dan al
+      
+      if (!usageDoc.exists) {
+        final limit = _getAILimit();
+        debugPrint('🤖 PremiumService: AI usage doc not found, count=0/$limit');
+        return {'current': 0, 'limit': limit};
+      }
+      
+      final data = usageDoc.data()!;
+      final count = (data['count'] as num?)?.toInt() ?? 0;
+      final lastReset = (data['lastReset'] as Timestamp?)?.toDate();
+      
+      final now = DateTime.now();
+      bool needsReset = false;
+      
+      if (isPremium) {
+        // Aylık reset kontrolü (Premium & Premium Plus)
+        if (lastReset != null && 
+            (lastReset.year != now.year || lastReset.month != now.month)) {
+          needsReset = true;
+        }
+      } else {
+        // Günlük reset kontrolü (Free)
+        if (lastReset != null && 
+            (lastReset.year != now.year || 
+             lastReset.month != now.month || 
+             lastReset.day != now.day)) {
+          needsReset = true;
+        }
+      }
+      
+      if (needsReset) {
+        final period = isPremium ? 'aylık' : 'günlük';
+        debugPrint('🤖 PremiumService: AI usage reset ($period), count=0');
+        return {'current': 0, 'limit': _getAILimit()};
+      }
+      
+      final limit = _getAILimit();
+      final period = isPremium ? 'aylık' : 'günlük';
+      final planName = isPremiumPlus ? 'Premium Plus' : isPremium ? 'Premium' : 'Free';
+      debugPrint('🤖 PremiumService: Current AI usage from Firebase: $count/$limit ($period - $planName)');
+      return {
+        'current': count,
+        'limit': limit,
+      };
+    } catch (e) {
+      debugPrint('❌ PremiumService: Error getting AI usage: $e');
+      return {'current': 0, 'limit': _getAILimit()}; // Hata durumunda 0 döndür
+    }
   }
   
   /// Servisi başlat
@@ -79,29 +247,80 @@ class PremiumService extends ChangeNotifier {
     // Kaydedilmiş premium durumunu yükle
     await _loadPremiumStatus();
     
+    // Premium durumunu Firebase'e senkronize et (UnifiedProviderV2 için)
+    await _syncPremiumStatusToFirebase();
+    
     // Geçmiş satın almaları kontrol et
     await _restorePurchases();
     
-    debugPrint('✅ PremiumService: Initialized - isPremium: $_isPremium');
+    debugPrint('✅ PremiumService: Initialized - isPremium: $_isPremium, isPremiumPlus: $_isPremiumPlus');
   }
   
-  /// Premium durumunu yükle (SharedPreferences)
+  /// Premium durumunu Firebase'e senkronize et
+  Future<void> _syncPremiumStatusToFirebase() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .set({
+              'isPremium': _isPremium,
+              'isPremiumPlus': _isPremiumPlus,
+              'isTestMode': _isTestMode,
+              'updatedAt': FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+        debugPrint('🔄 PremiumService: Premium status synced to Firebase: isPremium=$_isPremium, isPremiumPlus=$_isPremiumPlus, isTestMode=$_isTestMode');
+      }
+    } catch (e) {
+      debugPrint('❌ PremiumService: Error syncing premium status to Firebase: $e');
+    }
+  }
+  
+  /// Premium durumunu yükle (SharedPreferences ve Firebase)
   Future<void> _loadPremiumStatus() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _isPremium = prefs.getBool(_premiumKey) ?? false;
       _isPremiumPlus = prefs.getBool(_premiumPlusKey) ?? false;
       debugPrint('📱 PremiumService: Loaded from storage - isPremium: $_isPremium, isPremiumPlus: $_isPremiumPlus');
+      
+      // 🧪 Firebase'den test mode kontrolü yap
+      try {
+        final userId = FirebaseAuth.instance.currentUser?.uid;
+        if (userId != null) {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .get();
+          
+          if (userDoc.exists) {
+            final userData = userDoc.data()!;
+            _isTestMode = userData['isTestMode'] as bool? ?? false;
+            if (_isTestMode) {
+              debugPrint('🧪 PremiumService: Test mode enabled from Firebase');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ PremiumService: Failed to check test mode: $e');
+        _isTestMode = false;
+      }
     } catch (e) {
       debugPrint('❌ PremiumService: Error loading premium status: $e');
       _isPremium = false;
       _isPremiumPlus = false;
+      _isTestMode = false;
     }
   }
   
   /// Premium durumunu kaydet
   Future<void> _savePremiumStatus(bool isPremium, {bool isPremiumPlus = false}) async {
     try {
+      // Check if status actually changed
+      final bool statusChanged = _isPremium != isPremium || _isPremiumPlus != isPremiumPlus;
+      
+      // SharedPreferences'a kaydet
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_premiumKey, isPremium);
       await prefs.setBool(_premiumPlusKey, isPremiumPlus);
@@ -109,6 +328,30 @@ class PremiumService extends ChangeNotifier {
       _isPremiumPlus = isPremiumPlus;
       notifyListeners(); // UI'ı güncelle
       debugPrint('💾 PremiumService: Saved premium status: isPremium=$isPremium, isPremiumPlus=$isPremiumPlus');
+      
+      // Firebase'e de kaydet (UnifiedProviderV2 için)
+      try {
+        final userId = FirebaseAuth.instance.currentUser?.uid;
+        if (userId != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .set({
+                'isPremium': isPremium,
+                'isPremiumPlus': isPremiumPlus,
+                'updatedAt': FieldValue.serverTimestamp(),
+              }, SetOptions(merge: true));
+          debugPrint('💾 PremiumService: Premium status written to Firebase');
+        }
+      } catch (e) {
+        debugPrint('❌ PremiumService: Error writing premium status to Firebase: $e');
+      }
+      
+      // 🔔 NOTIFY: Premium status changed - trigger AI limit reload
+      if (statusChanged) {
+        debugPrint('🔔 PremiumService: Premium status changed, notifying listeners...');
+        onPremiumStatusChanged?.call();
+      }
     } catch (e) {
       debugPrint('❌ PremiumService: Error saving premium status: $e');
     }
@@ -278,30 +521,40 @@ class PremiumService extends ChangeNotifier {
   
   /// Test için premium durumunu manuel ayarla (sadece development)
   /// Test modu için premium durumunu manuel ayarla
+  /// ⚠️ Premium field'lar client-side'dan yazılamaz, backend çağırılır
   Future<void> setTestPremium(bool isPremium) async {
     debugPrint('🧪 PremiumService: setTestPremium called with: $isPremium');
-    debugPrint('🧪 PremiumService: Current isPremium before: $_isPremium');
+    debugPrint('🧪 PremiumService: Current state before: _isPremium=$_isPremium, _isPremiumPlus=$_isPremiumPlus, _isTestMode=$_isTestMode');
     
-    // Local state'i güncelle
-    _isTestMode = isPremium;
-    await _savePremiumStatus(isPremium);
-    
-    // Firebase'e de yaz (backend için)
     try {
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .set({'isTestMode': isPremium}, SetOptions(merge: true));
-        debugPrint('🧪 PremiumService: isTestMode written to Firebase: $isPremium');
+      // Backend'e çağrı yap (Firestore rules premium field'ları koruyor)
+      final functions = FirebaseFunctions.instance;
+      final callable = functions.httpsCallable('setTestMode');
+      
+      final result = await callable.call({
+        'enabled': isPremium,
+      });
+      
+      debugPrint('🧪 PremiumService: Backend response: ${result.data}');
+      
+      // Local state'i güncelle
+      _isTestMode = isPremium;
+      
+      // Test mode aktifse Premium Plus olarak ele al
+      if (isPremium) {
+        await _savePremiumStatus(true, isPremiumPlus: true);
+      } else {
+        await _savePremiumStatus(false, isPremiumPlus: false);
       }
+      
+      // State değişti, callback'i tetikle
+      debugPrint('🔔 PremiumService: Test mode changed, notifying listeners...');
+      onPremiumStatusChanged?.call();
+      debugPrint('🧪 PremiumService: Final state: _isPremium=$_isPremium, _isPremiumPlus=$_isPremiumPlus, _isTestMode=$_isTestMode');
     } catch (e) {
-      debugPrint('❌ PremiumService: Error writing isTestMode to Firebase: $e');
+      debugPrint('❌ PremiumService: Error setting test mode: $e');
+      rethrow;
     }
-    
-    debugPrint('🧪 PremiumService: Current isPremium after: $_isPremium');
-    debugPrint('🧪 PremiumService: notifyListeners() called');
   }
   
   /// Test kullanıcıları için premium durumunu tamamen sıfırla

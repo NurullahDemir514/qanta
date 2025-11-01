@@ -10,6 +10,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../premium/premium_offer_screen.dart';
 import '../../../shared/utils/currency_utils.dart';
+import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 import '../../transactions/widgets/forms/base_transaction_form.dart';
 import '../widgets/forms/stock_selection_step.dart';
 import '../widgets/forms/stock_account_step.dart';
@@ -224,8 +225,15 @@ class _StockTransactionFormScreenState
         return true;
 
       case 2: // Miktar ve Fiyat
-        final quantity = double.tryParse(_quantityController.text);
-        final price = double.tryParse(_priceController.text);
+        final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+        final quantity = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+          _quantityController.text,
+          locale,
+        );
+        final price = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+          _priceController.text,
+          locale,
+        );
 
         bool isValid = true;
 
@@ -512,19 +520,24 @@ class _StockTransactionFormScreenState
                 
                 // Yeni hisse alınıyor (portfolyoda hiç yok veya 0 adet)
                 if (existingPosition == null) {
-                  // Takip listesindeki hisse sayısını kontrol et
-                  final currentStockCount = stockProvider.watchedStocks.length;
-                  
-                  if (!premiumService.canAddStock(currentStockCount)) {
-                    // Premium teklif ekranını göster
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PremiumOfferScreen(),
-                        fullscreenDialog: true,
-                      ),
-                    );
-                    return; // Hisse seçilmez, geri dön
+                  // Premium kullanıcı limitsiz
+                  if (!premiumService.isPremium) {
+                    // Firebase'den gerçek hisse sayısını al (cache sorununu çözer)
+                    final currentStockCount = await premiumService.getCurrentStockCount();
+                    
+                    if (!premiumService.canAddStock(currentStockCount)) {
+                      // Premium teklif ekranını göster
+                      if (context.mounted) {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PremiumOfferScreen(),
+                            fullscreenDialog: true,
+                          ),
+                        );
+                      }
+                      return; // Hisse seçilmez, geri dön
+                    }
                   }
                 }
               }

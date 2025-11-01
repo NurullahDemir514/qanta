@@ -285,4 +285,75 @@ lib/
 - Implement proper loading states
 - Handle market hours properly
 
+## Savings Goals (Birikimler) Rules
+- Implement goal-based savings system with visual progress tracking
+- Support multiple savings goals with customizable emojis, colors, and target amounts
+- Integrate with existing account system for deposits/withdrawals
+- Implement milestone achievements (25%, 50%, 75%, 100%)
+- Support auto-transfer and round-up features (Premium)
+- Use Firebase for data persistence with proper security rules
+- Follow event-driven architecture for balance updates
+- Implement smart AI suggestions for savings optimization
+- Support goal categories (emergency, vacation, shopping, etc.)
+- Provide comprehensive transaction history per goal
+- Use animated progress indicators and celebration animations
+- Implement proper notification system for milestones and reminders
+- Free users: max 3 active goals, Premium: unlimited
+- Integrate with Cards screen as 4th tab (Cash, Debit, Credit, Savings)
+- Show summary cards on Home screen for quick overview
+- Support goal archiving and completion tracking
+- Implement proper validation (target > 0, current >= 0)
+- Use proper currency formatting and calculations
+- Support goal images/photos (Premium feature)
+- Implement daily/weekly/monthly progress analytics
+
+### Savings Data Models
+- Create `SavingsGoal` model with all properties (name, emoji, target, current, etc.)
+- Create `SavingsTransaction` model for deposits/withdrawals
+- Create `AutoTransferSettings` for automatic transfers
+- Create `RoundUpSettings` for round-up savings
+- Create `NotificationSettings` for goal reminders
+- Create `Milestone` model for achievement tracking
+- Use enums: `SavingsGoalCategory`, `SavingsTransactionType`, `TransferFrequency`
+
+### Savings Services
+- `SavingsService`: CRUD operations for goals
+- `SavingsTransactionService`: Handle deposits, withdrawals, transfers
+- `SavingsCalculatorService`: Calculate daily requirements, AI suggestions
+- `SavingsMilestoneService`: Track and award milestones
+- `SavingsNotificationService`: Handle reminders and notifications
+- Follow existing service patterns (Firebase integration, error handling)
+
+### Savings UI Components
+- `SavingsTab`: Main tab in Cards screen
+- `SavingsGoalCard`: Individual goal card widget with gradient and progress
+- `SavingsGoalDetailScreen`: Detailed view with transactions and analytics
+- `AddSavingsGoalForm`: Create new goal form
+- `EditSavingsGoalForm`: Edit existing goal
+- `SavingsDepositForm`: Deposit money to goal
+- `SavingsWithdrawForm`: Withdraw from goal
+- `SavingsSummarySection`: Home screen summary widget
+- `SavingsMilestoneDialog`: Celebration dialog for achievements
+- Use Material 3 design with iOS-style polish
+- Implement smooth animations and transitions
+- Support both light and dark themes
+
+### Savings Premium Features
+- Free: Max 3 active goals, manual deposits only
+- Premium: Unlimited goals, auto-transfer, round-up, goal images, advanced analytics
+- Implement proper premium gates with upgrade prompts
+- Use PremiumService for feature access control
+
+### Savings Events
+- Create `SavingsEvents` class following existing event pattern
+- Events: GoalCreated, GoalUpdated, GoalDeleted, GoalCompleted
+- Events: Deposit, Withdraw, MilestoneAchieved
+- Integrate with existing UnifiedProviderV2
+
+### Savings Localization
+- Add all savings-related strings to intl_en.arb and intl_tr.arb
+- Keys: savingsGoals, addGoal, targetAmount, currentAmount, etc.
+- Support plurals for goal counts
+- Localize milestone achievements and notifications
+
 Remember: Focus on creating a secure, user-friendly, and performant personal finance application that follows SOLID principles and Clean Architecture patterns. Every line of code should be maintainable, testable, and follow these guidelines.

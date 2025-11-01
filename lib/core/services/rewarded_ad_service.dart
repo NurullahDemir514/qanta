@@ -15,13 +15,16 @@ class RewardedAdService extends ChangeNotifier {
   RewardedAdService._internal();
 
   // AdMob Rewarded Ad Unit IDs
-  // TODO: Replace with your production ad unit IDs
+  // Fallback sistem: Önce primary ID'yi dene, yüklenmezse fallback ID'yi kullan
   static const String _testAdUnitId = 'ca-app-pub-3940256099942544/5224354917'; // Test ID
-  static const String _productionAdUnitId = 'ca-app-pub-8222173839673706/4477439276'; // Production ID
+  static const String _productionAdUnitId = 'ca-app-pub-8222217303967306/5244843269'; // Production ID - Primary (Öncelikli)
+  static const String _productionFallbackAdUnitId = 'ca-app-pub-8222217303967306/5832104734'; // Production ID - Fallback (Yeni)
   
   RewardedAd? _rewardedAd;
   bool _isAdLoading = false;
   bool _isAdReady = false;
+  int _currentAdUnitIndex = 0; // 0 = primary, 1 = fallback
+  bool _primaryAdFailed = false; // Primary ad başarısız oldu mu?
   
   bool get isAdReady => _isAdReady;
   bool get isAdLoading => _isAdLoading;
@@ -32,7 +35,8 @@ class RewardedAdService extends ChangeNotifier {
     await _loadRewardedAd();
   }
 
-  /// Ödüllü reklam yükle
+  /// Ödüllü reklam yükle (Fallback destekli)
+  /// Önce primary ID'yi dener, yüklenmezse fallback ID'yi kullanır
   Future<void> _loadRewardedAd() async {
     if (_isAdLoading) {
       debugPrint('⏳ RewardedAdService: Ad already loading...');
@@ -46,16 +50,36 @@ class RewardedAdService extends ChangeNotifier {
 
     // Test mode check - Use test ad unit in debug mode
     const bool isDebugMode = bool.fromEnvironment('dart.vm.product') == false;
-    final String adUnitId = isDebugMode ? _testAdUnitId : _productionAdUnitId;
     
-    debugPrint('🎯 Using Ad Unit: ${isDebugMode ? "TEST" : "PRODUCTION"}');
+    // Production modda: Önce primary, başarısız olursa fallback
+    String adUnitId;
+    if (isDebugMode) {
+      adUnitId = _testAdUnitId;
+      _currentAdUnitIndex = 0; // Test modda sadece test ID kullan
+      _primaryAdFailed = false;
+    } else {
+      // Production modda fallback sistemi
+      if (_primaryAdFailed || _currentAdUnitIndex == 1) {
+        // Primary başarısız olduysa veya zaten fallback kullanıyorsak
+        adUnitId = _productionFallbackAdUnitId;
+        _currentAdUnitIndex = 1;
+        debugPrint('🔄 RewardedAdService: Using FALLBACK ad unit');
+      } else {
+        // İlk deneme: Primary ID
+        adUnitId = _productionAdUnitId;
+        _currentAdUnitIndex = 0;
+        debugPrint('🎯 RewardedAdService: Using PRIMARY ad unit');
+      }
+    }
+    
+    debugPrint('🎯 Ad Unit ID: $adUnitId (${isDebugMode ? "TEST" : _currentAdUnitIndex == 0 ? "PRIMARY" : "FALLBACK"})');
 
     await RewardedAd.load(
       adUnitId: adUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (RewardedAd ad) {
-          debugPrint('✅ RewardedAdService: Ad loaded successfully');
+          debugPrint('✅ RewardedAdService: Ad loaded successfully (${_currentAdUnitIndex == 0 ? "PRIMARY" : "FALLBACK"})');
           _rewardedAd = ad;
           _isAdReady = true;
           _isAdLoading = false;
@@ -71,7 +95,7 @@ class RewardedAdService extends ChangeNotifier {
               _rewardedAd = null;
               _isAdReady = false;
               
-              // Yeni reklam yükle
+              // Yeni reklam yükle (aynı ID'yi kullan - hangi ID çalıştıysa onu kullan)
               _loadRewardedAd();
             },
             onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
@@ -79,6 +103,12 @@ class RewardedAdService extends ChangeNotifier {
               ad.dispose();
               _rewardedAd = null;
               _isAdReady = false;
+              
+              // Primary ad gösterilemediyse fallback'e geç
+              if (!_primaryAdFailed && _currentAdUnitIndex == 0 && !isDebugMode) {
+                debugPrint('🔄 RewardedAdService: Primary ad failed to show, switching to fallback');
+                _primaryAdFailed = true;
+              }
               
               // Yeni reklam yükle
               _loadRewardedAd();
@@ -91,12 +121,31 @@ class RewardedAdService extends ChangeNotifier {
           debugPrint('❌ RewardedAdService: Failed to load ad: ${error.message}');
           debugPrint('   Code: ${error.code}');
           debugPrint('   Domain: ${error.domain}');
+          debugPrint('   Current Ad Unit: ${_currentAdUnitIndex == 0 ? "PRIMARY" : "FALLBACK"}');
+          
+          // Production modda ve primary başarısız olduysa fallback'e geç
+          if (!isDebugMode && !_primaryAdFailed && _currentAdUnitIndex == 0) {
+            debugPrint('🔄 RewardedAdService: Primary ad failed to load, trying fallback...');
+            _primaryAdFailed = true;
+            _isAdLoading = false; // Fallback'i denemeden önce loading state'i resetle
+            notifyListeners();
+            
+            // Hemen fallback'i dene (30 saniye bekleme)
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (!_isAdReady && !_isAdLoading) {
+                _loadRewardedAd();
+              }
+            });
+            return;
+          }
+          
+          // Fallback de başarısız olduysa veya test modda
           _rewardedAd = null;
           _isAdReady = false;
           _isAdLoading = false;
           notifyListeners();
           
-          // 30 saniye sonra tekrar dene
+          // 30 saniye sonra tekrar dene (aynı ID'yi - hangi ID çalıştıysa onu)
           Future.delayed(const Duration(seconds: 30), () {
             if (!_isAdReady && !_isAdLoading) {
               _loadRewardedAd();

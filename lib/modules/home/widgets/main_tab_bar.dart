@@ -6,11 +6,13 @@ import '../../../l10n/app_localizations.dart';
 class MainTabBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTabChanged;
+  final Key? tutorialKey; // Tutorial için key
 
   const MainTabBar({
     super.key,
     required this.currentIndex,
     required this.onTabChanged,
+    this.tutorialKey,
   });
 
   @override
@@ -22,6 +24,7 @@ class MainTabBar extends StatelessWidget {
       left: 0,
       right: 0,
       child: SafeArea(
+        key: tutorialKey, // Tutorial key ekle
         top: false,
         child: Padding(
           padding: const EdgeInsets.only(left: 12, right: 12, bottom: 8, top: 4),

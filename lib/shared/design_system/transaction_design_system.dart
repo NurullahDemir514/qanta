@@ -341,10 +341,25 @@ class TransactionDesignSystem {
     double amount,
     TransactionType type, {
     String? currencySymbol,
+    Currency? currency,
   }) {
-    final formattedAmount = formatNumber(amount.abs());
-    final symbol =
-        currencySymbol ?? Currency.TRY.symbol; // Fallback to TRY symbol
+    // Use provided currency or determine from symbol
+    Currency activeCurrency = currency ?? Currency.TRY;
+    if (currency == null && currencySymbol != null) {
+      if (currencySymbol == '\$') {
+        activeCurrency = Currency.USD;
+      } else if (currencySymbol == '€') {
+        activeCurrency = Currency.EUR;
+      } else if (currencySymbol == '£') {
+        activeCurrency = Currency.GBP;
+      } else if (currencySymbol == '₺') {
+        activeCurrency = Currency.TRY;
+      }
+    }
+    
+    // Use CurrencyUtils for proper formatting
+    final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(amount.abs(), activeCurrency);
+    final symbol = currencySymbol ?? activeCurrency.symbol;
 
     switch (type) {
       case TransactionType.income:
@@ -376,7 +391,7 @@ class TransactionDesignSystem {
   static String localizeDisplayTime(String rawTime, BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
-    final isEnglish = locale.languageCode == 'en';
+    final languageCode = locale.languageCode;
     
     switch (rawTime) {
       case 'TODAY': 
@@ -395,11 +410,22 @@ class TransactionDesignSystem {
               final now = DateTime.now();
               final date = DateTime(now.year, month, day);
               
-              // Format with proper locale
-              final formatter = DateFormat(
-                isEnglish ? 'd MMM' : 'd MMM', 
-                isEnglish ? 'en_US' : 'tr_TR'
-              );
+              // Format with proper locale based on language code
+              String localeString;
+              switch (languageCode) {
+                case 'en':
+                  localeString = 'en_US';
+                  break;
+                case 'de':
+                  localeString = 'de_DE';
+                  break;
+                case 'tr':
+                default:
+                  localeString = 'tr_TR';
+                  break;
+              }
+              
+              final formatter = DateFormat('d MMM', localeString);
               return formatter.format(date);
             }
           }
@@ -557,6 +583,7 @@ class TransactionDesignSystem {
     int? totalInstallments,
     double? totalAmount,
     double? monthlyAmount,
+    Currency? currency,
   }) {
     // Convert V2 transaction type to design system type
     TransactionType transactionType;
@@ -578,8 +605,8 @@ class TransactionDesignSystem {
         transactionType = TransactionType.expense;
     }
 
-    // Format amount
-    final amount = formatAmount(transaction.amount, transactionType);
+    // Format amount with user's currency
+    final amount = formatAmount(transaction.amount, transactionType, currency: currency);
 
     // Use displayTime from transaction model (dynamic date formatting)
     final displayTime = time ?? transaction.displayTime;
@@ -626,6 +653,7 @@ class TransactionDesignSystem {
         onLongPress: onLongPress,
         isFirst: isFirst,
         isLast: isLast,
+        currency: currency,
       );
     }
 
@@ -754,109 +782,10 @@ class TransactionItem extends StatelessWidget {
 
             // Content
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title row with chip
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Title text (flexible to take available space)
-                      Flexible(
-                        child: Text(
-                          title,
-                          style: GoogleFonts.inter(
-                            fontSize: TransactionDesignSystem.titleFontSize,
-                            fontWeight: TransactionDesignSystem.titleFontWeight,
-                            color: TransactionDesignSystem.getTitleColor(
-                              isDark,
-                            ),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (isInstallment) ...[
-                        SizedBox(width: 6),
-                        // Taksitli chip
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.orange.shade800
-                                : Colors.orange.shade100,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.orange.shade600
-                                  : Colors.orange.shade300,
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)?.installment ??
-                                'Installment',
-                            style: GoogleFonts.inter(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white : Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                      if (isStock) ...[
-                        SizedBox(width: 6),
-                        // Stock chip
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.blue.shade800
-                                : Colors.blue.shade100,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.blue.shade600
-                                  : Colors.blue.shade300,
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)?.stockChip ?? 'Stock',
-                            style: GoogleFonts.inter(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white : Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  SizedBox(
-                    height: TransactionDesignSystem.titleSubtitleSpacing,
-                  ),
-                  Text(
-                    time != null ? '$subtitle • $time' : subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: TransactionDesignSystem.subtitleFontSize,
-                      fontWeight: TransactionDesignSystem.subtitleFontWeight,
-                      color: TransactionDesignSystem.getSubtitleColor(isDark),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+              child: _buildContentSection(context),
             ),
 
-            // Amount
+            // Amount (right aligned - outside of content)
             Text(
               amount,
               style: GoogleFonts.inter(
@@ -868,6 +797,132 @@ class TransactionItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Build content section with dynamic description support
+  Widget _buildContentSection(BuildContext context) {
+    // Split title by bullet point to separate category and description
+    final parts = title.split(' • ');
+    final categoryName = parts[0];
+    final description = parts.length > 1 ? parts.sublist(1).join(' • ') : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Title row with chip (no amount here)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Category name (flexible to take available space)
+            Flexible(
+              child: Text(
+                categoryName,
+                style: GoogleFonts.inter(
+                  fontSize: TransactionDesignSystem.titleFontSize,
+                  fontWeight: TransactionDesignSystem.titleFontWeight,
+                  color: TransactionDesignSystem.getTitleColor(isDark),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isInstallment) ...[
+              const SizedBox(width: 6),
+              // Taksitli chip
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.orange.shade800
+                      : Colors.orange.shade100,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.orange.shade600
+                        : Colors.orange.shade300,
+                    width: 0.5,
+                  ),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)?.installment ?? 'Installment',
+                  style: GoogleFonts.inter(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                ),
+              ),
+            ],
+            if (isStock) ...[
+              const SizedBox(width: 6),
+              // Stock chip
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.blue.shade800
+                      : Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.blue.shade600
+                        : Colors.blue.shade300,
+                    width: 0.5,
+                  ),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)?.stockChip ?? 'Stock',
+                  style: GoogleFonts.inter(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        
+        // Description (if available) - shown below category
+        if (description != null && description.isNotEmpty) ...[
+          const SizedBox(height: 3),
+          Text(
+            description,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: isDark 
+                  ? const Color(0xFF98989F)
+                  : const Color(0xFF6B6B70),
+              height: 1.3,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+        
+        const SizedBox(height: 2),
+        
+        // Subtitle (card name + time)
+        Text(
+          time != null ? '$subtitle • $time' : subtitle,
+          style: GoogleFonts.inter(
+            fontSize: TransactionDesignSystem.subtitleFontSize,
+            fontWeight: TransactionDesignSystem.subtitleFontWeight,
+            color: TransactionDesignSystem.getSubtitleColor(isDark),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
@@ -1089,6 +1144,7 @@ class StockExpandableCard extends StatefulWidget {
   final VoidCallback? onLongPress;
   final bool isFirst;
   final bool isLast;
+  final Currency? currency;
 
   const StockExpandableCard({
     super.key,
@@ -1097,6 +1153,7 @@ class StockExpandableCard extends StatefulWidget {
     this.onLongPress,
     this.isFirst = false,
     this.isLast = false,
+    this.currency,
   });
 
   @override
@@ -1143,11 +1200,13 @@ class _StockExpandableCardState extends State<StockExpandableCard>
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
     final transaction = widget.transaction;
+    final currency = widget.currency ?? Currency.TRY;
 
-    // Format amount
+    // Format amount with user's currency
     final amount = TransactionDesignSystem.formatAmount(
       transaction.amount,
       TransactionType.income,
+      currency: currency,
     );
     final rawTime = transaction.displayTime;
     final time = TransactionDesignSystem.localizeDisplayTime(rawTime, context);
@@ -1322,7 +1381,7 @@ class _StockExpandableCardState extends State<StockExpandableCard>
                           // Stock detail (small)
                           if (stockQuantity != null && stockPrice != null)
                             Text(
-                              '${stockQuantity.toStringAsFixed(0)} ${l10n.pieces} @ ${stockPrice.toStringAsFixed(2)} ₺',
+                              '${stockQuantity.toStringAsFixed(0)} ${l10n.pieces} @ ${CurrencyUtils.formatAmount(stockPrice, currency)}',
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w400,
@@ -1351,6 +1410,7 @@ class _StockExpandableCardState extends State<StockExpandableCard>
   Widget _buildStockDetails() {
     final isDark = widget.isDark;
     final transaction = widget.transaction;
+    final currency = widget.currency ?? Currency.TRY;
     final l10n = AppLocalizations.of(context)!;
     final stockName = transaction.stockName ?? '';
     final stockQuantity = transaction.stockQuantity;
@@ -1376,14 +1436,14 @@ class _StockExpandableCardState extends State<StockExpandableCard>
           if (stockPrice != null) ...[
             _buildDetailRow(
               l10n.price,
-              '${stockPrice.toStringAsFixed(2)} ₺',
+              CurrencyUtils.formatAmount(stockPrice, currency),
               isDark,
             ),
             const SizedBox(height: 8),
           ],
           _buildDetailRow(
             l10n.total,
-            '${totalAmount.toStringAsFixed(2)} ₺',
+            CurrencyUtils.formatAmount(totalAmount, currency),
             isDark,
           ),
         ],

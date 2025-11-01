@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/rewarded_ad_service.dart';
 import '../../core/services/premium_service.dart';
+import '../../core/providers/unified_provider_v2.dart';
+import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// AI Limit Göstergesi Widget
 /// 
@@ -30,14 +32,9 @@ class AILimitIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final premiumService = Provider.of<PremiumService>(context);
     final rewardedAdService = Provider.of<RewardedAdService>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // Premium kullanıcılar için gösterme
-    if (premiumService.isPremium) {
-      return const SizedBox.shrink();
-    }
+    final l10n = AppLocalizations.of(context)!;
 
     final remaining = totalLimit - currentUsage;
     final percentage = totalLimit > 0 ? currentUsage / totalLimit : 0.0;
@@ -79,16 +76,16 @@ class AILimitIndicator extends StatelessWidget {
               children: [
                 Icon(Icons.auto_awesome, size: 20, color: indicatorColor),
                 const SizedBox(width: 8),
-                const Text(
-                  'AI Kullanım Limiti',
-                  style: TextStyle(
+                Text(
+                  l10n.aiUsageLimit,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const Spacer(),
                 Text(
-                  '$remaining kaldı',
+                  l10n.remainingCount(remaining),
                   style: TextStyle(
                     fontSize: 14,
                     color: indicatorColor,
@@ -118,7 +115,7 @@ class AILimitIndicator extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '$currentUsage / $totalLimit mesaj',
+                  '$currentUsage / $totalLimit ${l10n.messages}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -126,7 +123,7 @@ class AILimitIndicator extends StatelessWidget {
                 ),
                 if (bonusCount > 0)
                   Text(
-                    '+$bonusCount bonus',
+                    '+$bonusCount ${l10n.bonus}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.green,
@@ -144,15 +141,15 @@ class AILimitIndicator extends StatelessWidget {
               
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.video_library,
                     size: 20,
-                    color: Colors.blue,
+                    color: AppColors.secondary,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Reklam izleyerek +5 ek kullanım hakkı kazanabilirsiniz',
+                      l10n.watchAdBonusInfo,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[700],
@@ -173,11 +170,11 @@ class AILimitIndicator extends StatelessWidget {
                   icon: const Icon(Icons.play_circle_filled),
                   label: Text(
                     rewardedAdService.isAdReady
-                        ? 'Reklam İzle (+5 Hak)'
-                        : 'Reklam Yükleniyor...',
+                        ? l10n.watchAdBonus
+                        : l10n.adLoading,
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppColors.secondary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -188,7 +185,7 @@ class AILimitIndicator extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    'Günlük maksimum ${maxBonus - bonusCount} bonus daha kazanabilirsiniz',
+                    l10n.maxBonusRemaining(maxBonus - bonusCount),
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.grey[500],
@@ -214,7 +211,7 @@ class AILimitIndicator extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Premium ile sınırsız AI kullanımı',
+                      l10n.unlimitedAIWithPremium,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[700],
@@ -234,7 +231,7 @@ class AILimitIndicator extends StatelessWidget {
                     Navigator.pushNamed(context, '/premium');
                   },
                   icon: const Icon(Icons.workspace_premium),
-                  label: const Text('Premium\'a Geç'),
+                  label: Text(l10n.upgradeToPremium),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber,
                     foregroundColor: Colors.black,
@@ -252,6 +249,13 @@ class AILimitIndicator extends StatelessWidget {
   /// Kompakt mod UI - AppBar için
   Widget _buildCompactMode(BuildContext context, bool isDark, Color indicatorColor, int remaining, double percentage) {
     final rewardedAdService = Provider.of<RewardedAdService>(context);
+    final premiumService = Provider.of<PremiumService>(context);
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Plan period - localized
+    final planPeriod = (premiumService.isPremiumPlus || premiumService.isPremium) 
+        ? l10n.perMonth 
+        : l10n.perDay;
     
     return GestureDetector(
       onTap: () {
@@ -261,10 +265,11 @@ class AILimitIndicator extends StatelessWidget {
             _showRewardedAd(context);
           } else {
             // Reklam hazır değilse bilgi mesajı göster
+            final l10n = AppLocalizations.of(context)!;
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Reklam yükleniyor, lütfen bekleyin...'),
-                duration: Duration(seconds: 2),
+              SnackBar(
+                content: Text(l10n.adLoadingWait),
+                duration: const Duration(seconds: 2),
               ),
             );
           }
@@ -272,51 +277,47 @@ class AILimitIndicator extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: indicatorColor.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: indicatorColor.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.auto_awesome,
               color: indicatorColor,
-              size: 14,
+              size: 12,
             ),
-            const SizedBox(width: 6),
-            Text(
-              '$remaining/$totalLimit',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: indicatorColor,
+            const SizedBox(width: 4),
+            // Limit bilgisi
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$remaining/$totalLimit',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: indicatorColor,
+                    ),
+                  ),
+                  // Period göster
+                  TextSpan(
+                    text: planPeriod,
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w500,
+                      color: indicatorColor.withOpacity(0.7),
+                    ),
+                  ),
+                ],
               ),
             ),
-            // Bonus varsa göster
-            if (bonusCount > 0) ...[
-              const SizedBox(width: 4),
-              Text(
-                '+$bonusCount',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: indicatorColor.withOpacity(0.7),
-                ),
-              ),
-            ],
             // Limit dolmuşsa ve bonus kazanılabilirse video ikonu göster
             if (bonusAvailable && remaining <= 0) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               Icon(
                 Icons.play_circle_filled,
-                color: Colors.blue,
-                size: 16,
+                color: AppColors.secondary,
+                size: 14,
               ),
             ],
           ],
@@ -329,6 +330,7 @@ class AILimitIndicator extends StatelessWidget {
   void _showLimitDialog(BuildContext context) {
     final rewardedAdService = context.read<RewardedAdService>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
     
     showDialog(
       context: context,
@@ -337,9 +339,9 @@ class AILimitIndicator extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.auto_awesome, color: Colors.amber, size: 24),
+            const Icon(Icons.auto_awesome, color: Colors.amber, size: 24),
             const SizedBox(width: 8),
-            const Text('AI Kullanım Limiti'),
+            Text(l10n.aiUsageLimit),
           ],
         ),
         content: Column(
@@ -348,13 +350,13 @@ class AILimitIndicator extends StatelessWidget {
           children: [
             // Kullanım bilgisi
             Text(
-              'Günlük kullanım: $currentUsage / $totalLimit',
+              '${l10n.dailyUsage}: $currentUsage / $totalLimit',
               style: const TextStyle(fontSize: 14),
             ),
             if (bonusCount > 0) ...[
               const SizedBox(height: 4),
               Text(
-                'Bonus: +$bonusCount hak',
+                '${l10n.bonus}: +$bonusCount ${l10n.rights}',
                 style: const TextStyle(fontSize: 14, color: Colors.green),
               ),
             ],
@@ -366,11 +368,11 @@ class AILimitIndicator extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.video_library, size: 20, color: Colors.blue),
+                  Icon(Icons.video_library, size: 20, color: AppColors.secondary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Reklam izleyerek +5 ek kullanım hakkı kazanabilirsiniz',
+                      l10n.watchAdBonusInfo,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ),
@@ -389,12 +391,12 @@ class AILimitIndicator extends StatelessWidget {
                   icon: const Icon(Icons.play_circle_filled, size: 20),
                   label: Text(
                     rewardedAdService.isAdReady
-                        ? 'Reklam İzle (+5)'
-                        : 'Yükleniyor...',
+                        ? l10n.watchAdBonusShort
+                        : l10n.loading,
                     style: const TextStyle(fontSize: 14),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppColors.secondary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -406,7 +408,7 @@ class AILimitIndicator extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Kapat'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -433,22 +435,26 @@ class AILimitIndicator extends StatelessWidget {
       Navigator.of(context).pop();
       
       if (success) {
-        // Başarı mesajı
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🎉 Tebrikler! +5 AI kullanım hakkı kazandınız'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-        
-        // Callback çağır
+        // 🔔 Reklam izlendi, AI limitlerini güncelle
+        debugPrint('🎁 AILimitIndicator: Ad rewarded, triggering callback...');
         onAdWatched?.call();
+        
+        // Context hala geçerliyse UnifiedProviderV2'yi de güncelle
+        if (context.mounted) {
+          try {
+            final provider = context.read<UnifiedProviderV2>();
+            await provider.loadAIUsage();
+            debugPrint('✅ AILimitIndicator: AI limits reloaded');
+          } catch (e) {
+            debugPrint('❌ AILimitIndicator: Failed to reload AI limits: $e');
+          }
+        }
       } else {
-        // Hata mesajı
+        // Hata mesajı - sadece hata durumunda göster
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Reklam izlenirken bir hata oluştu'),
+          SnackBar(
+            content: Text(l10n.adLoadError),
             backgroundColor: Colors.red,
           ),
         );

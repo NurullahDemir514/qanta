@@ -1,5 +1,14 @@
 {
-  "greeting": "Merhaba {name}! 👋 Size nasıl yardımcı olabilirim? İşlem eklemek ister misiniz?",
+  "greetings": [
+    "Merhaba {name}! 👋 Size nasıl yardımcı olabilirim? İşlem eklemek ister misiniz?",
+    "Hey {name}! 😊 Bugün hangi işlemi eklemek istersiniz?",
+    "Selam {name}! 💰 Finansal asistanınız hazır. Harcama mı gelir mi ekleyelim?",
+    "Hoş geldin {name}! ✨ Yeni bir işlem eklemek için hazırım.",
+    "Merhaba {name}! 🌟 Ne yapmak istersiniz? İşlem eklemek, analiz yapmak?",
+    "{name}, tekrar hoş geldin! 🎯 Bugün bütçenizi nasıl takip edelim?",
+    "Selam {name}! 📊 Finansal verilerinizi güncelleyelim mi?",
+    "Hey {name}! 💡 Yeni bir harcama veya gelir eklemek ister misiniz?"
+  ],
   "howAmI": "Bu ay toplam {income} gelir elde ettiniz ve {expense} harcadınız. {balance} {status}",
   "balancePositive": "artı bakiye 👏",
   "balanceNegative": "eksi bakiye ⚠️",
@@ -42,6 +51,23 @@
     "10": "Ekim",
     "11": "Kasım",
     "12": "Aralık"
+  },
+  "limits": {
+    "premiumMonthly": "{period} limitinize ulaştınız ({limit}). Ay sonunda limitiniz yenilenecek.",
+    "freeWithBonus": "{period} {type} limitinize ulaştınız. Reklam izleyerek +5 ek sorgu hakkı kazanabilirsiniz.",
+    "freeWithoutBonus": "{period} {type} limitinize ulaştınız. Premium'a geçerek ayda 1500 mesaj hakkı kazanın.",
+    "types": {
+      "chat": "mesaj",
+      "chat_with_image": "görselli mesaj"
+    },
+    "periods": {
+      "daily": "Günlük",
+      "monthly": "Aylık"
+    }
+  },
+  "cards": {
+    "limitReached": "Free kullanıcılar en fazla 3 kart ekleyebilir. Premium'a geçerek sınırsız kart ekleyebilirsiniz!",
+    "limitExceeded": "{count} kartınız var (Premium'dan kalan)\n\nFree kullanıcılar maksimum 3 kart kullanabilir. {deleteCount} kart silmeniz veya Premium'a geçmeniz gerekiyor."
   }
 }
 

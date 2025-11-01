@@ -5,7 +5,17 @@ enum Currency {
   TRY('TRY', '₺', 'tr_TR'),
   USD('USD', '\$', 'en_US'),
   EUR('EUR', '€', 'de_DE'),
-  GBP('GBP', '£', 'en_GB');
+  GBP('GBP', '£', 'en_GB'),
+  JPY('JPY', '¥', 'ja_JP'),
+  CHF('CHF', 'CHF', 'de_CH'),
+  CAD('CAD', 'CA\$', 'en_CA'),
+  AUD('AUD', 'A\$', 'en_AU'),
+  INR('INR', '₹', 'en_IN'),
+  AED('AED', 'AED', 'en_AE'),
+  SAR('SAR', 'SAR', 'en_SA'),
+  BDT('BDT', '৳', 'bn_BD'),
+  PKR('PKR', '₨', 'ur_PK'),
+  SDG('SDG', 'SDG', 'ar_SD');
 
   const Currency(this.code, this.symbol, this.locale);
 
@@ -127,6 +137,26 @@ class CurrencyUtils {
         return 'Euro (€)';
       case Currency.GBP:
         return languageCode == 'tr' ? 'İngiliz Sterlini (£)' : 'British Pound (£)';
+      case Currency.JPY:
+        return languageCode == 'tr' ? 'Japon Yeni (¥)' : 'Japanese Yen (¥)';
+      case Currency.CHF:
+        return languageCode == 'tr' ? 'İsviçre Frangı (CHF)' : 'Swiss Franc (CHF)';
+      case Currency.CAD:
+        return languageCode == 'tr' ? 'Kanada Doları (CA\$)' : 'Canadian Dollar (CA\$)';
+      case Currency.AUD:
+        return languageCode == 'tr' ? 'Avustralya Doları (A\$)' : 'Australian Dollar (A\$)';
+      case Currency.INR:
+        return languageCode == 'tr' ? 'Hindistan Rupisi (₹)' : 'Indian Rupee (₹)';
+      case Currency.AED:
+        return languageCode == 'tr' ? 'BAE Dirhemi (AED)' : 'UAE Dirham (AED)';
+      case Currency.SAR:
+        return languageCode == 'tr' ? 'Suudi Riyali (SAR)' : 'Saudi Riyal (SAR)';
+      case Currency.BDT:
+        return languageCode == 'tr' ? 'Bangladeş Takası (৳)' : 'Bangladeshi Taka (৳)';
+      case Currency.PKR:
+        return languageCode == 'tr' ? 'Pakistan Rupisi (₨)' : 'Pakistani Rupee (₨)';
+      case Currency.SDG:
+        return languageCode == 'tr' ? 'Sudan Lirası (SDG)' : 'Sudanese Pound (SDG)';
     }
   }
 
@@ -134,6 +164,41 @@ class CurrencyUtils {
   static bool isCurrencySymbolSupported(Currency currency) {
     // Bu metod gelecekte font desteği kontrolü için kullanılabilir
     return true; // Şimdilik tüm semboller destekleniyor varsayılıyor
+  }
+
+  /// Para biriminden ilgili ülke kodlarını getir
+  /// Bu kodlar bankaların supportedCountries ile eşleşmesi için kullanılır
+  static List<String> getCountryCodesForCurrency(Currency currency) {
+    switch (currency) {
+      case Currency.TRY:
+        return ['TR']; // Türkiye
+      case Currency.USD:
+        return ['US']; // Amerika
+      case Currency.EUR:
+        return ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'PT', 'FI', 'GR', 'IE', 'LU']; // Eurozone
+      case Currency.GBP:
+        return ['GB']; // İngiltere
+      case Currency.JPY:
+        return ['JP']; // Japonya
+      case Currency.CHF:
+        return ['CH']; // İsviçre
+      case Currency.CAD:
+        return ['CA']; // Kanada
+      case Currency.AUD:
+        return ['AU']; // Avustralya
+      case Currency.INR:
+        return ['IN']; // Hindistan
+      case Currency.AED:
+        return ['AE']; // BAE
+      case Currency.SAR:
+        return ['SA']; // Suudi Arabistan
+      case Currency.BDT:
+        return ['BD']; // Bangladeş
+      case Currency.PKR:
+        return ['PK']; // Pakistan
+      case Currency.SDG:
+        return ['SD']; // Sudan
+    }
   }
 
   // Alternatif para birimi gösterimi (sembol desteklenmiyorsa)
@@ -147,6 +212,73 @@ class CurrencyUtils {
         return 'EUR';
       case Currency.GBP:
         return 'GBP';
+      case Currency.JPY:
+        return 'JPY';
+      case Currency.CHF:
+        return 'CHF';
+      case Currency.CAD:
+        return 'CAD';
+      case Currency.AUD:
+        return 'AUD';
+      case Currency.INR:
+        return 'INR';
+      case Currency.AED:
+        return 'AED';
+      case Currency.SAR:
+        return 'SAR';
+      case Currency.BDT:
+        return 'BDT';
+      case Currency.PKR:
+        return 'PKR';
+      case Currency.SDG:
+        return 'SDG';
     }
+  }
+
+  /// Get thousands separator for a locale
+  static String getThousandsSeparator(String locale) {
+    // Turkish and most European locales use dot for thousands
+    if (locale.startsWith('tr') || 
+        locale.startsWith('de') || 
+        locale.startsWith('es') || 
+        locale.startsWith('it') ||
+        locale.startsWith('fr')) {
+      return '.';
+    }
+    // US and UK use comma
+    return ',';
+  }
+
+  /// Get decimal separator for a locale
+  static String getDecimalSeparator(String locale) {
+    // Turkish and most European locales use comma for decimals
+    if (locale.startsWith('tr') || 
+        locale.startsWith('de') || 
+        locale.startsWith('es') || 
+        locale.startsWith('it') ||
+        locale.startsWith('fr')) {
+      return ',';
+    }
+    // US and UK use dot
+    return '.';
+  }
+
+  /// Add thousands separators to an integer part string based on locale
+  /// Only formats the integer part (no decimal separator handling)
+  static String addThousandsSeparators(String integerPart, String locale) {
+    if (integerPart.isEmpty) return integerPart;
+    
+    final thousandsSeparator = getThousandsSeparator(locale);
+    
+    // Reverse the string, add separators every 3 digits from right to left
+    final reversed = integerPart.split('').reversed.join('');
+    String withSeparators = '';
+    for (int i = 0; i < reversed.length; i++) {
+      if (i > 0 && i % 3 == 0) {
+        withSeparators += thousandsSeparator;
+      }
+      withSeparators += reversed[i];
+    }
+    return withSeparators.split('').reversed.join('');
   }
 } 

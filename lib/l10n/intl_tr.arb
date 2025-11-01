@@ -44,6 +44,10 @@
   "@turkish": {
     "description": "Turkish language option"
   },
+  "german": "Almanca",
+  "@german": {
+    "description": "German language option"
+  },
   "login": "Giriş Yap",
   "@login": {
     "description": "Login button text"
@@ -372,9 +376,9 @@
   "@addExpense": {
     "description": "Add expense button text"
   },
-  "expenseLimitTracking": "Harcama Limit Takibi",
+  "expenseLimitTracking": "Bütçelerim",
   "@expenseLimitTracking": {
-    "description": "Expense limit tracking title"
+    "description": "My budgets title - user's personal budgets section"
   },
   "future": "Gelecek",
   "@future": {
@@ -856,6 +860,14 @@
   "@installmentOptions": {
     "description": "Installment options"
   },
+  "singlePayment": "Peşin",
+  "@singlePayment": {
+    "description": "Single payment (no installments)"
+  },
+  "howManyInstallments": "Kaç taksit?",
+  "@howManyInstallments": {
+    "description": "How many installments question"
+  },
   "installmentOptionsDesc": "Alışverişlerinizi taksitlendirin",
   "@installmentOptionsDesc": {
     "description": "Installment options description"
@@ -864,11 +876,11 @@
   "@savingsManagement": {
     "description": "Savings management section title"
   },
-  "savingsGoals": "Tasarruf Hedefleri",
+  "savingsGoals": "Birikimler",
   "@savingsGoals": {
     "description": "Savings goals option"
   },
-  "savingsGoalsDesc": "Tasarruf hedeflerinizi belirleyin ve takip edin",
+  "savingsGoalsDesc": "Birikim hedeflerinizi belirleyin ve takip edin",
   "@savingsGoalsDesc": {
     "description": "Savings goals description"
   },
@@ -1625,6 +1637,10 @@
   "@subscription": {
     "description": "Subscription category"
   },
+  "thisIsSubscription": "Bu bir abonelik",
+  "@thisIsSubscription": {
+    "description": "Checkbox label for recurring transaction"
+  },
   "utilities": "Faturalar",
   "@utilities": {
     "description": "Utilities category"
@@ -1672,6 +1688,28 @@
   "save": "Kaydet",
   "@save": {
     "description": "Save button text"
+  },
+  "automatic": "Otomatik",
+  "@automatic": {
+    "description": "Automatic label"
+  },
+  "createdAutomatically": "Otomatik oluşturuldu (Abonelik)",
+  "@createdAutomatically": {
+    "description": "Note for automatically created subscription transaction"
+  },
+  "automaticPaymentCreated": "Otomatik ödeme işlemi oluşturuldu",
+  "@automaticPaymentCreated": {
+    "description": "Notification message for single automatic payment"
+  },
+  "automaticPaymentsCreated": "{count} otomatik ödeme işlemi oluşturuldu",
+  "@automaticPaymentsCreated": {
+    "description": "Notification message for multiple automatic payments",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      }
+    }
   },
   "howMuchTransfer": "Ne kadar transfer yapacaksınız?",
   "@howMuchTransfer": {
@@ -2208,6 +2246,22 @@
   "@notificationPermissionRequired": {
     "description": "Notification permission required message"
   },
+  "enableNotifications": "Bildirimleri Etkinleştir",
+  "@enableNotifications": {
+    "description": "Enable notifications dialog title"
+  },
+  "subscriptionNotificationPermissionMessage": "Abonelik ödemeleri için otomatik bildirim almak ister misiniz? Bildirimler, ödemelerin ne zaman yapıldığını ve bir sonraki ödeme tarihini hatırlatır.",
+  "@subscriptionNotificationPermissionMessage": {
+    "description": "Subscription notification permission explanation message"
+  },
+  "notNow": "Şimdi Değil",
+  "@notNow": {
+    "description": "Not now button text"
+  },
+  "enable": "Etkinleştir",
+  "@enable": {
+    "description": "Enable button text"
+  },
   "frequentlyAskedQuestions": "Sık Sorulan Sorular",
   "@frequentlyAskedQuestions": {
     "description": "FAQ section title"
@@ -2357,6 +2411,10 @@
   "perMonth": "/ay",
   "@perMonth": {
     "description": "Per month indicator"
+  },
+  "perDay": "/gün",
+  "@perDay": {
+    "description": "Per day indicator"
   },
   "income": "Gelir",
   "@income": {
@@ -3501,6 +3559,10 @@
   "@averagePrice": {
     "description": "Average price label"
   },
+  "avg": "Ort",
+  "@avg": {
+    "description": "Average (short form)"
+  },
   "noTransactionsYet": "Henüz işlem yok",
   "@noTransactionsYet": {
     "description": "No transactions message"
@@ -4151,7 +4213,11 @@
   },
   "pieces": "lot",
   "@pieces": {
-    "description": "Pieces unit"
+    "description": "Pieces unit (singular)"
+  },
+  "piecesPlural": "lot",
+  "@piecesPlural": {
+    "description": "Pieces unit (plural)"
   },
   "noTransactionsFound": "İşlem bulunamadı",
   "@noTransactionsFound": {
@@ -4705,7 +4771,11 @@
   },
   "pieces": "lot",
   "@pieces": {
-    "description": "Pieces unit"
+    "description": "Pieces unit (singular)"
+  },
+  "piecesPlural": "lot",
+  "@piecesPlural": {
+    "description": "Pieces unit (plural)"
   },
   "executeTransaction": "{transactionType} İşlemi Gerçekleştir",
   "@executeTransaction": {
@@ -4799,7 +4869,11 @@
   },
   "pieces": "lot",
   "@pieces": {
-    "description": "Pieces unit"
+    "description": "Pieces unit (singular)"
+  },
+  "piecesPlural": "lot",
+  "@piecesPlural": {
+    "description": "Pieces unit (plural)"
   },
   "commissionRate": "Komisyon Oranı:",
   "@commissionRate": {
@@ -6135,42 +6209,6 @@
   "normalSpendingExplanation": "Günlük bütçenizin %8-15'i arasında harcıyorsunuz. Sağlıklı bir harcama hızı.",
   "slowSpendingExplanation": "Günlük bütçenizin %8'inden az harcıyorsunuz. Tasarruf ediyorsunuz!",
   "defaultSpendingExplanation": "Bu miktar, kalan günlere bölünmüş toplam bütçenizdir.",
-  "analyticsConsentTitle": "Uygulamayı Geliştirmemize Yardım Edin",
-  "@analyticsConsentTitle": {
-    "description": "Analytics consent modal title"
-  },
-  "analyticsConsentMessage": "Qanta'yı sizin için daha iyi hale getirmek istiyoruz! Anonim harcama verilerinizi toplayarak uygulamayı geliştirebilir, daha iyi özellikler sunabiliriz.\n\n• Verileriniz tamamen anonimdir\n• Kişisel bilgileriniz asla paylaşılmaz\n• Sadece harcama tutarları ve kategorileri toplanır\n• İstediğiniz zaman iptal edebilirsiniz",
-  "@analyticsConsentMessage": {
-    "description": "Analytics consent modal message"
-  },
-  "analyticsAccept": "Kabul Ediyorum",
-  "@analyticsAccept": {
-    "description": "Accept analytics consent button"
-  },
-  "analyticsDecline": "Hayır, Teşekkürler",
-  "@analyticsDecline": {
-    "description": "Decline analytics consent button"
-  },
-  "analyticsConsentNotice": "Bu izni Profil > Tercihler bölümünden değiştirebilirsiniz.",
-  "@analyticsConsentNotice": {
-    "description": "Analytics consent change notice"
-  },
-  "anonymousDataCollection": "Anonim Veri Toplama",
-  "@anonymousDataCollection": {
-    "description": "Anonymous data collection setting title"
-  },
-  "anonymousDataCollectionSubtitle": "Uygulamayı geliştirmek için\nanonim harcama verilerini paylaş",
-  "@anonymousDataCollectionSubtitle": {
-    "description": "Anonymous data collection setting subtitle"
-  },
-  "analyticsEnabled": "Anonim veri toplama açıldı",
-  "@analyticsEnabled": {
-    "description": "Analytics enabled message"
-  },
-  "analyticsDisabled": "Anonim veri toplama kapatıldı",
-  "@analyticsDisabled": {
-    "description": "Analytics disabled message"
-  },
   "cardLimitReached": "Kart Limiti Doldu",
   "@cardLimitReached": {
     "description": "Card limit reached title"
@@ -6178,6 +6216,24 @@
   "cardLimitReachedMessage": "Ücretsiz sürümde en fazla 3 kart ekleyebilirsiniz",
   "@cardLimitReachedMessage": {
     "description": "Card limit reached message"
+  },
+  "cardLimitExceeded": "Kart Limiti",
+  "@cardLimitExceeded": {
+    "description": "Card limit exceeded title for downgraded users"
+  },
+  "cardLimitExceededMessage": "{totalCards} kartınız var (Premium'dan kalan)\n\nFree kullanıcılar maksimum 3 kart kullanabilir. {deleteCount} kart silmeniz veya Premium'a geçmeniz gerekiyor.",
+  "@cardLimitExceededMessage": {
+    "description": "Card limit exceeded message with parameters",
+    "placeholders": {
+      "totalCards": {
+        "type": "int",
+        "example": "5"
+      },
+      "deleteCount": {
+        "type": "int",
+        "example": "2"
+      }
+    }
   },
   "upgradeToPremium": "Premium'a Geç",
   "@upgradeToPremium": {
@@ -6504,6 +6560,22 @@
   "@aiChatError": {
     "description": "AI chat error message"
   },
+  "aiImageAnalysisError": "Görüntü analiz edilirken hata oluştu. Lütfen tekrar deneyin.",
+  "@aiImageAnalysisError": {
+    "description": "AI image analysis error message"
+  },
+  "aiCategoryCreationError": "Kategori oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
+  "@aiCategoryCreationError": {
+    "description": "AI category creation error message"
+  },
+  "watchAdBonus": "Reklam İzle (+5 Hak)",
+  "@watchAdBonus": {
+    "description": "Watch ad to get bonus button text"
+  },
+  "adLoading": "Reklam Yükleniyor...",
+  "@adLoading": {
+    "description": "Ad loading text"
+  },
   "aiChatTransactionSuccess": "İşlem başarıyla kaydedildi!\n\nBaşka bir işlem eklemek ister misiniz? 😊",
   "@aiChatTransactionSuccess": {
     "description": "Transaction saved successfully message"
@@ -6802,6 +6874,40 @@
   "@unlockAllFeatures": {
     "description": "Unlock all features subtitle"
   },
+  "welcomeCampaign": "Hoş Geldin Kampanyası!",
+  "@welcomeCampaign": {
+    "description": "Welcome campaign banner title"
+  },
+  "monthlyPremiumOnly": "Aylık premium sadece {price}",
+  "@monthlyPremiumOnly": {
+    "description": "Monthly premium price in campaign",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "₺24,99"
+      }
+    }
+  },
+  "percentDiscount": "%{percent}",
+  "@percentDiscount": {
+    "description": "Percent discount label",
+    "placeholders": {
+      "percent": {
+        "type": "String",
+        "example": "50"
+      }
+    }
+  },
+  "daysRemaining": "{days} gün",
+  "@daysRemaining": {
+    "description": "Days remaining label",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
   "comparePlans": "Planları Karşılaştır",
   "@comparePlans": {
     "description": "Compare plans section title"
@@ -6872,5 +6978,909 @@
   "featureEarlyAccessDescription": "Yeni özelliklere erken erişim",
   "@featureEarlyAccessDescription": {
     "description": "Early access to new features"
+  },
+  "skip": "Atla",
+  "@skip": {
+    "description": "Skip button text"
+  },
+  "premiumWelcomeTitle": "Premium'a Hoş Geldiniz!",
+  "@premiumWelcomeTitle": {
+    "description": "Premium onboarding welcome title"
+  },
+  "premiumWelcomeSubtitle": "Yükseltme için teşekkürler. Artık tüm premium özelliklere erişiminiz var.",
+  "@premiumWelcomeSubtitle": {
+    "description": "Premium onboarding welcome subtitle"
+  },
+  "premiumFeaturesTitle": "Premium Özellikleriniz",
+  "@premiumFeaturesTitle": {
+    "description": "Premium features page title"
+  },
+  "premiumFeatureAI": "Sınırsız AI İçgörüler",
+  "@premiumFeatureAI": {
+    "description": "Premium AI insights feature"
+  },
+  "premiumFeatureReports": "Gelişmiş Raporlar ve Analizler",
+  "@premiumFeatureReports": {
+    "description": "Premium reports feature"
+  },
+  "premiumFeatureCards": "Sınırsız Kart ve Hesap",
+  "@premiumFeatureCards": {
+    "description": "Premium unlimited cards feature"
+  },
+  "premiumFeatureStocks": "Sınırsız Hisse Takibi",
+  "@premiumFeatureStocks": {
+    "description": "Premium unlimited stocks feature"
+  },
+  "premiumFeatureNoAds": "Reklamsız Deneyim",
+  "@premiumFeatureNoAds": {
+    "description": "Premium no ads feature"
+  },
+  "premiumReadyTitle": "Her Şey Hazır!",
+  "@premiumReadyTitle": {
+    "description": "Premium ready title"
+  },
+  "premiumReadySubtitle": "Premium yolculuğunuza başlayın ve bütçenizin kontrolünü elinize alın.",
+  "@premiumReadySubtitle": {
+    "description": "Premium ready subtitle"
+  },
+  "savings": "Birikimler",
+  "@savings": {
+    "description": "Savings tab title"
+  },
+  "totalSavings": "Toplam Birikim",
+  "@totalSavings": {
+    "description": "Total savings label"
+  },
+  "myGoals": "Birikimlerim",
+  "@myGoals": {
+    "description": "My goals header"
+  },
+  "goals": "Birikim",
+  "@goals": {
+    "description": "Goals plural"
+  },
+  "noSavingsGoals": "Henüz Birikim Hedefi Yok",
+  "@noSavingsGoals": {
+    "description": "No savings goals empty state"
+  },
+  "createFirstGoal": "İlk birikim hedefini oluştur ve finansal geleceğini inşa etmeye başla!",
+  "@createFirstGoal": {
+    "description": "Create first goal description"
+  },
+  "createGoal": "Hedef Oluştur",
+  "@createGoal": {
+    "description": "Create goal button"
+  },
+  "createSavingsGoal": "Birikim Hedefi Oluştur",
+  "@createSavingsGoal": {
+    "description": "Create savings goal title"
+  },
+  "goalName": "Birikim Adı",
+  "@goalName": {
+    "description": "Goal name label"
+  },
+  "enterGoalName": "Birikim adı girin",
+  "@enterGoalName": {
+    "description": "Enter goal name hint"
+  },
+  "pleaseEnterGoalName": "Lütfen bir birikim adı girin",
+  "@pleaseEnterGoalName": {
+    "description": "Goal name validation message"
+  },
+  "targetAmount": "Hedef Miktar",
+  "@targetAmount": {
+    "description": "Target amount label"
+  },
+  "currentAmount": "Mevcut Miktar",
+  "@currentAmount": {
+    "description": "Current amount label"
+  },
+  "current": "Mevcut",
+  "@current": {
+    "description": "Current label"
+  },
+  "remaining": "Kalan",
+  "@remaining": {
+    "description": "Remaining label"
+  },
+  "target": "Hedef",
+  "@target": {
+    "description": "Target label"
+  },
+  "targetDate": "Hedef Tarih",
+  "@targetDate": {
+    "description": "Target date label"
+  },
+  "selectDate": "Tarih Seç",
+  "@selectDate": {
+    "description": "Select date hint"
+  },
+  "selectColor": "Renk Seç",
+  "@selectColor": {
+    "description": "Select color label"
+  },
+  "optional": "Opsiyonel",
+  "@optional": {
+    "description": "Optional field indicator"
+  },
+  "goalCreatedSuccessfully": "Birikim hedefi başarıyla oluşturuldu!",
+  "@goalCreatedSuccessfully": {
+    "description": "Goal created success message"
+  },
+  "pleaseEnterAmount": "Lütfen bir miktar girin",
+  "@pleaseEnterAmount": {
+    "description": "Amount validation message"
+  },
+  "pleaseEnterValidAmount": "Lütfen geçerli bir miktar girin",
+  "@pleaseEnterValidAmount": {
+    "description": "Valid amount validation message"
+  },
+  "days": "gün",
+  "@days": {
+    "description": "Days label"
+  },
+  "day": "gün",
+  "@day": {
+    "description": "Day label singular"
+  },
+  "category": "Kategori",
+  "@category": {
+    "description": "Category label"
+  },
+  "retry": "Tekrar Dene",
+  "@retry": {
+    "description": "Retry button"
+  },
+  "error": "Hata",
+  "@error": {
+    "description": "Error title"
+  },
+  "archived": "Arşivlenen",
+  "@archived": {
+    "description": "Archived goals section title"
+  },
+  "completed": "Tamamlanan",
+  "@completed": {
+    "description": "Completed goals section title"
+  },
+  "goalInfoFailed": "Hedef bilgisi yüklenemedi. Lütfen sayfayı yenileyin.",
+  "@goalInfoFailed": {
+    "description": "Goal info load failed message"
+  },
+  "goalNotFound": "Hedef Bulunamadı",
+  "@goalNotFound": {
+    "description": "Goal not found title"
+  },
+  "savingsCompleted": "Birikim Tamamlandı",
+  "@savingsCompleted": {
+    "description": "Savings completed badge"
+  },
+  "add": "Ekle",
+  "@add": {
+    "description": "Add button"
+  },
+  "addSavings": "Tasarruf ekle",
+  "@addSavings": {
+    "description": "Add savings subtitle"
+  },
+  "withdraw": "Çek",
+  "@withdraw": {
+    "description": "Withdraw button"
+  },
+  "withdrawMoney": "Para çek",
+  "@withdrawMoney": {
+    "description": "Withdraw money subtitle"
+  },
+  "edit": "Düzenle",
+  "@edit": {
+    "description": "Edit button"
+  },
+  "editGoal": "Hedefi düzenle",
+  "@editGoal": {
+    "description": "Edit goal subtitle"
+  },
+  "unarchive": "Arşivden Çıkar",
+  "@unarchive": {
+    "description": "Unarchive button"
+  },
+  "activate": "Aktif Et",
+  "@activate": {
+    "description": "Activate button"
+  },
+  "archive": "Arşivle",
+  "@archive": {
+    "description": "Archive button"
+  },
+  "activateGoal": "Aktif et",
+  "@activateGoal": {
+    "description": "Activate goal subtitle"
+  },
+  "restartGoal": "Yeniden başlat",
+  "@restartGoal": {
+    "description": "Restart goal subtitle"
+  },
+  "archiveGoal": "Hedefi arşivle",
+  "@archiveGoal": {
+    "description": "Archive goal subtitle"
+  },
+  "delete": "Sil",
+  "@delete": {
+    "description": "Delete button"
+  },
+  "deleteGoal": "Hedefi sil",
+  "@deleteGoal": {
+    "description": "Delete goal subtitle"
+  },
+  "transactionHistory": "İşlem Geçmişi",
+  "@transactionHistory": {
+    "description": "Transaction history title"
+  },
+  "progress": "İlerleme",
+  "@progress": {
+    "description": "Progress label"
+  },
+  "remainingDays": "Kalan Gün",
+  "@remainingDays": {
+    "description": "Remaining days label"
+  },
+  "monthlyTarget": "Aylık Hedef",
+  "@monthlyTarget": {
+    "description": "Monthly target label"
+  },
+  "noTransactionsYet": "Henüz işlem yok",
+  "@noTransactionsYet": {
+    "description": "No transactions yet message"
+  },
+  "noTransactionsHint": "İlk işleminizi yapmak için yukarıdaki\nbutonları kullanabilirsiniz",
+  "@noTransactionsHint": {
+    "description": "No transactions hint message"
+  },
+  "savingsAdded": "Birikim Eklendi",
+  "@savingsAdded": {
+    "description": "Savings added label"
+  },
+  "moneyWithdrawn": "Para Çekildi",
+  "@moneyWithdrawn": {
+    "description": "Money withdrawn label"
+  },
+  "today": "Bugün",
+  "@today": {
+    "description": "Today label"
+  },
+  "yesterday": "Dün",
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
+  "invalidGoal": "Geçersiz hedef",
+  "@invalidGoal": {
+    "description": "Invalid goal message"
+  },
+  "cancel": "İptal",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "goalArchived": "Hedef arşivlendi",
+  "@goalArchived": {
+    "description": "Goal archived message"
+  },
+  "goalActivated": "Hedef aktif edildi",
+  "@goalActivated": {
+    "description": "Goal activated message"
+  },
+  "goalReactivated": "Hedef yeniden aktif edildi",
+  "@goalReactivated": {
+    "description": "Goal reactivated message"
+  },
+  "markAsCompleted": "Tamamlandı Olarak İşaretle",
+  "@markAsCompleted": {
+    "description": "Mark as completed button"
+  },
+  "completedButton": "Tamamlandı",
+  "@completedButton": {
+    "description": "Completed button"
+  },
+  "goalCompletedImpact": "Hedefin %{percent}'ini tamamladı",
+  "@goalCompletedImpact": {
+    "description": "Goal completion impact text",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "archiveGoalDialogTitle": "Hedefi Arşivle?",
+  "@archiveGoalDialogTitle": {
+    "description": "Archive goal dialog title"
+  },
+  "archiveGoalDialogContent": "Hedef arşivlenecek. Daha sonra arşivden erişebilirsiniz.",
+  "@archiveGoalDialogContent": {
+    "description": "Archive goal dialog content"
+  },
+  "unarchiveGoalDialogTitle": "Arşivden Çıkar?",
+  "@unarchiveGoalDialogTitle": {
+    "description": "Unarchive goal dialog title"
+  },
+  "unarchiveGoalDialogContent": "Hedef arşivden çıkarılacak ve aktif hedeflerinize eklenecek.",
+  "@unarchiveGoalDialogContent": {
+    "description": "Unarchive goal dialog content"
+  },
+  "activateGoalDialogTitle": "Hedefi Aktif Et?",
+  "@activateGoalDialogTitle": {
+    "description": "Activate goal dialog title"
+  },
+  "activateGoalDialogContent": "Tamamlanmış hedef tekrar aktif edilecek ve üzerinde çalışmaya devam edebilirsiniz.",
+  "@activateGoalDialogContent": {
+    "description": "Activate goal dialog content"
+  },
+  "completeGoalDialogTitle": "🎉 Tebrikler!",
+  "@completeGoalDialogTitle": {
+    "description": "Complete goal dialog title"
+  },
+  "completeGoalDialogContent": "Hedefini tamamladın! Tamamlandı olarak işaretlemek ister misin?",
+  "@completeGoalDialogContent": {
+    "description": "Complete goal dialog content"
+  },
+  "deleteGoalDialogTitle": "Hedefi Sil?",
+  "@deleteGoalDialogTitle": {
+    "description": "Delete goal dialog title"
+  },
+  "deleteGoalDialogContent": "Bu işlem geri alınamaz. Hedef ve tüm işlem geçmişi silinecek.",
+  "@deleteGoalDialogContent": {
+    "description": "Delete goal dialog content"
+  },
+  "goalCompletedSuccess": "🎉 Harika! Hedefini tamamladın!",
+  "@goalCompletedSuccess": {
+    "description": "Goal completed success message"
+  },
+  "pleaseSelectAccount": "Lütfen bir hesap seçin",
+  "@pleaseSelectAccount": {
+    "description": "Please select account validation"
+  },
+  "transactionFailed": "İşlem başarısız oldu",
+  "@transactionFailed": {
+    "description": "Transaction failed message"
+  },
+  "addSavingsTitle": "Tasarruf Ekle",
+  "@addSavingsTitle": {
+    "description": "Add savings form title"
+  },
+  "withdrawTitle": "Para Çek",
+  "@withdrawTitle": {
+    "description": "Withdraw form title"
+  },
+  "savingsDeposited": "Para eklendi!",
+  "@savingsDeposited": {
+    "description": "Money deposited success message"
+  },
+  "savingsWithdrawn": "Para çekildi!",
+  "@savingsWithdrawn": {
+    "description": "Money withdrawn success message"
+  },
+  "depositNoteHint": "Örn: Maaş günü tasarrufu",
+  "@depositNoteHint": {
+    "description": "Deposit note hint text"
+  },
+  "withdrawNoteHint": "Örn: Acil ihtiyaç için",
+  "@withdrawNoteHint": {
+    "description": "Withdraw note hint text"
+  },
+  "savingsGoalImpactDeposit": "Hedefin %{percentage}%'ini tamamladı",
+  "@savingsGoalImpactDeposit": {
+    "description": "Savings goal deposit impact message",
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsGoalImpactWithdraw": "Hedeften %{percentage} azaldı",
+  "@savingsGoalImpactWithdraw": {
+    "description": "Savings goal withdraw impact message",
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "amount": "Tutar",
+  "@amount": {
+    "description": "Amount label"
+  },
+  "insufficientBalance": "Yetersiz bakiye",
+  "@insufficientBalance": {
+    "description": "Insufficient balance error"
+  },
+  "editSavingsGoal": "Birikimi Düzenle",
+  "@editSavingsGoal": {
+    "description": "Edit savings goal title"
+  },
+  "savingsName": "Birikim Adı",
+  "@savingsName": {
+    "description": "Savings name label"
+  },
+  "enterGoalNameHint": "Hedef adını girin",
+  "@enterGoalNameHint": {
+    "description": "Enter goal name hint"
+  },
+  "pleaseEnterGoalNameError": "Lütfen hedef adı girin",
+  "@pleaseEnterGoalNameError": {
+    "description": "Please enter goal name error"
+  },
+  "selectDateHint": "Tarih seçin",
+  "@selectDateHint": {
+    "description": "Select date hint"
+  },
+  "color": "Renk",
+  "@color": {
+    "description": "Color label"
+  },
+  "update": "Güncelle",
+  "@update": {
+    "description": "Update button"
+  },
+  "milestone25Title": "İyi Başlangıç!",
+  "@milestone25Title": {
+    "description": "25% milestone title"
+  },
+  "milestone50Title": "Yarı Yoldasın!",
+  "@milestone50Title": {
+    "description": "50% milestone title"
+  },
+  "milestone75Title": "Neredeyse Tamam!",
+  "@milestone75Title": {
+    "description": "75% milestone title"
+  },
+  "milestone100Title": "Birikim Tamamlandı!",
+  "@milestone100Title": {
+    "description": "100% milestone title"
+  },
+  "milestoneDefaultTitle": "Tebrikler!",
+  "@milestoneDefaultTitle": {
+    "description": "Default milestone title"
+  },
+  "milestone25Message": "Hedefinin %25'ine ulaştın! Devam et!",
+  "@milestone25Message": {
+    "description": "25% milestone message"
+  },
+  "milestone50Message": "Hedefinin yarısını tamamladın! Harika gidiyorsun!",
+  "@milestone50Message": {
+    "description": "50% milestone message"
+  },
+  "milestone75Message": "Hedefinin %75'ine ulaştın! Son spurt!",
+  "@milestone75Message": {
+    "description": "75% milestone message"
+  },
+  "milestone100Message": "Hedefini tamamladın! Harika bir başarı!",
+  "@milestone100Message": {
+    "description": "100% milestone message"
+  },
+  "milestoneDefaultMessage": "Hedefine bir adım daha yaklaştın!",
+  "@milestoneDefaultMessage": {
+    "description": "Default milestone message"
+  },
+  "fromWhichAccount": "Hangi Hesaptan?",
+  "@fromWhichAccount": {
+    "description": "From which account label"
+  },
+  "toWhichAccount": "Hangi Hesaba?",
+  "@toWhichAccount": {
+    "description": "To which account label"
+  },
+  "optionalField": "(İsteğe Bağlı)",
+  "@optionalField": {
+    "description": "Optional field indicator"
+  },
+  "perMonth": "/ay",
+  "@perMonth": {
+    "description": "Per month unit"
+  },
+  "daysUnit": "gün",
+  "@daysUnit": {
+    "description": "Days unit"
+  },
+  "monthsUnit": "ay",
+  "@monthsUnit": {
+    "description": "Months unit"
+  },
+  "yearsUnit": "yıl",
+  "@yearsUnit": {
+    "description": "Years unit"
+  },
+  "timeRemaining": "kalan",
+  "@timeRemaining": {
+    "description": "Time remaining (lowercase)"
+  },
+  "aiUsageLimit": "AI Kullanım Limiti",
+  "@aiUsageLimit": {
+    "description": "AI usage limit title"
+  },
+  "remainingCount": "{count} kaldı",
+  "@remainingCount": {
+    "description": "Remaining count message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messages": "mesaj",
+  "@messages": {
+    "description": "Messages label"
+  },
+  "watchAdBonusInfo": "Reklam izleyerek +5 ek kullanım hakkı kazanabilirsiniz",
+  "@watchAdBonusInfo": {
+    "description": "Watch ad bonus info message"
+  },
+  "maxBonusRemaining": "Günlük maksimum {count} bonus daha kazanabilirsiniz",
+  "@maxBonusRemaining": {
+    "description": "Maximum bonus remaining message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unlimitedAIWithPremium": "Premium ile sınırsız AI kullanımı",
+  "@unlimitedAIWithPremium": {
+    "description": "Unlimited AI with premium message"
+  },
+  "upgradeToPremium": "Premium'a Geç",
+  "@upgradeToPremium": {
+    "description": "Upgrade to premium button text"
+  },
+  "adLoadingWait": "Reklam yükleniyor, lütfen bekleyin...",
+  "@adLoadingWait": {
+    "description": "Ad loading wait message"
+  },
+  "dailyUsage": "Günlük kullanım",
+  "@dailyUsage": {
+    "description": "Daily usage label"
+  },
+  "rights": "hak",
+  "@rights": {
+    "description": "Rights label (usage rights)"
+  },
+  "watchAdBonusShort": "Reklam İzle (+5)",
+  "@watchAdBonusShort": {
+    "description": "Watch ad bonus short button text"
+  },
+  "loading": "Yükleniyor...",
+  "@loading": {
+    "description": "Loading text"
+  },
+  "close": "Kapat",
+  "@close": {
+    "description": "Close button text"
+  },
+  "adLoadError": "Reklam yüklenirken bir hata oluştu",
+  "@adLoadError": {
+    "description": "Ad load error message"
+  },
+  "noDescription": "Açıklama yok",
+  "@noDescription": {
+    "description": "No description text for savings transactions"
+  },
+  "insufficientBalance": "Yetersiz bakiye",
+  "@insufficientBalance": {
+    "description": "Insufficient balance error"
+  },
+  "insufficientBalanceDetail": "Bu hesapta yeterli bakiye yok",
+  "@insufficientBalanceDetail": {
+    "description": "Insufficient balance detail message"
+  },
+  "insufficientSavings": "Yetersiz tasarruf",
+  "@insufficientSavings": {
+    "description": "Insufficient savings error"
+  },
+  "insufficientSavingsDetail": "Bu hedefteki çekilebilecek miktar: {amount}",
+  "@insufficientSavingsDetail": {
+    "description": "Insufficient savings detail message with available amount"
+  },
+  "availableBalance": "Kullanılabilir: {amount}",
+  "@availableBalance": {
+    "description": "Available balance label"
+  },
+  "availableBalanceLabel": "Kullanılabilir Bakiye",
+  "@availableBalanceLabel": {
+    "description": "Available balance text only"
+  },
+  "maxAmount": "Tümünü",
+  "@maxAmount": {
+    "description": "Max amount button"
+  },
+  "amountMustBeGreaterThanZero": "Tutar 0'dan büyük olmalı",
+  "@amountMustBeGreaterThanZero": {
+    "description": "Amount validation error"
+  },
+  "amountExceedsBalance": "Tutar kullanılabilir bakiyeyi aşıyor",
+  "@amountExceedsBalance": {
+    "description": "Amount exceeds available balance error"
+  },
+  "amountExceedsSavings": "Tutar mevcut tasarrufu aşıyor",
+  "@amountExceedsSavings": {
+    "description": "Amount exceeds available savings error"
+  },
+  "amountExceedsGoalRemaining": "Tutar hedefe kalan miktarı aşıyor",
+  "@amountExceedsGoalRemaining": {
+    "description": "Amount exceeds goal remaining amount error"
+  },
+  "goalCompletedTitle": "Hedefini Tamamladın! 🎉",
+  "@goalCompletedTitle": {
+    "description": "Goal completed dialog title"
+  },
+  "goalCompletedMessage": "Tebrikler! {goalName} hedefine ulaştın!",
+  "@goalCompletedMessage": {
+    "description": "Goal completed message"
+  },
+  "goalCompletedStats": "{days} günde {amount} biriktirdin",
+  "@goalCompletedStats": {
+    "description": "Goal completion stats"
+  },
+  "archiveGoal": "Arşivle",
+  "@archiveGoal": {
+    "description": "Archive goal button"
+  },
+  "keepActive": "Aktif Tut",
+  "@keepActive": {
+    "description": "Keep goal active button"
+  },
+  "createNewGoal": "Yeni Hedef",
+  "@createNewGoal": {
+    "description": "Create new goal button"
+  },
+  "goalArchivedSuccess": "Hedef arşivlendi",
+  "@goalArchivedSuccess": {
+    "description": "Goal archived success message"
+  },
+  "budgetAndSubscriptions": "Bütçe ve Abonelikler",
+  "@budgetAndSubscriptions": {
+    "description": "Budget and Subscriptions page title"
+  },
+  "budgets": "Bütçeler",
+  "@budgets": {
+    "description": "Budgets tab label"
+  },
+  "subscriptions": "Abonelikler",
+  "@subscriptions": {
+    "description": "Subscriptions tab label"
+  },
+  "subscriptionDetails": "Abonelik Detayları",
+  "@subscriptionDetails": {
+    "description": "Subscription details step title"
+  },
+  "subscriptionSchedule": "Tekrarlama Planı",
+  "@subscriptionSchedule": {
+    "description": "Subscription schedule step title"
+  },
+  "paymentAccount": "Ödeme Hesabı",
+  "@paymentAccount": {
+    "description": "Payment account label"
+  },
+  "summary": "Özet",
+  "@summary": {
+    "description": "Summary step title"
+  },
+  "subscriptionName": "Abonelik Adı",
+  "@subscriptionName": {
+    "description": "Subscription name field label"
+  },
+  "frequency": "Sıklık",
+  "@frequency": {
+    "description": "Frequency label"
+  },
+  "startDate": "Başlangıç Tarihi",
+  "@startDate": {
+    "description": "Start date label"
+  },
+  "endDate": "Bitiş Tarihi",
+  "@endDate": {
+    "description": "End date label"
+  },
+  "endDateOptional": "Bitiş Tarihi (Opsiyonel)",
+  "@endDateOptional": {
+    "description": "End date optional label"
+  },
+  "selectDate": "Tarih Seçin",
+  "@selectDate": {
+    "description": "Select date button"
+  },
+  "selectAccount": "Ödeme Hesabı Seçin",
+  "@selectAccount": {
+    "description": "Select account label"
+  },
+  "reviewSubscription": "Aboneliği Gözden Geçirin",
+  "@reviewSubscription": {
+    "description": "Review subscription label"
+  },
+  "nextPayment": "Sonraki",
+  "@nextPayment": {
+    "description": "Next payment label"
+  },
+  "noSubscriptionsYet": "Henüz abonelik eklemediniz",
+  "@noSubscriptionsYet": {
+    "description": "No subscriptions empty state title"
+  },
+  "addFirstSubscriptionDescription": "Netflix, Spotify gibi aboneliklerinizi ekleyerek otomatik takip edin",
+  "@addFirstSubscriptionDescription": {
+    "description": "Add first subscription description"
+  },
+  "addSubscription": "Abonelik Ekle",
+  "@addSubscription": {
+    "description": "Add subscription button"
+  },
+  "requiredField": "Bu alan zorunludur",
+  "@requiredField": {
+    "description": "Required field validation message"
+  },
+  "invalidAmount": "Geçerli bir tutar giriniz",
+  "@invalidAmount": {
+    "description": "Invalid amount validation message"
+  },
+  "save": "Kaydet",
+  "@save": {
+    "description": "Save button"
+  },
+  "next": "İleri",
+  "@next": {
+    "description": "Next button"
+  },
+  "back": "Geri",
+  "@back": {
+    "description": "Back button"
+  },
+  "amount": "Tutar",
+  "@amount": {
+    "description": "Amount label"
+  },
+  "deleteSubscription": "Aboneliği Sil",
+  "@deleteSubscription": {
+    "description": "Delete subscription dialog title"
+  },
+  "deleteSubscriptionConfirm": "{subscriptionName} aboneliğini silmek istediğinizden emin misiniz?",
+  "@deleteSubscriptionConfirm": {
+    "description": "Delete subscription confirmation message",
+    "placeholders": {
+      "subscriptionName": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDeleted": "Abonelik başarıyla silindi",
+  "@subscriptionDeleted": {
+    "description": "Subscription deleted success message"
+  },
+  "activeSubscriptions": "Aktif Abonelikler",
+  "@activeSubscriptions": {
+    "description": "Active subscriptions header"
+  },
+  "inactiveSubscriptions": "Pasif Abonelikler",
+  "@inactiveSubscriptions": {
+    "description": "Inactive subscriptions header",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inactiveSubscriptionsWithCount": "{count, plural, =0{Pasif Abonelikler} other{Pasif Abonelikler ({count})}}",
+  "@inactiveSubscriptionsWithCount": {
+    "description": "Inactive subscriptions header with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inactive": "Pasif",
+  "@inactive": {
+    "description": "Inactive badge text"
+  },
+  "monthlyTotal": "Aylık Toplam",
+  "@monthlyTotal": {
+    "description": "Monthly total label"
+  },
+  "yearlyPrefix": "Yıllık:",
+  "@yearlyPrefix": {
+    "description": "Yearly prefix label"
+  },
+  "subscriptionAdded": "Abonelik başarıyla eklendi",
+  "@subscriptionAdded": {
+    "description": "Subscription added success message"
+  },
+  "subscriptionExample": "Örn: Netflix Premium",
+  "@subscriptionExample": {
+    "description": "Subscription name example placeholder"
+  },
+  "available": "Kullanılabilir",
+  "@available": {
+    "description": "Available amount label"
+  },
+  "perMonth": "/ ay",
+  "@perMonth": {
+    "description": "Per month suffix"
+  },
+  "active": "Aktif",
+  "@active": {
+    "description": "Active label"
+  },
+  "tutorialTitle": "Hızlı İşlem Ekleme",
+  "@tutorialTitle": {
+    "description": "Tutorial başlığı - FAB adımı"
+  },
+  "tutorialDescription": "Alt köşedeki butona tıklayarak harcama, gelir veya transfer işlemi ekleyebilirsiniz.",
+  "@tutorialDescription": {
+    "description": "Tutorial açıklaması - FAB adımı"
+  },
+  "tutorialNext": "Devam Et",
+  "@tutorialNext": {
+    "description": "Tutorial sonraki adım butonu"
+  },
+  "tutorialPrevious": "Geri",
+  "@tutorialPrevious": {
+    "description": "Tutorial önceki adım butonu"
+  },
+  "tutorialSkip": "Atla",
+  "@tutorialSkip": {
+    "description": "Tutorial atla butonu"
+  },
+  "tutorialGotIt": "Anladım!",
+  "@tutorialGotIt": {
+    "description": "Tutorial tamamlandı butonu"
+  },
+  "tutorialBalanceOverviewTitle": "Toplam Varlıklar",
+  "@tutorialBalanceOverviewTitle": {
+    "description": "Tutorial başlığı - Balance Overview (Total Assets) adımı"
+  },
+  "tutorialBalanceOverviewDescription": "Burada tüm hesaplarınızın, kartlarınızın ve yatırımlarınızın toplam bakiyesini görebilirsiniz.",
+  "@tutorialBalanceOverviewDescription": {
+    "description": "Tutorial açıklaması - Balance Overview adımı"
+  },
+  "tutorialRecentTransactionsTitle": "Son İşlemler",
+  "@tutorialRecentTransactionsTitle": {
+    "description": "Tutorial başlığı - Recent Transactions adımı"
+  },
+  "tutorialRecentTransactionsDescription": "Eklediğiniz tüm işlemler burada görüntülenir. Uzun basarak işlemleri düzenleyebilir veya silebilirsiniz.",
+  "@tutorialRecentTransactionsDescription": {
+    "description": "Tutorial açıklaması - Recent Transactions adımı"
+  },
+  "tutorialAIChatTitle": "AI Asistan",
+  "@tutorialAIChatTitle": {
+    "description": "Tutorial başlığı - AI Chat adımı"
+  },
+  "tutorialAIChatDescription": "AI asistan ile doğal dilde konuşarak işlem ekleyin, özet alın, finansal analiz yapın, toplu silme işlemleri gerçekleştirin ve tüm finansal sorularınızı sorun. Güçlü bir finansal asistanınız var!",
+  "@tutorialAIChatDescription": {
+    "description": "Tutorial açıklaması - AI Chat adımı"
+  },
+  "tutorialCardsTitle": "Kart Yönetimi",
+  "@tutorialCardsTitle": {
+    "description": "Tutorial başlığı - Cards section adımı"
+  },
+  "tutorialCardsDescription": "Burada kartlarınızı görüntüleyebilir, yeni kart ekleyebilir ve bakiye bilgilerinizi takip edebilirsiniz.",
+  "@tutorialCardsDescription": {
+    "description": "Tutorial açıklaması - Cards section adımı"
+  },
+  "tutorialBottomNavigationTitle": "Sekmeler",
+  "@tutorialBottomNavigationTitle": {
+    "description": "Tutorial başlığı - Bottom Navigation Bar adımı"
+  },
+  "tutorialBottomNavigationDescription": "Alt kısımdaki sekmeler ile Ana Sayfa, İşlemler, Kartlar, Analitik, Takvim ve Yatırım sayfaları arasında geçiş yapabilirsiniz.",
+  "@tutorialBottomNavigationDescription": {
+    "description": "Tutorial açıklaması - Bottom Navigation Bar adımı"
+  },
+  "tutorialBudgetTitle": "Bütçe Yönetimi",
+  "@tutorialBudgetTitle": {
+    "description": "Tutorial başlığı - Budget Overview adımı"
+  },
+  "tutorialBudgetDescription": "Aylık harcamalarınızı takip edin, bütçe belirleyin ve harcama limitlerinizi kontrol edin.",
+  "@tutorialBudgetDescription": {
+    "description": "Tutorial açıklaması - Budget Overview adımı"
+  },
+  "tutorialProfileTitle": "Profil",
+  "@tutorialProfileTitle": {
+    "description": "Tutorial başlığı - Profile Avatar adımı"
+  },
+  "tutorialProfileDescription": "Profil fotoğrafınıza tıklayarak ayarlara, premium özelliklere ve kişisel bilgilerinize erişebilirsiniz.",
+  "@tutorialProfileDescription": {
+    "description": "Tutorial açıklaması - Profile Avatar adımı"
   }
 } 

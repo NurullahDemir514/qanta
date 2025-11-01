@@ -12,8 +12,13 @@ import '../../stocks/screens/stocks_screen.dart';
 
 class TransactionFab extends StatefulWidget {
   final double? customBottom;
+  final Key? tutorialKey; // Tutorial için key
   
-  const TransactionFab({super.key, this.customBottom});
+  const TransactionFab({
+    super.key,
+    this.customBottom,
+    this.tutorialKey,
+  });
 
   @override
   State<TransactionFab> createState() => _TransactionFabState();
@@ -92,6 +97,7 @@ class _TransactionFabState extends State<TransactionFab> {
       right: rightPosition,
       bottom: bottomPosition,
       child: Column(
+        key: widget.tutorialKey, // Tutorial için key ekle
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [

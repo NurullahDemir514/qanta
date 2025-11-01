@@ -22,6 +22,7 @@ import '../../../core/services/premium_service.dart';
 import '../../premium/premium_offer_screen.dart';
 import '../widgets/stock_transaction_fab.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../transactions/widgets/quick_add_chat_fab.dart';
 
 /// Hisse takip ana ekranı
@@ -159,6 +160,10 @@ class _StocksScreenState extends State<StocksScreen> {
     StockProvider stockProvider,
     bool isDark,
   ) {
+    // Kullanıcının seçtiği currency'yi al
+    final themeProvider = context.read<ThemeProvider>();
+    final userCurrency = themeProvider.currency;
+    
     // Portföy istatistiklerini hesapla
     double totalValue = 0.0;
     double totalCost = 0.0;
@@ -223,7 +228,7 @@ class _StocksScreenState extends State<StocksScreen> {
           Column(
             children: [
               Text(
-                CurrencyUtils.formatAmount(totalValue, Currency.TRY),
+                CurrencyUtils.formatAmount(totalValue, userCurrency),
                 style: GoogleFonts.inter(
                   fontSize: 36.sp,
                   fontWeight: FontWeight.w700,
@@ -271,24 +276,24 @@ class _StocksScreenState extends State<StocksScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // 1. Toplam Kar/Zarar
+              // 1. Maliyet
               Expanded(
                 child: _buildMetricItem(
-                  label: l10n.profitLoss,
-                  value: '${isProfit ? '+' : ''}${CurrencyUtils.formatAmount(totalProfitLoss, Currency.TRY)}',
-                  valueColor: isProfit
-                      ? Colors.green
-                      : const Color(0xFFFF4C4C),
+                  label: l10n.cost,
+                  value: CurrencyUtils.formatAmount(totalCost, userCurrency),
+                  valueColor: isDark ? Colors.white70 : Colors.black87,
                   isDark: isDark,
                 ),
               ),
               
-              // 2. Maliyet
+              // 2. Toplam Kar/Zarar
               Expanded(
                 child: _buildMetricItem(
-                  label: l10n.cost,
-                  value: CurrencyUtils.formatAmount(totalCost, Currency.TRY),
-                  valueColor: isDark ? Colors.white70 : Colors.black87,
+                  label: l10n.profitLoss,
+                  value: '${isProfit ? '+' : ''}${CurrencyUtils.formatAmount(totalProfitLoss, userCurrency)}',
+                  valueColor: isProfit
+                      ? Colors.green
+                      : const Color(0xFFFF4C4C),
                   isDark: isDark,
                 ),
               ),
@@ -574,6 +579,9 @@ class _StocksScreenState extends State<StocksScreen> {
                         ? const Color(0xFF38383A) 
                         : const Color(0xFFE5E5EA),
                   ),
+                // Son karttan sonra boşluk
+                if (index == stocksWithPositions.length - 1)
+                  const SizedBox(height: 75),
               ],
             );
           },

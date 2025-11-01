@@ -28,13 +28,18 @@ class BudgetModel {
   DateTime get endDate {
     switch (period) {
       case BudgetPeriod.weekly:
-        return startDate.add(const Duration(days: 7));
+        // 7 gün sonraki gün (dahil değil, son gün = startDate + 6 gün)
+        return startDate.add(const Duration(days: 6));
       case BudgetPeriod.monthly:
-        // 1 month from start date
-        return DateTime(startDate.year, startDate.month + 1, startDate.day);
+        // 1 ay sonraki ayın aynı günü (dahil değil) - 1 gün = son gün
+        // Örnek: 1 Ocak başlangıç -> 31 Ocak bitiş
+        final nextMonthSameDay = DateTime(startDate.year, startDate.month + 1, startDate.day);
+        // 1 gün geri git ki son gün dahil olsun
+        return nextMonthSameDay.subtract(const Duration(days: 1));
       case BudgetPeriod.yearly:
-        // 1 year from start date
-        return DateTime(startDate.year + 1, startDate.month, startDate.day);
+        // 1 yıl sonraki yılın aynı günü (dahil değil) - 1 gün = son gün
+        final nextYearSameDay = DateTime(startDate.year + 1, startDate.month, startDate.day);
+        return nextYearSameDay.subtract(const Duration(days: 1));
     }
   }
   
@@ -197,13 +202,18 @@ class BudgetCategoryStats {
   DateTime get endDate {
     switch (period) {
       case BudgetPeriod.weekly:
-        return startDate.add(const Duration(days: 7));
+        // 7 gün sonraki gün (dahil değil, son gün = startDate + 6 gün)
+        return startDate.add(const Duration(days: 6));
       case BudgetPeriod.monthly:
-        // 1 month from start date
-        return DateTime(startDate.year, startDate.month + 1, startDate.day);
+        // 1 ay sonraki ayın aynı günü (dahil değil) - 1 gün = son gün
+        // Örnek: 1 Ocak başlangıç -> 31 Ocak bitiş
+        final nextMonthSameDay = DateTime(startDate.year, startDate.month + 1, startDate.day);
+        // 1 gün geri git ki son gün dahil olsun
+        return nextMonthSameDay.subtract(const Duration(days: 1));
       case BudgetPeriod.yearly:
-        // 1 year from start date
-        return DateTime(startDate.year + 1, startDate.month, startDate.day);
+        // 1 yıl sonraki yılın aynı günü (dahil değil) - 1 gün = son gün
+        final nextYearSameDay = DateTime(startDate.year + 1, startDate.month, startDate.day);
+        return nextYearSameDay.subtract(const Duration(days: 1));
     }
   }
 

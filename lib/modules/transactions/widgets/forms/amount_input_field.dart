@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/theme_provider.dart';
+import '../../../../shared/widgets/thousands_separator_input_formatter.dart';
 
 class AmountInputField extends StatelessWidget {
   final TextEditingController controller;
@@ -23,6 +24,8 @@ class AmountInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final locale = themeProvider.currency.locale;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,7 +60,7 @@ class AmountInputField extends StatelessWidget {
             autofocus: autofocus,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              ThousandsSeparatorInputFormatter(locale: locale),
             ],
             onChanged: onChanged,
             style: GoogleFonts.inter(

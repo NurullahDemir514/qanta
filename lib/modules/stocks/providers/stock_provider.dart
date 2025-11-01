@@ -1516,10 +1516,18 @@ class StockProvider extends ChangeNotifier {
         return; // Zaten yüklü
       }
 
+      debugPrint('📊 Loading historical data for $symbol (days: $days)');
       final historicalData = await _stockApiService.getHistoricalData(
         symbol,
         days: days,
       );
+      
+      if (historicalData.isEmpty) {
+        debugPrint('⚠️ No historical data returned for $symbol');
+        return;
+      }
+      
+      debugPrint('✅ Historical data loaded for $symbol: ${historicalData.length} data points');
       _historicalData[symbol] = historicalData;
 
       // İlgili hisseyi güncelle
@@ -1548,7 +1556,10 @@ class StockProvider extends ChangeNotifier {
 
         notifyListeners();
       }
-    } catch (e) {}
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error loading historical data for $symbol: $e');
+      debugPrint('Stack trace: $stackTrace');
+    }
   }
 
   /// Stock positions'ı geçmiş veri ile güncelle

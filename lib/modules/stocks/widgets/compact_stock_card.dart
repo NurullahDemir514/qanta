@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/models/stock_models.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/utils/currency_utils.dart';
+import '../../../core/theme/theme_provider.dart';
 import 'mini_chart_widget.dart';
 
 /// Compact hisse kartı - Arkapansız, basit tasarım
@@ -22,16 +24,33 @@ class CompactStockCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currency = stock.currency == 'USD' ? Currency.USD : Currency.TRY;
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final currency = themeProvider.currency;
     final isProfit = position != null && position!.profitLoss > 0;
     final isLoss = position != null && position!.profitLoss < 0;
 
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Renk çubuğu - 2 satırı kapsayan
+            Container(
+              width: 3,
+              height: 48, // 2 satırı kapsayacak yükseklik
+              margin: const EdgeInsets.only(top: 2),
+              decoration: BoxDecoration(
+                color: isProfit
+                    ? Colors.green
+                    : isLoss
+                    ? Colors.red
+                    : Colors.grey,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
             // Sol: Hisse bilgileri
             Expanded(
               child: Column(
@@ -40,20 +59,6 @@ class CompactStockCard extends StatelessWidget {
                   // Hisse kodu ve mini chart
                   Row(
                     children: [
-                      // Renk çubuğu
-                      Container(
-                        width: 3,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: isProfit
-                              ? Colors.green
-                              : isLoss
-                              ? Colors.red
-                              : Colors.grey,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
                       // Sembol
                       Text(
                         _cleanStockName(stock.symbol),
@@ -90,15 +95,36 @@ class CompactStockCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 2),
+                  // Şirket adı
+                  if (stock.name.isNotEmpty && stock.name != stock.symbol)
+                    Text(
+                      _cleanStockName(stock.name),
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   const SizedBox(height: 4),
                   // Adet ve ortalama fiyat
                   if (position != null)
-                    Text(
-                      '${position!.totalQuantity.toStringAsFixed(0)} ${l10n.pieces} • Ort: ${CurrencyUtils.formatAmount(position!.averagePrice, currency)}',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: isDark ? Colors.white60 : Colors.grey[600],
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final quantity = position!.totalQuantity.toStringAsFixed(0);
+                        final quantityNum = position!.totalQuantity;
+                        final unit = quantityNum == 1 ? l10n.pieces : l10n.piecesPlural;
+                        
+                        return Text(
+                          '$quantity $unit • ${l10n.avg}: ${CurrencyUtils.formatAmount(position!.averagePrice, currency)}',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: isDark ? Colors.white60 : Colors.grey[600],
+                          ),
+                        );
+                      },
                     ),
                 ],
               ),

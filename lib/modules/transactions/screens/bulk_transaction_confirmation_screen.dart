@@ -470,14 +470,35 @@ class _EditableTransactionCardState extends State<_EditableTransactionCard> {
                             size: 14,
                             color: const Color(0xFF007AFF)),
                         const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            DateFormat('d MMM').format(widget.transaction.date),
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                        Builder(
+                          builder: (context) {
+                            final locale = Localizations.localeOf(context);
+                            final languageCode = locale.languageCode;
+                            
+                            String localeString;
+                            switch (languageCode) {
+                              case 'en':
+                                localeString = 'en_US';
+                                break;
+                              case 'de':
+                                localeString = 'de_DE';
+                                break;
+                              case 'tr':
+                              default:
+                                localeString = 'tr_TR';
+                                break;
+                            }
+                            
+                            return Expanded(
+                              child: Text(
+                                DateFormat('d MMM', localeString).format(widget.transaction.date),
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

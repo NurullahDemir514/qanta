@@ -106,15 +106,17 @@ class TransactionSummary extends StatelessWidget {
     String? warningType;
     Color? warningColor;
     
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    
     if (isOverBudget) {
       final overAmount = amount - remainingBudget;
-      final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(overAmount, Currency.TRY);
+      final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(overAmount, currency);
       warning = l10n.budgetExceededWarning(formattedAmount);
       warningType = 'over_budget';
       warningColor = const Color(0xFFFF4C4C);
     } else if (exceedsBudget) {
       final overAmount = amount - matchingBudget.limit;
-      final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(overAmount, Currency.TRY);
+      final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(overAmount, currency);
       warning = l10n.budgetExceededWarningTotal(formattedAmount);
       warningType = 'exceeds_budget';
       warningColor = const Color(0xFFFF9500);

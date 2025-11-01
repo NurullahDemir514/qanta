@@ -7,6 +7,7 @@ import '../../../shared/models/stock_models.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../shared/utils/currency_utils.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../providers/stock_provider.dart';
 import '../utils/recalculate_stock_profit_loss.dart';
 
@@ -59,10 +60,11 @@ class _StockDetailPageState extends State<StockDetailPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currency = widget.stock.currency == 'USD' ? Currency.USD : Currency.TRY;
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final currency = themeProvider.currency;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7),
+      backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
           _cleanStockName(widget.stock.symbol),
@@ -74,7 +76,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
         ),
         centerTitle: false,
         titleSpacing: 0,
-        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7),
+        backgroundColor: isDark ? const Color(0xFF000000) : const Color(0xFFFAFAFA),
         elevation: 0,
         leading: IconButton(
           icon: Icon(

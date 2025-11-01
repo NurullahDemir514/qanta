@@ -243,7 +243,14 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _searchController,
-              onChanged: _onSearchChanged,
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (value) {
+                setState(() {}); // UI'yi güncelle (clear button için)
+                _onSearchChanged(value);
+              },
               decoration: InputDecoration(
                 hintText: l10n.searchStocks ?? 'Hisse ara...',
                 prefixIcon: const Icon(Icons.search),
@@ -251,7 +258,9 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
-                          _searchController.clear();
+                          setState(() {
+                            _searchController.clear();
+                          });
                           _searchStocks('');
                         },
                       )

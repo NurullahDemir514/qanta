@@ -441,13 +441,34 @@ class _TransactionChatBubble extends StatelessWidget {
                     color: isDark ? Colors.white38 : Colors.black38,
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    DateFormat('d MMM').format(item.date),
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? Colors.white60 : Colors.black54,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final locale = Localizations.localeOf(context);
+                      final languageCode = locale.languageCode;
+                      
+                      String localeString;
+                      switch (languageCode) {
+                        case 'en':
+                          localeString = 'en_US';
+                          break;
+                        case 'de':
+                          localeString = 'de_DE';
+                          break;
+                        case 'tr':
+                        default:
+                          localeString = 'tr_TR';
+                          break;
+                      }
+                      
+                      return Text(
+                        DateFormat('d MMM', localeString).format(item.date),
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 12),
                   
@@ -811,11 +832,32 @@ class _EditTransactionSheetState extends State<_EditTransactionSheet> {
                       color: isDark ? Colors.white60 : Colors.black54,
                     ),
                     const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        DateFormat('d MMMM yyyy').format(_selectedDate),
-                        style: GoogleFonts.inter(fontSize: 15),
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final locale = Localizations.localeOf(context);
+                        final languageCode = locale.languageCode;
+                        
+                        String localeString;
+                        switch (languageCode) {
+                          case 'en':
+                            localeString = 'en_US';
+                            break;
+                          case 'de':
+                            localeString = 'de_DE';
+                            break;
+                          case 'tr':
+                          default:
+                            localeString = 'tr_TR';
+                            break;
+                        }
+                        
+                        return Expanded(
+                          child: Text(
+                            DateFormat('d MMMM yyyy', localeString).format(_selectedDate),
+                            style: GoogleFonts.inter(fontSize: 15),
+                          ),
+                        );
+                      },
                     ),
                     Icon(
                       Icons.chevron_right_rounded,

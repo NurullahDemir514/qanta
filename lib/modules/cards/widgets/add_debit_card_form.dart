@@ -9,6 +9,11 @@ import '../../../shared/models/account_model.dart';
 import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/premium_service.dart';
+import '../../../core/services/bank_service.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
+import '../../advertisement/config/advertisement_config.dart' as config;
+import '../../advertisement/models/advertisement_models.dart';
 
 class AddDebitCardForm extends StatefulWidget {
   final VoidCallback? onSuccess;
@@ -27,12 +32,30 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
 
   String? _selectedBankCode;
   List<String> _filteredBanks = [];
+  List<BankModel> _availableBanks = [];
   bool _isLoading = false;
+  bool _isLoadingBanks = false;
+  
+  late GoogleAdsRealBannerService _debitFormBannerService;
 
   @override
   void initState() {
     super.initState();
-    _filteredBanks = AppConstants.getAvailableBanks();
+    _loadBanks();
+    
+    // Initialize banner service
+    _debitFormBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.addCardFormBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Load ad after a delay
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        _debitFormBannerService.loadAd();
+      }
+    });
   }
 
   @override
@@ -40,18 +63,75 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
     _cardNameController.dispose();
     _balanceController.dispose();
     _searchController.dispose();
+    _debitFormBannerService.dispose();
     super.dispose();
+  }
+
+  /// Bankaları yükle (dinamik)
+  Future<void> _loadBanks() async {
+    setState(() {
+      _isLoadingBanks = true;
+    });
+
+    try {
+      final bankService = BankService();
+      await bankService.loadBanks();
+
+      // Kullanıcının para birimine göre bankaları önceliklendir
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      _availableBanks = bankService.getAvailableBanks(currency: themeProvider.currency);
+      
+      // Fallback: Eğer hiç banka yoksa static listeyi kullan
+      if (_availableBanks.isEmpty) {
+        final staticBanks = AppConstants.getAvailableBanks();
+        _availableBanks = staticBanks.map((code) {
+          return BankModel(
+            code: code,
+            name: AppConstants.getBankName(code),
+            gradientColors: AppConstants.getBankGradientColors(code)
+                .map((c) => c.value)
+                .toList(),
+            accentColor: AppConstants.getBankAccentColor(code).value,
+            isActive: true,
+          );
+        }).toList();
+      }
+
+      _filteredBanks = _availableBanks.map((b) => b.code).toList();
+    } catch (e) {
+      debugPrint('❌ Error loading banks: $e');
+      // Fallback: Static banks
+      _filteredBanks = AppConstants.getAvailableBanks();
+      _availableBanks = _filteredBanks.map((code) {
+        return BankModel(
+          code: code,
+          name: AppConstants.getBankName(code),
+          gradientColors: AppConstants.getBankGradientColors(code)
+              .map((c) => c.value)
+              .toList(),
+          accentColor: AppConstants.getBankAccentColor(code).value,
+          isActive: true,
+        );
+      }).toList();
+    } finally {
+      setState(() {
+        _isLoadingBanks = false;
+      });
+    }
   }
 
   void _filterBanks(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredBanks = AppConstants.getAvailableBanks();
+        _filteredBanks = _availableBanks.map((b) => b.code).toList();
       } else {
-        _filteredBanks = AppConstants.getAvailableBanks().where((bankCode) {
-          final bankName = AppConstants.getBankName(bankCode).toLowerCase();
-          return bankName.contains(query.toLowerCase());
-        }).toList();
+        _filteredBanks = _availableBanks
+            .where((bank) {
+              return bank.name.toLowerCase().contains(query.toLowerCase()) ||
+                  bank.code.toLowerCase().contains(query.toLowerCase());
+            })
+            .map((b) => b.code)
+            .toList();
       }
     });
   }
@@ -60,9 +140,17 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
     setState(() {
       _selectedBankCode = bankCode;
       // Auto-generate card name when bank is selected
-      final bankName = AppConstants.getBankName(bankCode);
+      final bank = _availableBanks.firstWhere(
+        (b) => b.code == bankCode,
+        orElse: () => BankModel(
+          code: bankCode,
+          name: AppConstants.getBankName(bankCode),
+          gradientColors: [],
+          accentColor: 0xFF1976D2,
+        ),
+      );
       _cardNameController.text =
-          '$bankName ${AppLocalizations.of(context)?.debitCard ?? 'Banka Kartı'}';
+          '${bank.name} ${AppLocalizations.of(context)?.debitCard ?? 'Banka Kartı'}';
     });
   }
 
@@ -77,10 +165,15 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
 
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
+      final themeProvider = context.read<ThemeProvider>();
+      final locale = themeProvider.currency.locale;
 
       final balance = _balanceController.text.trim().isEmpty
           ? 0.0
-          : double.tryParse(_balanceController.text.replaceAll(',', '')) ?? 0.0;
+          : ThousandsSeparatorInputFormatter.parseLocaleDouble(
+              _balanceController.text,
+              locale,
+            );
 
       final success = await unifiedProvider.createAccount(
         type: AccountType.debit,
@@ -237,18 +330,22 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _balanceController,
-                      hintText: '0',
-                      prefixIcon: Icons.account_balance_wallet,
-                      suffixText: Provider.of<ThemeProvider>(
-                        context,
-                        listen: false,
-                      ).currency.symbol,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [ThousandsSeparatorInputFormatter()],
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        final locale = themeProvider.currency.locale;
+                        return _buildTextField(
+                          controller: _balanceController,
+                          hintText: '0',
+                          prefixIcon: Icons.account_balance_wallet,
+                          suffixText: themeProvider.currency.symbol,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            ThousandsSeparatorInputFormatter(locale: locale)
+                          ],
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 32),
@@ -336,6 +433,24 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                       ),
                     ),
 
+                    const SizedBox(height: 24),
+                    
+                    // Banner ad
+                    Consumer<PremiumService>(
+                      builder: (context, premiumService, child) {
+                        if (!premiumService.isPremium && 
+                            _debitFormBannerService.isLoaded && 
+                            _debitFormBannerService.bannerWidget != null) {
+                          return Container(
+                            height: 50,
+                            alignment: Alignment.center,
+                            child: _debitFormBannerService.bannerWidget!,
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -349,7 +464,19 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
 
   Widget _buildBankGrid() {
     final l10n = AppLocalizations.of(context)!;
-    final banks = _filteredBanks;
+    // Filtrelenmiş bankaları al
+    final filteredBankModels = _availableBanks.where((bank) {
+      return _filteredBanks.contains(bank.code);
+    }).toList();
+
+    if (_isLoadingBanks) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return Column(
       children: [
@@ -405,7 +532,7 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
         // Banka listesi
         SizedBox(
           height: 80,
-          child: banks.isEmpty
+          child: filteredBankModels.isEmpty
               ? Center(
                   child: Text(
                     l10n.noBanksFound,
@@ -419,19 +546,18 @@ class _AddDebitCardFormState extends State<AddDebitCardForm> {
                 )
               : ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: banks.length,
+                  itemCount: filteredBankModels.length,
                   itemBuilder: (context, index) {
-                    final bankCode = banks[index];
-                    final bankName = AppConstants.getBankName(bankCode);
-                    final accentColor = AppConstants.getBankAccentColor(
-                      bankCode,
-                    );
+                    final bank = filteredBankModels[index];
+                    final bankCode = bank.code;
+                    final bankName = bank.name;
+                    final accentColor = bank.accentColorValue;
                     final isSelected = _selectedBankCode == bankCode;
 
                     return Container(
                       width: 100,
                       margin: EdgeInsets.only(
-                        right: index == banks.length - 1 ? 0 : 12,
+                        right: index == filteredBankModels.length - 1 ? 0 : 12,
                       ),
                       child: GestureDetector(
                         onTap: () => _onBankSelected(bankCode),

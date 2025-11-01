@@ -14,6 +14,7 @@ import '../widgets/card_transaction_section.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/premium_service.dart';
+import '../../../core/services/bank_service.dart';
 import '../../premium/premium_offer_screen.dart';
 import '../../advertisement/services/google_ads_real_banner_service.dart';
 import '../../advertisement/config/advertisement_config.dart' as config;
@@ -146,22 +147,27 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
     super.dispose();
   }
 
-  void _showAddCreditCardForm() {
-    // Kart limiti kontrolü (event handler içinde listen: false kullanmalıyız)
+  void _showAddCreditCardForm() async {
+    // Kart limiti kontrolü (Firebase'den gerçek sayı)
     final premiumService = context.read<PremiumService>();
-    final unifiedProvider = context.read<UnifiedProviderV2>();
-    final totalCards = unifiedProvider.debitCards.length + unifiedProvider.creditCards.length;
     
-    if (!premiumService.canAddCard(totalCards)) {
-      // Premium teklif ekranını göster
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const PremiumOfferScreen(),
-          fullscreenDialog: true,
-        ),
-      );
-      return;
+    // Premium kullanıcı limitsiz
+    if (!premiumService.isPremium) {
+      final totalCards = await premiumService.getCurrentCardCount();
+      
+      if (!premiumService.canAddCard(totalCards)) {
+        // Premium teklif ekranını göster
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PremiumOfferScreen(),
+              fullscreenDialog: true,
+            ),
+          );
+        }
+        return;
+      }
     }
     
     showModalBottomSheet(
@@ -386,10 +392,19 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
     );
   }
 
-  void _showStatements(creditCard) {
+  void _showStatements(creditCard) async {
     HapticFeedback.lightImpact();
     
-    context.push('/credit-card-statements?cardId=${creditCard['id']}&cardName=${Uri.encodeComponent(creditCard['cardName'] ?? AppLocalizations.of(context)!.creditCard)}&bankName=${Uri.encodeComponent(AppConstants.getLocalizedBankName(creditCard['bankCode'] ?? 'qanta', AppLocalizations.of(context)!))}&statementDay=${creditCard['statementDate'] ?? 15}&dueDay=${creditCard['dueDate'] ?? ''}');
+    // Get bank name dynamically from BankService
+    final bankCode = creditCard['bankCode'] ?? 'qanta';
+    final bankService = BankService();
+    await bankService.loadBanks();
+    final bank = bankService.getBankByCode(bankCode);
+    final bankName = bank != null 
+        ? bank.name 
+        : AppConstants.getLocalizedBankName(bankCode, AppLocalizations.of(context)!);
+    
+    context.push('/credit-card-statements?cardId=${creditCard['id']}&cardName=${Uri.encodeComponent(creditCard['cardName'] ?? AppLocalizations.of(context)!.creditCard)}&bankName=${Uri.encodeComponent(bankName)}&statementDay=${creditCard['statementDate'] ?? 15}&dueDay=${creditCard['dueDate'] ?? ''}');
   }
 
   void _editCard(creditCard) {

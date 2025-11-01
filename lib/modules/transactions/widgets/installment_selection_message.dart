@@ -23,7 +23,7 @@ class InstallmentSelectionMessage extends StatelessWidget {
 
     // Taksit seçenekleri
     final installmentOptions = [
-      {'count': 1, 'label': 'Peşin'},
+      {'count': 1, 'label': l10n.singlePayment},
       {'count': 3, 'label': '3 ${l10n.installment_summary}'},
       {'count': 6, 'label': '6 ${l10n.installment_summary}'},
       {'count': 9, 'label': '9 ${l10n.installment_summary}'},
@@ -48,7 +48,7 @@ class InstallmentSelectionMessage extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Kaç taksit?',
+                  l10n.howManyInstallments,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,

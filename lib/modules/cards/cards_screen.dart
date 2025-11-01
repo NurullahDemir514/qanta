@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/providers/cash_account_provider.dart';
-import '../../core/providers/debit_card_provider.dart';
-import '../../core/providers/credit_card_provider.dart';
 import '../../core/providers/unified_provider_v2.dart';
 import '../../core/events/card_events.dart';
 import '../../l10n/app_localizations.dart';
@@ -13,6 +11,7 @@ import '../../shared/design_system/transaction_design_system.dart';
 import 'tabs/cash_tab.dart';
 import 'tabs/debit_cards_tab.dart';
 import 'tabs/credit_cards_tab.dart';
+import 'tabs/savings_tab.dart';
 import 'services/cash_management_service.dart';
 import 'widgets/add_debit_card_form.dart';
 
@@ -31,7 +30,7 @@ class _CardsScreenState extends State<CardsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 3,
+      length: 4,
       vsync: this,
       animationDuration: const Duration(milliseconds: 200),
     );
@@ -185,8 +184,6 @@ class _CardsScreenState extends State<CardsScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
         return AnimatedBuilder(
           animation: _tabController,
           builder: (context, child) {
@@ -200,9 +197,26 @@ class _CardsScreenState extends State<CardsScreen>
                 subtitle: _getCardsSubtitle(l10n),
                 titleFontSize: 20,
                 subtitleFontSize: 12,
-                tabBar: AppTabBar(
+                tabBar: EnhancedTabBar(
                 controller: _tabController,
-                tabs: [l10n.cash, l10n.bankCard, l10n.creditCard],
+                tabs: [
+                  TabItem(
+                    label: l10n.cash,
+                    icon: Icons.account_balance_wallet_outlined,
+                  ),
+                  TabItem(
+                    label: l10n.bankCard,
+                    icon: Icons.credit_card_outlined,
+                  ),
+                  TabItem(
+                    label: l10n.creditCard,
+                    icon: Icons.credit_score_outlined,
+                  ),
+                  TabItem(
+                    label: l10n.savings,
+                    icon: Icons.savings_outlined,
+                  ),
+                ],
               ),
               onRefresh: () async {
                 // Tüm verileri Firebase'den yenile
@@ -227,12 +241,12 @@ class _CardsScreenState extends State<CardsScreen>
                     DebitCardsTab(l10n: l10n),
                     // Credit Cards Tab
                     CreditCardsTab(l10n: l10n),
+                    // Savings Tab
+                    SavingsTab(l10n: l10n),
                 ],
               ),
             ),
               ),
-            );
-          },
         );
       },
     );

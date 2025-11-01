@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../../shared/models/account_model.dart';
 import '../../shared/models/transaction_model_v2.dart';
 import '../../shared/models/installment_models_v2.dart';
@@ -29,7 +30,10 @@ import '../services/unified_cache_manager.dart';
 import '../services/cache_strategy_config.dart';
 import 'profile_provider.dart';
 import '../services/profile_image_service.dart';
-import '../services/anonymous_analytics_service.dart';
+import '../services/premium_service.dart';
+import '../services/savings_service.dart';
+import '../../shared/models/savings_goal.dart';
+import '../../shared/models/savings_transaction.dart';
 
 /// **QANTA v2 Unified Provider - Central Data Management System**
 ///
@@ -190,10 +194,17 @@ class UnifiedProviderV2 extends ChangeNotifier {
   List<TransactionWithDetailsV2> _transactions = [];
   List<InstallmentWithProgressModel> _installments = [];
   List<BudgetModel> _budgets = [];
+  List<SavingsGoal> _savingsGoals = [];
+  final Map<String, List<SavingsTransaction>> _savingsTransactions = {};
 
   // Stock positions for net worth calculation
   double _totalStockValue = 0.0;
   double _totalStockCost = 0.0;
+
+  // AI Usage tracking
+  int _aiUsageCurrent = 0;
+  int _aiUsageLimit = 10; // Default to free tier
+  int _aiUsageBonus = 0;
 
   // ==================== UNIFIED CACHE SYSTEM ====================
   late UnifiedCacheManager _cacheManager;
@@ -228,6 +239,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
   bool _isLoadingCategories = false;
   bool _isLoadingInstallments = false;
   bool _isLoadingBudgets = false;
+  bool _isLoadingSavings = false;
 
   // Error states
   String? _error;
@@ -267,6 +279,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
   
   /// Check if all critical data is ready
   bool get isFullyReady => isDataLoaded && isStockDataReady && isPositionsReady;
+
+  // AI Usage getters
+  int get aiUsageCurrent => _aiUsageCurrent;
+  int get aiUsageLimit => _aiUsageLimit;
+  int get aiUsageBonus => _aiUsageBonus;
+  int get aiUsageRemaining => (_aiUsageLimit - _aiUsageCurrent).clamp(0, _aiUsageLimit);
 
   List<AccountModel> get accounts => _accounts;
   List<dynamic> get creditCards =>
@@ -347,6 +365,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
   bool get isLoadingCategories => _isLoadingCategories;
   bool get isLoadingInstallments => _isLoadingInstallments;
   bool get isLoadingBudgets => _isLoadingBudgets;
+  bool get isLoadingSavings => _isLoadingSavings;
 
   String? get error => _error;
   Map<String, double> get balanceSummary => _balanceSummary;
@@ -354,6 +373,36 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
   /// Cache durumunu kontrol et
   bool get isDataCached => _isDataCached;
+
+  // ===============================
+  // SAVINGS GETTERS
+  // ===============================
+  
+  /// Tüm tasarruf hedefleri
+  List<SavingsGoal> get savingsGoals => _savingsGoals;
+  
+  /// Aktif tasarruf hedefleri
+  List<SavingsGoal> get activeSavingsGoals => 
+      _savingsGoals.where((g) => g.isActive && !g.isCompleted).toList();
+  
+  /// Tamamlanmış tasarruf hedefleri
+  List<SavingsGoal> get completedSavingsGoals => 
+      _savingsGoals.where((g) => g.isCompleted).toList();
+  
+  /// Arşivlenmiş tasarruf hedefleri
+  List<SavingsGoal> get archivedSavingsGoals => 
+      _savingsGoals.where((g) => g.isArchived).toList();
+  
+  /// Toplam tasarruf miktarı
+  double get totalSavings => _savingsGoals.fold(0.0, (sum, goal) => sum + goal.currentAmount);
+  
+  /// Toplam hedef miktarı
+  double get totalSavingsTarget => _savingsGoals.fold(0.0, (sum, goal) => sum + goal.targetAmount);
+  
+  /// Belirli bir hedefin işlemlerini al
+  List<SavingsTransaction> getSavingsTransactions(String goalId) {
+    return _savingsTransactions[goalId] ?? [];
+  }
 
   /// Save all data to unified cache system
   Future<void> _saveDataToCache() async {
@@ -399,6 +448,15 @@ class UnifiedProviderV2 extends ChangeNotifier {
         CacheStrategyConfig.getCacheKeyForType('budgets'),
         _budgets,
         ttl: CacheStrategyConfig.getPolicy('budgets').ttl,
+        type: CacheStrategyConfig.getPolicy('budgets').type,
+        compress: CacheStrategyConfig.getPolicy('budgets').compress,
+      );
+
+      // Savings goals cache
+      await _cacheManager.set(
+        CacheStrategyConfig.getCacheKeyForType('savings'),
+        _savingsGoals,
+        ttl: CacheStrategyConfig.getPolicy('budgets').ttl, // Budgets ile aynı TTL
         type: CacheStrategyConfig.getPolicy('budgets').type,
         compress: CacheStrategyConfig.getPolicy('budgets').compress,
       );
@@ -450,7 +508,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
         loadTransactions(),
         loadInstallments(),
         loadBudgets(),
+        loadSavingsGoals(),
         _loadProfileData(),
+        loadAIUsage(), // AI kullanım limitini yükle
       ]);
 
       // Hisse verilerini ayrı yükle (hata durumunda devam et)
@@ -517,7 +577,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
           .toList();
 
       if (cashAccounts.isEmpty) {
-        // Debug log kaldırıldı
+        debugPrint('💰 No cash account found - Creating default cash account');
 
         // Create default cash account using Firebase
         final cashAccount = AccountModel(
@@ -534,20 +594,22 @@ class UnifiedProviderV2 extends ChangeNotifier {
         final cashAccountId = await UnifiedAccountService.addAccount(
           cashAccount,
         );
-        // Debug log kaldırıldı
+        debugPrint('✅ Default cash account created with ID: $cashAccountId');
 
         // Reload accounts to include the new cash account
         _accounts = await UnifiedAccountService.getAllAccounts();
+        debugPrint('✅ Accounts reloaded - Total accounts: ${_accounts.length}');
       } else if (cashAccounts.length > 1) {
-        // Debug log kaldırıldı
+        debugPrint('⚠️ Multiple cash accounts found (${cashAccounts.length}) - Cleaning up duplicates');
         await _cleanupDuplicateCashAccounts(cashAccounts);
       } else {
-        // Debug log kaldırıldı
+        debugPrint('✅ Cash account exists: ${cashAccounts.first.name}');
         // Update existing cash account name if it's still "Cash Wallet"
         await _updateLegacyCashAccountNames(cashAccounts);
       }
     } catch (e) {
-      // Debug log kaldırıldı
+      debugPrint('❌ Error in _ensureDefaultCashAccount: $e');
+      debugPrint('❌ Stack trace: ${StackTrace.current}');
       // Don't rethrow - this is not critical for app functionality
     }
   }
@@ -866,21 +928,329 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Check and reset expired recurring budgets
       await checkAndResetExpiredBudgets();
 
-      // Update spent amounts for current month
-      final now = DateTime.now();
-      await UnifiedBudgetService.updateSpentAmountsForMonth(
-        now.month,
-        now.year,
-      );
+      // ✅ Recalculate all budget spent amounts using correct date ranges
+      // This fixes budgets that were calculated with wrong date logic
+      await _recalculateAllBudgetSpentAmounts();
 
       // Reload budgets to get updated spent amounts
       _budgets = await UnifiedBudgetService.getAllBudgets();
+      
+      debugPrint('✅ Budgets loaded and recalculated: ${_budgets.length} budgets');
     } catch (e) {
       rethrow;
     } finally {
       _isLoadingBudgets = false;
       notifyListeners();
     }
+  }
+
+  // ===============================
+  // SAVINGS GOALS OPERATIONS
+  // ===============================
+  
+  /// Load savings goals from Firebase
+  Future<void> loadSavingsGoals() async {
+    _isLoadingSavings = true;
+    notifyListeners();
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        debugPrint('⚠️ No user logged in, skipping savings load');
+        _savingsGoals = [];
+        return;
+      }
+
+      // Load savings goals from Firebase using static methods
+      _savingsGoals = await SavingsService.getAllGoals(includeArchived: false);
+      
+      debugPrint('✅ Savings goals loaded: ${_savingsGoals.length} goals');
+    } catch (e) {
+      debugPrint('❌ Error loading savings goals: $e');
+      rethrow;
+    } finally {
+      _isLoadingSavings = false;
+      notifyListeners();
+    }
+  }
+
+  /// Load transactions for a specific savings goal
+  Future<void> loadSavingsTransactions(String goalId) async {
+    try {
+      final transactions = await SavingsService.getTransactions(goalId, limit: 100);
+      _savingsTransactions[goalId] = transactions;
+      notifyListeners();
+      debugPrint('✅ Savings transactions loaded for goal $goalId: ${transactions.length} transactions');
+    } catch (e) {
+      debugPrint('❌ Error loading savings transactions: $e');
+      rethrow;
+    }
+  }
+
+  /// Create a new savings goal
+  Future<String> createSavingsGoal(SavingsGoal goal) async {
+    try {
+      final goalId = await SavingsService.createGoal(goal);
+      
+      // Reload goals to get the newly created goal with its ID
+      await loadSavingsGoals();
+      
+      debugPrint('✅ Savings goal created: ${goal.name} (ID: $goalId)');
+      return goalId;
+    } catch (e) {
+      debugPrint('❌ Error creating savings goal: $e');
+      rethrow;
+    }
+  }
+
+  /// Update an existing savings goal
+  Future<void> updateSavingsGoal(String goalId, SavingsGoal goal) async {
+    try {
+      await SavingsService.updateGoal(goalId, goal);
+      
+      // Reload goals to get updated data
+      await loadSavingsGoals();
+      
+      debugPrint('✅ Savings goal updated: ${goal.name}');
+    } catch (e) {
+      debugPrint('❌ Error updating savings goal: $e');
+      rethrow;
+    }
+  }
+
+  /// Delete a savings goal
+  Future<void> deleteSavingsGoal(String goalId) async {
+    try {
+      await SavingsService.deleteGoal(goalId);
+      
+      _savingsGoals.removeWhere((g) => g.id == goalId);
+      _savingsTransactions.remove(goalId);
+      notifyListeners();
+      
+      debugPrint('✅ Savings goal deleted: $goalId');
+    } catch (e) {
+      debugPrint('❌ Error deleting savings goal: $e');
+      rethrow;
+    }
+  }
+
+  /// Deposit money to a savings goal
+  Future<void> depositToSavingsGoal({
+    required String goalId,
+    required double amount,
+    required String sourceAccountId,
+    String? note,
+  }) async {
+    try {
+      await SavingsService.depositToGoal(
+        goalId: goalId,
+        amount: amount,
+        sourceAccountId: sourceAccountId,
+        note: note,
+      );
+      
+      // Reload the specific goal
+      await loadSavingsGoals();
+      await loadSavingsTransactions(goalId);
+      
+      debugPrint('✅ Deposited $amount to savings goal $goalId');
+    } catch (e) {
+      debugPrint('❌ Error depositing to savings goal: $e');
+      rethrow;
+    }
+  }
+
+  /// Withdraw money from a savings goal
+  Future<void> withdrawFromSavingsGoal({
+    required String goalId,
+    required double amount,
+    required String targetAccountId,
+    String? note,
+  }) async {
+    try {
+      await SavingsService.withdrawFromGoal(
+        goalId: goalId,
+        amount: amount,
+        targetAccountId: targetAccountId,
+        note: note,
+      );
+      
+      // Reload the specific goal
+      await loadSavingsGoals();
+      await loadSavingsTransactions(goalId);
+      
+      debugPrint('✅ Withdrawn $amount from savings goal $goalId');
+    } catch (e) {
+      debugPrint('❌ Error withdrawing from savings goal: $e');
+      rethrow;
+    }
+  }
+
+  /// Load AI usage data from Firebase
+  Future<void> loadAIUsage() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        debugPrint('⚠️ UnifiedProviderV2: No user logged in, skipping AI usage load');
+        return;
+      }
+      
+      // Import PremiumService dynamically
+      final premiumService = PremiumService();
+      
+      // Get premium status from PremiumService (more reliable than Firebase at startup)
+      bool isPremium = premiumService.isPremium;
+      bool isPremiumPlus = premiumService.isPremiumPlus;
+      
+      final firestore = FirebaseFirestore.instance;
+      
+      // 🧪 Check for test mode in Firebase (overrides PremiumService)
+      try {
+        final userDoc = await firestore.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          final userData = userDoc.data()!;
+          final isTestMode = userData['isTestMode'] as bool? ?? false;
+          
+          if (isTestMode) {
+            // Test mode = Premium Plus (en yüksek limit)
+            isPremium = true;
+            isPremiumPlus = true;
+            debugPrint('🧪 UnifiedProviderV2: Test mode detected - treating as Premium Plus');
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ Failed to check test mode: $e');
+      }
+      
+      debugPrint('🔐 UnifiedProviderV2: Premium status: isPremium=$isPremium, isPremiumPlus=$isPremiumPlus');
+      
+      // Determine limit based on premium status
+      int limit;
+      if (isPremiumPlus) {
+        limit = 3000; // Premium Plus: 3000/month
+      } else if (isPremium) {
+        limit = 1500; // Premium: 1500/month
+      } else {
+        limit = 10; // Free: 10/day
+      }
+      
+      // Get usage document (collection name must match backend)
+      String collectionName;
+      String docId;
+      
+      if (isPremium) {
+        // Premium/Plus: Monthly tracking (YYYY-MM)
+        collectionName = 'ai_usage_monthly';
+        final today = DateTime.now();
+        docId = '${today.year}-${today.month.toString().padLeft(2, '0')}';
+      } else {
+        // Free: Daily tracking (YYYY-MM-DD)
+        collectionName = 'ai_usage_daily';
+        final today = DateTime.now();
+        docId = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      }
+      
+      debugPrint('🔍 UnifiedProviderV2: Reading AI usage from $collectionName/$docId');
+      
+      final usageDoc = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection(collectionName)
+          .doc(docId)
+          .get(const GetOptions(source: Source.server)); // Force server read
+      
+      if (!usageDoc.exists) {
+        // Try to read from user document as fallback
+        debugPrint('⚠️ UnifiedProviderV2: AI usage subcollection not found, checking user document...');
+        
+        try {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get(const GetOptions(source: Source.server));
+          
+          if (userDoc.exists) {
+            final userData = userDoc.data()!;
+            
+            // Try to find AI usage in user document
+            // Backend might store it as 'aiUsage', 'monthlyAIUsage', etc.
+            Map<String, dynamic>? aiUsageData;
+            
+            if (userData['aiUsage'] != null) {
+              aiUsageData = Map<String, dynamic>.from(userData['aiUsage'] as Map);
+            } else if (userData['ai_usage'] != null) {
+              aiUsageData = Map<String, dynamic>.from(userData['ai_usage'] as Map);
+            }
+            
+            if (aiUsageData != null) {
+              final current = (aiUsageData['current'] as num?)?.toInt() ?? 
+                             (aiUsageData['count'] as num?)?.toInt() ?? 0;
+              final lastReset = (aiUsageData['lastReset'] as Timestamp?)?.toDate();
+              
+              // Check if needs reset
+              final now = DateTime.now();
+              bool needsReset = false;
+              
+              if (isPremium) {
+                if (lastReset != null && 
+                    (lastReset.year != now.year || lastReset.month != now.month)) {
+                  needsReset = true;
+                }
+              } else {
+                if (lastReset != null && 
+                    (lastReset.year != now.year || 
+                     lastReset.month != now.month || 
+                     lastReset.day != now.day)) {
+                  needsReset = true;
+                }
+              }
+              
+              _aiUsageCurrent = needsReset ? 0 : current;
+              _aiUsageLimit = limit;
+              
+              final period = isPremium ? 'aylık' : 'günlük';
+              debugPrint('🤖 UnifiedProviderV2: AI usage loaded from user doc - $_aiUsageCurrent/$_aiUsageLimit ($period)');
+              notifyListeners();
+              return;
+            }
+          }
+        } catch (e) {
+          debugPrint('⚠️ Failed to read AI usage from user document: $e');
+        }
+        
+        // No usage data found anywhere, initialize to 0
+        _aiUsageCurrent = 0;
+        _aiUsageLimit = limit;
+        debugPrint('🤖 UnifiedProviderV2: No AI usage data found, initialized to 0/$limit');
+        notifyListeners();
+        return;
+      }
+      
+      final data = usageDoc.data()!;
+      // Backend uses 'chat' field for AI usage count
+      final count = (data['chat'] as num?)?.toInt() ?? 0;
+      
+      // No need to check reset - backend manages document per period
+      _aiUsageCurrent = count;
+      
+      _aiUsageLimit = limit;
+      
+      final period = isPremium ? 'aylık' : 'günlük';
+      debugPrint('🤖 UnifiedProviderV2: AI usage loaded - $_aiUsageCurrent/$_aiUsageLimit ($period)');
+      
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ UnifiedProviderV2: Error loading AI usage: $e');
+      // Don't throw - AI usage is not critical for app functionality
+    }
+  }
+
+  /// Update AI usage from backend response
+  void updateAIUsageFromBackend(int current, int limit) {
+    _aiUsageCurrent = current;
+    _aiUsageLimit = limit;
+    debugPrint('🔄 UnifiedProviderV2: AI usage updated from backend - $current/$limit');
+    notifyListeners();
   }
 
   /// Fix budget category IDs to match real category IDs
@@ -940,6 +1310,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
   }
 
   /// Create new account
+  /// ⚠️ Free kullanıcılar max 3 kart (debit + credit) ekleyebilir
+  /// Backend'de limit kontrolü yapılır
   Future<String> createAccount({
     required AccountType type,
     required String name,
@@ -950,26 +1322,25 @@ class UnifiedProviderV2 extends ChangeNotifier {
     int? dueDay,
   }) async {
     try {
-      // Debug log kaldırıldı
+      debugPrint('💳 Creating account: type=$type, name=$name');
 
-      // Create AccountModel
-      final account = AccountModel(
-        id: '', // Will be generated by Firebase
-        userId: '', // Will be set by service
-        type: type,
-        name: name,
-        bankName: bankName,
-        balance: balance,
-        creditLimit: creditLimit,
-        statementDay: statementDay,
-        dueDay: dueDay,
-        isActive: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+      // Backend Cloud Function çağır (limit kontrolü ile)
+      final functions = FirebaseFunctions.instance;
+      final callable = functions.httpsCallable('createCard');
+      
+      final result = await callable.call({
+        'type': type == AccountType.credit ? 'credit' : 
+                type == AccountType.debit ? 'debit' : 'cash',
+        'name': name,
+        'bankName': bankName,
+        'balance': balance,
+        'creditLimit': creditLimit,
+        'statementDay': statementDay,
+        'dueDay': dueDay,
+      });
 
-      // Add account using Firebase service
-      final accountId = await UnifiedAccountService.addAccount(account);
+      final accountId = result.data['accountId'] as String;
+      debugPrint('✅ Account created: $accountId');
 
       // Reload accounts
       await loadAccounts();
@@ -977,6 +1348,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
       return accountId;
     } catch (e) {
+      debugPrint('❌ createAccount error: $e');
       rethrow;
     }
   }
@@ -1171,6 +1543,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
         installmentCount: transaction.installmentCount,
       );
       _transactions.insert(0, newTransaction);
+      
+      // Sort transactions by date (newest first) to maintain correct order
+      _transactions.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
 
       // ✅ OPTIMISTIC BALANCE UPDATE: Update account balance immediately
       await _updateAccountBalanceOptimistically(newTransaction, isReversal: false);
@@ -1187,13 +1562,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       _invalidateStatementCache(transaction.sourceAccountId);
 
       notifyListeners(); // Immediate UI update
-
-      // 📊 ANALYTICS: Anonim veri toplama (izin verilmişse)
-      if (type == TransactionType.expense) {
-        debugPrint('📊 Calling AnonymousAnalyticsService.trackExpense...');
-        await AnonymousAnalyticsService.trackExpense(newTransaction);
-        debugPrint('📊 trackExpense completed');
-      }
 
       // ✅ BACKGROUND RELOAD: Reload data in background without affecting UI
       Future.microtask(() async {
@@ -1516,27 +1884,23 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
   /// Check if transaction date is within budget date range
   bool _isTransactionInBudgetDateRange(BudgetModel budget, DateTime transactionDate) {
+    // Use budget.endDate getter which correctly calculates the end date
     final startDate = budget.startDate;
-    DateTime endDate;
+    final endDate = budget.endDate;
     
-    switch (budget.period) {
-      case BudgetPeriod.weekly:
-        // 7 gün sonra
-        endDate = startDate.add(const Duration(days: 7));
-        break;
-      case BudgetPeriod.monthly:
-        // 1 ay sonra
-        endDate = DateTime(startDate.year, startDate.month + 1, startDate.day);
-        break;
-      case BudgetPeriod.yearly:
-        // 1 yıl sonra
-        endDate = DateTime(startDate.year + 1, startDate.month, startDate.day);
-        break;
-    }
+    // Normalize dates to compare only date parts (ignore time)
+    final transactionDateOnly = DateTime(transactionDate.year, transactionDate.month, transactionDate.day);
+    final startDateOnly = DateTime(startDate.year, startDate.month, startDate.day);
+    final endDateOnly = DateTime(endDate.year, endDate.month, endDate.day);
     
-    // Only include transactions on or after the start date (not before)
-    final isInRange = transactionDate.isAfter(startDate.subtract(const Duration(milliseconds: 1))) && 
-                      transactionDate.isBefore(endDate.add(const Duration(days: 1)));
+    // Include transactions on or after start date AND on or before end date
+    final isInRange = (transactionDateOnly.isAtSameMomentAs(startDateOnly) || transactionDateOnly.isAfter(startDateOnly)) &&
+                      (transactionDateOnly.isAtSameMomentAs(endDateOnly) || transactionDateOnly.isBefore(endDateOnly));
+    
+    debugPrint('🔍 Budget Date Check: ${budget.categoryName}');
+    debugPrint('  Budget Period: ${startDateOnly.toString()} - ${endDateOnly.toString()}');
+    debugPrint('  Transaction Date: ${transactionDateOnly.toString()}');
+    debugPrint('  Is In Range: $isInRange');
     
     return isInRange;
   }
@@ -1878,11 +2242,6 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Notify listeners for immediate UI update
       notifyListeners();
 
-      // 📊 ANALYTICS: Anonim taksitli harcama verisi toplama (izin verilmişse)
-      debugPrint('📊 [INSTALLMENT] Calling AnonymousAnalyticsService.trackExpense...');
-      await AnonymousAnalyticsService.trackExpense(newTransaction);
-      debugPrint('📊 [INSTALLMENT] trackExpense completed');
-
       // ✅ BACKGROUND RELOAD: Reload data in background without affecting UI
       Future.microtask(() async {
         try {
@@ -2077,7 +2436,10 @@ class UnifiedProviderV2 extends ChangeNotifier {
       // Debug log kaldırıldı
 
       final now = DateTime.now();
-      final budgetStartDate = startDate ?? now;
+      // Normalize startDate to remove time component (use only date)
+      final budgetStartDate = startDate != null 
+          ? DateTime(startDate.year, startDate.month, startDate.day)
+          : DateTime(now.year, now.month, now.day);
       final budgetMonth = month ?? budgetStartDate.month;
       final budgetYear = year ?? budgetStartDate.year;
       
@@ -3033,14 +3395,33 @@ class UnifiedProviderV2 extends ChangeNotifier {
       final startDate = budget.startDate;
       final endDate = budget.endDate;
       
+      // Normalize dates to compare only date parts (ignore time)
+      final startDateOnly = DateTime(startDate.year, startDate.month, startDate.day);
+      final endDateOnly = DateTime(endDate.year, endDate.month, endDate.day);
+      
       // Get all expense transactions for this category within the budget date range
-      // Only include transactions on or after the start date (not before)
       final matchingTransactions = _transactions.where((transaction) {
-        return transaction.type == TransactionType.expense &&
-               transaction.categoryId == budget.categoryId &&
-               transaction.transactionDate.isAfter(startDate.subtract(const Duration(milliseconds: 1))) &&
-               transaction.transactionDate.isBefore(endDate.add(const Duration(days: 1)));
+        if (transaction.type != TransactionType.expense || transaction.categoryId != budget.categoryId) {
+          return false;
+        }
+        
+        final transactionDateOnly = DateTime(
+          transaction.transactionDate.year,
+          transaction.transactionDate.month,
+          transaction.transactionDate.day,
+        );
+        
+        // Include transactions on or after start date AND on or before end date
+        final isInRange = (transactionDateOnly.isAtSameMomentAs(startDateOnly) || transactionDateOnly.isAfter(startDateOnly)) &&
+                          (transactionDateOnly.isAtSameMomentAs(endDateOnly) || transactionDateOnly.isBefore(endDateOnly));
+        
+        return isInRange;
       }).toList();
+      
+      debugPrint('💰 Budget Calculation: ${budget.categoryName}');
+      debugPrint('  Period: ${startDateOnly.toString()} - ${endDateOnly.toString()}');
+      debugPrint('  Matching Transactions: ${matchingTransactions.length}');
+      debugPrint('  Transaction Dates: ${matchingTransactions.map((t) => DateTime(t.transactionDate.year, t.transactionDate.month, t.transactionDate.day).toString()).join(", ")}');
       
       // Sum up the amounts
       return matchingTransactions.fold<double>(0.0, (sum, transaction) => sum + transaction.amount);

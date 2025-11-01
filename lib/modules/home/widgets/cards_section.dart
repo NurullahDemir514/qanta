@@ -11,7 +11,12 @@ import 'credit_card_widget.dart';
 import '../../cards/widgets/debit_card_widget.dart';
 
 class CardsSection extends StatefulWidget {
-  const CardsSection({super.key});
+  final Key? tutorialKey; // Tutorial için key
+  
+  const CardsSection({
+    super.key,
+    this.tutorialKey,
+  });
 
   @override
   State<CardsSection> createState() => _CardsSectionState();
@@ -118,7 +123,7 @@ class _CardsSectionState extends State<CardsSection> {
       providerV2.recentTransactions,
     );
 
-    return _buildCardsUI(context, sortedCards, l10n, isDark);
+    return _buildCardsUI(context, sortedCards, l10n, isDark, widget.tutorialKey);
   }
 
   /// Sort cards by usage frequency based on transaction count
@@ -179,11 +184,13 @@ class _CardsSectionState extends State<CardsSection> {
     BuildContext context,
     List<Map<String, dynamic>> allCards,
     AppLocalizations l10n,
-    bool isDark,
-  ) {
+    bool isDark, [
+    Key? tutorialKey,
+  ]) {
     // Eğer hiç kart yoksa boş durum göster
     if (allCards.isEmpty) {
       return Column(
+        key: tutorialKey, // Tutorial key - başlık ve boş durum için
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -264,6 +271,7 @@ class _CardsSectionState extends State<CardsSection> {
     }
 
     return Column(
+      key: tutorialKey, // Tutorial key - başlık ve kartlar için
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -349,8 +357,12 @@ class _CardsSectionState extends State<CardsSection> {
                     animation: _pageController,
                     builder: (context, child) {
                       double value = 1.0;
-                      if (_pageController.position.haveDimensions) {
-                        value = _pageController.page! - index;
+                      // Controller'ın birden fazla scroll view'a bağlanmaması için kontrol
+                      if (_pageController.hasClients && 
+                          _pageController.positions.length == 1 &&
+                          _pageController.position.haveDimensions) {
+                        final page = _pageController.page ?? index.toDouble();
+                        value = page - index;
                         value = (1 - (value.abs() * 0.1)).clamp(0.0, 1.0);
                       }
 

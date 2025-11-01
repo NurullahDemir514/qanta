@@ -13,6 +13,8 @@ const admin = require("firebase-admin");
 // Import handlers
 const {chatWithAI} = require("./handlers/chatWithAI");
 const {bulkDeleteTransactions} = require("./handlers/bulkDeleteTransactions");
+const {setTestMode} = require("./handlers/setTestMode");
+const {createCard} = require("./handlers/createCard");
 const {trackAIUsage, checkDailyLimit, incrementDailyUsage, addAIBonus} = require("./utils/helpers");
 
 // Firebase Admin başlat
@@ -39,6 +41,21 @@ exports.chatWithAI = onCall({region: "us-central1"}, chatWithAI);
  * Handler: handlers/bulkDeleteTransactions.js
  */
 exports.bulkDeleteTransactions = onCall({region: "us-central1"}, bulkDeleteTransactions);
+
+/**
+ * Set Test Mode - Debug için premium testi (sadece development)
+ * Handler: handlers/setTestMode.js
+ * ⚠️ Frontend'de kDebugMode ile korumalı!
+ */
+exports.setTestMode = onCall({region: "us-central1"}, setTestMode);
+
+/**
+ * Create Card - Kart oluşturma (limit kontrolü ile)
+ * Handler: handlers/createCard.js
+ * Free kullanıcılar: Max 3 kart (debit + credit)
+ * Premium kullanıcılar: Sınırsız
+ */
+exports.createCard = onCall({region: "us-central1"}, createCard);
 
 /**
  * Add AI Bonus - Reklam izlenince bonus hakkı ekle

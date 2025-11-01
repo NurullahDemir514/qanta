@@ -13,6 +13,7 @@ class ProfileAvatar extends StatefulWidget {
   final bool showBorder;
   final bool isPremium;
   final VoidCallback? onTap;
+  final Key? tutorialKey; // Tutorial için key
 
   const ProfileAvatar({
     super.key,
@@ -22,6 +23,7 @@ class ProfileAvatar extends StatefulWidget {
     this.showBorder = false,
     this.isPremium = false,
     this.onTap,
+    this.tutorialKey,
   });
 
   @override
@@ -84,6 +86,7 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
     // Premium kullanıcılar için gradient border
     if (widget.isPremium && widget.showBorder) {
       return GestureDetector(
+        key: widget.tutorialKey, // Tutorial key ekle
         onTap: widget.onTap,
         child: Container(
           width: widget.size,
@@ -127,6 +130,7 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
 
     // Normal kullanıcılar için standart border
     return GestureDetector(
+      key: widget.tutorialKey, // Tutorial key ekle
       onTap: widget.onTap,
       child: Container(
         width: widget.size,

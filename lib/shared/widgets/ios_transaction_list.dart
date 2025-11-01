@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../models/payment_card_model.dart' as pcm;
 import 'transaction_detail_modal.dart';
 import '../design_system/transaction_design_system.dart';
+import '../utils/currency_utils.dart';
 import 'package:intl/intl.dart';
 
 class IOSTransactionList extends StatelessWidget {
@@ -180,9 +181,12 @@ class IOSTransactionList extends StatelessWidget {
 
   String _formatCardTransactionAmount(pcm.CardTransactionModel transaction, BuildContext context) {
     final amount = transaction.amount.abs();
-    final formattedAmount = TransactionDesignSystem.formatNumber(amount);
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
     
-    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
+    // Use CurrencyUtils for proper formatting
+    final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(amount, currency);
+    final currencySymbol = currency.symbol;
+    
     if (transaction.isIncome) {
       return '+$formattedAmount$currencySymbol';
     } else {
@@ -201,9 +205,26 @@ class IOSTransactionList extends StatelessWidget {
     } else if (transactionDay == yesterday) {
       return AppLocalizations.of(context)?.yesterday ?? 'Yesterday';
     } else {
-      // Simple date format: 8 Sep or 8/9 format
+      // Simple date format: 8 Sep or 8/9 format with proper locale
       try {
-        final formatter = DateFormat('d MMM');
+        final locale = Localizations.localeOf(context);
+        final languageCode = locale.languageCode;
+        
+        String localeString;
+        switch (languageCode) {
+          case 'en':
+            localeString = 'en_US';
+            break;
+          case 'de':
+            localeString = 'de_DE';
+            break;
+          case 'tr':
+          default:
+            localeString = 'tr_TR';
+            break;
+        }
+        
+        final formatter = DateFormat('d MMM', localeString);
         return formatter.format(date);
       } catch (e) {
         // Fallback: simple format

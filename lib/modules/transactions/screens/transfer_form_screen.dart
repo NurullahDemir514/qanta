@@ -4,6 +4,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/utils/currency_utils.dart';
+import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/services/premium_service.dart';
 import '../models/payment_method.dart';
@@ -14,7 +15,7 @@ import '../widgets/forms/description_field.dart';
 import '../widgets/forms/date_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../advertisement/providers/advertisement_provider.dart';
-import '../../advertisement/services/google_ads_banner_service.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
 import '../../advertisement/config/advertisement_config.dart' as ad_config;
 import '../../advertisement/models/advertisement_models.dart';
 
@@ -41,8 +42,8 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   int _currentStep = 0;
 
   // Banner servisleri
-  GoogleAdsBannerService? _step1BannerService; // Step 1 için (Calculator altı)
-  GoogleAdsBannerService? _step4BannerService; // Step 4 için
+  GoogleAdsRealBannerService? _step1BannerService; // Step 1 için (Calculator altı)
+  GoogleAdsRealBannerService? _step4BannerService; // Step 4 için
 
   @override
   void initState() {
@@ -66,7 +67,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
 
   // Step 1 için banner servisi başlat (Calculator altı)
   void _initializeStep1Banner() async {
-    _step1BannerService = GoogleAdsBannerService(
+    _step1BannerService = GoogleAdsRealBannerService(
       adUnitId: ad_config.AdvertisementConfig.transactionFormStep1Banner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
       isTestMode: ad_config.AdvertisementConfig.transactionFormStep1Banner.isTestMode,
@@ -81,7 +82,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
 
   // Step 4 için ikinci banner servisi başlat
   void _initializeStep4Banner() async {
-    _step4BannerService = GoogleAdsBannerService(
+    _step4BannerService = GoogleAdsRealBannerService(
       adUnitId: ad_config.AdvertisementConfig.incomeTransferFormBanner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
       isTestMode: ad_config.AdvertisementConfig.incomeTransferFormBanner.isTestMode,
@@ -269,15 +270,20 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                   child: Column(
                     children: [
                       // Transfer Amount
-                      CurrencyUtils.buildAmountText(
-                        double.tryParse(_amountController.text) ?? 0,
-                        currency: Currency.TRY,
-                        style: GoogleFonts.inter(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
+                      Builder(
+                        builder: (context) {
+                          final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+                          return CurrencyUtils.buildAmountText(
+                            double.tryParse(_amountController.text) ?? 0,
+                            currency: currency,
+                            style: GoogleFonts.inter(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          );
+                        },
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -510,8 +516,11 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
           isValid = false;
         } else {
           // Bakiye kontrolü yap
-          final amount =
-              double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0;
+          final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+          final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+            _amountController.text,
+            locale,
+          );
           if (amount > 0 && _fromAccount != null) {
             // Nakit hesap için bakiye kontrolü
             if (_fromAccount!.isCash && _fromAccount!.cashAccount != null) {
@@ -653,7 +662,12 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   Future<void> _saveTransfer() async {
     if (_fromAccount == null || _toAccount == null) return;
 
-    final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final locale = themeProvider.currency.locale;
+    final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+      _amountController.text,
+      locale,
+    );
     if (amount == null || amount <= 0) return;
 
     setState(() {

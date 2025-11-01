@@ -22,7 +22,12 @@ import '../../../shared/models/account_model.dart';
 import '../../premium/premium_offer_screen.dart';
 
 class BalanceOverviewCard extends StatefulWidget {
-  const BalanceOverviewCard({super.key});
+  final Key? tutorialKey; // Tutorial için key - sadece Balance Card için
+  
+  const BalanceOverviewCard({
+    super.key,
+    this.tutorialKey,
+  });
 
   @override
   State<BalanceOverviewCard> createState() => _BalanceOverviewCardState();
@@ -402,6 +407,7 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
             GestureDetector(
               onTap: () => BalanceDetailBottomSheet.show(context),
               child: Container(
+                key: widget.tutorialKey, // Tutorial key - sadece Balance Card için
                 width: double.infinity,
                 constraints: BoxConstraints(
                   maxHeight: ScreenCompatibility.responsiveHeight(context,
@@ -610,15 +616,19 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                               .trim();
                           String mainPart;
                           String decimalPart;
-                          if (currency.locale.startsWith('tr')) {
-                            final parts = numberOnly.split(',');
-                            mainPart = parts[0];
-                            decimalPart = parts.length > 1 ? parts[1] : '00';
-                          } else {
-                            final parts = numberOnly.split('.');
-                            mainPart = parts[0];
-                            decimalPart = parts.length > 1 ? parts[1] : '00';
-                          }
+                          
+                          // Currency locale'ine göre dinamik binlik ve ondalık ayırıcı belirleme
+                          final thousandsSeparator = CurrencyUtils.getThousandsSeparator(currency.locale);
+                          final decimalSeparator = CurrencyUtils.getDecimalSeparator(currency.locale);
+                          
+                          // Decimal separator'a göre split yap
+                          final parts = numberOnly.split(decimalSeparator);
+                          // Binlik ayırıcıları temizle (parse için)
+                          final cleanedMainPart = parts[0].replaceAll(thousandsSeparator, '').replaceAll(' ', '');
+                          decimalPart = parts.length > 1 ? parts[1].replaceAll(' ', '') : '00';
+                          
+                          // Binlik ayırıcıları tekrar ekle (gösterim için)
+                          mainPart = CurrencyUtils.addThousandsSeparators(cleanedMainPart, currency.locale);
                           
                           // Calculate responsive font sizes based on the amount
                           final amountFontSize = _calculateResponsiveFontSize(context, netWorth);
@@ -646,7 +656,7 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                                             ),
                                           ),
                                           TextSpan(
-                                            text: currency.locale.startsWith('tr') ? ',$decimalPart' : '.$decimalPart',
+                                            text: '${CurrencyUtils.getDecimalSeparator(currency.locale)}$decimalPart',
                                             style: GoogleFonts.inter(
                                               fontSize: decimalFontSize,
                                               fontWeight: FontWeight.w600,

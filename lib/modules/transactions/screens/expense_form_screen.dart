@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
@@ -8,6 +9,7 @@ import '../../../core/services/premium_service.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/models/unified_category_model.dart';
 import '../../../shared/services/category_icon_service.dart';
+import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 import '../models/payment_method.dart';
 import '../models/card.dart';
 import '../../../shared/models/cash_account.dart';
@@ -20,9 +22,18 @@ import '../widgets/forms/transaction_summary.dart';
 import '../widgets/forms/description_field.dart';
 import '../widgets/forms/date_selector.dart';
 import '../../advertisement/providers/advertisement_provider.dart';
-import '../../advertisement/services/google_ads_banner_service.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
 import '../../advertisement/config/advertisement_config.dart' as ad_config;
 import '../../advertisement/models/advertisement_models.dart';
+import '../../advertisement/services/google_ads_interstitial_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../modules/transactions/models/recurring_frequency.dart';
+import '../../../shared/models/recurring_transaction_model.dart';
+import '../../../core/services/recurring_transaction_service.dart';
+import '../../../core/providers/recurring_transaction_provider.dart';
+import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/unified_transaction_service.dart';
+import 'package:flutter/services.dart';
 
 /// Expense transaction form using v2 provider system
 ///
@@ -126,6 +137,16 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   String? _selectedCategory;
   PaymentMethod? _selectedPaymentMethod;
   DateTime _selectedDate = DateTime.now();
+  
+  // Subscription state
+  bool _isSubscription = false;
+  RecurringCategory _subscriptionCategory = RecurringCategory.subscription;
+  RecurringFrequency _subscriptionFrequency = RecurringFrequency.monthly;
+  DateTime? _subscriptionEndDate;
+  bool _hasSubscriptionEndDate = false;
+  
+  // Get subscription start date (use transaction date as start date)
+  DateTime get _subscriptionStartDate => _selectedDate;
 
   String? _amountError;
   String? _categoryError;
@@ -134,8 +155,11 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   int _currentStep = 0;
 
   // Banner servisleri
-  GoogleAdsBannerService? _step1BannerService; // Step 1 için (Calculator altı)
-  GoogleAdsBannerService? _step4BannerService; // Step 4 için
+  GoogleAdsRealBannerService? _step1BannerService; // Step 1 için (Calculator altı)
+  GoogleAdsRealBannerService? _step4BannerService; // Step 4 için
+  
+  // Success Interstitial servisi
+  late GoogleAdsInterstitialService _successInterstitialService;
 
   @override
   void initState() {
@@ -149,6 +173,13 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     if (widget.initialDescription != null) {
       _descriptionController.text = widget.initialDescription!;
     }
+    
+    // Initialize success interstitial service
+    _successInterstitialService = GoogleAdsInterstitialService(
+      adUnitId: ad_config.AdvertisementConfig.successInterstitial.interstitialAdUnitId,
+      isTestMode: false,
+    );
+    _successInterstitialService.loadAd();
 
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate!;
@@ -169,7 +200,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
 
   // Step 1 için banner servisi başlat (Calculator altı)
   void _initializeStep1Banner() async {
-    _step1BannerService = GoogleAdsBannerService(
+    _step1BannerService = GoogleAdsRealBannerService(
       adUnitId: ad_config.AdvertisementConfig.transactionFormStep1Banner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
       isTestMode: ad_config.AdvertisementConfig.transactionFormStep1Banner.isTestMode,
@@ -184,7 +215,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
 
   // Step 4 için ikinci banner servisi başlat
   void _initializeStep4Banner() async {
-    _step4BannerService = GoogleAdsBannerService(
+    _step4BannerService = GoogleAdsRealBannerService(
       adUnitId: ad_config.AdvertisementConfig.expenseFormBanner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50, // Standart banner boyutu (320x50)
       isTestMode: ad_config.AdvertisementConfig.expenseFormBanner.isTestMode,
@@ -334,7 +365,29 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     _pageController.dispose();
     _step1BannerService?.dispose(); // Step 1 banner'ı temizle
     _step4BannerService?.dispose(); // Step 4 banner'ı temizle
+    _successInterstitialService.dispose(); // Success interstitial temizle
     super.dispose();
+  }
+  
+  /// Show success interstitial ad every 3 transactions
+  Future<void> _showSuccessInterstitialIfNeeded() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final transactionCount = prefs.getInt('expense_transaction_count') ?? 0;
+      final newCount = transactionCount + 1;
+      
+      // Save new count
+      await prefs.setInt('expense_transaction_count', newCount);
+      
+      // Show interstitial every 3 transactions
+      if (newCount % 3 == 0 && _successInterstitialService.isLoaded) {
+        await _successInterstitialService.showAd();
+        // Reload for next time
+        _successInterstitialService.loadAd();
+      }
+    } catch (e) {
+      debugPrint('Error showing success interstitial: $e');
+    }
   }
 
   @override
@@ -375,19 +428,71 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
         BaseFormStep(
           title: l10n.whichCategorySpent,
           content: _buildStepWithBanner(
-            ExpenseCategorySelectorV2(
-              selectedCategory: _selectedCategory,
-              onCategorySelected: (category) {
-                setState(() {
-                  _selectedCategory = category;
-                  _categoryError = null;
-                });
-              },
-              errorText: _categoryError,
-              onNext: () {
-                // Move to next step when user presses next on keyboard
-                _nextStep();
-              },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ExpenseCategorySelectorV2(
+                  selectedCategory: _selectedCategory,
+                  onCategorySelected: (category) {
+                    setState(() {
+                      _selectedCategory = category;
+                      _categoryError = null;
+                    });
+                  },
+                  errorText: _categoryError,
+                  onNext: () {
+                    // Move to next step when user presses next on keyboard
+                    _nextStep();
+                  },
+                ),
+                const SizedBox(height: 20),
+                // Subscription checkbox
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: _isSubscription,
+                        onChanged: (value) {
+                          setState(() {
+                            _isSubscription = value ?? false;
+                            if (!_isSubscription) {
+                              // Reset subscription fields when unchecked
+                              _subscriptionCategory = RecurringCategory.subscription;
+                              _subscriptionFrequency = RecurringFrequency.monthly;
+                              _subscriptionEndDate = null;
+                              _hasSubscriptionEndDate = false;
+                            }
+                          });
+                        },
+                        activeColor: const Color(0xFFFF4C4C),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        l10n.thisIsSubscription,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : const Color(0xFF1C1C1E),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // Subscription fields (shown when checkbox is checked)
+                if (_isSubscription) ...[
+                  const SizedBox(height: 24),
+                  _buildSubscriptionFields(context),
+                ],
+              ],
             ),
           ),
         ),
@@ -526,8 +631,11 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
           });
           isValid = false;
         } else {
-          final amount =
-              double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0;
+          final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+          final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+            _amountController.text,
+            locale,
+          );
           if (amount > 0) {
             String? error;
             if (_selectedPaymentMethod!.isCash) {
@@ -624,6 +732,295 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   /// - Sets loading state during operation
   /// - Prevents double-submission
   /// - Clears loading state in finally block
+  /// Build subscription fields widget
+  Widget _buildSubscriptionFields(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Category selection
+        Text(
+          l10n.category ?? 'Kategori',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: RecurringCategory.values.map((category) {
+              final isSelected = _subscriptionCategory == category;
+              return GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  setState(() => _subscriptionCategory = category);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF007AFF)
+                        : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7)),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFF007AFF)
+                          : (isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA)),
+                      width: isSelected ? 2 : 1.2,
+                    ),
+                  ),
+                  child: Text(
+                    category.getName(l10n),
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark ? Colors.white : Colors.black),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 20),
+        
+        // Frequency selection
+        Text(
+          l10n.frequency,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+            border: Border.all(
+              color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+              width: 1.2,
+            ),
+          ),
+          child: Row(
+            children: RecurringFrequency.values.map((frequency) {
+              final isSelected = _subscriptionFrequency == frequency;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _subscriptionFrequency = frequency);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF007AFF)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        frequency.getDisplayName(l10n),
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected
+                              ? Colors.white
+                              : (isDark ? Colors.white : Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 20),
+        
+        // Start date
+        Text(
+          l10n.startDate,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+          ),
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () async {
+            final DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: _subscriptionStartDate,
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.light(
+                      primary: const Color(0xFF007AFF),
+                      onPrimary: Colors.white,
+                      surface: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      onSurface: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+            if (pickedDate != null && pickedDate != _selectedDate) {
+              setState(() {
+                _selectedDate = pickedDate; // Update transaction date (used as subscription start date)
+              });
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                width: 1.2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  color: isDark ? Colors.white : const Color(0xFF6D6D70),
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '${_subscriptionStartDate.day.toString().padLeft(2, '0')}/${_subscriptionStartDate.month.toString().padLeft(2, '0')}/${_subscriptionStartDate.year}',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: isDark ? Colors.white : const Color(0xFF6D6D70),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // End date (optional)
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Checkbox(
+              value: _hasSubscriptionEndDate,
+              onChanged: (value) {
+                setState(() {
+                  _hasSubscriptionEndDate = value ?? false;
+                  if (!_hasSubscriptionEndDate) {
+                    _subscriptionEndDate = null;
+                  } else if (_subscriptionEndDate == null) {
+                    _subscriptionEndDate = _subscriptionStartDate.add(const Duration(days: 365));
+                  }
+                });
+              },
+            ),
+            Text(
+              l10n.endDateOptional,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+              ),
+            ),
+          ],
+        ),
+        if (_hasSubscriptionEndDate) ...[
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () async {
+              final DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: _subscriptionEndDate ?? _subscriptionStartDate.add(const Duration(days: 365)),
+                firstDate: _subscriptionStartDate,
+                lastDate: DateTime(2030),
+                builder: (context, child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.light(
+                        primary: const Color(0xFF007AFF),
+                        onPrimary: Colors.white,
+                        surface: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                        onSurface: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                    child: child!,
+                  );
+                },
+              );
+              if (pickedDate != null && pickedDate != _subscriptionEndDate) {
+                setState(() {
+                  _subscriptionEndDate = pickedDate;
+                });
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF38383A) : const Color(0xFFE5E5EA),
+                  width: 1.2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    color: isDark ? Colors.white : const Color(0xFF6D6D70),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _subscriptionEndDate != null
+                          ? '${_subscriptionEndDate!.day.toString().padLeft(2, '0')}/${_subscriptionEndDate!.month.toString().padLeft(2, '0')}/${_subscriptionEndDate!.year}'
+                          : l10n.selectDate ?? 'Tarih Seç',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: isDark ? Colors.white : const Color(0xFF6D6D70),
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   ///
   /// **CHANGELOG:**
   /// v2.1.0: Fixed parameter names and transaction creation
@@ -636,7 +1033,12 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     });
 
     try {
-      final amount = double.parse(_amountController.text.replaceAll(',', '.'));
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final locale = themeProvider.currency.locale;
+      final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _amountController.text,
+        locale,
+      );
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
 
       // Tag'i category'ye çevir (otomatik oluştur)
@@ -677,48 +1079,180 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
           ? _selectedPaymentMethod!.cashAccount!.id
           : _selectedPaymentMethod!.card!.id;
 
-      // Taksit sayısını al
-      final installments = _selectedPaymentMethod!.installments ?? 1;
       final description = _descriptionController.text.trim().isEmpty
           ? (AppLocalizations.of(context)?.expense ?? 'Expense')
           : _descriptionController.text.trim();
 
       String? transactionId;
 
-      // Kredi kartı işlemleri için her zaman taksitli sistem kullan (peşin dahil)
-      if (_selectedPaymentMethod!.card?.type == CardType.credit) {
-        // Kredi kartı - her zaman taksitli sistem kullan (peşin = 1 taksit)
-        final result = await providerV2.createInstallmentTransaction(
-          sourceAccountId: sourceAccountId,
-          totalAmount: amount,
-          count: installments,
-          description: description,
-          categoryId: categoryId,
-          startDate: _selectedDate,
-        );
-        
-        transactionId = result['installmentId'];
-        
-        // Budget warnings are now shown in TransactionSummary widget
-        // No need for snackbar here
-      } else {
-        // Banka kartı/nakit - normal işlem
-        final result = await providerV2.createTransaction(
-          type: v2.TransactionType.expense,
+      // If subscription is selected, create subscription first, then first transaction
+      if (_isSubscription) {
+        final userId = FirebaseAuthService.currentUserId;
+        if (userId == null) {
+          throw Exception('Kullanıcı oturumu bulunamadı');
+        }
+
+        // Create subscription name from category name (Step 2 selection)
+        final subscriptionName = _selectedCategory ?? description;
+        final now = DateTime.now();
+        final subscription = RecurringTransaction(
+          id: '', // Will be generated by service
+          userId: userId,
+          name: subscriptionName,
+          category: _subscriptionCategory,
           amount: amount,
-          description: description,
-          sourceAccountId: sourceAccountId,
-          categoryId: categoryId,
-          transactionDate: _selectedDate,
+          categoryId: categoryId ?? _subscriptionCategory.name,
+          accountId: sourceAccountId,
+          frequency: _subscriptionFrequency,
+          startDate: _subscriptionStartDate,
+          endDate: _hasSubscriptionEndDate ? _subscriptionEndDate : null,
+          isActive: true,
+          lastExecutedDate: null,
+          nextExecutionDate: null, // Will be calculated by provider
+          description: null,
+          notes: null,
+          createdAt: now,
+          updatedAt: now,
         );
+
+        // Create subscription
+        final subscriptionProvider = Provider.of<RecurringTransactionProvider>(
+          context,
+          listen: false,
+        );
+        final subscriptionId = await subscriptionProvider.createSubscription(subscription);
         
-        transactionId = result['transactionId'];
+        if (subscriptionId == null) {
+          throw Exception('Abonelik oluşturulamadı');
+        }
+
+        // Create first transaction on start date
+        // Only create if start date is today or earlier
+        final today = DateTime.now();
+        final startDateOnly = DateTime(
+          _subscriptionStartDate.year,
+          _subscriptionStartDate.month,
+          _subscriptionStartDate.day,
+        );
+        final todayOnly = DateTime(today.year, today.month, today.day);
+
+        if (!todayOnly.isBefore(startDateOnly)) {
+          // Start date has arrived, create transaction
+          final l10n = AppLocalizations.of(context)!;
+          final transactionDescription = '$description (${l10n.automatic})';
+          
+          // Get account for display name
+          final account = providerV2.getAccountById(sourceAccountId);
+          String? accountDisplayName;
+          String? accountTypeDisplayName;
+          if (account != null) {
+            accountDisplayName = account.type == AccountType.cash 
+                ? 'CASH_WALLET' 
+                : account.name;
+            accountTypeDisplayName = account.typeDisplayName;
+          }
+          
+          // Create transaction directly with isRecurring flag
+          final firstTransaction = v2.TransactionWithDetailsV2(
+            id: '', // Will be generated by Firebase
+            userId: '', // Will be set by service
+            type: v2.TransactionType.expense,
+            amount: amount,
+            description: transactionDescription,
+            transactionDate: _subscriptionStartDate,
+            categoryId: categoryId,
+            sourceAccountId: sourceAccountId,
+            isRecurring: true, // Mark as recurring transaction
+            notes: l10n.createdAutomatically,
+            isPaid: true,
+            createdAt: _subscriptionStartDate,
+            updatedAt: _subscriptionStartDate,
+            sourceAccountName: accountDisplayName,
+            sourceAccountType: accountTypeDisplayName,
+            // Add category name (from Step 2 category selection)
+            categoryName: subscriptionName,
+          );
+          
+          transactionId = await UnifiedTransactionService.addTransaction(firstTransaction);
+          
+          // Manually trigger UI refresh by reloading transactions
+          await providerV2.loadTransactions();
+          
+          // Update subscription last executed date and next execution date
+          final nextExecutionDate = RecurringTransaction(
+            id: subscriptionId,
+            userId: userId,
+            name: subscriptionName,
+            category: _subscriptionCategory,
+            amount: amount,
+            accountId: sourceAccountId,
+            frequency: _subscriptionFrequency,
+            startDate: _subscriptionStartDate,
+            endDate: _hasSubscriptionEndDate ? _subscriptionEndDate : null,
+            categoryId: categoryId ?? _subscriptionCategory.name,
+            isActive: true,
+            lastExecutedDate: _subscriptionStartDate,
+            nextExecutionDate: null, // Will be calculated
+            createdAt: now,
+            updatedAt: DateTime.now(),
+          ).calculateNextExecutionDate();
+          
+          final updatedSubscription = subscription.copyWith(
+            id: subscriptionId,
+            lastExecutedDate: _subscriptionStartDate,
+            nextExecutionDate: nextExecutionDate,
+            updatedAt: DateTime.now(),
+          );
+          await subscriptionProvider.updateSubscription(subscriptionId, updatedSubscription);
+        }
         
-        // Budget warnings are now shown in TransactionSummary widget
-        // No need for snackbar here
+        debugPrint('✅ Created subscription $subscriptionId with first transaction');
+      } else {
+        // Normal transaction (not subscription)
+        // Taksit sayısını al
+        final installments = _selectedPaymentMethod!.installments ?? 1;
+
+        // Kredi kartı işlemleri için her zaman taksitli sistem kullan (peşin dahil)
+        if (_selectedPaymentMethod!.card?.type == CardType.credit) {
+          // Kredi kartı - her zaman taksitli sistem kullan (peşin = 1 taksit)
+          final result = await providerV2.createInstallmentTransaction(
+            sourceAccountId: sourceAccountId,
+            totalAmount: amount,
+            count: installments,
+            description: description,
+            categoryId: categoryId,
+            startDate: _selectedDate,
+          );
+          
+          transactionId = result['installmentId'];
+          
+          // Budget warnings are now shown in TransactionSummary widget
+          // No need for snackbar here
+        } else {
+          // Banka kartı/nakit - normal işlem
+          final result = await providerV2.createTransaction(
+            type: v2.TransactionType.expense,
+            amount: amount,
+            description: description,
+            sourceAccountId: sourceAccountId,
+            categoryId: categoryId,
+            transactionDate: _selectedDate,
+          );
+          
+          transactionId = result['transactionId'];
+          
+          // Budget warnings are now shown in TransactionSummary widget
+          // No need for snackbar here
+        }
       }
 
       if (mounted) {
+        // Show success interstitial every 3 transactions (only for non-premium users)
+        final premiumService = context.read<PremiumService>();
+        if (!premiumService.isPremium) {
+          _showSuccessInterstitialIfNeeded();
+        }
+        
         Navigator.pop(context, transactionId);
       }
     } catch (e) {

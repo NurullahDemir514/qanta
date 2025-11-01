@@ -9,6 +9,11 @@ import '../../../shared/models/account_model.dart';
 import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/premium_service.dart';
+import '../../../core/services/bank_service.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
+import '../../advertisement/config/advertisement_config.dart' as config;
+import '../../advertisement/models/advertisement_models.dart';
 
 class AddCreditCardForm extends StatefulWidget {
   final VoidCallback? onSuccess;
@@ -29,14 +34,32 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
   String? _selectedBankCode;
   int _statementDate = 1;
   List<String> _filteredBanks = [];
+  List<BankModel> _availableBanks = [];
   bool _isDebtMode = true; // true = borç, false = kullanılabilir limit
 
   bool _isLoading = false;
+  bool _isLoadingBanks = false;
+  
+  late GoogleAdsRealBannerService _creditFormBannerService;
 
   @override
   void initState() {
     super.initState();
-    _filteredBanks = AppConstants.getAvailableBanks();
+    _loadBanks();
+    
+    // Initialize banner service
+    _creditFormBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.addCardFormBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Load ad after a delay
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        _creditFormBannerService.loadAd();
+      }
+    });
   }
 
   @override
@@ -45,18 +68,75 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
     _creditLimitController.dispose();
     _totalDebtController.dispose();
     _searchController.dispose();
+    _creditFormBannerService.dispose();
     super.dispose();
+  }
+
+  /// Bankaları yükle (dinamik)
+  Future<void> _loadBanks() async {
+    setState(() {
+      _isLoadingBanks = true;
+    });
+
+    try {
+      final bankService = BankService();
+      await bankService.loadBanks();
+
+      // Kullanıcının para birimine göre bankaları önceliklendir
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      _availableBanks = bankService.getAvailableBanks(currency: themeProvider.currency);
+      
+      // Fallback: Eğer hiç banka yoksa static listeyi kullan
+      if (_availableBanks.isEmpty) {
+        final staticBanks = AppConstants.getAvailableBanks();
+        _availableBanks = staticBanks.map((code) {
+          return BankModel(
+            code: code,
+            name: AppConstants.getBankName(code),
+            gradientColors: AppConstants.getBankGradientColors(code)
+                .map((c) => c.value)
+                .toList(),
+            accentColor: AppConstants.getBankAccentColor(code).value,
+            isActive: true,
+          );
+        }).toList();
+      }
+
+      _filteredBanks = _availableBanks.map((b) => b.code).toList();
+    } catch (e) {
+      debugPrint('❌ Error loading banks: $e');
+      // Fallback: Static banks
+      _filteredBanks = AppConstants.getAvailableBanks();
+      _availableBanks = _filteredBanks.map((code) {
+        return BankModel(
+          code: code,
+          name: AppConstants.getBankName(code),
+          gradientColors: AppConstants.getBankGradientColors(code)
+              .map((c) => c.value)
+              .toList(),
+          accentColor: AppConstants.getBankAccentColor(code).value,
+          isActive: true,
+        );
+      }).toList();
+    } finally {
+      setState(() {
+        _isLoadingBanks = false;
+      });
+    }
   }
 
   void _filterBanks(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredBanks = AppConstants.getAvailableBanks();
+        _filteredBanks = _availableBanks.map((b) => b.code).toList();
       } else {
-        _filteredBanks = AppConstants.getAvailableBanks().where((bankCode) {
-          final bankName = AppConstants.getBankName(bankCode).toLowerCase();
-          return bankName.contains(query.toLowerCase());
-        }).toList();
+        _filteredBanks = _availableBanks
+            .where((bank) {
+              return bank.name.toLowerCase().contains(query.toLowerCase()) ||
+                  bank.code.toLowerCase().contains(query.toLowerCase());
+            })
+            .map((b) => b.code)
+            .toList();
       }
     });
   }
@@ -65,9 +145,17 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
     setState(() {
       _selectedBankCode = bankCode;
       // Auto-generate card name when bank is selected
-      final bankName = AppConstants.getBankName(bankCode);
+      final bank = _availableBanks.firstWhere(
+        (b) => b.code == bankCode,
+        orElse: () => BankModel(
+          code: bankCode,
+          name: AppConstants.getBankName(bankCode),
+          gradientColors: [],
+          accentColor: 0xFF1976D2,
+        ),
+      );
       _cardNameController.text =
-          '$bankName ${AppLocalizations.of(context)?.creditCard ?? 'Kredi Kartı'}';
+          '${bank.name} ${AppLocalizations.of(context)?.creditCard ?? 'Kredi Kartı'}';
     });
   }
 
@@ -131,10 +219,13 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
+      final themeProvider = context.read<ThemeProvider>();
+      final locale = themeProvider.currency.locale;
 
-      final creditLimit =
-          double.tryParse(_creditLimitController.text.replaceAll(',', '')) ??
-          0.0;
+      final creditLimit = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _creditLimitController.text,
+        locale,
+      );
       
       // Toggle'a göre hesaplama
       double totalDebt;
@@ -142,12 +233,18 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
         // Borç modu: Girilen değer borç
         totalDebt = _totalDebtController.text.trim().isEmpty
             ? 0.0
-            : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+            : ThousandsSeparatorInputFormatter.parseLocaleDouble(
+                _totalDebtController.text,
+                locale,
+              );
       } else {
         // Limit modu: Girilen değer kullanılabilir limit, borç = kredi limiti - kullanılabilir limit
         final availableLimit = _totalDebtController.text.trim().isEmpty
             ? 0.0
-            : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+            : ThousandsSeparatorInputFormatter.parseLocaleDouble(
+                _totalDebtController.text,
+                locale,
+              );
         totalDebt = creditLimit - availableLimit;
       }
 
@@ -310,36 +407,41 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    _buildTextField(
-                      controller: _creditLimitController,
-                      hintText: '15.000',
-                      prefixIcon: Icons.account_balance_wallet,
-                      suffixText: context
-                          .watch<ThemeProvider>()
-                          .currency
-                          .symbol,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [ThousandsSeparatorInputFormatter()],
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return AppLocalizations.of(
-                                context,
-                              )?.creditLimitRequired ??
-                              'Credit limit is required';
-                        }
-                        final amount = double.tryParse(
-                          value.replaceAll(',', ''),
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        final locale = themeProvider.currency.locale;
+                        return _buildTextField(
+                          controller: _creditLimitController,
+                          hintText: '15.000',
+                          prefixIcon: Icons.account_balance_wallet,
+                          suffixText: themeProvider.currency.symbol,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            ThousandsSeparatorInputFormatter(locale: locale)
+                          ],
+                          textInputAction: TextInputAction.next,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return AppLocalizations.of(
+                                    context,
+                                  )?.creditLimitRequired ??
+                                  'Credit limit is required';
+                            }
+                            final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+                              value,
+                              locale,
+                            );
+                            if (amount <= 0) {
+                              return AppLocalizations.of(
+                                    context,
+                                  )?.pleaseEnterValidAmount ??
+                                  'Please enter a valid amount';
+                            }
+                            return null;
+                          },
                         );
-                        if (amount == null || amount <= 0) {
-                          return AppLocalizations.of(
-                                context,
-                              )?.pleaseEnterValidAmount ??
-                              'Please enter a valid amount';
-                        }
-                        return null;
                       },
                     ),
 
@@ -449,19 +551,23 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    _buildTextField(
-                      controller: _totalDebtController,
-                      hintText: '0',
-                      prefixIcon: _isDebtMode ? Icons.receipt_long : Icons.account_balance_wallet,
-                      suffixText: Provider.of<ThemeProvider>(
-                        context,
-                        listen: false,
-                      ).currency.symbol,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [ThousandsSeparatorInputFormatter()],
-                      textInputAction: TextInputAction.done,
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        final locale = themeProvider.currency.locale;
+                        return _buildTextField(
+                          controller: _totalDebtController,
+                          hintText: '0',
+                          prefixIcon: _isDebtMode ? Icons.receipt_long : Icons.account_balance_wallet,
+                          suffixText: themeProvider.currency.symbol,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            ThousandsSeparatorInputFormatter(locale: locale)
+                          ],
+                          textInputAction: TextInputAction.done,
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 16),
@@ -598,6 +704,24 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                       ),
                     ),
 
+                    const SizedBox(height: 24),
+                    
+                    // Banner ad
+                    Consumer<PremiumService>(
+                      builder: (context, premiumService, child) {
+                        if (!premiumService.isPremium && 
+                            _creditFormBannerService.isLoaded && 
+                            _creditFormBannerService.bannerWidget != null) {
+                          return Container(
+                            height: 50,
+                            alignment: Alignment.center,
+                            child: _creditFormBannerService.bannerWidget!,
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -611,7 +735,19 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
 
   Widget _buildBankGrid() {
     final l10n = AppLocalizations.of(context)!;
-    final banks = _filteredBanks;
+    // Filtrelenmiş bankaları al
+    final filteredBankModels = _availableBanks.where((bank) {
+      return _filteredBanks.contains(bank.code);
+    }).toList();
+
+    if (_isLoadingBanks) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return Column(
       children: [
@@ -667,7 +803,7 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
         // Banka listesi
         SizedBox(
           height: 80,
-          child: banks.isEmpty
+          child: filteredBankModels.isEmpty
               ? Center(
                   child: Text(
                     l10n.noBanksFound,
@@ -681,19 +817,18 @@ class _AddCreditCardFormState extends State<AddCreditCardForm> {
                 )
               : ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: banks.length,
+                  itemCount: filteredBankModels.length,
                   itemBuilder: (context, index) {
-                    final bankCode = banks[index];
-                    final bankName = AppConstants.getBankName(bankCode);
-                    final accentColor = AppConstants.getBankAccentColor(
-                      bankCode,
-                    );
+                    final bank = filteredBankModels[index];
+                    final bankCode = bank.code;
+                    final bankName = bank.name;
+                    final accentColor = bank.accentColorValue;
                     final isSelected = _selectedBankCode == bankCode;
 
                     return Container(
                       width: 100,
                       margin: EdgeInsets.only(
-                        right: index == banks.length - 1 ? 0 : 12,
+                        right: index == filteredBankModels.length - 1 ? 0 : 12,
                       ),
                       child: GestureDetector(
                         onTap: () => _onBankSelected(bankCode),

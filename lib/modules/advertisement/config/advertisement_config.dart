@@ -93,13 +93,13 @@ class AdvertisementConfig implements AdvertisementConfigContract {
   static const AdvertisementConfig production = AdvertisementConfig(
     googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
     bannerAdUnitId:
-        'ca-app-pub-8222217303967306/8010623702', // Home Banner 1
+        'ca-app-pub-8222217303967306/8275910028', // Home Banner 1 - YENİ
     interstitialAdUnitId:
         'ca-app-pub-8222217303967306/5895772234', // Insights Interstitial (Geçiş)
     rewardedAdUnitId:
         'ca-app-pub-8222217303967306/8010623702', // Şimdilik banner ID kullan
     nativeAdUnitId: 'ca-app-pub-8222217303967306/2917760265', // Home Native (Yerel gelişmiş)
-    appOpenAdUnitId: 'ca-app-pub-8222217303967306/5668988633', // App Open Ad (Uygulama açıkken)
+    appOpenAdUnitId: 'ca-app-pub-8222217303967306/5441863125', // App Open Ad (Uygulama açıkken) - YENİ
     isTestMode: false,
     showFrequency: 3, // Her 3 işlemde bir göster
   );
@@ -222,6 +222,136 @@ class AdvertisementConfig implements AdvertisementConfigContract {
         'ca-app-pub-8222217303967306/8010623702',
     isTestMode: false,
     showFrequency: 1,
+  );
+
+  /// Savings Tab Banner konfigürasyonu
+  static const AdvertisementConfig savingsTabBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Savings Tab Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Analytics/Statistics Banner konfigürasyonu
+  static const AdvertisementConfig analyticsBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Analytics Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Calendar Banner konfigürasyonu
+  static const AdvertisementConfig calendarBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Calendar Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Transactions List Banner konfigürasyonu
+  static const AdvertisementConfig transactionsListBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Transactions List Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Stock Transaction Form Banner konfigürasyonu
+  static const AdvertisementConfig stockTransactionFormBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Stock Form Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Budget Management Banner konfigürasyonu
+  static const AdvertisementConfig budgetManagementBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Budget Management Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Savings Goal Detail Banner konfigürasyonu
+  static const AdvertisementConfig savingsGoalDetailBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Savings Detail Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Add Card Forms Banner konfigürasyonu (Debit/Credit/Savings)
+  static const AdvertisementConfig addCardFormBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Add Card Form Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Settings Screen Banner konfigürasyonu
+  static const AdvertisementConfig settingsBanner = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/1219547082', // Settings Banner - YENİ
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011',
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 1,
+  );
+
+  /// Success Interstitial (Her 3 başarılı transaction'da bir gösterilir)
+  static const AdvertisementConfig successInterstitial = AdvertisementConfig(
+    googleAdsAppId: 'ca-app-pub-8222217303967306~5324874321', // Gerçek App ID
+    bannerAdUnitId:
+        'ca-app-pub-8222217303967306/8275910028',
+    interstitialAdUnitId:
+        'ca-app-pub-8222217303967306/4529654011', // Success Interstitial - Mevcut
+    rewardedAdUnitId:
+        'ca-app-pub-8222217303967306/8010623702',
+    isTestMode: false,
+    showFrequency: 3, // Her 3 transaction'da bir
   );
 
   /// Geliştirme ortamı için konfigürasyon

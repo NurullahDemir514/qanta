@@ -6,6 +6,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/bank_service.dart';
 import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 
@@ -34,6 +35,8 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
   int _dueDate = 1;
   bool _isLoading = false;
   bool _isDebtMode = true; // true = borç, false = kullanılabilir limit
+  List<BankModel> _availableBanks = [];
+  bool _isLoadingBanks = false;
 
   // Helper methods to extract data from either CreditCardModel or Map
   String get cardId {
@@ -96,6 +99,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
   void initState() {
     super.initState();
     _initializeForm();
+    _loadBanks();
   }
 
   void _initializeForm() {
@@ -110,6 +114,55 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
     
     _statementDate = statementDate;
     _dueDate = dueDate;
+  }
+
+  /// Bankaları yükle (dinamik)
+  Future<void> _loadBanks() async {
+    setState(() {
+      _isLoadingBanks = true;
+    });
+
+    try {
+      final bankService = BankService();
+      await bankService.loadBanks();
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      _availableBanks = bankService.getAvailableBanks(currency: themeProvider.currency);
+      
+      // Fallback: Eğer hiç banka yoksa static listeyi kullan
+      if (_availableBanks.isEmpty) {
+        final staticBanks = AppConstants.getAvailableBanks();
+        _availableBanks = staticBanks.map((code) {
+          return BankModel(
+            code: code,
+            name: AppConstants.getBankName(code),
+            gradientColors: AppConstants.getBankGradientColors(code)
+                .map((c) => c.value)
+                .toList(),
+            accentColor: AppConstants.getBankAccentColor(code).value,
+            isActive: true,
+          );
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading banks: $e');
+      // Fallback: Static banks
+      final staticBanks = AppConstants.getAvailableBanks();
+      _availableBanks = staticBanks.map((code) {
+        return BankModel(
+          code: code,
+          name: AppConstants.getBankName(code),
+          gradientColors: AppConstants.getBankGradientColors(code)
+              .map((c) => c.value)
+              .toList(),
+          accentColor: AppConstants.getBankAccentColor(code).value,
+          isActive: true,
+        );
+      }).toList();
+    } finally {
+      setState(() {
+        _isLoadingBanks = false;
+      });
+    }
   }
 
   @override
@@ -179,10 +232,17 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
       _isDebtMode = isDebtMode;
       
       final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final locale = themeProvider.currency.locale;
       
       // Convert the current value based on the new mode
-      final currentValue = double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
-      final creditLimitValue = double.tryParse(_creditLimitController.text.replaceAll(',', '')) ?? 0.0;
+      final currentValue = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _totalDebtController.text,
+        locale,
+      );
+      final creditLimitValue = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _creditLimitController.text,
+        locale,
+      );
       
       if (isDebtMode) {
         // Switching to debt mode: current value is debt
@@ -210,10 +270,12 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
     try {
       final unifiedProvider = context.read<UnifiedProviderV2>();
       final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final locale = themeProvider.currency.locale;
 
-      final creditLimit =
-          double.tryParse(_creditLimitController.text.replaceAll(',', '')) ??
-          0.0;
+      final creditLimit = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _creditLimitController.text,
+        locale,
+      );
       
       // Toggle'a göre hesaplama
       double totalDebt;
@@ -221,12 +283,18 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
         // Borç modu: Girilen değer borç
         totalDebt = _totalDebtController.text.trim().isEmpty
             ? 0.0
-            : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+            : ThousandsSeparatorInputFormatter.parseLocaleDouble(
+                _totalDebtController.text,
+                locale,
+              );
       } else {
         // Limit modu: Girilen değer kullanılabilir limit, borç = kredi limiti - kullanılabilir limit
         final availableLimit = _totalDebtController.text.trim().isEmpty
             ? 0.0
-            : double.tryParse(_totalDebtController.text.replaceAll(',', '')) ?? 0.0;
+            : ThousandsSeparatorInputFormatter.parseLocaleDouble(
+                _totalDebtController.text,
+                locale,
+              );
         totalDebt = creditLimit - availableLimit;
       }
 
@@ -431,17 +499,19 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                         dropdownColor: isDark
                             ? const Color(0xFF2C2C2E)
                             : Colors.white,
-                        items: AppConstants.getAvailableBanks().map((bankCode) {
-                          return DropdownMenuItem(
-                            value: bankCode,
-                            child: Text(
-                              AppConstants.getBankName(bankCode),
-                              style: GoogleFonts.inter(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                        items: _isLoadingBanks
+                            ? [DropdownMenuItem(value: _selectedBankCode, child: const Text('Yükleniyor...'))]
+                            : _availableBanks.map((bank) {
+                                return DropdownMenuItem(
+                                  value: bank.code,
+                                  child: Text(
+                                    bank.name,
+                                    style: GoogleFonts.inter(
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
                         onChanged: (value) {
                           setState(() {
                             _selectedBankCode = value;
@@ -584,60 +654,65 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _creditLimitController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [ThousandsSeparatorInputFormatter()],
-                      decoration: InputDecoration(
-                        hintText: '50000',
-                        suffixText: Provider.of<ThemeProvider>(
-                          context,
-                          listen: false,
-                        ).currency.symbol,
-                        filled: true,
-                        fillColor: isDark
-                            ? const Color(0xFF2C2C2E)
-                            : const Color(0xFFF2F2F7),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: isDark
-                                ? const Color(0xFF38383A)
-                                : const Color(0xFFE5E5EA),
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        final locale = themeProvider.currency.locale;
+                        return TextFormField(
+                          controller: _creditLimitController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
                           ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: isDark
-                                ? const Color(0xFF38383A)
-                                : const Color(0xFFE5E5EA),
+                          inputFormatters: [
+                            ThousandsSeparatorInputFormatter(locale: locale)
+                          ],
+                          decoration: InputDecoration(
+                            hintText: '50000',
+                            suffixText: themeProvider.currency.symbol,
+                            filled: true,
+                            fillColor: isDark
+                                ? const Color(0xFF2C2C2E)
+                                : const Color(0xFFF2F2F7),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF38383A)
+                                    : const Color(0xFFE5E5EA),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF38383A)
+                                    : const Color(0xFFE5E5EA),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF6D6D70),
+                                width: 2,
+                              ),
+                            ),
                           ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF6D6D70),
-                            width: 2,
+                          style: GoogleFonts.inter(
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                        ),
-                      ),
-                      style: GoogleFonts.inter(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return AppLocalizations.of(context)?.creditLimitRequired ?? 'Credit limit is required';
-                        }
-                        final amount = double.tryParse(
-                          value.replaceAll(',', ''),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return AppLocalizations.of(context)?.creditLimitRequired ?? 'Credit limit is required';
+                            }
+                            final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+                              value,
+                              locale,
+                            );
+                            if (amount <= 0) {
+                              return AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
+                            }
+                            return null;
+                          },
                         );
-                        if (amount == null || amount <= 0) {
-                          return AppLocalizations.of(context)?.pleaseEnterValidAmount ?? 'Please enter a valid amount';
-                        }
-                        return null;
                       },
                     ),
 
@@ -739,49 +814,53 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _totalDebtController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [ThousandsSeparatorInputFormatter()],
-                      decoration: InputDecoration(
-                        hintText: _isDebtMode ? '0' : '0',
-                        suffixText: Provider.of<ThemeProvider>(
-                          context,
-                          listen: false,
-                        ).currency.symbol,
-                        filled: true,
-                        fillColor: isDark
-                            ? const Color(0xFF2C2C2E)
-                            : const Color(0xFFF2F2F7),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: isDark
-                                ? const Color(0xFF38383A)
-                                : const Color(0xFFE5E5EA),
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        final locale = themeProvider.currency.locale;
+                        return TextFormField(
+                          controller: _totalDebtController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
                           ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: isDark
-                                ? const Color(0xFF38383A)
-                                : const Color(0xFFE5E5EA),
+                          inputFormatters: [
+                            ThousandsSeparatorInputFormatter(locale: locale)
+                          ],
+                          decoration: InputDecoration(
+                            hintText: _isDebtMode ? '0' : '0',
+                            suffixText: themeProvider.currency.symbol,
+                            filled: true,
+                            fillColor: isDark
+                                ? const Color(0xFF2C2C2E)
+                                : const Color(0xFFF2F2F7),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF38383A)
+                                    : const Color(0xFFE5E5EA),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF38383A)
+                                    : const Color(0xFFE5E5EA),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF6D6D70),
+                                width: 2,
+                              ),
+                            ),
                           ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF6D6D70),
-                            width: 2,
+                          style: GoogleFonts.inter(
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                        ),
-                      ),
-                      style: GoogleFonts.inter(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 30),

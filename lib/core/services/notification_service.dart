@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workmanager/workmanager.dart';
 import '../../routes/app_router.dart';
 import '../../l10n/app_localizations.dart';
+import 'remote_config_service.dart';
 
 /// Service for managing push notifications
 ///
@@ -18,28 +22,32 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
+  static const String notificationTaskName = 'qanta_notification_task';
+  
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
-  Timer? _notificationTimer;
   final int _notificationId = 0;
   BuildContext? _context;
-  int _notificationCounter = 0;
 
   /// Initialize notification service
-  Future<void> initialize() async {
+  /// 
+  /// [requestPermission] - If true, requests notification permission immediately.
+  /// If false, only initializes the service without requesting permission.
+  /// Default is false (2025 best practice: request permission when user needs it)
+  Future<void> initialize({bool requestPermission = false}) async {
     // Android initialization settings with notification channel
     const androidSettings = AndroidInitializationSettings(
       '@drawable/ic_notification_q',
     );
 
-    // iOS initialization settings
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+    // iOS initialization settings (can't be const because requestPermission is variable)
+    final iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: requestPermission, // Only request if explicitly asked
+      requestBadgePermission: requestPermission,
+      requestSoundPermission: requestPermission,
     );
 
-    const initSettings = InitializationSettings(
+    final initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
@@ -52,8 +60,10 @@ class NotificationService {
     // Create Android notification channel (Android 8+)
     await _createNotificationChannel();
 
-    // Request permissions
-    await _requestPermissions();
+    // Request permissions only if explicitly requested
+    if (requestPermission) {
+      await _requestPermissions();
+    }
   }
 
   /// Create notification channel for Android 8+
@@ -116,151 +126,157 @@ class NotificationService {
     final status = await Permission.notification.status;
     return status.isGranted;
   }
+  
+  /// Request notification permission with context (2025 best practice)
+  /// This should be called when user explicitly needs notifications (e.g., adding subscription)
+  Future<bool> requestNotificationPermission(BuildContext? context) async {
+    try {
+      // Check current status
+      final status = await Permission.notification.status;
+      
+      if (status.isGranted) {
+        return true;
+      }
+      
+      if (status.isPermanentlyDenied) {
+        // Open settings if permanently denied
+        if (context != null) {
+          await openAppSettings();
+        }
+        return false;
+      }
+      
+      // Request permission
+      final result = await Permission.notification.request();
+      
+      if (result.isGranted) {
+        debugPrint('✅ Notification permission granted');
+        return true;
+      } else {
+        debugPrint('❌ Notification permission denied: $result');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ Error requesting notification permission: $e');
+      return false;
+    }
+  }
 
-  /// Start scheduled notifications (every 15 minutes)
-  void startScheduledNotifications() {
-    stopScheduledNotifications(); // Stop any existing timers
-
-    _schedulePeriodicNotifications();
+  /// Start scheduled notifications using Workmanager (dynamic interval from Remote Config)
+  Future<void> startScheduledNotifications() async {
+    await stopScheduledNotifications(); // Stop any existing tasks
+    
+    // Check if notifications are enabled in Remote Config
+    bool notificationsEnabled = true;
+    int intervalMinutes = 15; // Default fallback
+    
+    try {
+      final remoteConfig = RemoteConfigService();
+      await remoteConfig.initialize();
+      
+      // Check if notifications are enabled
+      notificationsEnabled = remoteConfig.areNotificationsEnabled();
+      if (!notificationsEnabled) {
+        print('🔕 Notifications disabled in Remote Config - skipping registration');
+        return;
+      }
+      
+      // Get interval
+      intervalMinutes = remoteConfig.getNotificationIntervalMinutes();
+      
+      // Android minimum is 15 minutes
+      if (intervalMinutes < 15) {
+        print('⚠️ Interval $intervalMinutes minutes is too low, using Android minimum: 15 minutes');
+        intervalMinutes = 15;
+      }
+    } catch (e) {
+      print('⚠️ Failed to get config from Remote Config, using defaults');
+    }
+    
+    // Register periodic task with Workmanager
+    await Workmanager().registerPeriodicTask(
+      notificationTaskName,
+      notificationTaskName,
+      frequency: Duration(minutes: intervalMinutes),
+      initialDelay: const Duration(seconds: 10), // Start after 10 seconds
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
+      constraints: Constraints(
+        networkType: NetworkType.notRequired,
+        requiresBatteryNotLow: false,
+        requiresCharging: false,
+        requiresDeviceIdle: false,
+        requiresStorageNotLow: false,
+      ),
+    );
+    
+    print('✅ Workmanager notification task registered (every $intervalMinutes minutes)');
   }
 
   /// Stop scheduled notifications
-  void stopScheduledNotifications() {
-    _notificationTimer?.cancel();
-    _notificationTimer = null;
+  Future<void> stopScheduledNotifications() async {
+    await Workmanager().cancelByUniqueName(notificationTaskName);
+    print('🛑 Workmanager notification task cancelled');
   }
 
-  /// Schedule periodic notifications every 15 minutes
-  void _schedulePeriodicNotifications() {
-    // Get localization
-    final context = _context ?? _getDefaultContext();
-    if (context == null) return;
-    
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return;
-
-    // Array of notification messages
-    final notificationMessages = [
-      {'title': l10n.lunchBreak, 'body': l10n.lunchBreakMessage},
-      {'title': l10n.eveningCheck, 'body': l10n.eveningCheckMessage},
-      {'title': l10n.dayEnd, 'body': l10n.dayEndMessage},
-      {'title': l10n.qantaReminders, 'body': l10n.reminderChannelDescription},
-    ];
-
-    // Start periodic timer for 15 minutes (900 seconds)
-    _notificationTimer = Timer.periodic(
-      const Duration(minutes: 15),
-      (timer) {
-        // Get current message (cycle through messages)
-        final message = notificationMessages[_notificationCounter % notificationMessages.length];
-        
-        _showNotification(
-          title: message['title']!,
-          body: message['body']!,
-          payload: 'home_screen',
-        );
-
-        // Increment counter
-        _notificationCounter++;
-      },
-    );
-
-    // Show first notification immediately
-    final firstMessage = notificationMessages[0];
-    _showNotification(
-      title: firstMessage['title']!,
-      body: firstMessage['body']!,
-      payload: 'home_screen',
-    );
-    _notificationCounter++;
-  }
-
-  /// Schedule notification at specific hour and minute
-  void _scheduleNotificationAt(
-    int hour,
-    int minute,
-    String title,
-    String body,
-  ) {
-    final now = DateTime.now();
-    var scheduledTime = DateTime(now.year, now.month, now.day, hour, minute);
-
-    // If the time has passed today, schedule for tomorrow
-    if (scheduledTime.isBefore(now)) {
-      scheduledTime = scheduledTime.add(const Duration(days: 1));
-    }
-
-    final duration = scheduledTime.difference(now);
-
-    Timer(duration, () {
-      _showNotification(title: title, body: body, payload: 'home_screen');
-
-      // Schedule next day's notification
-      _scheduleNotificationAt(hour, minute, title, body);
-    });
-  }
-
-  /// Show notification
-  Future<void> _showNotification({
+  /// Show notification (callable from background)
+  static Future<void> showNotification({
     required String title,
     required String body,
     String? payload,
   }) async {
-    // Check permissions first
-    final hasPermission = await Permission.notification.isGranted;
-    print('Showing scheduled notification. Has permission: $hasPermission');
-
-    if (!hasPermission) {
-      print('No notification permission. Requesting permission...');
-      // İzin yoksa iste
-      final requestResult = await Permission.notification.request();
-      print('Permission request result: $requestResult');
-      
-      // İzin verilmezse bildirim gönderme
-      if (!requestResult.isGranted) {
-        print('Permission denied. Cannot show scheduled notification.');
-        return;
-      }
-    }
-
-    // Get localization for notification details
-    final context = _context ?? _getDefaultContext();
-    final l10n = context != null ? AppLocalizations.of(context) : null;
-    
-    final androidDetails = AndroidNotificationDetails(
-      'qanta_reminders',
-      l10n?.qantaReminders ?? 'Qanta Reminders',
-      channelDescription: l10n?.reminderChannelDescription ?? 'Expense and income reminders',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-      icon: '@drawable/ic_notification_q',
-      ongoing: false, // Not persistent, can be dismissed
-      autoCancel: true, // Can be dismissed by user
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
     try {
-      await _notifications.show(
-        _notificationId,
+      // Create notification plugin instance
+      final FlutterLocalNotificationsPlugin notifications = FlutterLocalNotificationsPlugin();
+      
+      // Initialize notification plugin for background
+      const androidSettings = AndroidInitializationSettings('@drawable/ic_notification_q');
+      const iosSettings = DarwinInitializationSettings();
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
+      
+      await notifications.initialize(initSettings);
+      
+      // Note: Permission check is skipped in background as it may not work
+      // Permission should be granted when app is first opened
+
+      const androidDetails = AndroidNotificationDetails(
+        'qanta_reminders',
+        'Qanta Reminders',
+        channelDescription: 'Expense and income reminders',
+        importance: Importance.high,
+        priority: Priority.high,
+        showWhen: true,
+        icon: '@drawable/ic_notification_q',
+        ongoing: false,
+        autoCancel: true,
+        playSound: true,
+        enableVibration: true,
+      );
+
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final notificationId = DateTime.now().millisecondsSinceEpoch.remainder(100000);
+      
+      await notifications.show(
+        notificationId,
         title,
         body,
         details,
         payload: payload,
       );
-      print('Scheduled notification shown successfully');
     } catch (e) {
-      print('Error showing scheduled notification: $e');
+      // Silently fail - notification service should not crash the app
     }
   }
 
@@ -296,7 +312,69 @@ class NotificationService {
   }
 
   /// Dispose resources
-  void dispose() {
-    stopScheduledNotifications();
+  Future<void> dispose() async {
+    await stopScheduledNotifications();
+  }
+  
+  /// Get notification messages for background task (from Remote Config)
+  /// Kullanıcının uygulama diline göre mesajları getirir
+  static Future<Map<String, Map<String, String>>> getNotificationMessages() async {
+    try {
+      // Sistem dilini al (background isolate'de çalışır)
+      final systemLocale = _getSystemLocale();
+      final languageCode = systemLocale.startsWith('tr') ? 'tr' : 'en';
+      
+      final remoteConfig = RemoteConfigService();
+      await remoteConfig.initialize();
+      await remoteConfig.fetchAndActivate();
+      
+      final messages = remoteConfig.getNotificationMessages(languageCode);
+      
+      if (messages.isEmpty) {
+        return _getDefaultMessages(languageCode);
+      }
+      
+      return messages;
+    } catch (e) {
+      print('❌ Error fetching notification messages from Remote Config: $e');
+      return _getDefaultMessages('tr'); // Fallback to Turkish
+    }
+  }
+  
+  /// Sistem dilini al
+  static String _getSystemLocale() {
+    try {
+      // Platform locale'i al
+      return PlatformDispatcher.instance.locale.languageCode;
+    } catch (e) {
+      return 'tr'; // Default to Turkish
+    }
+  }
+  
+  /// Default notification messages (fallback - dile göre)
+  static Map<String, Map<String, String>> _getDefaultMessages(String languageCode) {
+    if (languageCode == 'tr') {
+      return {
+        'morning': {'title': 'Günaydın! 🌅', 'body': 'Bugünkü bütçenizi kontrol edin'},
+        'lunch': {'title': 'Öğle Arası 🍽️', 'body': 'Öğle yemeği harcamanızı eklediniz mi?'},
+        'afternoon': {'title': 'Öğleden Sonra ☕', 'body': 'Küçük harcamalarınızı kaydetmeyi unutmayın'},
+        'evening': {'title': 'Akşam Saati 🌆', 'body': 'Alışverişlerinizi kaydetme zamanı'},
+        'night': {'title': 'Gün Sonu 🌙', 'body': 'Bugünkü işlemlerinizi gözden geçirin'},
+        'weekend_morning': {'title': 'Hafta Sonu 🎯', 'body': 'Haftalık harcamalarınızı inceleyin'},
+        'weekend_evening': {'title': 'Hafta Sonu Özeti 📊', 'body': 'Gelecek hafta için planınızı yapın'},
+        'general': {'title': 'Qanta Hatırlatıcı', 'body': 'Finanslarınızı düzenli tutun'},
+      };
+    } else {
+      return {
+        'morning': {'title': 'Good Morning! 🌅', 'body': 'Check your budget for today'},
+        'lunch': {'title': 'Lunch Time 🍽️', 'body': 'Have you tracked your lunch expenses?'},
+        'afternoon': {'title': 'Afternoon Break ☕', 'body': 'Don\'t forget to track small expenses'},
+        'evening': {'title': 'Evening Time 🌆', 'body': 'Time to record your shopping'},
+        'night': {'title': 'Day End 🌙', 'body': 'Review your today\'s transactions'},
+        'weekend_morning': {'title': 'Weekend 🎯', 'body': 'Review your weekly spending'},
+        'weekend_evening': {'title': 'Weekend Summary 📊', 'body': 'Plan for next week'},
+        'general': {'title': 'Qanta Reminder', 'body': 'Keep your finances organized'},
+      };
+    }
   }
 }

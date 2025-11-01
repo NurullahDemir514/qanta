@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/theme/theme_provider.dart';
+import '../../../../shared/widgets/thousands_separator_input_formatter.dart';
 
 class RateInputField extends StatelessWidget {
   final TextEditingController controller;
@@ -29,6 +32,8 @@ class RateInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final locale = themeProvider.currency.locale;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +73,7 @@ class RateInputField extends StatelessWidget {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.done,
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ThousandsSeparatorInputFormatter(locale: locale),
             ],
             cursorColor: isDark ? Colors.white : Colors.black,
             cursorWidth: 2,

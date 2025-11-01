@@ -1,5 +1,14 @@
 {
-  "greeting": "Hello {name}! 👋 How can I help you? Would you like to add a transaction?",
+  "greetings": [
+    "Hello {name}! 👋 How can I help you? Would you like to add a transaction?",
+    "Hey {name}! 😊 What transaction would you like to add today?",
+    "Hi {name}! 💰 Your financial assistant is ready. Expense or income?",
+    "Welcome back {name}! ✨ Ready to add a new transaction.",
+    "Hello {name}! 🌟 What would you like to do? Add transaction or analyze?",
+    "{name}, welcome back! 🎯 How should we track your budget today?",
+    "Hi {name}! 📊 Shall we update your financial data?",
+    "Hey {name}! 💡 Would you like to add a new expense or income?"
+  ],
   "howAmI": "This month you earned {income} and spent {expense}. {balance} {status}",
   "balancePositive": "positive balance 👏",
   "balanceNegative": "negative balance ⚠️",
@@ -42,6 +51,23 @@
     "10": "October",
     "11": "November",
     "12": "December"
+  },
+  "limits": {
+    "premiumMonthly": "You've reached your {period} limit ({limit}). Your limit will renew at the end of the month.",
+    "freeWithBonus": "You've reached your {period} {type} limit. Watch an ad to get +5 extra queries.",
+    "freeWithoutBonus": "You've reached your {period} {type} limit. Upgrade to Premium to get 1500 messages per month.",
+    "types": {
+      "chat": "message",
+      "chat_with_image": "image message"
+    },
+    "periods": {
+      "daily": "daily",
+      "monthly": "monthly"
+    }
+  },
+  "cards": {
+    "limitReached": "Free users can add up to 3 cards. Upgrade to Premium for unlimited cards!",
+    "limitExceeded": "You have {count} cards (from Premium plan)\n\nFree users can use max 3 cards. Please delete {deleteCount} cards or upgrade to Premium."
   }
 }
 

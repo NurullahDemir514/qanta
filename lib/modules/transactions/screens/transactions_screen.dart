@@ -15,6 +15,7 @@ import '../widgets/transaction_combined_filters.dart';
 import '../widgets/transaction_sort_selector.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../shared/utils/currency_utils.dart';
 import '../../stocks/providers/stock_provider.dart';
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
@@ -49,9 +50,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     super.initState();
     // V2 provider will handle data loading automatically
     
-    // İşlemler sayfası banner reklamını başlat
+    // İşlemler sayfası banner reklamını başlat - YENİ BANNER
     _transactionsBannerService = GoogleAdsRealBannerService(
-      adUnitId: config.AdvertisementConfig.production.bannerAdUnitId,
+      adUnitId: config.AdvertisementConfig.transactionsListBanner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
       isTestMode: false,
     );
@@ -60,7 +61,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
     
     debugPrint('🔄 İŞLEMLER SAYFASI Banner reklam yükleniyor...');
-    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.production.bannerAdUnitId}');
+    debugPrint('📱 Ad Unit ID: ${config.AdvertisementConfig.transactionsListBanner.bannerAdUnitId}');
     debugPrint('🧪 Test Mode: false');
     debugPrint('📍 Konum: İşlemler sayfası - Gelir/Gider kartı altı');
     
@@ -120,7 +121,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final daysDiff = now.difference(firstTransactionDate).inDays + 1;
     final dailyAverage = totalExpense / daysDiff;
 
-    return '${l10n.dailyAverageExpense}: ${NumberFormat.currency(locale: 'tr_TR', symbol: '₺').format(dailyAverage)}';
+    // Get user's currency preference
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    final formattedAmount = CurrencyUtils.formatAmount(dailyAverage, currency);
+
+    return '${l10n.dailyAverageExpense}: $formattedAmount';
   }
 
   List<v2.TransactionWithDetailsV2> _getFilteredTransactions(
@@ -564,15 +569,28 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
 
     // Format amount with dynamic currency
-    final currencySymbol = Provider.of<ThemeProvider>(
+    final currency = Provider.of<ThemeProvider>(
       context,
       listen: false,
-    ).currency.symbol;
-    final amount = TransactionDesignSystem.formatAmount(
-      transaction.amount,
-      transactionType,
-      currencySymbol: currencySymbol,
-    );
+    ).currency;
+    
+    // Use CurrencyUtils directly for proper formatting
+    final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(transaction.amount.abs(), currency);
+    final currencySymbol = currency.symbol;
+    
+    // Apply prefix based on transaction type
+    String amount;
+    switch (transactionType) {
+      case TransactionType.income:
+        amount = '+$formattedAmount$currencySymbol';
+        break;
+      case TransactionType.expense:
+        amount = '-$formattedAmount$currencySymbol';
+        break;
+      case TransactionType.transfer:
+        amount = '$formattedAmount$currencySymbol';
+        break;
+    }
 
     // Use displayTime from transaction model and localize it
     final rawTime = transaction.displayTime;
@@ -631,10 +649,23 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       double? installmentMonthlyAmount =
           installmentTotalAmount / (installmentCount ?? 1);
 
+      // Prepare display title with description
+      String displayTitle = transaction.categoryName ?? transaction.description;
+      
+      // Add description if available
+      if (transaction.description.isNotEmpty) {
+        String cleanDescription = transaction.description
+            .replaceAll(RegExp(r'\s*\(\d+ taksit\)\s*'), '')
+            .trim();
+        
+        if (cleanDescription.isNotEmpty && cleanDescription != displayTitle) {
+          displayTitle = '$displayTitle • $cleanDescription';
+        }
+      }
+
       return InstallmentExpandableCard(
         installmentId: transaction.installmentId,
-        title:
-            transaction.categoryName ?? transaction.description, // Kategori adı
+        title: displayTitle, // Kategori adı + açıklama
         subtitle: cardName, // Banka adı
         amount: amount,
         time: time,
@@ -655,12 +686,27 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       );
     }
 
-    // Regular transaction - use Firebase integrated design system
-    return TransactionDesignSystem.buildTransactionItemFromV2(
-      context: context,
-      transaction: transaction,
-      isDark: isDark,
+    // Prepare display title with description for regular transactions
+    String displayTitle = transaction.getLocalizedDisplayTitle(context);
+    
+    if (transaction.description.isNotEmpty) {
+      String cleanDescription = transaction.description
+          .replaceAll(RegExp(r'\s*\(\d+ taksit\)\s*'), '')
+          .trim();
+      
+      if (cleanDescription.isNotEmpty && cleanDescription != displayTitle) {
+        displayTitle = '$displayTitle • $cleanDescription';
+      }
+    }
+
+    // Regular transaction - use direct build method with custom title
+    return TransactionDesignSystem.buildTransactionItem(
+      title: displayTitle,
+      subtitle: cardName,
+      amount: amount,
       time: time,
+      type: transactionType,
+      isDark: isDark,
       categoryIconData: categoryIcon,
       onLongPress: () {
         _showTransactionDeleteDialog(context, transaction);

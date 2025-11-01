@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_tr.dart';
 
@@ -94,6 +95,7 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
     Locale('en'),
     Locale('tr'),
   ];
@@ -163,6 +165,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Turkish'**
   String get turkish;
+
+  /// German language option
+  ///
+  /// In en, this message translates to:
+  /// **'German'**
+  String get german;
 
   /// Login button text
   ///
@@ -515,8 +523,8 @@ abstract class AppLocalizations {
   /// Available balance label
   ///
   /// In en, this message translates to:
-  /// **'Available Balance'**
-  String get availableBalance;
+  /// **'Available: {amount}'**
+  String availableBalance(Object amount);
 
   /// This month income label
   ///
@@ -560,10 +568,10 @@ abstract class AppLocalizations {
   /// **'This Month Summary'**
   String get thisMonthSummary;
 
-  /// Savings card type
+  /// Savings tab title
   ///
   /// In en, this message translates to:
-  /// **'SAVINGS'**
+  /// **'Savings'**
   String get savings;
 
   /// Budget used label
@@ -572,7 +580,7 @@ abstract class AppLocalizations {
   /// **'Used'**
   String get budgetUsed;
 
-  /// Remaining amount label
+  /// Remaining label
   ///
   /// In en, this message translates to:
   /// **'Remaining'**
@@ -626,10 +634,10 @@ abstract class AppLocalizations {
   /// **'Add Expense'**
   String get addExpense;
 
-  /// Expense limit tracking title
+  /// My budgets title - user's personal budgets section
   ///
   /// In en, this message translates to:
-  /// **'Expense Limit Tracking'**
+  /// **'My Budgets'**
   String get expenseLimitTracking;
 
   /// Future filter label
@@ -794,7 +802,7 @@ abstract class AppLocalizations {
   /// **'About'**
   String get about;
 
-  /// Edit action
+  /// Edit button
   ///
   /// In en, this message translates to:
   /// **'Edit'**
@@ -860,7 +868,7 @@ abstract class AppLocalizations {
   /// **'Transactions'**
   String get transactions;
 
-  /// Goals menu item
+  /// Goals plural
   ///
   /// In en, this message translates to:
   /// **'Goals'**
@@ -908,7 +916,7 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get status;
 
-  /// Active status
+  /// Active label
   ///
   /// In en, this message translates to:
   /// **'Active'**
@@ -1004,7 +1012,7 @@ abstract class AppLocalizations {
   /// **'Transaction notifications and alerts'**
   String get notificationSettingsDesc;
 
-  /// Transaction history option
+  /// Transaction history title
   ///
   /// In en, this message translates to:
   /// **'Transaction History'**
@@ -1214,10 +1222,10 @@ abstract class AppLocalizations {
   /// **'Cash balance added: {amount}'**
   String cashAdded(String amount);
 
-  /// Invalid amount error
+  /// Invalid amount validation message
   ///
   /// In en, this message translates to:
-  /// **'Invalid amount'**
+  /// **'Please enter a valid amount'**
   String get invalidAmount;
 
   /// Enter valid amount validation message
@@ -1321,6 +1329,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Installment Options'**
   String get installmentOptions;
+
+  /// Single payment (no installments)
+  ///
+  /// In en, this message translates to:
+  /// **'Single Payment'**
+  String get singlePayment;
+
+  /// How many installments question
+  ///
+  /// In en, this message translates to:
+  /// **'How many installments?'**
+  String get howManyInstallments;
 
   /// Installment options description
   ///
@@ -1466,13 +1486,13 @@ abstract class AppLocalizations {
   /// **'Final review and details'**
   String get lastCheckAndDetails;
 
-  /// Summary step
+  /// Summary step title
   ///
   /// In en, this message translates to:
   /// **'Summary'**
   String get summary;
 
-  /// Category placeholder
+  /// Category label
   ///
   /// In en, this message translates to:
   /// **'Category'**
@@ -1688,6 +1708,12 @@ abstract class AppLocalizations {
   /// **'Subscription'**
   String get subscription;
 
+  /// Checkbox label for recurring transaction
+  ///
+  /// In en, this message translates to:
+  /// **'This is a subscription'**
+  String get thisIsSubscription;
+
   /// Utilities category
   ///
   /// In en, this message translates to:
@@ -1748,17 +1774,41 @@ abstract class AppLocalizations {
   /// **'Other recurring payments'**
   String get otherDescription;
 
-  /// Next button text
+  /// Next button
   ///
   /// In en, this message translates to:
   /// **'Next'**
   String get next;
 
-  /// Save
+  /// Save button
   ///
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
+
+  /// Automatic label
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get automatic;
+
+  /// Note for automatically created subscription transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Created automatically (Subscription)'**
+  String get createdAutomatically;
+
+  /// Notification message for single automatic payment
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic payment created'**
+  String get automaticPaymentCreated;
+
+  /// Notification message for multiple automatic payments
+  ///
+  /// In en, this message translates to:
+  /// **'{count} automatic payments created'**
+  String automaticPaymentsCreated(int count);
 
   /// Income form opening message
   ///
@@ -2312,7 +2362,7 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get exitCancel;
 
-  /// Back button tooltip
+  /// Back button
   ///
   /// In en, this message translates to:
   /// **'Back'**
@@ -2348,7 +2398,7 @@ abstract class AppLocalizations {
   /// **'New Balance'**
   String get newBalance;
 
-  /// Update button text
+  /// Update button
   ///
   /// In en, this message translates to:
   /// **'Update'**
@@ -2366,7 +2416,7 @@ abstract class AppLocalizations {
   /// **'Error loading cash account'**
   String get cashAccountLoadError;
 
-  /// Retry button text
+  /// Retry button
   ///
   /// In en, this message translates to:
   /// **'Retry'**
@@ -2468,16 +2518,16 @@ abstract class AppLocalizations {
   /// **'How much will you transfer?'**
   String get howMuchTransfer;
 
-  /// From which account question
+  /// From which account label
   ///
   /// In en, this message translates to:
-  /// **'From which account?'**
+  /// **'From Which Account?'**
   String get fromWhichAccount;
 
-  /// To which account question
+  /// To which account label
   ///
   /// In en, this message translates to:
-  /// **'To which account?'**
+  /// **'To Which Account?'**
   String get toWhichAccount;
 
   /// Investment income category
@@ -2582,7 +2632,7 @@ abstract class AppLocalizations {
   /// **'Save Recurring Payment'**
   String get saveRecurringPayment;
 
-  /// No transactions message
+  /// No transactions yet message
   ///
   /// In en, this message translates to:
   /// **'No transactions yet'**
@@ -3044,7 +3094,7 @@ abstract class AppLocalizations {
   /// **'transaction. Are you sure you want to delete it?'**
   String deleteTransactionConfirm(String description);
 
-  /// Delete button text
+  /// Delete button
   ///
   /// In en, this message translates to:
   /// **'Delete'**
@@ -3116,13 +3166,13 @@ abstract class AppLocalizations {
   /// **'Delete Limit'**
   String get deleteLimitTooltip;
 
-  /// Error label
+  /// Error title
   ///
   /// In en, this message translates to:
   /// **'Error'**
   String get error;
 
-  /// Loading message
+  /// Loading text
   ///
   /// In en, this message translates to:
   /// **'Loading...'**
@@ -3236,6 +3286,30 @@ abstract class AppLocalizations {
   /// **'Notification permission required! Please enable it in settings.'**
   String get notificationPermissionRequired;
 
+  /// Enable notifications dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Notifications'**
+  String get enableNotifications;
+
+  /// Subscription notification permission explanation message
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to receive automatic notifications for subscription payments? Notifications will remind you when payments are made and about upcoming payment dates.'**
+  String get subscriptionNotificationPermissionMessage;
+
+  /// Not now button text
+  ///
+  /// In en, this message translates to:
+  /// **'Not Now'**
+  String get notNow;
+
+  /// Enable button text
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
+
   /// Frequently Asked Questions
   ///
   /// In en, this message translates to:
@@ -3254,7 +3328,7 @@ abstract class AppLocalizations {
   /// **'Now'**
   String get now;
 
-  /// Yesterday
+  /// Yesterday label
   ///
   /// In en, this message translates to:
   /// **'Yesterday'**
@@ -3272,7 +3346,7 @@ abstract class AppLocalizations {
   /// **'Transfer'**
   String get transfer;
 
-  /// Today
+  /// Today label
   ///
   /// In en, this message translates to:
   /// **'Today'**
@@ -3350,11 +3424,17 @@ abstract class AppLocalizations {
   /// **'2 days ago'**
   String get twoDaysAgo;
 
-  /// Per month text
+  /// Per month suffix
   ///
   /// In en, this message translates to:
-  /// **'/mo'**
+  /// **'/ month'**
   String get perMonth;
+
+  /// Per day indicator
+  ///
+  /// In en, this message translates to:
+  /// **'/day'**
+  String get perDay;
 
   /// Net balance label
   ///
@@ -3362,13 +3442,13 @@ abstract class AppLocalizations {
   /// **'Net'**
   String get net;
 
-  /// Please enter an amount message
+  /// Amount validation message
   ///
   /// In en, this message translates to:
   /// **'Please enter an amount'**
   String get pleaseEnterAmount;
 
-  /// Please enter a valid amount message
+  /// Valid amount validation message
   ///
   /// In en, this message translates to:
   /// **'Please enter a valid amount'**
@@ -3734,7 +3814,7 @@ abstract class AppLocalizations {
   /// **'Error selecting photo'**
   String get photoSelectionError;
 
-  /// Add
+  /// Add button
   ///
   /// In en, this message translates to:
   /// **'Add'**
@@ -3866,10 +3946,10 @@ abstract class AppLocalizations {
   /// **'Last Payment'**
   String get lastPayment;
 
-  /// Next Payment
+  /// Next payment label
   ///
   /// In en, this message translates to:
-  /// **'Next Payment'**
+  /// **'Next'**
   String get nextPayment;
 
   /// Minimum Payment
@@ -4568,7 +4648,7 @@ abstract class AppLocalizations {
   /// **'Initial Balance'**
   String get initialBalance;
 
-  /// day
+  /// Day label singular
   ///
   /// In en, this message translates to:
   /// **'day'**
@@ -4795,6 +4875,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Avg. Price'**
   String get averagePrice;
+
+  /// Average (short form)
+  ///
+  /// In en, this message translates to:
+  /// **'Avg'**
+  String get avg;
 
   /// Stock information section title
   ///
@@ -5306,11 +5392,17 @@ abstract class AppLocalizations {
   /// **'Total'**
   String get total;
 
-  /// Pieces unit
+  /// Pieces unit (singular)
   ///
   /// In en, this message translates to:
   /// **'lot'**
   String get pieces;
+
+  /// Pieces unit (plural)
+  ///
+  /// In en, this message translates to:
+  /// **'lots'**
+  String get piecesPlural;
 
   /// Total transactions count
   ///
@@ -5621,7 +5713,7 @@ abstract class AppLocalizations {
   /// Select account label
   ///
   /// In en, this message translates to:
-  /// **'Select Account'**
+  /// **'Select Payment Account'**
   String get selectAccount;
 
   /// Please select stock message
@@ -5630,10 +5722,10 @@ abstract class AppLocalizations {
   /// **'Please select a stock'**
   String get pleaseSelectStock;
 
-  /// Please select account validation error
+  /// Please select account validation
   ///
   /// In en, this message translates to:
-  /// **'Please select an account for each transaction'**
+  /// **'Please select an account'**
   String get pleaseSelectAccount;
 
   /// No stock selected message
@@ -5822,10 +5914,10 @@ abstract class AppLocalizations {
   /// **'Weight'**
   String get portfolioRatio;
 
-  /// Insufficient balance warning title
+  /// Insufficient balance error
   ///
   /// In en, this message translates to:
-  /// **'Insufficient Balance'**
+  /// **'Insufficient balance'**
   String get insufficientBalance;
 
   /// Insufficient balance warning message
@@ -6908,7 +7000,7 @@ abstract class AppLocalizations {
   /// **'You exceeded your budget by {amount}'**
   String budgetExceededBy(Object amount);
 
-  /// Days text
+  /// Days label
   ///
   /// In en, this message translates to:
   /// **'days'**
@@ -6974,60 +7066,6 @@ abstract class AppLocalizations {
   /// **'This amount is your total budget divided by remaining days.'**
   String get defaultSpendingExplanation;
 
-  /// Analytics consent modal title
-  ///
-  /// In en, this message translates to:
-  /// **'Help Us Improve the App'**
-  String get analyticsConsentTitle;
-
-  /// Analytics consent modal message
-  ///
-  /// In en, this message translates to:
-  /// **'We want to make Qanta better for you! By collecting anonymous spending data, we can improve the app and offer better features.\n\n• Your data is completely anonymous\n• Personal information is never shared\n• Only spending amounts and categories are collected\n• You can opt out anytime'**
-  String get analyticsConsentMessage;
-
-  /// Accept analytics consent button
-  ///
-  /// In en, this message translates to:
-  /// **'I Accept'**
-  String get analyticsAccept;
-
-  /// Decline analytics consent button
-  ///
-  /// In en, this message translates to:
-  /// **'No, Thanks'**
-  String get analyticsDecline;
-
-  /// Analytics consent change notice
-  ///
-  /// In en, this message translates to:
-  /// **'You can change this permission in Profile > Preferences.'**
-  String get analyticsConsentNotice;
-
-  /// Anonymous data collection setting title
-  ///
-  /// In en, this message translates to:
-  /// **'Anonymous Data Collection'**
-  String get anonymousDataCollection;
-
-  /// Anonymous data collection setting subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Share anonymous spending data\nto help improve the app'**
-  String get anonymousDataCollectionSubtitle;
-
-  /// Analytics enabled message
-  ///
-  /// In en, this message translates to:
-  /// **'Anonymous data collection enabled'**
-  String get analyticsEnabled;
-
-  /// Analytics disabled message
-  ///
-  /// In en, this message translates to:
-  /// **'Anonymous data collection disabled'**
-  String get analyticsDisabled;
-
   /// Card limit reached title
   ///
   /// In en, this message translates to:
@@ -7040,7 +7078,19 @@ abstract class AppLocalizations {
   /// **'You can add up to 3 cards in the free version'**
   String get cardLimitReachedMessage;
 
-  /// Upgrade to premium button
+  /// Card limit exceeded title for downgraded users
+  ///
+  /// In en, this message translates to:
+  /// **'Card Limit'**
+  String get cardLimitExceeded;
+
+  /// Card limit exceeded message with parameters
+  ///
+  /// In en, this message translates to:
+  /// **'You have {totalCards} cards (from Premium plan)\n\nFree users can use max 3 cards. Please delete {deleteCount} cards or upgrade to Premium.'**
+  String cardLimitExceededMessage(int totalCards, int deleteCount);
+
+  /// Upgrade to premium button text
   ///
   /// In en, this message translates to:
   /// **'Upgrade to Premium'**
@@ -7363,6 +7413,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sorry, an error occurred. Would you like to try again?'**
   String get aiChatError;
+
+  /// AI image analysis error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while analyzing the image. Please try again.'**
+  String get aiImageAnalysisError;
+
+  /// AI category creation error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while creating the category. Please try again.'**
+  String get aiCategoryCreationError;
+
+  /// Watch ad to get bonus button text
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Ad (+5 Bonus)'**
+  String get watchAdBonus;
+
+  /// Ad loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Ad...'**
+  String get adLoading;
 
   /// Transaction successfully created message
   ///
@@ -7712,6 +7786,30 @@ abstract class AppLocalizations {
   /// **'Unlock all features'**
   String get unlockAllFeatures;
 
+  /// Welcome campaign banner title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome Campaign!'**
+  String get welcomeCampaign;
+
+  /// Monthly premium price in campaign
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly premium only {price}'**
+  String monthlyPremiumOnly(String price);
+
+  /// Percent discount label
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% OFF'**
+  String percentDiscount(String percent);
+
+  /// Days remaining label
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String daysRemaining(int days);
+
   /// Compare plans section title
   ///
   /// In en, this message translates to:
@@ -7789,6 +7887,1044 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Early access to new features'**
   String get featureEarlyAccessDescription;
+
+  /// Skip button text
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// Premium onboarding welcome title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Premium!'**
+  String get premiumWelcomeTitle;
+
+  /// Premium onboarding welcome subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for upgrading. You now have access to all premium features.'**
+  String get premiumWelcomeSubtitle;
+
+  /// Premium features page title
+  ///
+  /// In en, this message translates to:
+  /// **'Your Premium Features'**
+  String get premiumFeaturesTitle;
+
+  /// Premium AI insights feature
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited AI Insights'**
+  String get premiumFeatureAI;
+
+  /// Premium reports feature
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced Reports & Analytics'**
+  String get premiumFeatureReports;
+
+  /// Premium unlimited cards feature
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited Cards & Accounts'**
+  String get premiumFeatureCards;
+
+  /// Premium unlimited stocks feature
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited Stock Tracking'**
+  String get premiumFeatureStocks;
+
+  /// Premium no ads feature
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-Free Experience'**
+  String get premiumFeatureNoAds;
+
+  /// Premium ready title
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re All Set!'**
+  String get premiumReadyTitle;
+
+  /// Premium ready subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Start your premium journey and take control of your finances.'**
+  String get premiumReadySubtitle;
+
+  /// Total savings label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Savings'**
+  String get totalSavings;
+
+  /// My goals header
+  ///
+  /// In en, this message translates to:
+  /// **'My Goals'**
+  String get myGoals;
+
+  /// No savings goals empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No Savings Goals Yet'**
+  String get noSavingsGoals;
+
+  /// Create first goal description
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first savings goal and start building your financial future!'**
+  String get createFirstGoal;
+
+  /// Create goal button
+  ///
+  /// In en, this message translates to:
+  /// **'Create Goal'**
+  String get createGoal;
+
+  /// Create savings goal title
+  ///
+  /// In en, this message translates to:
+  /// **'Create Savings Goal'**
+  String get createSavingsGoal;
+
+  /// Goal name label
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Name'**
+  String get goalName;
+
+  /// Enter goal name hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter goal name'**
+  String get enterGoalName;
+
+  /// Goal name validation message
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a goal name'**
+  String get pleaseEnterGoalName;
+
+  /// Target amount label
+  ///
+  /// In en, this message translates to:
+  /// **'Target Amount'**
+  String get targetAmount;
+
+  /// Current amount label
+  ///
+  /// In en, this message translates to:
+  /// **'Current Amount'**
+  String get currentAmount;
+
+  /// Current label
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get current;
+
+  /// Target label
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get target;
+
+  /// Target date label
+  ///
+  /// In en, this message translates to:
+  /// **'Target Date'**
+  String get targetDate;
+
+  /// Select date button
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// Select color label
+  ///
+  /// In en, this message translates to:
+  /// **'Select Color'**
+  String get selectColor;
+
+  /// Optional field indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get optional;
+
+  /// Goal created success message
+  ///
+  /// In en, this message translates to:
+  /// **'Goal created successfully!'**
+  String get goalCreatedSuccessfully;
+
+  /// Archived goals section title
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get archived;
+
+  /// Completed goals section title
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// Goal info load failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Goal information could not be loaded. Please refresh the page.'**
+  String get goalInfoFailed;
+
+  /// Goal not found title
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Not Found'**
+  String get goalNotFound;
+
+  /// Savings completed badge
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Completed'**
+  String get savingsCompleted;
+
+  /// Add savings subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Add savings'**
+  String get addSavings;
+
+  /// Withdraw button
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get withdraw;
+
+  /// Withdraw money subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw money'**
+  String get withdrawMoney;
+
+  /// Edit goal subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Edit goal'**
+  String get editGoal;
+
+  /// Unarchive button
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive'**
+  String get unarchive;
+
+  /// Activate button
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get activate;
+
+  /// Archive button
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get archive;
+
+  /// Activate goal subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Activate goal'**
+  String get activateGoal;
+
+  /// Restart goal subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Restart goal'**
+  String get restartGoal;
+
+  /// Archive goal button
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get archiveGoal;
+
+  /// Delete goal subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Delete goal'**
+  String get deleteGoal;
+
+  /// Progress label
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progress;
+
+  /// Remaining days label
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining Days'**
+  String get remainingDays;
+
+  /// Monthly target label
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Target'**
+  String get monthlyTarget;
+
+  /// No transactions hint message
+  ///
+  /// In en, this message translates to:
+  /// **'You can use the buttons above\nto make your first transaction'**
+  String get noTransactionsHint;
+
+  /// Savings added label
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Added'**
+  String get savingsAdded;
+
+  /// Money withdrawn label
+  ///
+  /// In en, this message translates to:
+  /// **'Money Withdrawn'**
+  String get moneyWithdrawn;
+
+  /// Invalid goal message
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid goal'**
+  String get invalidGoal;
+
+  /// Goal archived message
+  ///
+  /// In en, this message translates to:
+  /// **'Goal archived'**
+  String get goalArchived;
+
+  /// Goal activated message
+  ///
+  /// In en, this message translates to:
+  /// **'Goal activated'**
+  String get goalActivated;
+
+  /// Goal reactivated message
+  ///
+  /// In en, this message translates to:
+  /// **'Goal reactivated'**
+  String get goalReactivated;
+
+  /// Mark as completed button
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Completed'**
+  String get markAsCompleted;
+
+  /// Completed button
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completedButton;
+
+  /// Goal completion impact text
+  ///
+  /// In en, this message translates to:
+  /// **'Completed %{percent} of the goal'**
+  String goalCompletedImpact(String percent);
+
+  /// Archive goal dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Archive Goal?'**
+  String get archiveGoalDialogTitle;
+
+  /// Archive goal dialog content
+  ///
+  /// In en, this message translates to:
+  /// **'The goal will be archived. You can access it later from the archive.'**
+  String get archiveGoalDialogContent;
+
+  /// Unarchive goal dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive?'**
+  String get unarchiveGoalDialogTitle;
+
+  /// Unarchive goal dialog content
+  ///
+  /// In en, this message translates to:
+  /// **'The goal will be unarchived and added to your active goals.'**
+  String get unarchiveGoalDialogContent;
+
+  /// Activate goal dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Activate Goal?'**
+  String get activateGoalDialogTitle;
+
+  /// Activate goal dialog content
+  ///
+  /// In en, this message translates to:
+  /// **'The completed goal will be reactivated and you can continue working on it.'**
+  String get activateGoalDialogContent;
+
+  /// Complete goal dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Congratulations!'**
+  String get completeGoalDialogTitle;
+
+  /// Complete goal dialog content
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve completed your goal! Would you like to mark it as completed?'**
+  String get completeGoalDialogContent;
+
+  /// Delete goal dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Goal?'**
+  String get deleteGoalDialogTitle;
+
+  /// Delete goal dialog content
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone. The goal and all transaction history will be deleted.'**
+  String get deleteGoalDialogContent;
+
+  /// Goal completed success message
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Awesome! You\'ve completed your goal!'**
+  String get goalCompletedSuccess;
+
+  /// Transaction failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction failed'**
+  String get transactionFailed;
+
+  /// Add savings form title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Savings'**
+  String get addSavingsTitle;
+
+  /// Withdraw form title
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw Money'**
+  String get withdrawTitle;
+
+  /// Money deposited success message
+  ///
+  /// In en, this message translates to:
+  /// **'Money deposited!'**
+  String get savingsDeposited;
+
+  /// Money withdrawn success message
+  ///
+  /// In en, this message translates to:
+  /// **'Money withdrawn!'**
+  String get savingsWithdrawn;
+
+  /// Deposit note hint text
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Payday savings'**
+  String get depositNoteHint;
+
+  /// Withdraw note hint text
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Emergency need'**
+  String get withdrawNoteHint;
+
+  /// Savings goal deposit impact message
+  ///
+  /// In en, this message translates to:
+  /// **'Completed {percentage}% of goal'**
+  String savingsGoalImpactDeposit(String percentage);
+
+  /// Savings goal withdraw impact message
+  ///
+  /// In en, this message translates to:
+  /// **'Decreased by {percentage}% from goal'**
+  String savingsGoalImpactWithdraw(String percentage);
+
+  /// Edit savings goal title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Savings'**
+  String get editSavingsGoal;
+
+  /// Savings name label
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Name'**
+  String get savingsName;
+
+  /// Enter goal name hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter goal name'**
+  String get enterGoalNameHint;
+
+  /// Please enter goal name error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter goal name'**
+  String get pleaseEnterGoalNameError;
+
+  /// Select date hint
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get selectDateHint;
+
+  /// Color label
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get color;
+
+  /// 25% milestone title
+  ///
+  /// In en, this message translates to:
+  /// **'Great Start!'**
+  String get milestone25Title;
+
+  /// 50% milestone title
+  ///
+  /// In en, this message translates to:
+  /// **'Halfway There!'**
+  String get milestone50Title;
+
+  /// 75% milestone title
+  ///
+  /// In en, this message translates to:
+  /// **'Almost Done!'**
+  String get milestone75Title;
+
+  /// 100% milestone title
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Completed!'**
+  String get milestone100Title;
+
+  /// Default milestone title
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations!'**
+  String get milestoneDefaultTitle;
+
+  /// 25% milestone message
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached 25% of your goal! Keep going!'**
+  String get milestone25Message;
+
+  /// 50% milestone message
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve completed half of your goal! Great progress!'**
+  String get milestone50Message;
+
+  /// 75% milestone message
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached 75% of your goal! Final sprint!'**
+  String get milestone75Message;
+
+  /// 100% milestone message
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve completed your goal! Amazing achievement!'**
+  String get milestone100Message;
+
+  /// Default milestone message
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re one step closer to your goal!'**
+  String get milestoneDefaultMessage;
+
+  /// Optional field indicator
+  ///
+  /// In en, this message translates to:
+  /// **'(Optional)'**
+  String get optionalField;
+
+  /// Days unit
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get daysUnit;
+
+  /// Months unit
+  ///
+  /// In en, this message translates to:
+  /// **'mo'**
+  String get monthsUnit;
+
+  /// Years unit
+  ///
+  /// In en, this message translates to:
+  /// **'yr'**
+  String get yearsUnit;
+
+  /// Time remaining (lowercase)
+  ///
+  /// In en, this message translates to:
+  /// **'remaining'**
+  String get timeRemaining;
+
+  /// AI usage limit title
+  ///
+  /// In en, this message translates to:
+  /// **'AI Usage Limit'**
+  String get aiUsageLimit;
+
+  /// Remaining count message
+  ///
+  /// In en, this message translates to:
+  /// **'{count} remaining'**
+  String remainingCount(int count);
+
+  /// Messages label
+  ///
+  /// In en, this message translates to:
+  /// **'messages'**
+  String get messages;
+
+  /// Watch ad bonus info message
+  ///
+  /// In en, this message translates to:
+  /// **'Watch an ad to earn +5 extra usage rights'**
+  String get watchAdBonusInfo;
+
+  /// Maximum bonus remaining message
+  ///
+  /// In en, this message translates to:
+  /// **'You can earn up to {count} more bonus per day'**
+  String maxBonusRemaining(int count);
+
+  /// Unlimited AI with premium message
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited AI usage with Premium'**
+  String get unlimitedAIWithPremium;
+
+  /// Ad loading wait message
+  ///
+  /// In en, this message translates to:
+  /// **'Ad is loading, please wait...'**
+  String get adLoadingWait;
+
+  /// Daily usage label
+  ///
+  /// In en, this message translates to:
+  /// **'Daily usage'**
+  String get dailyUsage;
+
+  /// Rights label (usage rights)
+  ///
+  /// In en, this message translates to:
+  /// **'rights'**
+  String get rights;
+
+  /// Watch ad bonus short button text
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Ad (+5)'**
+  String get watchAdBonusShort;
+
+  /// Ad load error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while loading the ad'**
+  String get adLoadError;
+
+  /// No description text for savings transactions
+  ///
+  /// In en, this message translates to:
+  /// **'No description'**
+  String get noDescription;
+
+  /// Insufficient balance detail message
+  ///
+  /// In en, this message translates to:
+  /// **'This account doesn\'t have enough balance'**
+  String get insufficientBalanceDetail;
+
+  /// Insufficient savings error
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient savings'**
+  String get insufficientSavings;
+
+  /// Insufficient savings detail message with available amount
+  ///
+  /// In en, this message translates to:
+  /// **'Available to withdraw from this goal: {amount}'**
+  String insufficientSavingsDetail(Object amount);
+
+  /// Available balance text only
+  ///
+  /// In en, this message translates to:
+  /// **'Available Balance'**
+  String get availableBalanceLabel;
+
+  /// Max amount button
+  ///
+  /// In en, this message translates to:
+  /// **'Max'**
+  String get maxAmount;
+
+  /// Amount validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be greater than 0'**
+  String get amountMustBeGreaterThanZero;
+
+  /// Amount exceeds available balance error
+  ///
+  /// In en, this message translates to:
+  /// **'Amount exceeds available balance'**
+  String get amountExceedsBalance;
+
+  /// Amount exceeds available savings error
+  ///
+  /// In en, this message translates to:
+  /// **'Amount exceeds available savings'**
+  String get amountExceedsSavings;
+
+  /// Amount exceeds goal remaining amount error
+  ///
+  /// In en, this message translates to:
+  /// **'Amount exceeds goal remaining'**
+  String get amountExceedsGoalRemaining;
+
+  /// Goal completed dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Completed! 🎉'**
+  String get goalCompletedTitle;
+
+  /// Goal completed message
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations! You\'ve reached {goalName}!'**
+  String goalCompletedMessage(Object goalName);
+
+  /// Goal completion stats
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {amount} in {days} days'**
+  String goalCompletedStats(Object amount, Object days);
+
+  /// Keep goal active button
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Active'**
+  String get keepActive;
+
+  /// Create new goal button
+  ///
+  /// In en, this message translates to:
+  /// **'New Goal'**
+  String get createNewGoal;
+
+  /// Goal archived success message
+  ///
+  /// In en, this message translates to:
+  /// **'Goal archived'**
+  String get goalArchivedSuccess;
+
+  /// Budget and Subscriptions page title
+  ///
+  /// In en, this message translates to:
+  /// **'Budget and Subscriptions'**
+  String get budgetAndSubscriptions;
+
+  /// Budgets tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get budgets;
+
+  /// Subscriptions tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get subscriptions;
+
+  /// Subscription details step title
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Details'**
+  String get subscriptionDetails;
+
+  /// Subscription schedule step title
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get subscriptionSchedule;
+
+  /// Payment account label
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Account'**
+  String get paymentAccount;
+
+  /// Subscription name field label
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Name'**
+  String get subscriptionName;
+
+  /// Frequency label
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get frequency;
+
+  /// End date label
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get endDate;
+
+  /// End date optional label
+  ///
+  /// In en, this message translates to:
+  /// **'End Date (Optional)'**
+  String get endDateOptional;
+
+  /// Review subscription label
+  ///
+  /// In en, this message translates to:
+  /// **'Review Subscription'**
+  String get reviewSubscription;
+
+  /// No subscriptions empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No subscriptions yet'**
+  String get noSubscriptionsYet;
+
+  /// Add first subscription description
+  ///
+  /// In en, this message translates to:
+  /// **'Add subscriptions like Netflix, Spotify to track them automatically'**
+  String get addFirstSubscriptionDescription;
+
+  /// Add subscription button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Subscription'**
+  String get addSubscription;
+
+  /// Required field validation message
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get requiredField;
+
+  /// Delete subscription dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Subscription'**
+  String get deleteSubscription;
+
+  /// Delete subscription confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete {subscriptionName} subscription?'**
+  String deleteSubscriptionConfirm(String subscriptionName);
+
+  /// Subscription deleted success message
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription deleted successfully'**
+  String get subscriptionDeleted;
+
+  /// Active subscriptions header
+  ///
+  /// In en, this message translates to:
+  /// **'Active Subscriptions'**
+  String get activeSubscriptions;
+
+  /// Inactive subscriptions header
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive Subscriptions'**
+  String inactiveSubscriptions(int count);
+
+  /// Inactive subscriptions header with count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Inactive Subscriptions} other{Inactive Subscriptions ({count})}}'**
+  String inactiveSubscriptionsWithCount(int count);
+
+  /// Inactive badge text
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// Monthly total label
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Total'**
+  String get monthlyTotal;
+
+  /// Yearly prefix label
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly:'**
+  String get yearlyPrefix;
+
+  /// Subscription added success message
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription added successfully'**
+  String get subscriptionAdded;
+
+  /// Subscription name example placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'e.g: Netflix Premium'**
+  String get subscriptionExample;
+
+  /// Available amount label
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get available;
+
+  /// Tutorial title - FAB step
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add Transaction'**
+  String get tutorialTitle;
+
+  /// Tutorial description - FAB step
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the button in the bottom corner to add expenses, income, or transfer transactions.'**
+  String get tutorialDescription;
+
+  /// Tutorial next button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get tutorialNext;
+
+  /// Tutorial previous button
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get tutorialPrevious;
+
+  /// Tutorial skip button
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get tutorialSkip;
+
+  /// Tutorial completed button
+  ///
+  /// In en, this message translates to:
+  /// **'Got it!'**
+  String get tutorialGotIt;
+
+  /// Tutorial title - Balance Overview (Total Assets) step
+  ///
+  /// In en, this message translates to:
+  /// **'Total Assets'**
+  String get tutorialBalanceOverviewTitle;
+
+  /// Tutorial description - Balance Overview step
+  ///
+  /// In en, this message translates to:
+  /// **'Here you can see the total balance of all your accounts, cards, and investments.'**
+  String get tutorialBalanceOverviewDescription;
+
+  /// Tutorial title - Recent Transactions step
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get tutorialRecentTransactionsTitle;
+
+  /// Tutorial description - Recent Transactions step
+  ///
+  /// In en, this message translates to:
+  /// **'All your transactions are displayed here. Long press to edit or delete transactions.'**
+  String get tutorialRecentTransactionsDescription;
+
+  /// Tutorial title - AI Chat step
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistant'**
+  String get tutorialAIChatTitle;
+
+  /// Tutorial description - AI Chat step
+  ///
+  /// In en, this message translates to:
+  /// **'Chat naturally with AI assistant to add transactions, get financial summaries, perform analysis, bulk delete transactions, and ask any financial questions. You have a powerful financial assistant!'**
+  String get tutorialAIChatDescription;
+
+  /// Tutorial title - Cards section step
+  ///
+  /// In en, this message translates to:
+  /// **'Card Management'**
+  String get tutorialCardsTitle;
+
+  /// Tutorial description - Cards section step
+  ///
+  /// In en, this message translates to:
+  /// **'Here you can view your cards, add new cards, and track your balance information.'**
+  String get tutorialCardsDescription;
+
+  /// Tutorial title - Bottom Navigation Bar step
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation Tabs'**
+  String get tutorialBottomNavigationTitle;
+
+  /// Tutorial description - Bottom Navigation Bar step
+  ///
+  /// In en, this message translates to:
+  /// **'Use the tabs at the bottom to navigate between Home, Transactions, Cards, Analytics, Calendar, and Stocks pages.'**
+  String get tutorialBottomNavigationDescription;
+
+  /// Tutorial title - Budget Overview step
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Management'**
+  String get tutorialBudgetTitle;
+
+  /// Tutorial description - Budget Overview step
+  ///
+  /// In en, this message translates to:
+  /// **'Track your monthly expenses, set budgets, and monitor your spending limits.'**
+  String get tutorialBudgetDescription;
+
+  /// Tutorial title - Profile Avatar step
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get tutorialProfileTitle;
+
+  /// Tutorial description - Profile Avatar step
+  ///
+  /// In en, this message translates to:
+  /// **'Tap your profile photo to access settings, premium features, and your personal information.'**
+  String get tutorialProfileDescription;
 }
 
 class _AppLocalizationsDelegate
@@ -7802,7 +8938,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'tr'].contains(locale.languageCode);
+      <String>['de', 'en', 'tr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -7811,6 +8947,8 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
     case 'tr':

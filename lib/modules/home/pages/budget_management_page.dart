@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -13,10 +14,15 @@ import 'budget_add_sheet.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/utils/currency_utils.dart';
-import '../../../shared/utils/fab_positioning.dart';
+import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../shared/utils/fab_positioning.dart';
 import '../../transactions/screens/expense_form_screen.dart';
 import '../../transactions/widgets/quick_add_chat_fab.dart';
+import '../../../core/services/premium_service.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
+import '../../advertisement/config/advertisement_config.dart' as config;
+import '../../advertisement/models/advertisement_models.dart';
 
 class BudgetManagementPage extends StatefulWidget {
   final VoidCallback? onBudgetSaved;
@@ -33,10 +39,41 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
   String? _selectedCategoryName;
   bool _isSaving = false;
   final PageController _overallPageController = PageController();
+  late GoogleAdsRealBannerService _budgetBannerService;
+  
   
   // Sadece aylık bütçe destekleniyor - filter gerekmez
   final String _selectedFilter = 'monthly';
   final List<String> _availableFilters = [];
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Budget Management banner servisini başlat
+    _budgetBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.budgetManagementBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Banner'ı yükle
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        _budgetBannerService.loadAd();
+      }
+    });
+    
+    _updateAvailableFilters();
+  }
+
+  @override
+  void dispose() {
+    _limitController.dispose();
+    _overallPageController.dispose();
+    _budgetBannerService.dispose();
+    super.dispose();
+  }
 
   /// Format date range for budget duration with clear calculation info
   String _formatDateRange(DateTime startDate, DateTime endDate, BudgetPeriod period) {
@@ -73,19 +110,6 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
       isRecurring: budget.isRecurring,
       startDate: budget.startDate,
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _updateAvailableFilters();
-  }
-
-  @override
-  void dispose() {
-    _limitController.dispose();
-    _overallPageController.dispose();
-    super.dispose();
   }
 
   /// Update available filters based on existing budgets
@@ -125,7 +149,12 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     try {
       final provider = Provider.of<UnifiedProviderV2>(context, listen: false);
 
-      final limit = double.tryParse(_limitController.text.replaceAll(',', ''));
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final locale = themeProvider.currency.locale;
+      final limit = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _limitController.text,
+        locale,
+      );
       if (limit == null || limit <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.enterValidLimit)),
@@ -209,44 +238,54 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
                       child: CircularProgressIndicator(color: Color(0xFF007AFF)),
                     )
                   : (currentBudgets.isEmpty && _availableFilters.isEmpty)
-                  ? _buildEmptyState(isDark)
-                  : Column(
-                      children: [
-                        // Genel bütçe kartı
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: _buildOverallBudgetCard(
-                            currentBudgets.map((budget) => _calculateBudgetStats(budget)).toList(),
-                            isDark,
-                          ),
+                      ? _buildEmptyState(isDark)
+                      : Column(
+                          children: [
+                            const SizedBox(height: 16),
+                            
+                            // Genel bütçe kartı (bütçe varsa göster)
+                            if (currentBudgets.isNotEmpty) ...[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: _buildOverallBudgetCard(
+                                  currentBudgets.map((budget) => _calculateBudgetStats(budget)).toList(),
+                                  isDark,
+                                ),
+                              ),
+                              _buildPageIndicator(currentBudgets.map((budget) => _calculateBudgetStats(budget)).toList(), isDark),
+                              const SizedBox(height: 8),
+                            ],
+                            
+                            // İçerik
+                            Expanded(
+                              child: _buildBudgetsContent(currentBudgets, isDark),
+                            ),
+                            
+                            // Banner Reklam (Premium olmayanlara göster)
+                            Consumer<PremiumService>(
+                              builder: (context, premiumService, child) {
+                                if (!premiumService.isPremium && 
+                                    _budgetBannerService.isLoaded && 
+                                    _budgetBannerService.bannerWidget != null) {
+                                  return Column(
+                                    children: [
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        height: 50,
+                                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                                        child: _budgetBannerService.bannerWidget!,
+                                      ),
+                                      const SizedBox(height: 8),
+                                    ],
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
                         ),
-                        // Page indicator
-                        _buildPageIndicator(currentBudgets.map((budget) => _calculateBudgetStats(budget)).toList(), isDark),
-                        // Spacing after indicator
-                        const SizedBox(height: 8),
-                        // Filter toggle kaldırıldı - sadece aylık bütçe destekleniyor
-                        // Bireysel bütçe kartları
-                        const SizedBox(height: 8),
-                        Expanded(
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            itemCount: currentBudgets.length,
-                            itemBuilder: (context, index) {
-                              final budget = currentBudgets[index];
-                              final stat = _calculateBudgetStats(budget);
-                              return _buildBudgetCard(
-                                stat,
-                                isDark,
-                                index,
-                                currentBudgets.length,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-              // FABs (AI + Add Budget)
-              _buildAIFABStack(currentBudgets, isDark),
+              // FABs (AI + Add Budget/Subscription)
+              _buildFABStack(currentBudgets, isDark),
             ],
           ),
         );
@@ -254,7 +293,24 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     );
   }
 
-  Widget _buildAIFABStack(List<BudgetModel> currentBudgets, bool isDark) {
+  /// Budgets Content
+  Widget _buildBudgetsContent(List<BudgetModel> budgets, bool isDark) {
+    if (budgets.isEmpty) {
+      return _buildEmptyState(isDark);
+    }
+    
+    return ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: budgets.length,
+                            itemBuilder: (context, index) {
+        final budget = budgets[index];
+                              final stat = _calculateBudgetStats(budget);
+        return _buildBudgetCard(stat, isDark, index, budgets.length);
+      },
+    );
+  }
+
+  Widget _buildFABStack(List<BudgetModel> currentBudgets, bool isDark) {
     final fabSize = FabPositioning.getFabSize(context);
     final iconSize = FabPositioning.getIconSize(context);
     final rightPosition = FabPositioning.getRightPosition(context);
@@ -266,7 +322,7 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
     
     return Stack(
       children: [
-        // Budget FAB (altta, sağda) - Glassmorphism tasarımı
+        // Budget Add FAB
         Positioned(
           right: rightPosition,
           bottom: bottomPosition,
@@ -310,10 +366,11 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
             ),
           ),
         ),
-        // AI Chat FAB (üstte, sağda - Budget FAB'ın üzerinde)
+        
+        // AI Chat FAB (her zaman görünür, üstte)
         QuickAddChatFAB(
           customRight: rightPosition,
-          customBottom: bottomPosition + 60, // Budget FAB'ın 60px üstünde
+          customBottom: bottomPosition + 60, // Add FAB'ın 60px üstünde
         ),
       ],
     );

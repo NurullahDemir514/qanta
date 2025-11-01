@@ -1,0 +1,78 @@
+{
+  "parameters": {
+    "notification_messages_tr": {
+      "defaultValue": {
+        "value": "morning|Günaydın! 🌅|Bugünkü bütçenizi kontrol edin\nlunch|Öğle Arası 🍽️|Öğle yemeği harcamanızı eklediniz mi?\nafternoon|Öğleden Sonra ☕|Küçük harcamalarınızı kaydetmeyi unutmayın\nevening|Akşam Saati 🌆|Alışverişlerinizi kaydetme zamanı\nnight|Gün Sonu 🌙|Bugünkü işlemlerinizi gözden geçirin\nweekend_morning|Hafta Sonu 🎯|Haftalık harcamalarınızı inceleyin\nweekend_evening|Hafta Sonu Özeti 📊|Gelecek hafta için planınızı yapın\ngeneral|Qanta Hatırlatıcı|Finanslarınızı düzenli tutun"
+      },
+      "description": "Türkçe bildirim mesajları (Format: key|title|body)",
+      "valueType": "STRING"
+    },
+    "notification_messages_en": {
+      "defaultValue": {
+        "value": "morning|Good Morning! 🌅|Check your budget for today\nlunch|Lunch Time 🍽️|Have you tracked your lunch expenses?\nafternoon|Afternoon Break ☕|Don't forget to track small expenses\nevening|Evening Time 🌆|Time to record your shopping\nnight|Day End 🌙|Review your today's transactions\nweekend_morning|Weekend 🎯|Review your weekly spending\nweekend_evening|Weekend Summary 📊|Plan for next week\ngeneral|Qanta Reminder|Keep your finances organized"
+      },
+      "description": "İngilizce bildirim mesajları (Format: key|title|body)",
+      "valueType": "STRING"
+    },
+    "notifications_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Bildirimler aktif mi? (true/false)",
+      "valueType": "BOOLEAN"
+    },
+    "notification_interval_minutes": {
+      "defaultValue": {
+        "value": "15"
+      },
+      "description": "Workmanager kontrol sıklığı (dakika, minimum 15)",
+      "valueType": "NUMBER"
+    },
+    "smart_scheduling_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Akıllı zamanlama aktif mi? (true/false)",
+      "valueType": "BOOLEAN"
+    },
+    "min_hours_between_notifications": {
+      "defaultValue": {
+        "value": "2"
+      },
+      "description": "Bildirimler arası minimum saat",
+      "valueType": "NUMBER"
+    },
+    "max_daily_notifications": {
+      "defaultValue": {
+        "value": "5"
+      },
+      "description": "Günlük maksimum bildirim sayısı (hafta içi)",
+      "valueType": "NUMBER"
+    },
+    "notification_start_hour": {
+      "defaultValue": {
+        "value": "9"
+      },
+      "description": "İlk bildirim saati (0-23)",
+      "valueType": "NUMBER"
+    },
+    "notification_end_hour": {
+      "defaultValue": {
+        "value": "21"
+      },
+      "description": "Son bildirim saati (0-23)",
+      "valueType": "NUMBER"
+    }
+  },
+  "version": {
+    "versionNumber": "1",
+    "updateTime": "2025-10-29T00:00:00Z",
+    "updateUser": {
+      "email": "qanta@notification-system.com"
+    },
+    "description": "Akıllı bildirim sistemi için Remote Config ayarları",
+    "updateOrigin": "REST_API",
+    "updateType": "INCREMENTAL_UPDATE"
+  }
+}
+

@@ -8,6 +8,7 @@ import '../../../core/services/premium_service.dart';
 import '../../../shared/models/transaction_model_v2.dart' as v2;
 import '../../../shared/models/unified_category_model.dart';
 import '../../../shared/services/category_icon_service.dart';
+import '../../../shared/widgets/thousands_separator_input_formatter.dart';
 import '../models/payment_method.dart';
 import '../models/card.dart';
 import '../../../shared/models/cash_account.dart';
@@ -20,7 +21,7 @@ import '../widgets/forms/transaction_summary.dart';
 import '../widgets/forms/description_field.dart';
 import '../widgets/forms/date_selector.dart';
 import '../../advertisement/providers/advertisement_provider.dart';
-import '../../advertisement/services/google_ads_banner_service.dart';
+import '../../advertisement/services/google_ads_real_banner_service.dart';
 import '../../advertisement/config/advertisement_config.dart' as ad_config;
 import '../../advertisement/models/advertisement_models.dart';
 
@@ -62,8 +63,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
   int _currentStep = 0;
 
   // Banner servisleri
-  GoogleAdsBannerService? _step1BannerService; // Step 1 için (Calculator altı)
-  GoogleAdsBannerService? _step4BannerService; // Step 4 için
+  GoogleAdsRealBannerService? _step1BannerService; // Step 1 için (Calculator altı)
+  GoogleAdsRealBannerService? _step4BannerService; // Step 4 için
 
   @override
   void initState() {
@@ -112,7 +113,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
 
   // Step 1 için banner servisi başlat (Calculator altı)
   void _initializeStep1Banner() async {
-    _step1BannerService = GoogleAdsBannerService(
+    _step1BannerService = GoogleAdsRealBannerService(
       adUnitId: ad_config.AdvertisementConfig.transactionFormStep1Banner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
       isTestMode: ad_config.AdvertisementConfig.transactionFormStep1Banner.isTestMode,
@@ -127,7 +128,7 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
 
   // Step 4 için ikinci banner servisi başlat
   void _initializeStep4Banner() async {
-    _step4BannerService = GoogleAdsBannerService(
+    _step4BannerService = GoogleAdsRealBannerService(
       adUnitId: ad_config.AdvertisementConfig.incomeTransferFormBanner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
       isTestMode: ad_config.AdvertisementConfig.incomeTransferFormBanner.isTestMode,
@@ -458,7 +459,12 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
     });
 
     try {
-      final amount = double.parse(_amountController.text.replaceAll(',', '.'));
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final locale = themeProvider.currency.locale;
+      final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+        _amountController.text,
+        locale,
+      );
       final providerV2 = Provider.of<UnifiedProviderV2>(context, listen: false);
 
       // Tag'i category'ye çevir (otomatik oluştur)

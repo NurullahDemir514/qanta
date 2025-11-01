@@ -5,6 +5,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -41,8 +42,8 @@ android {
         applicationId = "com.qanta"
         minSdk = 23
         targetSdk = 35
-        versionCode = 26
-        versionName = "1.0.2"
+        versionCode = 35
+        versionName = "1.1.2"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
         
@@ -68,8 +69,7 @@ android {
         }
         getByName("debug") {
             signingConfig = signingConfigs.getByName("debug")
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-debug"
+            // Use the same applicationId as release to match google-services.json
         }
     }
 }

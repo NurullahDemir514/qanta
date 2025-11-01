@@ -10,11 +10,14 @@ import '../modules/cards/cards_screen.dart';
 import '../modules/insights/statistics_screen.dart';
 import '../modules/calendar/calendar_screen.dart';
 import '../modules/home/pages/budget_management_page.dart';
+import '../modules/subscriptions/pages/subscriptions_management_page.dart';
 import '../modules/transactions/screens/expense_form_screen.dart';
 import '../modules/transactions/screens/income_form_screen.dart';
 import '../modules/cards/screens/credit_card_statements_screen.dart';
 import '../modules/transactions/screens/ai_test_page.dart';
 import '../modules/premium/premium_offer_screen.dart';
+import '../modules/premium/premium_onboarding_screen.dart';
+import '../modules/cards/screens/savings_goal_detail_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -241,6 +244,29 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/subscriptions-management',
+        name: 'subscriptions-management',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SubscriptionsManagementPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: curve),
+            );
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      ),
+      GoRoute(
         path: '/income-form',
         name: 'income-form',
         pageBuilder: (context, state) {
@@ -378,6 +404,45 @@ class AppRouter {
           },
           transitionDuration: const Duration(milliseconds: 400),
         ),
+      ),
+      GoRoute(
+        path: '/premium-onboarding',
+        name: 'premium-onboarding',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const PremiumOnboardingScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 500),
+        ),
+      ),
+      GoRoute(
+        path: '/savings-goal-detail/:goalId',
+        name: 'savings-goal-detail',
+        pageBuilder: (context, state) {
+          final goalId = state.pathParameters['goalId']!;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: SavingsGoalDetailScreen(goalId: goalId),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1.0, 0.0),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeInOut,
+                )),
+                child: child,
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          );
+        },
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -8,12 +8,18 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/design_system/transaction_design_system.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/models/models_v2.dart' as v2;
+import '../../../shared/utils/currency_utils.dart';
 import '../../../shared/widgets/installment_expandable_card.dart';
 import '../../../shared/services/category_icon_service.dart';
 import '../../stocks/providers/stock_provider.dart';
 
 class RecentTransactionsSection extends StatefulWidget {
-  const RecentTransactionsSection({super.key});
+  final Key? tutorialKey; // Tutorial için key
+  
+  const RecentTransactionsSection({
+    super.key,
+    this.tutorialKey,
+  });
 
   @override
   State<RecentTransactionsSection> createState() => _RecentTransactionsSectionState();
@@ -35,6 +41,7 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
         final isLoadingV2 = providerV2.isLoadingTransactions;
 
         return Column(
+          key: widget.tutorialKey, // Tutorial key ekle
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Başlık
@@ -222,9 +229,28 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       }
     }
 
-    // Format amount with dynamic currency
-    final currencySymbol = Provider.of<ThemeProvider>(context, listen: false).currency.symbol;
-    final amount = TransactionDesignSystem.formatAmount(transaction.amount, transactionType, currencySymbol: currencySymbol);
+    // Format amount with user's selected currency
+    // Note: Until AccountModel supports currency field, we use ThemeProvider's currency
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final userCurrency = themeProvider.currency;
+    
+    // Use CurrencyUtils directly for proper formatting
+    final formattedAmount = CurrencyUtils.formatAmountWithoutSymbol(transaction.amount.abs(), userCurrency);
+    final currencySymbol = userCurrency.symbol;
+    
+    // Apply prefix based on transaction type
+    String amount;
+    switch (transactionType) {
+      case TransactionType.income:
+        amount = '+$formattedAmount$currencySymbol';
+        break;
+      case TransactionType.expense:
+        amount = '-$formattedAmount$currencySymbol';
+        break;
+      case TransactionType.transfer:
+        amount = '$formattedAmount$currencySymbol';
+        break;
+    }
 
     // Use displayTime from transaction model and localize it
     final rawTime = transaction.displayTime;
@@ -240,11 +266,27 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
       isInstallment: isActualInstallment,
     );
 
+    // Prepare display title with description
+    String displayTitle = transaction.getLocalizedDisplayTitle(context);
+    
+    // Add description if available (varsa açıklama ekle)
+    if (transaction.description.isNotEmpty) {
+      // Taksit pattern'ini temizle
+      String cleanDescription = transaction.description
+          .replaceAll(RegExp(r'\s*\(\d+ taksit\)\s*'), '')
+          .trim();
+      
+      // Açıklama boş değilse ve kategori adından farklıysa ekle
+      if (cleanDescription.isNotEmpty && cleanDescription != displayTitle) {
+        displayTitle = '$displayTitle • $cleanDescription';
+      }
+    }
+
     // Check if this should be displayed as an installment
     if (isActualInstallment) {
       return InstallmentExpandableCard(
         installmentId: transaction.installmentId,
-        title: transaction.getLocalizedDisplayTitle(context), // Kategori adı
+        title: displayTitle, // Kategori adı + açıklama
         subtitle: cardName, // Banka adı
         amount: amount,
         time: time,
@@ -267,11 +309,13 @@ class _RecentTransactionsSectionState extends State<RecentTransactionsSection> {
     }
 
     // Regular transaction - use Firebase integrated design system
-    return TransactionDesignSystem.buildTransactionItemFromV2(
-      context: context,
-      transaction: transaction,
-      isDark: isDark,
+    return TransactionDesignSystem.buildTransactionItem(
+      title: displayTitle, // Kategori + açıklama
+      subtitle: cardName,
+      amount: amount,
       time: time,
+      type: transactionType,
+      isDark: isDark,
       categoryIconData: categoryIcon,
       onLongPress: () {
         HapticFeedback.mediumImpact();

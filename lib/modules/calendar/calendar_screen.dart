@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/providers/unified_provider_v2.dart';
 import '../../core/theme/app_colors.dart';
@@ -11,6 +12,10 @@ import '../../shared/design_system/transaction_design_system.dart' as TDS;
 import '../../shared/services/category_icon_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../core/services/premium_service.dart';
+import '../advertisement/services/google_ads_real_banner_service.dart';
+import '../advertisement/config/advertisement_config.dart' as config;
+import '../advertisement/models/advertisement_models.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -30,11 +35,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // Seçili gün ve işlemler için state
   DateTime? _selectedDate;
   List<TransactionWithDetailsV2> _selectedDayTransactions = [];
+  
+  // Banner service
+  late GoogleAdsRealBannerService _calendarBannerService;
 
   @override
   void initState() {
     super.initState();
     _updateMonthData();
+    
+    // Initialize banner service
+    _calendarBannerService = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.calendarBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Load ad after a delay
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        _calendarBannerService.loadAd();
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    _calendarBannerService.dispose();
+    super.dispose();
   }
 
   @override
@@ -107,8 +135,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final Map<String, double> dailyAmounts = {};
 
     for (final transaction in transactions) {
-      // Skip transfer transactions as they don't represent actual income/expense
-      if (transaction.type == TransactionType.transfer) {
+      // Skip transfer and stock transactions as they don't represent actual income/expense
+      if (transaction.type == TransactionType.transfer || transaction.isStockTransaction) {
         continue;
       }
       
@@ -192,8 +220,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
               // Seçili günün işlemleri - takvimin hemen altında
               if (_selectedDate != null) ...[
                 const SizedBox(height: 5), // Takvim ile arasına 5px boşluk
-                _buildSelectedDayTransactions(isDark),
+                _buildSelectedDayTransactions(context, isDark),
               ],
+              
+              // Banner ad at the bottom
+              Consumer<PremiumService>(
+                builder: (context, premiumService, child) {
+                  if (!premiumService.isPremium && 
+                      _calendarBannerService.isLoaded && 
+                      _calendarBannerService.bannerWidget != null) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        Container(
+                          height: 50,
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          alignment: Alignment.center,
+                          child: _calendarBannerService.bannerWidget!,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ],
           );
         },
@@ -314,6 +365,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
     double totalExpense = 0.0;
 
     for (final transaction in transactions) {
+      // Skip transfer and stock transactions
+      if (transaction.type == TransactionType.transfer || transaction.isStockTransaction) {
+        continue;
+      }
+      
       final transactionDate = DateTime(
         transaction.transactionDate.year,
         transaction.transactionDate.month,
@@ -406,8 +462,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 final dateKey = DateFormat('yyyy-MM-dd').format(date);
                 final amount = dailyAmounts[dateKey] ?? 0.0;
 
-                // Get transactions for this day
+                // Get transactions for this day (excluding stock transactions)
                 final dayTransactions = transactions.where((t) {
+                  if (t.isStockTransaction) return false;
                   final transactionDate = DateTime(
                     t.transactionDate.year,
                     t.transactionDate.month,
@@ -615,7 +672,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     bool isDark,
   ) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final compactAmount = _formatCompactAmount(amount);
+    final compactAmount = _formatCompactAmount(amount, context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
@@ -649,76 +706,49 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return formattedAmount.length > 8; // Adjust threshold as needed
   }
 
-  String _formatCompactAmount(double amount) {
+  String _formatCompactAmount(double amount, BuildContext context) {
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    final currencySymbol = currency.symbol;
     final absAmount = amount.abs();
     final isNegative = amount < 0;
     final sign = isNegative ? '-' : '';
 
     if (absAmount >= 1000000) {
-      return '$sign₺${(absAmount / 1000000).toStringAsFixed(1)}M';
+      return '$sign$currencySymbol${(absAmount / 1000000).toStringAsFixed(1)}M';
     } else if (absAmount >= 1000) {
-      return '$sign₺${(absAmount / 1000).toStringAsFixed(1)}K';
+      return '$sign$currencySymbol${(absAmount / 1000).toStringAsFixed(1)}K';
     } else if (absAmount >= 100) {
-      return '$sign₺${absAmount.toStringAsFixed(0)}';
+      return '$sign$currencySymbol${absAmount.toStringAsFixed(0)}';
     } else {
-      return '$sign₺${absAmount.toStringAsFixed(1)}';
+      return '$sign$currencySymbol${absAmount.toStringAsFixed(1)}';
     }
   }
 
-  String _localizeDisplayTime(String rawTime) {
-    switch (rawTime) {
-      case 'TODAY':
-        return l10n.today;
-      case 'YESTERDAY':
-        return l10n.yesterday;
-      default:
-        return rawTime; // Diğer formatlar zaten localize
-    }
+  String _localizeDisplayTime(String rawTime, BuildContext context) {
+    // Use TransactionDesignSystem for proper localization
+    return TDS.TransactionDesignSystem.localizeDisplayTime(rawTime, context);
   }
 
-  Widget _buildSelectedDayTransactions(bool isDark) {
+  Widget _buildSelectedDayTransactions(BuildContext context, bool isDark) {
     if (_selectedDate == null) {
       return const SizedBox.shrink();
     }
     
-    // Boş gün için bilgilendirme
-    if (_selectedDayTransactions.isEmpty) {
+    // Filter out stock transactions from display
+    final filteredTransactions = _selectedDayTransactions
+        .where((t) => !t.isStockTransaction)
+        .toList();
+    
+    // Boş gün için bilgilendirme (stock işlemleri filtrelendikten sonra)
+    if (filteredTransactions.isEmpty) {
       return Container(
         margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : AppColors.lightCard,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark
-                ? AppColors.secondary.withValues(alpha: 0.2)
-                : AppColors.secondary.withValues(alpha: 0.1),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withValues(alpha: 0.1)
-                  : Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header - diğer widget ile aynı
             Container(
               padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.secondary.withValues(alpha: 0.05)
-                    : AppColors.secondary.withValues(alpha: 0.02),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -778,48 +808,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       );
     }
-
-    final totalAmount = _selectedDayTransactions.fold(
+    
+    final totalAmount = filteredTransactions.fold(
       0.0,
       (sum, t) => sum + t.signedAmount,
     );
 
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 8), // Daha da küçük margin
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : AppColors.lightCard,
-        borderRadius: BorderRadius.circular(12), // Daha küçük border radius
-        border: Border.all(
-          color: isDark
-              ? AppColors.secondary.withValues(alpha: 0.2)
-              : AppColors.secondary.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.1)
-                : Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 4, // Daha küçük blur
-            offset: const Offset(0, 1), // Daha küçük offset
-          ),
-        ],
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Header
           Container(
             padding: const EdgeInsets.fromLTRB(10, 6, 10, 6), // Üst ve alt padding azaltıldı
-            decoration: BoxDecoration(
-              color: isDark 
-                  ? AppColors.secondary.withValues(alpha: 0.05)
-                  : AppColors.secondary.withValues(alpha: 0.02),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -835,7 +837,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                     ),
                     Text(
-                      '${_selectedDayTransactions.length} ${l10n.transaction}', // "işlemler" yerine "işlem"
+                      '${filteredTransactions.length} ${l10n.transaction}', // "işlemler" yerine "işlem"
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
@@ -862,14 +864,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
           // Transactions List
           Container(
             constraints: BoxConstraints(
-              maxHeight: 150, // Maksimum sabit yükseklik azaltıldı
+              maxHeight: 180.h, // Responsive liste yüksekliği (15px azaltıldı)
             ),
             child: ListView.builder(
               shrinkWrap: true, // İçeriğe göre küçülür, maksimuma kadar
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 8), // Üst padding azaltıldı
-              itemCount: _selectedDayTransactions.length,
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0), // Kompakt görünüm için padding azaltıldı
+              itemCount: filteredTransactions.length,
               itemBuilder: (context, index) {
-                final transaction = _selectedDayTransactions[index];
+                final transaction = filteredTransactions[index];
                 return _buildTransactionItemCompact(
                   context,
                   transaction,
@@ -888,6 +890,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     TransactionWithDetailsV2 transaction,
     bool isDark,
   ) {
+    // Get user's currency preference
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    
     // Convert V2 transaction type to design system type
     TDS.TransactionType transactionType;
     switch (transaction.type) {
@@ -901,7 +906,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
         transactionType = TDS.TransactionType.transfer;
         break;
       case TransactionType.stock:
-        transactionType = TDS.TransactionType.income; // Treat stock as income for display
+        // Stock transactions are filtered out, but keep this case for safety
+        transactionType = TDS.TransactionType.income;
         break;
     }
 
@@ -927,7 +933,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // Use displayTime from transaction model and localize it
     final rawTime = transaction.displayTime;
-    final time = _localizeDisplayTime(rawTime);
+    final time = _localizeDisplayTime(rawTime, context);
 
     // Card name - centralized logic
     final cardName = TDS.TransactionDesignSystem.formatCardName(
@@ -939,13 +945,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 2), // Çok daha küçük margin
+      margin: const EdgeInsets.only(bottom: 0), // Kompakt görünüm için margin kaldırıldı
       child: TDS.TransactionDesignSystem.buildTransactionItemFromV2(
         context: context,
         transaction: transaction,
         isDark: isDark,
         time: time,
         categoryIconData: categoryIcon,
+        currency: currency,
         onLongPress: () {
           // Optional: Add long press functionality
         },
@@ -1028,15 +1035,9 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
     }
   }
 
-  String _localizeDisplayTime(String rawTime) {
-    switch (rawTime) {
-      case 'TODAY':
-        return l10n.today;
-      case 'YESTERDAY':
-        return l10n.yesterday;
-      default:
-        return rawTime; // Diğer formatlar zaten localize
-    }
+  String _localizeDisplayTime(String rawTime, BuildContext context) {
+    // Use TransactionDesignSystem for proper localization
+    return TDS.TransactionDesignSystem.localizeDisplayTime(rawTime, context);
   }
 
   @override
@@ -1231,6 +1232,9 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
     TransactionWithDetailsV2 transaction,
     bool isDark,
   ) {
+    // Get user's currency preference
+    final currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+    
     // Convert V2 transaction type to design system type
     TDS.TransactionType transactionType;
     switch (transaction.type) {
@@ -1244,8 +1248,8 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
         transactionType = TDS.TransactionType.transfer;
         break;
       case TransactionType.stock:
-        transactionType =
-            TDS.TransactionType.income; // Treat stock as income for display
+        // Stock transactions are filtered out, but keep this case for safety
+        transactionType = TDS.TransactionType.income;
         break;
     }
 
@@ -1274,7 +1278,7 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
 
     // Use displayTime from transaction model and localize it
     final rawTime = transaction.displayTime;
-    final time = _localizeDisplayTime(rawTime);
+    final time = _localizeDisplayTime(rawTime, context);
 
     // Card name - centralized logic
     final cardName = TDS.TransactionDesignSystem.formatCardName(
@@ -1293,6 +1297,7 @@ class _DayTransactionsBottomSheet extends StatelessWidget {
         isDark: isDark,
         time: time,
         categoryIconData: categoryIcon,
+        currency: currency,
         onLongPress: () {
           // Optional: Add long press functionality
         },

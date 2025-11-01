@@ -11,7 +11,9 @@ import '../../../shared/services/category_icon_service.dart';
 import '../../../l10n/app_localizations.dart';
 
 class BudgetOverviewCard extends StatefulWidget {
-  const BudgetOverviewCard({super.key});
+  final Key? tutorialKey; // Tutorial için key
+  
+  const BudgetOverviewCard({super.key, this.tutorialKey});
 
   @override
   State<BudgetOverviewCard> createState() => _BudgetOverviewCardState();
@@ -201,6 +203,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
         // Show empty state if no budgets - but still show the header with add button
         if (currentBudgets.isEmpty) {
           return Column(
+            key: widget.tutorialKey, // Tutorial key ekle
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header with add button
@@ -241,6 +244,7 @@ class _BudgetOverviewCardState extends State<BudgetOverviewCard> {
         final budgetStats = _calculateBudgetStats(currentBudgets);
 
         return Column(
+          key: widget.tutorialKey, // Tutorial key ekle
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header

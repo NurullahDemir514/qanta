@@ -10,6 +10,7 @@ import '../../../core/providers/unified_provider_v2.dart';
 import '../../premium/premium_offer_screen.dart';
 import '../widgets/add_debit_card_form.dart';
 import '../widgets/add_credit_card_form.dart';
+import '../widgets/add_savings_goal_form.dart';
 
 class AddCardFab extends StatefulWidget {
   final int currentTabIndex;
@@ -236,9 +237,9 @@ class _AddCardFabState extends State<AddCardFab>
     );
   }
 
-  void _showDebitCardForm() {
+  void _showDebitCardForm() async {
     // Check card limit
-    if (!_checkCardLimit()) return;
+    if (!await _checkCardLimit()) return;
     
     showModalBottomSheet(
       context: context,
@@ -257,9 +258,9 @@ class _AddCardFabState extends State<AddCardFab>
     );
   }
 
-  void _showCreditCardForm() {
+  void _showCreditCardForm() async {
     // Check card limit
-    if (!_checkCardLimit()) return;
+    if (!await _checkCardLimit()) return;
     
     showModalBottomSheet(
       context: context,
@@ -279,27 +280,122 @@ class _AddCardFabState extends State<AddCardFab>
   }
 
   /// Kart limiti kontrolü - false dönerse ekleme yapılamaz
-  bool _checkCardLimit() {
+  Future<bool> _checkCardLimit() async {
     final premiumService = context.read<PremiumService>();
-    final unifiedProvider = context.read<UnifiedProviderV2>();
+    final l10n = AppLocalizations.of(context);
     
-    // Toplam kart sayısı (debit + credit)
-    final totalCards = unifiedProvider.debitCards.length + unifiedProvider.creditCards.length;
+    // Premium kullanıcı limitsize
+    if (premiumService.isPremium) {
+      return true;
+    }
     
-    // Premium kontrolü (event handler içinde listen: false kullanmalıyız)
+    // Firebase'den gerçek kart sayısını al (cache sorununu çözer)
+    final totalCards = await premiumService.getCurrentCardCount();
+    
+    // Limit kontrolü
     if (!premiumService.canAddCard(totalCards)) {
-      // Premium teklif ekranını göster
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const PremiumOfferScreen(),
-          fullscreenDialog: true,
-        ),
-      );
+      if (mounted) {
+        // Premium'dan free'ye geçenler için özel mesaj
+        if (totalCards > 3) {
+          _showCardLimitDialog(
+            title: l10n?.cardLimitExceeded ?? 'Kart Limiti',
+            message: l10n?.cardLimitExceededMessage(totalCards, totalCards - 2) ?? 
+                'Şu anda $totalCards kartınız var.\n\nFree kullanıcılar en fazla 3 kart ekleyebilir.\n\n${totalCards - 2} kart silin veya Premium\'a geçin.',
+            totalCards: totalCards,
+          );
+        } else {
+          // Tam limit (3 kart): Premium ekranı göster
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PremiumOfferScreen(),
+              fullscreenDialog: true,
+            ),
+          );
+        }
+      }
       return false;
     }
     
     return true;
+  }
+
+  /// Kart limiti dialog'u göster
+  void _showCardLimitDialog({
+    required String title,
+    required String message,
+    required int totalCards,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: const Color(0xFFFF9500), // Orange
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.black,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            height: 1.4,
+            color: isDark ? Colors.white70 : Colors.black87,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              l10n?.close ?? 'Kapat',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: const Color(0xFF8E8E93),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PremiumOfferScreen(),
+                  fullscreenDialog: true,
+                ),
+              );
+            },
+            child: Text(
+              l10n?.upgradeToPremium ?? 'Premium\'a Geç',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF007AFF),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
 
@@ -344,6 +440,18 @@ class _AddCardFabState extends State<AddCardFab>
               label: l10n.creditCard,
               color: const Color(0xFFE74C3C), // Red
               onTap: () => _onCardTypeSelected('credit'),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Savings Goal Option
+            _buildCardOption(
+              context: context,
+              isDark: isDark,
+              icon: Icons.rocket_launch_rounded,
+              label: l10n.savingsGoals,
+              color: const Color(0xFFBF5AF2), // Purple
+              onTap: () => _onCardTypeSelected('savings'),
             ),
             
             const SizedBox(height: 16),
@@ -473,6 +581,27 @@ class _AddCardFabState extends State<AddCardFab>
       case 'credit':
         _showCreditCardForm();
         break;
+      case 'savings':
+        _showSavingsGoalForm();
+        break;
     }
+  }
+
+  void _showSavingsGoalForm() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: AddSavingsGoalForm(
+          onSuccess: () {
+            // Goals yeniden yüklenecek (provider otomatik günceller)
+          },
+        ),
+      ),
+    );
   }
 } 

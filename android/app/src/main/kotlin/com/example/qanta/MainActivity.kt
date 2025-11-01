@@ -39,12 +39,11 @@ class MainActivity : FlutterActivity() {
         super.onCreate(savedInstanceState)
         
         // Android 15+ (SDK 35) için Edge-to-Edge desteği
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            // enableEdgeToEdge() çağrısı otomatik olarak sistem tarafından yapılıyor
-            // Sadece window insets'i ayarlıyoruz
+        // enableEdgeToEdge() Flutter tarafından otomatik çağrılıyor
+        if (Build.VERSION.SDK_INT >= 35) { // Android 15 (VANILLA_ICE_CREAM)
             WindowCompat.setDecorFitsSystemWindows(window, false)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11+ için eski yöntem
+            // Android 11+ için edge-to-edge
             WindowCompat.setDecorFitsSystemWindows(window, false)
         }
     }

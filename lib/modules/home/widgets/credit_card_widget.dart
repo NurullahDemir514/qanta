@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/bank_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/utils/currency_utils.dart';
 
@@ -48,15 +49,25 @@ class CreditCardWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
     
-    final gradientColors = bankCode != null 
-        ? AppConstants.getBankGradientColors(bankCode!)
-        : AppConstants.getCardGradientColors(cardTypeLabel);
-    final accentColor = bankCode != null 
-        ? AppConstants.getBankAccentColor(bankCode!)
-        : AppConstants.getCardAccentColor(cardTypeLabel);
-    final bankName = bankCode != null 
-        ? AppConstants.getLocalizedBankName(bankCode!, AppLocalizations.of(context)!)
-        : null;
+    // Get bank design from BankService (dynamic) or fallback to AppConstants
+    final bankService = BankService();
+    final bank = bankCode != null ? bankService.getBankByCode(bankCode!) : null;
+    
+    final gradientColors = bank != null
+        ? bank.gradientColorsList
+        : (bankCode != null 
+            ? AppConstants.getBankGradientColors(bankCode!)
+            : AppConstants.getCardGradientColors(cardTypeLabel));
+    final accentColor = bank != null
+        ? bank.accentColorValue
+        : (bankCode != null 
+            ? AppConstants.getBankAccentColor(bankCode!)
+            : AppConstants.getCardAccentColor(cardTypeLabel));
+    final bankName = bank != null
+        ? bank.name
+        : (bankCode != null 
+            ? AppConstants.getLocalizedBankName(bankCode!, AppLocalizations.of(context)!)
+            : null);
     
     final isCreditCardWithDebt = totalDebt != null && creditLimit != null;
     
@@ -188,7 +199,7 @@ class CreditCardWidget extends StatelessWidget {
                               children: [
                                 SizedBox(height: isSmallScreen ? 7.h : 8.h),
                                  Text(
-                                   isCreditCardWithDebt ? l10n.availableLimit : l10n.availableBalance,
+                                   isCreditCardWithDebt ? l10n.availableLimit : l10n.availableBalanceLabel,
                                    style: GoogleFonts.inter(
                                      fontSize: isSmallScreen ? 10.sp : 11.sp,
                                      color: Colors.white.withValues(alpha: 1.0),

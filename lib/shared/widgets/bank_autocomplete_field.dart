@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/services/bank_service.dart';
+import '../../core/theme/theme_provider.dart';
+import '../../shared/utils/currency_utils.dart';
 
 class BankAutocompleteField extends StatefulWidget {
   final String? selectedBankCode;
@@ -24,7 +28,9 @@ class _BankAutocompleteFieldState extends State<BankAutocompleteField> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
   List<String> _filteredBanks = [];
+  List<BankModel> _availableBanks = [];
   bool _isDropdownOpen = false;
+  bool _isLoadingBanks = false;
   OverlayEntry? _overlayEntry;
 
   @override
@@ -32,13 +38,7 @@ class _BankAutocompleteFieldState extends State<BankAutocompleteField> {
     super.initState();
     _controller = TextEditingController();
     _focusNode = FocusNode();
-    
-    // Başlangıçta seçili banka varsa göster
-    if (widget.selectedBankCode != null) {
-      _controller.text = AppConstants.getBankName(widget.selectedBankCode!);
-    }
-    
-    _filteredBanks = AppConstants.getAvailableBanks();
+    _loadBanks();
     
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
@@ -48,6 +48,83 @@ class _BankAutocompleteFieldState extends State<BankAutocompleteField> {
       }
     });
   }
+
+  /// Bankaları yükle (dinamik)
+  Future<void> _loadBanks() async {
+    setState(() {
+      _isLoadingBanks = true;
+    });
+
+    try {
+      final bankService = BankService();
+      await bankService.loadBanks();
+      // Kullanıcının para birimine göre bankaları önceliklendir
+      Currency? currency;
+      try {
+        currency = Provider.of<ThemeProvider>(context, listen: false).currency;
+      } catch (e) {
+        debugPrint('⚠️ BankAutocompleteField: Could not get currency, using default');
+      }
+      _availableBanks = bankService.getAvailableBanks(currency: currency);
+      
+      // Fallback: Eğer hiç banka yoksa static listeyi kullan
+      if (_availableBanks.isEmpty) {
+        final staticBanks = AppConstants.getAvailableBanks();
+        _availableBanks = staticBanks.map((code) {
+          return BankModel(
+            code: code,
+            name: AppConstants.getBankName(code),
+            gradientColors: AppConstants.getBankGradientColors(code)
+                .map((c) => c.value)
+                .toList(),
+            accentColor: AppConstants.getBankAccentColor(code).value,
+            isActive: true,
+          );
+        }).toList();
+      }
+
+      _filteredBanks = _availableBanks.map((b) => b.code).toList();
+
+      // Başlangıçta seçili banka varsa göster
+      if (widget.selectedBankCode != null) {
+        final selectedBank = _availableBanks.firstWhere(
+          (b) => b.code == widget.selectedBankCode,
+          orElse: () => BankModel(
+            code: widget.selectedBankCode!,
+            name: AppConstants.getBankName(widget.selectedBankCode!),
+            gradientColors: [],
+            accentColor: 0xFF1976D2,
+          ),
+        );
+        _controller.text = selectedBank.name;
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading banks: $e');
+      // Fallback: Static banks
+      _filteredBanks = AppConstants.getAvailableBanks();
+      _availableBanks = _filteredBanks.map((code) {
+        return BankModel(
+          code: code,
+          name: AppConstants.getBankName(code),
+          gradientColors: AppConstants.getBankGradientColors(code)
+              .map((c) => c.value)
+              .toList(),
+          accentColor: AppConstants.getBankAccentColor(code).value,
+          isActive: true,
+        );
+      }).toList();
+
+      // Başlangıçta seçili banka varsa göster
+      if (widget.selectedBankCode != null) {
+        _controller.text = AppConstants.getBankName(widget.selectedBankCode!);
+      }
+    } finally {
+      setState(() {
+        _isLoadingBanks = false;
+      });
+    }
+  }
+
 
   @override
   void dispose() {
@@ -60,13 +137,14 @@ class _BankAutocompleteFieldState extends State<BankAutocompleteField> {
   void _filterBanks(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredBanks = AppConstants.getAvailableBanks();
+        _filteredBanks = _availableBanks.map((b) => b.code).toList();
       } else {
-        _filteredBanks = AppConstants.getAvailableBanks()
-            .where((bankCode) {
-              final bankName = AppConstants.getBankName(bankCode).toLowerCase();
-              return bankName.contains(query.toLowerCase());
+        _filteredBanks = _availableBanks
+            .where((bank) {
+              return bank.name.toLowerCase().contains(query.toLowerCase()) ||
+                  bank.code.toLowerCase().contains(query.toLowerCase());
             })
+            .map((b) => b.code)
             .toList();
       }
     });
@@ -128,19 +206,33 @@ class _BankAutocompleteFieldState extends State<BankAutocompleteField> {
                       ),
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    shrinkWrap: true,
-                    itemCount: _filteredBanks.length,
-                    itemBuilder: (context, index) {
-                      final bankCode = _filteredBanks[index];
-                      final bankName = AppConstants.getBankName(bankCode);
-                      final accentColor = AppConstants.getBankAccentColor(bankCode);
-                      
-                      return InkWell(
-                        onTap: () {
-                          _selectBank(bankCode, bankName);
-                        },
+                : _isLoadingBanks
+                    ? const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        shrinkWrap: true,
+                        itemCount: _filteredBanks.length,
+                        itemBuilder: (context, index) {
+                          final bankCode = _filteredBanks[index];
+                          final bank = _availableBanks.firstWhere(
+                            (b) => b.code == bankCode,
+                            orElse: () => BankModel(
+                              code: bankCode,
+                              name: AppConstants.getBankName(bankCode),
+                              gradientColors: [],
+                              accentColor: 0xFF1976D2,
+                            ),
+                          );
+                          final bankName = bank.name;
+                          final accentColor = bank.accentColorValue;
+                          
+                          return InkWell(
+                            onTap: () {
+                              _selectBank(bankCode, bankName);
+                            },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,

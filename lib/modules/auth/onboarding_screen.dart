@@ -591,8 +591,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   _buildLanguageOption(
                     flag: '🇺🇸',
                     language: 'English',
-                    isSelected: !themeProvider.isTurkish,
+                    isSelected: themeProvider.locale.languageCode == 'en',
                     onTap: () => themeProvider.setLocale(const Locale('en')),
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildLanguageOption(
+                    flag: '🇩🇪',
+                    language: 'Deutsch',
+                    isSelected: themeProvider.isGerman,
+                    onTap: () => themeProvider.setLocale(const Locale('de')),
                   ),
                 ],
               );
@@ -636,36 +643,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 48),
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
-              return Column(
-                children: [
-                  _buildCurrencyOption(
-                    currency: Currency.TRY,
-                    displayName: l10n.currencyTRY,
-                    isSelected: themeProvider.currency == Currency.TRY,
-                    onTap: () => themeProvider.setCurrency(Currency.TRY),
+              return ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      ...Currency.values.map((c) => Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: _buildCurrencyOption(
+                              currency: c,
+                              displayName: CurrencyUtils.getDisplayName(
+                                c,
+                                themeProvider.locale.languageCode,
+                              ),
+                              isSelected: themeProvider.currency == c,
+                              onTap: () => themeProvider.setCurrency(c),
+                            ),
+                          )),
+                    ],
                   ),
-                  SizedBox(height: 12.h),
-                  _buildCurrencyOption(
-                    currency: Currency.USD,
-                    displayName: l10n.currencyUSD,
-                    isSelected: themeProvider.currency == Currency.USD,
-                    onTap: () => themeProvider.setCurrency(Currency.USD),
-                  ),
-                  SizedBox(height: 12.h),
-                  _buildCurrencyOption(
-                    currency: Currency.EUR,
-                    displayName: l10n.currencyEUR,
-                    isSelected: themeProvider.currency == Currency.EUR,
-                    onTap: () => themeProvider.setCurrency(Currency.EUR),
-                  ),
-                  SizedBox(height: 12.h),
-                  _buildCurrencyOption(
-                    currency: Currency.GBP,
-                    displayName: l10n.currencyGBP,
-                    isSelected: themeProvider.currency == Currency.GBP,
-                    onTap: () => themeProvider.setCurrency(Currency.GBP),
-                  ),
-                ],
+                ),
               );
             },
           ),
