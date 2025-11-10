@@ -13,8 +13,11 @@ class ImageCacheService {
   static ImageCacheService get instance => _instance;
 
   // Cache configuration
-  static const int _maxCacheSize = 50 * 1024 * 1024; // 50MB
-  static const int _maxCacheAge = 24 * 60 * 60; // 1 day in seconds
+  // Profile images: Users have only 1 profile photo (max 5MB per photo)
+  // Cache limit set to 5MB since we only cache current user's single profile photo
+  // This is much lower than before (was 30MB) since we don't need to cache multiple photos
+  static const int _maxCacheSize = 5 * 1024 * 1024; // 5MB (sufficient for 1 profile photo)
+  static const int _maxCacheAge = 7 * 24 * 60 * 60; // 7 days (keep cached for a week)
   static const String _cacheFolder = 'profile_images';
 
   /// Get cache directory

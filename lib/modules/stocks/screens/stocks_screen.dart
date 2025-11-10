@@ -24,6 +24,7 @@ import '../widgets/stock_transaction_fab.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../transactions/widgets/quick_add_chat_fab.dart';
+import '../../../core/services/country_detection_service.dart';
 
 /// Hisse takip ana ekranı
 class StocksScreen extends StatefulWidget {
@@ -598,7 +599,11 @@ class _StocksScreenState extends State<StocksScreen> {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
+          child: FutureBuilder<bool>(
+            future: CountryDetectionService().isTurkishPlayStoreUser(),
+            builder: (context, snapshot) {
+              final isTurkish = snapshot.data ?? false;
+              return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Simple Icon
@@ -633,6 +638,41 @@ class _StocksScreenState extends State<StocksScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+                  
+                  // Reward message for Turkish users
+                  if (isTurkish) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade500.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.green.shade500.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.stars_rounded,
+                            size: 16,
+                            color: Colors.green.shade500,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.firstStockPurchaseRewardMessage,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
               
               const SizedBox(height: 32),
               
@@ -676,6 +716,8 @@ class _StocksScreenState extends State<StocksScreen> {
                 ),
               ),
             ],
+              );
+            },
           ),
         ),
       ),

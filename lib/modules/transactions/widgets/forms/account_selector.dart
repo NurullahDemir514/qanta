@@ -82,7 +82,7 @@ class AccountSelector extends StatelessWidget {
         number: '0000000000000000',
         expiryDate: '',
         bankName: AppLocalizations.of(context)?.bankName ?? 'Qanta',
-        color: const Color(0xFF34C759),
+        color: Colors.green.shade500,
       ),
       PaymentCard(
         id: '1',

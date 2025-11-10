@@ -4,7 +4,6 @@ import '../contracts/advertisement_service_contract.dart';
 import 'google_ads_banner_service.dart';
 import 'google_ads_real_banner_service.dart';
 import 'google_ads_interstitial_service.dart';
-import 'google_ads_rewarded_service.dart';
 import 'google_ads_app_open_service.dart';
 import '../models/advertisement_models.dart';
 
@@ -46,18 +45,17 @@ class AdvertisementManager implements AdvertisementManagerContract {
       isTestMode: isTestMode,
     );
     
-    // Rewarded (Ödüllü) reklam servisi (stub)
-    _rewardedService = GoogleAdsRewardedService(
-      adUnitId: rewardedAdUnitId,
-      isTestMode: isTestMode,
-    );
+    // Rewarded (Ödüllü) reklam servisi
+    // NOTE: Rewarded ads are handled by RewardedAdService in core/services
+    // This is kept for contract compatibility but not actively used
+    _rewardedService = _createStubRewardedService(rewardedAdUnitId, isTestMode);
     
     // App Open (Uygulama Açıkken) reklam servisi (optional)
     if (appOpenAdUnitId != null) {
       _appOpenService = GoogleAdsAppOpenService(
         adUnitId: appOpenAdUnitId,
         isTestMode: isTestMode,
-        cooldownDuration: const Duration(hours: 4), // 4 saatlik cooldown
+        cooldownDuration: const Duration(minutes: 30), // 30 dakikalık cooldown
       );
       _services['appOpen'] = _appOpenService!;
     } else {
@@ -83,14 +81,8 @@ class AdvertisementManager implements AdvertisementManagerContract {
   
   @override
   Future<void> initializeAll() async {
-    debugPrint('🔄 AdvertisementManager: Initializing all ad services...');
-    debugPrint('📊 Total services: ${_services.length}');
-    debugPrint('📋 Services: ${_services.keys.join(', ')}');
-    
     final futures = _services.values.map((service) => service.loadAd());
     await Future.wait(futures);
-    
-    debugPrint('✅ AdvertisementManager: All ad services initialized');
   }
   
   @override
@@ -124,5 +116,70 @@ class AdvertisementManager implements AdvertisementManagerContract {
   String? getServiceError(String key) {
     final service = _services[key];
     return service?.error;
+  }
+  
+  /// Stub rewarded service oluştur (contract compatibility için)
+  /// NOTE: Gerçek rewarded ads RewardedAdService (core/services) tarafından yönetiliyor
+  RewardedAdvertisementServiceContract _createStubRewardedService(
+    String adUnitId,
+    bool isTestMode,
+  ) {
+    return _StubRewardedService(adUnitId: adUnitId, isTestMode: isTestMode);
+  }
+}
+
+/// Stub Rewarded Service - Contract compatibility için
+/// Gerçek rewarded ads RewardedAdService (core/services) tarafından yönetiliyor
+class _StubRewardedService implements RewardedAdvertisementServiceContract {
+  final String adUnitId;
+  final bool isTestMode;
+  
+  void Function()? _onRewardEarned;
+  
+  _StubRewardedService({
+    required this.adUnitId,
+    required this.isTestMode,
+  });
+  
+  @override
+  bool get isLoaded => false;
+  
+  @override
+  bool get isLoading => false;
+  
+  @override
+  String? get error => null;
+  
+  @override
+  void Function()? get onRewardEarned => _onRewardEarned;
+  
+  @override
+  set onRewardEarned(void Function()? callback) {
+    _onRewardEarned = callback;
+  }
+  
+  @override
+  Future<void> loadAd() async {
+    // Stub implementation
+  }
+  
+  @override
+  Future<void> showAd() async {
+    // Stub implementation
+  }
+  
+  @override
+  Future<void> hideAd() async {
+    // Stub implementation
+  }
+  
+  @override
+  Future<void> showRewardedAd() async {
+    // Stub implementation
+  }
+  
+  @override
+  Future<void> dispose() async {
+    // Nothing to dispose
   }
 }

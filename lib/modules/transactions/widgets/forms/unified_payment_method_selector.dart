@@ -255,7 +255,7 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
         cardIcon = Icons.credit_card_rounded;
         break;
       case card.CardType.debit:
-        cardColor = const Color(0xFF34C759);
+        cardColor = Colors.green.shade500;
         cardIcon = Icons.credit_card_rounded;
         break;
       case card.CardType.cash:
@@ -338,8 +338,8 @@ class _UnifiedPaymentMethodSelectorState extends State<UnifiedPaymentMethodSelec
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: cardType == card.CardType.credit 
-                                  ? (balance > 0 ? const Color(0xFF34C759) : const Color(0xFFFF3B30))
-                                  : const Color(0xFF34C759),
+                                  ? (balance > 0 ? Colors.green.shade500 : const Color(0xFFFF3B30))
+                                  : Colors.green.shade500,
                                 letterSpacing: -0.1,
                               ),
                             ),

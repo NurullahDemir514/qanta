@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,51 @@ import 'installment_selection_message.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../stocks/providers/stock_provider.dart';
 import '../../../shared/widgets/animated_typing_message.dart';
+
+// ==================== DEBUG CONFIG ====================
+// Production'da token bilgisini görmek için email veya UID ekleyin
+const List<String> _debugTokenEmails = [
+  't5@gmail.com',
+  't6@gmail.com',
+  't7@gmail.com',
+  't8@gmail.com',
+  't9@gmail.com',
+  't10@gmail.com',
+  't11@gmail.com',
+  't12@gmail.com',
+  't13@gmail.com',
+  't14@gmail.com',
+  't15@gmail.com',
+  // Daha fazla email ekleyebilirsiniz
+];
+const List<String> _debugTokenUids = [
+  // 'uid123456', // UID ile de kontrol edebilirsiniz
+];
+
+/// Token bilgisini göstermek için kontrol
+bool _shouldShowTokenInfo() {
+  if (kDebugMode) return true; // Debug modda her zaman göster
+  
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+    
+    // Email kontrolü
+    if (user.email != null && _debugTokenEmails.contains(user.email)) {
+      return true;
+    }
+    
+    // UID kontrolü
+    if (_debugTokenUids.contains(user.uid)) {
+      return true;
+    }
+    
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+// ==================== END DEBUG CONFIG ====================
 
 // Kart ismini temizle ve localize et
 String _getLocalizedAccountName(AccountModel account, BuildContext context) {
@@ -603,8 +649,21 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
       final isReady = response?['isReady'] as bool? ?? false;  // Backend 'isReady' dönüyor
       final transactionData = response?['transactionData'];
       
+      // Token usage bilgisini parse et (type-safe)
+      Map<String, dynamic>? tokenUsage;
+      if (response?['tokenUsage'] != null) {
+        try {
+          tokenUsage = Map<String, dynamic>.from(response!['tokenUsage'] as Map);
+        } catch (e) {
+          debugPrint('⚠️ Failed to parse tokenUsage data: $e');
+        }
+      }
+      
       debugPrint('🤖 AI Response: $aiMessage');
       debugPrint('📊 Ready: $isReady, Has Data: ${transactionData != null}');
+      if (tokenUsage != null) {
+        debugPrint('🔢 Token Usage: ${tokenUsage['totalTokenCount']} tokens (Prompt: ${tokenUsage['promptTokenCount']}, Response: ${tokenUsage['candidatesTokenCount']})');
+      }
       
       if (mounted) {
         setState(() {
@@ -618,6 +677,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
             'content': aiMessage,
             'timestamp': DateTime.now().millisecondsSinceEpoch, // Streaming için timestamp
             'shouldAnimate': true, // Bu mesaj animasyonlu gösterilmeli
+            'tokenUsage': tokenUsage, // Token kullanımı (debug için)
           });
           _lastAIMessageTimestamp = DateTime.now(); // En son AI mesajı zamanı
           _lastAnimatedMessageIndex = _chatMessages.length - 1; // Bu mesajın index'i
@@ -752,17 +812,47 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
   /// Rastgele hoş geldin mesajı al
   String _getRandomWelcomeMessage(String firstName) {
     final l10n = AppLocalizations.of(context)!;
-    final isTurkish = l10n.localeName == 'tr';
+    final locale = l10n.localeName;
+    final isTurkish = locale == 'tr';
+    final isGerman = locale == 'de';
     
     final welcomeMessages = [
       l10n.aiChatWelcome(firstName),
-      'Hey $firstName! ${isTurkish ? 'Bugün hangi işlemi eklemek istersiniz?' : 'What transaction would you like to add today?'}',
-      '${isTurkish ? 'Selam' : 'Hi'} $firstName! ${isTurkish ? 'Finansal asistanınız hazır. Harcama mı gelir mi ekleyelim?' : 'Your financial assistant is ready. Expense or income?'}',
-      '${isTurkish ? 'Hoş geldin' : 'Welcome back'} $firstName! ${isTurkish ? 'Yeni bir işlem eklemek için hazırım.' : 'Ready to add a new transaction.'}',
-      '${isTurkish ? 'Merhaba' : 'Hello'} $firstName! ${isTurkish ? 'Ne yapmak istersiniz? İşlem eklemek, analiz yapmak?' : 'What would you like to do? Add transaction or analyze?'}',
-      '$firstName, ${isTurkish ? 'tekrar hoş geldin' : 'welcome back'}! ${isTurkish ? 'Bugün bütçeni nasıl takip edelim?' : 'How should we track your budget today?'}',
-      '${isTurkish ? 'Selam' : 'Hi'} $firstName! ${isTurkish ? 'Finansal verilerinizi güncelleyelim mi?' : 'Shall we update your financial data?'}',
-      'Hey $firstName! ${isTurkish ? 'Yeni bir harcama veya gelir eklemek ister misiniz?' : 'Would you like to add a new expense or income?'}',
+      isTurkish 
+        ? 'Hey $firstName! Bugün hangi işlemi eklemek istersiniz?'
+        : isGerman
+          ? 'Hey $firstName! Welche Transaktion möchten Sie heute hinzufügen?'
+          : 'Hey $firstName! What transaction would you like to add today?',
+      isTurkish
+        ? 'Selam $firstName! Finansal asistanınız hazır. Harcama mı gelir mi ekleyelim?'
+        : isGerman
+          ? 'Hallo $firstName! Ihr Finanzassistent ist bereit. Ausgabe oder Einnahme hinzufügen?'
+          : 'Hi $firstName! Your financial assistant is ready. Expense or income?',
+      isTurkish
+        ? 'Hoş geldin $firstName! Yeni bir işlem eklemek için hazırım.'
+        : isGerman
+          ? 'Willkommen $firstName! Ich bin bereit, eine neue Transaktion hinzuzufügen.'
+          : 'Welcome back $firstName! Ready to add a new transaction.',
+      isTurkish
+        ? 'Merhaba $firstName! Ne yapmak istersiniz? İşlem eklemek, analiz yapmak?'
+        : isGerman
+          ? 'Hallo $firstName! Was möchten Sie tun? Transaktion hinzufügen oder analysieren?'
+          : 'Hello $firstName! What would you like to do? Add transaction or analyze?',
+      isTurkish
+        ? '$firstName, tekrar hoş geldin! Bugün bütçeni nasıl takip edelim?'
+        : isGerman
+          ? '$firstName, willkommen zurück! Wie sollen wir heute Ihr Budget verfolgen?'
+          : '$firstName, welcome back! How should we track your budget today?',
+      isTurkish
+        ? 'Selam $firstName! Finansal verilerinizi güncelleyelim mi?'
+        : isGerman
+          ? 'Hallo $firstName! Sollen wir Ihre Finanzdaten aktualisieren?'
+          : 'Hi $firstName! Shall we update your financial data?',
+      isTurkish
+        ? 'Hey $firstName! Yeni bir harcama veya gelir eklemek ister misiniz?'
+        : isGerman
+          ? 'Hey $firstName! Möchten Sie eine neue Ausgabe oder Einnahme hinzufügen?'
+          : 'Hey $firstName! Would you like to add a new expense or income?',
     ];
     
     final randomIndex = (DateTime.now().millisecondsSinceEpoch % welcomeMessages.length);
@@ -1188,6 +1278,16 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
         final isReady = response['isReady'] as bool;
         final transactionData = response['transactionData'];
         
+        // Token usage bilgisini parse et (type-safe)
+        Map<String, dynamic>? tokenUsage;
+        if (response['tokenUsage'] != null) {
+          try {
+            tokenUsage = Map<String, dynamic>.from(response['tokenUsage'] as Map);
+          } catch (e) {
+            debugPrint('⚠️ Failed to parse tokenUsage data: $e');
+          }
+        }
+        
         // Usage bilgisini parse et (type-safe)
         Map<String, dynamic>? usage;
         if (response['usage'] != null) {
@@ -1202,6 +1302,9 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
         debugPrint('   Message: $aiMessage');
         debugPrint('   IsReady: $isReady');
         debugPrint('   TransactionData: $transactionData');
+        if (tokenUsage != null) {
+          debugPrint('🔢 Token Usage: ${tokenUsage['totalTokenCount']} tokens (Prompt: ${tokenUsage['promptTokenCount']}, Response: ${tokenUsage['candidatesTokenCount']})');
+        }
         
         // Usage bilgisini güncelle
         if (usage != null) {
@@ -1260,6 +1363,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
             'content': displayMessage,
             'timestamp': DateTime.now().millisecondsSinceEpoch, // Streaming için timestamp
             'shouldAnimate': true, // Bu mesaj animasyonlu gösterilmeli
+            'tokenUsage': tokenUsage, // Token kullanımı (debug için)
           });
           _lastAIMessageTimestamp = DateTime.now(); // En son AI mesajı zamanı
           _lastAnimatedMessageIndex = _chatMessages.length - 1; // Bu mesajın index'i
@@ -1646,8 +1750,21 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
       final transactionData = response?['transactionData'];
       final quickReplies = response?['quickReplies'] as List<dynamic>?;
       
+      // Token usage bilgisini parse et (type-safe)
+      Map<String, dynamic>? tokenUsage;
+      if (response?['tokenUsage'] != null) {
+        try {
+          tokenUsage = Map<String, dynamic>.from(response!['tokenUsage'] as Map);
+        } catch (e) {
+          debugPrint('⚠️ Failed to parse tokenUsage data: $e');
+        }
+      }
+      
       debugPrint('📥 Follow-up response: $aiMessage');
       debugPrint('   IsReady: $isReady, TransactionData: $transactionData');
+      if (tokenUsage != null) {
+        debugPrint('🔢 Token Usage: ${tokenUsage['totalTokenCount']} tokens (Prompt: ${tokenUsage['promptTokenCount']}, Response: ${tokenUsage['candidatesTokenCount']})');
+      }
       
       // Conversation history'e AI yanıtını ekle
       _conversationHistory.add({
@@ -1661,6 +1778,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
           _chatMessages.add({
             'role': 'ai',
             'content': aiMessage,
+            'tokenUsage': tokenUsage, // Token kullanımı (debug için)
           });
         });
         _messagesUpdateTrigger.value++;
@@ -2563,7 +2681,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
     if (isAsking) {
       debugPrint('🎯 AI is asking for account. Message: "$message"');
     } else {
-      debugPrint('⏭️ Not asking for account: "$message"');
+      // Debug: Sadece gerektiğinde log (spam önlemek için)
     }
     
     return isAsking;
@@ -2700,7 +2818,7 @@ class _QuickAddChatFABState extends State<QuickAddChatFAB>
     if (isAsking) {
       debugPrint('💳 AI is asking for installment. Message: "$message"');
     } else {
-      debugPrint('⏭️ Not asking for installment: "$message"');
+      // Debug: Sadece gerektiğinde log (spam önlemek için)
     }
     
     return isAsking;
@@ -3881,9 +3999,13 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
   
   double _previousKeyboardHeight = 0;
   
-  // Banner Ad
+  // Banner Ad 1 (Header altında)
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
+  
+  // Banner Ad 2 (Input üstünde)
+  BannerAd? _bannerAd2;
+  bool _isBannerAd2Loaded = false;
   
   // Interstitial Ad (Açıkken Reklam)
   InterstitialAd? _interstitialAd;
@@ -3894,23 +4016,25 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadBannerAd();
+    _loadBannerAd2();
     _checkAndShowInterstitialAd();
   }
   
   @override
   void dispose() {
     _bannerAd?.dispose();
+    _bannerAd2?.dispose();
     _interstitialAd?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
   
-  /// Banner reklamı yükle
+  /// Banner reklamı yükle (Header altında - 1. Banner)
   void _loadBannerAd() {
     _bannerAd = BannerAd(
       adUnitId: Platform.isAndroid
-          ? 'ca-app-pub-8222173839637306/8471335231' // Android Banner Ad Unit ID
-          : 'ca-app-pub-8222173839637306/1234567890', // iOS Banner Ad Unit ID (değiştirin)
+          ? 'ca-app-pub-8222173839637306/8471335231' // Android Banner Ad Unit ID 1
+          : 'ca-app-pub-8222173839637306/1234567890', // iOS Banner Ad Unit ID 1
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
@@ -3920,16 +4044,53 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
               _isBannerAdLoaded = true;
             });
           }
-          debugPrint('✅ Banner ad loaded successfully');
+          debugPrint('✅ Banner ad 1 loaded successfully');
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('❌ Banner ad failed to load: $error');
+          debugPrint('❌ Banner ad 1 failed to load: $error');
+          if (mounted) {
+            setState(() {
+              _isBannerAdLoaded = false;
+            });
+          }
           ad.dispose();
         },
       ),
     );
     
     _bannerAd?.load();
+  }
+  
+  /// Banner reklamı yükle (Input üstünde - 2. Banner)
+  void _loadBannerAd2() {
+    _bannerAd2 = BannerAd(
+      adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-8222217303967306/1932264468' // Android Banner Ad Unit ID 2 (yeni oluşturulan)
+          : 'ca-app-pub-8222217303967306/1932264468', // iOS Banner Ad Unit ID 2 (aynı ID - AdMob'dan aldığınız)
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          if (mounted) {
+            setState(() {
+              _isBannerAd2Loaded = true;
+            });
+          }
+          debugPrint('✅ Banner ad 2 loaded successfully');
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('❌ Banner ad 2 failed to load: $error');
+          if (mounted) {
+            setState(() {
+              _isBannerAd2Loaded = false;
+            });
+          }
+          ad.dispose();
+        },
+      ),
+    );
+    
+    _bannerAd2?.load();
   }
   
   /// Interstitial reklamı yükle
@@ -4192,7 +4353,7 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
             ),
           ),
 
-          // Banner Ad - Free kullanıcılar için
+          // Banner Ad 1 - Header altında - Free kullanıcılar için
           Consumer<PremiumService>(
             builder: (context, premiumService, _) {
               // Premium kullanıcılar için reklam gösterme
@@ -4200,7 +4361,7 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
                 return const SizedBox.shrink();
               }
               
-              // Reklam yüklüyse göster
+              // Reklam yüklüyse göster, değilse shrink (gizle)
               if (_isBannerAdLoaded && _bannerAd != null) {
                 return Container(
                   width: _bannerAd!.size.width.toDouble(),
@@ -4210,13 +4371,8 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
                 );
               }
               
-              // Reklam yüklenirken placeholder
-              return Container(
-                width: double.infinity,
-                height: 50,
-                margin: const EdgeInsets.only(bottom: 8),
-                color: Colors.transparent,
-              );
+              // Reklam yüklenmemişse shrink ile gizle
+              return const SizedBox.shrink();
             },
           ),
 
@@ -4514,13 +4670,23 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
                   return const SizedBox.shrink();
                 }
                 
-                // Typing indicator için özel widget - Modern animasyon
+                // Typing indicator - ChatGPT tarzı thinking mesajı
                 if (isTyping) {
+                  final l10n = AppLocalizations.of(context)!;
+                  final thinkingText = l10n.localeName == 'tr' 
+                      ? 'Düşünüyor...'
+                      : l10n.localeName == 'de'
+                          ? 'Denke...'
+                          : 'Thinking...';
+                  
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16, left: 0),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: _ModernTypingIndicator(isDark: isDark),
+                      child: _ChatGPTThinkingIndicator(
+                        isDark: isDark,
+                        thinkingText: thinkingText,
+                      ),
                     ),
                   );
                 }
@@ -4571,10 +4737,25 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
                       }
                     }
                     
-                    // Boş mesajları gösterme
-                    final content = (msg['content'] as String?)?.trim() ?? '';
+                    // Boş mesajları gösterme ve UTF-16 geçersiz karakterleri temizle
+                    String content = (msg['content'] as String?)?.trim() ?? '';
                     if (content.isEmpty) {
                       return const SizedBox.shrink();
+                    }
+                    
+                    // UTF-16 geçersiz karakterleri temizle (malformed string hatasını önle)
+                    try {
+                      content = content.replaceAll(RegExp(r'[\uFFFE\uFFFF]'), ''); // Geçersiz UTF-16 karakterlerini temizle
+                      // Surrogate pair'leri kontrol et
+                      content = String.fromCharCodes(
+                        content.runes.where((rune) {
+                          return rune >= 0 && rune <= 0xD7FF || rune >= 0xE000 && rune <= 0x10FFFF;
+                        }),
+                      );
+                    } catch (e) {
+                      debugPrint('⚠️ UTF-16 cleaning error: $e');
+                      // Hata olursa basit temizleme
+                      content = content.replaceAll(RegExp(r'[^\x00-\xFF]'), '?');
                     }
                     
                     // Mesajın animasyon durumunu kontrol et
@@ -4617,7 +4798,12 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
                                   color: Colors.white,
                                 ),
                               )
-                            : (shouldAnimate && isAI)
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // AI mesajı
+                                  (shouldAnimate && isAI)
                                 ? AnimatedTypingMessage(
                                     fullMessage: content,
                                     isDark: isDark,
@@ -4673,7 +4859,7 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
                                         backgroundColor: isDark 
                                           ? const Color(0xFF1C1C1E) 
                                           : const Color(0xFFF5F5F5),
-                                        color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
+                                        color: isDark ? Colors.green.shade500 : const Color(0xFF059669),
                                       ),
                                       blockquote: GoogleFonts.inter(
                                         fontSize: 15,
@@ -4682,6 +4868,43 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
                                       ),
                                     ),
                                   ),
+                                  // Token bilgisi (debug modda veya yetkili kullanıcılar için)
+                                  if (isAI && _shouldShowTokenInfo()) ...[
+                                    const SizedBox(height: 8),
+                                    Builder(
+                                      builder: (context) {
+                                        final tokenUsage = msg['tokenUsage'] as Map<String, dynamic>?;
+                                        if (tokenUsage == null) return const SizedBox.shrink();
+                                        
+                                        final totalTokens = tokenUsage['totalTokenCount'] as int? ?? 0;
+                                        final promptTokens = tokenUsage['promptTokenCount'] as int? ?? 0;
+                                        final responseTokens = tokenUsage['candidatesTokenCount'] as int? ?? 0;
+                                        
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: isDark 
+                                                ? const Color(0xFF1C1C1E).withOpacity(0.5)
+                                                : const Color(0xFFF5F5F5).withOpacity(0.5),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            '🔢 Tokens: $totalTokens (P: $promptTokens, R: $responseTokens)',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w500,
+                                              color: isDark 
+                                                  ? Colors.white.withOpacity(0.6)
+                                                  : Colors.black54,
+                                              letterSpacing: -0.2,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ],
+                              ),
                         ),
                       ),
                     );
@@ -5407,6 +5630,30 @@ class _AIChatPageWrapperState extends State<_AIChatPageWrapper> with WidgetsBind
                     },
                   ),
 
+                  // Banner Ad 2 - Input üstünde - Free kullanıcılar için
+                  Consumer<PremiumService>(
+                    builder: (context, premiumService, _) {
+                      // Premium kullanıcılar için reklam gösterme
+                      if (premiumService.isPremium) {
+                        return const SizedBox.shrink();
+                      }
+                      
+                      // Reklam yüklüyse göster, değilse shrink (gizle)
+                      if (_isBannerAd2Loaded && _bannerAd2 != null) {
+                        return Container(
+                          width: _bannerAd2!.size.width.toDouble(),
+                          height: _bannerAd2!.size.height.toDouble(),
+                          margin: const EdgeInsets.only(bottom: 8, top: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: AdWidget(ad: _bannerAd2!),
+                        );
+                      }
+                      
+                      // Reklam yüklenmemişse shrink ile gizle
+                      return const SizedBox.shrink();
+                    },
+                  ),
+
                   // Premium Modern Input
                   Container(
                     padding: EdgeInsets.only(
@@ -5763,7 +6010,119 @@ String _buildStockDetails(Map<String, dynamic> data, Currency currency, dynamic 
   return '$actionText: $symbol × ${quantity ?? 0} lot @ $formattedPrice';
 }
 
-// ==================== MODERN TYPING INDICATOR ====================
+// ==================== CHATGPT-STYLE THINKING INDICATOR ====================
+/// ChatGPT tarzı thinking mesajı - Mesaj balonu içinde "Thinking..." + animasyonlu noktalar
+class _ChatGPTThinkingIndicator extends StatefulWidget {
+  final bool isDark;
+  final String thinkingText;
+
+  const _ChatGPTThinkingIndicator({
+    required this.isDark,
+    required this.thinkingText,
+  });
+
+  @override
+  State<_ChatGPTThinkingIndicator> createState() => _ChatGPTThinkingIndicatorState();
+}
+
+class _ChatGPTThinkingIndicatorState extends State<_ChatGPTThinkingIndicator> 
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _controller.repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.75,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: widget.isDark 
+            ? const Color(0xFF2C2C2E) // ChatGPT'nin dark mode gri tonu
+            : const Color(0xFFF5F5F7), // ChatGPT'nin light mode gri tonu
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // "Thinking..." yazısı
+          Text(
+            widget.thinkingText,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+              color: widget.isDark 
+                  ? Colors.white.withOpacity(0.7)
+                  : Colors.black87.withOpacity(0.6),
+              letterSpacing: -0.2,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Animasyonlu noktalar
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildDot(0, _animation.value),
+                  const SizedBox(width: 4),
+                  _buildDot(1, _animation.value),
+                  const SizedBox(width: 4),
+                  _buildDot(2, _animation.value),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDot(int index, double animationValue) {
+    // Her nokta için farklı delay hesapla
+    final delay = index * 0.15;
+    final progress = (animationValue + delay) % 1.0;
+    
+    // Smooth wave animation
+    final opacity = 0.3 + (0.7 * (0.5 - (progress - 0.5).abs()) * 2);
+    
+    return Container(
+      width: 6,
+      height: 6,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: widget.isDark 
+            ? Colors.white.withOpacity(opacity)
+            : Colors.black87.withOpacity(opacity),
+      ),
+    );
+  }
+}
+
+// ==================== MODERN TYPING INDICATOR (Backup - artık kullanılmıyor) ====================
 /// ChatGPT tarzı modern typing indicator - Gradient pulse animasyonu
 class _ModernTypingIndicator extends StatefulWidget {
   final bool isDark;

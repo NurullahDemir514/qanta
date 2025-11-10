@@ -172,7 +172,7 @@ class _IncomePaymentMethodSelectorState
                   context: context,
                   title: l10n.cash,
                   icon: Icons.payments_rounded,
-                  color: const Color(0xFF34C759),
+                  color: Colors.green.shade500,
                   isSelected: widget.selectedPaymentMethod?.isCash == true,
                   balance: cashAccount.balance,
                   onTap: () {
@@ -207,7 +207,7 @@ class _IncomePaymentMethodSelectorState
                     '**** **** **** ****',
                 expiryDate: '',
                 bankName: cardData['bankName'] as String? ?? '',
-                color: const Color(0xFF34C759), // Yeşil - gelir için
+                color: Colors.green.shade500, // Yeşil - gelir için
               );
 
               return Padding(

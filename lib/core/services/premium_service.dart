@@ -557,6 +557,72 @@ class PremiumService extends ChangeNotifier {
     }
   }
   
+  /// Activate premium from points (1 month)
+  /// Called when user redeems points for premium
+  static Future<void> activatePremiumFromPoints(String userId, int months) async {
+    try {
+      debugPrint('🎁 PremiumService: Activating premium from points for $months month(s)');
+      
+      // Calculate expiration date
+      final now = DateTime.now();
+      final expirationDate = now.add(Duration(days: 30 * months));
+      
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .set({
+            'isPremium': true,
+            'isPremiumPlus': false,
+            'premiumExpiresAt': expirationDate.toIso8601String(),
+            'premiumSource': 'points',
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+      
+      // Update local state
+      final instance = PremiumService();
+      await instance._savePremiumStatus(true, isPremiumPlus: false);
+      
+      debugPrint('✅ PremiumService: Premium activated from points');
+    } catch (e) {
+      debugPrint('❌ PremiumService: Error activating premium from points: $e');
+      rethrow;
+    }
+  }
+
+  /// Activate premium plus from points (1 month)
+  /// Called when user redeems points for premium plus
+  static Future<void> activatePremiumPlusFromPoints(String userId, int months) async {
+    try {
+      debugPrint('🎁 PremiumService: Activating premium plus from points for $months month(s)');
+      
+      // Calculate expiration date
+      final now = DateTime.now();
+      final expirationDate = now.add(Duration(days: 30 * months));
+      
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .set({
+            'isPremium': true,
+            'isPremiumPlus': true,
+            'premiumExpiresAt': expirationDate.toIso8601String(),
+            'premiumSource': 'points',
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+      
+      // Update local state
+      final instance = PremiumService();
+      await instance._savePremiumStatus(true, isPremiumPlus: true);
+      
+      debugPrint('✅ PremiumService: Premium Plus activated from points');
+    } catch (e) {
+      debugPrint('❌ PremiumService: Error activating premium plus from points: $e');
+      rethrow;
+    }
+  }
+
   /// Test kullanıcıları için premium durumunu tamamen sıfırla
   /// SharedPreferences'tan da siler ve restore purchases çağırır
   Future<void> resetPremiumStatus() async {

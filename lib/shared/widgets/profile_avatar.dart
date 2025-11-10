@@ -88,42 +88,53 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
       return GestureDetector(
         key: widget.tutorialKey, // Tutorial key ekle
         onTap: widget.onTap,
-        child: Container(
-          width: widget.size,
-          height: widget.size,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.size / 2),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFFFD700), // Gold
-                Color(0xFFFFA500), // Orange
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFFFA500).withValues(alpha: 0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: widget.size,
+              height: widget.size,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(widget.size / 2),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFFFD700), // Gold
+                    Color(0xFFFFA500), // Orange
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFFA500).withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-            ],
-          ),
-          padding: const EdgeInsets.all(1.5), // Border thickness (ince)
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-              borderRadius: BorderRadius.circular((widget.size - 3) / 2),
+              padding: const EdgeInsets.all(1.5), // Border thickness (ince)
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                  borderRadius: BorderRadius.circular((widget.size - 3) / 2),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular((widget.size - 3) / 2),
+                  child: _isLoading
+                      ? _buildPlaceholder(isDark)
+                      : (_cachedImageData != null
+                            ? _buildImageWidget(_cachedImageData!)
+                            : _buildPlaceholder(isDark)),
+                ),
+              ),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular((widget.size - 3) / 2),
-              child: _isLoading
-                  ? _buildPlaceholder(isDark)
-                  : (_cachedImageData != null
-                        ? _buildImageWidget(_cachedImageData!)
-                        : _buildPlaceholder(isDark)),
+            // Premium badge - sağ üst köşe
+            Positioned(
+              right: widget.size * 0.02, // Border'dan hafif içeride
+              top: widget.size * 0.02,
+              child: _buildPremiumBadge(isDark),
             ),
-          ),
+          ],
         ),
       );
     }
@@ -132,37 +143,49 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
     return GestureDetector(
       key: widget.tutorialKey, // Tutorial key ekle
       onTap: widget.onTap,
-      child: Container(
-        width: widget.size,
-        height: widget.size,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(widget.size / 2),
-          border: widget.showBorder
-              ? Border.all(
-                  color: isDark
-                      ? const Color(0xFF38383A)
-                      : const Color(0xFFE5E5EA),
-                  width: 2,
-                )
-              : null,
-          boxShadow: widget.showBorder
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(widget.size / 2),
-          child: _isLoading
-              ? _buildPlaceholder(isDark)
-              : (_cachedImageData != null
-                    ? _buildImageWidget(_cachedImageData!)
-                    : _buildPlaceholder(isDark)),
-        ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.size / 2),
+              border: widget.showBorder
+                  ? Border.all(
+                      color: isDark
+                          ? const Color(0xFF38383A)
+                          : const Color(0xFFE5E5EA),
+                      width: 2,
+                    )
+                  : null,
+              boxShadow: widget.showBorder
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(widget.size / 2),
+              child: _isLoading
+                  ? _buildPlaceholder(isDark)
+                  : (_cachedImageData != null
+                        ? _buildImageWidget(_cachedImageData!)
+                        : _buildPlaceholder(isDark)),
+            ),
+          ),
+          // Premium badge - sadece premium kullanıcılar için
+          if (widget.isPremium)
+            Positioned(
+              right: widget.size * 0.02, // Border'dan hafif içeride
+              top: widget.size * 0.02,
+              child: _buildPremiumBadge(isDark),
+            ),
+        ],
       ),
     );
   }
@@ -186,22 +209,69 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
   }
 
   Widget _buildPlaceholder(bool isDark) {
+    final initial = widget.userName.isNotEmpty 
+        ? widget.userName[0].toUpperCase() 
+        : 'U';
+    
+    // Minimal, temiz renk seçimi
+    final backgroundColor = isDark 
+        ? const Color(0xFF3A3A3C)
+        : const Color(0xFFE5E5EA);
+    
+    final textColor = isDark
+        ? const Color(0xFFE5E5EA)
+        : const Color(0xFF6D6D70);
+    
     return Container(
       width: widget.size,
       height: widget.size,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(widget.size / 2),
       ),
       child: Center(
         child: Text(
-          widget.userName.isNotEmpty ? widget.userName[0].toUpperCase() : 'U',
+          initial,
           style: GoogleFonts.inter(
-            fontSize: widget.size * 0.4, // Responsive font size
-            fontWeight: FontWeight.w600,
-            color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6D6D70),
+            fontSize: widget.size * 0.38,
+            fontWeight: FontWeight.w500,
+            color: textColor,
           ),
         ),
+      ),
+    );
+  }
+
+  /// Premium badge widget - şık premium ikonu
+  Widget _buildPremiumBadge(bool isDark) {
+    final badgeSize = widget.size * 0.30; // Avatar boyutuna göre responsive (daha büyük)
+    
+    return Container(
+      width: badgeSize,
+      height: badgeSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFFFD700), // Gold
+            Color(0xFFFFA500), // Orange
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFFA500).withValues(alpha: 0.6),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.workspace_premium,
+        size: badgeSize * 0.75, // Daha büyük ikon
+        color: Colors.white,
       ),
     );
   }

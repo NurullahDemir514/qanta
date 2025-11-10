@@ -45,6 +45,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get german => 'Deutsch';
 
   @override
+  String get hindi => 'Hindi';
+
+  @override
   String get login => 'Anmelden';
 
   @override
@@ -2669,6 +2672,22 @@ class AppLocalizationsDe extends AppLocalizations {
       'Gehen Sie zur Seite \"Meine Karten\", um Ihre erste Karte hinzuzufügen';
 
   @override
+  String get firstCardRewardMessage =>
+      'Add your first card and earn 250 points!';
+
+  @override
+  String get firstBudgetRewardMessage =>
+      'Create your first budget and earn 250 points!';
+
+  @override
+  String get firstStockPurchaseRewardMessage =>
+      'Make your first stock purchase and earn 250 points!';
+
+  @override
+  String get firstSubscriptionRewardMessage =>
+      'Add your first subscription and earn 250 points!';
+
+  @override
   String deleteTransactionConfirmation(String description) {
     return 'Sind Sie sicher, dass Sie die Transaktion $description löschen möchten?';
   }
@@ -4268,6 +4287,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Früher Zugang zu neuen Funktionen';
 
   @override
+  String featurePointsMultiplier(String multiplier) {
+    return '${multiplier}x Punkte-Multiplikator';
+  }
+
+  @override
   String get skip => 'Überspringen';
 
   @override
@@ -4843,4 +4867,72 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get tutorialProfileDescription =>
       'Tippen Sie auf Ihr Profilfoto, um auf Einstellungen, Premium-Funktionen und Ihre persönlichen Informationen zuzugreifen.';
+
+  @override
+  String get incomeExpenseFlow => 'Income & Expense Flow';
+
+  @override
+  String get spendingIntensity => 'Spending Intensity';
+
+  @override
+  String get budgetSpendingDistribution => 'Budget & Spending Distribution';
+
+  @override
+  String get low => 'Low';
+
+  @override
+  String get medium => 'Medium';
+
+  @override
+  String get high => 'High';
+
+  @override
+  String get spending => 'Spending';
+
+  @override
+  String get compare => 'Compare';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get incomeExpenseComparison => 'Income & Expense Comparison';
+
+  @override
+  String get referralCodeTitle => 'Enter Referral Code';
+
+  @override
+  String get referralCodeDescription =>
+      'Enter a referral code to earn bonus points! You and your friend will both receive 500 points.';
+
+  @override
+  String get referralCode => 'Referral Code';
+
+  @override
+  String get referralCodeRequired => 'Referral code is required';
+
+  @override
+  String get referralCodeInvalidLength => 'Referral code must be 8 characters';
+
+  @override
+  String get referralCodeSubmit => 'Apply Code';
+
+  @override
+  String get referralCodeSkip => 'Skip for now';
+
+  @override
+  String get referralCodeSuccess => 'Referral code applied!';
+
+  @override
+  String get referralCodeSuccessMessage =>
+      'You and your friend have received bonus points!';
+
+  @override
+  String get referralCodeInvalid => 'Invalid referral code';
+
+  @override
+  String get referralCodeError => 'Error processing referral code';
 }

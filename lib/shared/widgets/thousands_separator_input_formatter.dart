@@ -35,6 +35,11 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
     return '.';
   }
 
+  // Public getter for decimal separator (for use in calculator)
+  static String getDecimalSeparator(String locale) {
+    return _getDecimalSeparator(locale);
+  }
+
   /// Parses a locale-formatted string to double
   /// Example: "277.050,47" (Turkish) -> 277050.47
   ///          "277,050.47" (US) -> 277050.47

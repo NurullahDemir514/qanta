@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/services/premium_service.dart';
@@ -20,6 +21,8 @@ import '../../cards/widgets/add_credit_card_form.dart';
 import '../../stocks/providers/stock_provider.dart';
 import '../../../shared/models/account_model.dart';
 import '../../premium/premium_offer_screen.dart';
+import '../../../core/services/ai/firebase_ai_service.dart';
+import 'package:flutter/services.dart';
 
 class BalanceOverviewCard extends StatefulWidget {
   final Key? tutorialKey; // Tutorial için key - sadece Balance Card için
@@ -300,109 +303,6 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
 
         return Column(
           children: [
-            // Premium Badge Section (Free kullanıcılar için)
-            Consumer<PremiumService>(
-              builder: (context, premiumService, child) {
-                if (premiumService.isPremium) return const SizedBox.shrink();
-                
-                return Container(
-                  margin: EdgeInsets.only(
-                    bottom: ScreenCompatibility.responsiveHeight(context, 12.0),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: ScreenCompatibility.responsiveWidth(context, 16.0),
-                    vertical: ScreenCompatibility.responsiveHeight(context, 12.0),
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFFFFD700),
-                        Color(0xFFFFA500),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFFA500).withOpacity(0.25),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.workspace_premium_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.upgradeToPremiumBanner,
-                              style: GoogleFonts.inter(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                                letterSpacing: 0.1,
-                                height: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              l10n.premiumBannerSubtitle,
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                                letterSpacing: 0,
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const PremiumOfferScreen(),
-                              fullscreenDialog: true,
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            l10n.upgradeNow,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFFFA500),
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            
             // Ana kart
             GestureDetector(
               onTap: () => BalanceDetailBottomSheet.show(context),
@@ -477,6 +377,7 @@ class _BalanceOverviewCardState extends State<BalanceOverviewCard> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                          if (totalStockValue > 0) const SizedBox(width: 8),
                           // Modern Segmented Control Toggle - Sadece hisse senedi varsa göster
                           if (totalStockValue > 0) Container(
                             decoration: BoxDecoration(

@@ -336,12 +336,14 @@ class _SubscriptionsOverviewCardState extends State<SubscriptionsOverviewCard> {
                                       ),
                                     ),
                                   ),
-                                  if (hasLastPayment && daysSinceLastPayment != null && daysSinceLastPayment >= 0) ...[
+                                  // Last payment badge - Sadece bugünden önce ödenenler için göster
+                                  // Bugün ödendiyse badge gösterme (çünkü zaten bugün, gereksiz bilgi)
+                                  if (hasLastPayment && daysSinceLastPayment != null && daysSinceLastPayment > 0) ...[
                                     SizedBox(width: 4.w),
                                     Container(
                                       padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF34C759).withOpacity(0.15),
+                                        color: Colors.green.shade500.withOpacity(0.15),
                                         borderRadius: BorderRadius.circular(4.r),
                                       ),
                                       child: Row(
@@ -350,7 +352,7 @@ class _SubscriptionsOverviewCardState extends State<SubscriptionsOverviewCard> {
                                           Icon(
                                             Icons.check_circle_outline,
                                             size: 9.w,
-                                            color: const Color(0xFF34C759),
+                                            color: Colors.green.shade500,
                                           ),
                                           SizedBox(width: 2.w),
                                           Text(
@@ -358,7 +360,7 @@ class _SubscriptionsOverviewCardState extends State<SubscriptionsOverviewCard> {
                                             style: GoogleFonts.inter(
                                               fontSize: 9.sp,
                                               fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF34C759),
+                                              color: Colors.green.shade500,
                                             ),
                                           ),
                                         ],
@@ -385,7 +387,7 @@ class _SubscriptionsOverviewCardState extends State<SubscriptionsOverviewCard> {
                                           ),
                                           SizedBox(width: 2.w),
                                           Text(
-                                            isOverdue ? l10n.overdue : (daysUntilNext == 0 ? l10n.today : daysUntilNext == 1 ? l10n.tomorrow : '${daysUntilNext} ${l10n.days}'),
+                                            _formatNextPaymentDateShort(nextPaymentDate, daysUntilNext, l10n),
                                             style: GoogleFonts.inter(
                                               fontSize: 9.sp,
                                               fontWeight: FontWeight.w600,
@@ -463,21 +465,44 @@ class _SubscriptionsOverviewCardState extends State<SubscriptionsOverviewCard> {
     );
   }
 
+  /// Badge için kısa format (relative tarih)
+  String _formatNextPaymentDateShort(DateTime date, int daysUntil, AppLocalizations l10n) {
+    if (daysUntil < 0) {
+      return l10n.overdue;
+    } else if (daysUntil == 0) {
+      return l10n.today;
+    } else if (daysUntil == 1) {
+      return l10n.tomorrow;
+    } else if (daysUntil <= 7) {
+      return '${daysUntil} ${l10n.days}';
+    } else {
+      // 7+ gün için kısa tarih formatı
+      final formatter = DateFormat('dd MMM', Localizations.localeOf(context).toString());
+      return formatter.format(date);
+    }
+  }
+
+  /// Alt satır için detaylı format (gerçek tarih)
   String _formatNextPaymentDate(DateTime date, int daysUntil, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final paymentDay = DateTime(date.year, date.month, date.day);
 
-    if (daysUntil == 0) {
+    if (daysUntil < 0) {
+      // Overdue: Gerçek tarihi göster
+      final formatter = DateFormat('dd MMM yyyy', Localizations.localeOf(context).toString());
+      return '${l10n.overdue} (${formatter.format(date)})';
+    } else if (daysUntil == 0) {
       return l10n.today;
     } else if (daysUntil == 1) {
       return l10n.tomorrow;
-    } else if (daysUntil < 0) {
-      return l10n.overdue;
     } else if (daysUntil <= 7) {
-      return '${daysUntil} ${l10n.days}';
-    } else {
+      // Yakın tarihler için relative + gerçek tarih
       final formatter = DateFormat('dd MMM', Localizations.localeOf(context).toString());
+      return '${daysUntil} ${l10n.days} (${formatter.format(date)})';
+    } else {
+      // Uzak tarihler için tam tarih
+      final formatter = DateFormat('dd MMM yyyy', Localizations.localeOf(context).toString());
       return formatter.format(date);
     }
   }
@@ -506,7 +531,7 @@ class _SubscriptionsOverviewCardState extends State<SubscriptionsOverviewCard> {
       case RecurringCategory.subscription:
         return const Color(0xFF007AFF);
       case RecurringCategory.utilities:
-        return const Color(0xFF34C759);
+        return Colors.green.shade500;
       case RecurringCategory.insurance:
         return const Color(0xFFFF9500);
       case RecurringCategory.rent:

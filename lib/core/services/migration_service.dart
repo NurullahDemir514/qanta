@@ -181,7 +181,8 @@ class MigrationService {
         );
 
         // Add to new transactions collection
-        await UnifiedTransactionService.addTransaction(transaction);
+        final result = await UnifiedTransactionService.addTransaction(transaction);
+        // Migration doesn't need to check Amazon reward
       }
     } catch (e) {
       rethrow;

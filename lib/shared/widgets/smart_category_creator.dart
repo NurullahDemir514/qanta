@@ -312,7 +312,7 @@ class _SmartCategoryCreatorState extends State<SmartCategoryCreator> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: widget.isIncomeCategory ? const Color(0xFF34C759) : const Color(0xFF00FFB3),
+                color: widget.isIncomeCategory ? Colors.green.shade500 : const Color(0xFF00FFB3),
                 width: 2,
               ),
             ),
@@ -448,7 +448,7 @@ class _SmartCategoryCreatorState extends State<SmartCategoryCreator> {
           child: ElevatedButton(
             onPressed: canCreate ? _createCategory : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: widget.isIncomeCategory ? const Color(0xFF34C759) : const Color(0xFF00FFB3),
+              backgroundColor: widget.isIncomeCategory ? Colors.green.shade500 : const Color(0xFF00FFB3),
               foregroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(

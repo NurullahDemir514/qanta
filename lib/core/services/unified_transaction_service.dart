@@ -1,15 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/models/transaction_model_v2.dart';
 import '../../shared/models/account_model.dart';
 import 'firebase_auth_service.dart';
 import 'firebase_firestore_service.dart';
 import 'unified_account_service.dart';
+import 'point_service.dart';
+import '../../modules/profile/providers/point_provider.dart';
+import 'amazon_reward_service.dart';
+import '../../modules/profile/providers/amazon_reward_provider.dart';
 
 /// Unified Transaction Service
 /// Handles all transaction operations in a single service
 class UnifiedTransactionService {
   static const String _collectionName = 'transactions';
+  static const String _transactionCountKey = 'transaction_count_for_interstitial';
 
   /// Debug: List all transactions with their source_account_id
   static Future<void> debugAllTransactions() async {
@@ -25,17 +31,9 @@ class UnifiedTransactionService {
             .limit(10),
       );
 
-      for (int i = 0; i < snapshot.docs.length; i++) {
-        final data = snapshot.docs[i].data();
-        debugPrint('   ${i + 1}. ID: ${snapshot.docs[i].id}');
-        debugPrint('      source_account_id: ${data['source_account_id']}');
-        debugPrint('      type: ${data['type']}');
-        debugPrint('      amount: ${data['amount']}');
-        debugPrint('      description: ${data['description']}');
-        debugPrint('      ---');
-      }
+      // Debug output removed for production
     } catch (e) {
-      debugPrint('Error in debugAllTransactions: $e');
+      if (kDebugMode) debugPrint('Error in debugAllTransactions: $e');
     }
   }
 
@@ -85,7 +83,7 @@ class UnifiedTransactionService {
         return TransactionWithDetailsV2.fromJson(transactionData);
       }).toList();
     } catch (e) {
-      debugPrint('Error fetching transactions: $e');
+      if (kDebugMode) debugPrint('Error fetching transactions: $e');
       rethrow;
     }
   }
@@ -117,7 +115,7 @@ class UnifiedTransactionService {
         });
       }).toList();
     } catch (e) {
-      debugPrint('Error fetching transactions by type: $e');
+      if (kDebugMode) debugPrint('Error fetching transactions by type: $e');
       rethrow;
     }
   }
@@ -149,7 +147,7 @@ class UnifiedTransactionService {
         });
       }).toList();
     } catch (e) {
-      debugPrint('Error fetching transactions by account: $e');
+      if (kDebugMode) debugPrint('Error fetching transactions by account: $e');
       rethrow;
     }
   }
@@ -182,13 +180,15 @@ class UnifiedTransactionService {
         });
       }).toList();
     } catch (e) {
-      debugPrint('Error fetching transactions by date range: $e');
+      if (kDebugMode) debugPrint('Error fetching transactions by date range: $e');
       rethrow;
     }
   }
 
   /// Add new transaction
-  static Future<String> addTransaction(
+  /// Add transaction
+  /// Returns: Map with 'transactionId' and optionally 'amazonRewardEarned'
+  static Future<Map<String, dynamic>> addTransaction(
     TransactionWithDetailsV2 transaction,
   ) async {
     try {
@@ -202,18 +202,7 @@ class UnifiedTransactionService {
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      // 🔥 FIREBASE DEBUG - What data is being sent?
-      debugPrint('   user_id: ${transactionData['user_id']}');
-      debugPrint('   type: ${transactionData['type']}');
-      debugPrint('   amount: ${transactionData['amount']}');
-      debugPrint('   description: ${transactionData['description']}');
-      debugPrint(
-        '   source_account_id: ${transactionData['source_account_id']}',
-      );
-      debugPrint(
-        '   target_account_id: ${transactionData['target_account_id']}',
-      );
-      debugPrint('   category_id: ${transactionData['category_id']}');
+      // Debug output removed for production
 
       final docRef = await FirebaseFirestoreService.addDocument(
         collectionName: _collectionName,
@@ -223,7 +212,80 @@ class UnifiedTransactionService {
       // Update account balance
       await _updateAccountBalance(transaction);
 
-      return docRef.id;
+      // NEW: Add points from transaction (only for expenses/income)
+      int pointsEarned = 0;
+      if (transaction.type == TransactionType.expense ||
+          transaction.type == TransactionType.income) {
+        try {
+          final pointService = PointService();
+          pointsEarned = await pointService.earnPointsFromTransaction(
+            userId,
+            docRef.id,
+          );
+          if (pointsEarned > 0) {
+            // Refresh PointProvider to update UI immediately
+            try {
+              final pointProvider = PointProvider();
+              await pointProvider.refresh();
+            } catch (e) {
+              if (kDebugMode) debugPrint('⚠️ UnifiedTransactionService: Failed to refresh PointProvider: $e');
+            }
+          }
+        } catch (e, stackTrace) {
+          if (kDebugMode) {
+            debugPrint('⚠️ UnifiedTransactionService: Point reward error: $e');
+          debugPrint('⚠️ Stack trace: $stackTrace');
+          }
+          // Don't fail transaction if point reward fails
+        }
+        
+        // NEW: Add Amazon reward credit from transaction
+        try {
+          final amazonRewardService = AmazonRewardService();
+          final amazonRewardEarned = await amazonRewardService.earnRewardFromTransaction(
+            userId,
+            docRef.id,
+          );
+          if (amazonRewardEarned) {
+            // Refresh AmazonRewardProvider to update UI immediately
+            try {
+              final amazonRewardProvider = AmazonRewardProvider();
+              await amazonRewardProvider.loadCredits();
+            } catch (e) {
+              if (kDebugMode) debugPrint('⚠️ UnifiedTransactionService: Failed to refresh AmazonRewardProvider: $e');
+            }
+          }
+        } catch (e, stackTrace) {
+          if (kDebugMode) {
+            debugPrint('⚠️ UnifiedTransactionService: Amazon reward error: $e');
+            debugPrint('⚠️ Stack trace: $stackTrace');
+          }
+          // Don't fail transaction if Amazon reward fails
+        }
+      }
+
+      // Check if we should show interstitial ad (every 3 transactions)
+      bool shouldShowInterstitial = false;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final currentCount = prefs.getInt(_transactionCountKey) ?? 0;
+        final newCount = currentCount + 1;
+        await prefs.setInt(_transactionCountKey, newCount);
+        
+        // Show interstitial ad every 3 transactions
+        if (newCount % 3 == 0) {
+          shouldShowInterstitial = true;
+        }
+      } catch (e) {
+        if (kDebugMode) debugPrint('⚠️ UnifiedTransactionService: Failed to track transaction count: $e');
+      }
+
+      // Return transaction ID, points earned, and interstitial ad flag
+      return {
+        'transactionId': docRef.id,
+        'pointsEarned': pointsEarned,
+        'shouldShowInterstitial': shouldShowInterstitial,
+      };
     } catch (e) {
       rethrow;
     }
@@ -300,7 +362,7 @@ class UnifiedTransactionService {
       final data = doc.data() as Map<String, dynamic>;
       return TransactionWithDetailsV2.fromJson({'id': doc.id, ...data});
     } catch (e) {
-      debugPrint('Error fetching transaction: $e');
+      if (kDebugMode) debugPrint('Error fetching transaction: $e');
       rethrow;
     }
   }
@@ -509,10 +571,7 @@ class UnifiedTransactionService {
     TransactionWithDetailsV2 transaction,
   ) async {
     try {
-      debugPrint('🔄 _reverseAccountBalance çağrıldı');
-      debugPrint('   Transaction ID: ${transaction.id}');
-      debugPrint('   Transaction Type: ${transaction.type.value}');
-      debugPrint('   Amount: ${transaction.amount}');
+      // Debug output removed for production
 
       // Force server read to avoid stale cache
       final account = await UnifiedAccountService.getAccountById(
@@ -634,17 +693,7 @@ class UnifiedTransactionService {
             .limit(limit),
       );
 
-      // Debug: List first few transactions to see source_account_id
-      if (snapshot.docs.isNotEmpty) {
-        for (int i = 0; i < snapshot.docs.length && i < 5; i++) {
-          final data = snapshot.docs[i].data();
-          debugPrint('   ${i + 1}. ID: ${snapshot.docs[i].id}');
-          debugPrint('      source_account_id: ${data['source_account_id']}');
-          debugPrint('      amount: ${data['amount']}');
-          debugPrint('      description: ${data['description']}');
-          debugPrint('      ---');
-        }
-      } else {}
+      // Debug output removed for production
 
       return snapshot.docs.map((doc) {
         final data = doc.data();

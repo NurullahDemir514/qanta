@@ -17,8 +17,6 @@ export 'firebase_transaction_service.dart';
 export 'firebase_credit_card_service.dart';
 export 'firebase_cash_account_service.dart';
 export 'firebase_debit_card_service.dart';
-export 'firebase_budget_service.dart';
-export 'firebase_budget_service_v2.dart';
 export 'profile_image_service.dart';
 
 // Legacy services (for backward compatibility during migration)

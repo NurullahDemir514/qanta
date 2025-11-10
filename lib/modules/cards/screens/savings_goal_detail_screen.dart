@@ -42,10 +42,15 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
       isTestMode: false,
     );
     
-    // Banner'ı yükle (2 saniye delay)
+    // Banner'ı yükle (2 saniye delay) - Sadece premium olmayanlar için
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final premiumService = context.read<PremiumService>();
+      if (!premiumService.isPremium && mounted) {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         _detailBannerService.loadAd();
+          }
+        });
       }
     });
     
@@ -124,7 +129,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF34C759).withOpacity(0.1),
+                      color: Colors.green.shade500.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
@@ -132,7 +137,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                       children: [
                         Icon(
                           Icons.check_circle,
-                          color: const Color(0xFF34C759),
+                          color: Colors.green.shade500,
                           size: 16,
                         ),
                         const SizedBox(width: 6),
@@ -141,7 +146,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF34C759),
+                            color: Colors.green.shade500,
                           ),
                         ),
                       ],
@@ -160,7 +165,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                               subtitle: l10n.addSavings,
                               icon: Icons.add_circle,
                               gradientColors: [
-                                const Color(0xFF34C759),
+                                Colors.green.shade500,
                                 const Color(0xFF30D158),
                               ],
                               onTap: () => _showDepositForm(context, goal),
@@ -799,8 +804,11 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
           goal: goal,
           onSuccess: () async {
             setState(() {}); // Refresh
+            final unifiedProvider = context.read<UnifiedProviderV2>();
             // Refresh account balances (in case goal amount changed)
-            await context.read<UnifiedProviderV2>().loadAccounts(forceServerRead: true);
+            await unifiedProvider.loadAccounts(forceServerRead: true);
+            // Refresh savings goals (anasayfa için)
+            await unifiedProvider.loadSavingsGoals();
           },
         ),
       ),
@@ -838,8 +846,11 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
           accounts: filteredAccounts,
           onSuccess: () async {
             setState(() {}); // Refresh
+            final unifiedProvider = context.read<UnifiedProviderV2>();
             // Refresh account balances
-            await context.read<UnifiedProviderV2>().loadAccounts(forceServerRead: true);
+            await unifiedProvider.loadAccounts(forceServerRead: true);
+            // Refresh savings goals (anasayfa için)
+            await unifiedProvider.loadSavingsGoals();
           },
         ),
       ),
@@ -877,8 +888,11 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
           accounts: filteredAccounts,
           onSuccess: () async {
             setState(() {}); // Refresh
+            final unifiedProvider = context.read<UnifiedProviderV2>();
             // Refresh account balances
-            await context.read<UnifiedProviderV2>().loadAccounts(forceServerRead: true);
+            await unifiedProvider.loadAccounts(forceServerRead: true);
+            // Refresh savings goals (anasayfa için)
+            await unifiedProvider.loadSavingsGoals();
           },
         ),
       ),
@@ -939,7 +953,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
               
               if (goal.completionPercentage >= 100 && !goal.isCompleted)
                 ListTile(
-                  leading: const Icon(Icons.check_circle, color: Color(0xFF34D399)),
+                  leading: Icon(Icons.check_circle, color: Colors.green.shade500),
                   title: Text(
                     'Tamamlandı Olarak İşaretle',
                     style: GoogleFonts.inter(fontWeight: FontWeight.w600),
@@ -996,6 +1010,10 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
       final success = await savingsProvider.archiveGoal(goal.id);
       
       if (success && mounted) {
+        // UnifiedProviderV2'yi güncelle (anasayfa için)
+        final unifiedProvider = context.read<UnifiedProviderV2>();
+        await unifiedProvider.loadSavingsGoals();
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.goalArchived),
@@ -1021,7 +1039,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFF34D399)),
+            style: TextButton.styleFrom(foregroundColor: Colors.green.shade500),
             child: Text(l10n.unarchive),
           ),
         ],
@@ -1033,10 +1051,14 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
       final success = await savingsProvider.unarchiveGoal(goal.id);
       
       if (success && mounted) {
+        // UnifiedProviderV2'yi güncelle (anasayfa için)
+        final unifiedProvider = context.read<UnifiedProviderV2>();
+        await unifiedProvider.loadSavingsGoals();
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.goalActivated),
-            backgroundColor: const Color(0xFF34D399),
+            backgroundColor: Colors.green.shade500,
           ),
         );
         Navigator.of(context).pop(); // Detail screen'den çık
@@ -1070,6 +1092,10 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
       final success = await savingsProvider.reactivateGoal(goal.id);
       
       if (success && mounted) {
+        // UnifiedProviderV2'yi güncelle (anasayfa için)
+        final unifiedProvider = context.read<UnifiedProviderV2>();
+        await unifiedProvider.loadSavingsGoals();
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.goalReactivated),
@@ -1095,7 +1121,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFF34D399)),
+            style: TextButton.styleFrom(foregroundColor: Colors.green.shade500),
             child: Text(l10n.completedButton),
           ),
         ],
@@ -1107,10 +1133,14 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
       final success = await savingsProvider.completeGoal(goal.id);
       
       if (success && mounted) {
+        // UnifiedProviderV2'yi güncelle (anasayfa için)
+        final unifiedProvider = context.read<UnifiedProviderV2>();
+        await unifiedProvider.loadSavingsGoals();
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.goalCompletedSuccess),
-            backgroundColor: const Color(0xFF34D399),
+            backgroundColor: Colors.green.shade500,
           ),
         );
         Navigator.of(context).pop(); // Detail screen'den çık
@@ -1144,6 +1174,10 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
       final success = await savingsProvider.deleteGoal(goal.id);
       
       if (success && mounted) {
+        // UnifiedProviderV2'yi güncelle (anasayfa için)
+        final unifiedProvider = context.read<UnifiedProviderV2>();
+        await unifiedProvider.loadSavingsGoals();
+        
         Navigator.of(context).pop(); // Detail screen'den çık
       }
     }

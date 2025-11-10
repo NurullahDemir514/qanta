@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,14 +44,11 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager>
       _isFirstTimeUser = !hasOpenedBefore;
       
       if (_isFirstTimeUser) {
-        debugPrint('🆕 First time user - App Open Ad will be skipped');
         // İlk açılışı kaydet
         await prefs.setBool(_firstOpenKey, true);
-      } else {
-        debugPrint('👤 Returning user - App Open Ad can be shown');
       }
     } catch (e) {
-      debugPrint('❌ Error checking first time user: $e');
+      if (kDebugMode) debugPrint('❌ Error checking first time user: $e');
       _isFirstTimeUser = false; // Hata durumunda eski kullanıcı gibi davran
     }
   }
@@ -66,27 +64,26 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager>
     super.didChangeAppLifecycleState(state);
     
     if (state == AppLifecycleState.resumed && !_isFirstLaunch) {
-      debugPrint('📱 App resumed from background');
       _showAppOpenAdIfNeeded();
-    } else if (state == AppLifecycleState.paused) {
-      debugPrint('📱 App went to background');
     }
   }
   
   Future<void> _showAppOpenAdIfNeeded() async {
     if (!mounted) return;
     
-    // İlk kez kullanıcılara reklam gösterme
-    if (_isFirstTimeUser) {
-      debugPrint('🆕 App Open: First time user - Skipping ad');
+    // İlk kez kullanıcılara reklam gösterme (sadece ilk açılışta)
+    if (_isFirstTimeUser && _isFirstLaunch) {
       return;
     }
     
     // Premium kullanıcılar için reklam gösterme
-    final premiumService = context.read<PremiumService>();
-    if (premiumService.isPremium) {
-      debugPrint('💎 App Open: Premium user - Skipping ad');
-      return;
+    try {
+      final premiumService = context.read<PremiumService>();
+      if (premiumService.isPremium) {
+        return;
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('⚠️ App Open: Error reading PremiumService: $e');
     }
     
     final adProvider = context.read<AdvertisementProvider>();
@@ -94,31 +91,26 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager>
     // Ad provider initialize olana kadar bekle (max 10 saniye)
     int attempts = 0;
     while (!adProvider.isInitialized && attempts < 20) {
-      debugPrint('⏳ App Open: Waiting for ad provider... (${attempts + 1}/20)');
       await Future.delayed(const Duration(milliseconds: 500));
       attempts++;
     }
     
     if (!adProvider.isInitialized) {
-      debugPrint('⚠️ App Open: Ad provider not initialized after 10 seconds');
       return;
     }
     
     // İlk açılış bayrağını kaldır
     if (_isFirstLaunch) {
       _isFirstLaunch = false;
-      debugPrint('🎉 First launch, showing App Open Ad');
     }
     
     // App Open Ad gösterilebilir mi kontrol et
     final appOpenService = adProvider.adManager.appOpenService;
     if (appOpenService == null) {
-      debugPrint('⚠️ App Open Ad service not available');
       return;
     }
     
     if (!appOpenService.isLoaded) {
-      debugPrint('⏳ App Open Ad not loaded yet, waiting...');
       // Reklamın yüklenmesini bekle (max 5 saniye)
       int loadAttempts = 0;
       while (!appOpenService.isLoaded && loadAttempts < 10) {
@@ -127,18 +119,21 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager>
       }
       
       if (!appOpenService.isLoaded) {
-        debugPrint('⚠️ App Open Ad failed to load in time');
+        // Yüklemeyi tekrar dene
+        await appOpenService.loadAd();
         return;
       }
     }
     
     if (!appOpenService.canShowAd()) {
-      debugPrint('⏰ App Open Ad cooldown active, skipping');
       return;
     }
     
-    debugPrint('🎬 Showing App Open Ad...');
-    await adProvider.showAppOpenAd();
+    try {
+      await adProvider.showAppOpenAd();
+    } catch (e) {
+      if (kDebugMode) debugPrint('❌ Error showing App Open Ad: $e');
+    }
   }
   
   @override

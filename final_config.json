@@ -1,0 +1,239 @@
+{
+  "parameters": {
+    "max_daily_notifications": {
+      "defaultValue": {
+        "value": "5"
+      },
+      "valueType": "NUMBER"
+    },
+    "notification_interval_minutes": {
+      "defaultValue": {
+        "value": "15"
+      },
+      "valueType": "NUMBER"
+    },
+    "smart_scheduling_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "notification_hours": {
+      "defaultValue": {
+        "value": "9,12,15,18,21"
+      },
+      "valueType": "STRING"
+    },
+    "notification_end_hour": {
+      "defaultValue": {
+        "value": "21"
+      },
+      "valueType": "NUMBER"
+    },
+    "min_hours_between_notifications": {
+      "defaultValue": {
+        "value": "2"
+      },
+      "valueType": "NUMBER"
+    },
+    "notification_start_hour": {
+      "defaultValue": {
+        "value": "9"
+      },
+      "valueType": "NUMBER"
+    },
+    "notifications_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "notification_messages_tr": {
+      "defaultValue": {
+        "value": " morning|G\u00fcnayd\u0131n! \ud83c\udf05|Bug\u00fcnk\u00fc b\u00fct\u00e7enizi kontrol edin lunch|\u00d6\u011fle Aras\u0131 \ud83c\udf7d\ufe0f|\u00d6\u011fle yeme\u011fi harcaman\u0131z\u0131 eklediniz mi? afternoon|\u00d6\u011fleden Sonra \u2615|K\u00fc\u00e7\u00fck harcamalar\u0131n\u0131z\u0131 kaydetmeyi unutmay\u0131n evening|Ak\u015fam Saati \ud83c\udf06|Al\u0131\u015fveri\u015flerinizi kaydetme zaman\u0131 night|G\u00fcn Sonu \ud83c\udf19|Bug\u00fcnk\u00fc i\u015flemlerinizi g\u00f6zden ge\u00e7irin weekend_morning|Hafta Sonu \ud83c\udfaf|Haftal\u0131k harcamalar\u0131n\u0131z\u0131 inceleyin weekend_evening|Hafta Sonu \u00d6zeti \ud83d\udcca|Gelecek hafta i\u00e7in plan\u0131n\u0131z\u0131 yap\u0131n general|Qanta Hat\u0131rlat\u0131c\u0131|Finanslar\u0131n\u0131z\u0131 d\u00fczenli tutun"
+      },
+      "valueType": "STRING"
+    },
+    "notification_messages_en": {
+      "defaultValue": {
+        "value": "morning|Good Morning! \ud83c\udf05|Check your budget for today lunch|Lunch Time \ud83c\udf7d\ufe0f|Have you tracked your lunch expenses? afternoon|Afternoon Break \u2615|Don't forget to track small expenses evening|Evening Time \ud83c\udf06|Time to record your shopping night|Day End \ud83c\udf19|Review your today's transactions weekend_morning|Weekend \ud83c\udfaf|Review your weekly spending weekend_evening|Weekend Summary \ud83d\udcca|Plan for next week general|Qanta Reminder|Keep your finances organized"
+      },
+      "valueType": "STRING"
+    },
+    "amazon_reward_rewarded_ad_amount": {
+      "defaultValue": {
+        "value": "0.20"
+      },
+      "description": "Amazon reward - Reklam izleme \u00f6d\u00fcl\u00fc (TL)",
+      "valueType": "NUMBER"
+    },
+    "amazon_reward_transaction_amount": {
+      "defaultValue": {
+        "value": "0.03"
+      },
+      "description": "Amazon reward - Harcama ekleme \u00f6d\u00fcl\u00fc (TL)",
+      "valueType": "NUMBER"
+    },
+    "amazon_reward_minimum_threshold": {
+      "defaultValue": {
+        "value": "100.0"
+      },
+      "description": "Amazon reward - Minimum hediye kart\u0131 e\u015fi\u011fi (TL)",
+      "valueType": "NUMBER"
+    },
+    "amazon_reward_gift_card_amount": {
+      "defaultValue": {
+        "value": "100.0"
+      },
+      "description": "Amazon reward - Hediye kart\u0131 tutar\u0131 (TL)",
+      "valueType": "NUMBER"
+    },
+    "amazon_reward_max_daily_ads": {
+      "defaultValue": {
+        "value": "10"
+      },
+      "description": "Amazon reward - G\u00fcnl\u00fck maksimum reklam say\u0131s\u0131",
+      "valueType": "NUMBER"
+    },
+    "amazon_reward_max_daily_transactions": {
+      "defaultValue": {
+        "value": "20"
+      },
+      "description": "Amazon reward - G\u00fcnl\u00fck maksimum harcama \u00f6d\u00fcl\u00fc",
+      "valueType": "NUMBER"
+    },
+    "point_rewarded_ad": {
+      "defaultValue": {
+        "value": "50"
+      },
+      "description": "Point - Reklam izleme puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_transaction": {
+      "defaultValue": {
+        "value": "15"
+      },
+      "description": "Point - Harcama ekleme puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_daily_login": {
+      "defaultValue": {
+        "value": "25"
+      },
+      "description": "Point - G\u00fcnl\u00fck giri\u015f puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_weekly_streak": {
+      "defaultValue": {
+        "value": "1000"
+      },
+      "description": "Point - Haftal\u0131k seri puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_monthly_goal": {
+      "defaultValue": {
+        "value": "50"
+      },
+      "description": "Point - Ayl\u0131k hedef puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_referral": {
+      "defaultValue": {
+        "value": "100"
+      },
+      "description": "Point - Referans puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_budget_goal": {
+      "defaultValue": {
+        "value": "15"
+      },
+      "description": "Point - B\u00fct\u00e7e hedefi puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_savings_milestone": {
+      "defaultValue": {
+        "value": "12"
+      },
+      "description": "Point - Birikim kilometre ta\u015f\u0131 puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_premium_bonus": {
+      "defaultValue": {
+        "value": "50"
+      },
+      "description": "Point - Premium bonus puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_special_event": {
+      "defaultValue": {
+        "value": "25"
+      },
+      "description": "Point - \u00d6zel etkinlik puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_first_card": {
+      "defaultValue": {
+        "value": "250"
+      },
+      "description": "Point - \u0130lk kart puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_first_budget": {
+      "defaultValue": {
+        "value": "250"
+      },
+      "description": "Point - \u0130lk b\u00fct\u00e7e puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_first_stock_purchase": {
+      "defaultValue": {
+        "value": "250"
+      },
+      "description": "Point - \u0130lk hisse al\u0131m\u0131 puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_first_subscription": {
+      "defaultValue": {
+        "value": "250"
+      },
+      "description": "Point - \u0130lk abonelik puan\u0131",
+      "valueType": "NUMBER"
+    },
+    "point_max_daily_ads": {
+      "defaultValue": {
+        "value": "10"
+      },
+      "description": "Point - G\u00fcnl\u00fck maksimum reklam",
+      "valueType": "NUMBER"
+    },
+    "point_max_daily_transactions": {
+      "defaultValue": {
+        "value": "20"
+      },
+      "description": "Point - G\u00fcnl\u00fck maksimum harcama",
+      "valueType": "NUMBER"
+    },
+    "point_max_daily_login": {
+      "defaultValue": {
+        "value": "1"
+      },
+      "description": "Point - G\u00fcnl\u00fck maksimum giri\u015f",
+      "valueType": "NUMBER"
+    },
+    "point_to_tl_rate": {
+      "defaultValue": {
+        "value": "1000"
+      },
+      "description": "Point - Puan to TL d\u00f6n\u00fc\u015f\u00fcm oran\u0131 (1000 puan = 1 TL)",
+      "valueType": "NUMBER"
+    },
+    "point_minimum_redemption": {
+      "defaultValue": {
+        "value": "10000"
+      },
+      "description": "Point - Minimum \u00e7ekilebilir puan (10,000 = 100 TL)",
+      "valueType": "NUMBER"
+    }
+  }
+}

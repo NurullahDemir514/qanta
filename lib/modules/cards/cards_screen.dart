@@ -214,7 +214,7 @@ class _CardsScreenState extends State<CardsScreen>
                   ),
                   TabItem(
                     label: l10n.savings,
-                    icon: Icons.savings_outlined,
+                    icon: Icons.account_balance_wallet_outlined,
                   ),
                 ],
               ),

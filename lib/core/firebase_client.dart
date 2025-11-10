@@ -21,9 +21,13 @@ class FirebaseManager {
       _storage = FirebaseStorage.instance;
       
       // Configure Firestore settings
+      // IMPORTANT: Cache size limited to 40MB to prevent app size growth
+      // This prevents Firestore cache from consuming unlimited storage space
+      // Users with many transactions may need to fetch data from server more often,
+      // but this prevents the app from growing to 400MB+
       _firestore?.settings = const Settings(
         persistenceEnabled: true,
-        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+        cacheSizeBytes: 40 * 1024 * 1024, // 40MB limit (default was unlimited)
       );
       
       debugPrint('✅ Firebase initialized successfully');

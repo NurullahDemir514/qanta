@@ -287,7 +287,7 @@ class _AIDescriptionFieldState extends State<AIDescriptionField>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF34D399).withOpacity(0.15),
+                        color: Colors.green.shade500.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -295,7 +295,7 @@ class _AIDescriptionFieldState extends State<AIDescriptionField>
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF34D399),
+                          color: Colors.green.shade500,
                           letterSpacing: -0.1,
                         ),
                       ),
@@ -325,7 +325,7 @@ class _AIDescriptionFieldState extends State<AIDescriptionField>
           // Checkmark (otomatik seçildiğini göster)
           Icon(
             Icons.check_circle,
-            color: const Color(0xFF34D399).withOpacity(0.8),
+            color: Colors.green.shade500.withOpacity(0.8),
             size: 20,
           ),
         ],

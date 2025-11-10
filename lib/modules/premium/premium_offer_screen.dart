@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:async';
 import '../../l10n/app_localizations.dart';
 import '../../core/services/premium_service.dart';
+import '../../core/services/country_detection_service.dart';
 import '../../core/theme/app_colors.dart';
 
 enum PremiumTier { free, premium, premiumPlus }
@@ -36,6 +37,7 @@ class _PremiumOfferScreenState extends State<PremiumOfferScreen> {
   );
   
   bool _isLoadingPrices = true;
+  bool _isTurkishUser = false; // Puanlama sistemi sadece Türkiye'de aktif
 
   // Premium prices (₺49,99/ay, ₺499/yıl %17 indirim)
   String _premiumMonthlyPriceString = '₺49,99';
@@ -56,7 +58,29 @@ class _PremiumOfferScreenState extends State<PremiumOfferScreen> {
     super.initState();
     _loadProductPrices();
     _checkCurrentTier();
+    _checkIfTurkishUser();
     _listenToPurchaseUpdates();
+  }
+
+  /// Check if user is from Turkey (points system is Turkey-only)
+  Future<void> _checkIfTurkishUser() async {
+    try {
+      final countryService = CountryDetectionService();
+      final isTurkish = await countryService.isTurkishPlayStoreUser();
+      if (mounted) {
+        setState(() {
+          _isTurkishUser = isTurkish;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('❌ Error checking Turkish user: $e');
+      // Default to false if error
+      if (mounted) {
+        setState(() {
+          _isTurkishUser = false;
+        });
+      }
+    }
   }
   
   @override
@@ -408,6 +432,7 @@ class _PremiumOfferScreenState extends State<PremiumOfferScreen> {
             _PlanFeature(Icons.credit_card, l10n.featureUnlimitedCards),
             _PlanFeature(Icons.trending_up, l10n.featureUnlimitedStocks),
             _PlanFeature(Icons.block, l10n.featureNoAds),
+            if (_isTurkishUser) _PlanFeature(Icons.stars, l10n.featurePointsMultiplier('1.5')),
             _PlanFeature(Icons.support, l10n.featurePrioritySupport),
           ],
           isPopular: true,
@@ -429,6 +454,7 @@ class _PremiumOfferScreenState extends State<PremiumOfferScreen> {
             _PlanFeature(Icons.credit_card, l10n.featureUnlimitedCards),
             _PlanFeature(Icons.trending_up, l10n.featureUnlimitedStocks),
             _PlanFeature(Icons.block, l10n.featureNoAds),
+            if (_isTurkishUser) _PlanFeature(Icons.stars, l10n.featurePointsMultiplier('2')),
             _PlanFeature(Icons.support_agent, l10n.feature247Support),
             _PlanFeature(Icons.rocket_launch, l10n.featureEarlyAccessDescription),
           ],

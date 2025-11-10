@@ -26,14 +26,25 @@ import 'widgets/main_tab_bar.dart';
 import 'widgets/balance_overview_card.dart';
 import 'widgets/budget_overview_card.dart';
 import 'widgets/subscriptions_overview_card.dart';
+import 'widgets/savings_goals_section.dart';
 import 'widgets/cards_section.dart';
 import 'widgets/recent_transactions_section.dart';
 import 'widgets/top_gainers_section.dart';
+import 'widgets/daily_tasks_card.dart';
+import 'widgets/daily_streak_indicator.dart';
+import 'widgets/premium_upgrade_banner.dart';
 import 'utils/greeting_utils.dart';
 import '../../core/providers/profile_provider.dart';
+import '../../modules/profile/providers/point_provider.dart';
 import '../../shared/widgets/reminder_checker.dart';
+import '../../core/services/country_detection_service.dart';
+import '../../core/services/point_service.dart';
+import '../../shared/models/point_activity_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import '../../modules/advertisement/config/advertisement_config.dart' as config;
-import '../../modules/advertisement/services/native_ad_service.dart';
+import '../../modules/advertisement/services/google_ads_real_banner_service.dart';
+import '../../modules/advertisement/models/advertisement_models.dart';
 import '../advertisement/providers/advertisement_provider.dart';
 import '../advertisement/services/google_ads_interstitial_service.dart';
 import '../premium/premium_offer_screen.dart';
@@ -43,6 +54,8 @@ import '../../core/services/tutorial_service.dart';
 import '../../shared/widgets/tutorial_overlay.dart';
 import '../../shared/models/tutorial_step_model.dart';
 import '../transactions/widgets/transaction_fab.dart';
+import '../../core/services/referral_service.dart';
+import 'widgets/referral_code_modal.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -97,6 +110,9 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _premiumService = context.read<PremiumService>();
       _premiumService.addListener(_onPremiumChanged);
+      
+      // Initialize Point Provider for daily tasks
+      Provider.of<PointProvider>(context, listen: false).initialize();
       
       // Tutorial kontrolü - İlk açılışta göster
       _checkAndShowTutorial();
@@ -480,16 +496,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late NativeAdService _homeNativeAd;
+  late GoogleAdsRealBannerService _homeBannerAd;
+  late GoogleAdsRealBannerService _cardsBannerAd;
   late PremiumService _premiumService;
 
   @override
   void initState() {
     super.initState();
     
-    // Yerel gelişmiş reklam
-    _homeNativeAd = NativeAdService(
-      adUnitId: config.AdvertisementConfig.production.nativeAdUnitId!,
+    // Banner reklam servisleri
+    _homeBannerAd = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.homeScreenBanner.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Cards Section altı için banner reklam servisi
+    _cardsBannerAd = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.homeBanner2.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
     );
     
     // Initialize providers
@@ -498,12 +524,15 @@ class _HomeScreenState extends State<HomeScreen> {
       _premiumService = context.read<PremiumService>();
       _premiumService.addListener(_onPremiumChanged);
       
-      // Premium değilse reklamı yükle
+      // Premium değilse banner reklamları yükle
       if (!_premiumService.isPremium) {
-        _homeNativeAd.load();
-        debugPrint('💎 HomeScreen: Loading native ad (not premium)');
+        debugPrint('💎 HomeScreen: Loading banner ads (not premium)');
+        debugPrint('📱 Banner Ad Unit ID 1: ${config.AdvertisementConfig.homeScreenBanner.bannerAdUnitId}');
+        debugPrint('📱 Banner Ad Unit ID 2 (Cards): ${config.AdvertisementConfig.homeBanner2.bannerAdUnitId}');
+        _homeBannerAd.loadAd();
+        _cardsBannerAd.loadAd();
       } else {
-        debugPrint('💎 HomeScreen: Skipping native ad (premium user)');
+        debugPrint('💎 HomeScreen: Skipping banner ads (premium user)');
       }
       // Data already loaded in splash screen, no need to reload
       // Set context for notification service
@@ -513,8 +542,314 @@ class _HomeScreenState extends State<HomeScreen> {
       final adProvider = context.read<AdvertisementProvider>();
       adProvider.initialize();
       
+      // Check and show daily login points modal
+      _checkAndShowDailyLoginModal();
+      
+      // Check and show referral code modal (only once, if user hasn't entered a code)
+      _checkAndShowReferralCodeModal();
+      
       debugPrint('🏠 HomeScreen.initState() - Data loading completed');
     });
+  }
+  
+  /// Check if user has entered a referral code and show modal if not
+  Future<void> _checkAndShowReferralCodeModal() async {
+    try {
+      // Wait a bit for user document to be ready
+      await Future.delayed(const Duration(milliseconds: 2000));
+      
+      if (!mounted) return;
+      
+      final referralService = ReferralService();
+      
+      // Check if user has already entered a referral code
+      final hasEnteredCode = await referralService.hasEnteredReferralCode();
+      
+      if (hasEnteredCode) {
+        debugPrint('✅ User has already entered a referral code, skipping modal');
+        return;
+      }
+      
+      // Check if modal was already shown (using SharedPreferences)
+      final prefs = await SharedPreferences.getInstance();
+      final modalShown = prefs.getBool('referral_code_modal_shown') ?? false;
+      
+      if (modalShown) {
+        debugPrint('✅ Referral code modal already shown, skipping');
+        return;
+      }
+      
+      // Wait a bit more for UI to be fully loaded
+      await Future.delayed(const Duration(milliseconds: 1000));
+      
+      if (!mounted) return;
+      
+      // Show bottom sheet
+      debugPrint('🎁 Showing referral code bottom sheet');
+      final result = await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.black.withOpacity(0.5),
+        isDismissible: false, // User must interact with bottom sheet
+        enableDrag: false, // Prevent dragging to dismiss
+        builder: (context) => const ReferralCodeModal(),
+      );
+      
+      // Mark modal as shown
+      await prefs.setBool('referral_code_modal_shown', true);
+      
+      if (result == true) {
+        debugPrint('✅ Referral code was successfully applied');
+      } else {
+        debugPrint('⏭️ User skipped referral code entry');
+      }
+    } catch (e) {
+      debugPrint('❌ Error checking/showing referral code modal: $e');
+    }
+  }
+  
+
+  /// Check if daily login points were earned today and show modal
+  Future<void> _checkAndShowDailyLoginModal() async {
+    try {
+      // Check if user is Turkish (points system is Turkey-only)
+      final countryService = CountryDetectionService();
+      final isTurkish = await countryService.isTurkishPlayStoreUser();
+      if (!isTurkish) return;
+
+      // Wait a bit for PointProvider to initialize
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      if (!mounted) return;
+
+      final pointProvider = Provider.of<PointProvider>(context, listen: false);
+      if (pointProvider.balance == null) {
+        // Try again after a delay
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) _checkAndShowDailyLoginModal();
+        });
+        return;
+      }
+
+      final balance = pointProvider.balance!;
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+
+      // Check if user logged in today
+      if (balance.lastDailyLogin == null) return;
+      if (!balance.lastDailyLogin!.isAfter(todayStart.subtract(const Duration(seconds: 1)))) {
+        return; // Not today's login
+      }
+
+      // Check if modal was already shown today
+      final prefs = await SharedPreferences.getInstance();
+      final lastShownDate = prefs.getString('daily_login_modal_shown_date');
+      final todayString = DateFormat('yyyy-MM-dd').format(today);
+
+      if (lastShownDate == todayString) {
+        return; // Already shown today
+      }
+
+      // Get today's daily login transaction to get points
+      final todayTransactions = pointProvider.transactions.where((transaction) {
+        return transaction.activity == PointActivity.dailyLogin &&
+            transaction.earnedAt.isAfter(todayStart) &&
+            transaction.earnedAt.isBefore(todayStart.add(const Duration(days: 1)));
+      }).toList();
+
+      if (todayTransactions.isEmpty) {
+        return; // No transaction found
+      }
+
+      final pointsEarned = todayTransactions.first.points;
+      final hasWeeklyBonus = todayTransactions.first.description?.contains('seri') ?? false;
+
+      // Mark as shown
+      await prefs.setString('daily_login_modal_shown_date', todayString);
+
+      // Show modal
+      if (mounted) {
+        _showDailyLoginPointsModal(pointsEarned, hasWeeklyBonus, balance.weeklyStreakCount);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Error checking daily login modal: $e');
+      }
+    }
+  }
+
+  /// Show daily login points modal
+  void _showDailyLoginPointsModal(int points, bool hasWeeklyBonus, int streakCount) {
+    final premiumService = PremiumService();
+    final isPremium = premiumService.isPremium;
+    final isPremiumPlus = premiumService.isPremiumPlus;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFFFCD34D), // Daha açık, yumuşak turuncu
+                const Color(0xFFF59E0B), // Orta ton
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15), // Daha hafif gölge
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Close button
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+              // Icon
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.stars_rounded,
+                  color: Colors.white,
+                  size: 48,
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Title
+              Text(
+                'Günlük Giriş Ödülü!',
+                style: GoogleFonts.inter(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              // Points
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    '+${NumberFormat('#,###').format(points)}',
+                    style: GoogleFonts.inter(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'puan',
+                    style: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ),
+                ],
+              ),
+              if (hasWeeklyBonus) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$streakCount günlük seri!',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (isPremium || isPremiumPlus) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.bolt_rounded, color: Colors.white, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        isPremiumPlus ? '2x Çarpan Aktif' : '1.5x Çarpan Aktif',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              // Close button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFFF59E0B),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Harika!',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
   
   /// Debug: Tutorial'ı manuel başlat (kDebugMode)
@@ -596,10 +931,10 @@ class _HomeScreenState extends State<HomeScreen> {
           debugPrint('✅ [DEBUG] Tutorial completed');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('🎓 Tutorial tamamlandı!'),
-                duration: Duration(seconds: 2),
-                backgroundColor: Color(0xFF34D399),
+              SnackBar(
+                content: const Text('🎓 Tutorial tamamlandı!'),
+                duration: const Duration(seconds: 2),
+                backgroundColor: Colors.green.shade500,
               ),
             );
           }
@@ -625,23 +960,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onPremiumChanged() {
     if (_premiumService.isPremium) {
-      // Premium aktif - Native ad'ı dispose et
-      _homeNativeAd.disposeAd();
+      // Premium aktif - Banner ad'ları dispose et
+      _homeBannerAd.dispose();
+      _cardsBannerAd.dispose();
       setState(() {}); // UI'ı güncelle
-      debugPrint('💎 HomeScreen: Premium active - Native ad disposed');
+      debugPrint('💎 HomeScreen: Premium active - Banner ads disposed');
     } else {
-      // Premium kapatıldı - Native ad'ı tekrar yükle
-      _homeNativeAd.load();
+      // Premium kapatıldı - Banner ad'ları tekrar yükle
+      _homeBannerAd.loadAd();
+      _cardsBannerAd.loadAd();
       setState(() {}); // UI'ı güncelle
-      debugPrint('💎 HomeScreen: Premium deactivated - Reloading native ad');
+      debugPrint('💎 HomeScreen: Premium deactivated - Reloading banner ads');
     }
   }
 
 
   @override
   void dispose() {
-    _premiumService.removeListener(_onPremiumChanged);
-    _homeNativeAd.disposeAd();
+    if (mounted) {
+      try {
+        _premiumService.removeListener(_onPremiumChanged);
+      } catch (e) {
+        // Premium service might not be initialized yet
+        debugPrint('⚠️ HomeScreen: Error removing premium listener: $e');
+      }
+    }
+    _homeBannerAd.dispose();
+    _cardsBannerAd.dispose();
     super.dispose();
   }
 
@@ -664,17 +1009,6 @@ class _HomeScreenState extends State<HomeScreen> {
               subtitleFontSize: 13, // Daha küçük alt başlık
               bottomPadding: 125,
               actions: [
-                // Debug: Tutorial butonu (kDebugMode)
-                if (kDebugMode)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: IconButton(
-                      icon: const Icon(Icons.school_outlined),
-                      tooltip: 'Tutorial Başlat (Debug)',
-                      onPressed: () => _startTutorialDebug(),
-                      color: const Color(0xFF6D6D70),
-                    ),
-                  ),
                 Consumer<PremiumService>(
                   builder: (context, premiumService, child) {
                     return Padding(
@@ -700,51 +1034,127 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // 0. Premium Upgrade Banner - Premium olmayanlar için
+                      const PremiumUpgradeBanner(),
+                      
+                      // 0.5. Daily Streak Indicator - Streak progress (sadece Türkiye'deki kullanıcılara)
+                      const DailyStreakIndicator(),
+                      
+                      // 1. Balance Overview - En önemli bilgi, en üstte
                       BalanceOverviewCard(
-                        tutorialKey: widget.balanceOverviewKey, // Tutorial key - sadece Balance Card için
-                      ),
-                      // TopGainersSection - Kendi içinde reactive
-                      const Column(
-                        children: [
-                          SizedBox(height: 20),
-                          TopGainersSection(),
-                        ],
+                        tutorialKey: widget.balanceOverviewKey,
                       ),
                       const SizedBox(height: 20),
-                      BudgetOverviewCard(
-                        tutorialKey: widget.budgetOverviewKey, // Tutorial key ekle
+                      
+                      // 1.5. Daily Tasks - Günlük görevler ve puanlar (sadece Türkiye'deki kullanıcılara)
+                      const DailyTasksCard(),
+                      const SizedBox(height: 20),
+                      
+                      // 2. Cards Section - Kartlar ve hesaplar (balance'dan hemen sonra mantıklı)
+                      CardsSection(
+                        tutorialKey: widget.cardsSectionKey,
                       ),
                       const SizedBox(height: 20),
-                      const SubscriptionsOverviewCard(),
-                      const SizedBox(height: 20),
-                      // Native Ad - RecentTransactionsSection üstü (Premium kullanıcılara gösterilmez)
+                      
+                      // 2.5. Banner Ad - Cards Section altında (Premium olmayanlar için)
                       Consumer<PremiumService>(
                         builder: (context, premiumService, child) {
-                          if (premiumService.isPremium) return const SizedBox.shrink();
-                          
-                          if (_homeNativeAd.isLoaded && _homeNativeAd.adWidget != null) {
-                            return Column(
-                              children: [
-                                const SizedBox(height: 12),
-                                Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                                  height: 90,
-                                  child: _homeNativeAd.adWidget!,
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-                            );
+                          // Premium kontrolü - Premium ise gizle
+                          if (premiumService.isPremium) {
+                            return const SizedBox.shrink();
                           }
-                          return const SizedBox.shrink();
+                          
+                          // Banner ad kontrolü - Yüklenmemişse gizle
+                          if (!_cardsBannerAd.isLoaded || _cardsBannerAd.bannerWidget == null) {
+                            return const SizedBox.shrink();
+                          }
+                          
+                          debugPrint('✅ HomeScreen: Rendering cards banner ad widget');
+                          
+                          // Banner ad widget'ı göster
+                          return Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                                alignment: Alignment.center,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: _cardsBannerAd.bannerHeight,
+                                  child: _cardsBannerAd.bannerWidget!,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          );
                         },
                       ),
-                      CardsSection(
-                        tutorialKey: widget.cardsSectionKey, // Tutorial key ekle
+                      
+                      // 3. Budget Overview - Bütçe durumu
+                      BudgetOverviewCard(
+                        tutorialKey: widget.budgetOverviewKey,
                       ),
                       const SizedBox(height: 20),
-                      RecentTransactionsSection(
-                        tutorialKey: widget.recentTransactionsKey, // Tutorial key ekle
+                      
+                      // 4. Subscriptions - Abonelikler (tekrarlayan ödemeler)
+                      const SubscriptionsOverviewCard(),
+                      const SizedBox(height: 20),
+                      
+                      // 5. Savings Goals - Tasarruf hedefleri (aboneliklerle benzer kategori)
+                      const SavingsGoalsSection(),
+                      const SizedBox(height: 28), // Birikimler ile banner arası boşluk artırıldı (20 -> 28)
+                      
+                      // 6. Banner Ad - Premium olmayanlar için
+                      Consumer<PremiumService>(
+                        builder: (context, premiumService, child) {
+                          // Premium kontrolü - Premium ise gizle
+                          if (premiumService.isPremium) {
+                            return const SizedBox.shrink();
+                          }
+                          
+                          // Banner ad kontrolü - Yüklenmemişse gizle
+                          if (!_homeBannerAd.isLoaded || _homeBannerAd.bannerWidget == null) {
+                            return const SizedBox.shrink();
+                          }
+                          
+                          debugPrint('✅ HomeScreen: Rendering banner ad widget');
+                          
+                          // Banner ad widget'ı göster
+                          return Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                                alignment: Alignment.center,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: _homeBannerAd.bannerHeight,
+                                  child: _homeBannerAd.bannerWidget!,
+                                ),
+                              ),
+                              const SizedBox(height: 28), // Banner ile son işlemler arası boşluk artırıldı (20 -> 28)
+                            ],
+                          );
+                        },
                       ),
+                      
+                      // Premium ise banner yok, direkt boşluk ekle
+                      Consumer<PremiumService>(
+                        builder: (context, premiumService, child) {
+                          if (!premiumService.isPremium) {
+                            return const SizedBox.shrink(); // Banner varsa boşluk zaten eklendi
+                          }
+                          // Premium ise banner yok, ekstra boşluk ekle
+                          return const SizedBox(height: 8);
+                        },
+                      ),
+                      
+                      // 7. Recent Transactions - Son işlemler
+                      RecentTransactionsSection(
+                        tutorialKey: widget.recentTransactionsKey,
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // 8. Top Gainers - Hisse senedi performansı (en altta, daha az öncelikli)
+                      const TopGainersSection(),
                       const SizedBox(height: 16),
                     ],
                   ),

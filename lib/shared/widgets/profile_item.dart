@@ -49,7 +49,7 @@ class ProfileItem extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: iconColor ?? (isDark 
-                    ? const Color(0xFF8E8E93)
+                    ? Colors.white.withValues(alpha: 0.9)
                     : const Color(0xFF6D6D70)),
                   size: 20,
                 ),
@@ -93,7 +93,7 @@ class ProfileItem extends StatelessWidget {
                 Icon(
                   Icons.chevron_right,
                   color: isDark 
-                    ? const Color(0xFF8E8E93)
+                    ? Colors.white.withValues(alpha: 0.7)
                     : const Color(0xFF6D6D70),
                   size: 20,
                 ),

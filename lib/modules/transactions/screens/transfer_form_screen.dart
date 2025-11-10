@@ -307,9 +307,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: _fromAccount!.isCash
-                                    ? const Color(
-                                        0xFF34C759,
-                                      ).withValues(alpha: 0.1)
+                                    ? Colors.green.shade500.withValues(alpha: 0.1)
                                     : (_fromAccount!.card?.color ??
                                               const Color(0xFF8E8E93))
                                           .withValues(alpha: 0.1),
@@ -320,7 +318,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                                   Icon(
                                     _fromAccount!.type.icon,
                                     color: _fromAccount!.isCash
-                                        ? const Color(0xFF34C759)
+                                        ? Colors.green.shade500
                                         : _fromAccount!.card?.color ??
                                               const Color(0xFF8E8E93),
                                     size: 24,
@@ -362,9 +360,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: _toAccount!.isCash
-                                    ? const Color(
-                                        0xFF34C759,
-                                      ).withValues(alpha: 0.1)
+                                    ? Colors.green.shade500.withValues(alpha: 0.1)
                                     : (_toAccount!.card?.color ??
                                               const Color(0xFF8E8E93))
                                           .withValues(alpha: 0.1),
@@ -375,7 +371,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                                   Icon(
                                     _toAccount!.type.icon,
                                     color: _toAccount!.isCash
-                                        ? const Color(0xFF34C759)
+                                        ? Colors.green.shade500
                                         : _toAccount!.card?.color ??
                                               const Color(0xFF8E8E93),
                                     size: 24,
@@ -754,7 +750,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                   ? 'Transfer tamamlandı! $cardName kartına ${_formatCurrency(overpaymentAmount)} fazla ödeme yapıldı.'
                   : 'Transfer başarıyla tamamlandı: ${_formatCurrency(amount)}',
             ),
-            backgroundColor: const Color(0xFF34C759),
+            backgroundColor: Colors.green.shade500,
             duration: Duration(seconds: isOverpayment ? 4 : 2),
           ),
         );
@@ -895,7 +891,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                           'Fazla Ödeme:',
                           style: GoogleFonts.inter(
                             fontSize: 14,
-                            color: const Color(0xFF34C759),
+                            color: Colors.green.shade500,
                           ),
                         ),
                         Text(
@@ -903,7 +899,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF34C759),
+                            color: Colors.green.shade500,
                           ),
                         ),
                       ],

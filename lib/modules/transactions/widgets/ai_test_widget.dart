@@ -124,10 +124,10 @@ class _AITestWidgetState extends State<AITestWidget> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF34D399).withOpacity(0.1),
+                color: Colors.green.shade500.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFF34D399).withOpacity(0.3),
+                  color: Colors.green.shade500.withOpacity(0.3),
                 ),
               ),
               child: Column(
@@ -155,7 +155,7 @@ class _AITestWidgetState extends State<AITestWidget> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF34D399),
+                          color: Colors.green.shade500,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(

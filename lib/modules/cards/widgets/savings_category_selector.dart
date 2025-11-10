@@ -136,7 +136,7 @@ class _SavingsCategorySelectorState extends State<SavingsCategorySelector> {
                 runSpacing: 8,
                 children: suggestions.map((category) {
                   final isSelected = _controller.text.toLowerCase() == category.toLowerCase();
-                  final color = const Color(0xFF34D399); // Mint Green
+                  final color = Colors.green.shade500; // Mint Green
 
                   return Material(
                     color: Colors.transparent,

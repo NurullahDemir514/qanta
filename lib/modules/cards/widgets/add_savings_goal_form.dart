@@ -585,7 +585,7 @@ class _AddSavingsGoalFormState extends State<AddSavingsGoalForm> {
               AppLocalizations.of(context)!.goalCreatedSuccessfully,
               style: GoogleFonts.inter(fontWeight: FontWeight.w600),
             ),
-            backgroundColor: const Color(0xFF34D399),
+            backgroundColor: Colors.green.shade500,
             behavior: SnackBarBehavior.floating,
           ),
         );

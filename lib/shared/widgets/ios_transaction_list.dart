@@ -405,7 +405,7 @@ class IOSTransactionItem {
     VoidCallback? onLongPress,
     pcm.CardTransactionModel? cardTransaction,
   }) {
-    const incomeColor = Color(0xFF34C759);
+    final incomeColor = Colors.green.shade500;
     return IOSTransactionItem(
       title: title,
       subtitle: subtitle,

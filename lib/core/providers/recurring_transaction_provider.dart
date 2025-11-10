@@ -1,7 +1,12 @@
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../shared/models/recurring_transaction_model.dart';
 import '../../modules/transactions/models/recurring_frequency.dart';
 import '../services/recurring_transaction_service.dart';
+import '../services/point_service.dart';
+import '../services/country_detection_service.dart';
+import '../../shared/models/point_activity_model.dart';
+import '../../modules/profile/providers/point_provider.dart';
 
 /// Recurring Transaction Provider - State management
 class RecurringTransactionProvider extends ChangeNotifier {
@@ -83,6 +88,9 @@ class RecurringTransactionProvider extends ChangeNotifier {
 
       // Reload subscriptions
       await loadSubscriptions(forceRefresh: true);
+
+      // Check if this is the first subscription and award points
+      await _awardFirstSubscriptionPoints();
 
       debugPrint('✅ Created subscription: ${transaction.name}');
       return id;
@@ -192,6 +200,50 @@ class RecurringTransactionProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  /// Award points for first subscription - 250 points
+  /// Only for Turkish users
+  Future<void> _awardFirstSubscriptionPoints() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) return;
+
+      // Check if user is from Turkey (points system is Turkey-only)
+      final countryService = CountryDetectionService();
+      final isTurkish = await countryService.isTurkishPlayStoreUser();
+      if (!isTurkish) {
+        debugPrint('⚠️ First subscription points: Points system is Turkey-only, user is not Turkish');
+        return;
+      }
+
+      // Check if this is the first subscription
+      // After reloadSubscriptions, check if total subscriptions = 1
+      if (_recurringTransactions.length == 1) {
+        // This is the first subscription - award 250 points
+        final pointService = PointService();
+        final pointsEarned = await pointService.earnPoints(
+          userId,
+          PointActivity.firstSubscription,
+          description: 'İlk abonelik oluşturuldu',
+        );
+
+        if (pointsEarned > 0) {
+          debugPrint('✅ First subscription points awarded: $pointsEarned');
+          
+          // Refresh PointProvider to update UI immediately
+          try {
+            final pointProvider = PointProvider();
+            await pointProvider.refresh();
+          } catch (e) {
+            debugPrint('⚠️ RecurringTransactionProvider: Failed to refresh PointProvider: $e');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error awarding first subscription points: $e');
+      // Don't throw - this is a bonus feature, shouldn't break subscription creation
+    }
   }
 
 }

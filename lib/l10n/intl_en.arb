@@ -48,6 +48,10 @@
   "@german": {
     "description": "German language option"
   },
+  "hindi": "Hindi",
+  "@hindi": {
+    "description": "Hindi language option"
+  },
   "login": "Login",
   "@login": {
     "description": "Login button text"
@@ -3827,7 +3831,22 @@
   },
   "addFirstCardDescription": "Go to My Cards page to add your first card",
   "@addFirstCardDescription": {
-    "description": "Description for adding first card"
+  },
+  "firstCardRewardMessage": "Add your first card and earn 250 points!",
+  "@firstCardRewardMessage": {
+    "description": "Reward message for first card"
+  },
+  "firstBudgetRewardMessage": "Create your first budget and earn 250 points!",
+  "@firstBudgetRewardMessage": {
+    "description": "Reward message for first budget"
+  },
+  "firstStockPurchaseRewardMessage": "Make your first stock purchase and earn 250 points!",
+  "@firstStockPurchaseRewardMessage": {
+    "description": "Reward message for first stock purchase"
+  },
+  "firstSubscriptionRewardMessage": "Add your first subscription and earn 250 points!",
+  "@firstSubscriptionRewardMessage": {
+    "description": "Reward message for first subscription"
   },
   "deleteTransaction": "Delete Transaction",
   "@deleteTransaction": {
@@ -6963,6 +6982,15 @@
   "@featureEarlyAccessDescription": {
     "description": "Early access to new features"
   },
+  "featurePointsMultiplier": "{multiplier}x points multiplier",
+  "@featurePointsMultiplier": {
+    "description": "Points multiplier feature for premium users",
+    "placeholders": {
+      "multiplier": {
+        "type": "String"
+      }
+    }
+  },
   "skip": "Skip",
   "@skip": {
     "description": "Skip button text"
@@ -7866,5 +7894,97 @@
   "tutorialProfileDescription": "Tap your profile photo to access settings, premium features, and your personal information.",
   "@tutorialProfileDescription": {
     "description": "Tutorial description - Profile Avatar step"
+  },
+  "incomeExpenseFlow": "Income & Expense Flow",
+  "@incomeExpenseFlow": {
+    "description": "Income and expense flow chart title"
+  },
+  "spendingIntensity": "Spending Intensity",
+  "@spendingIntensity": {
+    "description": "Spending intensity heatmap chart title"
+  },
+  "budgetSpendingDistribution": "Budget & Spending Distribution",
+  "@budgetSpendingDistribution": {
+    "description": "Budget and spending distribution scatter plot title"
+  },
+  "low": "Low",
+  "@low": {
+    "description": "Low intensity label"
+  },
+  "medium": "Medium",
+  "@medium": {
+    "description": "Medium intensity label"
+  },
+  "high": "High",
+  "@high": {
+    "description": "High intensity label"
+  },
+  "spending": "Spending",
+  "@spending": {
+    "description": "Spending label"
+  },
+  "budget": "Budget",
+  "@budget": {
+    "description": "Budget label"
+  },
+  "compare": "Compare",
+  "@compare": {
+    "description": "Compare button text"
+  },
+  "filter": "Filter",
+  "@filter": {
+    "description": "Filter button text"
+  },
+  "apply": "Apply",
+  "@apply": {
+    "description": "Apply button text"
+  },
+  "incomeExpenseComparison": "Income & Expense Comparison",
+  "@incomeExpenseComparison": {
+    "description": "Income and expense comparison chart title"
+  },
+  "referralCodeTitle": "Enter Referral Code",
+  "@referralCodeTitle": {
+    "description": "Referral code modal title"
+  },
+  "referralCodeDescription": "Enter a referral code to earn bonus points! You and your friend will both receive 500 points.",
+  "@referralCodeDescription": {
+    "description": "Referral code modal description"
+  },
+  "referralCode": "Referral Code",
+  "@referralCode": {
+    "description": "Referral code label"
+  },
+  "referralCodeRequired": "Referral code is required",
+  "@referralCodeRequired": {
+    "description": "Referral code required error message"
+  },
+  "referralCodeInvalidLength": "Referral code must be 8 characters",
+  "@referralCodeInvalidLength": {
+    "description": "Referral code invalid length error message"
+  },
+  "referralCodeSubmit": "Apply Code",
+  "@referralCodeSubmit": {
+    "description": "Referral code submit button text"
+  },
+  "referralCodeSkip": "Skip for now",
+  "@referralCodeSkip": {
+    "description": "Referral code skip button text"
+  },
+  "referralCodeSuccess": "Referral code applied!",
+  "@referralCodeSuccess": {
+    "description": "Referral code success message"
+  },
+  "referralCodeSuccessMessage": "You and your friend have received bonus points!",
+  "@referralCodeSuccessMessage": {
+    "description": "Referral code success description"
+  },
+  "referralCodeInvalid": "Invalid referral code",
+  "@referralCodeInvalid": {
+    "description": "Referral code invalid error message"
+  },
+  "referralCodeError": "Error processing referral code",
+  "@referralCodeError": {
+    "description": "Referral code error message"
   }
 } 

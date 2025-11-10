@@ -3,6 +3,7 @@ import '../services/advertisement_manager.dart';
 import '../config/advertisement_config.dart';
 import '../models/advertisement_models.dart' as models;
 import '../../../core/services/premium_service.dart';
+import '../../../core/services/rewarded_ad_service.dart';
 
 /// Reklam provider'ı
 /// SOLID - Single Responsibility Principle (SRP)
@@ -40,21 +41,14 @@ class AdvertisementProvider extends ChangeNotifier {
   AdvertisementManager get adManager => _adManager;
   
   /// Reklam servislerini başlat
+  /// Premium kullanıcılar için sadece rewarded ad servisi başlatılır
   Future<void> initialize() async {
     if (_isInitialized || _isLoading) {
       debugPrint('⚠️ AdvertisementProvider: Already initialized or loading');
       return;
     }
     
-    // Premium kullanıcılar için reklam yükleme
     final isPremium = PremiumService().isPremium;
-    if (isPremium) {
-      debugPrint('💎 AdvertisementProvider: User is PREMIUM - Skipping ads initialization');
-      _isInitialized = true;
-      _isLoading = false;
-      notifyListeners();
-      return;
-    }
     
     debugPrint('🔄 AdvertisementProvider: Starting initialization...');
     _isLoading = true;
@@ -62,8 +56,19 @@ class AdvertisementProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
+      if (isPremium) {
+        // Premium kullanıcılar için sadece rewarded ad servisini başlat (puan kazanmak için)
+        debugPrint('💎 AdvertisementProvider: User is PREMIUM - Initializing only rewarded ad');
+        // RewardedAdService'i doğrudan kullan (core/services)
+        final rewardedAdService = RewardedAdService();
+        await rewardedAdService.initialize();
+        // Premium kullanıcılar için de initialized olarak işaretle
+        _isInitialized = true;
+      } else {
+        // Free kullanıcılar için tüm reklam servislerini başlat
       await _adManager.initializeAll();
       _isInitialized = true;
+      }
       _isLoading = false;
       debugPrint('✅ AdvertisementProvider: Initialization complete');
       notifyListeners();
@@ -121,14 +126,18 @@ class AdvertisementProvider extends ChangeNotifier {
   }
   
   /// Rewarded reklam göster
+  /// Premium ve Premium Plus kullanıcılar için de erişilebilir (puan kazanmak için)
   Future<void> showRewardedAd() async {
-    // Premium kullanıcılar için reklam gösterme
-    if (PremiumService().isPremium) return;
-    
-    if (!_isInitialized) return;
+    // Premium kullanıcılar için rewarded ad erişilebilir (diğer reklamlar değil)
+    // Initialize edilmemişse önce initialize et
+    if (!_isInitialized) {
+      await initialize();
+    }
     
     try {
-      await _adManager.rewardedService.showRewardedAd();
+      // RewardedAdService'i doğrudan kullan (core/services)
+      final rewardedAdService = RewardedAdService();
+      await rewardedAdService.showRewardedAd();
       incrementAdShowCount();
     } catch (e) {
       _error = e.toString();

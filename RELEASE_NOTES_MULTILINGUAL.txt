@@ -1,0 +1,31 @@
+<tr-TR>
+• Kategori bazlı donut grafik eklendi
+• Dilimlere tıklayarak kategori detaylarını görüntüleyin
+• Grafik tasarımı iyileştirildi
+</tr-TR>
+
+<ar>
+• تمت إضافة مخطط دائري حسب الفئة
+• اضغط على الشرائح لعرض تفاصيل الفئة
+• تم تحسين تصميم المخطط
+</ar>
+
+<en-US>
+• Added category-based donut chart
+• Tap slices to view category details
+• Improved chart design
+</en-US>
+
+<hi-IN>
+• श्रेणी-आधारित डोनट चार्ट जोड़ा गया
+• श्रेणी विवरण देखने के लिए स्लाइस पर टैप करें
+• चार्ट डिज़ाइन में सुधार
+</hi-IN>
+
+<iw-IL>
+• נוסף תרשים דונאט מבוסס קטגוריות
+• הקש על פרוסות כדי לראות פרטי קטגוריה
+• שיפור עיצוב התרשים
+</iw-IL>
+
+

@@ -2,12 +2,35 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function to check if user is admin
+    function isAdmin() {
+      // Check if user is authenticated and admin_list exists
+      // Then check if user ID is in the admin list
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/admins/admin_list) &&
+             request.auth.uid in get(/databases/$(database)/documents/admins/admin_list).data.userIds;
+    }
+    
+    // Helper function to check if user is admin (for collection group queries)
+    // Collection group queries can't use isAdmin() directly, so we check the userId
+    function isAdminUserId(userId) {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/admins/admin_list) &&
+             request.auth.uid in get(/databases/$(database)/documents/admins/admin_list).data.userIds;
+    }
+    
     // =====================================================
     // KULLANICI VERİLERİ - Ana Koleksiyon
     // =====================================================
+    // Collection-level list izni (admin tüm kullanıcıları listeleyebilir)
+    match /users {
+      allow list: if request.auth != null && isAdmin();
+    }
+    
     match /users/{userId} {
-      // Okuma: Sadece kendi verilerine erişim
-      allow read: if request.auth != null && request.auth.uid == userId;
+      // Okuma: Sadece kendi verilerine erişim VEYA admin tüm kullanıcıları görebilir
+      allow read: if request.auth != null && 
+                   (request.auth.uid == userId || isAdmin());
       
       // Yazma: Premium-related field'lar SADECE backend tarafından yazılabilir
       // Kullanıcı diğer field'ları güncelleyebilir ama isPremium/isTestMode'u değiştiremez
@@ -282,11 +305,272 @@ service cloud.firestore {
                        request.auth.uid == userId &&
                        resource.data.user_id == userId;
       }
+      
+      // =====================================================
+      // POINT TRANSACTIONS (point_transactions) - Puan işlemleri
+      // =====================================================
+      // Koleksiyon seviyesinde list izni (query'ler için)
+      match /point_transactions {
+        allow list: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /point_transactions/{transactionId} {
+        // Okuma: Kullanıcı kendi puan işlemlerini okuyabilir
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Oluşturma: Kullanıcı kendi puan işlemlerini oluşturabilir (kazanma/harcama)
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.keys().hasAll(['user_id', 'points', 'activity', 'earned_at']);
+        
+        // Güncelleme: Kullanıcı kendi puan işlemlerini güncelleyemez
+        allow update: if false;
+        
+        // Silme: Kullanıcı kendi puan işlemlerini silemez
+        allow delete: if false;
+      }
+      
+      // =====================================================
+      // POINT BALANCE (point_balance) - Puan bakiyesi
+      // =====================================================
+      // Koleksiyon seviyesinde list izni (query'ler için)
+      match /point_balance {
+        allow list: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /point_balance/{balanceId} {
+        // Okuma: Kullanıcı kendi puan bakiyesini okuyabilir
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Oluşturma: Kullanıcı kendi bakiyesini oluşturabilir (ilk kez)
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.keys().hasAll(['user_id', 'total_points', 'total_earned', 'total_spent', 'last_earned_at', 'updated_at']);
+        
+        // Güncelleme: Kullanıcı kendi bakiyesini güncelleyebilir
+        allow update: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       resource.data.user_id == userId &&
+                       request.resource.data.user_id == userId;
+        
+        // Silme: Kullanıcı kendi bakiyesini silemez
+        allow delete: if false;
+      }
+      
+      // =====================================================
+      // AMAZON REWARD CREDITS (amazon_reward_credits) - Ödül kredileri
+      // =====================================================
+      match /amazon_reward_credits/{creditId} {
+        // Okuma: Kullanıcı kendi kredilerini okuyabilir
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Oluşturma: Kullanıcı kendi credit'lerini oluşturabilir (reklam izleme ve transaction için)
+        // Temel field kontrolü: user_id, amount, source, earned_at, status olmalı
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.keys().hasAll(['user_id', 'amount', 'source', 'earned_at', 'status']);
+        
+        // Güncelleme: Sadece Cloud Functions güncelleyebilir (status değişiklikleri için)
+        allow update: if false;
+        
+        // Silme: Kullanıcı kendi kredilerini silemez
+        allow delete: if false;
+      }
+      
+      // =====================================================
+      // AD WATCH HISTORY (ad_watch_history) - Reklam izleme geçmişi
+      // =====================================================
+      match /ad_watch_history/{watchId} {
+        // Okuma: Kullanıcı kendi reklam geçmişini okuyabilir VEYA admin tüm geçmişi okuyabilir
+        allow read: if request.auth != null && 
+                     (request.auth.uid == userId || isAdmin());
+        
+        // Oluşturma: Kullanıcı kendi reklam izleme kaydını oluşturabilir
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId;
+        
+        // Güncelleme: Sadece Cloud Functions güncelleyebilir
+        allow update: if false;
+        
+        // Silme: Kullanıcı kendi reklam geçmişini silemez
+        allow delete: if false;
+      }
+      
+      // =====================================================
+      // AMAZON GIFT CARDS (amazon_gift_cards) - Hediye kartları
+      // =====================================================
+      match /amazon_gift_cards/{giftCardId} {
+        // Okuma: Kullanıcı kendi hediye kartlarını okuyabilir
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Oluşturma: Sadece Cloud Functions oluşturabilir
+        allow create: if false;
+        
+        // Güncelleme: Cloud Functions veya Admin güncelleyebilir
+        allow update: if isAdmin();
+        
+        // Silme: Kullanıcı kendi hediye kartlarını silemez
+        allow delete: if false;
+      }
+      
+      // =====================================================
+      // AMAZON REWARD STATS (amazon_reward_stats) - İstatistikler
+      // =====================================================
+      match /amazon_reward_stats/{statsId} {
+        // Okuma: Kullanıcı kendi istatistiklerini okuyabilir
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Oluşturma: Kullanıcı kendi stats'ını oluşturabilir (ilk kez)
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId &&
+                       request.resource.data.keys().hasAll(['user_id', 'total_earned', 'current_balance', 'total_converted', 'total_gift_cards', 'rewarded_ad_count', 'transaction_count', 'last_earned_at', 'updated_at']);
+        
+        // Güncelleme: Kullanıcı kendi stats'ını güncelleyebilir
+        allow update: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       resource.data.user_id == userId &&
+                       request.resource.data.user_id == userId;
+        
+        // Silme: Kullanıcı kendi istatistiklerini silemez
+        allow delete: if false;
+      }
+      
+      // =====================================================
+      // COUNTRY INFO (country_info) - Ülke bilgisi
+      // =====================================================
+      match /country_info/{infoId} {
+        // Okuma: Kullanıcı kendi ülke bilgisini okuyabilir
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Oluşturma: İlk kez kayıt olurken oluşturulabilir
+        allow create: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       request.resource.data.user_id == userId;
+        
+        // Güncelleme: Kullanıcı kendi ülke bilgisini güncelleyemez (sadece sistem)
+        allow update: if false;
+        
+        // Silme: Kullanıcı kendi ülke bilgisini silemez
+        allow delete: if false;
+      }
+      
+      // =====================================================
+      // REFERRAL STATS (referral_stats) - Referral istatistikleri
+      // =====================================================
+      match /referral_stats/{statsId} {
+        // Okuma: Kullanıcı kendi referral istatistiklerini okuyabilir VEYA admin tüm stats'ları okuyabilir
+        allow read: if request.auth != null && 
+                     (request.auth.uid == userId || isAdmin());
+        
+        // Oluşturma: Sadece Cloud Functions oluşturabilir
+        allow create: if false; // Cloud Functions admin SDK kullanır
+        
+        // Güncelleme: Sadece Cloud Functions güncelleyebilir
+        allow update: if false; // Cloud Functions admin SDK kullanır
+        
+        // Silme: Kullanıcı kendi istatistiklerini silemez
+        allow delete: if false;
+      }
+      
+      // =====================================================
+      // REFERRALS (referrals) - Referred users listesi
+      // =====================================================
+      match /referrals/{referralId} {
+        // Okuma: Kullanıcı kendi referral listesini okuyabilir VEYA admin tüm referral'ları okuyabilir
+        allow read: if request.auth != null && 
+                     (request.auth.uid == userId || isAdmin());
+        
+        // Oluşturma: Sadece Cloud Functions oluşturabilir
+        allow create: if false; // Cloud Functions admin SDK kullanır
+        
+        // Güncelleme: Sadece Cloud Functions güncelleyebilir
+        allow update: if false; // Cloud Functions admin SDK kullanır
+        
+        // Silme: Kullanıcı kendi referral listesini silemez
+        allow delete: if false;
+      }
     }
     
-    // =====================================================
-    // HİSSE İŞLEMLERİ (stock_transactions) - Collection Group Query
-    // =====================================================
+  // =====================================================
+  // AMAZON REWARD STATS - Collection Group Query (Admin Access)
+  // =====================================================
+  match /{path=**}/amazon_reward_stats/{statsId} {
+    // Okuma: Kullanıcı kendi stats'ını okuyabilir VEYA admin tüm stats'ları okuyabilir
+    allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.user_id || isAdmin());
+    
+    // Yazma: Sadece kullanıcı kendi stats'ını yazabilir (admin yazamaz)
+    allow write: if request.auth != null && request.auth.uid == resource.data.user_id;
+  }
+  
+  // =====================================================
+  // AD WATCH HISTORY - Collection Group Query (Admin Access)
+  // =====================================================
+  match /{path=**}/ad_watch_history/{watchId} {
+    // Okuma: Kullanıcı kendi reklam geçmişini okuyabilir VEYA admin tüm geçmişi okuyabilir
+    allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.user_id || isAdmin());
+    
+    // Yazma: Sadece kullanıcı kendi reklam geçmişini yazabilir (admin yazamaz)
+    allow write: if request.auth != null && request.auth.uid == resource.data.user_id;
+  }
+  
+  // =====================================================
+  // POINT TRANSACTIONS - Collection Group Query (Admin Access)
+  // =====================================================
+  match /{path=**}/point_transactions/{transactionId} {
+    // Okuma: Kullanıcı kendi puan işlemlerini okuyabilir VEYA admin tüm işlemleri okuyabilir
+    allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.user_id || isAdmin());
+    
+    // Yazma: Sadece kullanıcı kendi puan işlemlerini yazabilir (admin yazamaz)
+    allow write: if request.auth != null && request.auth.uid == resource.data.user_id;
+  }
+  
+  // =====================================================
+  // POINT BALANCE - Collection Group Query (Admin Access)
+  // =====================================================
+  match /{path=**}/point_balance/{balanceId} {
+    // Okuma: Kullanıcı kendi puan bakiyesini okuyabilir VEYA admin tüm bakiyeleri okuyabilir
+    allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.user_id || isAdmin());
+    
+    // Yazma: Sadece kullanıcı kendi puan bakiyesini yazabilir (admin yazamaz)
+    allow write: if request.auth != null && request.auth.uid == resource.data.user_id;
+  }
+  
+  // =====================================================
+  // REFERRAL STATS - Collection Group Query (Admin Access)
+  // =====================================================
+  match /{path=**}/referral_stats/{statsId} {
+    // Okuma: Kullanıcı kendi referral stats'ını okuyabilir VEYA admin tüm stats'ları okuyabilir
+    allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.user_id || isAdmin());
+    
+    // Yazma: Sadece Cloud Functions yazabilir
+    allow write: if false;
+  }
+  
+  // =====================================================
+  // REFERRALS - Collection Group Query (Admin Access)
+  // =====================================================
+  match /{path=**}/referrals/{referralId} {
+    // Okuma: Kullanıcı kendi referral'larını okuyabilir VEYA admin tüm referral'ları okuyabilir
+    allow read: if request.auth != null && 
+                 (request.auth.uid == resource.data.user_id || isAdmin());
+    
+    // Yazma: Sadece Cloud Functions yazabilir
+    allow write: if false;
+  }
+  
+  // =====================================================
+  // HİSSE İŞLEMLERİ (stock_transactions) - Collection Group Query
+  // =====================================================
   match /{path=**}/stock_transactions/{transactionId} {
     allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
   }
@@ -475,10 +759,108 @@ match /installment_details/{installmentDetailId} {
     }
     
     // =====================================================
+    // ADMINS (admins) - Admin listesi
+    // ÖNEMLİ: Bu kurallar match /{document=**} kuralından ÖNCE olmalı!
+    // =====================================================
+    // Koleksiyon seviyesinde list izni
+    match /admins {
+      allow list: if request.auth != null;
+    }
+    
+    // admin_list dokümanı için özel kural (isAdmin kontrolü için gerekli)
+    match /admins/admin_list {
+      // Okuma: Authenticated kullanıcılar okuyabilir (isAdmin kontrolü için gerekli)
+      // Sadece userIds listesi var, hassas bilgi yok
+      allow read: if request.auth != null;
+      allow get: if request.auth != null;
+      
+      // Yazma: Sadece Cloud Functions yazabilir
+      allow write: if false; // Cloud Functions admin SDK kullanır
+    }
+    
+    // Diğer admin dokümanları için genel kural
+    match /admins/{adminId} {
+      // Okuma: Authenticated kullanıcılar okuyabilir
+      allow read: if request.auth != null;
+      allow get: if request.auth != null;
+      
+      // Yazma: Sadece Cloud Functions yazabilir
+      allow write: if false; // Cloud Functions admin SDK kullanır
+    }
+    
+    // =====================================================
+    // ADMIN REQUESTS (admin_requests) - Admin bildirimleri
+    // =====================================================
+    // Bu koleksiyon sadece Cloud Functions tarafından oluşturulur
+    // Admin Firebase Console'dan veya özel admin panelinden erişebilir
+    
+    // Helper function: Check if user is admin (predefined or in admin list)
+    function isAdminOrPredefined() {
+      // Predefined admin user ID (fallback if admin_list doesn't exist yet)
+      return (request.auth != null && 
+              request.auth.uid == 'obwsYff7JuNBEis9ENvX2pIdIKE2') ||
+             (request.auth != null &&
+              exists(/databases/$(database)/documents/admins/admin_list) &&
+              request.auth.uid in get(/databases/$(database)/documents/admins/admin_list).data.userIds);
+    }
+    
+    // Koleksiyon seviyesinde list izni (query'ler için)
+    match /admin_requests {
+      allow list: if isAdminOrPredefined();
+    }
+    
+    // Doküman seviyesinde izinler
+    match /admin_requests/{requestId} {
+      // Read izni: Query'ler ve tek doküman okuma için
+      allow read: if isAdminOrPredefined();
+      
+      // Oluşturma: Sadece Cloud Functions oluşturabilir
+      allow create: if false; // Cloud Functions admin SDK kullanır
+      
+      // Güncelleme: Admin kontrolü
+      allow update: if isAdminOrPredefined();
+      
+      // Silme: Admin silebilir (sadece completed requestler için)
+      allow delete: if isAdminOrPredefined();
+    }
+    
+    // =====================================================
+    // SUPPORT REQUESTS (support_requests) - Destek talepleri
+    // =====================================================
+    // Bu koleksiyon Cloud Functions tarafından oluşturulur
+    // Admin panelinden görüntülenir ve yönetilir
+    
+    // Koleksiyon seviyesinde list izni (query'ler için)
+    // Admin tüm talepleri görebilir, kullanıcılar sadece kendi taleplerini
+    // where('user_id', isEqualTo: request.auth.uid) query'si yapabilir
+    match /support_requests {
+      allow list: if isAdminOrPredefined() || 
+                     (request.auth != null);
+    }
+    
+    // Doküman seviyesinde izinler
+    match /support_requests/{requestId} {
+      // Read izni: Admin okuyabilir, kullanıcı kendi taleplerini okuyabilir
+      allow read: if isAdminOrPredefined() || 
+                     (request.auth != null && 
+                      request.auth.uid == resource.data.user_id);
+      
+      // Oluşturma: Sadece Cloud Functions oluşturabilir
+      allow create: if false; // Cloud Functions admin SDK kullanır
+      
+      // Güncelleme: Admin güncelleyebilir (durum, notlar, mesajlar vb.)
+      // Kullanıcılar Cloud Function üzerinden mesaj gönderecek (client-side update yok)
+      allow update: if isAdminOrPredefined();
+      
+      // Silme: Admin silebilir (sadece resolved/closed requestler için)
+      allow delete: if isAdminOrPredefined();
+    }
+    
+    // =====================================================
     // GENEL KURALLAR
     // =====================================================
     
-    // Tüm diğer belgeler reddedilir
+    // Tüm diğer belgeler reddedilir (EN SONA KONULMALI!)
     match /{document=**} {
       allow read, write: if false;
     }

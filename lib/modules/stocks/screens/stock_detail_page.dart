@@ -224,7 +224,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: stock.isPositive
-                      ? const Color(0xFF34C759).withOpacity(0.15)
+                      ? Colors.green.shade500.withOpacity(0.15)
                       : const Color(0xFFFF3B30).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -234,7 +234,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: stock.isPositive 
-                        ? const Color(0xFF34C759) 
+                        ? Colors.green.shade500 
                         : const Color(0xFFFF3B30),
                     letterSpacing: -0.2,
                   ),
@@ -346,7 +346,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
                       color: isProfit 
-                          ? const Color(0xFF34C759) 
+                          ? Colors.green.shade500 
                           : const Color(0xFFFF3B30),
                       letterSpacing: -0.3,
                     ),
@@ -357,7 +357,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: isProfit 
-                          ? const Color(0xFF34C759) 
+                          ? Colors.green.shade500 
                           : const Color(0xFFFF3B30),
                     ),
                   ),
@@ -471,14 +471,14 @@ class _StockDetailPageState extends State<StockDetailPage> {
             height: 40,
             decoration: BoxDecoration(
               color: isBuy
-                  ? const Color(0xFF34C759).withOpacity(0.12)
+                  ? Colors.green.shade500.withOpacity(0.12)
                   : const Color(0xFFFF3B30).withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               isBuy ? Icons.trending_down_rounded : Icons.trending_up_rounded,
               size: 20,
-              color: isBuy ? const Color(0xFF34C759) : const Color(0xFFFF3B30),
+              color: isBuy ? Colors.green.shade500 : const Color(0xFFFF3B30),
             ),
           ),
           const SizedBox(width: 12),
@@ -553,7 +553,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: isProfit ? const Color(0xFF34C759) : const Color(0xFFFF3B30),
+                    color: isProfit ? Colors.green.shade500 : const Color(0xFFFF3B30),
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -563,7 +563,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: isProfit ? const Color(0xFF34C759) : const Color(0xFFFF3B30),
+                    color: isProfit ? Colors.green.shade500 : const Color(0xFFFF3B30),
                   ),
                 ),
               ],

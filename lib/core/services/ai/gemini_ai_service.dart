@@ -8,7 +8,10 @@ import 'ai_models.dart';
 /// Harcama kategorizasyonu, analiz ve öneriler sağlar.
 class GeminiAIService {
   late final GenerativeModel _model;
-  static const String _apiKey = 'AIzaSyAZJAs_OCsi-gmYpN1RaX7dQGaIZY-8n-Q'; // TODO: Environment variable'a taşınacak
+  // ⚠️ DEPRECATED: Bu servis artık kullanılmıyor (FirebaseAIService kullanılıyor)
+  // API key burada hardcoded ama servis aktif değil
+  // Güvenlik için key'i kaldırdık - Bu servis kullanılmıyor!
+  static const String _apiKey = 'DEPRECATED_SERVICE_NOT_USED';
 
   // Singleton pattern
   static final GeminiAIService _instance = GeminiAIService._internal();

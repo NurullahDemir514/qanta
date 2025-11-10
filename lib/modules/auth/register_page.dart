@@ -17,6 +17,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/qanta_logo.dart';
+import '../../routes/app_router.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -53,35 +54,38 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       final credential = await FirebaseAuthService.signInWithGoogle();
 
-      if (credential.user != null && mounted) {
-        // Clear all caches and refresh profile data for new user
-        await _clearAllCachesAndRefreshProfile();
+      if (credential.user != null) {
+        // Clear caches in background (non-blocking)
+        _clearAllCachesAndRefreshProfile().catchError((e) {
+          debugPrint('❌ Error clearing caches in background: $e');
+        });
         
-        // Show success message
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.googleSignUpSuccess),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-
-        // Navigate directly to home
-        context.go('/home');
+        // Reset loading state before navigation
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+        
+        // Navigate to home using router directly (no context needed)
+        // This prevents context deactivation errors
+        AppRouter.router.go('/home');
+        return;
       }
     } catch (e) {
+      final errorString = e.toString().toLowerCase();
+      
+      // User cancelled, don't show error
+      if (errorString.contains('cancelled') || errorString.contains('canceled') ||
+          errorString.contains('user_cancelled') || errorString.contains('sign_in_cancelled')) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+        return;
+      }
+      
+      // Show error message
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         debugPrint('🔴 Google Sign Up Error: $e');
-        
-        final errorString = e.toString().toLowerCase();
-        
-        // User cancelled, don't show error
-        if (errorString.contains('cancelled') || errorString.contains('canceled') ||
-            errorString.contains('user_cancelled') || errorString.contains('sign_in_cancelled')) {
-          return;
-        }
         
         String errorMessage = l10n.googleSignUpError;
 
@@ -95,6 +99,10 @@ class _RegisterPageState extends State<RegisterPage> {
           errorMessage = l10n.userAlreadyRegistered;
         }
 
+        // Show error message safely using post frame callback
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            try {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -102,9 +110,16 @@ class _RegisterPageState extends State<RegisterPage> {
             duration: const Duration(seconds: 4),
           ),
         );
+            } catch (e) {
+              debugPrint('⚠️ Could not show snackbar: $e');
+            }
+          }
+        });
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -123,26 +138,24 @@ class _RegisterPageState extends State<RegisterPage> {
         additionalData: {'displayName': _nameController.text.trim()},
       );
 
-      if (credential.user != null && mounted) {
-        // Clear all caches and refresh profile data for new user
-        await _clearAllCachesAndRefreshProfile();
+      if (credential.user != null) {
+        // Clear caches in background (non-blocking)
+        _clearAllCachesAndRefreshProfile().catchError((e) {
+          debugPrint('❌ Error clearing caches in background: $e');
+        });
         
-        // Show success message with name
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.registrationSuccessful(_nameController.text.trim()),
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-
-        // Navigate directly to home
-        context.go('/home');
+        // Reset loading state before navigation
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+        
+        // Navigate to home using router directly (no context needed)
+        // This prevents context deactivation errors
+        AppRouter.router.go('/home');
+        return;
       }
     } catch (e) {
+      // Show error message
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         debugPrint('🔴 Register Error: $e');
@@ -163,7 +176,8 @@ class _RegisterPageState extends State<RegisterPage> {
                    errorString.contains('email-already-in-use') ||
                    errorString.contains('email already in use') ||
                    errorString.contains('user already registered') ||
-                   errorString.contains('already exists')) {
+                   errorString.contains('already exists') ||
+                   errorString.contains('e-posta adresi zaten kullanımda')) {
           errorMessage = l10n.userAlreadyRegistered;
         } else if (errorString.contains('signup_disabled') ||
                    errorString.contains('signup disabled')) {
@@ -173,6 +187,10 @@ class _RegisterPageState extends State<RegisterPage> {
           errorMessage = l10n.networkError;
         }
 
+        // Show error message safely using post frame callback
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            try {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -180,51 +198,54 @@ class _RegisterPageState extends State<RegisterPage> {
             duration: const Duration(seconds: 4),
           ),
         );
+            } catch (e) {
+              debugPrint('⚠️ Could not show snackbar: $e');
+            }
+          }
+        });
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   /// Clear all caches and refresh profile data for new user
+  /// This is called in background after navigation to avoid context issues
   Future<void> _clearAllCachesAndRefreshProfile() async {
     try {
-      debugPrint('🧹 Clearing all caches for new user...');
+      debugPrint('🧹 Clearing caches for new user (background)...');
       
-      // 1. Clear all provider data
-      final unifiedProvider = Provider.of<UnifiedProviderV2>(context, listen: false);
-      await unifiedProvider.clearAllData();
-      
-      final stockProvider = Provider.of<StockProvider>(context, listen: false);
-      await stockProvider.clearAllData();
-      
-      final cashProvider = Provider.of<CashAccountProvider>(context, listen: false);
-      cashProvider.clear();
-      
-      // 2. Clear profile provider and refresh
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-      await profileProvider.clearProfile();
-      await profileProvider.refresh(); // Refresh with new user data
-      
-      // 3. Clear all caches
+      // Clear image caches (no context needed)
+      try {
       await ProfileImageService.instance.clearAllData();
       await ImageCacheService.instance.clearCache();
+        imageCache.clear();
+        imageCache.clearLiveImages();
+      } catch (e) {
+        debugPrint('⚠️ Error clearing image caches: $e');
+      }
       
-      // 4. Clear SharedPreferences
+      // Clear SharedPreferences (no context needed)
+      try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
+        // Don't clear all - just clear user-specific data
+        // await prefs.clear(); // Commented out to preserve app settings
+      } catch (e) {
+        debugPrint('⚠️ Error clearing SharedPreferences: $e');
+      }
       
-      // 5. Clear Flutter image cache
-      imageCache.clear();
-      imageCache.clearLiveImages();
-      
-      // 6. Clear temporary files
+      // Clear temporary files (no context needed)
       await _clearTemporaryFiles();
       
-      debugPrint('✅ All caches cleared for new user');
+      debugPrint('✅ Caches cleared for new user');
     } catch (e) {
       debugPrint('❌ Error clearing caches for new user: $e');
     }
+    
+    // Note: Provider clearing will happen automatically when home screen loads
+    // The home screen will refresh all providers with new user data
   }
 
   /// Clear temporary files

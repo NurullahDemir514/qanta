@@ -48,6 +48,10 @@
   "@german": {
     "description": "German language option"
   },
+  "hindi": "Hintçe",
+  "@hindi": {
+    "description": "Hindi language option"
+  },
   "login": "Giriş Yap",
   "@login": {
     "description": "Login button text"
@@ -3735,7 +3739,22 @@
   },
   "addFirstCardDescription": "İlk kartını eklemek için Kartlarım sayfasına git",
   "@addFirstCardDescription": {
-    "description": "Description for adding first card"
+  },
+  "firstCardRewardMessage": "İlk kartını ekle ve 250 puan kazan!",
+  "@firstCardRewardMessage": {
+    "description": "Reward message for first card"
+  },
+  "firstBudgetRewardMessage": "İlk bütçeni oluştur ve 250 puan kazan!",
+  "@firstBudgetRewardMessage": {
+    "description": "Reward message for first budget"
+  },
+  "firstStockPurchaseRewardMessage": "İlk hisse alımını yap ve 250 puan kazan!",
+  "@firstStockPurchaseRewardMessage": {
+    "description": "Reward message for first stock purchase"
+  },
+  "firstSubscriptionRewardMessage": "İlk aboneliğini ekle ve 250 puan kazan!",
+  "@firstSubscriptionRewardMessage": {
+    "description": "Reward message for first subscription"
   },
   "deleteTransaction": "İşlemi Sil",
   "@deleteTransaction": {
@@ -6979,6 +6998,15 @@
   "@featureEarlyAccessDescription": {
     "description": "Early access to new features"
   },
+  "featurePointsMultiplier": "Puanlarda {multiplier}x çarpan",
+  "@featurePointsMultiplier": {
+    "description": "Points multiplier feature for premium users",
+    "placeholders": {
+      "multiplier": {
+        "type": "String"
+      }
+    }
+  },
   "skip": "Atla",
   "@skip": {
     "description": "Skip button text"
@@ -7882,5 +7910,97 @@
   "tutorialProfileDescription": "Profil fotoğrafınıza tıklayarak ayarlara, premium özelliklere ve kişisel bilgilerinize erişebilirsiniz.",
   "@tutorialProfileDescription": {
     "description": "Tutorial açıklaması - Profile Avatar adımı"
+  },
+  "incomeExpenseFlow": "Gelir & Gider Akışı",
+  "@incomeExpenseFlow": {
+    "description": "Income and expense flow chart title"
+  },
+  "spendingIntensity": "Harcama Yoğunluğu",
+  "@spendingIntensity": {
+    "description": "Spending intensity heatmap chart title"
+  },
+  "budgetSpendingDistribution": "Bütçe ve Harcama Dağılımı",
+  "@budgetSpendingDistribution": {
+    "description": "Budget and spending distribution scatter plot title"
+  },
+  "low": "Düşük",
+  "@low": {
+    "description": "Low intensity label"
+  },
+  "medium": "Orta",
+  "@medium": {
+    "description": "Medium intensity label"
+  },
+  "high": "Yüksek",
+  "@high": {
+    "description": "High intensity label"
+  },
+  "spending": "Harcama",
+  "@spending": {
+    "description": "Spending label"
+  },
+  "budget": "Bütçe",
+  "@budget": {
+    "description": "Budget label"
+  },
+  "compare": "Karşılaştır",
+  "@compare": {
+    "description": "Compare button text"
+  },
+  "filter": "Filtrele",
+  "@filter": {
+    "description": "Filter button text"
+  },
+  "apply": "Uygula",
+  "@apply": {
+    "description": "Apply button text"
+  },
+  "incomeExpenseComparison": "Gelir & Gider Karşılaştırması",
+  "@incomeExpenseComparison": {
+    "description": "Income and expense comparison chart title"
+  },
+  "referralCodeTitle": "Referans Kodu Gir",
+  "@referralCodeTitle": {
+    "description": "Referral code modal title"
+  },
+  "referralCodeDescription": "Bir referans kodu girerek bonus puanlar kazan! Sen ve arkadaşın her ikiniz de 500 puan kazanacaksınız.",
+  "@referralCodeDescription": {
+    "description": "Referral code modal description"
+  },
+  "referralCode": "Referans Kodu",
+  "@referralCode": {
+    "description": "Referral code label"
+  },
+  "referralCodeRequired": "Referans kodu gereklidir",
+  "@referralCodeRequired": {
+    "description": "Referral code required error message"
+  },
+  "referralCodeInvalidLength": "Referans kodu 8 karakter olmalıdır",
+  "@referralCodeInvalidLength": {
+    "description": "Referral code invalid length error message"
+  },
+  "referralCodeSubmit": "Kodu Uygula",
+  "@referralCodeSubmit": {
+    "description": "Referral code submit button text"
+  },
+  "referralCodeSkip": "Şimdilik Geç",
+  "@referralCodeSkip": {
+    "description": "Referral code skip button text"
+  },
+  "referralCodeSuccess": "Referans kodu uygulandı!",
+  "@referralCodeSuccess": {
+    "description": "Referral code success message"
+  },
+  "referralCodeSuccessMessage": "Sen ve arkadaşın bonus puanlar kazandınız!",
+  "@referralCodeSuccessMessage": {
+    "description": "Referral code success description"
+  },
+  "referralCodeInvalid": "Geçersiz referans kodu",
+  "@referralCodeInvalid": {
+    "description": "Referral code invalid error message"
+  },
+  "referralCodeError": "Referans kodu işlenirken bir hata oluştu",
+  "@referralCodeError": {
+    "description": "Referral code error message"
   }
 } 

@@ -48,6 +48,10 @@
   "@german": {
     "description": "German language option"
   },
+  "hindi": "Hindi",
+  "@hindi": {
+    "description": "Hindi language option"
+  },
   "login": "Anmelden",
   "@login": {
     "description": "Login button text"
@@ -6962,6 +6966,15 @@
   "featureEarlyAccessDescription": "Früher Zugang zu neuen Funktionen",
   "@featureEarlyAccessDescription": {
     "description": "Early access to new features"
+  },
+  "featurePointsMultiplier": "{multiplier}x Punkte-Multiplikator",
+  "@featurePointsMultiplier": {
+    "description": "Points multiplier feature for premium users",
+    "placeholders": {
+      "multiplier": {
+        "type": "String"
+      }
+    }
   },
   "skip": "Überspringen",
   "@skip": {

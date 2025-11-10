@@ -425,7 +425,8 @@ class RecurringTransactionService {
       );
       
       // Add transaction using UnifiedTransactionService
-      final transactionId = await UnifiedTransactionService.addTransaction(transaction);
+      final result = await UnifiedTransactionService.addTransaction(transaction);
+      final transactionId = result['transactionId'] as String;
       
       debugPrint('✅ Created transaction $transactionId for subscription ${recurring.name} (Account: ${accountDisplayName})');
       return transactionId;

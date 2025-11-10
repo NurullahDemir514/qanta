@@ -458,8 +458,8 @@ class CategoryIconService {
     'vergiler': Icons.receipt_long_rounded,
     'loans': Icons.credit_score_rounded,
     'krediler': Icons.credit_score_rounded,
-    'savings': Icons.savings_rounded,
-    'tasarruf': Icons.savings_rounded,
+    'savings': Icons.account_balance_wallet_rounded,
+    'tasarruf': Icons.account_balance_wallet_rounded,
     
     // Emergency & Others
     'emergency': Icons.emergency_rounded,

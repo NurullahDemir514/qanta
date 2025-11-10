@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -174,12 +175,12 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       _descriptionController.text = widget.initialDescription!;
     }
     
-    // Initialize success interstitial service
+    // Initialize success interstitial service (lazy load - only when needed)
     _successInterstitialService = GoogleAdsInterstitialService(
       adUnitId: ad_config.AdvertisementConfig.successInterstitial.interstitialAdUnitId,
       isTestMode: false,
     );
-    _successInterstitialService.loadAd();
+    // Don't load immediately - wait until we need it (every 3 transactions)
 
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate!;
@@ -369,24 +370,42 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     super.dispose();
   }
   
-  /// Show success interstitial ad every 3 transactions
-  Future<void> _showSuccessInterstitialIfNeeded() async {
+  /// Show interstitial ad (every 3 transactions)
+  Future<void> _showInterstitialAd() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final transactionCount = prefs.getInt('expense_transaction_count') ?? 0;
-      final newCount = transactionCount + 1;
+      // Wait a bit for smooth transition
+      await Future.delayed(const Duration(milliseconds: 500));
       
-      // Save new count
-      await prefs.setInt('expense_transaction_count', newCount);
+      if (!mounted) return;
       
-      // Show interstitial every 3 transactions
-      if (newCount % 3 == 0 && _successInterstitialService.isLoaded) {
-        await _successInterstitialService.showAd();
-        // Reload for next time
-        _successInterstitialService.loadAd();
+      // Check if ad is loaded
+      if (!_successInterstitialService.isLoaded) {
+        // Try to load if not already loading
+        if (!_successInterstitialService.isLoading) {
+          _successInterstitialService.loadAd();
+        }
+        // Wait for ad to load (max 3 seconds)
+        int attempts = 0;
+        while (!_successInterstitialService.isLoaded && attempts < 6 && mounted) {
+          await Future.delayed(const Duration(milliseconds: 500));
+          attempts++;
+        }
+      }
+      
+      // Only show if ad is loaded and mounted
+      if (_successInterstitialService.isLoaded && mounted) {
+        await _successInterstitialService.showInterstitialAd();
+        // Reload for next time (after a delay to avoid rate limiting)
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted && !_successInterstitialService.isLoading) {
+            _successInterstitialService.loadAd();
+          }
+        });
       }
     } catch (e) {
-      debugPrint('Error showing success interstitial: $e');
+      if (kDebugMode) {
+        debugPrint('Error showing interstitial ad: $e');
+      }
     }
   }
 
@@ -526,7 +545,10 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                     _selectedCategory != null &&
                     _selectedPaymentMethod != null)
                   TransactionSummary(
-                    amount: double.tryParse(_amountController.text) ?? 0,
+                    amount: ThousandsSeparatorInputFormatter.parseLocaleDouble(
+                      _amountController.text,
+                      Provider.of<ThemeProvider>(context, listen: false).currency.locale,
+                    ),
                     categoryName: _selectedCategory!,
                     paymentMethodName: _getPaymentMethodDisplayName(),
                     date: _selectedDate,
@@ -599,10 +621,12 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
           });
           isValid = false;
         } else {
-          final amount = double.tryParse(
-            _amountController.text.replaceAll(',', '.'),
+          final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+          final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(
+            _amountController.text,
+            locale,
           );
-          if (amount == null || amount <= 0) {
+          if (amount <= 0) {
             setState(() {
               _amountError =
                   AppLocalizations.of(context)?.pleaseEnterValidAmount ??
@@ -1084,6 +1108,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
           : _descriptionController.text.trim();
 
       String? transactionId;
+      bool shouldShowInterstitial = false;
 
       // If subscription is selected, create subscription first, then first transaction
       if (_isSubscription) {
@@ -1173,7 +1198,52 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
             categoryName: subscriptionName,
           );
           
-          transactionId = await UnifiedTransactionService.addTransaction(firstTransaction);
+          final result = await UnifiedTransactionService.addTransaction(firstTransaction);
+          transactionId = result['transactionId'] as String;
+          final pointsEarned = result['pointsEarned'] as int? ?? 0;
+          
+          // Show points notification if earned
+          if (pointsEarned > 0 && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.stars, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '🎉 Puan Kazandınız!',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            '+$pointsEarned puan bakiyenize eklendi',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.green.shade500,
+                duration: const Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: const EdgeInsets.all(16),
+              ),
+            );
+          }
           
           // Manually trigger UI refresh by reloading transactions
           await providerV2.loadTransactions();
@@ -1240,6 +1310,51 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
           );
           
           transactionId = result['transactionId'];
+          final pointsEarned = result['pointsEarned'] as int? ?? 0;
+          shouldShowInterstitial = result['shouldShowInterstitial'] as bool? ?? false;
+          
+          // Show points notification if earned
+          if (pointsEarned > 0 && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.stars, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '🎉 Puan Kazandınız!',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            '+$pointsEarned puan bakiyenize eklendi',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.green.shade500,
+                duration: const Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: const EdgeInsets.all(16),
+              ),
+            );
+          }
           
           // Budget warnings are now shown in TransactionSummary widget
           // No need for snackbar here
@@ -1247,10 +1362,10 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       }
 
       if (mounted) {
-        // Show success interstitial every 3 transactions (only for non-premium users)
+        // Show interstitial ad every 3 transactions (only for non-premium users)
         final premiumService = context.read<PremiumService>();
-        if (!premiumService.isPremium) {
-          _showSuccessInterstitialIfNeeded();
+        if (shouldShowInterstitial && !premiumService.isPremium) {
+          _showInterstitialAd();
         }
         
         Navigator.pop(context, transactionId);

@@ -325,7 +325,7 @@ class _EditCreditCardFormState extends State<EditCreditCardForm> {
                 color: Colors.white,
               ),
             ),
-            backgroundColor: const Color(0xFF34C759),
+            backgroundColor: Colors.green.shade500,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),

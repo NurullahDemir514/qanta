@@ -431,11 +431,11 @@ class EnhancedTabBar extends StatelessWidget implements PreferredSizeWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399), // Mint green
+                    color: Colors.green.shade500, // Mint green
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
+                        color: Colors.green.shade500.withValues(alpha: 0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),

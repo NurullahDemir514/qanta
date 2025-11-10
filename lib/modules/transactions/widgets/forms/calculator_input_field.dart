@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/utils/currency_utils.dart';
+import '../../../../shared/widgets/thousands_separator_input_formatter.dart';
 
 class CalculatorInputField extends StatefulWidget {
   final TextEditingController controller;
@@ -49,21 +50,22 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
     HapticFeedback.lightImpact();
   }
 
-  void _onOperationPressed(String operation) {
+  void _onOperationPressed(String operation, BuildContext context) {
     setState(() {
       if (_operation.isNotEmpty && !_waitingForOperand) {
-        _calculate();
+        _calculate(context);
       }
-      _previousValue = double.tryParse(_displayValue) ?? 0;
+      final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+      _previousValue = ThousandsSeparatorInputFormatter.parseLocaleDouble(_displayValue, locale);
       _operation = operation;
       _waitingForOperand = true;
     });
     HapticFeedback.lightImpact();
   }
 
-  void _onEqualsPressed() {
+  void _onEqualsPressed(BuildContext context) {
     if (_operation.isNotEmpty && !_waitingForOperand) {
-      _calculate();
+      _calculate(context);
       setState(() {
         _operation = '';
         _waitingForOperand = true;
@@ -72,8 +74,9 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
     HapticFeedback.lightImpact();
   }
 
-  void _calculate() {
-    final currentValue = double.tryParse(_displayValue) ?? 0;
+  void _calculate(BuildContext context) {
+    final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+    final currentValue = ThousandsSeparatorInputFormatter.parseLocaleDouble(_displayValue, locale);
     double result = _previousValue;
 
     switch (_operation) {
@@ -94,17 +97,20 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
     }
 
     setState(() {
-      _displayValue = _formatNumber(result);
+      _displayValue = _formatNumber(result, locale);
       widget.controller.text = _displayValue;
       widget.onChanged?.call();
     });
   }
 
-  String _formatNumber(double number) {
+  String _formatNumber(double number, String locale) {
+    final decimalSeparator = ThousandsSeparatorInputFormatter.getDecimalSeparator(locale);
     if (number == number.toInt()) {
       return number.toInt().toString();
     }
-    return number.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+    final formatted = number.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+    // Replace dot with locale-appropriate decimal separator
+    return formatted.replaceAll('.', decimalSeparator);
   }
 
   void _onClearPressed() {
@@ -132,14 +138,17 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
     HapticFeedback.lightImpact();
   }
 
-  void _onDecimalPressed() {
-    if (!_displayValue.contains('.')) {
+  void _onDecimalPressed(BuildContext context) {
+    final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+    final decimalSeparator = ThousandsSeparatorInputFormatter.getDecimalSeparator(locale);
+    
+    if (!_displayValue.contains(decimalSeparator)) {
       setState(() {
         if (_waitingForOperand) {
-          _displayValue = '0.';
+          _displayValue = '0$decimalSeparator';
           _waitingForOperand = false;
         } else {
-          _displayValue += '.';
+          _displayValue += decimalSeparator;
         }
         widget.controller.text = _displayValue;
         widget.onChanged?.call();
@@ -149,10 +158,8 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
   }
 
   String _formatCurrency(String value, BuildContext context) {
-    final amount = double.tryParse(value);
-    if (amount == null)
-      return Provider.of<ThemeProvider>(context, listen: false).formatAmount(0);
-
+    final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+    final amount = ThousandsSeparatorInputFormatter.parseLocaleDouble(value, locale);
     return Provider.of<ThemeProvider>(
       context,
       listen: false,
@@ -349,8 +356,11 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (_operation.isNotEmpty) ...[
-                    Text(
-                      '${_formatNumber(_previousValue)} $_operation',
+                    Builder(
+                      builder: (context) {
+                        final locale = Provider.of<ThemeProvider>(context, listen: false).currency.locale;
+                        return Text(
+                          '${_formatNumber(_previousValue, locale)} $_operation',
                       style: GoogleFonts.inter(
                         fontSize: operationFontSize,
                         fontWeight: FontWeight.w400,
@@ -358,6 +368,8 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                             ? const Color(0xFF8E8E93)
                             : const Color(0xFF6D6D70),
                       ),
+                        );
+                      },
                     ),
                     SizedBox(height: isSmallMobile ? 3.0 : 4.0),
                   ],
@@ -449,14 +461,14 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                       ),
                       _buildButton(
                         '%',
-                        () => _onOperationPressed('%'),
+                        () => _onOperationPressed('%', context),
                         isOperator: true,
                         buttonHeight: adjustedButtonHeight,
                         buttonFontSize: buttonFontSize,
                       ),
                       _buildButton(
                         '÷',
-                        () => _onOperationPressed('÷'),
+                        () => _onOperationPressed('÷', context),
                         isOperator: true,
                         buttonHeight: adjustedButtonHeight,
                         buttonFontSize: buttonFontSize,
@@ -488,7 +500,7 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                       ),
                       _buildButton(
                         '×',
-                        () => _onOperationPressed('×'),
+                        () => _onOperationPressed('×', context),
                         isOperator: true,
                         buttonHeight: adjustedButtonHeight,
                         buttonFontSize: buttonFontSize,
@@ -520,7 +532,7 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                       ),
                       _buildButton(
                         '-',
-                        () => _onOperationPressed('-'),
+                        () => _onOperationPressed('-', context),
                         isOperator: true,
                         buttonHeight: adjustedButtonHeight,
                         buttonFontSize: buttonFontSize,
@@ -552,7 +564,7 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                       ),
                       _buildButton(
                         '+',
-                        () => _onOperationPressed('+'),
+                        () => _onOperationPressed('+', context),
                         isOperator: true,
                         buttonHeight: adjustedButtonHeight,
                         buttonFontSize: buttonFontSize,
@@ -573,13 +585,13 @@ class _CalculatorInputFieldState extends State<CalculatorInputField> {
                       ),
                       _buildButton(
                         ',',
-                        _onDecimalPressed,
+                        () => _onDecimalPressed(context),
                         buttonHeight: adjustedButtonHeight,
                         buttonFontSize: buttonFontSize,
                       ),
                       _buildButton(
                         '=',
-                        _onEqualsPressed,
+                        () => _onEqualsPressed(context),
                         isOperator: true,
                         buttonHeight: adjustedButtonHeight,
                         buttonFontSize: buttonFontSize,

@@ -42,8 +42,8 @@ android {
         applicationId = "com.qanta"
         minSdk = 23
         targetSdk = 35
-        versionCode = 35
-        versionName = "1.1.2"
+        versionCode = 38
+        versionName = "1.1.5"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
         
@@ -81,4 +81,11 @@ flutter {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.multidex:multidex:2.0.1")
+    
+    // Google Play Billing Library for Play Store country detection
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
+    
+    // Kotlin Coroutines for async operations
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 }

@@ -18,6 +18,7 @@ import '../widgets/subscription_card.dart';
 import '../widgets/add_subscription_form.dart';
 import '../../../shared/utils/fab_positioning.dart';
 import '../../../modules/transactions/widgets/quick_add_chat_fab.dart';
+import '../../../core/services/country_detection_service.dart';
 
 class SubscriptionsManagementPage extends StatefulWidget {
   const SubscriptionsManagementPage({super.key});
@@ -499,6 +500,49 @@ class _SubscriptionsManagementPageState extends State<SubscriptionsManagementPag
               ),
               textAlign: TextAlign.center,
             ),
+            // Reward message for Turkish users
+            FutureBuilder<bool>(
+              future: CountryDetectionService().isTurkishPlayStoreUser(),
+              builder: (context, snapshot) {
+                final isTurkish = snapshot.data ?? false;
+                if (!isTurkish) return const SizedBox.shrink();
+                return Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade500.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.green.shade500.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.stars_rounded,
+                            size: 16,
+                            color: Colors.green.shade500,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.firstSubscriptionRewardMessage,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
             const SizedBox(height: 32),
             Container(
               height: 40,
@@ -658,7 +702,7 @@ class _SubscriptionsManagementPageState extends State<SubscriptionsManagementPag
                 color: Colors.white,
               ),
             ),
-            backgroundColor: success ? const Color(0xFF34C759) : const Color(0xFFFF3B30),
+            backgroundColor: success ? Colors.green.shade500 : const Color(0xFFFF3B30),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),

@@ -10,8 +10,32 @@ class StatisticsProvider extends ChangeNotifier {
   StatisticsData? _statistics;
   bool _isLoading = false;
   String? _error;
+  bool _isInitialized = false;
 
-  StatisticsProvider(this._unifiedProvider);
+  StatisticsProvider(this._unifiedProvider) {
+    _initializeListener();
+  }
+
+  /// Initialize listener for automatic updates
+  void _initializeListener() {
+    if (!_isInitialized) {
+      _unifiedProvider.addListener(_onUnifiedProviderChanged);
+      _isInitialized = true;
+    }
+  }
+
+  /// Handle UnifiedProviderV2 changes - automatically refresh statistics
+  void _onUnifiedProviderChanged() {
+    // Only refresh if we have existing statistics (don't auto-load on first change)
+    if (_statistics != null && !_isLoading && _isInitialized) {
+      // Debounce: Don't refresh too frequently (200ms delay)
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (_statistics != null && !_isLoading && _isInitialized) {
+          refreshStatistics();
+        }
+      });
+    }
+  }
 
   // Getters
   StatisticsData? get statistics => _statistics;
@@ -72,13 +96,19 @@ class StatisticsProvider extends ChangeNotifier {
     DateTime startDate,
     DateTime endDate,
   ) {
-    // Separate income and expense transactions
-    final incomeTransactions = transactions
-        .where((t) => t.signedAmount > 0)
+    // Filter out transfers and stock transactions
+    final filteredTransactions = transactions.where((t) {
+      return t.type != TransactionType.transfer && !t.isStockTransaction;
+    }).toList();
+    
+    // Separate income and expense transactions by type (more reliable than signedAmount)
+    final incomeTransactions = filteredTransactions
+        .where((t) => t.type == TransactionType.income)
         .toList();
-    final expenseTransactions = transactions
-        .where((t) => t.signedAmount < 0)
+    final expenseTransactions = filteredTransactions
+        .where((t) => t.type == TransactionType.expense)
         .toList();
+    
 
     // Calculate totals
     final totalIncome = incomeTransactions.fold<double>(
@@ -115,7 +145,7 @@ class StatisticsProvider extends ChangeNotifier {
     );
 
     // Calculate monthly trends
-    final monthlyTrends = _calculateMonthlyTrends(transactions, period);
+    final monthlyTrends = _calculateMonthlyTrends(filteredTransactions, period);
 
     return StatisticsData(
       period: period,
@@ -126,7 +156,7 @@ class StatisticsProvider extends ChangeNotifier {
       highestSpending: highestSpending,
       lowestSpending: lowestSpending,
       savingsRate: savingsRate,
-      totalTransactions: transactions.length,
+      totalTransactions: filteredTransactions.length,
       categoryBreakdown: categoryBreakdown,
       monthlyTrends: monthlyTrends,
       startDate: startDate,
@@ -141,10 +171,15 @@ class StatisticsProvider extends ChangeNotifier {
   ) {
     if (expenseTransactions.isEmpty || totalExpenses == 0) return [];
 
-    // Group transactions by category
+    // Group transactions by category - normalize category IDs
     final Map<String, List<TransactionWithDetailsV2>> categoryGroups = {};
     for (final transaction in expenseTransactions) {
-      final categoryId = transaction.categoryId ?? 'other';
+      // Normalize category ID: null, empty string, or whitespace -> 'other'
+      final rawCategoryId = transaction.categoryId;
+      final categoryId = (rawCategoryId == null || rawCategoryId.trim().isEmpty) 
+          ? 'other' 
+          : rawCategoryId.trim();
+      
       categoryGroups.putIfAbsent(categoryId, () => []).add(transaction);
     }
 
@@ -153,20 +188,21 @@ class StatisticsProvider extends ChangeNotifier {
     for (final entry in categoryGroups.entries) {
       final categoryId = entry.key;
       final categoryTransactions = entry.value;
+      
       final categoryAmount = categoryTransactions.fold<double>(
         0,
-        (sum, t) => sum + (t).amount,
+        (sum, t) => sum + t.amount,
       );
       final percentage = (categoryAmount / totalExpenses) * 100;
 
       // Get category info
-      final category = _getCategoryInfo(categoryId);
+      final categoryInfo = _getCategoryInfo(categoryId);
 
       categoryStats.add(
         CategoryStatistic(
           categoryId: categoryId,
-          categoryName: category.name,
-          categoryIcon: category.icon,
+          categoryName: categoryInfo.name,
+          categoryIcon: categoryInfo.icon,
           amount: categoryAmount,
           percentage: percentage,
           transactionCount: categoryTransactions.length,
@@ -211,9 +247,14 @@ class StatisticsProvider extends ChangeNotifier {
   ) {
     if (transactions.isEmpty) return [];
 
+    // Filter out transfers and stock transactions
+    final filteredTransactions = transactions.where((t) {
+      return t.type != TransactionType.transfer && !t.isStockTransaction;
+    }).toList();
+
     // Group transactions by month
     final Map<String, List<TransactionWithDetailsV2>> monthlyGroups = {};
-    for (final transaction in transactions) {
+    for (final transaction in filteredTransactions) {
       final monthYear =
           '${transaction.transactionDate.year}-${transaction.transactionDate.month.toString().padLeft(2, '0')}';
       monthlyGroups.putIfAbsent(monthYear, () => []).add(transaction);
@@ -226,11 +267,11 @@ class StatisticsProvider extends ChangeNotifier {
       final monthTransactions = entry.value;
 
       final income = monthTransactions
-          .where((t) => (t).signedAmount > 0)
-          .fold<double>(0, (sum, t) => sum + (t).amount);
+          .where((t) => t.type == TransactionType.income)
+          .fold<double>(0, (sum, t) => sum + t.amount);
       final expenses = monthTransactions
-          .where((t) => (t).signedAmount < 0)
-          .fold<double>(0, (sum, t) => sum + (t).amount);
+          .where((t) => t.type == TransactionType.expense)
+          .fold<double>(0, (sum, t) => sum + t.amount);
       final netBalance = income - expenses;
 
       trends.add(
@@ -299,5 +340,14 @@ class StatisticsProvider extends ChangeNotifier {
 
   void _clearError() {
     _error = null;
+  }
+
+  @override
+  void dispose() {
+    if (_isInitialized) {
+      _unifiedProvider.removeListener(_onUnifiedProviderChanged);
+      _isInitialized = false;
+    }
+    super.dispose();
   }
 }

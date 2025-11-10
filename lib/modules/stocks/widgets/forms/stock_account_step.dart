@@ -262,7 +262,7 @@ class _StockAccountStepState extends State<StockAccountStep> {
   Color _getAccountColor(AccountType type) {
     switch (type) {
       case AccountType.cash:
-        return const Color(0xFF34C759); // iOS Green
+        return Colors.green.shade500; // iOS Green
       case AccountType.credit:
         return const Color(0xFFFF9500); // iOS Orange
       case AccountType.debit:

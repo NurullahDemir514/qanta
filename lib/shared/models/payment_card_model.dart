@@ -201,7 +201,7 @@ class CardTransactionModel {
   // İşlem rengi
   Color get transactionColor {
     if (isIncome || amount > 0) {
-      return const Color(0xFF34C759); // Yeşil - Gelir
+      return Colors.green.shade500; // Yeşil - Gelir
     } else {
       return const Color(0xFFFF3B30); // Kırmızı - Gider
     }

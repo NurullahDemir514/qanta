@@ -69,6 +69,46 @@ class CurrencyUtils {
     return formatter.format(amount);
   }
 
+  /// Format amount with letter format after 6 digits (1.000.000+)
+  /// Examples: 999.999 -> ₺999.999,00 | 1.000.000 -> ₺1M | 1.500.000 -> ₺1,5M | 1.000.000.000 -> ₺1B
+  static String formatAmountWithLetterFormat(double amount, Currency currency) {
+    final absAmount = amount.abs();
+    final isNegative = amount < 0;
+    final sign = isNegative ? '-' : '';
+    final symbol = currency.symbol;
+    
+    // 6 basamaktan az ise normal format kullan
+    if (absAmount < 1000000) {
+      return formatAmount(amount, currency);
+    }
+    
+    // 1.000.000.000 ve üstü (B - Milyar / Billion)
+    if (absAmount >= 1000000000) {
+      final billions = absAmount / 1000000000;
+      // 1 ondalık basamak, gereksiz sıfırları kaldır
+      final formatted = billions.toStringAsFixed(1).replaceAll(RegExp(r'\.?0+$'), '');
+      // Locale'e göre ondalık ayracı
+      final decimalSep = getDecimalSeparator(currency.locale);
+      final normalized = formatted.replaceAll('.', decimalSep);
+      // Türkçe'de Milyar için B kullan (M ile karışmasın)
+      return '$sign$symbol$normalized B';
+    }
+    
+    // 1.000.000 ve üstü (M - Milyon / Million)
+    if (absAmount >= 1000000) {
+      final millions = absAmount / 1000000;
+      // 1 ondalık basamak, gereksiz sıfırları kaldır
+      final formatted = millions.toStringAsFixed(1).replaceAll(RegExp(r'\.?0+$'), '');
+      // Locale'e göre ondalık ayracı
+      final decimalSep = getDecimalSeparator(currency.locale);
+      final normalized = formatted.replaceAll('.', decimalSep);
+      return '$sign$symbol$normalized M';
+    }
+    
+    // Fallback (olmayacak ama yine de)
+    return formatAmount(amount, currency);
+  }
+
   static String getSymbolForCurrency(Currency currency) {
     return currency.symbol;
   }

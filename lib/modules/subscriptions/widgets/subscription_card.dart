@@ -252,7 +252,7 @@ class SubscriptionCard extends StatelessWidget {
                               height: 20,
                               decoration: BoxDecoration(
                                 color: subscription.isActive
-                                    ? const Color(0xFF34C759)
+                                    ? Colors.green.shade500
                                     : (isDark 
                                         ? Colors.white.withOpacity(0.6)
                                         : Colors.black.withOpacity(0.4)),
@@ -260,7 +260,7 @@ class SubscriptionCard extends StatelessWidget {
                                 boxShadow: subscription.isActive
                                     ? [
                                         BoxShadow(
-                                          color: const Color(0xFF34C759).withOpacity(0.3),
+                                          color: Colors.green.shade500.withOpacity(0.3),
                                           blurRadius: 4,
                                           offset: const Offset(0, 2),
                                         ),

@@ -49,6 +49,43 @@ class RemoteConfigService {
         'max_daily_notifications': 4, // Günlük maksimum bildirim sayısı
         'notification_start_hour': 9, // İlk bildirim saati (09:00)
         'notification_end_hour': 21, // Son bildirim saati (21:00)
+        
+        // ========== AMAZON REWARD SYSTEM ==========
+        // Amazon reward ödül miktarları (TL)
+        'amazon_reward_rewarded_ad_amount': 0.20, // Reklam izleme ödülü
+        'amazon_reward_transaction_amount': 0.03, // Harcama ekleme ödülü
+        
+        // Amazon reward eşik ve limitler
+        'amazon_reward_minimum_threshold': 100.0, // Minimum hediye kartı eşiği (TL)
+        'amazon_reward_gift_card_amount': 100.0, // Hediye kartı tutarı (TL)
+        'amazon_reward_max_daily_ads': 10, // Günlük maksimum reklam sayısı
+        'amazon_reward_max_daily_transactions': 20, // Günlük maksimum harcama ödülü
+        
+        // ========== POINT SYSTEM ==========
+        // Puan değerleri
+        'point_rewarded_ad': 50, // Reklam izleme puanı
+        'point_transaction': 15, // Harcama ekleme puanı
+        'point_daily_login': 25, // Günlük giriş puanı
+        'point_weekly_streak': 1000, // Haftalık seri puanı
+        'point_monthly_goal': 50, // Aylık hedef puanı
+        'point_referral': 500, // Referans puanı (her arkadaş getirene 500 puan)
+        'point_budget_goal': 15, // Bütçe hedefi puanı
+        'point_savings_milestone': 12, // Birikim kilometre taşı puanı
+        'point_premium_bonus': 50, // Premium bonus puanı
+        'point_special_event': 25, // Özel etkinlik puanı
+        'point_first_card': 250, // İlk kart puanı
+        'point_first_budget': 250, // İlk bütçe puanı
+        'point_first_stock_purchase': 250, // İlk hisse alımı puanı
+        'point_first_subscription': 250, // İlk abonelik puanı
+        
+        // Puan sistemi limitler
+        'point_max_daily_ads': 10, // Günlük maksimum reklam
+        'point_max_daily_transactions': 20, // Günlük maksimum harcama
+        'point_max_daily_login': 1, // Günlük maksimum giriş
+        
+        // Puan dönüşüm oranları
+        'point_to_tl_rate': 200, // 200 puan = 1 TL (Amazon hediye kartı)
+        'point_minimum_redemption': 20000, // Minimum çekilebilir puan (20,000 = 100 TL)
       });
 
       // İlk fetch
@@ -196,6 +233,235 @@ class RemoteConfigService {
       return _remoteConfig?.getInt('notification_end_hour') ?? 21;
     } catch (e) {
       return 21;
+    }
+  }
+
+  // ========== AMAZON REWARD SYSTEM GETTERS ==========
+
+  /// Amazon reward - Reklam izleme ödülü (TL)
+  double getAmazonRewardRewardedAdAmount() {
+    try {
+      return _remoteConfig?.getDouble('amazon_reward_rewarded_ad_amount') ?? 0.20;
+    } catch (e) {
+      return 0.20;
+    }
+  }
+
+  /// Amazon reward - Harcama ekleme ödülü (TL)
+  double getAmazonRewardTransactionAmount() {
+    try {
+      return _remoteConfig?.getDouble('amazon_reward_transaction_amount') ?? 0.03;
+    } catch (e) {
+      return 0.03;
+    }
+  }
+
+  /// Amazon reward - Minimum hediye kartı eşiği (TL)
+  double getAmazonRewardMinimumThreshold() {
+    try {
+      return _remoteConfig?.getDouble('amazon_reward_minimum_threshold') ?? 100.0;
+    } catch (e) {
+      return 100.0;
+    }
+  }
+
+  /// Amazon reward - Hediye kartı tutarı (TL)
+  double getAmazonRewardGiftCardAmount() {
+    try {
+      return _remoteConfig?.getDouble('amazon_reward_gift_card_amount') ?? 100.0;
+    } catch (e) {
+      return 100.0;
+    }
+  }
+
+  /// Amazon reward - Günlük maksimum reklam sayısı
+  int getAmazonRewardMaxDailyAds() {
+    try {
+      return _remoteConfig?.getInt('amazon_reward_max_daily_ads') ?? 10;
+    } catch (e) {
+      return 10;
+    }
+  }
+
+  /// Amazon reward - Günlük maksimum harcama ödülü
+  int getAmazonRewardMaxDailyTransactions() {
+    try {
+      return _remoteConfig?.getInt('amazon_reward_max_daily_transactions') ?? 20;
+    } catch (e) {
+      return 20;
+    }
+  }
+
+  // ========== POINT SYSTEM GETTERS ==========
+
+  /// Point - Reklam izleme puanı
+  int getPointRewardedAd() {
+    try {
+      return _remoteConfig?.getInt('point_rewarded_ad') ?? 50;
+    } catch (e) {
+      return 50;
+    }
+  }
+
+  /// Point - Harcama ekleme puanı
+  int getPointTransaction() {
+    try {
+      return _remoteConfig?.getInt('point_transaction') ?? 15;
+    } catch (e) {
+      return 15;
+    }
+  }
+
+  /// Point - Günlük giriş puanı
+  int getPointDailyLogin() {
+    try {
+      return _remoteConfig?.getInt('point_daily_login') ?? 25;
+    } catch (e) {
+      return 25;
+    }
+  }
+
+  /// Point - Haftalık seri puanı
+  int getPointWeeklyStreak() {
+    try {
+      return _remoteConfig?.getInt('point_weekly_streak') ?? 1000;
+    } catch (e) {
+      return 1000;
+    }
+  }
+
+  /// Point - Aylık hedef puanı
+  int getPointMonthlyGoal() {
+    try {
+      return _remoteConfig?.getInt('point_monthly_goal') ?? 50;
+    } catch (e) {
+      return 50;
+    }
+  }
+
+  /// Point - Referans puanı
+  int getPointReferral() {
+    try {
+      return _remoteConfig?.getInt('point_referral') ?? 500;
+    } catch (e) {
+      return 500;
+    }
+  }
+
+  /// Point - Bütçe hedefi puanı
+  int getPointBudgetGoal() {
+    try {
+      return _remoteConfig?.getInt('point_budget_goal') ?? 15;
+    } catch (e) {
+      return 15;
+    }
+  }
+
+  /// Point - Birikim kilometre taşı puanı
+  int getPointSavingsMilestone() {
+    try {
+      return _remoteConfig?.getInt('point_savings_milestone') ?? 12;
+    } catch (e) {
+      return 12;
+    }
+  }
+
+  /// Point - Premium bonus puanı
+  int getPointPremiumBonus() {
+    try {
+      return _remoteConfig?.getInt('point_premium_bonus') ?? 50;
+    } catch (e) {
+      return 50;
+    }
+  }
+
+  /// Point - Özel etkinlik puanı
+  int getPointSpecialEvent() {
+    try {
+      return _remoteConfig?.getInt('point_special_event') ?? 25;
+    } catch (e) {
+      return 25;
+    }
+  }
+
+  /// Point - İlk kart puanı
+  int getPointFirstCard() {
+    try {
+      return _remoteConfig?.getInt('point_first_card') ?? 250;
+    } catch (e) {
+      return 250;
+    }
+  }
+
+  /// Point - İlk bütçe puanı
+  int getPointFirstBudget() {
+    try {
+      return _remoteConfig?.getInt('point_first_budget') ?? 250;
+    } catch (e) {
+      return 250;
+    }
+  }
+
+  /// Point - İlk hisse alımı puanı
+  int getPointFirstStockPurchase() {
+    try {
+      return _remoteConfig?.getInt('point_first_stock_purchase') ?? 250;
+    } catch (e) {
+      return 250;
+    }
+  }
+
+  /// Point - İlk abonelik puanı
+  int getPointFirstSubscription() {
+    try {
+      return _remoteConfig?.getInt('point_first_subscription') ?? 250;
+    } catch (e) {
+      return 250;
+    }
+  }
+
+  /// Point - Günlük maksimum reklam
+  int getPointMaxDailyAds() {
+    try {
+      return _remoteConfig?.getInt('point_max_daily_ads') ?? 10;
+    } catch (e) {
+      return 10;
+    }
+  }
+
+  /// Point - Günlük maksimum harcama
+  int getPointMaxDailyTransactions() {
+    try {
+      return _remoteConfig?.getInt('point_max_daily_transactions') ?? 20;
+    } catch (e) {
+      return 20;
+    }
+  }
+
+  /// Point - Günlük maksimum giriş
+  int getPointMaxDailyLogin() {
+    try {
+      return _remoteConfig?.getInt('point_max_daily_login') ?? 1;
+    } catch (e) {
+      return 1;
+    }
+  }
+
+  /// Point - Puan to TL dönüşüm oranı (200 puan = 1 TL for Amazon gift cards)
+  int getPointToTLRate() {
+    try {
+      return _remoteConfig?.getInt('point_to_tl_rate') ?? 200;
+    } catch (e) {
+      return 200;
+    }
+  }
+
+  /// Point - Minimum çekilebilir puan
+  int getPointMinimumRedemption() {
+    try {
+      return _remoteConfig?.getInt('point_minimum_redemption') ?? 20000;
+    } catch (e) {
+      return 20000;
     }
   }
 

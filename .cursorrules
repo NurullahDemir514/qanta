@@ -17,7 +17,7 @@ Qanta is a modern personal finance mobile application built with Flutter, focusi
 
 ## Color Palette
 - **Primary**: Sophisticated Grey (#6D6D70) - Main brand color
-- **Secondary**: Mint Green (#34D399) - Accent and success color
+- **Secondary**: Material Green (#4CAF50) - Accent and success color
 - **iOS Blue**: (#007AFF) - Interactive elements and buttons
 - **Success**: Green (#4CAF50) - Positive actions and income
 - **Error**: Red (#FF4C4C) - Negative actions and expenses
@@ -355,5 +355,645 @@ lib/
 - Keys: savingsGoals, addGoal, targetAmount, currentAmount, etc.
 - Support plurals for goal counts
 - Localize milestone achievements and notifications
+
+## Amazon Gift Card Reward System (Turkey Only)
+
+### Overview
+Reward system for Turkish Play Store users:
+- **Rewarded Ad Watch**: 0.25 TL Amazon gift card credit
+- **Transaction Add**: 0.10 TL Amazon gift card credit
+- **Minimum Threshold**: 50 TL accumulated credit triggers automatic Amazon gift card delivery
+- **Target Audience**: Only users who installed from Turkish Play Store
+- **Delivery**: Automatic email delivery to user's Amazon account when threshold reached
+
+### System Architecture
+
+#### Reward Earning Rules
+1. **Rewarded Ad**: User watches rewarded ad → +0.25 TL credit
+2. **Transaction**: User adds expense/income → +0.10 TL credit
+3. **Accumulation**: Credits accumulate in user's account
+4. **Threshold**: When total reaches 50.00 TL → Automatic gift card purchase and delivery
+5. **Country Restriction**: Only Turkish Play Store users eligible
+
+#### Data Models
+
+**AmazonRewardCredit Model** (`lib/shared/models/amazon_reward_credit_model.dart`):
+```dart
+class AmazonRewardCredit {
+  final String id;
+  final String userId;
+  final double amount;              // 0.25 or 0.10
+  final RewardSource source;        // rewardedAd or transaction
+  final String? transactionId;      // If from transaction
+  final String? rewardedAdId;       // If from ad
+  final DateTime earnedAt;
+  final RewardStatus status;        // pending, accumulated, converted
+  final String? giftCardId;         // When converted to gift card
+}
+
+enum RewardSource { rewardedAd, transaction }
+enum RewardStatus { pending, accumulated, converted }
+```
+
+**AmazonGiftCard Model** (`lib/shared/models/amazon_gift_card_model.dart`):
+```dart
+class AmazonGiftCard {
+  final String id;
+  final String userId;
+  final double amount;              // Always 50.00 TL minimum
+  final String amazonCode;          // Gift card code from Amazon
+  final String amazonClaimCode;     // Claim code for user
+  final DateTime purchasedAt;
+  final DateTime? sentAt;
+  final GiftCardStatus status;      // purchased, sent, redeemed
+  final String recipientEmail;      // User's email (for Amazon delivery)
+  final List<String> creditIds;     // Which credits were converted
+}
+
+enum GiftCardStatus { purchased, sent, redeemed }
+```
+
+**AmazonRewardStats Model** (`lib/shared/models/amazon_reward_stats_model.dart`):
+```dart
+class AmazonRewardStats {
+  final String userId;
+  final double totalEarned;         // Total credits earned
+  final double currentBalance;      // Current accumulated (not yet converted)
+  final double totalConverted;      // Total converted to gift cards
+  final int totalGiftCards;         // Number of gift cards received
+  final int rewardedAdCount;        // Number of ads watched
+  final int transactionCount;       // Number of transactions rewarded
+  final DateTime lastEarnedAt;
+  final DateTime? lastConvertedAt;
+}
+```
+
+#### Firebase Firestore Structure
+
+```
+users/{userId}/
+├── amazon_reward_credits/{creditId}
+│   {
+│     "id": "credit_123",
+│     "user_id": "user_456",
+│     "amount": 0.25,
+│     "source": "rewardedAd",
+│     "transaction_id": null,
+│     "rewarded_ad_id": "ad_789",
+│     "earned_at": "2025-01-20T14:30:00Z",
+│     "status": "accumulated",
+│     "gift_card_id": null,
+│     "created_at": "2025-01-20T14:30:00Z"
+│   }
+│
+├── amazon_gift_cards/{giftCardId}
+│   {
+│     "id": "gc_123",
+│     "user_id": "user_456",
+│     "amount": 50.00,
+│     "amazon_code": "ABC123XYZ789",
+│     "amazon_claim_code": "AMZN-GC-ABC123XYZ789",
+│     "purchased_at": "2025-01-20T15:00:00Z",
+│     "sent_at": "2025-01-20T15:01:00Z",
+│     "status": "sent",
+│     "recipient_email": "user@example.com",
+│     "credit_ids": ["credit_1", "credit_2", ...],
+│     "created_at": "2025-01-20T15:00:00Z"
+│   }
+│
+└── amazon_reward_stats (single document)
+    {
+      "user_id": "user_456",
+      "total_earned": 52.50,
+      "current_balance": 2.50,
+      "total_converted": 50.00,
+      "total_gift_cards": 1,
+      "rewarded_ad_count": 10,
+      "transaction_count": 500,
+      "last_earned_at": "2025-01-20T14:30:00Z",
+      "last_converted_at": "2025-01-20T15:00:00Z",
+      "updated_at": "2025-01-20T14:30:00Z"
+    }
+
+campaigns/amazon_gift_card_rewards (global config)
+{
+  "campaign_id": "amazon_gift_card_rewards",
+  "is_active": true,
+  "rewarded_ad_amount": 0.25,
+  "transaction_amount": 0.10,
+  "minimum_threshold": 50.00,
+  "eligible_countries": ["TR"],
+  "gift_card_amount": 50.00,
+  "start_date": "2025-01-20T00:00:00Z",
+  "end_date": null
+}
+```
+
+#### Services
+
+**AmazonRewardService** (`lib/core/services/amazon_reward_service.dart`):
+- `earnRewardFromAd(String userId)`: Add 0.25 TL credit from rewarded ad
+- `earnRewardFromTransaction(String userId, String transactionId)`: Add 0.10 TL credit from transaction
+- `getCurrentBalance(String userId)`: Get current accumulated balance
+- `getRewardStats(String userId)`: Get user's reward statistics
+- `checkAndConvertToGiftCard(String userId)`: Check if threshold reached and convert
+
+**AmazonGiftCardService** (`lib/core/services/amazon_gift_card_service.dart`):
+- `purchaseGiftCard(double amount, String recipientEmail)`: Purchase gift card from Amazon API
+- `sendGiftCardEmail(String giftCardId)`: Send gift card via email
+- `getGiftCardHistory(String userId)`: Get user's gift card history
+
+**CountryDetectionService** (`lib/core/services/country_detection_service.dart`):
+- `isTurkishPlayStoreUser()`: Check if user installed from Turkish Play Store
+- `getUserCountry()`: Get user's country code
+- `shouldShowAmazonRewards()`: Determine if Amazon rewards should be visible
+
+#### Cloud Functions
+
+**functions/handlers/amazonRewards.js**:
+- `earnRewardFromAd`: Add credit from rewarded ad
+- `earnRewardFromTransaction`: Add credit from transaction
+- `checkAndConvertToGiftCard`: Check threshold and convert if reached
+- `purchaseAmazonGiftCard`: Purchase gift card via Amazon API
+- `sendGiftCardEmail`: Send gift card code via email
+
+### Implementation Phases
+
+#### Phase 1: Foundation & Models (Days 1-2)
+**Goal**: Create data models and Firebase structure
+
+**Tasks**:
+1. Create `AmazonRewardCredit` model with all fields
+2. Create `AmazonGiftCard` model with all fields
+3. Create `AmazonRewardStats` model with all fields
+4. Create enum classes: `RewardSource`, `RewardStatus`, `GiftCardStatus`
+5. Add Firebase Firestore security rules for new collections
+6. Create test data in Firebase for development
+
+**Concrete Outputs**:
+- ✅ `lib/shared/models/amazon_reward_credit_model.dart` file created
+- ✅ `lib/shared/models/amazon_gift_card_model.dart` file created
+- ✅ `lib/shared/models/amazon_reward_stats_model.dart` file created
+- ✅ `firestore.rules` updated with security rules
+- ✅ Test data inserted in Firebase
+- ✅ Models have proper toJson/fromJson methods
+- ✅ Models have proper validation
+
+**Acceptance Criteria**:
+- All models compile without errors
+- Firebase structure matches specification
+- Security rules prevent unauthorized access
+- Test data can be created and read
+
+---
+
+#### Phase 2: Country Detection (Days 3-4)
+**Goal**: Implement Turkish Play Store detection
+
+**Tasks**:
+1. Create `CountryDetectionService` with Play Store country detection
+2. Implement device locale detection (tr_TR)
+3. Implement Play Store country code detection
+4. Add country info to user profile on first login
+5. Create country detection UI indicator (optional)
+6. Add Remote Config flag for country-based features
+
+**Concrete Outputs**:
+- ✅ `lib/core/services/country_detection_service.dart` file created
+- ✅ Country detection working for Turkish users
+- ✅ User country stored in `users/{userId}/country_info` document
+- ✅ `shouldShowAmazonRewards()` method returns correct value
+- ✅ Remote Config integration for feature flag
+- ✅ Country detection tested with Turkish and non-Turkish devices
+
+**Acceptance Criteria**:
+- Turkish Play Store users correctly identified
+- Non-Turkish users don't see Amazon rewards
+- Country detection persists across app restarts
+- Remote Config controls feature visibility
+
+---
+
+#### Phase 3: Reward Earning System (Days 5-7)
+**Goal**: Implement reward earning from ads and transactions
+
+**Tasks**:
+1. Create `AmazonRewardService` with reward earning methods
+2. Integrate with `RewardedAdService` to add 0.25 TL on ad watch
+3. Integrate with `UnifiedTransactionService` to add 0.10 TL on transaction
+4. Create Cloud Function `earnRewardFromAd`
+5. Create Cloud Function `earnRewardFromTransaction`
+6. Add reward earning UI feedback (snackbar/toast)
+7. Update reward stats after each earning
+8. Add duplicate prevention (same transaction/ad can't earn twice)
+
+**Concrete Outputs**:
+- ✅ `lib/core/services/amazon_reward_service.dart` file created
+- ✅ `RewardedAdService` modified to call Amazon reward on ad watch
+- ✅ `UnifiedTransactionService` modified to call Amazon reward on transaction
+- ✅ Cloud Functions `earnRewardFromAd` and `earnRewardFromTransaction` deployed
+- ✅ Reward credits saved to Firebase
+- ✅ Reward stats updated after each earning
+- ✅ UI shows "0.25 TL kazandınız!" or "0.10 TL kazandınız!" message
+- ✅ Duplicate prevention working (same transaction/ad only earns once)
+
+**Acceptance Criteria**:
+- Rewarded ad watch adds 0.25 TL credit
+- Transaction add adds 0.10 TL credit
+- Credits accumulate correctly
+- Stats update in real-time
+- Duplicate earnings prevented
+- Only Turkish users can earn rewards
+
+---
+
+#### Phase 4: Balance Tracking & UI (Days 8-10)
+**Goal**: Show user their current balance and progress
+
+**Tasks**:
+1. Create `AmazonRewardProvider` for state management
+2. Create reward balance widget for Home screen
+3. Create reward progress bar (current balance / 50 TL)
+4. Create reward history screen (list of credits earned)
+5. Add "Amazon Hediye Kartı" section in Profile screen
+6. Implement pull-to-refresh for balance
+7. Add loading states for balance fetch
+8. Create reward stats display (total earned, gift cards received)
+
+**Concrete Outputs**:
+- ✅ `lib/modules/profile/providers/amazon_reward_provider.dart` file created
+- ✅ `lib/modules/home/widgets/amazon_reward_balance_card.dart` widget created
+- ✅ `lib/modules/profile/pages/amazon_rewards_page.dart` screen created
+- ✅ Reward balance visible on Home screen
+- ✅ Progress bar shows "X.XX TL / 50.00 TL"
+- ✅ Reward history shows all credits with dates and sources
+- ✅ Stats show total earned, converted, gift cards received
+- ✅ Pull-to-refresh updates balance
+
+**Acceptance Criteria**:
+- Balance displays correctly
+- Progress bar updates in real-time
+- History shows all earned credits
+- UI is responsive and follows Material 3 design
+- Loading states work properly
+- Error handling shows user-friendly messages
+
+---
+
+#### Phase 5: Threshold Detection & Conversion (Days 11-13)
+**Goal**: Automatically convert 50 TL to gift card
+
+**Tasks**:
+1. Create Cloud Function `checkAndConvertToGiftCard`
+2. Implement threshold check logic (balance >= 50.00 TL)
+3. Create `AmazonGiftCardService` for gift card operations
+4. Integrate Amazon Gift Card API (or manual purchase flow)
+5. Update credit statuses to "converted"
+6. Create gift card document in Firebase
+7. Send conversion notification to user
+8. Handle partial conversion (if balance > 50 TL, keep remainder)
+
+**Concrete Outputs**:
+- ✅ Cloud Function `checkAndConvertToGiftCard` deployed
+- ✅ Threshold check runs after each credit earning
+- ✅ `AmazonGiftCardService` created with purchase method
+- ✅ Gift card purchased when threshold reached
+- ✅ Credits marked as "converted"
+- ✅ Gift card document created in Firebase
+- ✅ User receives notification: "50 TL Amazon hediye kartınız hazır!"
+- ✅ Remaining balance preserved if > 50 TL
+
+**Acceptance Criteria**:
+- Automatic conversion works when threshold reached
+- Gift card purchased successfully
+- Credits properly marked as converted
+- Remaining balance handled correctly
+- User notified of conversion
+
+---
+
+#### Phase 6: Amazon Gift Card Purchase Integration (Days 14-16)
+**Goal**: Integrate with Amazon to purchase gift cards
+
+**Tasks**:
+1. Research Amazon Gift Card API options
+2. Set up Amazon API credentials (if available)
+3. Create Cloud Function `purchaseAmazonGiftCard`
+4. Implement gift card purchase flow
+5. Handle purchase errors and retries
+6. Store gift card codes securely
+7. Add purchase logging for debugging
+8. Implement fallback: Manual purchase process (if API not available)
+
+**Concrete Outputs**:
+- ✅ Amazon API integration working OR manual purchase flow ready
+- ✅ Cloud Function `purchaseAmazonGiftCard` deployed
+- ✅ Gift card codes stored in Firebase
+- ✅ Purchase errors handled gracefully
+- ✅ Purchase logs for debugging
+- ✅ Fallback manual process documented
+
+**Acceptance Criteria**:
+- Gift cards can be purchased automatically (or manually)
+- Codes stored securely
+- Errors handled properly
+- Purchase logs available
+
+---
+
+#### Phase 7: Email Delivery System (Days 17-18)
+**Goal**: Send gift card codes via email
+
+**Tasks**:
+1. Create Cloud Function `sendGiftCardEmail`
+2. Integrate with email service (Firebase Extensions or SendGrid)
+3. Create email template for gift card delivery
+4. Include gift card code and redemption instructions
+5. Send email when gift card purchased
+6. Update gift card status to "sent"
+7. Add email delivery error handling
+8. Add email delivery logs
+
+**Concrete Outputs**:
+- ✅ Cloud Function `sendGiftCardEmail` deployed
+- ✅ Email service integrated (Firebase Extensions or SendGrid)
+- ✅ Email template created with gift card code
+- ✅ Email sent automatically when gift card purchased
+- ✅ Gift card status updated to "sent"
+- ✅ Email delivery errors handled
+- ✅ Email logs for debugging
+
+**Acceptance Criteria**:
+- Emails sent successfully
+- Gift card codes included in email
+- Redemption instructions clear
+- Error handling works
+- Email delivery logged
+
+---
+
+#### Phase 8: Gift Card History & Management (Days 19-20)
+**Goal**: Show user their gift card history
+
+**Tasks**:
+1. Create gift card history screen
+2. Display all gift cards with status (sent, redeemed)
+3. Show gift card codes (masked until clicked)
+4. Add "Copy Code" functionality
+5. Add "Open Amazon" button
+6. Show gift card purchase date and amount
+7. Add gift card redemption status tracking
+8. Create gift card detail view
+
+**Concrete Outputs**:
+- ✅ `lib/modules/profile/pages/amazon_gift_card_history_page.dart` screen created
+- ✅ Gift card list shows all cards
+- ✅ Gift card codes can be copied
+- ✅ "Open Amazon" button works
+- ✅ Gift card details visible (date, amount, status)
+- ✅ Redemption status tracked (if possible)
+
+**Acceptance Criteria**:
+- Gift card history displays correctly
+- Codes can be copied easily
+- Amazon link works
+- UI follows Material 3 design
+- Loading and error states handled
+
+---
+
+#### Phase 9: Localization & Polish (Days 21-22)
+**Goal**: Add Turkish and English translations
+
+**Tasks**:
+1. Add all Amazon reward strings to `intl_tr.arb`
+2. Add all Amazon reward strings to `intl_en.arb`
+3. Localize all UI elements
+4. Localize email templates
+5. Add proper error messages
+6. Add success messages
+7. Test with both Turkish and English locales
+
+**Concrete Outputs**:
+- ✅ All strings added to `intl_tr.arb`
+- ✅ All strings added to `intl_en.arb`
+- ✅ All UI elements localized
+- ✅ Email templates localized
+- ✅ Error messages localized
+- ✅ Success messages localized
+- ✅ Tested with Turkish and English
+
+**Acceptance Criteria**:
+- All text localized
+- No hardcoded strings
+- Email templates localized
+- Proper translations
+
+---
+
+#### Phase 10: Testing & Deployment (Days 23-25)
+**Goal**: Comprehensive testing and production deployment
+
+**Tasks**:
+1. Unit tests for services
+2. Widget tests for UI components
+3. Integration tests for reward flow
+4. Test with Turkish Play Store account
+5. Test with non-Turkish account (should not see rewards)
+6. Test threshold conversion
+7. Test email delivery
+8. Test error scenarios
+9. Performance testing
+10. Production deployment
+
+**Concrete Outputs**:
+- ✅ Unit tests written and passing
+- ✅ Widget tests written and passing
+- ✅ Integration tests written and passing
+- ✅ Tested with Turkish account
+- ✅ Tested with non-Turkish account
+- ✅ Threshold conversion tested
+- ✅ Email delivery tested
+- ✅ Error scenarios handled
+- ✅ Performance acceptable
+- ✅ Deployed to production
+
+**Acceptance Criteria**:
+- All tests passing
+- No critical bugs
+- Performance acceptable
+- Production ready
+
+### Integration Points
+
+#### RewardedAdService Integration
+```dart
+// In RewardedAdService.showRewardedAd()
+onUserEarnedReward: (AdWithoutView ad, RewardItem reward) async {
+  // Existing AI bonus logic...
+  
+  // NEW: Add Amazon reward (only for Turkish users)
+  if (await CountryDetectionService().shouldShowAmazonRewards()) {
+    await AmazonRewardService().earnRewardFromAd(userId);
+  }
+}
+```
+
+#### UnifiedTransactionService Integration
+```dart
+// In UnifiedTransactionService.addTransaction()
+// After transaction saved successfully
+if (await CountryDetectionService().shouldShowAmazonRewards()) {
+  await AmazonRewardService().earnRewardFromTransaction(
+    userId,
+    transactionId,
+  );
+}
+```
+
+### UI Components
+
+#### Home Screen Widget
+- `AmazonRewardBalanceCard`: Shows current balance and progress to 50 TL
+- Display: "X.XX TL / 50.00 TL Amazon Hediye Kartı"
+- Progress bar visualization
+- "Detaylar" button to reward history
+
+#### Profile Screen Section
+- "Amazon Hediye Kartları" section
+- Current balance display
+- Link to reward history
+- Link to gift card history
+
+#### Reward History Screen
+- List of all credits earned
+- Show: Date, Amount, Source (Ad/Transaction)
+- Total earned summary
+- Progress to next gift card
+
+#### Gift Card History Screen
+- List of all gift cards received
+- Show: Date, Amount, Status, Code
+- "Copy Code" button
+- "Open Amazon" button
+
+### Error Handling
+
+#### Reward Earning Errors
+- Network errors: Retry with exponential backoff
+- Duplicate detection: Show "Already earned" message
+- Country check failure: Log but don't block user
+- Firebase errors: Show user-friendly error message
+
+#### Gift Card Purchase Errors
+- API errors: Retry up to 3 times
+- Insufficient balance: Queue for manual processing
+- Email delivery failure: Retry and log
+- Invalid email: Mark for manual review
+
+### Security Considerations
+
+#### Firebase Security Rules
+- Users can only read their own reward data
+- Users cannot modify reward credits
+- Only Cloud Functions can create gift cards
+- Only Cloud Functions can update reward stats
+
+#### API Security
+- Amazon API credentials stored in Firebase Functions config
+- Never expose API keys to client
+- Validate all inputs server-side
+- Rate limiting on reward earning
+
+### Monitoring & Analytics
+
+#### Key Metrics to Track
+- Number of rewards earned (by source)
+- Average time to reach 50 TL threshold
+- Gift cards purchased per day
+- Email delivery success rate
+- User engagement with rewards feature
+
+#### Logging
+- All reward earnings logged
+- Gift card purchases logged
+- Email deliveries logged
+- Errors logged with stack traces
+
+### Future Enhancements
+
+#### Phase 11+ (Future)
+- Multiple gift card providers (Getir, Yemeksepeti)
+- Tiered rewards (100 TL = 110 TL gift card)
+- Referral bonuses
+- Seasonal campaigns
+- Premium user bonuses
+
+### Cost & Profit Analysis
+
+#### Revenue Sources
+- **AdMob Rewarded Ad Revenue (Turkey)**: 0.40 TL per ad watch (conservative estimate)
+  - Realistic range: 0.30-0.80 TL per ad
+  - Factors: User segmentation, ad format, time of day, season
+- **Transaction Indirect Revenue**: 0.05 TL per transaction (engagement value)
+
+#### Costs
+- **Amazon Gift Card Cost**: 50 TL = 50 TL (direct purchase, no discount assumed)
+- **Operational Costs**: 0 TL (Firebase free tier sufficient)
+- **Reward Costs**: See pricing below
+
+#### Recommended Pricing (Profit-Optimized)
+
+**Option A: High Profit Margin (RECOMMENDED)**
+```
+Rewarded Ad Reward: 0.20 TL
+├─ Revenue: 0.40 TL per ad
+├─ Cost: 0.20 TL per ad
+└─ Profit: 0.20 TL per ad (50% margin)
+
+Transaction Reward: 0.03 TL
+├─ Revenue: 0.05 TL per transaction (indirect)
+├─ Cost: 0.03 TL per transaction
+└─ Profit: 0.02 TL per transaction (40% margin)
+
+Minimum Threshold: 50 TL
+
+Daily Limits:
+├─ Max ads: 10 ads/user/day
+├─ Max transactions: 20 transactions/user/day
+└─ Max daily reward: 2.60 TL/user
+```
+
+**Profit Projection (1000 Active Users)**
+```
+Daily:
+├─ Ad rewards: 1000 × 2 ads × 0.20 TL = 400 TL
+├─ Transaction rewards: 1000 × 5 transactions × 0.03 TL = 150 TL
+├─ Total reward cost: 550 TL/day
+├─ Ad revenue: 1000 × 2 ads × 0.40 TL = 800 TL
+├─ Transaction revenue: 1000 × 5 transactions × 0.05 TL = 250 TL
+├─ Total revenue: 1,050 TL/day
+└─ Net profit: 500 TL/day ✅
+
+Monthly:
+├─ Reward cost: 550 × 30 = 16,500 TL
+├─ Revenue: 1,050 × 30 = 31,500 TL
+└─ Net profit: 15,000 TL/month ✅
+```
+
+#### Risk Management
+- **Conservative eCPM**: Use 0.30 TL instead of 0.40 TL for safety
+- **Minimum profit margin**: Maintain 20% minimum
+- **Dynamic pricing**: Use Remote Config to adjust rewards based on actual eCPM
+- **Daily limits**: Prevent abuse (10 ads/day, 20 transactions/day)
+- **Fraud detection**: Monitor for bot usage and spam
+
+#### Dynamic Pricing Strategy
+- Monitor actual eCPM weekly
+- Adjust rewards via Remote Config if profit margin < 20%
+- Automatic adjustment algorithm in Cloud Functions
+- Real-time cost tracking and alerts
+
+**See detailed analysis in**: `AMAZON_REWARD_COST_ANALYSIS.md`
 
 Remember: Focus on creating a secure, user-friendly, and performant personal finance application that follows SOLID principles and Clean Architecture patterns. Every line of code should be maintainable, testable, and follow these guidelines.

@@ -106,9 +106,9 @@ class _EditSavingsGoalFormState extends State<EditSavingsGoalForm> {
       if (success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Birikim hedefi güncellendi!'),
-              backgroundColor: Color(0xFF34D399),
+            SnackBar(
+              content: const Text('Birikim hedefi güncellendi!'),
+              backgroundColor: Colors.green.shade500,
             ),
           );
           Navigator.of(context).pop();

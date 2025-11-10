@@ -116,4 +116,8 @@ class ThemeProvider extends ChangeNotifier {
   String formatAmountCompact(double amount) {
     return CurrencyUtils.formatAmountCompact(amount, _currency);
   }
+
+  String formatAmountWithLetterFormat(double amount) {
+    return CurrencyUtils.formatAmountWithLetterFormat(amount, _currency);
+  }
 } 

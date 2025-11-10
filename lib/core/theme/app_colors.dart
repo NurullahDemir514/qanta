@@ -31,7 +31,7 @@ class AppColors {
   static const Color neutral = Color(0xFFA0A0A0);
   
   // Additional colors for Premium UI
-  static const Color mintGreen = Color(0xFF34D399); // Mint Green for badges
+  static const Color mintGreen = Colors.green; // Material Green for badges
   static const Color ioSBlue = Color(0xFF007AFF); // iOS Blue for buttons
   
   // Special colors

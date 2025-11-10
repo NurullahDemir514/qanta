@@ -40,29 +40,17 @@ class GoogleAdsAppOpenService implements AppOpenAdvertisementServiceContract {
     if (_lastShownTime == null) return true; // İlk gösterim
     
     final timeSinceLastAd = DateTime.now().difference(_lastShownTime!);
-    final canShow = timeSinceLastAd >= _cooldownDuration;
-    
-    debugPrint('🕐 App Open Ad Cooldown Check:');
-    debugPrint('   Last shown: ${_lastShownTime}');
-    debugPrint('   Time since: ${timeSinceLastAd.inMinutes} minutes');
-    debugPrint('   Can show: $canShow');
-    
-    return canShow;
+    return timeSinceLastAd >= _cooldownDuration;
   }
   
   @override
   Future<void> loadAd() async {
     if (_isLoading || _isLoaded) {
-      debugPrint('⚠️ App Open Ad: Already loading or loaded');
       return;
     }
     
     _isLoading = true;
     _error = null;
-    
-    debugPrint('📱 Loading App Open Ad...');
-    debugPrint('   Ad Unit ID: $_adUnitId');
-    debugPrint('   Test Mode: $_isTestMode');
     
     try {
       await AppOpenAd.load(
@@ -70,47 +58,67 @@ class GoogleAdsAppOpenService implements AppOpenAdvertisementServiceContract {
         request: const AdRequest(),
         adLoadCallback: AppOpenAdLoadCallback(
           onAdLoaded: (ad) {
-            debugPrint('✅ App Open Ad loaded successfully');
             _appOpenAd = ad;
             _isLoaded = true;
             _isLoading = false;
             
             _appOpenAd!.fullScreenContentCallback = FullScreenContentCallback(
               onAdShowedFullScreenContent: (ad) {
-                debugPrint('🎬 App Open Ad showed full screen');
+                // Ad showed
               },
               onAdDismissedFullScreenContent: (ad) {
-                debugPrint('👋 App Open Ad dismissed');
                 ad.dispose();
                 _appOpenAd = null;
                 _isLoaded = false;
-                // Otomatik olarak yeni reklam yükle
-                loadAd();
+                // Otomatik olarak yeni reklam yükle (5 saniye sonra)
+                Future.delayed(const Duration(seconds: 5), () {
+                  loadAd();
+                });
               },
               onAdFailedToShowFullScreenContent: (ad, error) {
-                debugPrint('❌ App Open Ad failed to show: $error');
+                if (kDebugMode) debugPrint('❌ App Open Ad failed to show: $error');
                 ad.dispose();
                 _appOpenAd = null;
                 _isLoaded = false;
                 _error = error.message;
-                // Otomatik olarak yeni reklam yükle
-                loadAd();
+                // Otomatik olarak yeni reklam yükle (10 saniye sonra)
+                Future.delayed(const Duration(seconds: 10), () {
+                  loadAd();
+                });
               },
             );
           },
           onAdFailedToLoad: (error) {
+            if (kDebugMode) {
             debugPrint('❌ App Open Ad failed to load: $error');
+            }
             _error = error.message;
             _isLoading = false;
             _isLoaded = false;
+            
+            // "No fill" hatası için retry mekanizması (30 saniye sonra)
+            if (error.code == 3) {
+              Future.delayed(const Duration(seconds: 30), () {
+                if (!_isLoaded && !_isLoading) {
+                  loadAd();
+                }
+              });
+            }
           },
         ),
       );
     } catch (e) {
-      debugPrint('❌ App Open Ad load exception: $e');
+      if (kDebugMode) debugPrint('❌ App Open Ad load exception: $e');
       _error = e.toString();
       _isLoading = false;
       _isLoaded = false;
+      
+      // Exception durumunda da retry (30 saniye sonra)
+      Future.delayed(const Duration(seconds: 30), () {
+        if (!_isLoaded && !_isLoading) {
+          loadAd();
+        }
+      });
     }
   }
   
@@ -122,23 +130,18 @@ class GoogleAdsAppOpenService implements AppOpenAdvertisementServiceContract {
   @override
   Future<void> showAppOpenAd() async {
     if (!_isLoaded || _appOpenAd == null) {
-      debugPrint('⚠️ App Open Ad not loaded yet');
       return;
     }
     
     if (!canShowAd()) {
-      debugPrint('⏰ App Open Ad cooldown active, skipping');
       return;
     }
-    
-    debugPrint('🎬 Showing App Open Ad...');
     
     try {
       await _appOpenAd!.show();
       _lastShownTime = DateTime.now();
-      debugPrint('✅ App Open Ad shown successfully at $_lastShownTime');
     } catch (e) {
-      debugPrint('❌ Failed to show App Open Ad: $e');
+      if (kDebugMode) debugPrint('❌ Failed to show App Open Ad: $e');
       _error = e.toString();
     }
   }
@@ -146,12 +149,10 @@ class GoogleAdsAppOpenService implements AppOpenAdvertisementServiceContract {
   @override
   Future<void> hideAd() async {
     // App Open Ads cannot be hidden manually
-    debugPrint('⚠️ App Open Ads cannot be hidden manually');
   }
   
   @override
   Future<void> dispose() async {
-    debugPrint('🗑️ Disposing App Open Ad service...');
     _appOpenAd?.dispose();
     _appOpenAd = null;
     _isLoaded = false;

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_hi.dart';
 import 'app_localizations_tr.dart';
 
 // ignore_for_file: type=lint
@@ -97,6 +98,7 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('de'),
     Locale('en'),
+    Locale('hi'),
     Locale('tr'),
   ];
 
@@ -172,6 +174,12 @@ abstract class AppLocalizations {
   /// **'German'**
   String get german;
 
+  /// Hindi language option
+  ///
+  /// In en, this message translates to:
+  /// **'Hindi'**
+  String get hindi;
+
   /// Login button text
   ///
   /// In en, this message translates to:
@@ -214,7 +222,7 @@ abstract class AppLocalizations {
   /// **'I forgot my password, what should I do?'**
   String get forgotPassword;
 
-  /// Budget feature
+  /// Budget label
   ///
   /// In en, this message translates to:
   /// **'Budget'**
@@ -5044,11 +5052,35 @@ abstract class AppLocalizations {
   /// **'Excluding investments'**
   String get investmentsExcluded;
 
-  /// Description for adding first card
+  /// No description provided for @addFirstCardDescription.
   ///
   /// In en, this message translates to:
   /// **'Go to My Cards page to add your first card'**
   String get addFirstCardDescription;
+
+  /// Reward message for first card
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first card and earn 250 points!'**
+  String get firstCardRewardMessage;
+
+  /// Reward message for first budget
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first budget and earn 250 points!'**
+  String get firstBudgetRewardMessage;
+
+  /// Reward message for first stock purchase
+  ///
+  /// In en, this message translates to:
+  /// **'Make your first stock purchase and earn 250 points!'**
+  String get firstStockPurchaseRewardMessage;
+
+  /// Reward message for first subscription
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first subscription and earn 250 points!'**
+  String get firstSubscriptionRewardMessage;
 
   /// Delete transaction confirmation message
   ///
@@ -7888,6 +7920,12 @@ abstract class AppLocalizations {
   /// **'Early access to new features'**
   String get featureEarlyAccessDescription;
 
+  /// Points multiplier feature for premium users
+  ///
+  /// In en, this message translates to:
+  /// **'{multiplier}x points multiplier'**
+  String featurePointsMultiplier(String multiplier);
+
   /// Skip button text
   ///
   /// In en, this message translates to:
@@ -8925,6 +8963,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap your profile photo to access settings, premium features, and your personal information.'**
   String get tutorialProfileDescription;
+
+  /// Income and expense flow chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Income & Expense Flow'**
+  String get incomeExpenseFlow;
+
+  /// Spending intensity heatmap chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Intensity'**
+  String get spendingIntensity;
+
+  /// Budget and spending distribution scatter plot title
+  ///
+  /// In en, this message translates to:
+  /// **'Budget & Spending Distribution'**
+  String get budgetSpendingDistribution;
+
+  /// Low intensity label
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get low;
+
+  /// Medium intensity label
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get medium;
+
+  /// High intensity label
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get high;
+
+  /// Spending label
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get spending;
+
+  /// Compare button text
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get compare;
+
+  /// Filter button text
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filter;
+
+  /// Apply button text
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
+
+  /// Income and expense comparison chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Income & Expense Comparison'**
+  String get incomeExpenseComparison;
+
+  /// Referral code modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Referral Code'**
+  String get referralCodeTitle;
+
+  /// Referral code modal description
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a referral code to earn bonus points! You and your friend will both receive 500 points.'**
+  String get referralCodeDescription;
+
+  /// Referral code label
+  ///
+  /// In en, this message translates to:
+  /// **'Referral Code'**
+  String get referralCode;
+
+  /// Referral code required error message
+  ///
+  /// In en, this message translates to:
+  /// **'Referral code is required'**
+  String get referralCodeRequired;
+
+  /// Referral code invalid length error message
+  ///
+  /// In en, this message translates to:
+  /// **'Referral code must be 8 characters'**
+  String get referralCodeInvalidLength;
+
+  /// Referral code submit button text
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Code'**
+  String get referralCodeSubmit;
+
+  /// Referral code skip button text
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get referralCodeSkip;
+
+  /// Referral code success message
+  ///
+  /// In en, this message translates to:
+  /// **'Referral code applied!'**
+  String get referralCodeSuccess;
+
+  /// Referral code success description
+  ///
+  /// In en, this message translates to:
+  /// **'You and your friend have received bonus points!'**
+  String get referralCodeSuccessMessage;
+
+  /// Referral code invalid error message
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid referral code'**
+  String get referralCodeInvalid;
+
+  /// Referral code error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error processing referral code'**
+  String get referralCodeError;
 }
 
 class _AppLocalizationsDelegate
@@ -8938,7 +9108,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['de', 'en', 'tr'].contains(locale.languageCode);
+      <String>['de', 'en', 'hi', 'tr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -8951,6 +9121,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'hi':
+      return AppLocalizationsHi();
     case 'tr':
       return AppLocalizationsTr();
   }

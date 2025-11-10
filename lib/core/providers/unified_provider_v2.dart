@@ -34,6 +34,11 @@ import '../services/premium_service.dart';
 import '../services/savings_service.dart';
 import '../../shared/models/savings_goal.dart';
 import '../../shared/models/savings_transaction.dart';
+import '../services/amazon_reward_service.dart';
+import '../services/point_service.dart';
+import '../services/country_detection_service.dart';
+import '../../shared/models/point_activity_model.dart';
+import '../../modules/profile/providers/point_provider.dart';
 
 /// **QANTA v2 Unified Provider - Central Data Management System**
 ///
@@ -1346,10 +1351,110 @@ class UnifiedProviderV2 extends ChangeNotifier {
       await loadAccounts();
       await _loadSummaries();
 
+      // Check if this is the first card (debit or credit) and award points
+      if (type == AccountType.debit || type == AccountType.credit) {
+        await _awardFirstCardPoints();
+      }
+
       return accountId;
     } catch (e) {
       debugPrint('❌ createAccount error: $e');
       rethrow;
+    }
+  }
+
+  /// Award points for first budget - 250 points
+  /// Only for Turkish users
+  Future<void> _awardFirstBudgetPoints() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) return;
+
+      // Check if user is from Turkey (points system is Turkey-only)
+      final countryService = CountryDetectionService();
+      final isTurkish = await countryService.isTurkishPlayStoreUser();
+      if (!isTurkish) {
+        debugPrint('⚠️ First budget points: Points system is Turkey-only, user is not Turkish');
+        return;
+      }
+
+      // Check if this is the first budget
+      // After reloadBudgets, check if total budgets = 1
+      if (_budgets.length == 1) {
+        // This is the first budget - award 250 points
+        final pointService = PointService();
+        final pointsEarned = await pointService.earnPoints(
+          userId,
+          PointActivity.firstBudget,
+          description: 'İlk bütçe oluşturuldu',
+        );
+
+        if (pointsEarned > 0) {
+          debugPrint('✅ First budget points awarded: $pointsEarned');
+          
+          // Refresh PointProvider to update UI immediately
+          try {
+            final pointProvider = PointProvider();
+            await pointProvider.refresh();
+          } catch (e) {
+            debugPrint('⚠️ UnifiedProviderV2: Failed to refresh PointProvider: $e');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error awarding first budget points: $e');
+      // Don't throw - this is a bonus feature, shouldn't break budget creation
+    }
+  }
+
+  /// Award points for first card (debit or credit) - 250 points
+  /// Only for Turkish users
+  Future<void> _awardFirstCardPoints() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) return;
+
+      // Check if user is from Turkey (points system is Turkey-only)
+      final countryService = CountryDetectionService();
+      final isTurkish = await countryService.isTurkishPlayStoreUser();
+      if (!isTurkish) {
+        debugPrint('⚠️ First card points: Points system is Turkey-only, user is not Turkish');
+        return;
+      }
+
+      // Check if this is the first card (debit or credit)
+      // After reloadAccounts, check if total debit + credit cards = 1
+      final debitCreditCards = _accounts
+          .where((account) =>
+              account.type == AccountType.debit ||
+              account.type == AccountType.credit)
+          .where((account) => account.isActive)
+          .toList();
+
+      if (debitCreditCards.length == 1) {
+        // This is the first card - award 250 points
+        final pointService = PointService();
+        final pointsEarned = await pointService.earnPoints(
+          userId,
+          PointActivity.firstCard,
+          description: 'İlk kart eklendi',
+        );
+
+        if (pointsEarned > 0) {
+          debugPrint('✅ First card points awarded: $pointsEarned');
+          
+          // Refresh PointProvider to update UI immediately
+          try {
+            final pointProvider = PointProvider();
+            await pointProvider.refresh();
+          } catch (e) {
+            debugPrint('⚠️ UnifiedProviderV2: Failed to refresh PointProvider: $e');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error awarding first card points: $e');
+      // Don't throw - this is a bonus feature, shouldn't break card creation
     }
   }
 
@@ -1514,9 +1619,12 @@ class UnifiedProviderV2 extends ChangeNotifier {
       );
 
       // Add transaction using Firebase service (this also updates account balance in Firebase)
-      final transactionId = await UnifiedTransactionService.addTransaction(
+      final result = await UnifiedTransactionService.addTransaction(
         transaction,
       );
+      final transactionId = result['transactionId'] as String;
+      final pointsEarned = result['pointsEarned'] as int? ?? 0;
+      final shouldShowInterstitial = result['shouldShowInterstitial'] as bool? ?? false;
 
       // Add to local list immediately for instant UI update
       final newTransaction = TransactionWithDetailsV2(
@@ -1594,6 +1702,7 @@ class UnifiedProviderV2 extends ChangeNotifier {
           return {
             'transactionId': transactionId,
             'budgetCheck': budgetCheck,
+            'shouldShowInterstitial': shouldShowInterstitial,
           };
         }
 
@@ -1603,6 +1712,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
       return {
         'transactionId': transactionId,
         'budgetCheck': budgetCheck,
+        'pointsEarned': pointsEarned,
+        'shouldShowInterstitial': shouldShowInterstitial,
       };
     } catch (e) {
       rethrow;
@@ -2311,7 +2422,8 @@ class UnifiedProviderV2 extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
-      final transactionId = await UnifiedTransactionService.addTransaction(transaction);
+      final result = await UnifiedTransactionService.addTransaction(transaction);
+      final transactionId = result['transactionId'] as String;
       return transactionId;
     } catch (e) {
       rethrow;
@@ -2475,6 +2587,9 @@ class UnifiedProviderV2 extends ChangeNotifier {
 
       // Reload budgets
       await loadBudgets();
+
+      // Check if this is the first budget and award points
+      await _awardFirstBudgetPoints();
 
       return budget.copyWith(id: budgetId);
     } catch (e) {

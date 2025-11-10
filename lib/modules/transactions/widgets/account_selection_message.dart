@@ -146,7 +146,7 @@ class AccountSelectionMessage extends StatelessWidget {
     if (type.contains('cash')) return Icons.payments_rounded;
     if (type.contains('credit')) return Icons.credit_card_rounded;
     if (type.contains('debit')) return Icons.account_balance_wallet_rounded;
-    if (type.contains('savings')) return Icons.savings_rounded;
+    if (type.contains('savings')) return Icons.account_balance_wallet_rounded;
     if (type.contains('investment')) return Icons.trending_up_rounded;
     return Icons.account_balance_rounded;
   }

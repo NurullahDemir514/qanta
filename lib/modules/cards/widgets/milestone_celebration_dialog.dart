@@ -113,7 +113,7 @@ class _MilestoneCelebrationDialogState extends State<MilestoneCelebrationDialog>
       case 75:
         return const Color(0xFFAF52DE); // Purple
       case 100:
-        return const Color(0xFF34C759); // Green
+        return Colors.green.shade500; // Green
       default:
         return const Color(0xFF007AFF);
     }

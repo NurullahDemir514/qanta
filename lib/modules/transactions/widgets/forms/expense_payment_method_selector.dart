@@ -302,7 +302,7 @@ class _ExpensePaymentMethodSelectorState extends State<ExpensePaymentMethodSelec
                   context: context,
                   title: l10n.cash,
                   icon: Icons.payments_rounded,
-                  color: const Color(0xFF34C759),
+                  color: Colors.green.shade500,
                   isSelected: widget.selectedPaymentMethod?.isCash == true &&
                               widget.selectedPaymentMethod?.cashAccount?.id == cashAccount.id,
                   balance: cashAccount.balance,

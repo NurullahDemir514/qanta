@@ -171,33 +171,96 @@ class RecurringTransaction {
   }
 
   /// Sonraki ödeme tarihini hesapla
+  /// 
+  /// Mantık:
+  /// - Her zaman startDate'deki günü baz alarak hesapla
+  /// - lastExecutedDate olsa bile, startDate'deki günü kullan
+  /// - Bu sayede kullanıcı ayın 1'ini seçtiğinde, sonraki kesim tarihi de ayın 1'i olur
+  /// 
+  /// Örnek:
+  /// - Start date: 1 Ocak 2024, Frequency: Monthly
+  /// - lastExecutedDate: 15 Ocak 2024 (bugün oluşturuldu)
+  /// - nextExecutionDate: 1 Şubat 2024 (start date'deki günü kullan)
   DateTime calculateNextExecutionDate() {
-    final now = DateTime.now();
-    DateTime baseDate;
+    // Her zaman startDate'deki günü baz al
+    // lastExecutedDate'in tarihi değil, startDate'in günü önemli
+    final baseDay = startDate.day;
+    final baseMonth = startDate.month;
+    final baseYear = startDate.year;
+    
+    // Hangi tarihten itibaren hesaplayacağız?
+    DateTime referenceDate;
 
     if (lastExecutedDate != null) {
-      baseDate = lastExecutedDate!;
-    } else if (nextExecutionDate != null && now.isBefore(nextExecutionDate!)) {
-      return nextExecutionDate!;
+      // Son çalıştırma tarihi varsa, ondan sonraki startDate gününü bul
+      // Örnek: lastExecutedDate = 15 Ocak, startDate günü = 1
+      // → Sonraki 1'i bul: 1 Şubat
+      referenceDate = lastExecutedDate!;
     } else {
-      baseDate = startDate.isBefore(now) ? now : startDate;
+      // İlk çalıştırmada, startDate'den itibaren hesapla
+      referenceDate = startDate;
     }
 
     switch (frequency) {
       case RecurringFrequency.weekly:
-        return baseDate.add(const Duration(days: 7));
+        // Start date'den 7 gün sonra
+        return referenceDate.add(const Duration(days: 7));
+        
       case RecurringFrequency.monthly:
-        // Ayın aynı günü
-        final nextMonth = DateTime(baseDate.year, baseDate.month + 1, baseDate.day);
-        return nextMonth;
+        // Start date'deki günü kullanarak sonraki ayı hesapla
+        // Örnek: Start date = 1 Ocak, lastExecutedDate = 15 Ocak
+        // → Sonraki ayın 1'i = 1 Şubat
+        var nextYear = referenceDate.year;
+        var nextMonth = referenceDate.month + 1;
+        
+        // Ay taşması kontrolü
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear++;
+        }
+        
+        // Günü startDate'den al (ayın son günü kontrolü)
+        var nextDay = baseDay;
+        final daysInMonth = DateTime(nextYear, nextMonth + 1, 0).day;
+        if (nextDay > daysInMonth) {
+          nextDay = daysInMonth; // Ayın son günü
+        }
+        
+        return DateTime(nextYear, nextMonth, nextDay);
+        
       case RecurringFrequency.quarterly:
-        // 3 ay sonra
-        final nextQuarter = DateTime(baseDate.year, baseDate.month + 3, baseDate.day);
-        return nextQuarter;
+        // Start date'deki günü kullanarak 3 ay sonrasını hesapla
+        var nextYear = referenceDate.year;
+        var nextMonth = referenceDate.month + 3;
+        
+        // Ay taşması kontrolü
+        while (nextMonth > 12) {
+          nextMonth -= 12;
+          nextYear++;
+        }
+        
+        // Günü startDate'den al
+        var nextDay = baseDay;
+        final daysInMonth = DateTime(nextYear, nextMonth + 1, 0).day;
+        if (nextDay > daysInMonth) {
+          nextDay = daysInMonth;
+        }
+        
+        return DateTime(nextYear, nextMonth, nextDay);
+        
       case RecurringFrequency.yearly:
-        // 1 yıl sonra
-        final nextYear = DateTime(baseDate.year + 1, baseDate.month, baseDate.day);
-        return nextYear;
+        // Start date'deki günü kullanarak 1 yıl sonrasını hesapla
+        var nextYear = referenceDate.year + 1;
+        var nextMonth = baseMonth;
+        var nextDay = baseDay;
+        
+        // Şubat 29 kontrolü
+        final daysInMonth = DateTime(nextYear, nextMonth + 1, 0).day;
+        if (nextDay > daysInMonth) {
+          nextDay = daysInMonth;
+        }
+        
+        return DateTime(nextYear, nextMonth, nextDay);
     }
   }
 

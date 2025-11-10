@@ -113,7 +113,7 @@ class _AnimatedTypingMessageState extends State<AnimatedTypingMessage> {
           backgroundColor: widget.isDark 
             ? const Color(0xFF1C1C1E) 
             : const Color(0xFFF5F5F5),
-          color: widget.isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
+          color: widget.isDark ? Colors.green.shade500 : const Color(0xFF059669),
         ),
         blockquote: GoogleFonts.inter(
           fontSize: 15,

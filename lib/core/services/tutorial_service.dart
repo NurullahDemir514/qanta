@@ -12,6 +12,10 @@ class TutorialService {
   static bool _isTutorialActive = false;
   static String? _currentStepId; // Şu anki tutorial step ID
   
+  // Tutorial'ı geçici olarak devre dışı bırakmak için flag
+  // TODO: İleride tutorial'ı tekrar aktif etmek için bu flag'i true yap
+  static const bool _isTutorialSuspended = true;
+  
   /// Tutorial aktif mi?
   static bool get isTutorialActive => _isTutorialActive;
   
@@ -120,6 +124,12 @@ class TutorialService {
   /// İlk açılışta ve tamamlanmadıysa göster
   static Future<bool> shouldShowTutorial() async {
     try {
+      // Tutorial geçici olarak devre dışı bırakıldı
+      if (_isTutorialSuspended) {
+        debugPrint('📚 TutorialService: Tutorial is currently suspended');
+        return false;
+      }
+      
       final completed = await isTutorialCompleted();
       final skipped = await isTutorialSkipped();
       

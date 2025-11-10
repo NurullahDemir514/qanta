@@ -45,6 +45,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get german => 'Almanca';
 
   @override
+  String get hindi => 'Hintçe';
+
+  @override
   String get login => 'Giriş Yap';
 
   @override
@@ -2635,6 +2638,21 @@ class AppLocalizationsTr extends AppLocalizations {
       'İlk kartını eklemek için Kartlarım sayfasına git';
 
   @override
+  String get firstCardRewardMessage => 'İlk kartını ekle ve 250 puan kazan!';
+
+  @override
+  String get firstBudgetRewardMessage =>
+      'İlk bütçeni oluştur ve 250 puan kazan!';
+
+  @override
+  String get firstStockPurchaseRewardMessage =>
+      'İlk hisse alımını yap ve 250 puan kazan!';
+
+  @override
+  String get firstSubscriptionRewardMessage =>
+      'İlk aboneliğini ekle ve 250 puan kazan!';
+
+  @override
   String deleteTransactionConfirmation(String description) {
     return '$description işlemini silmek istediğinden emin misin?';
   }
@@ -4209,6 +4227,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get featureEarlyAccessDescription => 'Yeni özelliklere erken erişim';
 
   @override
+  String featurePointsMultiplier(String multiplier) {
+    return 'Puanlarda ${multiplier}x çarpan';
+  }
+
+  @override
   String get skip => 'Atla';
 
   @override
@@ -4775,4 +4798,72 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get tutorialProfileDescription =>
       'Profil fotoğrafınıza tıklayarak ayarlara, premium özelliklere ve kişisel bilgilerinize erişebilirsiniz.';
+
+  @override
+  String get incomeExpenseFlow => 'Gelir & Gider Akışı';
+
+  @override
+  String get spendingIntensity => 'Harcama Yoğunluğu';
+
+  @override
+  String get budgetSpendingDistribution => 'Bütçe ve Harcama Dağılımı';
+
+  @override
+  String get low => 'Düşük';
+
+  @override
+  String get medium => 'Orta';
+
+  @override
+  String get high => 'Yüksek';
+
+  @override
+  String get spending => 'Harcama';
+
+  @override
+  String get compare => 'Karşılaştır';
+
+  @override
+  String get filter => 'Filtrele';
+
+  @override
+  String get apply => 'Uygula';
+
+  @override
+  String get incomeExpenseComparison => 'Gelir & Gider Karşılaştırması';
+
+  @override
+  String get referralCodeTitle => 'Referans Kodu Gir';
+
+  @override
+  String get referralCodeDescription =>
+      'Bir referans kodu girerek bonus puanlar kazan! Sen ve arkadaşın her ikiniz de 500 puan kazanacaksınız.';
+
+  @override
+  String get referralCode => 'Referans Kodu';
+
+  @override
+  String get referralCodeRequired => 'Referans kodu gereklidir';
+
+  @override
+  String get referralCodeInvalidLength => 'Referans kodu 8 karakter olmalıdır';
+
+  @override
+  String get referralCodeSubmit => 'Kodu Uygula';
+
+  @override
+  String get referralCodeSkip => 'Şimdilik Geç';
+
+  @override
+  String get referralCodeSuccess => 'Referans kodu uygulandı!';
+
+  @override
+  String get referralCodeSuccessMessage =>
+      'Sen ve arkadaşın bonus puanlar kazandınız!';
+
+  @override
+  String get referralCodeInvalid => 'Geçersiz referans kodu';
+
+  @override
+  String get referralCodeError => 'Referans kodu işlenirken bir hata oluştu';
 }

@@ -483,7 +483,7 @@ class _SavingsDepositFormState extends State<SavingsDepositForm> {
                                           ? Colors.white.withOpacity(0.1)
                                           : Colors.black.withOpacity(0.1),
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        const Color(0xFF34C759),
+                                        Colors.green.shade500,
                                       ),
                                     ),
                                   ),
@@ -496,7 +496,7 @@ class _SavingsDepositFormState extends State<SavingsDepositForm> {
                               style: GoogleFonts.inter(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF34C759),
+                                color: Colors.green.shade500,
                               ),
                             ),
                           ],
@@ -537,7 +537,7 @@ class _SavingsDepositFormState extends State<SavingsDepositForm> {
                               label: l10n.target,
                               amount: themeProvider.formatAmount(widget.goal.targetAmount),
                               isDark: isDark,
-                              color: const Color(0xFF34C759),
+                              color: Colors.green.shade500,
                             ),
                           ],
                         ),
@@ -566,7 +566,7 @@ class _SavingsDepositFormState extends State<SavingsDepositForm> {
                         final account = widget.accounts[index];
                         final isSelected = _selectedAccount?.id == account.id;
                         final accentColor = account.type == AccountType.cash
-                            ? const Color(0xFF34C759)
+                            ? Colors.green.shade500
                             : account.type == AccountType.debit
                                 ? const Color(0xFF007AFF)
                                 : const Color(0xFFFF9500);

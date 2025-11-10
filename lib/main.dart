@@ -18,6 +18,7 @@ import 'core/services/notification_service.dart';
 import 'core/services/remote_config_service.dart';
 import 'routes/app_router.dart';
 import 'modules/insights/providers/statistics_provider.dart';
+import 'modules/insights/providers/ai_insights_provider.dart';
 import 'modules/stocks/providers/stock_provider.dart';
 import 'modules/stocks/repositories/firebase_stock_repository.dart';
 import 'modules/stocks/services/yandex_finance_api_service.dart';
@@ -26,6 +27,8 @@ import 'modules/advertisement/providers/advertisement_provider.dart';
 import 'core/providers/statement_provider.dart';
 import 'core/providers/savings_provider.dart';
 import 'core/providers/recurring_transaction_provider.dart';
+import 'modules/profile/providers/amazon_reward_provider.dart';
+import 'modules/profile/providers/point_provider.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'core/firebase_client.dart';
 import 'core/services/network_service.dart';
@@ -35,6 +38,7 @@ import 'core/services/rewarded_ad_service.dart';
 import 'core/services/consent_service.dart';
 import 'core/services/bank_service.dart';
 import 'core/services/recurring_transaction_service.dart';
+import 'core/services/cache_cleanup_service.dart';
 import 'shared/widgets/no_internet_screen.dart';
 
 /// Background callback for Workmanager
@@ -200,6 +204,18 @@ void main() async {
     // Continue without Firebase for now
   }
 
+  // 🧹 Cache Cleanup: Prevent app size growth by cleaning caches on startup
+  // This runs in the background to avoid slowing app launch
+  try {
+    final cacheCleanup = CacheCleanupService.instance;
+    // Run cleanup asynchronously without blocking app startup
+    cacheCleanup.performStartupCleanup().catchError((e) {
+      debugPrint('⚠️ Cache cleanup error (non-blocking): $e');
+    });
+  } catch (e) {
+    debugPrint('⚠️ Cache cleanup service not available: $e');
+  }
+
   // 🔐 STEP 1: Initialize Consent (UMP SDK) - MUST be before AdMob
   try {
     await ConsentService().initialize();
@@ -351,6 +367,13 @@ void main() async {
               statisticsProvider ?? StatisticsProvider(unifiedProvider),
         ),
 
+        // AI Insights provider
+        ChangeNotifierProxyProvider<UnifiedProviderV2, AIInsightsProvider>(
+          create: (context) => AIInsightsProvider(UnifiedProviderV2.instance),
+          update: (context, unifiedProvider, aiProvider) =>
+              aiProvider ?? AIInsightsProvider(unifiedProvider),
+        ),
+
         // Stock provider
         ChangeNotifierProvider(
           create: (context) {
@@ -375,6 +398,10 @@ void main() async {
         // Savings provider
         ChangeNotifierProvider(create: (context) => SavingsProvider()),
         ChangeNotifierProvider.value(value: RecurringTransactionProvider()),
+        
+        // Amazon Reward Provider
+        ChangeNotifierProvider.value(value: AmazonRewardProvider()),
+        ChangeNotifierProvider.value(value: PointProvider()),
 
         // Legacy providers disabled to prevent duplicate balance updates
         // TODO: Remove these completely after full migration to V2
@@ -412,6 +439,7 @@ void main() async {
                     Locale('tr'), // Turkish (default)
                     Locale('en'), // English
                     Locale('de'), // German
+                    Locale('hi'), // Hindi
                   ],
                   locale: themeProvider.locale, // Use locale from provider
                   

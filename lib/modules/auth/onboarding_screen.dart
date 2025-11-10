@@ -601,6 +601,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     isSelected: themeProvider.isGerman,
                     onTap: () => themeProvider.setLocale(const Locale('de')),
                   ),
+                  SizedBox(height: 12.h),
+                  _buildLanguageOption(
+                    flag: '🇮🇳',
+                    language: 'हिंदी',
+                    isSelected: themeProvider.locale.languageCode == 'hi',
+                    onTap: () => themeProvider.setLocale(const Locale('hi')),
+                  ),
                 ],
               );
             },

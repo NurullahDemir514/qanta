@@ -56,3 +56,4 @@ supabase/logs/
 # supabase/config.toml
 # supabase/migrations/
 # supabase/functions/
+qanta-de0b9-firebase-adminsdk-*.json

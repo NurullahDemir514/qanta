@@ -19,6 +19,7 @@ import '../../premium/premium_offer_screen.dart';
 import '../../advertisement/services/google_ads_real_banner_service.dart';
 import '../../advertisement/config/advertisement_config.dart' as config;
 import '../../advertisement/models/advertisement_models.dart';
+import '../../../core/services/country_detection_service.dart';
 
 class CreditCardsTab extends StatefulWidget {
   final AppLocalizations l10n;
@@ -450,7 +451,7 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
                 color: Colors.white,
               ),
             ),
-            backgroundColor: const Color(0xFF34C759),
+            backgroundColor: Colors.green.shade500,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -556,6 +557,49 @@ class _CreditCardsTabState extends State<CreditCardsTab> with AutomaticKeepAlive
                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                      // Reward message for Turkish users
+                      FutureBuilder<bool>(
+                        future: CountryDetectionService().isTurkishPlayStoreUser(),
+                        builder: (context, snapshot) {
+                          final isTurkish = snapshot.data ?? false;
+                          if (!isTurkish) return const SizedBox.shrink();
+                          return Column(
+                            children: [
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade500.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.green.shade500.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.stars_rounded,
+                                      size: 16,
+                                      color: Colors.green.shade500,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      widget.l10n.firstCardRewardMessage,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.green.shade500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 32),
                       // Şık kart ekleme butonu

@@ -243,7 +243,7 @@ class _BalanceDetailContent extends StatelessWidget {
                             title: l10n.income,
                             amount: monthlyIncome,
                             icon: Icons.trending_up_rounded,
-                            color: const Color(0xFF34C759), // Yeşil
+                            color: Colors.green.shade500, // Yeşil
                             subtitle: l10n.thisMonth,
                           ),
                         ),
@@ -593,7 +593,7 @@ class _AccountItem extends StatelessWidget {
                                   style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF34C759),
+                                    color: Colors.green.shade500,
                                   ),
                                 ),
                               ],
@@ -666,7 +666,7 @@ class _AccountItem extends StatelessWidget {
                                 ? const Color(0xFFFF3B30)
                                 : account.creditUtilization > 50
                                   ? const Color(0xFFFF9500)
-                                  : const Color(0xFF34C759),
+                                  : Colors.green.shade500,
                             ),
                           ),
                         ],
@@ -689,7 +689,7 @@ class _AccountItem extends StatelessWidget {
                                 ? const Color(0xFFFF3B30)
                                 : account.creditUtilization > 50
                                   ? const Color(0xFFFF9500)
-                                  : const Color(0xFF34C759),
+                                  : Colors.green.shade500,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),

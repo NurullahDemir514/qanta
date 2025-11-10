@@ -22,6 +22,7 @@ import '../../shared/widgets/profile_avatar.dart';
 import '../settings/pages/privacy_policy_page.dart';
 import '../settings/pages/terms_of_service_page.dart';
 import '../settings/pages/support_page.dart';
+import 'pages/support_requests_page.dart';
 import '../settings/pages/change_password_page.dart';
 import '../settings/pages/faq_page.dart';
 import '../../core/services/reminder_service.dart';
@@ -33,8 +34,18 @@ import 'package:workmanager/workmanager.dart';
 import 'pages/premium_test_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../advertisement/services/google_ads_real_banner_service.dart';
-import '../advertisement/config/advertisement_config.dart' as config;
 import '../advertisement/models/advertisement_models.dart';
+import '../advertisement/config/advertisement_config.dart' as config;
+import 'pages/cache_test_page.dart';
+import 'providers/amazon_reward_provider.dart';
+import 'widgets/multi_provider_gift_card_widget.dart';
+import 'widgets/referral_widget.dart';
+import 'pages/amazon_reward_history_page.dart';
+import 'pages/amazon_gift_card_history_page.dart';
+import 'pages/amazon_reward_terms_page.dart';
+import 'providers/point_provider.dart';
+import 'pages/admin_panel_page.dart';
+import '../../core/services/admin_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -47,7 +58,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
   bool _isUploadingImage = false;
   
-  late GoogleAdsRealBannerService _settingsBannerService;
+  late GoogleAdsRealBannerService _profileBannerAd1;
+  late GoogleAdsRealBannerService _profileBannerAd2;
+  late PremiumService _premiumService;
 
   @override
   void initState() {
@@ -59,24 +72,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
       FocusScope.of(context).unfocus();
     });
     
-    // Initialize banner service
-    _settingsBannerService = GoogleAdsRealBannerService(
-      adUnitId: config.AdvertisementConfig.settingsBanner.bannerAdUnitId,
+    // Initialize Banner Ad services
+    _profileBannerAd1 = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.profileBanner1.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
       isTestMode: false,
     );
     
-    // Load ad after a delay
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        _settingsBannerService.loadAd();
+    _profileBannerAd2 = GoogleAdsRealBannerService(
+      adUnitId: config.AdvertisementConfig.profileBanner2.bannerAdUnitId,
+      size: AdvertisementSize.banner320x50,
+      isTestMode: false,
+    );
+    
+    // Initialize providers and load ads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _premiumService = context.read<PremiumService>();
+      _premiumService.addListener(_onPremiumChanged);
+      
+      // Premium değilse banner ad'ları yükle
+      if (!_premiumService.isPremium) {
+        _profileBannerAd1.loadAd();
+        _profileBannerAd2.loadAd();
       }
+      
+      // Initialize Amazon Reward Provider
+      Provider.of<AmazonRewardProvider>(context, listen: false).initialize();
+      
+      // Initialize Point Provider
+      Provider.of<PointProvider>(context, listen: false).initialize();
     });
+  }
+  
+  void _onPremiumChanged() {
+    if (_premiumService.isPremium) {
+      // Premium aktif - Banner ad'ları dispose et
+      _profileBannerAd1.dispose();
+      _profileBannerAd2.dispose();
+      setState(() {});
+    } else {
+      // Premium kapatıldı - Banner ad'ları tekrar yükle
+      _profileBannerAd1.loadAd();
+      _profileBannerAd2.loadAd();
+      setState(() {});
+    }
   }
   
   @override
   void dispose() {
-    _settingsBannerService.dispose();
+    if (mounted) {
+      try {
+        _premiumService.removeListener(_onPremiumChanged);
+      } catch (e) {
+        // Premium service might not be initialized yet
+      }
+    }
+    _profileBannerAd1.dispose();
+    _profileBannerAd2.dispose();
     super.dispose();
   }
 
@@ -314,7 +366,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             profileImageUrl,
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 32),
+                          // Multi-Provider Gift Card Section (only for eligible Turkish users) - EN ÜSTTE
+                          const MultiProviderGiftCardWidget(),
+                          const SizedBox(height: 16),
+                          // Referral Widget (only for eligible Turkish users)
+                          // Load after gift card widget is ready
+                          FutureBuilder<bool>(
+                            future: Future.delayed(
+                              const Duration(milliseconds: 300),
+                              () => true,
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return const ReferralWidget();
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                          // Banner Ad 1 after Gift Card Section
+                          _buildBannerAd(_profileBannerAd1),
+                          const SizedBox(height: 32),
                           // Preferences Section
                           ProfileSection(
                             title: l10n.preferences,
@@ -349,6 +421,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     languageSubtitle = l10n.turkish;
                                   } else if (themeProvider.isGerman) {
                                     languageSubtitle = l10n.german;
+                                  } else if (themeProvider.locale.languageCode == 'hi') {
+                                    languageSubtitle = l10n.hindi;
                                   } else {
                                     languageSubtitle = l10n.english;
                                   }
@@ -384,7 +458,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 32),
                           // Premium Management Section
                           Consumer<PremiumService>(
                             builder: (context, premiumService, child) {
@@ -544,7 +618,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               );
                             },
                           ),
-                          const SizedBox(height: 24),
+                          // Banner Ad 2 after Premium Section
+                          _buildBannerAd(_profileBannerAd2),
+                          const SizedBox(height: 32),
                           // Security Section
                           ProfileSection(
                             title: l10n.security,
@@ -588,14 +664,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 32),
+                          // Gift Card System Section (only for eligible Turkish users)
+                          Consumer<AmazonRewardProvider>(
+                            builder: (context, amazonProvider, child) {
+                              if (!amazonProvider.isEligible) {
+                                return const SizedBox.shrink();
+                              }
+                              return ProfileSection(
+                                title: 'Hediye Kartları',
+                                children: [
+                                  ProfileItem(
+                                    icon: Icons.info_outline,
+                                    title: 'Şartlar ve Koşullar',
+                                    subtitle: 'Ödül sistemi hakkında detaylı bilgi',
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const AmazonRewardTermsPage(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  ProfileItem(
+                                    icon: Icons.history,
+                                    title: 'Ödül Geçmişi',
+                                    subtitle: 'Kazandığınız puanları görüntüleyin',
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const AmazonRewardHistoryPage(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  ProfileItem(
+                                    icon: Icons.card_giftcard,
+                                    title: 'Hediye Kartlarım',
+                                    subtitle: 'Aldığınız hediye kartlarını görüntüleyin',
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const AmazonGiftCardHistoryPage(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 32),
                           // Support Section
                           ProfileSection(
                             title: l10n.support,
                             children: [
                               ProfileItem(
+                                icon: Icons.chat_bubble_outline,
+                                title: 'Destek Taleplerim',
+                                subtitle: 'Mesajlaşma geçmişi ve yeni talep',
+                                onTap: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const SupportRequestsPage(),
+                                    ),
+                                  );
+                                  // Sayfa geri döndüğünde refresh yapılacak (real-time listener zaten var)
+                                },
+                              ),
+                              ProfileItem(
                                 icon: Icons.help_outline,
-                                title: l10n.contactSupport,
+                                title: 'Sıkça Sorulan Sorular',
+                                subtitle: 'Yardım ve bilgi edinin',
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -633,6 +780,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 },
                               ),
                             ],
+                          ),
+                          // Admin Section (sadece admin kullanıcılar için)
+                          FutureBuilder<bool>(
+                            future: AdminService().isAdmin(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const SizedBox.shrink();
+                              }
+                              
+                              if (snapshot.data == true) {
+                                return Column(
+                                  children: [
+                                    const SizedBox(height: 24),
+                                    ProfileSection(
+                                      title: '👑 Admin',
+                                      children: [
+                                        ProfileItem(
+                                          icon: Icons.admin_panel_settings,
+                                          title: 'Admin Panel',
+                                          subtitle: 'Hediye kartı taleplerini yönet',
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => const AdminPanelPage(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              }
+                              
+                              return const SizedBox.shrink();
+                            },
                           ),
                           
                           // Debug Section (sadece debug modda görünür)
@@ -873,35 +1057,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     }
                                   },
                                 ),
+                                ProfileItem(
+                                  icon: Icons.storage_outlined,
+                                  title: 'Cache Test & Monitoring',
+                                  subtitle: 'Cache boyutlarını kontrol et ve temizle',
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const CacheTestPage(),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                           ],
                           
                           const SizedBox(height: 24),
                           _buildLogoutButton(context, l10n),
-                          
-                          // Banner ad at the bottom
-                          Consumer<PremiumService>(
-                            builder: (context, premiumService, child) {
-                              if (!premiumService.isPremium && 
-                                  _settingsBannerService.isLoaded && 
-                                  _settingsBannerService.bannerWidget != null) {
-                                return Column(
-                                  children: [
-                                    const SizedBox(height: 24),
-                                    Container(
-                                      height: 50,
-                                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                                      alignment: Alignment.center,
-                                      child: _settingsBannerService.bannerWidget!,
-                                    ),
-                                    const SizedBox(height: 16),
-                                  ],
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
                         ],
                       ),
                     );
@@ -946,37 +1120,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         children: [
           // Profile Avatar with loading state
-          Stack(
-            children: [
-              ProfileAvatar(
-                imageUrl: profileImageUrl,
-                userName: userName,
-                size: 56,
-                showBorder: false,
-                onTap: _isUploadingImage ? null : _showImageSourceActionSheet,
-              ),
-              if (_isUploadingImage)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    child: const Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+          Consumer<PremiumService>(
+            builder: (context, premiumService, child) {
+              return Stack(
+                children: [
+                  ProfileAvatar(
+                    imageUrl: profileImageUrl,
+                    userName: userName,
+                    size: 56,
+                    showBorder: premiumService.isPremium, // Premium için border göster
+                    isPremium: premiumService.isPremium,
+                    onTap: _isUploadingImage ? null : _showImageSourceActionSheet,
+                  ),
+                  if (_isUploadingImage)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-            ],
+                ],
+              );
+            },
           ),
           const SizedBox(width: 12),
 
@@ -1195,6 +1374,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Navigator.pop(context);
               },
             ),
+            ListTile(
+              leading: const Text('🇮🇳', style: TextStyle(fontSize: 24)),
+              title: Text(l10n.hindi, style: GoogleFonts.inter(fontSize: 16)),
+              trailing: themeProvider.locale.languageCode == 'hi'
+                  ? const Icon(Icons.check, color: Color(0xFF6D6D70))
+                  : null,
+              onTap: () {
+                themeProvider.setLocale(const Locale('hi'));
+                Navigator.pop(context);
+              },
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -1352,6 +1542,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         )),
       ],
+    );
+  }
+
+  /// Banner Ad widget'ı - premium kullanıcılar için gösterilmez
+  Widget _buildBannerAd(GoogleAdsRealBannerService bannerService) {
+    return Consumer<PremiumService>(
+      builder: (context, premiumService, child) {
+        // Premium ise veya ad yüklenmemişse tüm bölümü gizle
+        if (premiumService.isPremium || 
+            !bannerService.isLoaded || 
+            bannerService.bannerWidget == null) {
+          return const SizedBox.shrink();
+        }
+        
+        return Column(
+          children: [
+            const SizedBox(height: 16),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: double.infinity,
+                height: bannerService.bannerHeight,
+                child: bannerService.bannerWidget!,
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
     );
   }
 

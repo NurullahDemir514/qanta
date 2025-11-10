@@ -232,9 +232,10 @@ class FirebaseAIService {
     String? currency,
     String? imageBase64, // 📷 Görüntü/PDF base64
     String? fileType, // 'image' veya 'pdf'
+    bool isInsightsAnalysis = false, // Free kullanıcılar için limit bypass
   }) async {
     try {
-      debugPrint('💬 AI Chat: "$message" (lang: $language, currency: $currency, hasImage: ${imageBase64 != null}, fileType: $fileType, budgetCount: ${budgets?.length ?? 0}, categoryCount: ${categories?.length ?? 0}, stockCount: ${stockPortfolio?.length ?? 0}, stockTxCount: ${stockTransactions?.length ?? 0})');
+      debugPrint('💬 AI Chat: "$message" (lang: $language, currency: $currency, hasImage: ${imageBase64 != null}, fileType: $fileType, budgetCount: ${budgets?.length ?? 0}, categoryCount: ${categories?.length ?? 0}, stockCount: ${stockPortfolio?.length ?? 0}, stockTxCount: ${stockTransactions?.length ?? 0}, isInsightsAnalysis: $isInsightsAnalysis)');
 
       final callable = _functions.httpsCallable('chatWithAI');
       
@@ -254,6 +255,7 @@ class FirebaseAIService {
         'language': language ?? 'tr',
         'currency': currency ?? 'TRY',
         'userTimezone': userTimezone, // Timezone ekle
+        'isInsightsAnalysis': isInsightsAnalysis, // Free kullanıcılar için limit bypass
       };
       
       // Görüntü varsa ekle
@@ -286,6 +288,7 @@ class FirebaseAIService {
           'isReady': data['isReady'] as bool? ?? false,
           'transactionData': data['transactionData'],
           'usage': data['usage'], // Raw data, caller'da parse edilecek
+          'tokenUsage': data['tokenUsage'], // Token kullanımı (debug için)
         };
       }
       

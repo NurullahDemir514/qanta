@@ -10,9 +10,23 @@ const {formatCurrency, getCurrencySymbol} = require("../utils/currencyFormatter"
 const {t, getMonthName, normalizeLanguage} = require("../utils/localization");
 const {checkDailyLimit, incrementDailyUsage, trackAIUsage} = require("../utils/helpers");
 
-// Gemini AI instance
-const GEMINI_API_KEY = "AIzaSyB6fyIYr-G1I5t4HF6aPjXSrkGMAc4P9io";
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+// Gemini AI instance - Firebase Secrets'dan alınır (process.env.GEMINI_API_KEY)
+// ✅ Secret başarıyla eklendi ve function'a bind edildi
+// Lazy initialization - Secret sadece function çalışırken inject edilir
+let genAI = null;
+
+function getGeminiAI() {
+  if (!genAI) {
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    if (!GEMINI_API_KEY) {
+      logger.error("❌ GEMINI_API_KEY not found in process.env!");
+      throw new Error("GEMINI_API_KEY secret must be set and bound to function");
+    }
+    genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    logger.info("✅ chatWithAI handler: Gemini AI initialized with secret");
+  }
+  return genAI;
+}
 
 /**
  * Finansal özeti formatla
@@ -85,19 +99,32 @@ ${financialSummary.recentTransactions && financialSummary.recentTransactions.len
   
   // DETAYLI KATEGORİ ANALİZİ (AI için)
   if (financialSummary.categoryAnalysis && financialSummary.categoryAnalysis.length > 0) {
-    const analysisTitle = language === "tr" 
-      ? "\nDETAYLI KATEGORİ ANALİZİ (Son 90 Gün):"
-      : "\nDETAILED CATEGORY ANALYSIS (Last 90 Days):";
+    let analysisTitle = "\nDETAILED CATEGORY ANALYSIS (Last 90 Days):";
+    if (language === "tr") {
+      analysisTitle = "\nDETAYLI KATEGORİ ANALİZİ (Son 90 Gün):";
+    } else if (language === "de") {
+      analysisTitle = "\nDETAILLIERTE KATEGORIEANALYSE (Letzte 90 Tage):";
+    }
     
     summary += analysisTitle;
     
     // Her kategori için detaylı metrikler
     financialSummary.categoryAnalysis.slice(0, 10).forEach((cat) => {
       summary += `\n• ${cat.category}:`;
-      summary += `\n  - Total: ${formatCurrency(cat.total, currency)} (${cat.count} ${language === 'tr' ? 'işlem' : 'transactions'})`;
+      let transactionWord = 'transactions';
+      if (language === 'tr') transactionWord = 'işlem';
+      else if (language === 'de') transactionWord = 'Transaktionen';
+      summary += `\n  - Total: ${formatCurrency(cat.total, currency)} (${cat.count} ${transactionWord})`;
       summary += `\n  - Average: ${formatCurrency(cat.average, currency)}`;
-      summary += `\n  - Frequency: ${cat.frequency.toFixed(2)} ${language === 'tr' ? 'işlem/gün' : 'transactions/day'}`;
-      summary += `\n  - Range: ${formatCurrency(cat.min, currency)} - ${formatCurrency(cat.max, currency)}`;
+      let frequencyLabel = 'transactions/day';
+      if (language === 'tr') frequencyLabel = 'işlem/gün';
+      else if (language === 'de') frequencyLabel = 'Transaktionen/Tag';
+      summary += `\n  - Frequency: ${cat.frequency.toFixed(2)} ${frequencyLabel}`;
+      
+      let rangeLabel = 'Range';
+      if (language === 'tr') rangeLabel = 'Aralık';
+      else if (language === 'de') rangeLabel = 'Bereich';
+      summary += `\n  - ${rangeLabel}: ${formatCurrency(cat.min, currency)} - ${formatCurrency(cat.max, currency)}`;
       
       // Pattern analizi için tarihleri de ekle (AI bunu kullanacak)
       if (cat.dates && cat.dates.length > 0) {
@@ -141,18 +168,36 @@ ${financialSummary.recentTransactions && financialSummary.recentTransactions.len
     
     console.log(`💳 Installment Summary: ${activeCount} active, ${financialSummary.installments.length} total installments`);
     
-    const installmentTitle = language === "tr" 
-      ? "\n\n💳 TAKSİTLİ İŞLEMLER:" 
-      : "\n\n💳 INSTALLMENT TRANSACTIONS:";
+    let installmentTitle = "\n\n💳 INSTALLMENT TRANSACTIONS:";
+    if (language === "tr") {
+      installmentTitle = "\n\n💳 TAKSİTLİ İŞLEMLER:";
+    } else if (language === "de") {
+      installmentTitle = "\n\n💳 RATENZAHLUNGEN:";
+    }
     
     summary += installmentTitle;
-    summary += `\n- ${language === 'tr' ? 'Aktif Taksit' : 'Active Installments'}: ${activeCount}`;
-    summary += `\n- ${language === 'tr' ? 'Aylık Toplam Ödeme' : 'Total Monthly Payment'}: ${formatCurrency(monthlyPayment, currency)}`;
-    summary += `\n- ${language === 'tr' ? 'Kalan Toplam Tutar' : 'Total Remaining Amount'}: ${formatCurrency(remainingAmount, currency)}`;
+    
+    let activeLabel = 'Active Installments';
+    if (language === 'tr') activeLabel = 'Aktif Taksit';
+    else if (language === 'de') activeLabel = 'Aktive Raten';
+    summary += `\n- ${activeLabel}: ${activeCount}`;
+    let monthlyLabel = 'Total Monthly Payment';
+    let remainingLabel = 'Total Remaining Amount';
+    if (language === 'tr') {
+      monthlyLabel = 'Aylık Toplam Ödeme';
+      remainingLabel = 'Kalan Toplam Tutar';
+    } else if (language === 'de') {
+      monthlyLabel = 'Monatliche Gesamtzahlung';
+      remainingLabel = 'Verbleibender Gesamtbetrag';
+    }
+    summary += `\n- ${monthlyLabel}: ${formatCurrency(monthlyPayment, currency)}`;
+    summary += `\n- ${remainingLabel}: ${formatCurrency(remainingAmount, currency)}`;
     
     // Detaylı taksit listesi
     if (financialSummary.installments && financialSummary.installments.length > 0) {
-      const detailTitle = language === 'tr' ? '\n\nDetaylı Taksit Listesi:' : '\n\nDetailed Installment List:';
+      let detailTitle = '\n\nDetailed Installment List:';
+      if (language === 'tr') detailTitle = '\n\nDetaylı Taksit Listesi:';
+      else if (language === 'de') detailTitle = '\n\nDetaillierte Ratenliste:';
       summary += detailTitle;
       
       financialSummary.installments.slice(0, 10).forEach((inst) => {
@@ -378,7 +423,48 @@ function buildSystemPrompt(userAccounts, financialContext, language, currency) {
     : `   ${t("noAccounts", language)}`;
 
   // Dile göre sistem prompt'u
-  if (language === "tr") {
+  if (language === "de") {
+    // German (Almanca) prompt - Türkçe ve İngilizce ile aynı yapıda
+    return `Du bist ein freundlicher KI-Assistent für Qanta, eine persönliche Finanz-App. 
+Du hilfst Benutzern dabei, Einnahmen/Ausgaben-Transaktionen hinzuzufügen, Aktiengeschäfte durchzuführen und App-Einstellungen zu verwalten.
+
+🌐 SPRACHE WICHTIG: Antworte in der GLEICHEN SPRACHE wie die Nachricht des Benutzers!
+   - Türkische Nachricht → Türkische Antwort
+   - Englische Nachricht → Englische Antwort
+   - Deutsche Nachricht → Deutsche Antwort
+   - Sprache wird automatisch erkannt, passe dich einfach der Sprache der Nachricht an
+
+${t("accountsTitle", language)}
+${accountsList}
+${financialContext}
+
+🎯 ANALYSEMETHODE (Versteckte Denkprozess - Nicht dem Benutzer zeigen):
+⚠️ WICHTIG: Verwende NIEMALS das [Thinking: ...] Format! Zeige dem Benutzer keine technischen Details.
+Führe diese Schritte im Hintergrund aus, zeige aber nur die Ergebnisse:
+1. DATENSAMMLUNG: Relevante Daten aus Kategorienanalyse, Vergleichsdaten, Budgetkontext extrahieren
+2. BERECHNUNG: Monatliche/jährliche Prognosen, Trendanalyse, Mustererkennung durchführen
+3. ERKENNUNG: Kleine Ausgabenlecks, Überschreitungsrisiken, Sparmöglichkeiten identifizieren
+4. EMPFEHLUNG: Handlungsempfehlungen mit konkreten Zahlen geben
+
+🧠 DENKMETHODOLOGIE (Versteckt - Nicht dem Benutzer zeigen):
+⚠️ KRITISCH: Führe deinen Denkprozess im HINTERGRUND aus, zeige dem Benutzer NIEMALS das [Thinking: ...] Format!
+Vor jeder Antwort denke an Folgendes (nur für dich):
+1. Was ist das wirkliche Bedürfnis des Benutzers? (Transaktion hinzufügen / Analyse / Information)
+2. Welche Daten sollte ich verwenden? (Finanzübersicht, Budgets, Kategorienanalyse)
+3. Welchen Ansatz sollte ich wählen? (schnell / detailliert / analytisch)
+4. Welchen Wert bietet meine Antwort? (konkrete Zahlen / umsetzbare Empfehlungen)
+
+WICHTIG:
+- ❌ Verwende NIEMALS das [Thinking: ...] Format! Zeige dem Benutzer keine technischen Details!
+- ✅ Verwende natürliche, freundliche und verständliche Sprache
+- ✅ Sei proaktiv, auch wenn der Benutzer nicht fragt, wenn der KONTEXT RICHTIG ist
+- ✅ Beispiel: "5€ Kaffee" Transaktion → Sofort Analyse kleiner Ausgaben durchführen, aber natürlich sagen
+- ✅ Beispiel: "Wie ist meine finanzielle Situation?" → Detaillierte Analyse + Empfehlungen, aber in freundlichem Ton
+- ✅ Jede Empfehlung MUSS auf KONKRETEN ZAHLEN basieren (nicht Schätzungen, echte Daten)
+- ✅ Priorität: HOHE WIRKUNG + EINFACH UMSETZBARE Empfehlungen
+
+📋 HINWEIS: Der vollständige System-Prompt für Deutsche Sprache folgt demselben Format wie Türkisch und Englisch, jedoch mit deutschen Übersetzungen aller Anweisungen, Beispiele und Formatierungsregeln.`;
+  } else if (language === "tr") {
     return `Sen Qanta adlı kişisel finans uygulamasının dostane AI asistanısın. 
 Kullanıcıların gelir/gider işlemlerini, hisse alım/satım işlemlerini eklemelerine ve uygulama ayarlarını değiştirmelerine yardımcı oluyorsun.
 
@@ -631,9 +717,58 @@ En çok harcama kategorileri:
 **EN ÇOK:** Restoran
 *Dikkat! Çok harcama var!*"
 
-AKILLI ANALİZ VE ÖNERİLER (Proaktif Finansal Danışmanlık):
+🧠 AKILLI ANALİZ VE ÖNERİLER (Proaktif Finansal Danışmanlık):
 Sen sadece işlem ekleyen bir asistan değilsin - aynı zamanda kullanıcının kişisel finans danışmanısın!
 Yukarıda verilen finansal verileri (categoryAnalysis, comparison, lastMonth, vs.) DİKKATLİCE analiz et ve GERÇEK VERİYE DAYALI önerilerde bulun.
+
+🎯 ANALİZ YÖNTEMİ (Gizli Chain-of-Thought - Kullanıcıya Gösterme):
+⚠️ ÖNEMLİ: [Thinking: ...] formatını ASLA kullanma! Kullanıcıya teknik detaylar gösterme.
+Arka planda şu adımları takip et ama sadece sonuçları göster:
+1. VERİ TOPLAMA: categoryAnalysis, comparison, budgetContext'ten ilgili verileri çıkar
+2. HESAPLAMA: Monthly/yearly projections, trend analysis, pattern detection
+3. TESPİT: Small leaks, overspending risks, savings opportunities
+4. ÖNERİ: Somut sayılarla, uygulanabilir öneriler sun
+
+💡 DOĞRU ÖRNEK - Doğal ve Samimi:
+User: "Finansal durumum nasıl?"
+AI: "Bu ay **2.500₺** harcadınız (geçen ay: **2.200₺**, +**300₺** artış).
+
+En çok harcama:
+- Restoran: **1.200₺** (48%)
+- Ulaşım: **800₺** (32%)
+
+💡 Küçük bir gözlem: Son 3 ayda **45 kez** kahve aldınız (ortalama **50₺**). Bu, yıllık **~9.000₺** demek! Evden termos kahve ile aylık **750₺** tasarruf edebilirsiniz 😊
+
+Önerim: 3 küçük değişiklikle ayda **2.100₺** tasarruf:
+   • Kahve: -750₺/ay (evden termos)
+   • Taksi: -950₺/ay (hafta içi toplu taşıma)
+   • Restoran: -400₺/ay (hafta içi ev yemeği)
+   
+Yıllık: **25.200₺** = Tatil parası! ✈️"
+
+📚 FEW-SHOT ÖRNEKLER (Doğru Yaklaşım):
+
+Örnek 1 - Hızlı İşlem Ekleme:
+User: "100₺ kahve aldım"
+AI: "**100₺** kahve harcaması. Hangi hesaptan?" + QUICK_REPLIES: ["Nakit Hesap", "Garanti", "İş Bankası"]
+User: "Nakit"
+AI: READY: {"type": "expense", "amount": 100, "description": "kahve", "category": "Kahve", "account": "Nakit Hesap", "date": "today"}
+
+Örnek 2 - Finansal Analiz (Doğal ve Samimi):
+User: "Bu ay ne kadar harcadım?"
+AI: "Bu ay **2.500₺** harcadınız (geçen ay: **2.200₺**, +**300₺** artış).
+
+En çok harcama:
+- Restoran: **1.200₺** (48%)
+- Ulaşım: **800₺** (32%)
+
+Öneri: Hafta içi ev yemeği ile aylık **400₺** tasarruf edebilirsiniz 😊"
+
+Örnek 3 - Small Leak Detection:
+User: "50₺ kahve" [Transaction added]
+AI: "✅ Kahve eklendi! 
+
+💡 Küçük bir gözlem: Son 3 ayda **45 kez** kahve aldınız (ortalama **50₺**). Bu, yıllık **~9.000₺** demek - iPhone parası! Evden termos kahve ile %60 tasarruf: **5.400₺/yıl** 😊"
 
 1. KÜÇÜK SIZINTILAR TESPİTİ (Small Leaks):
    - categoryAnalysis'teki 'frequency' değerine bak
@@ -694,13 +829,23 @@ Yukarıda verilen finansal verileri (categoryAnalysis, comparison, lastMonth, vs
      ✅ "Yıllık 12.000₺ = 2 hafta Maldivler tatili 🏝️"
      ✅ "Aylık 800₺ = 6 aylık spor salonu üyeliği"
 
+🧠 DÜŞÜNME METODOLOJİSİ (Gizli - Kullanıcıya Gösterme):
+⚠️ KRİTİK: Düşünme sürecini ARKA PLANDA yap, kullanıcıya ASLA [Thinking: ...] formatında gösterme!
+Her cevap vermeden önce şunları düşün (sadece kendin için):
+1. Kullanıcının gerçek ihtiyacı ne? (transaction ekleme / analiz / bilgi)
+2. Hangi verileri kullanmalıyım? (financialSummary, budgets, categoryAnalysis)
+3. Nasıl bir yaklaşım benimsemeliyim? (hızlı / detaylı / analitik)
+4. Yanıtımın kullanıcıya değeri nedir? (somut sayılar / uygulanabilir öneriler)
+
 ÖNEMLİ:
-- Kullanıcı sormasa bile, BAĞLAM UYGUNsa proaktif öner
-- Örnek: "50₺ kahve" işlemi → Hemen small leak analizi yap
-- Örnek: "Finansal durumum nasıl?" → Detaylı analiz + öneriler sun
-- Her öneri SOMUT SAYILARA dayanmalı (tahmin değil, gerçek veri)
-- Öncelik: YÜKSEK ETKİLİ + KOLAY UYGULANIR öneriler
-- Data yetersizse (dataQuality: 'limited') → "Daha fazla veri toplanınca detaylı analiz yapabilirim"
+- ❌ ASLA [Thinking: ...] formatını kullanma! Kullanıcıya teknik detaylar gösterme!
+- ✅ Doğal, samimi ve anlaşılır bir dille konuş
+- ✅ Kullanıcı sormasa bile, BAĞLAM UYGUNsa proaktif öner
+- ✅ Örnek: "50₺ kahve" işlemi → Hemen small leak analizi yap ama doğal bir şekilde söyle
+- ✅ Örnek: "Finansal durumum nasıl?" → Detaylı analiz + öneriler sun, ama samimi bir dille
+- ✅ Her öneri SOMUT SAYILARA dayanmalı (tahmin değil, gerçek veri)
+- ✅ Öncelik: YÜKSEK ETKİLİ + KOLAY UYGULANIR öneriler
+- ✅ Data yetersizse (dataQuality: 'limited') → "Daha fazla veri toplanınca detaylı analiz yapabilirim"
 
 📱 QUICK_REPLIES & 📜 KONUŞMA GEÇMİŞİ:
 - Kullanıcıya soru soruyorsan, QUICK_REPLIES: formatında yanıt seçenekleri sun (maks 4 seçenek, 1-3 kelime)
@@ -972,6 +1117,31 @@ Example WRONG:
 **TOP:** Restaurant
 *Warning! Too much spending!*"
 
+🎯 ANALYSIS METHOD (Hidden Chain-of-Thought - Don't Show to User):
+⚠️ IMPORTANT: NEVER use [Thinking: ...] format! Don't show technical details to the user.
+Follow these steps in the background but only show the results:
+1. DATA COLLECTION: Extract relevant data from categoryAnalysis, comparison, budgetContext
+2. CALCULATION: Monthly/yearly projections, trend analysis, pattern detection
+3. DETECTION: Small leaks, overspending risks, savings opportunities
+4. RECOMMENDATION: Provide actionable recommendations with specific numbers
+
+💡 CORRECT EXAMPLE - Natural and Friendly:
+User: "How's my financial situation?"
+AI: "You spent **$2,500** this month (last month: **$2,200**, +**$300** increase).
+
+Top spending:
+- Restaurant: **$1,200** (48%)
+- Transport: **$800** (32%)
+
+💡 Small observation: You bought coffee **45 times** in the last 3 months (avg **$5**). That's yearly **~$900**! Bring coffee from home to save **$75/month** 😊
+
+My recommendation: 3 small changes = **$210/month** savings:
+   • Coffee: -$75/month (from home)
+   • Taxi: -$95/month (public transport on weekdays)
+   • Restaurant: -$40/month (home cooking on weekdays)
+   
+Yearly: **$2,520** = Vacation money! ✈️"
+
 SMART ANALYSIS & RECOMMENDATIONS (Proactive Financial Advisor):
 You're not just a transaction assistant - you're the user's personal financial advisor!
 CAREFULLY analyze the financial data provided (categoryAnalysis, comparison, lastMonth, etc.) and make REAL DATA-DRIVEN recommendations.
@@ -1035,13 +1205,23 @@ CAREFULLY analyze the financial data provided (categoryAnalysis, comparison, las
      ✅ "Yearly $1,200 = 2 weeks Maldives vacation 🏝️"
      ✅ "Monthly $80 = 6 months gym membership"
 
+🧠 THINKING METHODOLOGY (Hidden - Don't Show to User):
+⚠️ CRITICAL: Do your thinking process in the BACKGROUND, NEVER show [Thinking: ...] format to the user!
+Before each response, think the following (for yourself only):
+1. What is the user's real need? (transaction adding / analysis / information)
+2. What data should I use? (financialSummary, budgets, categoryAnalysis)
+3. What approach should I adopt? (fast / detailed / analytical)
+4. What value does my response provide? (concrete numbers / actionable recommendations)
+
 IMPORTANT:
-- Be proactive even if user doesn't ask, when CONTEXT IS RIGHT
-- Example: "$5 coffee" transaction → Immediately do small leak analysis
-- Example: "How's my financial situation?" → Detailed analysis + recommendations
-- Every recommendation MUST be based on CONCRETE NUMBERS (not estimates, real data)
-- Priority: HIGH IMPACT + EASY TO IMPLEMENT recommendations
-- If data insufficient (dataQuality: 'limited') → "I can provide detailed analysis once more data is collected"
+- ❌ NEVER use [Thinking: ...] format! Don't show technical details to the user!
+- ✅ Use natural, friendly, and understandable language
+- ✅ Be proactive even if user doesn't ask, when CONTEXT IS RIGHT
+- ✅ Example: "$5 coffee" transaction → Immediately do small leak analysis but say it naturally
+- ✅ Example: "How's my financial situation?" → Detailed analysis + recommendations, but in a friendly tone
+- ✅ Every recommendation MUST be based on CONCRETE NUMBERS (not estimates, real data)
+- ✅ Priority: HIGH IMPACT + EASY TO IMPLEMENT recommendations
+- ✅ If data insufficient (dataQuality: 'limited') → "I can provide detailed analysis once more data is collected"
 
 📱 QUICK_REPLIES & 📜 CONVERSATION HISTORY:
 - When asking questions, provide QUICK_REPLIES: format with answer options (max 4 options, 1-3 words)
@@ -1089,6 +1269,42 @@ READY FORMAT:
 - Budget Update: READY: {"type": "budget_update", "category": "Groceries", "limit": 600}
 - Budget Delete: READY: {"type": "budget_delete", "category": "Restaurant"}`;
   }
+}
+
+/**
+ * Mesaj tipine göre analiz gerekip gerekmediğini tespit et
+ */
+function isAnalysisRequest(message, language) {
+  const messageLower = message.toLowerCase();
+  const analysisKeywords = language === "tr"
+    ? ['nasıl', 'neden', 'analiz', 'öner', 'tasarruf', 'harcama', 'gelir', 'durum', 'situation', 
+       'finansal', 'financial', 'ne kadar', 'how much', 'how', 'why', 'analyze', 'suggest', 
+       'save', 'spend', 'income', 'advice', 'öğüt', 'ipucu', 'tip', 'karşılaştır', 'compare']
+    : ['how', 'why', 'analyze', 'suggest', 'save', 'spend', 'income', 'financial', 
+       'situation', 'advice', 'tip', 'compare', 'analysis', 'recommendation'];
+  
+  return analysisKeywords.some(keyword => messageLower.includes(keyword));
+}
+
+/**
+ * Basit transaction ekleme mi yoksa karmaşık işlem mi?
+ */
+function isSimpleTransactionRequest(message, language) {
+  const messageLower = message.toLowerCase();
+  
+  // Basit transaction pattern: "miktar + açıklama" veya "miktar + kategori"
+  const hasAmount = /\d+\s*(tl|₺|dollar|\$|try|usd|eur|€)/i.test(message);
+  const isAction = messageLower.includes('ekle') || 
+                   messageLower.includes('add') ||
+                   messageLower.includes('harcama') ||
+                   messageLower.includes('expense') ||
+                   messageLower.includes('gelir') ||
+                   messageLower.includes('income');
+  
+  // Analiz gerektiren kelimeler YOKsa basit transaction
+  const needsAnalysis = isAnalysisRequest(message, language);
+  
+  return hasAmount && isAction && !needsAnalysis && message.length < 100;
 }
 
 /**
@@ -1140,7 +1356,7 @@ function detectMessageLanguage(message) {
  */
 async function chatWithAI(request) {
   try {
-    const {message, conversationHistory, userAccounts, financialSummary, budgets, categories, stockPortfolio, stockTransactions, language, currency, imageBase64, fileType, userTimezone} = request.data;
+    const {message, conversationHistory, userAccounts, financialSummary, budgets, categories, stockPortfolio, stockTransactions, language, currency, imageBase64, fileType, userTimezone, isInsightsAnalysis} = request.data;
     const userId = request.auth?.uid;
     
     // Mesajın dilini algıla (Türkçe karakterler varsa TR, yoksa EN)
@@ -1150,7 +1366,7 @@ async function chatWithAI(request) {
     // Kullanıcı timezone'u (varsayılan: +03:00 - İstanbul)
     const timezone = userTimezone || "+03:00";
     
-    logger.info("chatWithAI called", {message, userId, appLanguage: language, detectedLanguage, finalLanguage, currency, timezone, hasImage: !!imageBase64, fileType, hasBudgets: !!budgets, hasCategories: !!categories, hasStocks: !!stockPortfolio});
+    logger.info("chatWithAI called", {message, userId, appLanguage: language, detectedLanguage, finalLanguage, currency, timezone, hasImage: !!imageBase64, fileType, hasBudgets: !!budgets, hasCategories: !!categories, hasStocks: !!stockPortfolio, isInsightsAnalysis: !!isInsightsAnalysis});
 
     if (!message || typeof message !== "string") {
       throw new HttpsError("invalid-argument", "Message is required");
@@ -1164,17 +1380,25 @@ async function chatWithAI(request) {
     // Normalize language first (needed for limit messages)
     const lang = normalizeLanguage(finalLanguage);
     
+    // 🔓 AI Insights Analysis için limit bypass (Free kullanıcılar için)
+    const skipLimitCheck = isInsightsAnalysis === true;
+    
     // Görsel mesaj ise hem chat_with_image hem de chat limitini kontrol et
     const hasImage = !!imageBase64;
     
-    if (hasImage) {
-      // Önce görsel mesaj limitini kontrol et
-      await checkDailyLimit(userId, "chat_with_image", timezone, lang);
+    let limitCheck = null;
+    if (!skipLimitCheck) {
+      if (hasImage) {
+        // Önce görsel mesaj limitini kontrol et
+        await checkDailyLimit(userId, "chat_with_image", timezone, lang);
+      }
+      
+      // Sonra toplam mesaj limitini kontrol et
+      limitCheck = await checkDailyLimit(userId, "chat", timezone, lang);
+      logger.info(`✅ Daily limit check passed: ${limitCheck.current}/${limitCheck.limit} (${limitCheck.remaining} remaining)`);
+    } else {
+      logger.info(`🔓 AI Insights Analysis: Limit check bypassed for free users`);
     }
-    
-    // Sonra toplam mesaj limitini kontrol et
-    const limitCheck = await checkDailyLimit(userId, "chat", timezone, lang);
-    logger.info(`✅ Daily limit check passed: ${limitCheck.current}/${limitCheck.limit} (${limitCheck.remaining} remaining)`);
     const curr = currency || "TRY";
 
     // Gemini AI model - Görsel/PDF varsa Pro, yoksa Flash Lite
@@ -1183,7 +1407,23 @@ async function chatWithAI(request) {
     const modelName = hasImage ? "gemini-2.0-flash-exp" : "gemini-2.5-flash-lite";
     console.log(`🤖 Using model: ${modelName}${hasImage ? ' (image/pdf detected)' : ' (text only)'}`);
     
-    const model = genAI.getGenerativeModel({model: modelName});
+    // Mesaj tipine göre generation config optimize et
+    const needsAnalysis = isAnalysisRequest(message, lang);
+    const isSimpleTransaction = isSimpleTransactionRequest(message, lang);
+    
+    // Optimize edilmiş generation config - AI'ın daha akıllı düşünmesi için
+    const generationConfig = {
+      temperature: needsAnalysis ? 0.4 : isSimpleTransaction ? 0.2 : 0.3, // Analiz için biraz daha yaratıcı
+      topK: needsAnalysis ? 32 : 20, // Analiz için daha geniş token seçimi
+      topP: needsAnalysis ? 0.95 : 0.9, // Analiz için daha çeşitli
+      maxOutputTokens: needsAnalysis ? 2048 : isSimpleTransaction ? 512 : 1024, // İhtiyaca göre token limiti
+      responseMimeType: "text/plain",
+    };
+    
+    const model = getGeminiAI().getGenerativeModel({
+      model: modelName,
+      generationConfig: generationConfig,
+    });
 
     // Finansal özeti formatla
     const financialContext = formatFinancialSummary(financialSummary, lang, curr);
@@ -1206,12 +1446,24 @@ async function chatWithAI(request) {
     // Sistem prompt'u oluştur
     const systemPrompt = buildSystemPrompt(userAccounts, fullContext, lang, curr);
 
-    // Konuşma geçmişini hazırla
+    // Konuşma geçmişini hazırla - Context compression ile optimize et
     const chatHistory = conversationHistory || [];
+    
+    // Context compression: Uzun konuşmalarda sadece önemli kısımları gönder
+    // İlk mesajlar context setup için, son mesajlar aktif conversation için önemli
+    const compressedHistory = chatHistory.length > 10 
+      ? [
+          ...chatHistory.slice(0, 3), // İlk 3 mesaj (context)
+          ...chatHistory.slice(-7), // Son 7 mesaj (aktif conversation)
+        ]
+      : chatHistory;
+    
+    logger.info(`📜 Conversation history: ${chatHistory.length} messages → ${compressedHistory.length} (compressed)`);
+    
     const messages = [
       {role: "user", parts: [{text: systemPrompt}]},
       {role: "model", parts: [{text: lang === "tr" ? "Anladım, yardımcı olmaya hazırım!" : "Got it, ready to help!"}]},
-      ...chatHistory.map((msg) => ({
+      ...compressedHistory.map((msg) => ({
         role: msg.role,
         parts: [{text: msg.content}],
       })),
@@ -1236,10 +1488,91 @@ async function chatWithAI(request) {
     lastMessage.parts.push({text: message});
     messages.push(lastMessage);
 
-    // AI'dan yanıt al
+    // AI'dan yanıt al - Chain-of-Thought reasoning ile
     const chat = model.startChat({history: messages.slice(0, -1)});
-    const result = await chat.sendMessage(lastMessage.parts);
+    
+    // Chain-of-Thought için enhanced prompt ekle
+    // Finansal analiz gerektiren mesajlarda AI'ın adım adım düşünmesini sağla
+    let enhancedMessage = lastMessage.parts;
+    
+    // Chain-of-Thought reasoning - Mesaj tipine göre optimize et
+    if (!hasImage) {
+      let cotPrompt = "";
+      
+      if (needsAnalysis) {
+        // Finansal analiz için detaylı CoT (gizli - kullanıcıya gösterme)
+        if (lang === "tr") {
+          cotPrompt = `\n\n⚠️ ÖNEMLİ: Arka planda adım adım düşün ama ASLA [Thinking: ...] formatını kullanma! Kullanıcıya sadece doğal, samimi ve anlaşılır sonuçları göster.
+
+Arka planda şunları yap (sadece kendin için):
+1. VERİ TOPLAMA: categoryAnalysis, comparison, budgetContext'ten ilgili verileri çıkar
+2. HESAPLAMA: Monthly/yearly projections, trend analysis, pattern detection yap
+3. TESPİT: Small leaks, overspending risks, savings opportunities belirle
+4. ÖNERİ: Somut sayılarla, uygulanabilir öneriler sun
+5. DOĞRULAMA: Her önerinin gerçek veriye dayandığından emin ol
+
+Kullanıcıya cevap verirken: Doğal, samimi, anlaşılır dil kullan. Teknik detaylar, adımlar veya [Thinking: ...] formatı ASLA kullanma. Sadece sonuçları ve önerileri göster.]`;
+        } else if (lang === "de") {
+          cotPrompt = `\n\n⚠️ WICHTIG: Denke Schritt für Schritt im Hintergrund, aber verwende NIEMALS das [Thinking: ...] Format! Zeige dem Benutzer nur natürliche, freundliche und verständliche Ergebnisse.
+
+Im Hintergrund folgendes tun (nur für dich):
+1. DATENSAMMLUNG: Relevante Daten aus categoryAnalysis, comparison, budgetContext extrahieren
+2. BERECHNUNG: Monatliche/jährliche Prognosen, Trendanalyse, Mustererkennung durchführen
+3. ERKENNUNG: Kleine Lecks, Überschreitungsrisiken, Sparmöglichkeiten identifizieren
+4. EMPFEHLUNG: Handlungsempfehlungen mit konkreten Zahlen geben
+5. VALIDIERUNG: Sicherstellen, dass jede Empfehlung auf echten Daten basiert
+
+Beim Antworten an den Benutzer: Verwende natürliche, freundliche, verständliche Sprache. NIEMALS technische Details, Schritte oder [Thinking: ...] Format zeigen. Zeige nur Ergebnisse und Empfehlungen.]`;
+        } else {
+          cotPrompt = `\n\n⚠️ IMPORTANT: Think step by step in the background but NEVER use [Thinking: ...] format! Show only natural, friendly, and understandable results to the user.
+
+In the background, do the following (for yourself only):
+1. DATA COLLECTION: Extract relevant data from categoryAnalysis, comparison, budgetContext
+2. CALCULATION: Perform monthly/yearly projections, trend analysis, pattern detection
+3. DETECTION: Identify small leaks, overspending risks, savings opportunities
+4. RECOMMENDATION: Provide actionable recommendations with specific numbers
+5. VALIDATION: Ensure every recommendation is based on real data
+
+When responding to the user: Use natural, friendly, understandable language. NEVER show technical details, steps, or [Thinking: ...] format. Show only results and recommendations.]`;
+        }
+      } else if (!isSimpleTransaction) {
+        // Karmaşık transaction işlemleri için basit CoT
+        if (lang === "tr") {
+          cotPrompt = `\n\n[Düşün: Kullanıcının mesajını analiz et, hangi bilgilerin eksik olduğunu tespit et, minimum soru ile işlemi tamamla.]`;
+        } else if (lang === "de") {
+          cotPrompt = `\n\n[Denken: Analysiere die Nachricht des Benutzers, identifiziere fehlende Informationen, vervollständige die Transaktion mit minimalen Fragen.]`;
+        } else {
+          cotPrompt = `\n\n[Think: Analyze user's message, identify missing information, complete transaction with minimum questions.]`;
+        }
+      }
+      
+      if (cotPrompt) {
+        enhancedMessage = [
+          ...lastMessage.parts,
+          {text: cotPrompt},
+        ];
+        logger.info(`🧠 Chain-of-Thought reasoning enabled${needsAnalysis ? ' for financial analysis' : ' for complex transaction'}`);
+      }
+    }
+    
+    const result = await chat.sendMessage(enhancedMessage);
     const aiResponse = result.response.text();
+    
+    // Token kullanımını al (debug için)
+    let tokenUsage = null;
+    try {
+      const usageMetadata = result.response.usageMetadata;
+      if (usageMetadata) {
+        tokenUsage = {
+          promptTokenCount: usageMetadata.promptTokenCount || 0,
+          candidatesTokenCount: usageMetadata.candidatesTokenCount || 0,
+          totalTokenCount: usageMetadata.totalTokenCount || 0,
+        };
+        logger.info("📊 Token Usage:", tokenUsage);
+      }
+    } catch (e) {
+      logger.warn("⚠️ Could not extract token usage:", e);
+    }
 
     logger.info("📤 AI Full Response:", aiResponse);
 
@@ -1268,36 +1601,57 @@ async function chatWithAI(request) {
       }
     }
 
+    // [Düşün: ...], [Think: ...], [Thinking: ...], [Denken: ...] formatlarını temizle (CoT prompt'ları)
+    let cleanedMessage = messageWithoutReplies;
+    
+    // Türkçe: [Düşün: ...]
+    const dusunPattern = /\[Düşün:[^\]]*\]/gi;
+    cleanedMessage = cleanedMessage.replace(dusunPattern, '').trim();
+    
+    // İngilizce: [Think: ...] ve [Thinking: ...]
+    const thinkPattern = /\[Think(?:ing)?:[^\]]*\]/gi;
+    cleanedMessage = cleanedMessage.replace(thinkPattern, '').trim();
+    
+    // Almanca: [Denken: ...]
+    const denkenPattern = /\[Denken:[^\]]*\]/gi;
+    cleanedMessage = cleanedMessage.replace(denkenPattern, '').trim();
+    
+    // Birden fazla boş satırı temizle ve normalize et
+    cleanedMessage = cleanedMessage.replace(/\n\s*\n\s*\n+/g, '\n\n').trim();
+    
+    // Başta ve sonda fazla boşlukları temizle
+    cleanedMessage = cleanedMessage.replace(/^\s+|\s+$/g, '');
+
     // READY: ile başlıyorsa, parse et
     let transactionData = null;
-    let displayMessage = messageWithoutReplies;
+    let displayMessage = cleanedMessage;
 
-    if (messageWithoutReplies.includes("READY:")) {
-      const readyIndex = aiResponse.indexOf("READY:");
+    if (cleanedMessage.includes("READY:")) {
+      const readyIndex = cleanedMessage.indexOf("READY:");
       if (readyIndex !== -1) {
-        const jsonStart = aiResponse.indexOf("{", readyIndex);
+        const jsonStart = cleanedMessage.indexOf("{", readyIndex);
         if (jsonStart !== -1) {
           // JSON'un sonunu bul (balanced braces)
           let braceCount = 0;
           let jsonEnd = jsonStart;
           
-          for (let i = jsonStart; i < aiResponse.length; i++) {
-            if (aiResponse[i] === "{") braceCount++;
-            if (aiResponse[i] === "}") braceCount--;
+          for (let i = jsonStart; i < cleanedMessage.length; i++) {
+            if (cleanedMessage[i] === "{") braceCount++;
+            if (cleanedMessage[i] === "}") braceCount--;
             if (braceCount === 0) {
               jsonEnd = i + 1;
               break;
             }
           }
           
-          const jsonStr = aiResponse.substring(jsonStart, jsonEnd);
+          const jsonStr = cleanedMessage.substring(jsonStart, jsonEnd);
           
           try {
             transactionData = JSON.parse(jsonStr);
             logger.info("✅ Transaction data parsed:", transactionData);
             
             // READY: ve JSON'u mesajdan çıkar
-            displayMessage = aiResponse.substring(0, readyIndex).trim();
+            displayMessage = cleanedMessage.substring(0, readyIndex).trim();
           } catch (e) {
             logger.error("❌ JSON parse error:", e);
             logger.error("   Attempted to parse:", jsonStr);
@@ -1306,34 +1660,50 @@ async function chatWithAI(request) {
       }
     }
 
-    // AI başarıyla çalıştı - kullanımı kaydet
-    await incrementDailyUsage(userId, "chat", timezone, lang);
-    
-    // Görsel mesaj ise ayrıca chat_with_image'ı da artır
-    if (hasImage) {
-      await incrementDailyUsage(userId, "chat_with_image", timezone, lang);
-    }
-    
-    const usage = await trackAIUsage(userId, "chat");
+    // AI başarıyla çalıştı - kullanımı kaydet (AI Insights Analysis için skip)
+    if (!skipLimitCheck) {
+      await incrementDailyUsage(userId, "chat", timezone, lang);
+      
+      // Görsel mesaj ise ayrıca chat_with_image'ı da artır
+      if (hasImage) {
+        await incrementDailyUsage(userId, "chat_with_image", timezone, lang);
+      }
+      
+      const usage = await trackAIUsage(userId, "chat");
 
-    return {
-      success: true,
-      message: displayMessage,
-      isReady: transactionData !== null,
-      transactionData: transactionData,
-      quickReplies: quickReplies,
-      usage: {
-        ...usage,
-        daily: {
-          current: limitCheck.current + 1,
-          limit: limitCheck.limit,
-          remaining: limitCheck.remaining - 1,
-          bonusCount: limitCheck.bonusCount || 0,
-          bonusAvailable: limitCheck.bonusAvailable || false,
-          maxBonus: limitCheck.maxBonus || 0,
+      return {
+        success: true,
+        message: displayMessage,
+        isReady: transactionData !== null,
+        transactionData: transactionData,
+        quickReplies: quickReplies,
+        tokenUsage: tokenUsage, // Token kullanımı (debug için)
+        usage: {
+          ...usage,
+          daily: {
+            current: limitCheck.current + 1,
+            limit: limitCheck.limit,
+            remaining: limitCheck.remaining - 1,
+            bonusCount: limitCheck.bonusCount || 0,
+            bonusAvailable: limitCheck.bonusAvailable || false,
+            maxBonus: limitCheck.maxBonus || 0,
+          },
         },
-      },
-    };
+      };
+    } else {
+      // AI Insights Analysis - Limit sayılmaz, usage bilgisi güncellenmez
+      logger.info(`🔓 AI Insights Analysis: Usage not tracked (free user benefit)`);
+      
+      return {
+        success: true,
+        message: displayMessage,
+        isReady: transactionData !== null,
+        transactionData: transactionData,
+        quickReplies: quickReplies,
+        tokenUsage: tokenUsage,
+        usage: null, // Usage bilgisi yok (limit sayılmadı)
+      };
+    }
   } catch (error) {
     logger.error("chatWithAI error:", error);
     

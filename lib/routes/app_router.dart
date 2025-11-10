@@ -18,6 +18,7 @@ import '../modules/transactions/screens/ai_test_page.dart';
 import '../modules/premium/premium_offer_screen.dart';
 import '../modules/premium/premium_onboarding_screen.dart';
 import '../modules/cards/screens/savings_goal_detail_screen.dart';
+import '../modules/home/pages/daily_tasks_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -443,6 +444,29 @@ class AppRouter {
             transitionDuration: const Duration(milliseconds: 300),
           );
         },
+      ),
+      GoRoute(
+        path: '/daily-tasks',
+        name: 'daily-tasks',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const DailyTasksPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(0.0, 1.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: curve),
+            );
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

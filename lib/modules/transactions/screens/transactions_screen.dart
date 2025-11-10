@@ -22,7 +22,6 @@ import '../../../shared/services/category_icon_service.dart';
 import '../../advertisement/services/google_ads_real_banner_service.dart';
 import '../../advertisement/config/advertisement_config.dart' as config;
 import '../../advertisement/models/advertisement_models.dart';
-import '../../advertisement/services/native_ad_service.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -37,7 +36,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   final _numberFormat = NumberFormat('#,##0', 'tr_TR'); // Türkçe binlik ayıraç
   late AppLocalizations l10n;
   late GoogleAdsRealBannerService _transactionsBannerService;
-  late NativeAdService _transactionsNativeAd;
 
   // Filter state using V2 transaction types
   v2.TransactionType? _selectedFilter;
@@ -50,14 +48,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     super.initState();
     // V2 provider will handle data loading automatically
     
-    // İşlemler sayfası banner reklamını başlat - YENİ BANNER
+    // İşlemler sayfası banner reklamını başlat
     _transactionsBannerService = GoogleAdsRealBannerService(
       adUnitId: config.AdvertisementConfig.transactionsListBanner.bannerAdUnitId,
       size: AdvertisementSize.banner320x50,
       isTestMode: false,
-    );
-    _transactionsNativeAd = NativeAdService(
-      adUnitId: config.AdvertisementConfig.production.nativeAdUnitId!,
     );
     
     debugPrint('🔄 İŞLEMLER SAYFASI Banner reklam yükleniyor...');
@@ -68,10 +63,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     // İşlemler sayfası reklamını 5 saniye geciktir
     Future.delayed(const Duration(seconds: 5), () {
       _transactionsBannerService.loadAd();
-    });
-    // Native ad'ı gecikmeli yükle (liste UI hazır olduğunda)
-    Future.delayed(const Duration(seconds: 6), () {
-      _transactionsNativeAd.load();
     });
   }
 
@@ -86,7 +77,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     _searchController.dispose();
     _scrollController.dispose();
     _transactionsBannerService.dispose();
-    _transactionsNativeAd.disposeAd();
     super.dispose();
   }
 
@@ -289,28 +279,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             children: [
               // Quick stats card
               _buildQuickStatsCard(transactions, isDark),
-              // Native Ad - Quick stats'ten sonra (Premium kullanıcılara gösterilmez)
-              Consumer<PremiumService>(
-                builder: (context, premiumService, child) {
-                  if (premiumService.isPremium) return const SizedBox.shrink();
-                  
-                  if (_transactionsNativeAd.isLoaded && _transactionsNativeAd.adWidget != null) {
-                    return Column(
-                      children: [
-                        const SizedBox(height: 12),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                          height: 90,
-                          child: _transactionsNativeAd.adWidget!,
-                        ),
-                      ],
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
               
-              // Banner reklam - Gelir/Gider kartından sonra (Premium kullanıcılara gösterilmez)
+              // Banner reklam - Quick stats'ten sonra (Premium kullanıcılara gösterilmez)
               Consumer<PremiumService>(
                 builder: (context, premiumService, child) {
                   if (premiumService.isPremium) return const SizedBox.shrink();
@@ -945,7 +915,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               'Delete failed'),
                   ),
                   backgroundColor: success
-                      ? const Color(0xFF34C759)
+                      ? Colors.green.shade500
                       : Colors.red,
                   duration: const Duration(seconds: 1),
                 ),
@@ -995,7 +965,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               AppLocalizations.of(context)?.installmentTransactionDeleted ??
                   'Installment transaction deleted',
             ),
-            backgroundColor: const Color(0xFF34C759),
+            backgroundColor: Colors.green.shade500,
             duration: const Duration(seconds: 2),
           ),
         );

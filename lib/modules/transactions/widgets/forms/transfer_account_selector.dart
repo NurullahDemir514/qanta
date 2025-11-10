@@ -183,7 +183,7 @@ class TransferAccountSelector extends StatelessWidget {
                     title: account.getDisplayName(l10n),
                     subtitle: l10n.digitalWallet,
                     icon: Icons.payments_rounded,
-                    color: const Color(0xFF34C759),
+                    color: Colors.green.shade500,
                     isSelected: isSelected,
                     balance: account.cashAccount?.balance,
                     onTap: () {

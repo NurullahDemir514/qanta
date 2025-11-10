@@ -63,8 +63,12 @@ class GoogleAdsInterstitialService implements InterstitialAdvertisementServiceCo
                 ad.dispose();
                 _isLoaded = false;
                 _interstitialAd = null;
-                // Reload ad for next time
-                loadAd();
+                // Reload ad for next time (after delay to avoid rate limiting)
+                Future.delayed(const Duration(seconds: 3), () {
+                  if (!_isLoaded && !_isLoading) {
+                    loadAd();
+                  }
+                });
               },
               onAdFailedToShowFullScreenContent: (ad, error) {
                 debugPrint('❌ Interstitial ad failed to show: $error');
@@ -72,8 +76,12 @@ class GoogleAdsInterstitialService implements InterstitialAdvertisementServiceCo
                 ad.dispose();
                 _isLoaded = false;
                 _interstitialAd = null;
-                // Reload ad
-                loadAd();
+                // Reload ad (after delay to avoid rate limiting)
+                Future.delayed(const Duration(seconds: 3), () {
+                  if (!_isLoaded && !_isLoading) {
+                    loadAd();
+                  }
+                });
               },
             );
           },
@@ -83,8 +91,17 @@ class GoogleAdsInterstitialService implements InterstitialAdvertisementServiceCo
             _isLoading = false;
             _isLoaded = false;
             
-            // Retry after delay
-            Future.delayed(const Duration(seconds: 5), () {
+            // Don't retry for "No fill" (code 3) or "Too many requests" (code 1) errors
+            // These are rate limiting issues and should be handled by the caller
+            if (error.code == 3 || error.code == 1) {
+              if (kDebugMode) {
+                debugPrint('⚠️ Interstitial ad: Skipping retry for error code ${error.code} (rate limiting)');
+              }
+              return;
+            }
+            
+            // Retry after delay for other errors
+            Future.delayed(const Duration(seconds: 10), () {
               if (!_isLoaded && !_isLoading) {
                 loadAd();
               }
@@ -133,8 +150,12 @@ class GoogleAdsInterstitialService implements InterstitialAdvertisementServiceCo
       _interstitialAd = null;
       _isLoaded = false;
       
-      // Reload ad
-      loadAd();
+      // Reload ad (after delay to avoid rate limiting)
+      Future.delayed(const Duration(seconds: 3), () {
+        if (!_isLoaded && !_isLoading) {
+          loadAd();
+        }
+      });
     }
   }
   

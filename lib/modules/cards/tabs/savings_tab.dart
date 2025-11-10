@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/savings_provider.dart';
+import '../../../core/providers/unified_provider_v2.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/services/premium_service.dart';
 import '../../../l10n/app_localizations.dart';
@@ -48,10 +49,15 @@ class _SavingsTabState extends State<SavingsTab>
       isTestMode: false,
     );
     
-    // Banner reklamını gecikmeli yükle
+    // Banner reklamını gecikmeli yükle (sadece premium olmayanlar için)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final premiumService = context.read<PremiumService>();
+      if (!premiumService.isPremium && mounted) {
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         _savingsBannerService.loadAd();
+          }
+        });
       }
     });
     
@@ -210,9 +216,14 @@ class _SavingsTabState extends State<SavingsTab>
                   ),
                 ],
                 
-                // Banner Reklam
-                if (_savingsBannerService.isLoaded && 
-                    _savingsBannerService.bannerWidget != null) ...[
+                // Banner Reklam (Premium olmayanlara göster)
+                Consumer<PremiumService>(
+                  builder: (context, premiumService, child) {
+                    if (!premiumService.isPremium && 
+                        _savingsBannerService.isLoaded && 
+                        _savingsBannerService.bannerWidget != null) {
+                      return Column(
+                        children: [
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -224,6 +235,11 @@ class _SavingsTabState extends State<SavingsTab>
                   ),
                   const SizedBox(height: 80), // Alt boşluk
                 ],
+                      );
+                    }
+                    return const SizedBox(height: 80); // Alt boşluk (premium için)
+                  },
+                ),
               ],
             ),
           );
@@ -341,9 +357,14 @@ class _SavingsTabState extends State<SavingsTab>
                     ),
                   ),
                   
-                  // Banner Reklam (Empty State)
-                  if (_savingsBannerService.isLoaded && 
-                      _savingsBannerService.bannerWidget != null) ...[
+                  // Banner Reklam (Empty State) - Premium olmayanlara göster
+                  Consumer<PremiumService>(
+                    builder: (context, premiumService, child) {
+                      if (!premiumService.isPremium && 
+                          _savingsBannerService.isLoaded && 
+                          _savingsBannerService.bannerWidget != null) {
+                        return Column(
+                          children: [
                     const SizedBox(height: 40),
                     Container(
                       height: 50,
@@ -351,6 +372,11 @@ class _SavingsTabState extends State<SavingsTab>
                       child: _savingsBannerService.bannerWidget!,
                     ),
                   ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ],
               ),
             ),
@@ -388,8 +414,11 @@ class _SavingsTabState extends State<SavingsTab>
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (context, scrollController) => AddSavingsGoalForm(
-          onSuccess: () {
+          onSuccess: () async {
             // Hedefler yeniden yüklenecek
+            // UnifiedProviderV2'yi de güncelle (anasayfa için)
+            final unifiedProvider = context.read<UnifiedProviderV2>();
+            await unifiedProvider.loadSavingsGoals();
           },
         ),
       ),

@@ -1051,7 +1051,7 @@ class _QuickAddFABState extends State<QuickAddFAB>
     
     final isIncome = transactionType == TransactionType.income;
     final action = isIncome ? (l10n?.income ?? 'GELİR') : (l10n?.expense ?? 'GİDER');
-    final actionColor = isIncome ? const Color(0xFF34D399) : const Color(0xFFFF3B30);
+    final actionColor = isIncome ? Colors.green.shade500 : const Color(0xFFFF3B30);
     final categoryIcon = CategoryIconService.getIcon(categoryName.toLowerCase());
     
     // Tarih formatı: 15 Ekim 2025
@@ -1195,7 +1195,7 @@ class _QuickAddFABState extends State<QuickAddFAB>
     final account = _selectedStockAccount!;
     
     final action = isSell ? (l10n?.sell ?? 'SATIŞ') : (isBuy ? (l10n?.buy ?? 'ALIM') : (l10n?.transaction ?? 'İŞLEM'));
-    final actionColor = isSell ? const Color(0xFFFF3B30) : const Color(0xFF34D399);
+    final actionColor = isSell ? const Color(0xFFFF3B30) : Colors.green.shade500;
     final actionIcon = isSell ? Icons.trending_down : Icons.trending_up;
     
     // Al/Sat seçimi - kullanıcı belirtmediyse sor
@@ -1280,7 +1280,7 @@ class _QuickAddFABState extends State<QuickAddFAB>
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF34D399),
+                        backgroundColor: Colors.green.shade500,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(

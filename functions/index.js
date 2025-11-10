@@ -10,21 +10,45 @@ const logger = require("firebase-functions/logger");
 const {GoogleGenerativeAI} = require("@google/generative-ai");
 const admin = require("firebase-admin");
 
+// Secret name - Firebase Functions v2 secrets otomatik olarak process.env'e inject edilir
+// Secret bağlamak için function tanımında secrets: ["GEMINI_API_KEY"] kullanılır
+const GEMINI_API_KEY_SECRET_NAME = "GEMINI_API_KEY";
+
 // Import handlers
 const {chatWithAI} = require("./handlers/chatWithAI");
 const {bulkDeleteTransactions} = require("./handlers/bulkDeleteTransactions");
 const {setTestMode} = require("./handlers/setTestMode");
 const {createCard} = require("./handlers/createCard");
+const {checkAndConvertToGiftCard, createGiftCardRequestFromPoints, notifyGiftCardSent} = require("./handlers/amazonRewards");
+const {adminAddPoints} = require("./handlers/adminPoints");
+const {submitSupportRequest, addSupportMessage} = require("./handlers/supportRequests");
+const {addAdmin} = require("./handlers/addAdmin");
+const {processReferralCode, generateReferralCodesForAllUsers} = require("./handlers/referralHandler");
+const {getUserInfo} = require("./handlers/getUserInfo");
 const {trackAIUsage, checkDailyLimit, incrementDailyUsage, addAIBonus} = require("./utils/helpers");
 
 // Firebase Admin başlat
 admin.initializeApp();
 
-// API key - Google AI Studio'dan alındı
-const GEMINI_API_KEY = "AIzaSyB6fyIYr-G1I5t4HF6aPjXSrkGMAc4P9io";
+// API key - Firebase Secrets'dan alınır (process.env.GEMINI_API_KEY)
+// ✅ Secret başarıyla eklendi: projects/982050181554/secrets/GEMINI_API_KEY
+// Firebase Functions v2 secrets otomatik olarak process.env'e inject edilir
+// Gemini AI instance - Lazy initialization
+// Secret sadece function çalışırken inject edilir, module load sırasında değil
+let genAI = null;
 
-// Gemini AI instance
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+function getGeminiAI() {
+  if (!genAI) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      logger.error("❌ GEMINI_API_KEY not found in process.env!");
+      throw new Error("GEMINI_API_KEY secret must be set and bound to function");
+    }
+    genAI = new GoogleGenerativeAI(apiKey);
+    logger.info("✅ Gemini AI initialized with secret");
+  }
+  return genAI;
+}
 
 // ========================================
 // EXPORTED CLOUD FUNCTIONS
@@ -33,8 +57,12 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 /**
  * Conversational AI Assistant - Quick Add için sohbet arayüzü
  * Handler: handlers/chatWithAI.js
+ * ✅ Secret eklendi: GEMINI_API_KEY
  */
-exports.chatWithAI = onCall({region: "us-central1"}, chatWithAI);
+exports.chatWithAI = onCall({
+  region: "us-central1",
+  secrets: [GEMINI_API_KEY_SECRET_NAME],
+}, chatWithAI);
 
 /**
  * Bulk Delete Transactions - Filtrelere göre toplu işlem silme
@@ -56,6 +84,72 @@ exports.setTestMode = onCall({region: "us-central1"}, setTestMode);
  * Premium kullanıcılar: Sınırsız
  */
 exports.createCard = onCall({region: "us-central1"}, createCard);
+
+/**
+ * Check and Convert Amazon Rewards to Gift Card
+ * Handler: handlers/amazonRewards.js
+ * Automatically converts 50 TL accumulated credits to Amazon gift card
+ */
+exports.checkAndConvertToGiftCard = onCall({region: "us-central1"}, checkAndConvertToGiftCard);
+
+/**
+ * Create Gift Card Request From Points
+ * Handler: handlers/amazonRewards.js
+ * Creates gift card request when points have already been spent
+ */
+exports.createGiftCardRequestFromPoints = onCall({region: "us-central1"}, createGiftCardRequestFromPoints);
+
+/**
+ * Notify User When Gift Card is Sent
+ * Handler: handlers/amazonRewards.js
+ * Sends push notification when admin marks gift card as sent
+ */
+exports.notifyGiftCardSent = onCall({region: "us-central1"}, notifyGiftCardSent);
+
+/**
+ * Admin Add Points
+ * Handler: handlers/adminPoints.js
+ * Allows admin to add points to a user's account
+ */
+exports.adminAddPoints = onCall({region: "us-central1"}, adminAddPoints);
+
+/**
+ * Submit Support Request
+ * Handler: handlers/supportRequests.js
+ * Allows users to submit support/contact form requests
+ */
+exports.submitSupportRequest = onCall({region: "us-central1"}, submitSupportRequest);
+
+/**
+ * Add Message to Support Request
+ * Handler: handlers/supportRequests.js
+ * Allows admin to send messages to users and users to reply
+ */
+exports.addSupportMessage = onCall({region: "us-central1"}, addSupportMessage);
+
+/**
+ * Add Admin
+ * Handler: handlers/addAdmin.js
+ * Adds a user to admin list by User ID
+ */
+exports.addAdmin = onCall({region: "us-central1"}, addAdmin);
+
+/**
+ * Process Referral Code
+ * Handler: handlers/referralHandler.js
+ * Processes referral code after user registration
+ * Gives 500 points to referrer and updates referral count
+ */
+exports.processReferralCode = onCall({region: "us-central1"}, processReferralCode);
+exports.generateReferralCodesForAllUsers = onCall({region: "us-central1"}, generateReferralCodesForAllUsers);
+
+/**
+ * Get User Info
+ * Handler: handlers/getUserInfo.js
+ * Gets user email and name from Firebase Auth and Firestore
+ * Used by admin panel to display user information
+ */
+exports.getUserInfo = onCall({region: "us-central1"}, getUserInfo);
 
 /**
  * Add AI Bonus - Reklam izlenince bonus hakkı ekle
@@ -95,7 +189,9 @@ exports.addAIBonus = onCall({region: "us-central1"}, async (request) => {
  * @param {string[]} data.availableCategories - Mevcut kategoriler
  * @return {Object} Kategori tahmini sonucu
  */
-exports.categorizeExpense = onCall(async (request) => {
+exports.categorizeExpense = onCall({
+  secrets: [GEMINI_API_KEY_SECRET_NAME],
+}, async (request) => {
   // Auth kontrolü
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Kullanıcı girişi gerekli");
@@ -119,7 +215,7 @@ exports.categorizeExpense = onCall(async (request) => {
     console.log(`🤖 AI Categorizing: "${description}"`);
 
     // Gemini AI model (Lite version - hızlı ve ucuz)
-    const model = genAI.getGenerativeModel({model: "gemini-2.5-flash-lite"});
+    const model = getGeminiAI().getGenerativeModel({model: "gemini-2.5-flash-lite"});
 
     // Kategorileri hazırla
     const categoriesText = availableCategories && availableCategories.length > 0 ?
@@ -186,7 +282,10 @@ NEDEN: Starbucks bir kafe zinciridir
 /**
  * Quick Add Text Parsing - AI ile otomatik işlem tespiti
  */
-exports.parseQuickAddText = onCall({region: "us-central1"}, async (request) => {
+exports.parseQuickAddText = onCall({
+  region: "us-central1",
+  secrets: [GEMINI_API_KEY_SECRET_NAME],
+}, async (request) => {
   try {
     const {text, userTimezone} = request.data;
     const userId = request.auth?.uid;
@@ -211,7 +310,7 @@ exports.parseQuickAddText = onCall({region: "us-central1"}, async (request) => {
     await checkDailyLimit(userId, "chat", timezone);
 
     // Gemini AI ile parse et (Lite version - hızlı ve ucuz)
-    const model = genAI.getGenerativeModel({model: "gemini-2.5-flash-lite"});
+    const model = getGeminiAI().getGenerativeModel({model: "gemini-2.5-flash-lite"});
     
     const prompt = `Sen bir finansal asistan yapay zekasısın. Kullanıcının girdiği metni analiz edip şu bilgileri çıkar:
 
@@ -300,7 +399,10 @@ HİSSE_İŞLEM: satış
  * AI Financial Summary - Kullanıcının finansal durumunu analiz eder
  * Kullanım: Total kart, dashboard özet, vs.
  */
-exports.getAIFinancialSummary = onCall({region: "us-central1"}, async (request) => {
+exports.getAIFinancialSummary = onCall({
+  region: "us-central1",
+  secrets: [GEMINI_API_KEY_SECRET_NAME],
+}, async (request) => {
   try {
     const {financialData, period, userTimezone} = request.data;
     const userId = request.auth?.uid;
@@ -322,7 +424,7 @@ exports.getAIFinancialSummary = onCall({region: "us-central1"}, async (request) 
     await checkDailyLimit(userId, "chat", timezone);
 
     // Gemini AI model (Lite version - hızlı ve ucuz)
-    const model = genAI.getGenerativeModel({model: "gemini-2.5-flash-lite"});
+    const model = getGeminiAI().getGenerativeModel({model: "gemini-2.5-flash-lite"});
 
     const prompt = `Sen bir finansal danışmansın. Kullanıcının ${period || 'bu ayki'} finansal verilerini analiz et ve kısa, öz bir özet ver.
 
@@ -369,13 +471,16 @@ Kısa, öz ve dostane. Max 4-5 cümle.`;
 /**
  * Test function - Mevcut Gemini modellerini listele
  */
-exports.listGeminiModels = onCall({region: "us-central1"}, async (request) => {
+exports.listGeminiModels = onCall({
+  region: "us-central1",
+  secrets: [GEMINI_API_KEY_SECRET_NAME],
+}, async (request) => {
   try {
     logger.info("Listing available Gemini models...");
 
     // API'den model listesini al
     const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`,
     );
 
     if (!response.ok) {

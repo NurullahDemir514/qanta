@@ -23,6 +23,7 @@ import '../../../core/services/premium_service.dart';
 import '../../advertisement/services/google_ads_real_banner_service.dart';
 import '../../advertisement/config/advertisement_config.dart' as config;
 import '../../advertisement/models/advertisement_models.dart';
+import '../../../core/services/country_detection_service.dart';
 
 class BudgetManagementPage extends StatefulWidget {
   final VoidCallback? onBudgetSaved;
@@ -392,6 +393,10 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
 
   Widget _buildEmptyState(bool isDark) {
     final l10n = AppLocalizations.of(context)!;
+    return FutureBuilder<bool>(
+      future: CountryDetectionService().isTurkishPlayStoreUser(),
+      builder: (context, snapshot) {
+        final isTurkish = snapshot.data ?? false;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -430,6 +435,41 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
               ),
               textAlign: TextAlign.center,
             ),
+                
+                // Reward message for Turkish users
+                if (isTurkish) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade500.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.green.shade500.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.stars_rounded,
+                          size: 16,
+                          color: Colors.green.shade500,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.firstBudgetRewardMessage,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
             
             const SizedBox(height: 32),
             
@@ -473,6 +513,8 @@ class _BudgetManagementPageState extends State<BudgetManagementPage> {
           ],
         ),
       ),
+        );
+      },
     );
   }
 

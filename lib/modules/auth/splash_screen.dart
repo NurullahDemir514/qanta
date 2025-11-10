@@ -12,6 +12,8 @@ import '../../modules/insights/models/statistics_model.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/qanta_logo.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/services/point_service.dart';
+import '../../core/firebase_client.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -109,6 +111,16 @@ class _SplashScreenState extends State<SplashScreen>
         // Kullanıcı giriş yapmışsa verilerini önceden yükle
         _updateLoadingText('Veriler yükleniyor...');
         await _preloadUserData();
+
+        // Award daily login points (async, don't wait)
+        final userId = currentUser.uid;
+        PointService().earnPointsFromDailyLogin(userId).then((points) {
+          if (points > 0) {
+            debugPrint('✅ SplashScreen: Daily login points earned ($points points)');
+          }
+        }).catchError((e) {
+          debugPrint('⚠️ SplashScreen: Daily login points error: $e');
+        });
 
         context.go('/home');
       } else {

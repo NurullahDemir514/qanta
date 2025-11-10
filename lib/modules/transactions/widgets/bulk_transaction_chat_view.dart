@@ -215,7 +215,7 @@ class _BulkTransactionChatViewState extends State<BulkTransactionChatView> {
                     child: ElevatedButton(
                       onPressed: _isSaving ? null : _saveAll,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF34D399),
+                        backgroundColor: Colors.green.shade500,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(

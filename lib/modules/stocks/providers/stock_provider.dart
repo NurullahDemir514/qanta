@@ -7,6 +7,10 @@ import '../exceptions/stock_exceptions.dart';
 import '../../../shared/models/stock_models.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/providers/unified_provider_v2.dart';
+import '../../../core/services/point_service.dart';
+import '../../../core/services/country_detection_service.dart';
+import '../../../shared/models/point_activity_model.dart';
+import '../../../modules/profile/providers/point_provider.dart';
 
 /// Hisse modülü için ana provider - SOLID prensiplerine uygun
 class StockProvider extends ChangeNotifier {
@@ -917,6 +921,11 @@ class StockProvider extends ChangeNotifier {
           await loadStockTransactionsSilently(transaction.userId);
           await loadStockPositionsSilently(transaction.userId);
 
+          // Check if this is the first stock purchase and award points (only for buy transactions)
+          if (transaction.type == StockTransactionType.buy) {
+            await _awardFirstStockPurchasePoints(transaction.userId);
+          }
+
           // UnifiedProviderV2'yi güncelle (home screen için)
           try {
             final unifiedProvider = UnifiedProviderV2.instance;
@@ -1750,6 +1759,59 @@ class StockProvider extends ChangeNotifier {
       debugPrint('✅ All stock data cleared');
     } catch (e) {
       debugPrint('Error clearing stock data: $e');
+    }
+  }
+
+  /// Award points for first stock purchase - 250 points
+  /// Only for Turkish users
+  Future<void> _awardFirstStockPurchasePoints(String userId) async {
+    try {
+      // Check if user is from Turkey (points system is Turkey-only)
+      final countryService = CountryDetectionService();
+      final isTurkish = await countryService.isTurkishPlayStoreUser();
+      if (!isTurkish) {
+        if (kDebugMode) {
+          debugPrint('⚠️ First stock purchase points: Points system is Turkey-only, user is not Turkish');
+        }
+        return;
+      }
+
+      // Check if this is the first stock purchase (buy transaction)
+      // After loadStockTransactionsSilently, check if total buy transactions = 1
+      final buyTransactions = _stockTransactions
+          .where((transaction) => transaction.type == StockTransactionType.buy)
+          .toList();
+
+      if (buyTransactions.length == 1) {
+        // This is the first stock purchase - award 250 points
+        final pointService = PointService();
+        final pointsEarned = await pointService.earnPoints(
+          userId,
+          PointActivity.firstStockPurchase,
+          description: 'İlk hisse alımı yapıldı',
+        );
+
+        if (pointsEarned > 0) {
+          if (kDebugMode) {
+            debugPrint('✅ First stock purchase points awarded: $pointsEarned');
+          }
+          
+          // Refresh PointProvider to update UI immediately
+          try {
+            final pointProvider = PointProvider();
+            await pointProvider.refresh();
+          } catch (e) {
+            if (kDebugMode) {
+              debugPrint('⚠️ StockProvider: Failed to refresh PointProvider: $e');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Error awarding first stock purchase points: $e');
+      }
+      // Don't throw - this is a bonus feature, shouldn't break stock transaction
     }
   }
 }

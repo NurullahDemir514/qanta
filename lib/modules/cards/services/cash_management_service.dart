@@ -143,7 +143,8 @@ class CashManagementService {
       isScrollControlled: true,
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.85,
-        maxChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
         builder: (context, scrollController) => Container(
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
@@ -164,172 +165,191 @@ class CashManagementService {
                 ),
               ),
 
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Text(
-                      l10n.updateCashBalanceTitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.updateCashBalanceMessage,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: isDark
-                            ? const Color(0xFF8E8E93)
-                            : const Color(0xFF6D6D70),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Calculator
+              // Scrollable content
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: CalculatorInputField(
-                    controller: controller,
-                    onChanged: () {
-                      // Hesap makinesi değişikliklerini dinle
-                    },
-                  ),
-                ),
-              ),
-
-              // Buttons
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(
-                            color: isDark
-                                ? const Color(0xFF3A3A3C)
-                                : const Color(0xFFD1D1D6),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          l10n.cancel,
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  physics: const ClampingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final newBalance = double.tryParse(controller.text);
-                          if (newBalance != null && newBalance >= 0) {
-                            Navigator.of(context).pop();
+                    child: Column(
+                      children: [
+                        // Header
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Text(
+                                l10n.updateCashBalanceTitle,
+                                style: GoogleFonts.inter(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                l10n.updateCashBalanceMessage,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: isDark
+                                      ? const Color(0xFF8E8E93)
+                                      : const Color(0xFF6D6D70),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
 
-                            try {
-                              // Use v2 provider to update cash account
-                              final providerV2 = Provider.of<UnifiedProviderV2>(
-                                context,
-                                listen: false,
-                              );
+                        // Calculator
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: CalculatorInputField(
+                            controller: controller,
+                            onChanged: () {
+                              // Hesap makinesi değişikliklerini dinle
+                            },
+                          ),
+                        ),
 
-                              // Get cash accounts
-                              final cashAccounts = providerV2.accounts
-                                  .where((a) => a.type == AccountType.cash)
-                                  .toList();
+                        const SizedBox(height: 20),
 
-                              if (cashAccounts.isNotEmpty) {
-                                // Update existing cash account
-                                final cashAccount = cashAccounts.first;
-                                await providerV2.updateAccountBalance(
-                                  cashAccount.id,
-                                  newBalance,
-                                );
-                              } else {
-                                // This should not happen as _ensureDefaultCashAccount should create one
-                                // But if it does, create one manually
-                                debugPrint(
-                                  'CashManagementService - No cash account found, creating one',
-                                );
-                                await providerV2.createAccount(
-                                  type: AccountType.cash,
-                                  name: 'CASH_WALLET', // Generic identifier
-                                  balance: newBalance,
-                                );
-                              }
+                        // Buttons
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    side: BorderSide(
+                                      color: isDark
+                                          ? const Color(0xFF3A3A3C)
+                                          : const Color(0xFFD1D1D6),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    l10n.cancel,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final newBalance = double.tryParse(controller.text);
+                                    if (newBalance != null && newBalance >= 0) {
+                                      Navigator.of(context).pop();
 
-                              onBalanceUpdated(newBalance);
-
-                              // Show success message
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      l10n.cashBalanceUpdated(
-                                        Provider.of<ThemeProvider>(
+                                      try {
+                                        // Use v2 provider to update cash account
+                                        final providerV2 = Provider.of<UnifiedProviderV2>(
                                           context,
                                           listen: false,
-                                        ).formatAmount(newBalance),
-                                      ),
+                                        );
+
+                                        // Get cash accounts
+                                        final cashAccounts = providerV2.accounts
+                                            .where((a) => a.type == AccountType.cash)
+                                            .toList();
+
+                                        if (cashAccounts.isNotEmpty) {
+                                          // Update existing cash account
+                                          final cashAccount = cashAccounts.first;
+                                          await providerV2.updateAccountBalance(
+                                            cashAccount.id,
+                                            newBalance,
+                                          );
+                                        } else {
+                                          // This should not happen as _ensureDefaultCashAccount should create one
+                                          // But if it does, create one manually
+                                          debugPrint(
+                                            'CashManagementService - No cash account found, creating one',
+                                          );
+                                          await providerV2.createAccount(
+                                            type: AccountType.cash,
+                                            name: 'CASH_WALLET', // Generic identifier
+                                            balance: newBalance,
+                                          );
+                                        }
+
+                                        onBalanceUpdated(newBalance);
+
+                                        // Show success message
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                l10n.cashBalanceUpdated(
+                                                  Provider.of<ThemeProvider>(
+                                                    context,
+                                                    listen: false,
+                                                  ).formatAmount(newBalance),
+                                                ),
+                                              ),
+                                              backgroundColor: Colors.green.shade500,
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Hata: $e'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    } else {
+                                      // Show error for invalid amount
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(l10n.enterValidAmount),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF007AFF),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    backgroundColor: const Color(0xFF34C759),
                                   ),
-                                );
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Hata: $e'),
-                                    backgroundColor: Colors.red,
+                                  child: Text(
+                                    l10n.update,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                );
-                              }
-                            }
-                          } else {
-                            // Show error for invalid amount
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.enterValidAmount),
-                                backgroundColor: Colors.red,
+                                ),
                               ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF007AFF),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            ],
                           ),
                         ),
-                        child: Text(
-                          l10n.update,
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                        
+                        // Bottom padding for safe area
+                        SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],

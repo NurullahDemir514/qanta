@@ -39,7 +39,7 @@ extension PaymentMethodTypeExtension on PaymentMethodType {
   Color get color {
     switch (this) {
       case PaymentMethodType.cash:
-        return const Color(0xFF34C759);
+        return Colors.green.shade500;
       case PaymentMethodType.card:
         return const Color(0xFF007AFF);
     }

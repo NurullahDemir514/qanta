@@ -17,7 +17,9 @@ class UnifiedCacheManager {
   // Cache configuration
   static const Duration _defaultCacheDuration = Duration(minutes: 15);
   static const int _maxMemoryCacheSize = 100; // Max items in memory
-  static const int _maxFileCacheSize = 100 * 1024 * 1024; // 100MB
+  // Reduced from 100MB to 60MB to prevent app size growth
+  // This prevents unified cache from consuming too much storage
+  static const int _maxFileCacheSize = 60 * 1024 * 1024; // 60MB (reduced from 100MB)
   static const String _cacheFolder = 'unified_cache';
 
   // Cache layers

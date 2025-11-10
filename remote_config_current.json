@@ -1,0 +1,64 @@
+{
+  "parameters": {
+    "max_daily_notifications": {
+      "defaultValue": {
+        "value": "5"
+      },
+      "valueType": "NUMBER"
+    },
+    "notification_interval_minutes": {
+      "defaultValue": {
+        "value": "15"
+      },
+      "valueType": "NUMBER"
+    },
+    "smart_scheduling_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "notification_hours": {
+      "defaultValue": {
+        "value": "9,12,15,18,21"
+      },
+      "valueType": "STRING"
+    },
+    "notification_end_hour": {
+      "defaultValue": {
+        "value": "21"
+      },
+      "valueType": "NUMBER"
+    },
+    "min_hours_between_notifications": {
+      "defaultValue": {
+        "value": "2"
+      },
+      "valueType": "NUMBER"
+    },
+    "notification_start_hour": {
+      "defaultValue": {
+        "value": "9"
+      },
+      "valueType": "NUMBER"
+    },
+    "notifications_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "notification_messages_tr": {
+      "defaultValue": {
+        "value": " morning|Günaydın! 🌅|Bugünkü bütçenizi kontrol edin lunch|Öğle Arası 🍽️|Öğle yemeği harcamanızı eklediniz mi? afternoon|Öğleden Sonra ☕|Küçük harcamalarınızı kaydetmeyi unutmayın evening|Akşam Saati 🌆|Alışverişlerinizi kaydetme zamanı night|Gün Sonu 🌙|Bugünkü işlemlerinizi gözden geçirin weekend_morning|Hafta Sonu 🎯|Haftalık harcamalarınızı inceleyin weekend_evening|Hafta Sonu Özeti 📊|Gelecek hafta için planınızı yapın general|Qanta Hatırlatıcı|Finanslarınızı düzenli tutun"
+      },
+      "valueType": "STRING"
+    },
+    "notification_messages_en": {
+      "defaultValue": {
+        "value": "morning|Good Morning! 🌅|Check your budget for today lunch|Lunch Time 🍽️|Have you tracked your lunch expenses? afternoon|Afternoon Break ☕|Don't forget to track small expenses evening|Evening Time 🌆|Time to record your shopping night|Day End 🌙|Review your today's transactions weekend_morning|Weekend 🎯|Review your weekly spending weekend_evening|Weekend Summary 📊|Plan for next week general|Qanta Reminder|Keep your finances organized"
+      },
+      "valueType": "STRING"
+    }
+  }
+}

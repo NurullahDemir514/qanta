@@ -295,7 +295,7 @@ class _SmartRecommendationsWidgetState extends State<SmartRecommendationsWidget>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.savings,
+                            Icons.account_balance_wallet,
                             size: 12,
                             color: Color(0xFF00FFB3),
                           ),
